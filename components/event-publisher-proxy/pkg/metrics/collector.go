@@ -11,14 +11,14 @@ const (
 	Errors = "event_publish_to_messaging_server_errors_total"
 	// Latency name of the latency metric
 	Latency = "event_publish_to_messaging_server_latency"
-	// EventType name of the eventType metric
-	EventType = "event_type_published"
+	// EventTypePublishedMetricKey name of the eventType metric
+	EventTypePublishedMetricKey = "event_type_published"
 	// errorsHelp help for the errors metric
 	errorsHelp = "The total number of errors while sending Events to the messaging server"
 	// latencyHelp help for the latency metric
 	latencyHelp = "The duration of sending Events to the messaging server"
-	// eventTypeHelp help for the eventType metric
-	eventTypeHelp = "The total number of events published for a given eventType"
+	// EventTypePublishedMetricHelp help for the eventType metric
+	EventTypePublishedMetricHelp = "The total number of events published for a given eventType"
 )
 
 // Collector implements the prometheus.Collector interface
@@ -47,8 +47,8 @@ func NewCollector() *Collector {
 		),
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: EventType,
-				Help: eventTypeHelp,
+				Name: EventTypePublishedMetricKey,
+				Help: EventTypePublishedMetricHelp,
 			},
 			[]string{"event_type", "event_source"},
 		),

@@ -14,11 +14,11 @@ const (
 	// deliveryMetricHelp help text for the delivery per subscription metric
 	deliveryMetricHelp = "Number of dispatched events per subscription"
 
-	// eventTypeMetricKey name of the eventType subscribed metric
-	eventTypeMetricKey = "event_type_subscribed"
+	// eventTypeSubscribedMetricKey name of the eventType subscribed metric
+	eventTypeSubscribedMetricKey = "event_type_subscribed"
 
-	// help text for the eventType subscribed metric
-	eventTypeMetricHelp = "All the eventTypes subscribed using the Subscription CRD"
+	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric
+	eventTypeSubscribedMetricHelp = "All the eventTypes subscribed using the Subscription CRD"
 )
 
 // Collector implements the prometheus.Collector interface
@@ -39,8 +39,8 @@ func NewCollector() *Collector {
 		),
 		eventTypes: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: eventTypeMetricKey,
-				Help: eventTypeMetricHelp,
+				Name: eventTypeSubscribedMetricKey,
+				Help: eventTypeSubscribedMetricHelp,
 			},
 			[]string{"subscription_name", "subscription_namespace", "event_type", "consumer_name"},
 		),

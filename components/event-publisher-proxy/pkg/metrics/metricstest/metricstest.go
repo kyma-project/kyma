@@ -18,9 +18,9 @@ func EnsureMetricLatency(t *testing.T, collector *metrics.Collector) {
 	ensureMetricCount(t, collector, metrics.Latency, 1)
 }
 
-// EnsureMetricEventType ensures metric eventType exists
-func EnsureMetricEventType(t *testing.T, collector *metrics.Collector) {
-	ensureMetricCount(t, collector, metrics.EventType, 1)
+// EnsureMetricEventTypePublished ensures metric eventType exists
+func EnsureMetricEventTypePublished(t *testing.T, collector *metrics.Collector) {
+	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, 1)
 }
 
 func ensureMetricCount(t *testing.T, collector *metrics.Collector, metric string, expectedCount int) {

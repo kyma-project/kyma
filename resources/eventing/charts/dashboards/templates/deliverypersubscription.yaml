@@ -28,9 +28,7 @@ data:
         "links": [],
         "panels": [
           {
-            "aliasColors": {
-              "test-noapp(sink=http://test.tunas-testing.svc.cluster.local, eventType=sap.kyma.custom.noapp.order.created.v1)": "red"
-            },
+            "aliasColors": {},
             "bars": false,
             "dashLength": 10,
             "dashes": false,
