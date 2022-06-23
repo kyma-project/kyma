@@ -82,7 +82,7 @@ replace (
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0 // indirect
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8
-	golang.org/x/text => golang.org/x/text v0.3.3
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
+	golang.org/x/text => golang.org/x/text v0.3.7
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.5.0
 )
