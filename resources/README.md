@@ -28,8 +28,6 @@ The version of the actual component image is located under the **global.{name_of
 
 Include configuration files for Service Monitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component.
 
-For an example of such a component, see [Service Catalog](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates) that contains the [Service Monitor](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
-
 
 When creating a Service Monitor resource, follow this naming convention:
 
@@ -40,6 +38,6 @@ When creating a Service Monitor resource, follow this naming convention:
 | Alert rule| `prometheus-rules.yaml` | `prometheus-rules.yaml` | Name of the file which contains the alert rule's specification.|
 | Alert rule | `{chart_name}` if the resource contains rules for all chart elements, `{name_of_main_chart}-{name_of_sub-chart}` if every sub-chart has its own set of rules  | `monitoring` if the resource contains all alert rules for the monitoring chart, `monitoring-grafana`, if it contains the rules for Grafana sub-chart only. | Name of the resource in the **metadata** section of the file.|
 | Dashboard |`dashboard-configmap.yaml`|`dashboard-configmap.yaml`|Name of the file which contains the dashboard's specification.|
-| Dashboard| `{chart_name}-dashboard` for the main chart dashboard,`{chart_name}-{sub_chart_name}-dashboard` for the sub-chart | `backup-dashboard`, `rafter-asyncapi-service-dashboard` |  Name of the resource in the **metadata** section of the file.|
+| Dashboard| `{chart_name}-dashboard` for the main chart dashboard,`{chart_name}-{sub_chart_name}-dashboard` for the sub-chart | `backup-dashboard`, `eventing-nats-dashboard` |  Name of the resource in the **metadata** section of the file.|
 
 For details on observing metrics, creating dashboards, and setting alerting rules, see [these](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-observability/) tutorials.

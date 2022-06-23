@@ -27,9 +27,9 @@ const (
 	serverlessAPIGroup   = "serverless.kyma-project.io"
 	serverlessAPIVersion = "v1alpha1"
 
-	DefaultingWebhookName     = "function.defaulting.webhook.serverless.kyma-project.io"
+	DefaultingWebhookName     = "defaulting.webhook.serverless.kyma-project.io"
 	SecretMutationWebhookName = "mutating.secret.webhook.serverless.kyma-project.io"
-	ValidationWebhookName     = "function.validation.webhook.serverless.kyma-project.io"
+	ValidationWebhookName     = "validation.webhook.serverless.kyma-project.io"
 
 	FunctionDefaultingWebhookPath       = "/defaulting/functions"
 	RegistryConfigDefaultingWebhookPath = "/defaulting/registry-config-secrets"

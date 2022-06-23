@@ -24,7 +24,9 @@ containers:
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
-        value: "warn"
+        value: "info"
+      logFormat:
+        value: "json"
     resources:
       limits:
         cpu: 300m

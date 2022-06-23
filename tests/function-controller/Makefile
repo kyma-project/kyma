@@ -1,6 +1,6 @@
 APP_NAME = function-controller-test
 APP_PATH = tests/function-controller
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20220613-63e4233c
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
