@@ -32,7 +32,7 @@ global:
   images:
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-13913"
+      version: "PR-14610"
     central_application_gateway:
       name: "central-application-gateway"
       version: "PR-14636"
