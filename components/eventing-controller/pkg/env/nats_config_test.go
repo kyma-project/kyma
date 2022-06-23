@@ -14,10 +14,12 @@ func Test_GetNatsConfig(t *testing.T) {
 	maxConnsPerHost := 20
 	maxIdleConnsPerHost := 30
 	idleConnTimeout := time.Second * 40
+	jsStreamReplicas := 3
 
 	envs := map[string]string{
 		"NATS_URL":                "NATS_URL",
 		"JS_STREAM_NAME":          "kyma",
+		"JS_STREAM_REPLICAS":      fmt.Sprintf("%d", jsStreamReplicas),
 		"EVENT_TYPE_PREFIX":       "EVENT_TYPE_PREFIX",
 		"MAX_IDLE_CONNS":          fmt.Sprintf("%d", maxIdleConns),
 		"MAX_CONNS_PER_HOST":      fmt.Sprintf("%d", maxConnsPerHost),
@@ -50,4 +52,5 @@ func Test_GetNatsConfig(t *testing.T) {
 	require.Equal(t, config.IdleConnTimeout, idleConnTimeout)
 
 	require.Equal(t, config.JSStreamName, envs["JS_STREAM_NAME"])
+	require.Equal(t, config.JSStreamReplicas, jsStreamReplicas)
 }

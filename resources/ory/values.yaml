@@ -100,7 +100,7 @@ hydra:
         cpu: 500m
         memory: 256Mi
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 128Mi
     autoscaling:
       enabled: true
@@ -237,14 +237,14 @@ oathkeeper:
         cpu: 100m
         memory: 128Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 64Mi
     autoscaling:
       enabled: true
       minReplicas: 1
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
-      targetCPUUtilizationPercentage: 80    
+      targetCPUUtilizationPercentage: 80
   oathkeeper-maester:
     deployment:
       annotations:
@@ -254,7 +254,7 @@ oathkeeper:
           cpu: 100m
           memory: 50Mi
         requests:
-          cpu: 50m
+          cpu: 10m
           memory: 20Mi
 
 # Local persistance settings
@@ -262,11 +262,14 @@ postgresql:
   resources:
     requests:
       memory: 256Mi
-      cpu: 250m
+      cpu: 100m
     limits:
       memory: 1024Mi
       cpu: 750m
   master:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
+  slave:
     podAnnotations:
       sidecar.istio.io/inject: "false"
   # Must be in-sync with hydra.hydra.config.existingSecret

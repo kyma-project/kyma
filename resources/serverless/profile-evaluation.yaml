@@ -28,11 +28,13 @@ containers:
       functionBuildMaxSimultaneousJobs:
         value: "1"
       logLevel:
-        value: "warn"
+        value: "info"
+      logFormat:
+        value: "json"
     resources:
       limits:
         cpu: 200m
         memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 32Mi

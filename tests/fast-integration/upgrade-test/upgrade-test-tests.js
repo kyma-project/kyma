@@ -1,5 +1,3 @@
-const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
-
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
@@ -31,10 +29,6 @@ describe('Upgrade test tests', function() {
 
   it('function should be reachable through secured API Rule', async function() {
     await checkFunctionResponse(testNamespace);
-  });
-
-  it('service instance provisioned by helm broker should be reachable', async function() {
-    await checkServiceInstanceExistence(testNamespace);
   });
 
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {

@@ -11,12 +11,12 @@ webhook:
   deployment:
     resources:
       requests:
-        cpu: 50m
+        cpu: 10m
 
 docker-registry:
   resources:
     requests:
-      cpu: 50m
+      cpu: 10m
 
 containers:
   manager:
@@ -24,11 +24,13 @@ containers:
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
-        value: "warn"
+        value: "info"
+      logFormat:
+        value: "json"
     resources:
       limits:
         cpu: 300m
         memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
-        cpu: 75m
+        cpu: 10m
         memory: 32Mi

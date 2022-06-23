@@ -9,13 +9,11 @@ require (
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/kubernetes-sigs/service-catalog v0.3.0
-	github.com/kyma-project/helm-broker v1.1.0
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210708083136-5479837a0948
-	github.com/onsi/gomega v1.10.2
+	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.6.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a

@@ -33,8 +33,9 @@ type FluentBitDaemonSetConfig struct {
 
 type LogPipelineSyncer struct {
 	client.Client
-	DaemonSetConfig FluentBitDaemonSetConfig
-	EmitterConfig   fluentbit.EmitterConfig
+	DaemonSetConfig         FluentBitDaemonSetConfig
+	EmitterConfig           fluentbit.EmitterConfig
+	EnableUnsupportedPlugin bool
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -69,6 +70,11 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 	secretsChanged, err := s.syncSecretRefs(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
+		return false, err
+	}
+	err = s.syncEnableUnsupportedPluginMetric(ctx)
+	if err != nil {
+		log.Error(err, "Failed to sync enable unsupported plugin metrics")
 		return false, err
 	}
 	return sectionsChanged || parsersChanged || filesChanged || secretsChanged, nil
@@ -122,6 +128,17 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 	return changed, nil
 }
 
+func (s *LogPipelineSyncer) syncEnableUnsupportedPluginMetric(ctx context.Context) error {
+	var logPipelines telemetryv1alpha1.LogPipelineList
+	err := s.List(ctx, &logPipelines)
+	if err != nil {
+		return err
+	}
+
+	s.EnableUnsupportedPlugin = updateEnableAllPluginMetrics(&logPipelines)
+	return nil
+}
+
 // Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
 func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
@@ -131,11 +148,12 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 	}
 
 	changed := false
+	var logPipelines telemetryv1alpha1.LogPipelineList
+
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
 
-			var logPipelines telemetryv1alpha1.LogPipelineList
 			err = s.List(ctx, &logPipelines)
 			if err != nil {
 				return false, err
@@ -153,7 +171,6 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 			changed = true
 		}
 	} else {
-		var logPipelines telemetryv1alpha1.LogPipelineList
 		err = s.List(ctx, &logPipelines)
 		if err != nil {
 			return false, err
@@ -166,6 +183,7 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 			}
 			cm.Data = nil
 		} else {
+
 			if cm.Data == nil {
 				data := make(map[string]string)
 				data[parsersConfigMapKey] = fluentBitParsersConfig
@@ -316,4 +334,15 @@ func (s *LogPipelineSyncer) getOrCreate(ctx context.Context, obj client.Object) 
 		return s.Create(ctx, obj)
 	}
 	return err
+}
+
+func updateEnableAllPluginMetrics(pipelines *telemetryv1alpha1.LogPipelineList) bool {
+	enableUnsupportedPlugins := false
+	for _, l := range pipelines.Items {
+		if l.Spec.EnableUnsupportedPlugins && l.DeletionTimestamp == nil {
+			enableUnsupportedPlugins = true
+			break
+		}
+	}
+	return enableUnsupportedPlugins
 }
