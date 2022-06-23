@@ -24,3 +24,4 @@ build-image:
 push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
+
