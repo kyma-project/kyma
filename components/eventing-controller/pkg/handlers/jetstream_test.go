@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -1281,8 +1283,11 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
+	// init the metrics collector
+	metricsCollector := metrics.NewCollector()
+
 	jsClient := getJetStreamClient(t, natsConfig.URL)
-	jsBackend := NewJetStream(natsConfig, defaultLogger)
+	jsBackend := NewJetStream(natsConfig, metricsCollector, defaultLogger)
 	cleaner := createEventTypeCleaner(evtesting.EventTypePrefix, evtesting.ApplicationNameNotClean, defaultLogger)
 
 	return &TestEnvironment{

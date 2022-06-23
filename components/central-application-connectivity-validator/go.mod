@@ -5,12 +5,12 @@ go 1.17
 require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210624133846-3e1e71e9f682
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/vrischmann/envconfig v1.1.0
-	go.uber.org/zap v1.18.1
+	go.uber.org/zap v1.21.0
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
 	sigs.k8s.io/controller-runtime v0.9.6
@@ -81,7 +81,6 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0 // indirect
-	github.com/kyma-project/kyma/components/application-operator => github.com/franpog859/kyma/components/application-operator v0.0.0-20220617091550-a2f359bebb52
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20211115234514-b4de73f9ece8
 	golang.org/x/text => golang.org/x/text v0.3.3
