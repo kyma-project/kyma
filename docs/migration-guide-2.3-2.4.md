@@ -6,7 +6,7 @@ In Kyma 2.0, we introduced a [new way to reach registered services and some Appl
 We then also informed you we'd be removing the support for the old way soon and encouraged you to switch to the new flow making use of Central Application Gateway. In this release, we're following up on this promise and switching off the support for the old flow.
 
 Due to the removal of the deprecated components (such as Application Operator, Application Broker, Rafter, and Service Catalog), certain resources which were previously created in your cluster are now obsolete.
-If you want to delete these obsolete resources, **after** you upgrade from Kyma 2.3 to 2.4, either run the cleanup script [`2.3-2.4-cleanup-orphaned-svcat-resources.sh`](https://github.com/kyma-project/kyma/blob/main/docs/assets/2.3-2.4-cleanup-orphaned-svcat-resources.sh) or perform the steps from that script manually.
+If you want to delete these obsolete resources, **after** you upgrade from Kyma 2.3 to 2.4, either run the cleanup script [`2.3-2.4-cleanup-orphaned-svcat-resources.sh`](https://github.com/kyma-project/kyma/blob/release-2.4/docs/assets/2.3-2.4-cleanup-orphaned-svcat-resources.sh) or perform the steps from that script manually.
 
 This script removes the obsolete resources, but it leaves the deprecated Application Gateways intact. However, due to the removal of Application Operator, new Application Gateways will not be created. For new services to work properly, you must make use of the currently supported flow using Central Application Gateway.
 
