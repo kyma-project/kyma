@@ -11,3 +11,5 @@ Due to the removal of the deprecated components (such as Application Operator, A
 This script removes the obsolete resources, but it leaves the deprecated Application Gateways intact. However, due to the removal of Application Operator, new Application Gateways will not be created. For new services to work properly, you must make use of the currently supported flow using Central Application Gateway.
 
 > **NOTE:** By default, we do not remove any components from your cluster. If, for some reason, you would like to keep the Service Catalog-related resources, then you can choose to skip this migration guide and just not run the provided script.
+
+> **CAUTION:** Note that although we no longer support the old flow, you should run the cleanup consciously **after** you've switched to the new flow, as running this script will break your application if you continue to use service instances in your workloads, for example in Functions.
