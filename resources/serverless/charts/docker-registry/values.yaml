@@ -45,7 +45,7 @@ resources:
    cpu: 400m
    memory: 800Mi
   requests:
-   cpu: 100m
+   cpu: 10m
    memory: 300Mi
 
 podAnnotations:

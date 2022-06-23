@@ -33,12 +33,8 @@ config.truncateThreshold = 0; // more verbose errors
 const {
   retryPromise,
   waitForK8sObject,
-  waitForVirtualService,
-  waitForServiceBinding,
-  waitForServiceInstance,
   k8sApply,
   deleteAllK8sResources,
-  waitForServiceBindingUsage,
   deleteNamespaces,
 } = require('../../../utils');
 
@@ -139,10 +135,12 @@ async function ensureGettingStartedTestFixture() {
     return (watchObj.object.metadata.name == orderService && watchObj.object.status.APIRuleStatus.code == 'OK');
   }, 60 * 1000, 'Waiting for APIRule to be ready timeout');
   const virtualService = await waitForVirtualService(orderService, orderService);
-  await waitForServiceInstance('redis-service', orderService, 300 * 1000);
-  await waitForServiceBinding(orderService, orderService);
+  // deprecated after sc migration
+  // await waitForServiceInstance('redis-service', orderService, 300 * 1000);
+  // await waitForServiceBinding(orderService, orderService);
   await k8sApply([sbuObj], orderService);
-  const sbu = await waitForServiceBindingUsage(orderService, orderService);
+  // deprecated after sc migration
+  // const sbu = await waitForServiceBindingUsage(orderService, orderService);
   await waitForPodWithSbuToBeReady(sbu);
 
   const serviceDomain = await virtualService.spec.hosts[0];
@@ -151,9 +149,6 @@ async function ensureGettingStartedTestFixture() {
 
 function getResourcePaths(namespace) {
   return [
-    `/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`,
-    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`,
-    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`,
     `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,

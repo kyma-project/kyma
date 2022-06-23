@@ -5,11 +5,11 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-14539
+      version: PR-14534
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-14502
+      version: PR-14599
     nats:
       name: nats
       version: 2.8.2-alpine
@@ -24,9 +24,9 @@ global:
       directory: external
 
   jetstream:
-    enabled: false
+    enabled: true
     # Storage type of the stream, memory or file.
-    storage: memory
+    storage: file
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

@@ -34,14 +34,7 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, mwh)
 		require.Equal(t, mwh.Name, DefaultingWebhookName)
-		require.NotNil(t, mwh.Webhooks)
-
-		require.Equal(t, int32(443), *mwh.Webhooks[0].ClientConfig.Service.Port)
-		require.Equal(t, "/defaulting", *mwh.Webhooks[0].ClientConfig.Service.Path)
-		require.Equal(t, wc.ServiceName, mwh.Webhooks[0].ClientConfig.Service.Name)
-		require.Equal(t, wc.ServiceNamespace, mwh.Webhooks[0].ClientConfig.Service.Namespace)
-		require.Contains(t, mwh.Webhooks[0].Rules[0].Resources, "functions")
-		require.Contains(t, mwh.Webhooks[0].Rules[0].Resources, "functions/status")
+		validateMutatingWebhook(t, wc, mwh.Webhooks)
 	})
 
 	t.Run("ensure a Validating Webhook is created if it doesn't exist", func(t *testing.T) {
@@ -63,7 +56,7 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.NotNil(t, vwh.Webhooks)
 
 		require.Equal(t, int32(443), *vwh.Webhooks[0].ClientConfig.Service.Port)
-		require.Equal(t, "/validation", *vwh.Webhooks[0].ClientConfig.Service.Path)
+		require.Equal(t, FunctionValidationWebhookPath, *vwh.Webhooks[0].ClientConfig.Service.Path)
 		require.Equal(t, wc.ServiceName, vwh.Webhooks[0].ClientConfig.Service.Name)
 		require.Equal(t, wc.ServiceNamespace, vwh.Webhooks[0].ClientConfig.Service.Namespace)
 		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions")
@@ -102,14 +95,7 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Equal(t, UpdateMwh.Name, DefaultingWebhookName)
 		require.NotNil(t, UpdateMwh.Webhooks)
 		require.Contains(t, UpdateMwh.Labels, "dont-remove-me")
-
-		require.Equal(t, int32(443), *UpdateMwh.Webhooks[0].ClientConfig.Service.Port)
-		require.Equal(t, "/defaulting", *UpdateMwh.Webhooks[0].ClientConfig.Service.Path)
-		require.Equal(t, wc.ServiceName, UpdateMwh.Webhooks[0].ClientConfig.Service.Name)
-		require.Equal(t, wc.ServiceNamespace, UpdateMwh.Webhooks[0].ClientConfig.Service.Namespace)
-		require.Contains(t, UpdateMwh.Webhooks[0].Rules[0].Resources, "functions")
-		require.Contains(t, UpdateMwh.Webhooks[0].Rules[0].Resources, "functions/status")
-
+		validateMutatingWebhook(t, wc, UpdateMwh.Webhooks)
 	})
 
 	t.Run("ensure a Validating Webhook is updated if it already exist", func(t *testing.T) {
@@ -143,7 +129,7 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Contains(t, UpdateVwh.Labels, "dont-remove-me")
 
 		require.Equal(t, int32(443), *UpdateVwh.Webhooks[0].ClientConfig.Service.Port)
-		require.Equal(t, "/validation", *UpdateVwh.Webhooks[0].ClientConfig.Service.Path)
+		require.Equal(t, FunctionValidationWebhookPath, *UpdateVwh.Webhooks[0].ClientConfig.Service.Path)
 		require.Equal(t, wc.ServiceName, UpdateVwh.Webhooks[0].ClientConfig.Service.Name)
 		require.Equal(t, wc.ServiceNamespace, UpdateVwh.Webhooks[0].ClientConfig.Service.Namespace)
 		require.Contains(t, UpdateVwh.Webhooks[0].Rules[0].Resources, "functions")
@@ -151,4 +137,30 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Contains(t, UpdateVwh.Webhooks[0].Rules[1].Resources, "gitrepositories")
 		require.Contains(t, UpdateVwh.Webhooks[0].Rules[1].Resources, "gitrepositories/status")
 	})
+}
+
+func validateMutatingWebhook(t *testing.T, wc WebhookConfig, webhooks []admissionregistrationv1.MutatingWebhook) {
+	require.Len(t, webhooks, 2)
+	functionWebhook := webhooks[0]
+
+	require.NotNil(t, functionWebhook.ClientConfig.Service.Port)
+	require.Equal(t, int32(443), *functionWebhook.ClientConfig.Service.Port)
+	require.NotNil(t, functionWebhook.ClientConfig.Service.Path)
+	require.Equal(t, FunctionDefaultingWebhookPath, *functionWebhook.ClientConfig.Service.Path)
+	require.Equal(t, wc.ServiceName, functionWebhook.ClientConfig.Service.Name)
+	require.Equal(t, wc.ServiceNamespace, functionWebhook.ClientConfig.Service.Namespace)
+	require.Len(t, functionWebhook.Rules, 1)
+	require.Contains(t, functionWebhook.Rules[0].Resources, "functions")
+	require.Contains(t, functionWebhook.Rules[0].Resources, "functions/status")
+
+	secretWebhook := webhooks[1]
+	require.NotNil(t, secretWebhook.ClientConfig.Service.Port)
+	require.Equal(t, int32(443), *secretWebhook.ClientConfig.Service.Port)
+	require.NotNil(t, secretWebhook.ClientConfig.Service.Path)
+	require.Equal(t, RegistryConfigDefaultingWebhookPath, *secretWebhook.ClientConfig.Service.Path)
+	require.Equal(t, wc.ServiceName, secretWebhook.ClientConfig.Service.Name)
+	require.Equal(t, wc.ServiceNamespace, secretWebhook.ClientConfig.Service.Namespace)
+	require.Len(t, secretWebhook.Rules, 1)
+	require.Contains(t, secretWebhook.Rules[0].Resources, "secrets")
+
 }

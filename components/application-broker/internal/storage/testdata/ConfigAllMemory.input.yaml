@@ -1,3 +1,0 @@
-- driver: memory
-  provide:
-    all: ~

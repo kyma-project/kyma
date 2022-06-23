@@ -45,9 +45,11 @@ const {
   slowTime,
   mockNamespace,
   isSKR,
-  isJetStreamEnabled,
-  isFileStorage,
   getNatsPods,
+  getStreamConfigForJetStream,
+  skipAtLeastOnceDeliveryTest,
+  isJetStreamEnabled,
+  subscriptionNames,
 } = require('./utils');
 const {
   bebBackend,
@@ -74,6 +76,10 @@ describe('Eventing tests', function() {
     await exposeGrafana();
   });
 
+  before('Get stream config for JetStream', async function() {
+    const success = await getStreamConfigForJetStream();
+    assert.isTrue(success);
+  });
 
   // eventingTestSuite - Runs Eventing tests
   function eventingTestSuite(backend, isSKR) {
@@ -89,8 +95,8 @@ describe('Eventing tests', function() {
       eventingE2ETestSuiteWithCommerceMock(backend);
     }
 
-    if (backend === natsBackend && isJetStreamEnabled && isFileStorage) {
-      testJetStreamFileStorage();
+    if (backend === natsBackend) {
+      testJetStreamAtLeastOnceDelivery();
     }
   }
 
@@ -109,7 +115,7 @@ describe('Eventing tests', function() {
     });
   }
 
-  function testJetStreamFileStorage() {
+  function testJetStreamAtLeastOnceDelivery() {
     context('with JetStream file storage', function() {
       const minute = 60 * 1000;
       const funcName = 'lastorder';
@@ -119,9 +125,18 @@ describe('Eventing tests', function() {
       const eventIdStructured = getRandomEventId(encodingStructured);
       const sink = `http://lastorder.${testNamespace}.svc.cluster.local`;
       const subscriptions = [
-        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`, sink, 'order-received', testNamespace),
-        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`, sink, 'order-created', testNamespace),
+        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`,
+            sink, subscriptionNames.orderReceived, testNamespace),
+        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`,
+            sink, subscriptionNames.orderCreated, testNamespace),
       ];
+
+      before('check if at least once delivery tests need to be skipped', async function() {
+        if (skipAtLeastOnceDeliveryTest()) {
+          console.log('Skipping the at least once delivery tests for NATS JetStream');
+          this.skip();
+        }
+      });
 
       it('Delete subscriptions', async function() {
         await k8sDelete(subscriptions);
@@ -212,8 +227,10 @@ describe('Eventing tests', function() {
     eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
-    // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled);
+
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+    });
   });
 
   context('with BEB backend', function() {
@@ -237,8 +254,10 @@ describe('Eventing tests', function() {
     });
     // Running Eventing end-to-end tests
     eventingTestSuite(bebBackend, isSKR);
-    // Running Eventing Monitoring tests
-    eventingMonitoringTest(bebBackend, isSKR);
+
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(bebBackend, isSKR, isJetStreamEnabled());
+    });
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -256,8 +275,10 @@ describe('Eventing tests', function() {
     eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
-    // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled);
+
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+    });
   });
 
   after('Unexpose Grafana', async function() {

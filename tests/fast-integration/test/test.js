@@ -1,6 +1,6 @@
 const {
   commerceMockTests,
-  gettingStartedGuideTests,
+  // gettingStartedGuideTests,
 } = require('./');
 
 const {apiExposureTests} = require('../api-exposure');
@@ -37,7 +37,8 @@ describe('Executing Standard Testsuite:', function() {
 
   apiExposureTests();
   commerceMockTests(testNamespace);
-  gettingStartedGuideTests();
+  // unusuble because of redis dependency that is not usable in the current form after SC migration
+  // gettingStartedGuideTests();
 
   loggingTests();
   tracingTests(testNamespace);

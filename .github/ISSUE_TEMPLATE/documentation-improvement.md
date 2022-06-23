@@ -18,8 +18,7 @@ about: Suggest an improvement or report a bug in the documentation
 <!-- Provide the area the document refers to. For example, write: 
 * Application Connector
 * Event Mesh
-* Kyma Environment Broker
-* Rafter -->
+* Kyma Environment Broker -->
 
 **Reasons**
 
