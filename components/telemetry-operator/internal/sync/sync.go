@@ -35,7 +35,7 @@ type LogPipelineSyncer struct {
 	client.Client
 	DaemonSetConfig         FluentBitDaemonSetConfig
 	EmitterConfig           fluentbit.EmitterConfig
-	EnableUnsupportedPlugin bool
+	UnsupportedPluginsTotal int
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -72,7 +72,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		log.Error(err, "Failed to sync secret references")
 		return false, err
 	}
-	err = s.syncEnableUnsupportedPluginMetric(ctx)
+	err = s.syncUnsupportedPluginsTotal(ctx)
 	if err != nil {
 		log.Error(err, "Failed to sync enable unsupported plugin metrics")
 		return false, err
@@ -128,14 +128,14 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 	return changed, nil
 }
 
-func (s *LogPipelineSyncer) syncEnableUnsupportedPluginMetric(ctx context.Context) error {
+func (s *LogPipelineSyncer) syncUnsupportedPluginsTotal(ctx context.Context) error {
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	err := s.List(ctx, &logPipelines)
 	if err != nil {
 		return err
 	}
 
-	s.EnableUnsupportedPlugin = updateEnableAllPluginMetrics(&logPipelines)
+	s.UnsupportedPluginsTotal = updateUnsupportedPluginsTotal(&logPipelines)
 	return nil
 }
 
@@ -336,13 +336,22 @@ func (s *LogPipelineSyncer) getOrCreate(ctx context.Context, obj client.Object) 
 	return err
 }
 
-func updateEnableAllPluginMetrics(pipelines *telemetryv1alpha1.LogPipelineList) bool {
-	enableUnsupportedPlugins := false
+func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList) int {
+	unsupportedPluginsTotal := 0
 	for _, l := range pipelines.Items {
-		if l.Spec.EnableUnsupportedPlugins && l.DeletionTimestamp == nil {
-			enableUnsupportedPlugins = true
-			break
+		if l.DeletionTimestamp == nil {
+			continue
+		}
+		for _, f := range l.Spec.Filters {
+			if f.Custom != "" {
+				unsupportedPluginsTotal++
+			}
+		}
+		for _, f := range l.Spec.Outputs {
+			if f.Custom != "" {
+				unsupportedPluginsTotal++
+			}
 		}
 	}
-	return enableUnsupportedPlugins
+	return unsupportedPluginsTotal
 }

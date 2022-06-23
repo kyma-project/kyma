@@ -44,11 +44,11 @@ var (
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme                  *runtime.Scheme
-	Syncer                  *sync.LogPipelineSyncer
-	FluentBitDaemonSet      types.NamespacedName
-	FluentBitRestartsCount  prometheus.Counter
-	EnableUnsupportedPlugin prometheus.Gauge
+	Scheme             *runtime.Scheme
+	Syncer             *sync.LogPipelineSyncer
+	FluentBitDaemonSet types.NamespacedName
+	restartsTotal      prometheus.Counter
+	unsupportedTotal   prometheus.Gauge
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
@@ -56,22 +56,20 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
-	lpr.Syncer = sync.NewLogPipelineSyncer(client,
-		daemonSetConfig,
-		emitterConfig,
-	)
+	lpr.Syncer = sync.NewLogPipelineSyncer(client, daemonSetConfig, emitterConfig)
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
-	lpr.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_operator_fluentbit_restarts_total",
+	// Metrics
+	lpr.restartsTotal = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
 		Help: "Number of triggered FluentBit restarts",
 	})
-	lpr.EnableUnsupportedPlugin = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "telemetry_enable_unsupported_plugins",
-		Help: "EnableUnsupportedPlugins flag state for all the logpipelines.",
+	lpr.unsupportedTotal = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "telemetry_plugins_unsupported_total",
+		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	metrics.Registry.MustRegister(lpr.FluentBitRestartsCount)
-	metrics.Registry.MustRegister(lpr.EnableUnsupportedPlugin)
+	metrics.Registry.MustRegister(lpr.restartsTotal)
+	metrics.Registry.MustRegister(lpr.unsupportedTotal)
 
 	return &lpr
 }
@@ -101,7 +99,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
 		log.Info("Ignoring deleted LogPipeline")
-		// Ignore not-found errors since we can get them on deleted requests.
+		// Ignore not-found errors since we can get them on deleted requests
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -110,11 +108,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
-	if r.Syncer.EnableUnsupportedPlugin {
-		r.EnableUnsupportedPlugin.Set(1)
-	} else {
-		r.EnableUnsupportedPlugin.Set(0)
-	}
+	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
 	if changed {
 		log.V(1).Info("Fluent bit configuration was updated. Restarting the daemon set")
@@ -195,7 +189,7 @@ func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 		log.Error(err, "Failed to patch fluent bit to trigger rolling update")
 		return err
 	}
-	r.FluentBitRestartsCount.Inc()
+	r.restartsTotal.Inc()
 	return nil
 }
 

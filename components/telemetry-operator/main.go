@@ -181,8 +181,6 @@ func main() {
 		fluentBitNs,
 		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fluentbit.NewPluginValidator(
-			strings.SplitN(strings.ReplaceAll(supportedFilterPlugins, " ", ""), ",", len(supportedFilterPlugins)),
-			strings.SplitN(strings.ReplaceAll(supportedOutputPlugins, " ", ""), ",", len(supportedOutputPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
 

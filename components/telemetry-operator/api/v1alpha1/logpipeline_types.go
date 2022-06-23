@@ -28,13 +28,12 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins,omitempty"`
-	Parsers                  []Parser          `json:"parsers,omitempty"`
-	MultiLineParsers         []MultiLineParser `json:"multilineParsers,omitempty"`
-	Filters                  []Filter          `json:"filters,omitempty"`
-	Outputs                  []Output          `json:"outputs,omitempty"`
-	Files                    []FileMount       `json:"files,omitempty"`
-	SecretRefs               []SecretReference `json:"secretRefs,omitempty"`
+	Parsers          []Parser          `json:"parsers,omitempty"`
+	MultiLineParsers []MultiLineParser `json:"multilineParsers,omitempty"`
+	Filters          []Filter          `json:"filters,omitempty"`
+	Outputs          []Output          `json:"outputs,omitempty"`
+	Files            []FileMount       `json:"files,omitempty"`
+	SecretRefs       []SecretReference `json:"secretRefs,omitempty"`
 }
 
 // Parser describes a Fluent Bit parser configuration section
@@ -49,12 +48,12 @@ type MultiLineParser struct {
 
 // Filter describes a Fluent Bit filter configuration section
 type Filter struct {
-	Content string `json:"content,omitempty"`
+	Custom string `json:"custom,omitempty"`
 }
 
 // Output describes a Fluent Bit output configuration section
 type Output struct {
-	Content string `json:"content,omitempty"`
+	Custom string `json:"custom,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration
@@ -91,7 +90,8 @@ type LogPipelineCondition struct {
 
 // LogPipelineStatus defines the observed state of LogPipeline
 type LogPipelineStatus struct {
-	Conditions []LogPipelineCondition `json:"conditions,omitempty"`
+	Conditions      []LogPipelineCondition `json:"conditions,omitempty"`
+	UnsupportedMode bool                   `json:"unsupportedMode,omitempty"`
 }
 
 func NewLogPipelineCondition(reason string, condType LogPipelineConditionType) *LogPipelineCondition {

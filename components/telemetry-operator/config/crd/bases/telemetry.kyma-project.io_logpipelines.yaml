@@ -46,8 +46,6 @@ spec:
           spec:
             description: LogPipelineSpec defines the desired state of LogPipeline
             properties:
-              enableUnsupportedPlugins:
-                type: boolean
               files:
                 items:
                   description: FileMount provides file content to be consumed by a
@@ -64,7 +62,7 @@ spec:
                   description: Filter describes a Fluent Bit filter configuration
                     section
                   properties:
-                    content:
+                    custom:
                       type: string
                   type: object
                 type: array
@@ -82,7 +80,7 @@ spec:
                   description: Output describes a Fluent Bit output configuration
                     section
                   properties:
-                    content:
+                    custom:
                       type: string
                   type: object
                 type: array

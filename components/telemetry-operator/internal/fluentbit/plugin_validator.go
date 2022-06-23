@@ -13,31 +13,37 @@ type PluginValidator interface {
 }
 
 type pluginValidator struct {
-	supportedFilterPlugins []string
-	supportedOutputPlugins []string
-	deniedFilterPlugins    []string
-	deniedOutputPlugins    []string
+	deniedFilterPlugins []string
+	deniedOutputPlugins []string
 }
 
-func NewPluginValidator(supportedFilerPlugins, supportedOutputPlugins, deniedFilterPlugins, deniedOutputPlugins []string) PluginValidator {
+func NewPluginValidator(deniedFilterPlugins, deniedOutputPlugins []string) PluginValidator {
 	return &pluginValidator{
-		supportedFilterPlugins: supportedFilerPlugins,
-		supportedOutputPlugins: supportedOutputPlugins,
-		deniedFilterPlugins:    deniedFilterPlugins,
-		deniedOutputPlugins:    deniedOutputPlugins,
+		deniedFilterPlugins: deniedFilterPlugins,
+		deniedOutputPlugins: deniedOutputPlugins,
 	}
 }
 
 func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 
+	if err := validateFilters(filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
+		return err
+	}
+
+	if err := validateOutputs(filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
+		return err
+	}
+
+	return nil
+
 	for _, filterPlugin := range logPipeline.Spec.Filters {
-		if err := checkIfPluginIsValid("filter", filterPlugin.Content, logPipeline, v.supportedFilterPlugins, v.deniedFilterPlugins, logPipelines); err != nil {
+		if err := checkIfPluginIsValid("filter", filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
 			return err
 		}
 	}
 
 	for _, outputPlugin := range logPipeline.Spec.Outputs {
-		if err := checkIfPluginIsValid("output", outputPlugin.Content, logPipeline, v.supportedOutputPlugins, v.deniedOutputPlugins, logPipelines); err != nil {
+		if err := checkIfPluginIsValid("output", outputPlugin.Custom, logPipeline, v.deniedOutputPlugins, logPipelines); err != nil {
 			return err
 		}
 	}
@@ -45,20 +51,65 @@ func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, l
 	return nil
 }
 
-func checkIfPluginIsValid(pluginType, pluginContent string, logPipeline *telemetryv1alpha1.LogPipeline, supportedPlugins, deniedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	var err error
-	var section map[string]string
-	var pluginName string
+func validateFilters(filters []telemetryv1alpha1.Filter, logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+	for _, filterPlugin := range filters {
+		if err := checkIfPluginIsValid("filter", filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
+			return err
+		}
+	}
+}
 
-	if section, err = parseSection(pluginContent); err != nil {
+func checkForDeniedFilters(pluginContent string, deniedPlugins []string) error {
+	section, err := parseSection(pluginContent)
+	if err != nil {
 		return err
 	}
-	if pluginName, err = getSectionName(section); err != nil {
+
+	pluginName, err := getSectionName(section)
+	if err != nil {
 		return err
 	}
 
-	if !isPluginSupported(pluginName, supportedPlugins, deniedPlugins, logPipeline.Spec.EnableUnsupportedPlugins) {
-		return fmt.Errorf("%s plugin '%s' is not supported. Following plugins are supported '%s' ", pluginType, pluginName, supportedPlugins)
+	for _, deniedPlugin := range deniedPlugins {
+		if strings.EqualFold(pluginName, deniedPlugin) {
+			return fmt.Errorf("filter plugin '%s' is not supported. ", pluginName)
+		}
+	}
+	return nil
+}
+
+func checkForDeniedOutputs(pluginContent string, deniedPlugins []string) error {
+	section, err := parseSection(pluginContent)
+	if err != nil {
+		return err
+	}
+
+	pluginName, err := getSectionName(section)
+	if err != nil {
+		return err
+	}
+
+	for _, deniedPlugin := range deniedPlugins {
+		if strings.EqualFold(pluginName, deniedPlugin) {
+			return fmt.Errorf("output plugin '%s' is not supported. ", pluginName)
+		}
+	}
+	return nil
+}
+
+func validateFiltersMatchCondition(pluginContent string, logPipeline *telemetryv1alpha1.LogPipeline, deniedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+
+}
+
+func validateOutputsMatchCondition(pluginContent string, logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+	section, err := parseSection(pluginContent)
+	if err != nil {
+		return err
+	}
+
+	pluginName, err := getSectionName(section)
+	if err != nil {
+		return err
 	}
 
 	matchCond := getMatchCondition(section)
@@ -66,7 +117,7 @@ func checkIfPluginIsValid(pluginType, pluginContent string, logPipeline *telemet
 		return nil
 	}
 	if matchCond == "*" {
-		return fmt.Errorf("%s plugin '%s' with match condition '*' (match all) is not allowed", pluginType, pluginName)
+		return fmt.Errorf("output plugin '%s' with match condition '*' (match all) is not allowed", pluginName)
 	}
 
 	if isValid, logPipelinesNames := isMatchCondValid(matchCond, logPipeline.Name, logPipelines); !isValid {
@@ -74,28 +125,10 @@ func checkIfPluginIsValid(pluginType, pluginContent string, logPipeline *telemet
 		if len(logPipelinesNames) > 0 {
 			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
 		}
-		return fmt.Errorf("%s plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
-			pluginType, pluginName, matchCond, validLogPipelinesNames)
+		return fmt.Errorf("output plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
+			pluginName, matchCond, validLogPipelinesNames)
 	}
 	return nil
-}
-
-func isPluginSupported(pluginName string, supportedPlugins, deniedPlugins []string, enableAllPlugins bool) bool {
-	for _, deniedPlugin := range deniedPlugins {
-		if strings.EqualFold(pluginName, deniedPlugin) {
-			return false
-		}
-	}
-
-	if len(supportedPlugins) == 0 || enableAllPlugins {
-		return true
-	}
-	for _, supportedPlugin := range supportedPlugins {
-		if strings.EqualFold(pluginName, supportedPlugin) {
-			return true
-		}
-	}
-	return false
 }
 
 func getSectionName(section map[string]string) (string, error) {
