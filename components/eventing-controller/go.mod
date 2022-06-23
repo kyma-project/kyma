@@ -100,3 +100,7 @@ replace (
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
+
+replace github.com/emicklei/go-restful => github.com/emicklei/go-restful/v3 v3.8.0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
+
+exclude github.com/emicklei/go-restful v2.9.5+incompatible
