@@ -33,6 +33,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 )
 
 const (
@@ -100,6 +102,17 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 					Reason:  StatusReasonConfigurationError,
 					Message: err.Error(),
 				},
+			},
+		}
+	}
+
+	secretsFound := v.validateSecrets(ctx, logPipeline)
+	if !secretsFound {
+		warnMsg := "One or more secrets do not exist, the log pipeline creation would not be completed"
+		return admission.Response{
+			AdmissionResponse: admissionv1.AdmissionResponse{
+				Allowed:  true,
+				Warnings: []string{warnMsg},
 			},
 		}
 	}
@@ -215,4 +228,9 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
+}
+
+func (v *LogPipelineValidator) validateSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) bool {
+	secVal := secret.NewSecretValidator(v.Client)
+	return secVal.ValidateSecretsExist(ctx, logPipeline)
 }

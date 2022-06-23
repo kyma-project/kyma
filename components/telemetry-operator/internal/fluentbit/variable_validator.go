@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -32,37 +30,30 @@ func (v *variablesValidator) Validate(context context.Context, logPipeline *tele
 	for _, l := range logPipelines.Items {
 		if l.Name != logPipeline.Name {
 			for _, variable := range l.Spec.Variables {
-				err := validateSecretRefs(logPipeline, variable, l.Name)
+
+				err := findConflictingVariables(logPipeline, variable, l.Name)
 				if err != nil {
 					return err
 				}
-
 			}
 		}
 	}
 
 	for _, variable := range logPipeline.Spec.Variables {
-		err := v.validateSecretKeysExist(context, variable.ValueFrom.SecretKey)
-		if err != nil {
-			return err
+		if validateMandatoryFieldsAreEmpty(variable) {
+			return fmt.Errorf("mandatory field variable name or secretKeyRef name or secretKeyRef namespace or secretKeyRef key cannot be empty")
 		}
 	}
 	return nil
 }
 
-func (v *variablesValidator) validateSecretKeysExist(ctx context.Context, secretKeyRef telemetryv1alpha1.SecretKeyRef) error {
-	var referencedSecret corev1.Secret
-	if err := v.client.Get(ctx, types.NamespacedName{Name: secretKeyRef.Name, Namespace: secretKeyRef.Namespace}, &referencedSecret); err != nil {
-		return fmt.Errorf("failed reading secret %s from namespace %s", secretKeyRef.Name, secretKeyRef.Namespace)
-	}
+func validateMandatoryFieldsAreEmpty(vr telemetryv1alpha1.VariableReference) bool {
+	secretKey := vr.ValueFrom.SecretKey
+	return len(vr.Name) == 0 || len(secretKey.Key) == 0 || len(secretKey.Namespace) == 0 || len(secretKey.Name) == 0
 
-	if _, ok := referencedSecret.Data[secretKeyRef.Key]; !ok {
-		return fmt.Errorf("failed to find the key: %s in the secret %s", secretKeyRef.Key, secretKeyRef.Name)
-	}
-	return nil
 }
 
-func validateSecretRefs(logPipeLine *telemetryv1alpha1.LogPipeline, vr telemetryv1alpha1.VariableReference, existingPipelineName string) error {
+func findConflictingVariables(logPipeLine *telemetryv1alpha1.LogPipeline, vr telemetryv1alpha1.VariableReference, existingPipelineName string) error {
 	for _, v := range logPipeLine.Spec.Variables {
 		if v.Name == vr.Name {
 			return fmt.Errorf("variable with name '%s' has a been previously used in pipeline '%s'", v.Name, existingPipelineName)

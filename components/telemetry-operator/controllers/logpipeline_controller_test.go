@@ -274,7 +274,7 @@ var _ = Describe("LogPipeline controller", func() {
 					return 0
 				}
 				return int(fluentBitDaemonSet.Generation)
-			}, timeout, interval).Should(Equal(1))
+			}, timeout, interval).Should(Equal(2))
 
 			// Custom metrics should be exported
 			Eventually(func() bool {

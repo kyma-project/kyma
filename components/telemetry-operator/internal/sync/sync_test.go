@@ -123,16 +123,3 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, result, false)
 }
-
-func TestSyncSecretRefsConfigMapErrorClientErrorReturnsError(t *testing.T) {
-	mockClient := &mocks.Client{}
-	badReqErr := errors.NewBadRequest("")
-	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
-
-	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncVariables(context.Background(), &lp)
-
-	require.Error(t, err)
-	require.Equal(t, result, false)
-}

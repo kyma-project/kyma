@@ -62,36 +62,38 @@ func TestValidateSecretRefs(t *testing.T) {
 	require.Error(t, err)
 }
 
-//func TestValidateSecretKeyExists(t *testing.T) {
-//	logPipeline := &telemetryv1alpha1.LogPipeline{
-//		Spec: telemetryv1alpha1.LogPipelineSpec{
-//			Variables: []telemetryv1alpha1.VariableReference{
-//				{
-//					Name: "foo1",
-//					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-//						Name:      "fooN",
-//						Namespace: "fooNs",
-//						Key:       "foo",
-//					},
-//					},
-//				},
-//				{
-//					Name: "foo2",
-//					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-//						Name:      "fooN",
-//						Namespace: "fooNs",
-//						Key:       "foo",
-//					}},
-//				},
-//			},
-//		},
-//	}
-//	logPipeline.Name = "pipe1"
-//	mockClient := &mocks.Client{}
-//	varValidator := NewVariablesValidator(mockClient)
-//	logPipelines := &telemetryv1alpha1.LogPipelineList{}
-//	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return()
-//	err := varValidator.Validate(context.TODO(), logPipeline, logPipelines)
-//	require.Error(t, err)
-//
-//}
+func TestVariableValidator(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Variables: []telemetryv1alpha1.VariableReference{
+				{
+					Name: "foo1",
+					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
+						Name:      "fooN",
+						Namespace: "fooNs",
+						Key:       "foo",
+					},
+					},
+				},
+				{
+					Name: "foo2",
+					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
+						Name:      "",
+						Namespace: "",
+						Key:       "",
+					}},
+				},
+			},
+		},
+	}
+	logPipeline.Name = "pipe1"
+	mockClient := &mocks.Client{}
+	varValidator := NewVariablesValidator(mockClient)
+	logPipelines := &telemetryv1alpha1.LogPipelineList{
+		Items: []telemetryv1alpha1.LogPipeline{*logPipeline},
+	}
+
+	err := varValidator.Validate(context.TODO(), logPipeline, logPipelines)
+	require.Error(t, err)
+	require.Equal(t, "mandatory field variable name or secretKeyRef name or secretKeyRef namespace or secretKeyRef key cannot be empty", err.Error())
+}
