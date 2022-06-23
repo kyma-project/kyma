@@ -103,4 +103,4 @@ replace (
 
 replace github.com/emicklei/go-restful => github.com/emicklei/go-restful/v3 v3.8.0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 
-exclude github.com/emicklei/go-restful v2.9.5+incompatible
+exclude github.com/emicklei/go-restful v2.9.5+incompatible // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
