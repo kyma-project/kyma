@@ -3,13 +3,9 @@ module github.com/kyma-project/kyma/tests/components/application-connector
 go 1.18
 
 require (
-	github.com/google/uuid v1.1.2
-	github.com/gorilla/mux v1.8.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
-	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.8.1
+	github.com/labstack/echo/v4 v4.7.2
 	github.com/stretchr/testify v1.7.1
-	github.com/vrischmann/envconfig v1.3.0
 	k8s.io/apimachinery v0.24.1
 	k8s.io/client-go v0.24.1
 )
@@ -24,17 +20,23 @@ require (
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/matoous/go-nanoid/v2 v2.0.0 // indirect
+	github.com/mattn/go-colorable v0.1.11 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.1 // indirect
+	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect

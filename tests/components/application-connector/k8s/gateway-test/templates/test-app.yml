@@ -16,7 +16,7 @@ spec:
         app: test-app
     spec:
       containers:
-        - image: mvshao/test-gateway-app:test
+        - image: void404/test-app:latest
           name: test-app
           env:
             - name: APP_CACERTPATH
@@ -27,17 +27,16 @@ spec:
               value: "/etc/secret-volume/server.key"
           ports:
             - containerPort: 8080
-            - containerPort: 8090
           imagePullPolicy: Always
           volumeMounts:
             - name: secret-volume
               mountPath: /etc/secret-volume
-          livenessProbe:
-            httpGet:
-              path: /v1/health
-              port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3
+          # livenessProbe:
+          #   httpGet:
+          #     path: /v1/health
+          #     port: 8080
+          #   initialDelaySeconds: 3
+          #   periodSeconds: 3
       volumes:
         - name: secret-volume
           secret:
@@ -55,6 +54,3 @@ spec:
     - name: "http"
       protocol: TCP
       port: 8080
-    - name: "https"
-      protocol: TCP
-      port: 8090
