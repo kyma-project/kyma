@@ -1,6 +1,7 @@
 package fluentbit
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -104,4 +105,11 @@ func TestRewriteTagFilterSection(t *testing.T) {
 	name, err := getSectionName(result)
 	require.NoError(t, err)
 	require.Equal(t, "rewrite_tag", name)
+}
+
+func getSectionName(section map[string]string) (string, error) {
+	if name, hasKey := section["name"]; hasKey {
+		return name, nil
+	}
+	return "", fmt.Errorf("configuration section does not have name attribute")
 }

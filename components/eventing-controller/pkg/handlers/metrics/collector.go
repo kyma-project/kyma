@@ -11,13 +11,20 @@ const (
 	// deliveryMetricKey name of the delivery per subscription metric
 	deliveryMetricKey = "delivery_per_subscription"
 
-	// deliveryMetricHelp help text for the delivery_per_subscription metric
+	// deliveryMetricHelp help text for the delivery per subscription metric
 	deliveryMetricHelp = "Number of dispatched events per subscription"
+
+	// eventTypeSubscribedMetricKey name of the eventType subscribed metric
+	eventTypeSubscribedMetricKey = "event_type_subscribed"
+
+	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric
+	eventTypeSubscribedMetricHelp = "All the eventTypes subscribed using the Subscription CRD"
 )
 
 // Collector implements the prometheus.Collector interface
 type Collector struct {
 	deliveryPerSubscription *prometheus.CounterVec
+	eventTypes              *prometheus.CounterVec
 }
 
 // NewCollector a new instance of Collector
@@ -30,17 +37,26 @@ func NewCollector() *Collector {
 			},
 			[]string{"subscription_name", "event_type", "sink", "response_code"},
 		),
+		eventTypes: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: eventTypeSubscribedMetricKey,
+				Help: eventTypeSubscribedMetricHelp,
+			},
+			[]string{"subscription_name", "subscription_namespace", "event_type", "consumer_name"},
+		),
 	}
 }
 
 // Describe implements the prometheus.Collector interface Describe method
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.deliveryPerSubscription.Describe(ch)
+	c.eventTypes.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface Collect method
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.deliveryPerSubscription.Collect(ch)
+	c.eventTypes.Collect(ch)
 }
 
 // RecordDeliveryPerSubscription records the delivery_per_subscription metric
@@ -51,4 +67,10 @@ func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, s
 // RegisterMetrics registers the metrics
 func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.deliveryPerSubscription)
+	metrics.Registry.MustRegister(c.eventTypes)
+}
+
+// RecordEventTypes records the event_type_subscribed metric
+func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, eventType, consumer string) {
+	c.eventTypes.WithLabelValues(subscriptionName, subscriptionNamespace, eventType, consumer).Inc()
 }

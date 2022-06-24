@@ -1,0 +1,62 @@
+{{- if not (.Capabilities.APIVersions.Has "route.openshift.io/v1") }}
+{{- if eq "true" (include "kiali-server.deployment.ingress.enabled" .) }}
+---
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ include "kiali-server.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- if .Values.deployment.ingress.additional_labels }}
+    {{- toYaml .Values.deployment.ingress.additional_labels | nindent 4 }}
+    {{- end }}
+    {{- include "kiali-server.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.deployment.ingress.override_yaml.metadata.annotations }}
+    {{- toYaml .Values.deployment.ingress.override_yaml.metadata.annotations | nindent 4 }}
+    {{- else }}
+    # For ingress-nginx versions older than 0.20.0 use secure-backends.
+    # (see: https://github.com/kubernetes/ingress-nginx/issues/3416#issuecomment-438247948)
+    # For ingress-nginx versions 0.20.0 and later use backend-protocol.
+    {{- if (include "kiali-server.identity.cert_file" .) }}
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    {{- else }}
+    nginx.ingress.kubernetes.io/secure-backends: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    {{- end }}
+    {{- end }}
+spec:
+  {{- if hasKey .Values.deployment.ingress.override_yaml "spec" }}
+  {{- toYaml .Values.deployment.ingress.override_yaml.spec | nindent 2 }}
+  {{- else }}
+  {{- if .Values.deployment.ingress.class_name }}
+  ingressClassName: {{ .Values.deployment.ingress.class_name }}
+  {{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ include "kiali-server.server.web_root" . }}
+        {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "kiali-server.fullname" . }}
+            port:
+              number: {{ .Values.server.port }}
+        {{- else }}
+        backend:
+          serviceName: {{ include "kiali-server.fullname" . }}
+          servicePort: {{ .Values.server.port }}
+        {{- end }}
+    {{- if not (empty .Values.server.web_fqdn) }}
+    host: {{ .Values.server.web_fqdn }}
+    {{- end }}
+  {{- end }}
+...
+{{- end }}
+{{- end }}
