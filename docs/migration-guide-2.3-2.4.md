@@ -2,7 +2,7 @@
 title: Migration Guide 2.3-2.4
 ---
 
-In Kyma 2.0, we introduced a [new way to reach registered services and some Application Connectivity improvements](https://kyma-project.io/blog/2021/12/7/release-notes-20/#application-connectivity), which were related to [Service Catalog removal](https://kyma-project.io/blog/2021/12/7/release-notes-20/#service-catalog-deprecation-update).
+In Kyma 2.0, we introduced a [new way to reach registered services and some Application Connectivity improvements](https://kyma-project.io/blog/2021/12/7/release-notes-20/#application-connectivity), which were related to the [Service Catalog removal](https://kyma-project.io/blog/2021/12/7/release-notes-20/#service-catalog-deprecation-update).
 We then also informed you we'd be removing the support for the old way soon and encouraged you to switch to the new flow making use of Central Application Gateway. In this release, we're following up on this promise and switching off the support for the old flow.
 
 Due to the removal of the deprecated components (such as Application Operator, Application Broker, Rafter, and Service Catalog), certain resources which were previously created in your cluster are now obsolete.
