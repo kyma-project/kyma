@@ -113,7 +113,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.LogPipelinePending,
 		)
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
-			return ctrl.Result{RequeueAfter: requeueTime}, err
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 		}
 
 		return ctrl.Result{RequeueAfter: requeueTime}, nil

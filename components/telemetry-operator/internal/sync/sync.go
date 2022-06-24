@@ -35,7 +35,7 @@ type LogPipelineSyncer struct {
 	DaemonSetConfig         FluentBitDaemonSetConfig
 	EmitterConfig           fluentbit.EmitterConfig
 	EnableUnsupportedPlugin bool
-	SecretValidator         *secret.SecretValidator
+	SecretValidator         *secret.SecretHelper
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -46,7 +46,7 @@ func NewLogPipelineSyncer(client client.Client,
 	lps.Client = client
 	lps.DaemonSetConfig = daemonSetConfig
 	lps.EmitterConfig = emitterConfig
-	lps.SecretValidator = secret.NewSecretValidator(client)
+	lps.SecretValidator = secret.NewSecretHelper(client)
 	return &lps
 }
 

@@ -100,3 +100,10 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 func generateEmitter(emitterConfig EmitterConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipelineName, logPipelineName, emitterConfig.StorageType, emitterConfig.BufferLimit)
 }
+
+func getMatchCondition(section map[string]string) string {
+	if matchCond, hasKey := section["match"]; hasKey {
+		return matchCond
+	}
+	return ""
+}

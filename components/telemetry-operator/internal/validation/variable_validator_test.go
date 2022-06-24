@@ -1,4 +1,4 @@
-package fluentbit
+package validation
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 )
 
 func TestValidateSecretRefs(t *testing.T) {
-
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Variables: []telemetryv1alpha1.VariableReference{

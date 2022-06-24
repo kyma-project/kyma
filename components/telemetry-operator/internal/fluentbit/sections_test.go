@@ -84,7 +84,7 @@ func TestGrepFilterSection(t *testing.T) {
 		"regex": "$kubernetes['labels']['app'] my-deployment",
 	}, result)
 
-	name, err := getSectionName(result)
+	name, err := validation.getSectionName(result)
 	require.NoError(t, err)
 	require.Equal(t, "grep", name)
 }
@@ -101,7 +101,7 @@ func TestRewriteTagFilterSection(t *testing.T) {
 		"emitter_storage.type": "filesystem",
 	}, result)
 
-	name, err := getSectionName(result)
+	name, err := validation.getSectionName(result)
 	require.NoError(t, err)
 	require.Equal(t, "rewrite_tag", name)
 }

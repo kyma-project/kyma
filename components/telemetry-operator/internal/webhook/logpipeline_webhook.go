@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
+
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,9 +50,9 @@ type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
-	variablesValidator fluentbit.VariablesValidator
-	configValidator    fluentbit.ConfigValidator
-	pluginValidator    fluentbit.PluginValidator
+	variablesValidator validation.VariablesValidator
+	configValidator    validation.ConfigValidator
+	pluginValidator    validation.PluginValidator
 	emitterConfig      fluentbit.EmitterConfig
 	fsWrapper          fs.Wrapper
 
@@ -61,9 +63,9 @@ func NewLogPipeLineValidator(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
-	variablesValidator fluentbit.VariablesValidator,
-	configValidator fluentbit.ConfigValidator,
-	pluginValidator fluentbit.PluginValidator,
+	variablesValidator validation.VariablesValidator,
+	configValidator validation.ConfigValidator,
+	pluginValidator validation.PluginValidator,
 	emitterConfig fluentbit.EmitterConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
@@ -108,7 +110,7 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 
 	secretsFound := v.validateSecrets(ctx, logPipeline)
 	if !secretsFound {
-		warnMsg := "One or more secrets do not exist, the log pipeline creation would not be completed"
+		warnMsg := "One or more secrets do not exist, the log pipeline will stay in pending state until the secrets are available"
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
 				Allowed:  true,
@@ -231,6 +233,6 @@ func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 }
 
 func (v *LogPipelineValidator) validateSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) bool {
-	secVal := secret.NewSecretValidator(v.Client)
+	secVal := secret.NewSecretHelper(v.Client)
 	return secVal.ValidateSecretsExist(ctx, logPipeline)
 }

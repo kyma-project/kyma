@@ -97,8 +97,8 @@ spec:
                 type: array
               variables:
                 items:
-                  description: VariableReference is a pointer to a Kubernetes secret
-                    that should be provided as environment variable to Fluent Bit
+                  description: Variables is a pointer to a Kubernetes secret that
+                    should be provided as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string

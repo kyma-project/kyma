@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
+
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
@@ -183,9 +185,9 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		fluentbit.NewVariablesValidator(mgr.GetClient()),
-		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
-		fluentbit.NewPluginValidator(
+		validation.NewVariablesValidator(mgr.GetClient()),
+		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		validation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(supportedFilterPlugins, " ", ""), ",", len(supportedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(supportedOutputPlugins, " ", ""), ",", len(supportedOutputPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
