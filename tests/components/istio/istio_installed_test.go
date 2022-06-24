@@ -131,6 +131,10 @@ func (i *istioInstallledCase) getIstioPods() error {
 	}
 	i.pilotPods = istiodPods
 
+	for _, p := range istiodPods.Items {
+		fmt.Printf("[5525] name:%v timestamp: %v\n, status:%v", p.Name, p.CreationTimestamp, p.Status)
+	}
+
 	ingressGwPods, err := listPodsIstioNamespace(metav1.ListOptions{
 		LabelSelector: "istio=ingressgateway",
 	})
