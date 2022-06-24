@@ -6,6 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap"
 )
 
 const envPrefix = "APP"
@@ -26,7 +27,9 @@ func main() {
 	if err := envconfig.InitWithPrefix(&cfg, envPrefix); err != nil {
 		log.Fatalf("while reading env variables: %s", err.Error())
 	}
-	operator := git.NewGit2Go()
+
+	logger, _ := zap.NewProduction()
+	operator := git.NewGit2Go(logger.Sugar())
 
 	log.Println("Get auth config...")
 	gitOptions := cfg.getOptions()

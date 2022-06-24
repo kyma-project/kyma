@@ -95,6 +95,7 @@ supportedPlugins:
     - grafana-loki
     - http
     - forward
+syncPeriod: 1h
 
 nodeSelector: {}
 
