@@ -2,6 +2,7 @@ package fluentbit
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
@@ -24,109 +25,70 @@ func NewPluginValidator(deniedFilterPlugins, deniedOutputPlugins []string) Plugi
 	}
 }
 
-func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 
-	if err := validateFilters(filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
-		return err
+	err := pv.validateFilters(logPipeline, logPipelines)
+	if err != nil {
+		return errors.Wrap(err, " error validating Filter plugins")
 	}
 
-	if err := validateOutputs(filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
-		return err
+	err = pv.validateOutputs(logPipeline, logPipelines)
+	if err != nil {
+		return errors.Wrap(err, " error validating Output plugins")
 	}
 
 	return nil
+}
 
-	for _, filterPlugin := range logPipeline.Spec.Filters {
-		if err := checkIfPluginIsValid("filter", filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
+func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
+	for _, filterPlugin := range pipeline.Spec.Filters {
+		if err := checkIfPluginIsValid(filterPlugin.Custom, pipeline, pv.deniedFilterPlugins, pipelines); err != nil {
 			return err
 		}
 	}
+	return nil
+}
 
-	for _, outputPlugin := range logPipeline.Spec.Outputs {
-		if err := checkIfPluginIsValid("output", outputPlugin.Custom, logPipeline, v.deniedOutputPlugins, logPipelines); err != nil {
+func (pv *pluginValidator) validateOutputs(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
+	for _, outputPlugin := range pipeline.Spec.Outputs {
+		if err := checkIfPluginIsValid(outputPlugin.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
-func validateFilters(filters []telemetryv1alpha1.Filter, logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	for _, filterPlugin := range filters {
-		if err := checkIfPluginIsValid("filter", filterPlugin.Custom, logPipeline, v.deniedFilterPlugins, logPipelines); err != nil {
-			return err
+func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipeline, denied []string, pipelines *telemetryv1alpha1.LogPipelineList) error {
+	section, err := parseSection(content)
+	if err != nil {
+		return err
+	}
+	name, err := getSectionName(section)
+	if err != nil {
+		return err
+	}
+
+	for _, deniedPlugin := range denied {
+		if strings.EqualFold(name, deniedPlugin) {
+			return fmt.Errorf("plugin '%s' is not supported. ", name)
 		}
 	}
-}
 
-func checkForDeniedFilters(pluginContent string, deniedPlugins []string) error {
-	section, err := parseSection(pluginContent)
-	if err != nil {
-		return err
-	}
-
-	pluginName, err := getSectionName(section)
-	if err != nil {
-		return err
-	}
-
-	for _, deniedPlugin := range deniedPlugins {
-		if strings.EqualFold(pluginName, deniedPlugin) {
-			return fmt.Errorf("filter plugin '%s' is not supported. ", pluginName)
-		}
-	}
-	return nil
-}
-
-func checkForDeniedOutputs(pluginContent string, deniedPlugins []string) error {
-	section, err := parseSection(pluginContent)
-	if err != nil {
-		return err
-	}
-
-	pluginName, err := getSectionName(section)
-	if err != nil {
-		return err
-	}
-
-	for _, deniedPlugin := range deniedPlugins {
-		if strings.EqualFold(pluginName, deniedPlugin) {
-			return fmt.Errorf("output plugin '%s' is not supported. ", pluginName)
-		}
-	}
-	return nil
-}
-
-func validateFiltersMatchCondition(pluginContent string, logPipeline *telemetryv1alpha1.LogPipeline, deniedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-
-}
-
-func validateOutputsMatchCondition(pluginContent string, logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	section, err := parseSection(pluginContent)
-	if err != nil {
-		return err
-	}
-
-	pluginName, err := getSectionName(section)
-	if err != nil {
-		return err
-	}
-
-	matchCond := getMatchCondition(section)
-	if matchCond == "" {
+	matchCondition := getMatchCondition(section)
+	if matchCondition == "" {
 		return nil
 	}
-	if matchCond == "*" {
-		return fmt.Errorf("output plugin '%s' with match condition '*' (match all) is not allowed", pluginName)
+	if matchCondition == "*" {
+		return fmt.Errorf("plugin '%s' with match condition '*' (match all) is not allowed", name)
 	}
 
-	if isValid, logPipelinesNames := isMatchCondValid(matchCond, logPipeline.Name, logPipelines); !isValid {
-		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", logPipeline.Name)
+	if isValid, logPipelinesNames := isMatchCondValid(matchCondition, pipeline.Name, pipelines); !isValid {
+		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", pipeline.Name)
 		if len(logPipelinesNames) > 0 {
 			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
 		}
-		return fmt.Errorf("output plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
-			pluginName, matchCond, validLogPipelinesNames)
+		return fmt.Errorf("plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
+			name, matchCondition, validLogPipelinesNames)
 	}
 	return nil
 }
@@ -146,7 +108,6 @@ func getMatchCondition(section map[string]string) string {
 }
 
 func isMatchCondValid(matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
-
 	if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
 		return true, nil
 	}

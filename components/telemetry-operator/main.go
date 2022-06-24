@@ -65,8 +65,6 @@ var (
 	logFormat                  string
 	logLevel                   string
 	certDir                    string
-	supportedFilterPlugins     string
-	supportedOutputPlugins     string
 	deniedFilterPlugins        string
 	deniedOutputPlugins        string
 )
@@ -109,8 +107,6 @@ func main() {
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
-	flag.StringVar(&supportedFilterPlugins, "supported-filter-plugins", "", "Comma separated list of supported filter plugins. If empty, all filter plugins are allowed.")
-	flag.StringVar(&supportedOutputPlugins, "supported-output-plugins", "", "Comma separated list of supported output plugins. If empty, all output plugins are allowed.")
 	flag.StringVar(&deniedFilterPlugins, "denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
 	flag.StringVar(&deniedOutputPlugins, "denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
 
@@ -183,7 +179,6 @@ func main() {
 		fluentbit.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-
 		emitterConfig,
 		fs.NewWrapper(),
 	)
