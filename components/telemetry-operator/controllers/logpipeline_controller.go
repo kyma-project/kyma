@@ -70,6 +70,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 		Name: "telemetry_enable_unsupported_plugins",
 		Help: "EnableUnsupportedPlugins flag state for all the logpipelines.",
 	})
+
 	metrics.Registry.MustRegister(lpr.FluentBitRestartsCount)
 	metrics.Registry.MustRegister(lpr.EnableUnsupportedPlugin)
 
@@ -103,6 +104,19 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		log.Info("Ignoring deleted LogPipeline")
 		// Ignore not-found errors since we can get them on deleted requests.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	secretsOK := r.Syncer.SecretValidator.ValidateSecretsExist(ctx, &logPipeline)
+	if !secretsOK {
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.SecretsNotPresent,
+			telemetryv1alpha1.LogPipelinePending,
+		)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
+		}
+
+		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
 	var changed, err = r.Syncer.SyncAll(ctx, &logPipeline)

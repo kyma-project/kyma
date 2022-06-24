@@ -16,9 +16,7 @@ limitations under the License.
 
 package v1alpha1
 
-import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -28,13 +26,13 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins,omitempty"`
-	Parsers                  []Parser          `json:"parsers,omitempty"`
-	MultiLineParsers         []MultiLineParser `json:"multilineParsers,omitempty"`
-	Filters                  []Filter          `json:"filters,omitempty"`
-	Outputs                  []Output          `json:"outputs,omitempty"`
-	Files                    []FileMount       `json:"files,omitempty"`
-	SecretRefs               []SecretReference `json:"secretRefs,omitempty"`
+	EnableUnsupportedPlugins bool                `json:"enableUnsupportedPlugins,omitempty"`
+	Parsers                  []Parser            `json:"parsers,omitempty"`
+	MultiLineParsers         []MultiLineParser   `json:"multilineParsers,omitempty"`
+	Filters                  []Filter            `json:"filters,omitempty"`
+	Outputs                  []Output            `json:"outputs,omitempty"`
+	Files                    []FileMount         `json:"files,omitempty"`
+	Variables                []VariableReference `json:"variables,omitempty"`
 }
 
 // Parser describes a Fluent Bit parser configuration section
@@ -63,10 +61,20 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// SecretReference is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
-type SecretReference struct {
+// Variables is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
+type VariableReference struct {
+	Name      string        `json:"name,omitempty"`
+	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+}
+
+type ValueFromType struct {
+	SecretKey SecretKeyRef `json:"secretKeyRef,omitempty"`
+}
+
+type SecretKeyRef struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
+	Key       string `json:"key,omitempty"`
 }
 
 type LogPipelineConditionType string
@@ -80,6 +88,7 @@ const (
 const (
 	FluentBitDSRestartedReason        = "FluentBitDaemonSetRestarted"
 	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
+	SecretsNotPresent                 = "OneORMoreSecretsAreNotPresent"
 )
 
 // LogPipelineCondition contains details for the current condition of this LogPipeline
