@@ -13,13 +13,13 @@ spec:
         Rule      "start_state"   "/^Function failed to execute.*/"  "cont"
         Rule      "cont"          "/^\s+at.*/"                       "cont"
   filters:
-    - content: |
+    - custom: |
         name                  multiline
         match                 *
         multiline.key_content log
         multiline.parser      multiline-kyma-js-function
   outputs:
-    - content: |
+    - custom: |
         Name               grafana-loki
         Alias              loki-output
         Match              kube.*

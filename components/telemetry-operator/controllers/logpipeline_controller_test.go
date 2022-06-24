@@ -279,7 +279,23 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_operator_fluentbit_restarts_total") {
+					if strings.Contains(line, "telemetry_fluentbit_restarts_total") {
+						return true
+					}
+				}
+				return false
+			}, timeout, interval).Should(Equal(true))
+
+			Eventually(func() bool {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return false
+				}
+				defer resp.Body.Close()
+				scanner := bufio.NewScanner(resp.Body)
+				for scanner.Scan() {
+					line := scanner.Text()
+					if strings.Contains(line, "telemetry_plugins_unsupported_total") {
 						return true
 					}
 				}
