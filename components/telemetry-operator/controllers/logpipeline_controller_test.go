@@ -158,10 +158,10 @@ var _ = Describe("LogPipeline controller", func() {
 				Content: FluentBitMultiLineParserConfig,
 			}
 			filter := telemetryv1alpha1.Filter{
-				Content: FluentBitFilterConfig,
+				Custom: FluentBitFilterConfig,
 			}
 			output := telemetryv1alpha1.Output{
-				Content: FluentBitOutputConfig,
+				Custom: FluentBitOutputConfig,
 			}
 			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{

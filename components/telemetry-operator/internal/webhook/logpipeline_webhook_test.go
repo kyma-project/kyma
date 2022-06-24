@@ -57,7 +57,7 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		Content: "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+)$",
 	}
 	output := telemetryv1alpha1.Output{
-		Content: "Name   stdout\nMatch   dummy_test.*",
+		Custom: "Name   stdout\nMatch   dummy_test.*",
 	}
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		TypeMeta: metav1.TypeMeta{

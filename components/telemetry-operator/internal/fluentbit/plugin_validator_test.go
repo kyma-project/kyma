@@ -40,26 +40,6 @@ func TestValidateForbiddenFilters(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestValidateAllowedOutputs(t *testing.T) {
-	logPipeline := &telemetryv1alpha1.LogPipeline{
-		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
-    Name    http
-    Match   foo.*`,
-				},
-			},
-		},
-	}
-	logPipeline.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
-
-	sut := NewPluginValidator([]string{}, []string{"loki", "http"})
-	err := sut.Validate(logPipeline, logPipelines)
-
-	require.NoError(t, err)
-}
-
 func TestValidateForbiddenOutputs(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -236,4 +216,47 @@ func TestDeniedOutputPlugins(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), " error validating Output plugins: plugin 'lua' is not supported. ")
+}
+
+func TestContainsCustomPluginWithCustomFilter(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Filters: []telemetryv1alpha1.Filter{
+				{Custom: `
+    Name    some-filter`,
+				},
+			},
+		},
+	}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.ContainsCustomPlugin(logPipeline)
+
+	require.True(t, result)
+}
+
+func TestContainsCustomPluginWithCustomOutput(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Outputs: []telemetryv1alpha1.Output{
+				{Custom: `
+    Name    some-output`,
+				},
+			},
+		},
+	}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.ContainsCustomPlugin(logPipeline)
+
+	require.True(t, result)
+}
+
+func TestContainsCustomPluginWithoutAny(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{Spec: telemetryv1alpha1.LogPipelineSpec{}}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.ContainsCustomPlugin(logPipeline)
+
+	require.False(t, result)
 }

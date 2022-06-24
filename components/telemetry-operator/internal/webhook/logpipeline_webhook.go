@@ -101,8 +101,8 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 		}
 	}
 
-	if logPipeline.Spec.EnableUnsupportedPlugins {
-		warnMsg := "'enableUnsupportedPlugin' is enabled which would allow unsupported plugins to be used!"
+	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
+		warnMsg := "LogPipeline contains a custom filter or output. Be aware that you are hereby entering unsupported mode!"
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
 				Allowed:  true,

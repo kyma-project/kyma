@@ -11,6 +11,7 @@ import (
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
 type PluginValidator interface {
 	Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error
+	ContainsCustomPlugin(logPipeline *telemetryv1alpha1.LogPipeline) bool
 }
 
 type pluginValidator struct {
@@ -25,17 +26,34 @@ func NewPluginValidator(deniedFilterPlugins, deniedOutputPlugins []string) Plugi
 	}
 }
 
+// ContainsCustomPlugin returns true if the pipeline
+// contains any custom filters or outputs
+func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.LogPipeline) bool {
+	for _, filterPlugin := range logPipeline.Spec.Filters {
+		if filterPlugin.Custom != "" {
+			return true
+		}
+	}
+	for _, outputPlugin := range logPipeline.Spec.Outputs {
+		if outputPlugin.Custom != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// Validate returns an error if validation fails
+// because of using denied plugins or errors in match conditions
+// for filters or outputs.
 func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 	err := pv.validateFilters(logPipeline, logPipelines)
 	if err != nil {
 		return errors.Wrap(err, " error validating Filter plugins")
 	}
-
 	err = pv.validateOutputs(logPipeline, logPipelines)
 	if err != nil {
 		return errors.Wrap(err, " error validating Output plugins")
 	}
-
 	return nil
 }
 
