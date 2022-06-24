@@ -18,6 +18,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.12.1
 	github.com/stretchr/testify v1.7.2
 	go.uber.org/atomic v1.9.0
 	go.uber.org/zap v1.21.0
@@ -64,7 +65,6 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
@@ -100,3 +100,7 @@ replace (
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
+
+replace github.com/emicklei/go-restful => github.com/emicklei/go-restful/v3 v3.8.0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
+
+exclude github.com/emicklei/go-restful v2.9.5+incompatible // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2

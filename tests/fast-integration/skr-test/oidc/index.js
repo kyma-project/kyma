@@ -1,3 +1,4 @@
+const {expect} = require('chai');
 const {
   updateSKR,
   ensureValidShootOIDCConfig,
@@ -11,9 +12,17 @@ const {keb, kcp, gardener} = require('../provision/provision-skr');
 
 const updateTimeout = 1000 * 60 * 20; // 20m
 
-function oidcE2ETest(options, shoot) {
-  describe('OIDC Test', async function() {
-    const givenOidcConfig = shoot.oidcConfig;
+function oidcE2ETest(options, getShootInfoFunc) {
+  describe('OIDC Test', function() {
+    let shoot = undefined;
+    let givenOidcConfig = undefined;
+
+    before('Get provisioned Shoot Info', async function() {
+      shoot = getShootInfoFunc();
+      expect(shoot).to.not.be.undefined;
+      givenOidcConfig = shoot.oidcConfig;
+    });
+
     it('Assure initial OIDC config is applied on shoot cluster', async function() {
       ensureValidShootOIDCConfig(shoot, givenOidcConfig);
     });

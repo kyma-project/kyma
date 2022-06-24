@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
@@ -46,23 +48,25 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // SubscriptionManager implements the subscriptionmanager.Manager interface.
 type SubscriptionManager struct {
-	cancel      context.CancelFunc
-	envCfg      env.NatsConfig
-	restCfg     *rest.Config
-	metricsAddr string
-	mgr         manager.Manager
-	backend     handlers.NatsBackend
-	logger      *logger.Logger
+	cancel           context.CancelFunc
+	envCfg           env.NatsConfig
+	restCfg          *rest.Config
+	metricsAddr      string
+	metricsCollector *pkgmetrics.Collector
+	mgr              manager.Manager
+	backend          handlers.NatsBackend
+	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
-		envCfg:      natsConfig,
-		restCfg:     restCfg,
-		metricsAddr: metricsAddr,
-		logger:      logger,
+		envCfg:           natsConfig,
+		restCfg:          restCfg,
+		metricsAddr:      metricsAddr,
+		metricsCollector: metricsCollector,
+		logger:           logger,
 	}
 }
 
@@ -84,7 +88,7 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-nats")
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
+	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,

@@ -58,7 +58,7 @@ ci-post-upgrade:
 .PHONY: ci-application-connectivity-2-compass
 ci-application-connectivity-2-compass:
 	npm install
-	npm run test-application-connectivity-2-compass
+	npm run test-compass
 
 .PHONY: ci-test-eventing
 ci-test-eventing:
