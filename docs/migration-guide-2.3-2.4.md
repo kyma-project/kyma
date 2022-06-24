@@ -12,4 +12,4 @@ This script removes the obsolete resources, but it leaves the deprecated Applica
 
 > **NOTE:** By default, we do not remove any components from your cluster. If, for some reason, you would like to keep the Service Catalog-related resources, then you can choose to skip this migration guide and just not run the provided script.
 
-> **CAUTION:** Note that although we no longer support the old flow, you should run the cleanup consciously **after** you've switched to the new flow. If you continue to use service instances in your workloads, for example in Functions, running this script will break your application.
+> **CAUTION:** Note that although we no longer support the old flow, you should run the cleanup consciously **after** you've switched to the new flow. If you continue to use service instances in your workloads, for example in Functions, running this script will remove these service instances, cause data loss, and break your application!
