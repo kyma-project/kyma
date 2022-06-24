@@ -26,7 +26,6 @@ func NewPluginValidator(deniedFilterPlugins, deniedOutputPlugins []string) Plugi
 }
 
 func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-
 	err := pv.validateFilters(logPipeline, logPipelines)
 	if err != nil {
 		return errors.Wrap(err, " error validating Filter plugins")

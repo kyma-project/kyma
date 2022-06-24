@@ -123,9 +123,9 @@ func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
 	lps.Conditions = append(newConditions, cond)
 }
 
-func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineConditionType) []LogPipelineCondition {
+func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineConditionType) []LogPipelineCondition {
 	var newConditions []LogPipelineCondition
-	for _, cond := range conds {
+	for _, cond := range conditions {
 		if cond.Type == condType {
 			continue
 		}
@@ -138,7 +138,6 @@ func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineCondit
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
-//+kubebuilder:printcolumn:name="Unsupported-Plugins",type=boolean,JSONPath=`.spec.enableUnsupportedPlugins`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // LogPipeline is the Schema for the logpipelines API

@@ -97,7 +97,7 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestValidateDisallowAll(t *testing.T) {
+func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Outputs: []telemetryv1alpha1.Output{
@@ -140,7 +140,7 @@ func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 	sut := NewPluginValidator([]string{}, []string{})
 	err := sut.Validate(logPipeline, logPipelines)
 
-	assert.Contains(t, err.Error(), "plugin 'http' with match condition 'abc' is not allowed. Valid match conditions are: 'foo' (current logpipeline name)")
+	assert.Contains(t, err.Error(), " error validating Output plugins: plugin 'http' with match condition 'abc' is not allowed. Valid match conditions are: 'foo' (current logpipeline name)")
 }
 
 func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
@@ -213,6 +213,7 @@ func TestDeniedFilterPlugins(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), " error validating Filter plugins: plugin 'lua' is not supported. ")
 }
 
 func TestDeniedOutputPlugins(t *testing.T) {
@@ -234,4 +235,5 @@ func TestDeniedOutputPlugins(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), " error validating Output plugins: plugin 'lua' is not supported. ")
 }
