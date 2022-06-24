@@ -48,13 +48,14 @@ const (
 )
 
 var (
-	k8sClient           client.Client
-	testEnv             *envtest.Environment
-	ctx                 context.Context
-	cancel              context.CancelFunc
-	fsWrapperMock       *fsmocks.Wrapper
-	configValidatorMock *fluentbitmocks.ConfigValidator
-	pluginValidatorMock *fluentbitmocks.PluginValidator
+	k8sClient             client.Client
+	testEnv               *envtest.Environment
+	ctx                   context.Context
+	cancel                context.CancelFunc
+	fsWrapperMock         *fsmocks.Wrapper
+	variableValidatorMock *fluentbitmocks.VariablesValidator
+	configValidatorMock   *fluentbitmocks.ConfigValidator
+	pluginValidatorMock   *fluentbitmocks.PluginValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -111,6 +112,7 @@ var _ = BeforeSuite(func() {
 		StorageType: "filesystem",
 	}
 
+	variableValidatorMock = &fluentbitmocks.VariablesValidator{}
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
 	pluginValidatorMock = &fluentbitmocks.PluginValidator{}
 	fsWrapperMock = &fsmocks.Wrapper{}
@@ -118,6 +120,7 @@ var _ = BeforeSuite(func() {
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
+		variableValidatorMock,
 		configValidatorMock,
 		pluginValidatorMock,
 		emitterConfig,

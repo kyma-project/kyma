@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
@@ -95,13 +97,15 @@ type JetStream struct {
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
 	connClosedHandler ConnClosedHandler
 	logger            *logger.Logger
+	metricsCollector  *pkgmetrics.Collector
 }
 
-func NewJetStream(config env.NatsConfig, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *JetStream {
 	return &JetStream{
-		config:        config,
-		logger:        logger,
-		subscriptions: make(map[SubscriptionSubjectIdentifier]*nats.Subscription),
+		config:           config,
+		logger:           logger,
+		subscriptions:    make(map[SubscriptionSubjectIdentifier]*nats.Subscription),
+		metricsCollector: metricsCollector,
 	}
 }
 
@@ -157,7 +161,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	}
 
 	// async callback for maxInflight messages
-	callback := js.getCallback(subKeyPrefix)
+	callback := js.getCallback(subKeyPrefix, subscription.Name)
 	asyncCallback := func(m *nats.Msg) {
 		go callback(m)
 	}
@@ -405,6 +409,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		}
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
+		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
 		log.Debugw("created subscription on JetStream", "subject", subject)
 	}
 	return nil
@@ -428,7 +433,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 	return defaultOpts
 }
 
-func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
+func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
 		sinkValue, ok := js.sinks.Load(subKeyPrefix)
@@ -459,13 +464,19 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 		// dispatch the event to sink
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
+			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
 			js.namedLogger().Errorw("failed to dispatch an event", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
+
+		// event was successfully dispatched, check if acknowledged by the NATS server
+		// if not, the message is redelivered.
 		if err := msg.Ack(); err != nil {
 			js.namedLogger().Errorw("failed to ACK an event on JetStream", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 		}
+
+		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
 		js.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 	}
 }

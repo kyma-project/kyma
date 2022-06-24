@@ -4,28 +4,29 @@ go 1.17
 
 require (
 	github.com/avast/retry-go/v3 v3.1.1
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.0
-	github.com/cloudevents/sdk-go/v2 v2.10.0
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.1
+	github.com/cloudevents/sdk-go/v2 v2.10.1
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20220318061314-9fd030a8cbd1
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220603121114-e1491c4678e0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220617175450-95d343ae2760
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220617175450-95d343ae2760
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.8.2
-	github.com/nats-io/nats.go v1.15.0
+	github.com/nats-io/nats-server/v2 v2.8.4
+	github.com/nats-io/nats.go v1.16.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.12.1
 	github.com/stretchr/testify v1.7.2
 	go.uber.org/atomic v1.9.0
 	go.uber.org/zap v1.21.0
-	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
-	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df
-	k8s.io/api v0.24.1
-	k8s.io/apimachinery v0.24.1
-	k8s.io/client-go v0.24.1
+	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb
+	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
+	k8s.io/api v0.24.2
+	k8s.io/apimachinery v0.24.2
+	k8s.io/client-go v0.24.2
 	sigs.k8s.io/controller-runtime v0.12.1
 )
 
@@ -36,7 +37,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
+	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -64,7 +65,6 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
@@ -97,5 +97,10 @@ require (
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.2
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
+
+replace github.com/emicklei/go-restful => github.com/emicklei/go-restful/v3 v3.8.0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
+
+exclude github.com/emicklei/go-restful v2.9.5+incompatible // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2

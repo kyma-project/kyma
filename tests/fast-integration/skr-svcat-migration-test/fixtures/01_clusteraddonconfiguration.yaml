@@ -1,7 +1,0 @@
-apiVersion: addons.kyma-project.io/v1alpha1
-kind: ClusterAddonsConfiguration
-metadata:
-  name: redis-addon
-spec:
-  repositories:
-    - url: "https://github.com/kyma-project/addons/releases/download/0.14.0/index-testing.yaml"

@@ -70,6 +70,8 @@ var _ = Describe("LogPipeline controller", func() {
     Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
     Rule      "cont"          "/^\s+at.*/"                     "cont"`
 
+	var expectedSecret = make(map[string][]byte)
+	expectedSecret["myKey"] = []byte("value")
 	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {
 			By("By creating a new LogPipeline")
@@ -147,9 +149,14 @@ var _ = Describe("LogPipeline controller", func() {
 				Name:    "myFile",
 				Content: "file-content",
 			}
-			secretRef := telemetryv1alpha1.SecretReference{
+			secretRef := telemetryv1alpha1.SecretKeyRef{
 				Name:      "my-secret",
 				Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
+				Key:       "key",
+			}
+			variableRefs := telemetryv1alpha1.VariableReference{
+				Name:      "myKey",
+				ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: secretRef},
 			}
 			parser := telemetryv1alpha1.Parser{
 				Content: FluentBitParserConfig,
@@ -177,7 +184,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Filters:          []telemetryv1alpha1.Filter{filter},
 					Outputs:          []telemetryv1alpha1.Output{output},
 					Files:            []telemetryv1alpha1.FileMount{file},
-					SecretRefs:       []telemetryv1alpha1.SecretReference{secretRef},
+					Variables:        []telemetryv1alpha1.VariableReference{variableRefs},
 				},
 			}
 			Expect(k8sClient.Create(ctx, loggingConfiguration)).Should(Succeed())
@@ -237,7 +244,7 @@ var _ = Describe("LogPipeline controller", func() {
 				if err != nil {
 					return err.Error()
 				}
-				return string(envSecret.Data["key"])
+				return string(envSecret.Data["myKey"])
 			}, timeout, interval).Should(Equal("value"))
 
 			// Finalizers should be added
@@ -256,7 +263,7 @@ var _ = Describe("LogPipeline controller", func() {
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
 
-			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 2)
+			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 3)
 			Eventually(func() int {
 				var fluentBitDaemonSet appsv1.DaemonSet
 				err := k8sClient.Get(ctx, types.NamespacedName{

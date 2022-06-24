@@ -96,6 +96,11 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
 	resources := spec.BuildResources
+	// if build resources are not set by the user we don't default them.
+	// However, if only a part is set or the preset label is set, we should correctly set missing defaults.
+	if shouldSkipBuildResourcesDefault(fn) {
+		return
+	}
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 
@@ -106,6 +111,16 @@ func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
 	if spec.Runtime == "" {
 		spec.Runtime = config.Runtime
 	}
+}
+
+func shouldSkipBuildResourcesDefault(fn *Function) bool {
+	resources := fn.Spec.BuildResources
+	_, hasPresetLabel := fn.Labels[BuildResourcesPresetLabel]
+
+	if resources.Limits == nil && resources.Requests == nil && !hasPresetLabel {
+		return true
+	}
+	return false
 }
 
 func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {

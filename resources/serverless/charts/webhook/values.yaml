@@ -11,7 +11,6 @@ commonLabels:
   app: '{{ template "webhook.fullname" . }}'
   app.kubernetes.io/name: '{{ template "webhook.fullname" . }}'
   app.kubernetes.io/instance: "{{ .Release.Name }}"
-  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   role: webhook
 
 deployment:
@@ -21,7 +20,7 @@ deployment:
   extraProperties: {}
   resources:
     requests:
-      cpu: 30m
+      cpu: 10m
       memory: 50Mi
     limits:
       cpu: 300m

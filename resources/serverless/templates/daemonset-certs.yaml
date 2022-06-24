@@ -26,7 +26,7 @@ spec:
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
           resources:
             requests:
-              cpu: 70m
+              cpu: 1m
               memory: 70Mi
             limits:
               cpu: 100m
