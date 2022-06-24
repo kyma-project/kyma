@@ -1,6 +1,7 @@
 package fluentbit
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -84,7 +85,7 @@ func TestGrepFilterSection(t *testing.T) {
 		"regex": "$kubernetes['labels']['app'] my-deployment",
 	}, result)
 
-	name, err := validation.getSectionName(result)
+	name, err := getSectionName(result)
 	require.NoError(t, err)
 	require.Equal(t, "grep", name)
 }
@@ -101,7 +102,14 @@ func TestRewriteTagFilterSection(t *testing.T) {
 		"emitter_storage.type": "filesystem",
 	}, result)
 
-	name, err := validation.getSectionName(result)
+	name, err := getSectionName(result)
 	require.NoError(t, err)
 	require.Equal(t, "rewrite_tag", name)
+}
+
+func getSectionName(section map[string]string) (string, error) {
+	if name, hasKey := section["name"]; hasKey {
+		return name, nil
+	}
+	return "", fmt.Errorf("configuration section does not have name attribute")
 }
