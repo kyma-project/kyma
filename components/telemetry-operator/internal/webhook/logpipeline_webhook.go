@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
+
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +35,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 )
 
 const (
@@ -46,8 +50,9 @@ type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
-	configValidator    fluentbit.ConfigValidator
-	pluginValidator    fluentbit.PluginValidator
+	variablesValidator validation.VariablesValidator
+	configValidator    validation.ConfigValidator
+	pluginValidator    validation.PluginValidator
 	emitterConfig      fluentbit.EmitterConfig
 	fsWrapper          fs.Wrapper
 
@@ -58,8 +63,9 @@ func NewLogPipeLineValidator(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
-	configValidator fluentbit.ConfigValidator,
-	pluginValidator fluentbit.PluginValidator,
+	variablesValidator validation.VariablesValidator,
+	configValidator validation.ConfigValidator,
+	pluginValidator validation.PluginValidator,
 	emitterConfig fluentbit.EmitterConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
@@ -69,10 +75,11 @@ func NewLogPipeLineValidator(
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		configValidator: configValidator,
-		pluginValidator: pluginValidator,
-		fsWrapper:       fsWrapper,
-		emitterConfig:   emitterConfig,
+		variablesValidator: variablesValidator,
+		configValidator:    configValidator,
+		pluginValidator:    pluginValidator,
+		fsWrapper:          fsWrapper,
+		emitterConfig:      emitterConfig,
 	}
 }
 
@@ -100,13 +107,21 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 			},
 		}
 	}
+	var warnMsg []string
 
+	secretsFound := v.validateSecrets(ctx, logPipeline)
+	if !secretsFound {
+		warnMsg = append(warnMsg, "One or more secrets do not exist, the log pipeline will stay in pending state until the secrets are available")
+	}
 	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
-		warnMsg := "LogPipeline contains a custom filter or output. Be aware that you are hereby entering unsupported mode!"
+		warnMsg = append(warnMsg, "LogPipeline contains a custom filter or output. Be aware that you are hereby entering unsupported mode!")
+	}
+
+	if len(warnMsg) != 0 {
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
 				Allowed:  true,
-				Warnings: []string{warnMsg},
+				Warnings: warnMsg,
 			},
 		}
 	}
@@ -138,6 +153,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	if err := v.List(ctx, &logPipelines); err != nil {
+		return err
+	}
+
+	if err = v.variablesValidator.Validate(ctx, logPipeline, &logPipelines); err != nil {
+		log.Error(err, "Failed to validate variables")
 		return err
 	}
 
@@ -207,4 +227,9 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
+}
+
+func (v *LogPipelineValidator) validateSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) bool {
+	secVal := secret.NewSecretHelper(v.Client)
+	return secVal.ValidateSecretsExist(ctx, logPipeline)
 }

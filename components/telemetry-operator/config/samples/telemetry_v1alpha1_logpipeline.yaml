@@ -35,4 +35,4 @@ spec:
         Name               stdout
         Match              *
   files: [ ]
-  secretRefs: [ ]
+  variables: [ ]

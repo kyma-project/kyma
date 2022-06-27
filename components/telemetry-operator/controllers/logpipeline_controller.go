@@ -103,6 +103,19 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	secretsOK := r.Syncer.SecretValidator.ValidateSecretsExist(ctx, &logPipeline)
+	if !secretsOK {
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.SecretsNotPresent,
+			telemetryv1alpha1.LogPipelinePending,
+		)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
+		}
+
+		return ctrl.Result{RequeueAfter: requeueTime}, nil
+	}
+
 	var changed, err = r.Syncer.SyncAll(ctx, &logPipeline)
 	if err != nil {
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil

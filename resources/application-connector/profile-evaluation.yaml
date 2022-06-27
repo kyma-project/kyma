@@ -1,13 +1,3 @@
-application-operator:
-  controller:
-    resources:
-      profile: "evaluation"
-      limits:
-        cpu: 50m
-        memory: 256Mi
-      requests:
-        cpu: 10m
-        memory: 40Mi
 central-application-gateway:
   autoscaling:
     enable: false
