@@ -15,7 +15,7 @@ deployment:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-        - ALL
+      - ALL
     privileged: false
     runAsGroup: 65534
     runAsNonRoot: true
