@@ -21,8 +21,12 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
+ifeq ($(EXPORT_RESULT), true)
+	$(GOTEST) -v -race ./... | tee /dev/tty | go-junit-report -set-exit-code > junit-report.xml
+else
 	$(GOTEST) -v -race ./...
-
+endif
+	
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
 
 provision-k3d: ## Provision k3d cluster

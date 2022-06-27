@@ -10,8 +10,13 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/colors"
 	"github.com/pkg/errors"
+<<<<<<< HEAD
 	"github.com/tidwall/pretty"
+=======
+	"github.com/spf13/pflag"
+>>>>>>> 506e114ae (Add JUnit test report)
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -38,6 +43,8 @@ const (
 )
 
 func TestMain(m *testing.M) {
+	pflag.Parse()
+	opts.Paths = pflag.Args()
 	k8sClient, dynamicClient, mapper = initK8sClient()
 	os.Exit(m.Run())
 }
@@ -79,7 +86,21 @@ func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.Defer
 	return k8sClient, dynClient, mapper
 }
 
+var opts = godog.Options{
+	Output: colors.Colored(os.Stdout),
+	Format: "pretty", // can define default values
+	Paths:  []string{"features"},
+}
+
+func init() {
+	godog.BindCommandLineFlags("godog.", &opts) // godog v0.11.0 and later
+}
 func TestIstioInstalledEvaluation(t *testing.T) {
+	/* 	b := godog.Options{
+	   		Paths: []string{"features/istio_evaluation.feature"},
+	   	}
+	   	mergo.Merge(&opts, b) */
+
 	suite := godog.TestSuite{
 		Name:                evalProfile,
 		ScenarioInitializer: InitializeScenarioEvalProfile,
