@@ -49,12 +49,13 @@ const (
 type LogPipelineValidator struct {
 	client.Client
 
-	fluentBitConfigMap types.NamespacedName
-	variablesValidator validation.VariablesValidator
-	configValidator    validation.ConfigValidator
-	pluginValidator    validation.PluginValidator
-	emitterConfig      fluentbit.EmitterConfig
-	fsWrapper          fs.Wrapper
+	fluentBitConfigMap    types.NamespacedName
+	variablesValidator    validation.VariablesValidator
+	configValidator       validation.ConfigValidator
+	pluginValidator       validation.PluginValidator
+	maxPipelinesValidator validation.MaxPipelinesValidator
+	emitterConfig         fluentbit.EmitterConfig
+	fsWrapper             fs.Wrapper
 
 	decoder *admission.Decoder
 }
@@ -66,6 +67,7 @@ func NewLogPipeLineValidator(
 	variablesValidator validation.VariablesValidator,
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
+	maxPipelinesValidator validation.MaxPipelinesValidator,
 	emitterConfig fluentbit.EmitterConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
@@ -75,11 +77,12 @@ func NewLogPipeLineValidator(
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		variablesValidator: variablesValidator,
-		configValidator:    configValidator,
-		pluginValidator:    pluginValidator,
-		fsWrapper:          fsWrapper,
-		emitterConfig:      emitterConfig,
+		variablesValidator:    variablesValidator,
+		configValidator:       configValidator,
+		pluginValidator:       pluginValidator,
+		maxPipelinesValidator: maxPipelinesValidator,
+		fsWrapper:             fsWrapper,
+		emitterConfig:         emitterConfig,
 	}
 }
 
@@ -156,6 +159,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	if err := v.List(ctx, &logPipelines); err != nil {
+		return err
+	}
+
+	if err = v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
+		log.Error(err, "Maximum number of log pipelines reached")
 		return err
 	}
 
