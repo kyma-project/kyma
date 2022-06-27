@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tidwall/pretty"
 	"github.com/cucumber/godog"
 	"github.com/pkg/errors"
+	"github.com/tidwall/pretty"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -240,13 +240,16 @@ func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodL
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
 }
 
-func getPodListReport(list *corev1.PodList) string{
+func getPodListReport(list *corev1.PodList) string {
 	type returnedPodList struct {
 		PodList []struct {
 			Metadata struct {
 				Name              string `json:"name"`
 				CreationTimestamp string `json:"creationTimestamp"`
 			} `json:"metadata"`
+			Status            struct {
+				Phase string `json:"phase"`
+			} `json:"status"`
 		} `json:"items"`
 	}
 
