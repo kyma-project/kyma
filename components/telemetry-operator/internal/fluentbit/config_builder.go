@@ -20,6 +20,8 @@ const (
 	MultiLineParserConfigHeader ConfigHeader = "[MULTILINE_PARSER]"
 	FilterConfigHeader          ConfigHeader = "[FILTER]"
 	OutputConfigHeader          ConfigHeader = "[OUTPUT]"
+	MatchKey                    string       = "match"
+	OutputStorageMaxSizeKey     string       = "storage.total_limit_size"
 	EmitterTemplate             string       = `
 name                  rewrite_tag
 match                 %s.*
@@ -43,42 +45,55 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	return sb.String()
 }
 
+func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
+	var sb strings.Builder
+	sb.WriteString(string(header))
+	sb.WriteByte('\n')
+	for key, val := range section {
+		sb.WriteString("    " + key + " " + val + "\n") // 4 indentations
+	}
+	sb.WriteByte('\n')
+
+	return sb.String()
+}
+
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig) (string, error) {
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig, fluentBitMaxFSBufferSize string) (string, error) {
 	var sb strings.Builder
 
 	if len(logPipeline.Spec.Outputs) > 0 {
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline.Name)))
 	}
 	for _, filter := range logPipeline.Spec.Filters {
-		filterSection, err := ensureMatchCondIsValid(filter.Content, logPipeline.Name)
+		section, err := ParseSection(filter.Content)
 		if err != nil {
 			return "", err
 		}
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, filterSection))
+
+		section[MatchKey] = getValidMatchCond(section, logPipeline.Name)
+
+		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
 	for _, output := range logPipeline.Spec.Outputs {
-		outputSection, err := ensureMatchCondIsValid(output.Content, logPipeline.Name)
+		section, err := ParseSection(output.Content)
 		if err != nil {
 			return "", err
 		}
-		sb.WriteString(BuildConfigSection(OutputConfigHeader, outputSection))
+
+		section[MatchKey] = getValidMatchCond(section, logPipeline.Name)
+		section[OutputStorageMaxSizeKey] = fluentBitMaxFSBufferSize
+
+		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
 	}
 	return sb.String(), nil
 }
 
-func ensureMatchCondIsValid(content, logPipelineName string) (string, error) {
-	section, err := parseSection(content)
-	if err != nil {
-		return "", err
+func getValidMatchCond(section map[string]string, logPipelineName string) string {
+	if matchCond, hasKey := section["match"]; hasKey {
+		return matchCond
 	}
 
-	matchCond := getMatchCondition(section)
-	if matchCond == "" {
-		content += fmt.Sprintf("\nMatch              %s.*", logPipelineName)
-	}
-
-	return content, nil
+	return fmt.Sprintf("%s.*", logPipelineName)
 }
 
 // MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
@@ -99,11 +114,4 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 
 func generateEmitter(emitterConfig EmitterConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipelineName, logPipelineName, emitterConfig.StorageType, emitterConfig.BufferLimit)
-}
-
-func getMatchCondition(section map[string]string) string {
-	if matchCond, hasKey := section["match"]; hasKey {
-		return matchCond
-	}
-	return ""
 }

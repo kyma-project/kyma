@@ -319,6 +319,7 @@ config:
         Skip_Long_Lines On
         Refresh_Interval 10
         DB /data/flb_kube.db
+        storage.type  filesystem
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |

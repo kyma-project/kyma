@@ -65,6 +65,7 @@ var (
 	fluentBitInputTag          string
 	fluentBitBufferLimit       string
 	fluentBitStorageType       string
+	fluentBitMaxFSBufferSize   string
 	logFormat                  string
 	logLevel                   string
 	certDir                    string
@@ -111,6 +112,7 @@ func main() {
 	flag.StringVar(&fluentBitInputTag, "fluent-bit-input-tag", "tele", "Fluent Bit base tag of the input to use")
 	flag.StringVar(&fluentBitBufferLimit, "fluent-bit-buffer-limit", "10M", "Fluent Bit buffer limit per log pipeline")
 	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
+	flag.StringVar(&fluentBitMaxFSBufferSize, "fluent-bit-max-filesystem-buffer-size", "1G", "Fluent Bit maximum filesystem buffer size per log pipeline")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
@@ -195,6 +197,7 @@ func main() {
 
 		emitterConfig,
 		fs.NewWrapper(),
+		fluentBitMaxFSBufferSize,
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",

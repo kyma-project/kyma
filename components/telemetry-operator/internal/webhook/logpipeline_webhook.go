@@ -49,12 +49,14 @@ const (
 type LogPipelineValidator struct {
 	client.Client
 
-	fluentBitConfigMap types.NamespacedName
-	variablesValidator validation.VariablesValidator
-	configValidator    validation.ConfigValidator
-	pluginValidator    validation.PluginValidator
-	emitterConfig      fluentbit.EmitterConfig
-	fsWrapper          fs.Wrapper
+	fluentBitConfigMap       types.NamespacedName
+	variablesValidator       validation.VariablesValidator
+	configValidator          validation.ConfigValidator
+	pluginValidator          validation.PluginValidator
+	emitterConfig            fluentbit.EmitterConfig
+	fluentBitMaxFSBufferSize string
+
+	fsWrapper fs.Wrapper
 
 	decoder *admission.Decoder
 }
@@ -67,7 +69,8 @@ func NewLogPipeLineValidator(
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
 	emitterConfig fluentbit.EmitterConfig,
-	fsWrapper fs.Wrapper) *LogPipelineValidator {
+	fsWrapper fs.Wrapper,
+	fluentBitMaxFSBufferSize string) *LogPipelineValidator {
 
 	return &LogPipelineValidator{
 		Client: client,
@@ -75,11 +78,12 @@ func NewLogPipeLineValidator(
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		variablesValidator: variablesValidator,
-		configValidator:    configValidator,
-		pluginValidator:    pluginValidator,
-		fsWrapper:          fsWrapper,
-		emitterConfig:      emitterConfig,
+		variablesValidator:       variablesValidator,
+		configValidator:          configValidator,
+		pluginValidator:          pluginValidator,
+		fsWrapper:                fsWrapper,
+		emitterConfig:            emitterConfig,
+		fluentBitMaxFSBufferSize: fluentBitMaxFSBufferSize,
 	}
 }
 
@@ -169,6 +173,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
+	if err = v.validateOutput(logPipeline); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit output")
+		return err
+	}
+
 	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
@@ -203,7 +212,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig, v.fluentBitMaxFSBufferSize)
 	if err != nil {
 		return []fs.File{}, err
 	}
@@ -235,4 +244,19 @@ func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 func (v *LogPipelineValidator) validateSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	secVal := secret.NewSecretHelper(v.Client)
 	return secVal.ValidateSecretsExist(ctx, logPipeline)
+}
+
+func (v *LogPipelineValidator) validateOutput(logPipeline *telemetryv1alpha1.LogPipeline) error {
+
+	for _, output := range logPipeline.Spec.Outputs {
+		section, err := fluentbit.ParseSection(output.Content)
+		if err != nil {
+			return err
+		}
+
+		if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
+			return fmt.Errorf("config key '%s' is not allowed in log pipeline '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
+		}
+	}
+	return nil
 }
