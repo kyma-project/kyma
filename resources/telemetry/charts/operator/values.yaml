@@ -96,7 +96,7 @@ supportedPlugins:
     - http
     - forward
 syncPeriod: 1h
-maxLogPipelines: 5
+maxLogPipelines: 3
 
 nodeSelector: {}
 
