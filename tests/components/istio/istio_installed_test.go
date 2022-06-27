@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/tidwall/pretty"
 	"github.com/cucumber/godog"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -126,8 +127,7 @@ func (i *istioInstallledCase) getIstioPods() error {
 	istiodPods, err := listPodsIstioNamespace(metav1.ListOptions{
 		LabelSelector: "istio=pilot",
 	})
-	podList, _ := json.Marshal(i.ingressGwPods.Items)
-	fmt.Print(podList)
+	
 	if err != nil {
 		return err
 	}
@@ -197,16 +197,14 @@ func (i *istioInstallledCase) istioPodsAreAvailable() error {
 
 func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
 	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
-		podList, _ := json.Marshal(i.ingressGwPods.Items)
-		return errors.Wrap(fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.ingressGwPods.Items), numberOfPodsRequired),string(podList))
+		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d\n Pod list: %v", len(i.ingressGwPods.Items), numberOfPodsRequired, getPodListReport(i.ingressGwPods))
 	}
 	return nil
 }
 
 func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
 	if len(i.pilotPods.Items) != numberOfPodsRequired {
-		podList, _ := json.Marshal(i.pilotPods.Items)
-		return errors.Wrap(fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired),string(podList))
+		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d\n Pod list: %v", len(i.pilotPods.Items), numberOfPodsRequired, getPodListReport(i.pilotPods))
 	}
 	return nil
 }
@@ -241,4 +239,21 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
+}
+
+func getPodListReport(list *corev1.PodList) string{
+	type returnedPodList struct {
+		PodList []struct {
+			Metadata struct {
+				Name              string `json:"name"`
+				CreationTimestamp string `json:"creationTimestamp"`
+			} `json:"metadata"`
+		} `json:"items"`
+	}
+
+	p := returnedPodList{}
+	toMarshal, _ := json.Marshal(list)
+	json.Unmarshal(toMarshal, &p)
+	toPrint, _ := json.Marshal(p)
+	return string(pretty.Pretty(toPrint))
 }
