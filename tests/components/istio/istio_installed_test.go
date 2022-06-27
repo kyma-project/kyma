@@ -47,6 +47,7 @@ func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.Defer
 	if kConfig, ok := os.LookupEnv("KUBECONFIG"); !ok {
 		if home := homedir.HomeDir(); home != "" {
 			kubeconfig = filepath.Join(home, ".kube", "config")
+			
 		}
 	} else {
 		kubeconfig = kConfig
@@ -127,7 +128,6 @@ func (i *istioInstallledCase) getIstioPods() error {
 	istiodPods, err := listPodsIstioNamespace(metav1.ListOptions{
 		LabelSelector: "istio=pilot",
 	})
-	
 	if err != nil {
 		return err
 	}
