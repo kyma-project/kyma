@@ -2,6 +2,7 @@ package istio
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -195,22 +196,16 @@ func (i *istioInstallledCase) istioPodsAreAvailable() error {
 
 func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
 	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
-		//Log for debuging https://status.build.kyma-project.io/view/gs/kyma-prow-logs/pr-logs/pull/kyma-project_kyma/14670/pre-main-kyma-prod-istio-integration-k3d/1539914627880587264
-		for _, p := range i.ingressGwPods.Items {
-			fmt.Printf("Ingress gateway pod: name:%v timestamp: %v, status:%v\n", p.Name, p.CreationTimestamp, p.Status)
-		}
-		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.ingressGwPods.Items), numberOfPodsRequired)
+		podList, _ := json.Marshal(i.ingressGwPods.Items)
+		return errors.Wrap(fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.ingressGwPods.Items), numberOfPodsRequired),string(podList))
 	}
 	return nil
 }
 
 func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
 	if len(i.pilotPods.Items) != numberOfPodsRequired {
-		//Log for debuging https://status.build.kyma-project.io/view/gs/kyma-prow-logs/pr-logs/pull/kyma-project_kyma/14670/pre-main-kyma-prod-istio-integration-k3d/1539914627880587264
-		for _, p := range i.pilotPods.Items {
-			fmt.Printf("Ingress gateway pod: name:%v timestamp: %v, status:%v\n", p.Name, p.CreationTimestamp, p.Status)
-		}
-		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
+		podList, _ := json.Marshal(i.pilotPods.Items)
+		return errors.Wrap(fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired),string(podList))
 	}
 	return nil
 }
