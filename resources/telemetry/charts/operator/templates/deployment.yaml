@@ -38,8 +38,6 @@ spec:
             - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
             - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
             - --fluent-bit-ns={{ .Release.Namespace }}
-            - --supported-filter-plugins={{ join "," .Values.supportedPlugins.filter}}
-            - --supported-output-plugins={{ join "," .Values.supportedPlugins.output}}
             - --denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
             - --denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
             - --sync-period={{.Values.syncPeriod}}
