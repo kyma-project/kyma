@@ -15,7 +15,7 @@ deployment:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-      - ALL
+        - ALL
     privileged: false
     runAsGroup: 65534
     runAsNonRoot: true
@@ -112,4 +112,3 @@ global:
       name: "api-gateway-controller"
       version: "9fd030a8"
       directory: "incubator"
-
