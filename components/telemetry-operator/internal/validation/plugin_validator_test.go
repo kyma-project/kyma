@@ -17,7 +17,8 @@ func TestValidateEmpty(t *testing.T) {
 	sut := NewPluginValidator([]string{}, []string{})
 	err := sut.Validate(logPipeline, logPipelines)
 
-	require.NoError(t, err)
+	require.Error(t, err)
+	require.Equal(t, " error validating Output plugins: no output is defined! One output needs to be defined", err.Error())
 }
 
 func TestValidateForbiddenFilters(t *testing.T) {

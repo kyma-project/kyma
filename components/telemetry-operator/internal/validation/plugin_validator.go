@@ -72,7 +72,7 @@ func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeli
 
 func (pv *pluginValidator) validateOutputs(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
 	if len(pipeline.Spec.Output.Custom) == 0 {
-		return nil
+		return fmt.Errorf("no output is defined! One output needs to be defined")
 	}
 	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
 		return err
