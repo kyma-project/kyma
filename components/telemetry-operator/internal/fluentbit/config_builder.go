@@ -2,6 +2,7 @@ package fluentbit
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
@@ -46,11 +47,18 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 }
 
 func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
+	// Sort maps for idempotent results
+	keys := make([]string, 0, len(section))
+	for k := range section {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
 	var sb strings.Builder
 	sb.WriteString(string(header))
 	sb.WriteByte('\n')
-	for key, val := range section {
-		sb.WriteString("    " + key + " " + val + "\n") // 4 indentations
+	for _, key := range keys {
+		sb.WriteString("    " + key + " " + section[key] + "\n") // 4 indentations
 	}
 	sb.WriteByte('\n')
 

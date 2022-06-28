@@ -52,13 +52,13 @@ var _ = Describe("LogPipeline controller", func() {
     Emitter_Mem_Buf_Limit 10M
 
 [FILTER]
-    name grep
     match *
+    name grep
     regex $kubernetes['labels']['app'] my-deployment
 
 [OUTPUT]
-    name stdout
     match log-pipeline.*
+    name stdout
     storage.total_limit_size 1G`
 
 	var expectedFluentBitParserConfig = `[PARSER]

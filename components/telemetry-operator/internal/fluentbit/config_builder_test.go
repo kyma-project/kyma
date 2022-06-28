@@ -33,6 +33,23 @@ func TestBuildSectionWithWrongIndentation(t *testing.T) {
 	assert.Equal(t, expected, actual, "Fluent Bit config indentation has not been fixed")
 }
 
+func TestBuildConfigSectionFromMap(t *testing.T) {
+	expected := `[FILTER]
+    Key_A Value_A
+    Key_B Value_B
+
+`
+
+	content := map[string]string{
+		"Key_A": "Value_A",
+		"Key_B": "Value_B",
+	}
+	actual := BuildConfigSectionFromMap(FilterConfigHeader, content)
+
+	assert.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
+
+}
+
 func TestGenerateEmitter(t *testing.T) {
 	emitterConfig := EmitterConfig{
 		InputTag:    "kube",
@@ -54,8 +71,8 @@ Emitter_Mem_Buf_Limit 10M`
 
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
-    name grep
     match foo.*
+    name grep
 
 `
 
@@ -92,8 +109,8 @@ func TestOutput(t *testing.T) {
     Emitter_Mem_Buf_Limit 10M
 
 [OUTPUT]
-    name http
     match foo.*
+    name http
     storage.total_limit_size 1G
 
 `
