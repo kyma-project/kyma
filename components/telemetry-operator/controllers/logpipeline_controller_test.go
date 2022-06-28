@@ -167,9 +167,7 @@ var _ = Describe("LogPipeline controller", func() {
 			filter := telemetryv1alpha1.Filter{
 				Custom: FluentBitFilterConfig,
 			}
-			output := telemetryv1alpha1.Output{
-				Custom: FluentBitOutputConfig,
-			}
+
 			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "telemetry.kyma-project.io/v1alpha1",
@@ -182,7 +180,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Parsers:          []telemetryv1alpha1.Parser{parser},
 					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
 					Filters:          []telemetryv1alpha1.Filter{filter},
-					Output:           []telemetryv1alpha1.Output{output},
+					Output:           telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:            []telemetryv1alpha1.FileMount{file},
 					Variables:        []telemetryv1alpha1.VariableReference{variableRefs},
 				},

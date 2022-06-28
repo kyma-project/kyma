@@ -58,11 +58,13 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConf
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, filterSection))
 	}
 
-	outputSection, err := ensureMatchCondIsValid(logPipeline.Spec.Output.Custom, logPipeline.Name)
-	if err != nil {
-		return "", err
+	if len(logPipeline.Spec.Output.Custom) > 0 {
+		outputSection, err := ensureMatchCondIsValid(logPipeline.Spec.Output.Custom, logPipeline.Name)
+		if err != nil {
+			return "", err
+		}
+		sb.WriteString(BuildConfigSection(OutputConfigHeader, outputSection))
 	}
-	sb.WriteString(BuildConfigSection(OutputConfigHeader, outputSection))
 
 	return sb.String(), nil
 }

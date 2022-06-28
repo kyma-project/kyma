@@ -71,11 +71,12 @@ func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeli
 }
 
 func (pv *pluginValidator) validateOutputs(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
-
+	if len(pipeline.Spec.Output.Custom) == 0 {
+		return nil
+	}
 	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -115,7 +116,6 @@ func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipelin
 }
 
 func getCustomName(custom map[string]string) (string, error) {
-	fmt.Printf("custom: %v", custom)
 	if name, hasKey := custom["name"]; hasKey {
 		return name, nil
 	}

@@ -99,10 +99,9 @@ func TestOutput(t *testing.T) {
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Output: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     name               http`,
-				},
 			},
 		},
 	}
