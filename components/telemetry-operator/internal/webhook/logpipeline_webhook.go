@@ -255,7 +255,7 @@ func (v *LogPipelineValidator) validateOutput(logPipeline *telemetryv1alpha1.Log
 		}
 
 		if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
-			return fmt.Errorf("config key '%s' is not allowed in log pipeline '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
+			return fmt.Errorf("configuring '%s' key in Fluent Bit Output is not allowed in log pipeline '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
 		}
 	}
 	return nil

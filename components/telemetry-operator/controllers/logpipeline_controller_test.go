@@ -37,8 +37,8 @@ var _ = Describe("LogPipeline controller", func() {
 		LogPipelineName                = "log-pipeline"
 		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
 		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
-		FluentBitFilterConfig          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
-		FluentBitOutputConfig          = "Name   stdout\nMatch   log-pipeline.*"
+		FluentBitFilterConfig          = "Name   grep\nmatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig          = "Name   stdout\nmatch   log-pipeline.*"
 		timeout                        = time.Second * 10
 		interval                       = time.Millisecond * 250
 	)
@@ -51,13 +51,15 @@ var _ = Describe("LogPipeline controller", func() {
     Emitter_Mem_Buf_Limit 10M
 
 [FILTER]
-    Name   grep
-    Match   *
-    Regex   $kubernetes['labels']['app'] my-deployment
+    name grep
+    match *
+    regex $kubernetes['labels']['app'] my-deployment
 
 [OUTPUT]
-    Name   stdout
-    Match   log-pipeline.*`
+    name stdout
+    match log-pipeline.*
+    storage.total_limit_size 1G`
+
 	var expectedFluentBitParserConfig = `[PARSER]
     Name   dummy_test
     Format   regex

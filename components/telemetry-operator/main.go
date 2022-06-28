@@ -207,7 +207,8 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		emitterConfig)
+		emitterConfig,
+		fluentBitMaxFSBufferSize)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)

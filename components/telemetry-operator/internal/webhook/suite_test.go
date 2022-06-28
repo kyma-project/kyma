@@ -111,6 +111,7 @@ var _ = BeforeSuite(func() {
 		BufferLimit: "10M",
 		StorageType: "filesystem",
 	}
+	fluentBitMaxFSBufferSize := "1G"
 
 	variableValidatorMock = &fluentbitmocks.VariablesValidator{}
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
@@ -125,6 +126,7 @@ var _ = BeforeSuite(func() {
 		pluginValidatorMock,
 		emitterConfig,
 		fsWrapperMock,
+		fluentBitMaxFSBufferSize,
 	)
 
 	By("registering LogPipeline webhook")

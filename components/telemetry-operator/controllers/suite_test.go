@@ -106,12 +106,15 @@ var _ = BeforeSuite(func() {
 		BufferLimit: "10M",
 		StorageType: "filesystem",
 	}
+	fluentBitMaxFSBufferSize := "1G"
 
 	reconciler := NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		emitterConfig)
+		emitterConfig,
+		fluentBitMaxFSBufferSize,
+	)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 
