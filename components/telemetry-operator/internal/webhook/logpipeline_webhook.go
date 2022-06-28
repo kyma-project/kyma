@@ -53,6 +53,7 @@ type LogPipelineValidator struct {
 	variablesValidator       validation.VariablesValidator
 	configValidator          validation.ConfigValidator
 	pluginValidator          validation.PluginValidator
+	maxPipelinesValidator    validation.MaxPipelinesValidator
 	outputValidator          validation.OutputValidator
 	globalFluentBitConfig    fluentbit.PipelineSpecificConfig
 	fluentBitMaxFSBufferSize string
@@ -69,6 +70,7 @@ func NewLogPipeLineValidator(
 	variablesValidator validation.VariablesValidator,
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
+	maxPipelinesValidator validation.MaxPipelinesValidator,
 	outputValidator validation.OutputValidator,
 	globalFluentBitConfig fluentbit.PipelineSpecificConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
@@ -82,6 +84,7 @@ func NewLogPipeLineValidator(
 		variablesValidator:    variablesValidator,
 		configValidator:       configValidator,
 		pluginValidator:       pluginValidator,
+		maxPipelinesValidator: maxPipelinesValidator,
 		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
 		globalFluentBitConfig: globalFluentBitConfig,
@@ -161,6 +164,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	if err := v.List(ctx, &logPipelines); err != nil {
+		return err
+	}
+
+	if err = v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
+		log.Error(err, "Maximum number of log pipelines reached")
 		return err
 	}
 
