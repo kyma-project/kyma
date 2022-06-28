@@ -12,5 +12,5 @@ spec:
   output:
     custom: |
       Name null
-      Match tele.*   
+      Match logpipeline-test.*   
   files: []
