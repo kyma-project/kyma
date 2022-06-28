@@ -19,7 +19,6 @@ package controllers
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -205,7 +204,6 @@ var _ = Describe("LogPipeline controller", func() {
 					return err.Error()
 				}
 				actualFluentBitConfig := strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
-				fmt.Println("actualFluentBitConfig:", actualFluentBitConfig)
 				return actualFluentBitConfig
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
 
