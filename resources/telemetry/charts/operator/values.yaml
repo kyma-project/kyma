@@ -90,6 +90,7 @@ deniedPlugins:
   output: []
 
 syncPeriod: 1h
+maxLogPipelines: 3
 
 nodeSelector: {}
 

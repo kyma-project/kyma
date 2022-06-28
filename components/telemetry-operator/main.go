@@ -70,6 +70,7 @@ var (
 	certDir                    string
 	deniedFilterPlugins        string
 	deniedOutputPlugins        string
+	maxPipelines               int
 )
 
 //nolint:gochecknoinits
@@ -114,6 +115,7 @@ func main() {
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
 	flag.StringVar(&deniedFilterPlugins, "denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
 	flag.StringVar(&deniedOutputPlugins, "denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
+	flag.IntVar(&maxPipelines, "max-pipelines", 5, "Maximum number of log pipelines to be created. If 0, no limit is applied.")
 
 	flag.Parse()
 
@@ -186,6 +188,7 @@ func main() {
 		validation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
+		validation.NewMaxPipelinesValidator(maxPipelines),
 		emitterConfig,
 		fs.NewWrapper(),
 	)

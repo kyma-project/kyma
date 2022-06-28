@@ -27,7 +27,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
-	validationMocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/validation/mocks"
+	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/validation/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -53,9 +53,10 @@ var (
 	ctx                   context.Context
 	cancel                context.CancelFunc
 	fsWrapperMock         *fsmocks.Wrapper
-	variableValidatorMock *validationMocks.VariablesValidator
-	configValidatorMock   *validationMocks.ConfigValidator
-	pluginValidatorMock   *validationMocks.PluginValidator
+	variableValidatorMock *validationmocks.VariablesValidator
+	configValidatorMock   *validationmocks.ConfigValidator
+	pluginValidatorMock   *validationmocks.PluginValidator
+	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -112,9 +113,10 @@ var _ = BeforeSuite(func() {
 		StorageType: "filesystem",
 	}
 
-	variableValidatorMock = &validationMocks.VariablesValidator{}
-	configValidatorMock = &validationMocks.ConfigValidator{}
-	pluginValidatorMock = &validationMocks.PluginValidator{}
+	variableValidatorMock = &validationmocks.VariablesValidator{}
+	configValidatorMock = &validationmocks.ConfigValidator{}
+	pluginValidatorMock = &validationmocks.PluginValidator{}
+	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
@@ -123,6 +125,7 @@ var _ = BeforeSuite(func() {
 		variableValidatorMock,
 		configValidatorMock,
 		pluginValidatorMock,
+		maxPipelinesValidator,
 		emitterConfig,
 		fsWrapperMock,
 	)
