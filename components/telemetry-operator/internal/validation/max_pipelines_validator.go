@@ -22,7 +22,7 @@ func NewMaxPipelinesValidator(maxPipelines int) MaxPipelinesValidator {
 }
 
 func (m maxPipelinesValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	if m.isNewPipeline(logPipeline, logPipelines) && len(logPipelines.Items) >= m.maxPipelines {
+	if m.maxPipelines > 0 && m.isNewPipeline(logPipeline, logPipelines) && len(logPipelines.Items) >= m.maxPipelines {
 		return fmt.Errorf("the maximum number of log pipelines is %d", m.maxPipelines)
 	}
 	return nil

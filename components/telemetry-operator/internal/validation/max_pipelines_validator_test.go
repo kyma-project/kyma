@@ -8,6 +8,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func TestValidateWithoutLimit(t *testing.T) {
+	validator := NewMaxPipelinesValidator(0)
+	pipeline := v1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "pipeline-1",
+		},
+	}
+	pipelines := v1alpha1.LogPipelineList{}
+
+	err := validator.Validate(&pipeline, &pipelines)
+	require.NoError(t, err)
+}
+
 func TestValidateFirstPipeline(t *testing.T) {
 	validator := NewMaxPipelinesValidator(1)
 	pipeline := v1alpha1.LogPipeline{
