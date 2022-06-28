@@ -7,19 +7,19 @@ Now it's time to actually use an event to trigger a workload.
 
 ## Prerequisites
 
-- Provision a [Kyma Cluster](01-quick-install.md).
-- (Optional) Deploy [Kyma Dashboard](../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma Cluster using the following command. Alternatively, you can also use `kubectl` CLI.
+1. Provision a [Kyma Cluster](01-quick-install.md).
+2. (Optional) Deploy [Kyma Dashboard](../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
    ```bash
    kyma dashboard
    ```
-- (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
+3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
    ```bash
    go install github.com/cloudevents/conformance/cmd/cloudevents@latest
    ```
 
 ## Create a Function
 
-For this purpose, we are going to create a new Function. As this is a sample Function, we'll make it so that it prints out the received event to console. 
+First, create a sample Function that prints out the received event to console:
 
 <div tabs name="Deploy a Function" group="trigger-workload">
   <details open>
@@ -27,10 +27,10 @@ For this purpose, we are going to create a new Function. As this is a sample Fun
   Kyma Dashboard
   </summary>
 
-1. From the left navigation, go to **Namespaces** and click **default** namespace.
-2. From the left navigation, go to **Workloads** > **Functions** and click **Create Function +**.
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Workloads** > **Functions** and click **Create Function +**.
 3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, modify its source replacing it with this code:
+4. In the inline editor for the Function, replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -39,7 +39,7 @@ For this purpose, we are going to create a new Function. As this is a sample Fun
       } 
     }
     ```
-5. Click on **Save**
+5. Save your changes.
 6. Wait a few seconds for the Function to have status `RUNNING`.
 
   </details>
@@ -47,6 +47,8 @@ For this purpose, we are going to create a new Function. As this is a sample Fun
   <summary label="kubectl">
   kubectl
   </summary>
+  
+  Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -101,8 +103,8 @@ All the events published against this event type will be forwarded to the `Sink`
   Kyma Dashboard
   </summary>
 
-1. In your Function's (`lastorder`) view, go to the **Configuration** tab in Kyma Dashboard.
-2. In the **Configuration** tab, click on **Create Subscription+**.
+1. In Kyma Dashboard, go to the view of your Function `lastorder`.
+2. Go to **Configuration** > **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
    - **Application name**: `myapp`
@@ -155,13 +157,13 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function, and created a Subscription for it to listen for `order.received.v1` events. Now it's time to send an event and trigger the Function. For the sake of this example, we'll port-forward the Kyma Eventing Service to localhost. 
+We created the `lastorder` Function, and created a Subscription for it to listen for `order.received.v1` events. Now it's time to send an event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost. 
 
 1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run: 
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Now publish an event to trigger your function. In another Terminal window run: 
+2. Now publish an event to trigger your Function. In another terminal window, run: 
 
 <div tabs name="Publish an event" group="trigger-workload">
   <details open>
@@ -209,10 +211,10 @@ To verify that the event was properly delivered, check the logs of the Function:
   Kyma Dashboard
   </summary>
 
-1. Go back to your `lastorder` Function's view in Kyma Dashboard.
-2. In the **Code** tab, scroll down to the **Replicas of the Function** section.
+1. In Kyma Dashboard, return to the view of your `lastorder` Function.
+2. Go to **Code** and find the **Replicas of the Function** section.
 3. Click on **View Logs**.
-4. You will see the received event in the logs:
+4. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213' }
    ```
@@ -232,7 +234,7 @@ kubectl logs -f -n default \
     -o jsonpath="{.items[0].metadata.name}")
 ```
 
-You will see the received event in the logs:
+You see the received event in the logs:
 ```
 Received event: { orderCode: '3211213' }
 ```
