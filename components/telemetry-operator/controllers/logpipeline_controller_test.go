@@ -19,6 +19,7 @@ package controllers
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -203,7 +204,9 @@ var _ = Describe("LogPipeline controller", func() {
 				if err != nil {
 					return err.Error()
 				}
-				return strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
+				actualFluentBitConfig := strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
+				fmt.Println("actualFluentBitConfig:", actualFluentBitConfig)
+				return actualFluentBitConfig
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
 
 			// Fluent Bit parsers config should be copied to ConfigMap
