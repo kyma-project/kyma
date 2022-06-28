@@ -1,0 +1,255 @@
+---
+title: Event name cleanup in Subscriptions
+---
+
+To conform to Cloud Event specifications, sometimes Eventing must modify the event names to filter out non-alphanumeric character. In this tutorial, we will show one such example of event name cleanup.
+We will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) having alphanumeric characters in the event names and see how Eventing behaves. You can read more about Event name format and cleanup [here](../../05-technical-reference/evnt-01-event-names.md).
+
+## Prerequisites
+
+1. Provision a [Kyma Cluster](../../02-get-started/01-quick-install.md).
+2. (Optional) Deploy [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
+   ```bash
+   kyma dashboard
+   ```
+3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
+   ```bash
+   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
+   ```
+
+## Create a Workload
+
+First, create a sample Function that prints out the received event to console:
+
+<div tabs name="Deploy a Function" group="create-workload">
+  <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Workloads** > **Functions** and click **Create Function +**.
+3. Name the Function `lastorder` and click **Create**.
+4. In the inline editor for the Function, replace its source with the following code:
+    ```js
+    module.exports = {
+      main: async function (event, context) {
+        console.log("Received event:", event.data);
+        return;
+      } 
+    }
+    ```
+5. Save your changes.
+6. Wait a few seconds for the Function to have status `RUNNING`.
+
+  </details>
+  <details>
+  <summary label="kubectl">
+  kubectl
+  </summary>
+
+```bash
+cat <<EOF | kubectl apply -f -
+  apiVersion: serverless.kyma-project.io/v1alpha1
+  kind: Function
+  metadata:
+    labels:
+      serverless.kyma-project.io/build-resources-preset: local-dev
+      serverless.kyma-project.io/function-resources-preset: S
+      serverless.kyma-project.io/replicas-preset: S
+    name: lastorder
+    namespace: default
+  spec:
+    deps: '{ "dependencies": {}}'
+    maxReplicas: 1
+    minReplicas: 1
+    source: |
+      module.exports = {
+        main: async function (event, context) {
+          console.log("Received event:", event.data);
+          return; 
+        } 
+      }
+EOF
+```
+
+If the resources were created successfully, the command returns this message:
+
+```bash
+function.serverless.kyma-project.io/lastorder created
+```
+
+To check the Function status, run:
+
+```bash
+kubectl get functions -n default lastorder
+```
+
+> **NOTE:** You might need to wait a few seconds for the Function to be ready.
+
+  </details>
+</div>
+
+## Create a Subscription with Event type consisting of alphanumeric characters
+
+Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for event of type: `order.payment-success.v1`. Note that `order.payment-success.v1` contains a non-alphanumeric character (i.e. hyphen `-`).
+
+<div tabs name="Create a Subscription" group="create-subscription">
+  <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In Kyma Dashboard, go to the view of your Function `lastorder`.
+2. Go to **Configuration** > **Create Subscription+**.
+3. Provide the following parameters:
+   - **Subscription name**: `lastorder-payment-sub`
+   - **Application name**: `myapp`
+   - **Event name**: `order.payment-success`
+   - **Event version**: `v1`
+
+   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.payment-success.v1`.
+
+4. Click **Create**.
+5. Wait a few seconds for the Subscription to have status `READY`.
+
+  </details>
+  <details>
+  <summary label="kubectl">
+  kubectl
+  </summary>
+
+Run:
+```bash
+cat <<EOF | kubectl apply -f -
+   apiVersion: eventing.kyma-project.io/v1alpha1
+   kind: Subscription
+   metadata:
+     name: lastorder-payment-sub
+     namespace: default
+   spec:
+     sink: 'http://lastorder.default.svc.cluster.local'
+     filter:
+       filters:
+         - eventSource:
+             property: source
+             type: exact
+             value: ''
+           eventType:
+             property: type
+             type: exact
+             value: sap.kyma.custom.myapp.order.payment-success.v1
+EOF
+```
+
+To check that the Subscription was created and is ready, run:
+```bash
+kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.ready}"
+```
+
+The operation was successful if the returned status says `true`.
+  </details>
+</div>
+
+## Check the Subscription cleaned Event type
+
+To check the Subscription cleaned Event type, run:
+```bash
+kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.cleanEventTypes}"
+```
+
+Now, note that the returned cleaned event type `["sap.kyma.custom.myapp.order.paymentsuccess.v1"]` does not contain the hyphen (i.e. `-`) in `payment-success` part, because Eventing services cleans out the non-alphanumeric characters from the Event name and uses the cleaned Event name in underlying Eventing-Backend.
+
+## Trigger the workload with an event
+
+We created the `lastorder` Function, and created a Subscription for it to listen for `order.payment-success.v1` events. 
+Now we will see that we can still publish events against the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
+In this example, we'll port-forward the Kyma Eventing Service to localhost.
+
+1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run:
+   ```bash
+   kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
+   ```
+2. Now publish an event to trigger your function. In another Terminal window run:
+
+   <div tabs name="Publish an event" group="trigger-workload">
+     <details open>
+     <summary label="CloudEvents Conformance Tool">
+     CloudEvents Conformance Tool
+     </summary>
+   
+      ```bash
+      cloudevents send http://localhost:3000/publish \
+         --type sap.kyma.custom.myapp.order.payment-success.v1 \
+         --id e4bcc616-c3a9-4840-9321-763aa23851fc \
+         --source myapp \
+         --datacontenttype application/json \
+         --data "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
+         --yaml
+      ```
+   
+     </details>
+     <details>
+     <summary label="curl">
+     curl
+     </summary>
+   
+      ```bash
+      curl -v -X POST \
+           -H "ce-specversion: 1.0" \
+           -H "ce-type: sap.kyma.custom.myapp.order.payment-success.v1" \
+           -H "ce-source: /default/io.kyma-project/custom" \
+           -H "ce-eventtypeversion: v1" \
+           -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851fc" \
+           -H "content-type: application/json" \
+           -d "{\"orderCode\":\"3211213\", \"orderAmount\":\"1250\"}" \
+           http://localhost:3000/publish
+      ```
+     </details>
+   </div>
+
+## Verify the event delivery
+
+To verify that the event was properly delivered, check the logs of the Function:
+
+<div tabs name="Verify the event delivery" group="trigger-workload">
+  <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In Kyma Dashboard, return to the view of your `lastorder` Function.
+2. Go to **Code** and find the **Replicas of the Function** section.
+3. Click on **View Logs**.
+4. You will see the received event in the logs:
+   ```
+   Received event: { orderCode: '3211213', orderAmount: '1250' }
+   ```
+
+</details>
+  <details>
+  <summary label="kubectl">
+  kubectl
+  </summary>
+Run: 
+
+```bash
+kubectl logs -f -n default \
+  $(kubectl get pod \
+    --field-selector=status.phase==Running \
+    -l serverless.kyma-project.io/function-name=lastorder \
+    -o jsonpath="{.items[0].metadata.name}")
+```
+
+You will see the received event in the logs:
+```
+Received event: { orderCode: '3211213', orderAmount: '1250' }
+```
+
+  </details>
+</div>
+
+## Conclusion
+
+We saw that Eventing services modifies the event names to filter out non-alphanumeric character to conform to Cloud Event specifications. But this modification is abstract to the user because the user can still publish and subscribe to the original Event names. 
+Only catch is that in some cases, it can lead to a naming collision as explained in [Event names](../../05-technical-reference/evnt-01-event-names.md).
