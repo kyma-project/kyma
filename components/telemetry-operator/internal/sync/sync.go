@@ -32,24 +32,21 @@ type FluentBitDaemonSetConfig struct {
 
 type LogPipelineSyncer struct {
 	client.Client
-	DaemonSetConfig          FluentBitDaemonSetConfig
-	EmitterConfig            fluentbit.EmitterConfig
-	EnableUnsupportedPlugin  bool
-	SecretValidator          *secret.SecretHelper
-	FluentBitMaxFSBufferSize string
+	DaemonSetConfig         FluentBitDaemonSetConfig
+	PipelineSpecificConfig  fluentbit.PipelineSpecificConfig
+	EnableUnsupportedPlugin bool
+	SecretValidator         *secret.SecretHelper
 }
 
 func NewLogPipelineSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
-	emitterConfig fluentbit.EmitterConfig,
-	fluentBitMaxFSBufferSize string,
+	pipelineSpecificConfig fluentbit.PipelineSpecificConfig,
 ) *LogPipelineSyncer {
 	var lps LogPipelineSyncer
 	lps.Client = client
 	lps.DaemonSetConfig = daemonSetConfig
-	lps.EmitterConfig = emitterConfig
+	lps.PipelineSpecificConfig = pipelineSpecificConfig
 	lps.SecretValidator = secret.NewSecretHelper(client)
-	lps.FluentBitMaxFSBufferSize = fluentBitMaxFSBufferSize
 	return &lps
 }
 
@@ -102,7 +99,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 	} else {
-		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.EmitterConfig, s.FluentBitMaxFSBufferSize)
+		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineSpecificConfig)
 		if err != nil {
 			return false, err
 		}

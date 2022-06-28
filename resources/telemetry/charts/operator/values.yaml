@@ -97,7 +97,7 @@ supportedPlugins:
     - forward
 syncPeriod: 1h
 
-maxFileSystemBufferSize: 1G
+filesystemBufferLimit: 1G
 
 nodeSelector: {}
 

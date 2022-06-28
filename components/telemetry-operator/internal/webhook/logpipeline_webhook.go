@@ -54,7 +54,7 @@ type LogPipelineValidator struct {
 	configValidator          validation.ConfigValidator
 	pluginValidator          validation.PluginValidator
 	outputValidator          validation.OutputValidator
-	emitterConfig            fluentbit.EmitterConfig
+	globalFluentBitConfig    fluentbit.PipelineSpecificConfig
 	fluentBitMaxFSBufferSize string
 
 	fsWrapper fs.Wrapper
@@ -70,9 +70,8 @@ func NewLogPipeLineValidator(
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
 	outputValidator validation.OutputValidator,
-	emitterConfig fluentbit.EmitterConfig,
-	fsWrapper fs.Wrapper,
-	fluentBitMaxFSBufferSize string) *LogPipelineValidator {
+	globalFluentBitConfig fluentbit.PipelineSpecificConfig,
+	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
 	return &LogPipelineValidator{
 		Client: client,
@@ -80,13 +79,12 @@ func NewLogPipeLineValidator(
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		variablesValidator:       variablesValidator,
-		configValidator:          configValidator,
-		pluginValidator:          pluginValidator,
-		outputValidator:          outputValidator,
-		fsWrapper:                fsWrapper,
-		emitterConfig:            emitterConfig,
-		fluentBitMaxFSBufferSize: fluentBitMaxFSBufferSize,
+		variablesValidator:    variablesValidator,
+		configValidator:       configValidator,
+		pluginValidator:       pluginValidator,
+		outputValidator:       outputValidator,
+		fsWrapper:             fsWrapper,
+		globalFluentBitConfig: globalFluentBitConfig,
 	}
 }
 
@@ -215,7 +213,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig, v.fluentBitMaxFSBufferSize)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.globalFluentBitConfig)
 	if err != nil {
 		return []fs.File{}, err
 	}

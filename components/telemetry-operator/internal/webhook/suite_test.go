@@ -107,12 +107,12 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	emitterConfig := fluentbit.EmitterConfig{
-		InputTag:    "kube",
-		BufferLimit: "10M",
-		StorageType: "filesystem",
+	pipelineSpecificConfig := fluentbit.PipelineSpecificConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
 	}
-	fluentBitMaxFSBufferSize := "1G"
 
 	variableValidatorMock = &fluentbitmocks.VariablesValidator{}
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
@@ -127,9 +127,8 @@ var _ = BeforeSuite(func() {
 		configValidatorMock,
 		pluginValidatorMock,
 		outputValidatorMock,
-		emitterConfig,
+		pipelineSpecificConfig,
 		fsWrapperMock,
-		fluentBitMaxFSBufferSize,
 	)
 
 	By("registering LogPipeline webhook")

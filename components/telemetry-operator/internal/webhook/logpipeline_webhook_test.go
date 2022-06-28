@@ -236,7 +236,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(pluginErr).Times(1)
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
-			fsWrapperMock.On( "RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
 			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)

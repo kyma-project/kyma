@@ -10,10 +10,11 @@ import (
 
 type ConfigHeader string
 
-type EmitterConfig struct {
-	InputTag    string
-	BufferLimit string
-	StorageType string
+type PipelineSpecificConfig struct {
+	InputTag          string
+	MemoryBufferLimit string
+	StorageType       string
+	FsBufferLimit     string
 }
 
 const (
@@ -66,11 +67,11 @@ func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) s
 }
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig, fluentBitMaxFSBufferSize string) (string, error) {
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineSpecificConfig PipelineSpecificConfig) (string, error) {
 	var sb strings.Builder
 
 	if len(logPipeline.Spec.Outputs) > 0 {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline.Name)))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineSpecificConfig, logPipeline.Name)))
 	}
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Content)
@@ -89,7 +90,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConf
 		}
 
 		section[MatchKey] = getValidMatchCond(section, logPipeline.Name)
-		section[OutputStorageMaxSizeKey] = fluentBitMaxFSBufferSize
+		section[OutputStorageMaxSizeKey] = pipelineSpecificConfig.FsBufferLimit
 
 		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
 	}
@@ -120,6 +121,6 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 	return sb.String()
 }
 
-func generateEmitter(emitterConfig EmitterConfig, logPipelineName string) string {
-	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipelineName, logPipelineName, emitterConfig.StorageType, emitterConfig.BufferLimit)
+func generateEmitter(config PipelineSpecificConfig, logPipelineName string) string {
+	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }
