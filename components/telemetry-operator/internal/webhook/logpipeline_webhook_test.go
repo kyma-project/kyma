@@ -70,7 +70,7 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Parsers: []telemetryv1alpha1.Parser{parser},
-			Outputs: []telemetryv1alpha1.Output{output},
+			Output:  []telemetryv1alpha1.Output{output},
 			Files:   []telemetryv1alpha1.FileMount{file},
 		},
 	}

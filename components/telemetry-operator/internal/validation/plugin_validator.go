@@ -35,8 +35,11 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 			return true
 		}
 	}
-	for _, outputPlugin := range logPipeline.Spec.Outputs {
-		if outputPlugin.Custom != "" {
+	if logPipeline.Spec.Output.Custom != "" {
+		return true
+	}
+	for _, f := range logPipeline.Spec.Filters {
+		if f.Custom != "" {
 			return true
 		}
 	}
@@ -68,20 +71,20 @@ func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeli
 }
 
 func (pv *pluginValidator) validateOutputs(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
-	for _, outputPlugin := range pipeline.Spec.Outputs {
-		if err := checkIfPluginIsValid(outputPlugin.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
-			return err
-		}
+
+	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
+		return err
 	}
+
 	return nil
 }
 
 func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipeline, denied []string, pipelines *telemetryv1alpha1.LogPipelineList) error {
-	section, err := parseSection(content)
+	customSection, err := parseSection(content)
 	if err != nil {
 		return err
 	}
-	name, err := getSectionName(section)
+	name, err := getCustomName(customSection)
 	if err != nil {
 		return err
 	}
@@ -92,7 +95,7 @@ func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipelin
 		}
 	}
 
-	matchCondition := getMatchCondition(section)
+	matchCondition := getMatchCondition(customSection)
 	if matchCondition == "" {
 		return nil
 	}
@@ -111,8 +114,9 @@ func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipelin
 	return nil
 }
 
-func getSectionName(section map[string]string) (string, error) {
-	if name, hasKey := section["name"]; hasKey {
+func getCustomName(custom map[string]string) (string, error) {
+	fmt.Printf("custom: %v", custom)
+	if name, hasKey := custom["name"]; hasKey {
 		return name, nil
 	}
 	return "", fmt.Errorf("configuration section does not have name attribute")

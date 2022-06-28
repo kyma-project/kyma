@@ -182,7 +182,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Parsers:          []telemetryv1alpha1.Parser{parser},
 					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
 					Filters:          []telemetryv1alpha1.Filter{filter},
-					Outputs:          []telemetryv1alpha1.Output{output},
+					Output:           []telemetryv1alpha1.Output{output},
 					Files:            []telemetryv1alpha1.FileMount{file},
 					Variables:        []telemetryv1alpha1.VariableReference{variableRefs},
 				},

@@ -43,11 +43,10 @@ func TestValidateForbiddenFilters(t *testing.T) {
 func TestValidateForbiddenOutputs(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    es
     Match   *`,
-				},
 			},
 		},
 	}
@@ -62,10 +61,9 @@ func TestValidateForbiddenOutputs(t *testing.T) {
 func TestValidateUnnamedOutputs(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Match   *`,
-				},
 			},
 		},
 	}
@@ -80,11 +78,10 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    http
     Match   *`,
-				},
 			},
 			Filters: []telemetryv1alpha1.Filter{
 				{Custom: `
@@ -106,11 +103,10 @@ func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    http
     Match   abc`,
-				},
 			},
 		},
 	}
@@ -126,11 +122,10 @@ func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
 	logPipeline1 := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    http
     Match   foo.*`,
-				},
 			},
 		},
 	}
@@ -138,11 +133,10 @@ func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
 	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline1}}
 	logPipeline2 := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    http
     Match   bar`,
-				},
 			},
 		},
 	}
@@ -157,11 +151,10 @@ func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
 func TestValidatePipelineCreation(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    http
     Match   foo.*`,
-				},
 			},
 		},
 	}
@@ -199,12 +192,11 @@ func TestDeniedFilterPlugins(t *testing.T) {
 func TestDeniedOutputPlugins(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    lua
     Match   foo.*
     Regex   $kubernetes['labels']['app'] my-deployment`,
-				},
 			},
 		},
 	}
@@ -238,10 +230,9 @@ func TestContainsCustomPluginWithCustomFilter(t *testing.T) {
 func TestContainsCustomPluginWithCustomOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{Custom: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     Name    some-output`,
-				},
 			},
 		},
 	}

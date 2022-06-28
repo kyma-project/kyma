@@ -72,15 +72,12 @@ spec:
                       type: string
                   type: object
                 type: array
-              outputs:
-                items:
-                  description: Output describes a Fluent Bit output configuration
-                    section
-                  properties:
-                    custom:
-                      type: string
-                  type: object
-                type: array
+              output:
+                description: Output describes a Fluent Bit output configuration section
+                properties:
+                  custom:
+                    type: string
+                type: object
               parsers:
                 items:
                   description: Parser describes a Fluent Bit parser configuration

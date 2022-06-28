@@ -342,7 +342,7 @@ func (s *LogPipelineSyncer) getOrCreate(ctx context.Context, obj client.Object) 
 func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList) int {
 	unsupportedPluginsTotal := 0
 	for _, l := range pipelines.Items {
-		if l.DeletionTimestamp == nil {
+		if l.DeletionTimestamp != nil {
 			continue
 		}
 		for _, f := range l.Spec.Filters {
@@ -350,10 +350,8 @@ func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList)
 				unsupportedPluginsTotal++
 			}
 		}
-		for _, f := range l.Spec.Outputs {
-			if f.Custom != "" {
-				unsupportedPluginsTotal++
-			}
+		if l.Spec.Output.Custom != "" {
+			unsupportedPluginsTotal++
 		}
 	}
 	return unsupportedPluginsTotal

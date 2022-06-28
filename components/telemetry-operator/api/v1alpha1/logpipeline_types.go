@@ -29,7 +29,7 @@ type LogPipelineSpec struct {
 	Parsers          []Parser            `json:"parsers,omitempty"`
 	MultiLineParsers []MultiLineParser   `json:"multilineParsers,omitempty"`
 	Filters          []Filter            `json:"filters,omitempty"`
-	Outputs          []Output            `json:"outputs,omitempty"`
+	Output           Output              `json:"output,omitempty"`
 	Files            []FileMount         `json:"files,omitempty"`
 	Variables        []VariableReference `json:"variables,omitempty"`
 }
