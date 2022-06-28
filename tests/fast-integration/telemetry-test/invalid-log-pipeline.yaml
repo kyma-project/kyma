@@ -9,6 +9,8 @@ spec:
     - custom: |
         Name               abc
         Match              logpipeline-test.*
-  outputs: []
+  output:
+    custom: |
+      Name null
+      Match tele.*   
   files: []
-  secretRefs: [ ]
