@@ -40,6 +40,7 @@ const (
 	deployedKymaProfileVar = "KYMA_PROFILE"
 	exportResultVar        = "EXPORT_RESULT"
 	junitFileName          = "junit-report.xml"
+	cucumberFileName       = "cucumber-report.json"
 )
 
 var t *testing.T
@@ -50,8 +51,30 @@ var goDogOpts = godog.Options{
 }
 
 func init() {
-	godog.BindCommandLineFlags("godog.", &goDogOpts) // godog v0.11.0 and later
+	godog.BindCommandLineFlags("godog.", &goDogOpts)
 }
+
+/* func generateHTMLReport() {
+	html := gocure.HTML{
+		Config: html.Data{
+			InputJsonPath:    cucumberFileName,
+			OutputHtmlFolder: "reports/",
+			Title:            "Kyma Istio component tests",
+			Metadata: models.Metadata{
+				TestEnvironment: os.Getenv(deployedKymaProfileVar),
+				Platform:        runtime.GOOS,
+				Parallel:        "Scenarios",
+				Executed:        "Remote",
+				AppVersion:      "main",
+				Browser:         "default",
+			},
+		},
+	}
+	err := html.Generate()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+} */
 
 func TestMain(m *testing.M) {
 	pflag.Parse()
@@ -113,6 +136,9 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
+	/* 	if os.Getenv(exportResultVar) == "true" {
+		generateHTMLReport()
+	} */
 }
 
 func TestIstioInstalledProduction(t *testing.T) {
@@ -131,7 +157,9 @@ func TestIstioInstalledProduction(t *testing.T) {
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
-
+	/* 	if os.Getenv(exportResultVar) == "true" {
+		generateHTMLReport()
+	} */
 }
 
 type istioInstallledCase struct {
