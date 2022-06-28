@@ -54,9 +54,6 @@ type FunctionSpec struct {
 	// +optional
 	Runtime Runtime `json:"runtime,omitempty"`
 
-	// +optional
-	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
-
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []corev1.EnvVar `json:"env,omitempty"`
 

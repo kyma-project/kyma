@@ -1194,7 +1194,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		runtimeImageOverride := "any-custom-image"
-		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", runtimeImageOverride, 1, 2)
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", "initail-image-name-to-change", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
@@ -1205,7 +1205,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.RuntimeImageOverride = runtimeImageOverride
+		function.Annotations = map[string]string{runtimeImageOverrideAnnotation: runtimeImageOverride}
 		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
 
 		result, err := reconciler.Reconcile(ctx, request)
@@ -1215,12 +1215,12 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(function.Annotations[runtimeImageOverrideAnnotation]).To(gomega.Equal(runtimeImageOverride))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
 
 		t.Log("should detect runtimeImageOverride rollback")
 
-		function.Spec.RuntimeImageOverride = ""
+		function.Annotations[runtimeImageOverrideAnnotation] = ""
 		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(ctx, request)
@@ -1229,7 +1229,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
-		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
+		g.Expect(function.Annotations[runtimeImageOverrideAnnotation]).To(gomega.Equal(""))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
 	})
 }

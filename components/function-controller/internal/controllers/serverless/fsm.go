@@ -51,7 +51,8 @@ type reconciler struct {
 }
 
 const (
-	continuousGitCheckoutLabel = "serverless.kyma-project.io/continuousGitCheckout"
+	continuousGitCheckoutLabel     = "serverless.kyma-project.io/continuousGitCheckout"
+	runtimeImageOverrideAnnotation = "serverless.kyma-project.io/runtimeImageOverride"
 )
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Function) (ctrl.Result, error) {
@@ -121,7 +122,7 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha1.Condition, rep
 
 		currentFunction.Status.Source = s.instance.Spec.Source
 		currentFunction.Status.Runtime = serverlessv1alpha1.RuntimeExtended(s.instance.Spec.Runtime)
-		currentFunction.Status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
+		currentFunction.Status.RuntimeImageOverride = s.instance.Annotations[runtimeImageOverrideAnnotation]
 
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
 
