@@ -56,6 +56,7 @@ var (
 	variableValidatorMock *fluentbitmocks.VariablesValidator
 	configValidatorMock   *fluentbitmocks.ConfigValidator
 	pluginValidatorMock   *fluentbitmocks.PluginValidator
+	outputValidatorMock   *fluentbitmocks.OutputValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -116,6 +117,7 @@ var _ = BeforeSuite(func() {
 	variableValidatorMock = &fluentbitmocks.VariablesValidator{}
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
 	pluginValidatorMock = &fluentbitmocks.PluginValidator{}
+	outputValidatorMock = &fluentbitmocks.OutputValidator{}
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
@@ -124,6 +126,7 @@ var _ = BeforeSuite(func() {
 		variableValidatorMock,
 		configValidatorMock,
 		pluginValidatorMock,
+		outputValidatorMock,
 		emitterConfig,
 		fsWrapperMock,
 		fluentBitMaxFSBufferSize,

@@ -194,7 +194,7 @@ func main() {
 			strings.SplitN(strings.ReplaceAll(supportedOutputPlugins, " ", ""), ",", len(supportedOutputPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-
+		validation.NewOutputValidator(),
 		emitterConfig,
 		fs.NewWrapper(),
 		fluentBitMaxFSBufferSize,

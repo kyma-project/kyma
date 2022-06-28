@@ -53,6 +53,7 @@ type LogPipelineValidator struct {
 	variablesValidator       validation.VariablesValidator
 	configValidator          validation.ConfigValidator
 	pluginValidator          validation.PluginValidator
+	outputValidator          validation.OutputValidator
 	emitterConfig            fluentbit.EmitterConfig
 	fluentBitMaxFSBufferSize string
 
@@ -68,6 +69,7 @@ func NewLogPipeLineValidator(
 	variablesValidator validation.VariablesValidator,
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
+	outputValidator validation.OutputValidator,
 	emitterConfig fluentbit.EmitterConfig,
 	fsWrapper fs.Wrapper,
 	fluentBitMaxFSBufferSize string) *LogPipelineValidator {
@@ -81,6 +83,7 @@ func NewLogPipeLineValidator(
 		variablesValidator:       variablesValidator,
 		configValidator:          configValidator,
 		pluginValidator:          pluginValidator,
+		outputValidator:          outputValidator,
 		fsWrapper:                fsWrapper,
 		emitterConfig:            emitterConfig,
 		fluentBitMaxFSBufferSize: fluentBitMaxFSBufferSize,
@@ -173,7 +176,7 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
-	if err = v.validateOutput(logPipeline); err != nil {
+	if err = v.outputValidator.Validate(logPipeline); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit output")
 		return err
 	}
@@ -244,19 +247,4 @@ func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 func (v *LogPipelineValidator) validateSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	secVal := secret.NewSecretHelper(v.Client)
 	return secVal.ValidateSecretsExist(ctx, logPipeline)
-}
-
-func (v *LogPipelineValidator) validateOutput(logPipeline *telemetryv1alpha1.LogPipeline) error {
-
-	for _, output := range logPipeline.Spec.Outputs {
-		section, err := fluentbit.ParseSection(output.Content)
-		if err != nil {
-			return err
-		}
-
-		if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
-			return fmt.Errorf("configuring '%s' key in Fluent Bit Output is not allowed in log pipeline '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
-		}
-	}
-	return nil
 }

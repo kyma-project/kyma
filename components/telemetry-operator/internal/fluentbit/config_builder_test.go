@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBuildSection(t *testing.T) {
@@ -17,7 +17,7 @@ func TestBuildSection(t *testing.T) {
 	content := "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
 	actual := BuildConfigSection(ParserConfigHeader, content)
 
-	assert.Equal(t, expected, actual, "Fluent Bit Config Build is invalid")
+	require.Equal(t, expected, actual, "Fluent Bit Config Build is invalid")
 }
 
 func TestBuildSectionWithWrongIndentation(t *testing.T) {
@@ -30,7 +30,7 @@ func TestBuildSectionWithWrongIndentation(t *testing.T) {
 	content := "Name   dummy_test   \n  Format   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
 	actual := BuildConfigSection(ParserConfigHeader, content)
 
-	assert.Equal(t, expected, actual, "Fluent Bit config indentation has not been fixed")
+	require.Equal(t, expected, actual, "Fluent Bit config indentation has not been fixed")
 }
 
 func TestBuildConfigSectionFromMap(t *testing.T) {
@@ -46,7 +46,7 @@ func TestBuildConfigSectionFromMap(t *testing.T) {
 	}
 	actual := BuildConfigSectionFromMap(FilterConfigHeader, content)
 
-	assert.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
+	require.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
 
 }
 
@@ -66,7 +66,7 @@ Emitter_Storage.type  filesystem
 Emitter_Mem_Buf_Limit 10M`
 
 	actual := generateEmitter(emitterConfig, "test")
-	assert.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
+	require.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
 
 func TestFilter(t *testing.T) {
@@ -94,8 +94,8 @@ func TestFilter(t *testing.T) {
 	}
 
 	actual, err := MergeSectionsConfig(logPipeline, emitterConfig, "1G")
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
 
 }
 
@@ -132,6 +132,6 @@ func TestOutput(t *testing.T) {
 	}
 
 	actual, err := MergeSectionsConfig(logPipeline, emitterConfig, "1G")
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
 }
