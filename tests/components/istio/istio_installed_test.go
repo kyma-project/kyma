@@ -42,9 +42,20 @@ const (
 	junitFileName          = "junit-report.xml"
 )
 
+var t *testing.T
+var goDogOpts = godog.Options{
+	Output:   colors.Colored(os.Stdout),
+	Format:   "pretty",
+	TestingT: t,
+}
+
+func init() {
+	godog.BindCommandLineFlags("godog.", &goDogOpts) // godog v0.11.0 and later
+}
+
 func TestMain(m *testing.M) {
 	pflag.Parse()
-	opts.Paths = pflag.Args()
+	goDogOpts.Paths = pflag.Args()
 	k8sClient, dynamicClient, mapper = initK8sClient()
 	os.Exit(m.Run())
 }
@@ -86,29 +97,14 @@ func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.Defer
 	return k8sClient, dynClient, mapper
 }
 
-var opts = godog.Options{
-	Output: colors.Colored(os.Stdout),
-	Format: "pretty", // can define default values
-	Paths:  []string{"features"},
-}
-
-func init() {
-	godog.BindCommandLineFlags("godog.", &opts) // godog v0.11.0 and later
-}
 func TestIstioInstalledEvaluation(t *testing.T) {
-	/* 	b := godog.Options{
-	   		Paths: []string{"features/istio_evaluation.feature"},
-	   	}
-	   	mergo.Merge(&opts, b) */
+	evalOpts := goDogOpts
+	evalOpts.Paths = []string{"features/istio_evaluation.feature", "features/kube_system_sidecar.feature"}
 
 	suite := godog.TestSuite{
 		Name:                evalProfile,
 		ScenarioInitializer: InitializeScenarioEvalProfile,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/istio_evaluation.feature"},
-			TestingT: t,
-		},
+		Options:             &evalOpts,
 	}
 
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
@@ -120,14 +116,13 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 }
 
 func TestIstioInstalledProduction(t *testing.T) {
+	prodOpts := goDogOpts
+	prodOpts.Paths = []string{"features/istio_production.feature", "features/kube_system_sidecar.feature"}
+
 	suite := godog.TestSuite{
 		Name:                prodProfile,
 		ScenarioInitializer: InitializeScenarioProdProfile,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/istio_production.feature"},
-			TestingT: t,
-		},
+		Options:             &prodOpts,
 	}
 
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
@@ -241,6 +236,7 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
+	InitializeScenarioKubeSystemSidecar(ctx)
 }
 
 func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
@@ -255,6 +251,7 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
+	InitializeScenarioKubeSystemSidecar(ctx)
 }
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {

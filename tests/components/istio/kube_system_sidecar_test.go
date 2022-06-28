@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"testing"
 	"time"
 
 	"github.com/cucumber/godog"
@@ -29,21 +28,6 @@ const (
 
 //go:embed test/httpbin.yaml
 var httpbin []byte
-
-func TestKubeSystemSidecar(t *testing.T) {
-	suite := godog.TestSuite{
-		Name:                kubeSystemNamespace,
-		ScenarioInitializer: InitializeScenarioKubeSystemSidecar,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/kube-system-sidecar.feature"},
-			TestingT: t,
-		},
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
-}
 
 func InitializeScenarioKubeSystemSidecar(ctx *godog.ScenarioContext) {
 	installedCase := istioInstallledCase{}
