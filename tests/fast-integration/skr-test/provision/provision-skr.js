@@ -31,8 +31,6 @@ async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningT
     console.log('Provisioning new SKR instance...');
     shoot = await provisionSKRInstance(options, provisioningTimeout);
   }
-  console.log('Preparing compass resources on the SKR instance...');
-  await prepareCompassResources(shoot, options);
 
   console.log('Initiating K8s config...');
   await initK8sConfig(shoot);
@@ -57,11 +55,6 @@ async function provisionSKRInstance(options, timeout) {
     debug('SKR is provisioned!');
     const shoot = skr.shoot;
 
-    console.log('Adding scenario to compass...');
-    await addScenarioInCompass(director, options.scenarioName);
-
-    console.log('Assigning runtime to scenario...');
-    await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
     return shoot;
   } catch (e) {
     throw new Error(`Provisioning failed: ${e.toString()}`);

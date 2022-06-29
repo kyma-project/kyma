@@ -33,9 +33,6 @@ describe('SKR test', function() {
   // Run the OIDC tests
   oidcE2ETest(options, getShootInfoFunc);
 
-  // Run the commerce mock tests
-  commerceMockTest(options);
-
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
     await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, false);
