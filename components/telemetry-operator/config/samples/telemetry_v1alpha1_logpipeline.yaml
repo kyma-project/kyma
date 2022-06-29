@@ -14,25 +14,20 @@ spec:
         Rule      "cont"          "/^\s+at.*/"                     "cont"
   filters:
     - custom: |
-        Name                  multiline
-        Match                 *
-        Multiline.key_content log
-        Multiline.parser      go, multiline-custom-regex
-    - custom: |
         Name    grep
-        Match   *
+        Match   logpipeline-sample.*
         Regex   $kubernetes['labels']['app'] my-deployment
     - custom: |
         Name    grep
-        Match   *
+        Match   logpipeline-sample.*
         Exclude $kubernetes['namespace_name'] kyma-system|kube-system|kyma-integration|istio-system
     - custom: |
         Name    record_modifier
-        Match   *
+        Match   logpipeline-sample.*
         Record  cluster_identifier ${KUBERNETES_SERVICE_HOST}
-  outputs:
-    - custom: |
-        Name               stdout
-        Match              *
+  output:
+    custom: |
+      Name               stdout
+      Match              logpipeline-sample.*
   files: [ ]
   variables: [ ]
