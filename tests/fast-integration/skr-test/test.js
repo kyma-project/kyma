@@ -1,6 +1,5 @@
 const {
   gatherOptions,
-  commerceMockTest,
   oidcE2ETest,
 } = require('./index');
 const {getOrProvisionSKR} = require('./provision/provision-skr');

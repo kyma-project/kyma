@@ -3,19 +3,10 @@ const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
 const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
 const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../gardener');
-const {
-  DirectorClient,
-  DirectorConfig,
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-  scenarioExistsInCompass,
-  isRuntimeAssignedToScenario,
-} = require('../compass');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
-const director = new DirectorClient(DirectorConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 const testNS = 'skr-test';
@@ -116,30 +107,6 @@ async function getSKRConfig(instanceID) {
   return await gardener.getShoot(shootName);
 }
 
-async function prepareCompassResources(shoot, options) {
-  // check if compass scenario setup is needed
-  const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, options.scenarioName);
-  if (compassScenarioAlreadyExist) {
-    console.log(`Compass scenario with the name ${options.scenarioName} already exist, do not register it again`);
-  } else {
-    console.log('Assigning SKR to scenario in Compass');
-    // Create a new scenario (systems/formations) in compass for this test
-    await addScenarioInCompass(director, options.scenarioName);
-  }
-
-  // check if assigning the runtime to the scenario is needed
-  const runtimeAssignedToScenario = await isRuntimeAssignedToScenario(director,
-      shoot.compassID,
-      options.scenarioName);
-  if (!runtimeAssignedToScenario) {
-    console.log('Assigning Runtime to a compass scenario');
-    // map scenario to target SKR
-    await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
-  } else {
-    console.log('Runtime %s is already assigned to the %s compass scenario', shoot.compassID, options.scenarioName);
-  }
-}
-
 async function initK8sConfig(shoot) {
   console.log('Should save kubeconfig for the SKR to ~/.kube/config');
   await saveKubeconfig(shoot.kubeconfig);
@@ -151,11 +118,9 @@ async function initK8sConfig(shoot) {
 module.exports = {
   keb,
   kcp,
-  director,
   gardener,
   testNS,
   getSKRConfig,
-  prepareCompassResources,
   initK8sConfig,
   gatherOptions,
   withInstanceID,

@@ -1,6 +1,5 @@
 const {
   initK8sConfig,
-  prepareCompassResources,
   getSKRConfig,
   withSuffix,
   withInstanceID,
@@ -10,13 +9,12 @@ const {
   gardener,
 } = require('../helpers');
 const {getEnvOrThrow, genRandom, debug} = require('../../utils');
-const {addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
 async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout) {
   if (skipProvisioning) {
-    console.log('Gather information from externally provisioned SKR and prepare the compass resources');
+    console.log('Gather information from externally provisioned SKR and prepare resources');
     const instanceID = getEnvOrThrow('INSTANCE_ID');
     let suffix = process.env.TEST_SUFFIX;
     if (suffix === undefined) {
