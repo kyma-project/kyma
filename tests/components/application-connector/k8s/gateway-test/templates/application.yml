@@ -16,7 +16,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/unprotected"
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/always-ok"
     - displayName: basic
       name: basic
@@ -25,7 +25,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/basic"
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/basic"
           credentials:
             secretName: basic-test
@@ -37,9 +37,9 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/mtlsoauth/ok"
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/oauth"
           credentials:
             secretName: oauth-test
-            authenticationUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/mtlsoauth/token"
+            authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
             type: OAuthWithCert
