@@ -51,8 +51,8 @@ type reconciler struct {
 }
 
 const (
-	continuousGitCheckoutLabel     = "serverless.kyma-project.io/continuousGitCheckout"
-	runtimeImageOverrideAnnotation = "serverless.kyma-project.io/runtimeImageOverride"
+	continuousGitCheckoutAnnotation = "serverless.kyma-project.io/continuousGitCheckout"
+	runtimeImageOverrideAnnotation  = "serverless.kyma-project.io/runtimeImageOverride"
 )
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Function) (ctrl.Result, error) {
@@ -245,7 +245,7 @@ func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) state
 }
 
 func skipGitSourceCheck(f serverlessv1alpha1.Function, cfg cfg) bool {
-	if v, ok := f.Labels[continuousGitCheckoutLabel]; ok && strings.ToLower(v) == "true" {
+	if v, ok := f.Annotations[continuousGitCheckoutAnnotation]; ok && strings.ToLower(v) == "true" {
 		return false
 	}
 
