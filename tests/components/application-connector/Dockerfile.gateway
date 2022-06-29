@@ -13,4 +13,4 @@ FROM scratch
 
 COPY --from=builder /connectivity-test/test /
 ENTRYPOINT [ "/test" ]
-CMD []
+CMD ["-test.v"]

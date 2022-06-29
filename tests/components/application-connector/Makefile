@@ -19,7 +19,10 @@ test-os: test-gateway
 test-gateway:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template k8s/gateway-test --set testImage=$(GATEWAY_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
-	kubectl -n $(NAMESPACE) wait --for=condition=complete job/connectivity-test --timeout 60s
+	kubectl -n $(NAMESPACE) wait --for=jsonpath='{.status.phase}'=Running pod/connectivity-test --timeout 60s
+	@echo ""
+	@echo ""
+	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f
 
 clean-gateway:
 	helm template k8s/gateway-test --set testImage=$(GATEWAY_IMAGE) | kubectl delete -f -
