@@ -23,8 +23,6 @@ all: help
 test: ## Run the tests of the project
 ifeq ($(EXPORT_RESULT), true)
 	$(GOTEST) -v -race ./... --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
-	npm install cucumber-html-reporter --save-dev
-	node index.js
 else
 	$(GOTEST) -v -race ./...
 endif

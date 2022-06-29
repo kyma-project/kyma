@@ -7,16 +7,17 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 	"github.com/pkg/errors"
-<<<<<<< HEAD
-	"github.com/tidwall/pretty"
-=======
 	"github.com/spf13/pflag"
->>>>>>> 506e114ae (Add JUnit test report)
+	"github.com/tidwall/pretty"
+	"gitlab.com/rodrigoodhin/gocure/models"
+	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
+	"gitlab.com/rodrigoodhin/gocure/report/html"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -54,7 +55,7 @@ func init() {
 	godog.BindCommandLineFlags("godog.", &goDogOpts)
 }
 
-/* func generateHTMLReport() {
+func generateHTMLReport() {
 	html := gocure.HTML{
 		Config: html.Data{
 			InputJsonPath:    cucumberFileName,
@@ -74,7 +75,7 @@ func init() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-} */
+}
 
 func TestMain(m *testing.M) {
 	pflag.Parse()
@@ -136,9 +137,9 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
-	/* 	if os.Getenv(exportResultVar) == "true" {
+	if os.Getenv(exportResultVar) == "true" {
 		generateHTMLReport()
-	} */
+	}
 }
 
 func TestIstioInstalledProduction(t *testing.T) {
@@ -157,9 +158,9 @@ func TestIstioInstalledProduction(t *testing.T) {
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
-	/* 	if os.Getenv(exportResultVar) == "true" {
+	if os.Getenv(exportResultVar) == "true" {
 		generateHTMLReport()
-	} */
+	}
 }
 
 type istioInstallledCase struct {
@@ -293,7 +294,7 @@ func getPodListReport(list *corev1.PodList) string {
 				Name              string `json:"name"`
 				CreationTimestamp string `json:"creationTimestamp"`
 			} `json:"metadata"`
-			Status            struct {
+			Status struct {
 				Phase string `json:"phase"`
 			} `json:"status"`
 		} `json:"items"`
