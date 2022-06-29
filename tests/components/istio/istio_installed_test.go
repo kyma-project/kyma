@@ -7,11 +7,17 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/colors"
 	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
 	"github.com/tidwall/pretty"
+	"gitlab.com/rodrigoodhin/gocure/models"
+	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
+	"gitlab.com/rodrigoodhin/gocure/report/html"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -35,9 +41,45 @@ const (
 	deployedKymaProfileVar = "KYMA_PROFILE"
 	exportResultVar        = "EXPORT_RESULT"
 	junitFileName          = "junit-report.xml"
+	cucumberFileName       = "cucumber-report.json"
 )
 
+var t *testing.T
+var goDogOpts = godog.Options{
+	Output:   colors.Colored(os.Stdout),
+	Format:   "pretty",
+	TestingT: t,
+}
+
+func init() {
+	godog.BindCommandLineFlags("godog.", &goDogOpts)
+}
+
+func generateHTMLReport() {
+	html := gocure.HTML{
+		Config: html.Data{
+			InputJsonPath:    cucumberFileName,
+			OutputHtmlFolder: "reports/",
+			Title:            "Kyma Istio component tests",
+			Metadata: models.Metadata{
+				TestEnvironment: os.Getenv(deployedKymaProfileVar),
+				Platform:        runtime.GOOS,
+				Parallel:        "Scenarios",
+				Executed:        "Remote",
+				AppVersion:      "main",
+				Browser:         "default",
+			},
+		},
+	}
+	err := html.Generate()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+}
+
 func TestMain(m *testing.M) {
+	pflag.Parse()
+	goDogOpts.Paths = pflag.Args()
 	k8sClient, dynamicClient, mapper = initK8sClient()
 	os.Exit(m.Run())
 }
@@ -80,14 +122,13 @@ func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.Defer
 }
 
 func TestIstioInstalledEvaluation(t *testing.T) {
+	evalOpts := goDogOpts
+	evalOpts.Paths = []string{"features/istio_evaluation.feature", "features/kube_system_sidecar.feature"}
+
 	suite := godog.TestSuite{
 		Name:                evalProfile,
 		ScenarioInitializer: InitializeScenarioEvalProfile,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/istio_evaluation.feature"},
-			TestingT: t,
-		},
+		Options:             &evalOpts,
 	}
 
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
@@ -95,18 +136,20 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 	}
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
+	}
+	if os.Getenv(exportResultVar) == "true" {
+		generateHTMLReport()
 	}
 }
 
 func TestIstioInstalledProduction(t *testing.T) {
+	prodOpts := goDogOpts
+	prodOpts.Paths = []string{"features/istio_production.feature", "features/kube_system_sidecar.feature"}
+
 	suite := godog.TestSuite{
 		Name:                prodProfile,
 		ScenarioInitializer: InitializeScenarioProdProfile,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/istio_production.feature"},
-			TestingT: t,
-		},
+		Options:             &prodOpts,
 	}
 
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
@@ -115,7 +158,9 @@ func TestIstioInstalledProduction(t *testing.T) {
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
-
+	if os.Getenv(exportResultVar) == "true" {
+		generateHTMLReport()
+	}
 }
 
 type istioInstallledCase struct {
@@ -220,6 +265,7 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
+	InitializeScenarioKubeSystemSidecar(ctx)
 }
 
 func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
@@ -234,6 +280,7 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
+	InitializeScenarioKubeSystemSidecar(ctx)
 }
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
@@ -247,7 +294,7 @@ func getPodListReport(list *corev1.PodList) string {
 				Name              string `json:"name"`
 				CreationTimestamp string `json:"creationTimestamp"`
 			} `json:"metadata"`
-			Status            struct {
+			Status struct {
 				Phase string `json:"phase"`
 			} `json:"status"`
 		} `json:"items"`
