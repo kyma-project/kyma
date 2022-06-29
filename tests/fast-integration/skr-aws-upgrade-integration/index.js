@@ -1,6 +1,5 @@
 const {
   gatherOptions,
-  commerceMockTest,
   oidcE2ETest,
   withCustomParams,
 } = require('../skr-test');
@@ -50,8 +49,6 @@ describe('SKR-Upgrade-test', function() {
 
   // Run the OIDC tests
   oidcE2ETest(options, getShootInfoFunc);
-  // Run the commerce mock tests
-  commerceMockTest(options);
 
   it('Perform Upgrade', async function() {
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
@@ -59,8 +56,6 @@ describe('SKR-Upgrade-test', function() {
 
   // Run the OIDC tests
   oidcE2ETest(options, getShootInfoFunc);
-  // Run the commerce mock tests
-  commerceMockTest(options);
 
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
   if (skipCleanup === 'FALSE') {
