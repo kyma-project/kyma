@@ -114,10 +114,10 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 
 	secretsFound := v.validateSecrets(ctx, logPipeline)
 	if !secretsFound {
-		warnMsg = append(warnMsg, "One or more secrets do not exist, the log pipeline will stay in pending state until the secrets are available")
+		warnMsg = append(warnMsg, "One or more secrets do not exist. The LogPipeline stays in pending state until the secrets are available.")
 	}
 	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
-		warnMsg = append(warnMsg, "LogPipeline contains a custom filter or output. Be aware that you are hereby entering unsupported mode!")
+		warnMsg = append(warnMsg, "Caution: LogPipeline contains an unsupported custom filter or output. This means that you proceed without support!")
 	}
 
 	if len(warnMsg) != 0 {

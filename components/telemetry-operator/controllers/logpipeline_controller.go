@@ -51,7 +51,7 @@ type LogPipelineReconciler struct {
 	unsupportedTotal   prometheus.Gauge
 }
 
-// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
 func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, emitterConfig fluentbit.EmitterConfig) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
@@ -62,7 +62,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	// Metrics
 	lpr.restartsTotal = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_restarts_total",
-		Help: "Number of triggered FluentBit restarts",
+		Help: "Number of triggered Fluent Bit restarts",
 	})
 	lpr.unsupportedTotal = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "telemetry_plugins_unsupported_total",
@@ -124,7 +124,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
 	if changed {
-		log.V(1).Info("Fluent bit configuration was updated. Restarting the daemon set")
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet.")
 
 		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
@@ -199,7 +199,7 @@ func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 
 	if err := r.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
-		log.Error(err, "Failed to patch fluent bit to trigger rolling update")
+		log.Error(err, "Failed to patch Fluent Bit to trigger rolling update")
 		return err
 	}
 	r.restartsTotal.Inc()
