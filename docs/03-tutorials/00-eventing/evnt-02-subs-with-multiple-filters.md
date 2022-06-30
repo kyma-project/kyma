@@ -92,7 +92,7 @@ kubectl get functions -n default lastorder
 ## Create a Subscription with Multiple Filters
 
 Next, to subscribe to multiple events so that we can actually listen for them, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for events of two types: `order.received.v1` and `order.changed.v1`.
-All the events published against these event types will be forwarded to the `Sink` (i.e. HTTP endpoint) defined in the Subscription's Spec.
+All the events published with these event types will be forwarded to the `Sink` (i.e. HTTP endpoint) defined in the Subscription's Spec.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
