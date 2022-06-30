@@ -22,7 +22,11 @@ func (g *git2goFetcher) git2goFetch(url, outputPath string, remoteCallbacks git2
 	}
 	defer remote.Free()
 
-	err = remote.Fetch(nil, &git2go.FetchOptions{RemoteCallbacks: remoteCallbacks}, "")
+	err = remote.Fetch(nil,
+		&git2go.FetchOptions{
+			RemoteCallbacks: remoteCallbacks,
+			DownloadTags:    git2go.DownloadTagsAll,
+		}, "")
 	if err != nil {
 		return nil, errors.Wrap(err, "while fetching remote")
 	}
