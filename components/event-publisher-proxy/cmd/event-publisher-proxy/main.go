@@ -59,7 +59,7 @@ func main() {
 	}
 	defer func() {
 		if err := logger.WithContext().Sync(); err != nil {
-			golog.Fatalf("Failed to flush logger, error: %v", err)
+			golog.Printf("Failed to flush logger, error: %v", err)
 		}
 	}()
 	setupLogger := logger.WithContext().With("backend", cfg.Backend, "jetstream mode", cfg.JetstreamModeEnabled)
