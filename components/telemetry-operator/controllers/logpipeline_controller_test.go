@@ -165,11 +165,9 @@ var _ = Describe("LogPipeline controller", func() {
 				Content: FluentBitMultiLineParserConfig,
 			}
 			filter := telemetryv1alpha1.Filter{
-				Content: FluentBitFilterConfig,
+				Custom: FluentBitFilterConfig,
 			}
-			output := telemetryv1alpha1.Output{
-				Content: FluentBitOutputConfig,
-			}
+
 			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "telemetry.kyma-project.io/v1alpha1",
@@ -182,7 +180,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Parsers:          []telemetryv1alpha1.Parser{parser},
 					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
 					Filters:          []telemetryv1alpha1.Filter{filter},
-					Outputs:          []telemetryv1alpha1.Output{output},
+					Output:           telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:            []telemetryv1alpha1.FileMount{file},
 					Variables:        []telemetryv1alpha1.VariableReference{variableRefs},
 				},
@@ -286,7 +284,23 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_operator_fluentbit_restarts_total") {
+					if strings.Contains(line, "telemetry_fluentbit_restarts_total") {
+						return true
+					}
+				}
+				return false
+			}, timeout, interval).Should(Equal(true))
+
+			Eventually(func() bool {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return false
+				}
+				defer resp.Body.Close()
+				scanner := bufio.NewScanner(resp.Body)
+				for scanner.Scan() {
+					line := scanner.Text()
+					if strings.Contains(line, "telemetry_plugins_unsupported_total") {
 						return true
 					}
 				}

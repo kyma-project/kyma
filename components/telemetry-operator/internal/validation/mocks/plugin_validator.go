@@ -12,6 +12,20 @@ type PluginValidator struct {
 	mock.Mock
 }
 
+// ContainsCustomPlugin provides a mock function with given fields: logPipeline
+func (_m *PluginValidator) ContainsCustomPlugin(logPipeline *v1alpha1.LogPipeline) bool {
+	ret := _m.Called(logPipeline)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(*v1alpha1.LogPipeline) bool); ok {
+		r0 = rf(logPipeline)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 // Validate provides a mock function with given fields: logPipeline, logPipelines
 func (_m *PluginValidator) Validate(logPipeline *v1alpha1.LogPipeline, logPipelines *v1alpha1.LogPipelineList) error {
 	ret := _m.Called(logPipeline, logPipelines)

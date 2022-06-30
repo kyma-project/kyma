@@ -13,26 +13,21 @@ spec:
         Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
         Rule      "cont"          "/^\s+at.*/"                     "cont"
   filters:
-    - content: |
-        Name                  multiline
-        Match                 *
-        Multiline.key_content log
-        Multiline.parser      go, multiline-custom-regex
-    - content: |
+    - custom: |
         Name    grep
-        Match   *
+        Match   logpipeline-sample.*
         Regex   $kubernetes['labels']['app'] my-deployment
-    - content: |
+    - custom: |
         Name    grep
-        Match   *
+        Match   logpipeline-sample.*
         Exclude $kubernetes['namespace_name'] kyma-system|kube-system|kyma-integration|istio-system
-    - content: |
+    - custom: |
         Name    record_modifier
-        Match   *
+        Match   logpipeline-sample.*
         Record  cluster_identifier ${KUBERNETES_SERVICE_HOST}
-  outputs:
-    - content: |
-        Name               stdout
-        Match              *
+  output:
+    custom: |
+      Name               stdout
+      Match              logpipeline-sample.*
   files: [ ]
   variables: [ ]
