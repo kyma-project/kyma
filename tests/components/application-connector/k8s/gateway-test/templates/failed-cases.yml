@@ -1,0 +1,55 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: failed-auth-cases
+  namespace: "{{ .Values.namespace }}"
+spec:
+  description: |
+    Test cases with bad auth data
+  skipVerify: true
+  services:
+    - displayName: basic
+      name: basic
+      providerDisplayName: Rafał
+      description: Basic Auth Pessimistic scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/basic"
+          credentials:
+            secretName: basic-bad
+            type: Basic
+    - displayName: oauth
+      name: oauth
+      providerDisplayName: Rafał
+      description: OAuth Optimistic Scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/oauth"
+          credentials:
+            secretName: mtls-oauth-bad
+            authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
+            type: OAuthWithCert
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-bad
+  namespace: kyma-integration
+type: Opaque
+data:
+  password: {{ "bad passwd" | b64enc }}
+  username: {{ "bad user" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mtls-oauth-bad
+  namespace: kyma-integration
+data:
+  clientId: {{ "clientID" | b64enc }}
+  key: {{ .Files.Get "certs/invalid.key" | b64enc }}
+  crt: {{ .Files.Get "certs/invalid.crt" | b64enc }}
