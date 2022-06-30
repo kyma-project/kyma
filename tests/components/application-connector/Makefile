@@ -1,7 +1,7 @@
 NAMESPACE ?= "test"
 TAG := $(DOCKER_TAG)
 TAG ?= "latest"
-GATEWAY_IMAGE ?= "void404/connectivity-test"
+GATEWAY_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(TAG)"
 
 APP_URL = test-app.test.svc.cluster.local
 OPENSSL = '/usr/local/opt/openssl@3/bin/openssl'
