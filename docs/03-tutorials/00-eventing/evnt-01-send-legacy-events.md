@@ -13,10 +13,6 @@ Kyma Eventing also supports sending and receiving of legacy events. In this tuto
    ```bash
    kyma dashboard
    ```
-3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
-   ```bash
-   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
-   ```
 
 ## Create a Function
 
