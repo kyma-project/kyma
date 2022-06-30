@@ -345,17 +345,22 @@ func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList)
 		if l.DeletionTimestamp != nil {
 			continue
 		}
-		if l.Spec.Output.Custom != "" {
+		if LogPipelineIsUnsupported(&l) {
 			unsupportedPluginsTotal++
-			continue
-		}
-		for _, f := range l.Spec.Filters {
-			if f.Custom != "" {
-				unsupportedPluginsTotal++
-				break
-			}
 		}
 
 	}
 	return unsupportedPluginsTotal
+}
+
+func LogPipelineIsUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
+	if pipeline.Spec.Output.Custom != "" {
+		return true
+	}
+	for _, f := range pipeline.Spec.Filters {
+		if f.Custom != "" {
+			return true
+		}
+	}
+	return false
 }

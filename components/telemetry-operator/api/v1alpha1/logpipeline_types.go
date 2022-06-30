@@ -44,7 +44,7 @@ type MultiLineParser struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Filter describes a Fluent Bit filter configuration section
+// Filter describes a Fluent Bit filter configuration
 type Filter struct {
 	Custom string `json:"custom,omitempty"`
 }
@@ -147,6 +147,7 @@ func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineC
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+//+kubebuilder:printcolumn:name="Unsupported-Plugins",type=boolean,JSONPath=`.status.unsupportedMode`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // LogPipeline is the Schema for the logpipelines API

@@ -20,6 +20,9 @@ spec:
     - jsonPath: .status.conditions[-1].type
       name: Status
       type: string
+    - jsonPath: .status.unsupportedMode
+      name: Unsupported-Plugins
+      type: boolean
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -57,7 +60,6 @@ spec:
               filters:
                 items:
                   description: Filter describes a Fluent Bit filter configuration
-                    section
                   properties:
                     custom:
                       type: string

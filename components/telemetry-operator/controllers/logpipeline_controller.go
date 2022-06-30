@@ -109,7 +109,8 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		pipleLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipleLineUnsupported); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 		}
 
@@ -140,7 +141,8 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		pipleLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipleLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 
@@ -164,7 +166,9 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		pipleLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipleLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
@@ -226,9 +230,7 @@ func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (
 	return observedGeneration == generation && updated == desired && ready >= desired, nil
 }
 
-func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
-	name types.NamespacedName,
-	condition *telemetryv1alpha1.LogPipelineCondition) error {
+func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition, unSupported bool) error {
 	log := logf.FromContext(ctx)
 
 	var logPipeline telemetryv1alpha1.LogPipeline
@@ -253,6 +255,7 @@ func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
 	}
 
 	logPipeline.Status.SetCondition(*condition)
+	logPipeline.Status.UnsupportedMode = unSupported
 
 	if err := r.Status().Update(ctx, &logPipeline); err != nil {
 		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
