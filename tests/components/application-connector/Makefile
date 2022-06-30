@@ -16,7 +16,7 @@ publish: publish-gateway
 
 release: publish
 test-os: test-gateway
-test-skr: test-gatewy
+test-skr: test-gateway
 
 test-gateway:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
