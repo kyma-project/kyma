@@ -55,7 +55,7 @@ async function provisionSKRInstance(options, timeout) {
 
     return shoot;
   } catch (e) {
-    throw new Error(`Provisioning failed: ${e.toString()}`);
+    throw new Error(`Provisioning failed: ${e.toString(), e.stack}`);
   } finally {
     debug('Fetching runtime status...');
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
