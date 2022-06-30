@@ -16,9 +16,7 @@ To learn more about how Eventing works, see:
 To perform tasks with Eventing, go through these tutorials:
 
 - [Tutorial: Trigger your workload with an event](../../../02-get-started/04-trigger-workload-with-event.md) - part of the [Get Started guides](../../../02-get-started), shows how to deploy a Function and trigger it with an event.
-- [Tutorial: Send events without a Kyma Application](../../../03-tutorials/00-eventing/evnt-02-setup-in-cluster-eventing.md) - explains how to send events without the need for a Kyma Application.
-- [Tutorial: Send events from outside the Kyma cluster](../../../03-tutorials/00-eventing/evnt-01-send-event-outside-cluster.md) - shows how to send different types of events from an external Application.
-- [Tutorial: Introduction to JetStream](../../../03-tutorials/00-eventing/evnt-03-introduction-to-jetstream.md) - explains the key concepts of JetStream and how to verify `at least once` delivery with JetStream.
+- [Tutorial: Send events without a Kyma Application](../../../03-tutorials/00-eventing/evnt-01-setup-in-cluster-eventing.md) - explains how to send events without the need for a Kyma Application.
 
 For other technical resources, check out these links on the Kyma GitHub repository:
 
