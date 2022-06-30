@@ -1,9 +1,9 @@
 package validation
 
 import (
+	"github.com/kyma-project/kyma/components/telemetry-operator/apis/log-pipelines/v1alpha1"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

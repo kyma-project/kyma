@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/apis/log-pipelines/v1alpha1"
 	mock "github.com/stretchr/testify/mock"
 )
 

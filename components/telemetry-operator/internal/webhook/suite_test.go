@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/apis/log-pipelines/v1alpha1"
 	"net"
 	"path/filepath"
 	"testing"
@@ -37,7 +38,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

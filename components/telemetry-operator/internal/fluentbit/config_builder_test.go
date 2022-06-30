@@ -1,9 +1,9 @@
 package fluentbit
 
 import (
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/log-pipelines/v1alpha1"
 	"testing"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 

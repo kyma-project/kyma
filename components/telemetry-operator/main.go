@@ -23,16 +23,21 @@ import (
 	"strings"
 	"time"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/log-pipelines/v1alpha1"
+	log_pipelines "github.com/kyma-project/kyma/components/telemetry-operator/controllers/log-pipelines"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/go-logr/zapr"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
-	"k8s.io/apimachinery/pkg/types"
+
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -44,8 +49,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
+	telemetrykymaprojectiov1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry.kyma-project.io/v1alpha1"
+	telemetrykymaprojectiocontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry.kyma-project.io"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	//+kubebuilder:scaffold:imports
 )
@@ -80,6 +85,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(telemetryv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(telemetrykymaprojectiov1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -202,7 +208,7 @@ func main() {
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
-	reconciler := controllers.NewLogPipelineReconciler(
+	reconciler := log_pipelines.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
@@ -212,6 +218,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&telemetrykymaprojectiocontrollers.LogParserReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		os.Exit(1)
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

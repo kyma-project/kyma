@@ -19,12 +19,12 @@ package webhook
 import (
 	"context"
 	"fmt"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/log-pipelines/v1alpha1"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/google/uuid"
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
