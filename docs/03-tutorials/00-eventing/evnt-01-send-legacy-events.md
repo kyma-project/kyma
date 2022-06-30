@@ -8,8 +8,8 @@ Kyma Eventing also supports sending and receiving of legacy events. In this tuto
 
 ## Prerequisites
 
-1. Provision a [Kyma Cluster](01-quick-install.md).
-2. (Optional) Deploy [Kyma Dashboard](../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
+1. Provision a [Kyma Cluster](../../02-get-started/01-quick-install.md).
+2. (Optional) Deploy [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
    ```bash
    kyma dashboard
    ```
@@ -95,7 +95,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription
 
-Next, to subscribe to an event so that we can actually listen for it, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for an event of type `order.received.v1`.
+Next, to subscribe to an event so that we can actually listen for it, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for an event of type `order.received.v1`.
 All the events published against this event type will be forwarded to the `Sink` (i.e. HTTP endpoint) defined in the Subscription's Spec.
 
 <div tabs name="Create a Subscription" group="trigger-workload">
