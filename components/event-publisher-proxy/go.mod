@@ -7,17 +7,17 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.10.1
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220620092658-f1f8e3668674
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220620092658-f1f8e3668674
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220629122813-0d5fe9b1f129
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220629122813-0d5fe9b1f129
 	github.com/nats-io/nats-server/v2 v2.8.4
 	github.com/nats-io/nats.go v1.16.0
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	go.opencensus.io v0.23.0
-	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb
+	golang.org/x/oauth2 v0.0.0-20220628200809-02e64fa58f26
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
