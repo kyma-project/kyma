@@ -45,11 +45,6 @@ type Commander interface {
 
 func main() {
 	opts := options.ParseArgs()
-	//log, err := controllerlogger.New(fmt.Sprint(kymalogger.JSON), fmt.Sprint(kymalogger.FATAL))
-	//if err != nil {
-	//	golog.Fatal("Failed to initialize the logger")
-	//}
-	//setupLogger := log.WithContext().Named("setup")
 
 	// parse the config for main:
 	cfg := new(Config)
