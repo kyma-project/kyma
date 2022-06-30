@@ -109,8 +109,8 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipleLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
-		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipleLineUnsupported); err != nil {
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 		}
 
@@ -125,7 +125,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet.")
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
 
 		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
@@ -141,8 +141,8 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipleLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipleLineUnsupported); err != nil {
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 
@@ -166,9 +166,9 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipleLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
 
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipleLineUnsupported); err != nil {
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}

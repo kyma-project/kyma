@@ -10,7 +10,7 @@ spec:
     custom: |
       Name               grafana-loki
       Alias              loki-output
-      Match              kube.*
+      Match              loki.*
       Url                http://logging-loki:3100/loki/api/v1/push
       Labels             {job="telemetry-fluent-bit"}
       RemoveKeys         kubernetes, stream
