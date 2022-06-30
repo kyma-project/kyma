@@ -22,7 +22,7 @@ test-gateway:
 	kubectl -n $(NAMESPACE) wait --for=jsonpath='{.status.phase}'=Running pod/connectivity-test --timeout 60s
 	@echo ""
 	@echo ""
-	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f
+	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f | tee /dev/stderr | go-junit-report -set-exit-code > report.xml
 
 clean-gateway:
 	helm template k8s/gateway-test --set testImage=$(GATEWAY_IMAGE) | kubectl delete -f -
