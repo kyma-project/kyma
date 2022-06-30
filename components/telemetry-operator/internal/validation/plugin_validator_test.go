@@ -18,7 +18,7 @@ func TestValidateEmpty(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	require.Equal(t, " error validating Output plugins: No output is defined. You must define one output!", err.Error())
+	require.Equal(t, " error validating output plugins: No output is defined. You must define one output!", err.Error())
 }
 
 func TestValidateForbiddenFilters(t *testing.T) {
@@ -117,7 +117,7 @@ func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 	sut := NewPluginValidator([]string{}, []string{})
 	err := sut.Validate(logPipeline, logPipelines)
 
-	assert.Contains(t, err.Error(), " error validating Output plugins: plugin 'http' with match condition 'abc' is not allowed. Valid match conditions are: 'foo' (current logpipeline name)")
+	assert.Contains(t, err.Error(), " error validating output plugins: plugin 'http' with match condition 'abc' is not allowed. Valid match conditions are: 'foo' (current logpipeline name)")
 }
 
 func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
