@@ -20,19 +20,32 @@ spec:
           credentials:
             secretName: basic-bad
             type: Basic
+    - displayName: oauth-mtls
+      name: oauth-mtls
+      providerDisplayName: Rafał
+      description: mTLS OAuth Pessimistic Scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/oauth-mtls"
+          credentials:
+            secretName: mtls-oauth-bad
+            authenticationUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
+            type: OAuthWithCert
     - displayName: oauth
       name: oauth
       providerDisplayName: Rafał
-      description: OAuth Optimistic Scenario
+      description: OAuth Pessimistic Scenario
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/oauth"
           credentials:
-            secretName: mtls-oauth-bad
+            secretName: oauth-bad
             authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
-            type: OAuthWithCert
+            type: OAuth
 ---
 apiVersion: v1
 kind: Secret
@@ -53,3 +66,12 @@ data:
   clientId: {{ "clientID" | b64enc }}
   key: {{ .Files.Get "certs/invalid.key" | b64enc }}
   crt: {{ .Files.Get "certs/invalid.crt" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth-bad
+  namespace: kyma-integration
+data:
+  clientId: {{ "clientID" | b64enc }}
+  clientSecret: {{ "bad secret" | b64enc }}
