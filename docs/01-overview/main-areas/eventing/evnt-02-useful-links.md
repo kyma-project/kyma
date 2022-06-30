@@ -17,6 +17,9 @@ To perform tasks with Eventing, go through these tutorials:
 
 - [Tutorial: Trigger your workload with an event](../../../02-get-started/04-trigger-workload-with-event.md) - part of the [Get Started guides](../../../02-get-started), shows how to deploy a Function and trigger it with an event.
 - [Tutorial: Send events without a Kyma Application](../../../03-tutorials/00-eventing/evnt-01-setup-in-cluster-eventing.md) - explains how to send events without the need for a Kyma Application.
+- [Tutorial: Create subscription listening to multiple event types](../../../03-tutorials/00-eventing/evnt-02-subs-with-multiple-filters.md) - shows how to subscribe to one or more event types using the Kyma Subscription.
+- [Tutorial: Event name cleanup in Subscriptions](../../../03-tutorials/00-eventing/evnt-03-type-cleanup.md) - explains how Eventing Services filter out non-alphanumeric character from event names.
+- [Tutorial: Changing Events Max-In-Flight in Subscriptions](../../../03-tutorials/00-eventing/evnt-04-change-max-in-flight-in-sub.md) - shows how to set idle "in-flight messages" limit in Kyma Subscriptions.
 
 For other technical resources, check out these links on the Kyma GitHub repository:
 
