@@ -18,7 +18,7 @@ func TestValidateEmpty(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	require.Equal(t, " error validating Output plugins: no output is defined! One output needs to be defined", err.Error())
+	require.Equal(t, " error validating Output plugins: No output is defined. You must define one output!", err.Error())
 }
 
 func TestValidateForbiddenFilters(t *testing.T) {
@@ -187,7 +187,7 @@ func TestDeniedFilterPlugins(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), " error validating Filter plugins: plugin 'lua' is not supported. ")
+	assert.Contains(t, err.Error(), " error validating filter plugins: plugin 'lua' is not supported. ")
 }
 
 func TestDeniedOutputPlugins(t *testing.T) {
@@ -208,7 +208,7 @@ func TestDeniedOutputPlugins(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), " error validating Output plugins: plugin 'lua' is not supported. ")
+	assert.Contains(t, err.Error(), " error validating output plugins: plugin 'lua' is not supported. ")
 }
 
 func TestContainsCustomPluginWithCustomFilter(t *testing.T) {

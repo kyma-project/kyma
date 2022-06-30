@@ -147,7 +147,7 @@ func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineC
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
-//+kubebuilder:printcolumn:name="Unsupported-Plugins",type=boolean,JSONPath=`.status.unsupportedMode`
+//+kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // LogPipeline is the Schema for the logpipelines API

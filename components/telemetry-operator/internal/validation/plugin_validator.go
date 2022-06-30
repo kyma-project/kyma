@@ -56,7 +56,7 @@ func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, 
 	}
 	err = pv.validateOutputs(logPipeline, logPipelines)
 	if err != nil {
-		return errors.Wrap(err, " error validating Output plugins")
+		return errors.Wrap(err, " error validating output plugins")
 	}
 	return nil
 }
