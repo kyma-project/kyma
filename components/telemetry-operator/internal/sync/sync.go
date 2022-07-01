@@ -3,7 +3,7 @@ package sync
 import (
 	"context"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 	corev1 "k8s.io/api/core/v1"

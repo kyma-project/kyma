@@ -1,6 +1,7 @@
 domain: kyma-project.io
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 projectName: telemetry-operator
 repo: github.com/kyma-project/kyma/components/telemetry-operator
 resources:

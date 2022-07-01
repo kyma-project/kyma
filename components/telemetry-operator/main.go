@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"os"
 	"strings"
 	"time"
@@ -44,8 +45,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	//+kubebuilder:scaffold:imports
 )
@@ -196,7 +196,7 @@ func main() {
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
-	reconciler := controllers.NewLogPipelineReconciler(
+	reconciler := telemetry.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
