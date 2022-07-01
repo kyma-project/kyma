@@ -538,7 +538,6 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 func (js *JetStream) checkJetStreamConnection(log *zap.SugaredLogger) error {
 	if js.conn.Status() != nats.CONNECTED {
 		if err := js.Initialize(js.connClosedHandler); err != nil {
-			//todo check why double logging ?
 			log.Errorw("Failed to connect to JetStream", "status", js.conn.Status(), "error", err)
 			return errors.Wrapf(err, "connect to JetStream failed")
 		}
