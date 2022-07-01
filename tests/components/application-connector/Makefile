@@ -1,8 +1,8 @@
 NAMESPACE ?= "test"
 TAG := $(DOCKER_TAG)
 TAG ?= "latest"
+GATEWAY_IMAGE_FOR_TESTS="eu.gcr.io/kyma-project/gateway-test:PR-14504"
 GATEWAY_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(TAG)"
-GATEWAY_IMAGE_FOR_TESTS="$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:PR-14504"
 
 APP_URL = test-app.test.svc.cluster.local
 OPENSSL = '/usr/local/opt/openssl@3/bin/openssl'
