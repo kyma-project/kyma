@@ -30,9 +30,12 @@ class GardenerClient {
     const kc = new k8s.KubeConfig();
     if (config.kubeconfigPath) {
       kc.loadFromFile(config.kubeconfigPath);
+      debug("Loading from kubeconfig path")
     } else if (config.kubeconfig) {
       kc.loadFromString(config.kubeconfig);
+      debug("Loading kubeconfig from string")
     } else {
+      debug("Unable to load kubeconfig")
       throw new Error('Unable to create GardenerClient - no kubeconfig');
     }
 
