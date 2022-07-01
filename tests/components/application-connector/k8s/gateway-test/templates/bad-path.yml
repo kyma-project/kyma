@@ -1,0 +1,38 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: bad-path
+  namespace: "{{ .Values.namespace }}"
+spec:
+  description: Test cases with incorrect path
+  skipVerify: true
+  labels:
+    app: bad-path
+  services:
+    - displayName: missingSrvApp
+      name: missingSrvApp
+      providerDisplayName: Rafał
+      description: Missing service and application name
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080"
+    - displayName: missingSrv
+      name: missingSrv
+      providerDisplayName: Rafał
+      description: Missing service
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/bad-path"
+    - displayName: badTargetURL
+      name: badTargetURL
+      providerDisplayName: Rafał
+      description: Bad targetURL
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://bad.bad.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/bad-path/badTargetURL"
