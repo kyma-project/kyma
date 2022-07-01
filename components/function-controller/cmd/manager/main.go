@@ -115,7 +115,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, zapLogger, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunction(resourceClient, zapLogger, config.Function, git.NewGit2Go(zapLogger), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")

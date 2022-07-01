@@ -124,15 +124,24 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	require.Equal(t, result, false)
 }
 
-func TestSyncSecretRefsConfigMapErrorClientErrorReturnsError(t *testing.T) {
-	mockClient := &mocks.Client{}
-	badReqErr := errors.NewBadRequest("")
-	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
-
-	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncSecretRefs(context.Background(), &lp)
-
-	require.Error(t, err)
-	require.Equal(t, result, false)
+func TestUnsupportedTotal(t *testing.T) {
+	l1OpCustom := `Name  foo
+Alias  bar`
+	l2FilterCustom1 := telemetryv1alpha1.Filter{
+		Custom: `Name  filter1`,
+	}
+	l2FilterCustom2 := telemetryv1alpha1.Filter{
+		Custom: `Name  filter2`,
+	}
+	l1 := telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{Name: "l1"},
+		Spec:       telemetryv1alpha1.LogPipelineSpec{Output: telemetryv1alpha1.Output{Custom: l1OpCustom}},
+	}
+	l2 := telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{Name: "l2"},
+		Spec:       telemetryv1alpha1.LogPipelineSpec{Filters: []telemetryv1alpha1.Filter{l2FilterCustom1, l2FilterCustom2}},
+	}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{l1, l2}}
+	res := updateUnsupportedPluginsTotal(logPipelines)
+	require.Equal(t, 2, res)
 }

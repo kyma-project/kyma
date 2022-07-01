@@ -409,6 +409,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		}
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
+		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
 		log.Debugw("created subscription on JetStream", "subject", subject)
 	}
 	return nil

@@ -62,8 +62,7 @@ func TestFilter(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Filters: []telemetryv1alpha1.Filter{
-				{
-					Content: `
+				{Custom: `
 	name               grep	`,
 				},
 			},
@@ -77,6 +76,7 @@ func TestFilter(t *testing.T) {
 	}
 
 	actual, err := MergeSectionsConfig(logPipeline, emitterConfig)
+
 	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
 
@@ -96,13 +96,12 @@ func TestOutput(t *testing.T) {
     Match              foo.*
 
 `
+
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{
-					Content: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     name               http`,
-				},
 			},
 		},
 	}

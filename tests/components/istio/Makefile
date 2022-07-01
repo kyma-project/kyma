@@ -21,7 +21,11 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
+ifeq ($(EXPORT_RESULT), true)
+	$(GOTEST) -v -race ./... --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
+else
 	$(GOTEST) -v -race ./...
+endif
 
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
 

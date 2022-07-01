@@ -45,4 +45,6 @@ Events were not received by the consumers.
         kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
         ```
     2. On `localhost:8081` search for `NATS JetStream` dashboard. You can find the stream and consumer metrics as well as the storage and memory consumption.
+   
+    3. Also search for `JetStream Event Types Summary` and `Delivery per Subscription` dashboards to visualize and debug the phase during which the events were lost.
     

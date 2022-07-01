@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	"go.opencensus.io/plugin/ochttp"
 )
@@ -15,6 +15,8 @@ import (
 const (
 	// defaultShutdownTimeout is the default timeout for the receiver to shutdown.
 	defaultShutdownTimeout = time.Minute * 1
+
+	receiverName = "receiver"
 )
 
 // HTTPMessageReceiver is responsible for receiving messages over HTTP.
@@ -31,7 +33,7 @@ func NewHTTPMessageReceiver(port int) *HTTPMessageReceiver {
 }
 
 // StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal.
-func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Handler) error {
+func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Handler, logger *kymalogger.Logger) error {
 	var err error
 	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
 		return err
@@ -47,7 +49,11 @@ func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.H
 	go func() {
 		errChan <- recv.server.Serve(recv.listener)
 	}()
-	logrus.Info("Event Publisher Receiver has started.")
+
+	// init the contexted logger
+	namedLogger := logger.WithContext().Named(receiverName)
+
+	namedLogger.Info("Event Publisher Receiver has started.")
 
 	// wait for the server to return or ctx.Done().
 	select {

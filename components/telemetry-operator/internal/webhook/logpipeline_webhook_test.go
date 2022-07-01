@@ -57,7 +57,7 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		Content: "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+)$",
 	}
 	output := telemetryv1alpha1.Output{
-		Content: "Name   stdout\nMatch   dummy_test.*",
+		Custom: "Name   stdout\nMatch   dummy_test.*",
 	}
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		TypeMeta: metav1.TypeMeta{
@@ -70,7 +70,7 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Parsers: []telemetryv1alpha1.Parser{parser},
-			Outputs: []telemetryv1alpha1.Output{output},
+			Output:  telemetryv1alpha1.Output{Custom: output.Custom},
 			Files:   []telemetryv1alpha1.FileMount{file},
 		},
 	}
@@ -79,7 +79,6 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 }
 
 var _ = Describe("LogPipeline webhook", func() {
-
 	Context("When creating LogPipeline", func() {
 		AfterEach(func() {
 			logPipeline := getLogPipeline()
@@ -93,7 +92,11 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -105,6 +108,9 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(0)
+			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
@@ -122,8 +128,10 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should reject LogPipeline with forbidden plugin", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			pluginErr := errors.New("output plugin stdout is not allowed")
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(pluginErr).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(0)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -135,15 +143,33 @@ var _ = Describe("LogPipeline webhook", func() {
 			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
 			Expect(status.Status().Message).To(ContainSubstring(pluginErr.Error()))
 		})
+
+		It("Should reject LogPipeline when exceeding pipeline limit", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
+			maxPipelinesErr := errors.New("too many pipelines")
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(maxPipelinesErr).Times(1)
+
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			logPipeline := getLogPipeline()
+			err := k8sClient.Create(ctx, logPipeline)
+
+			Expect(err).To(HaveOccurred())
+			var status apierrors.APIStatus
+			errors.As(err, &status)
+
+			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
+			Expect(status.Status().Message).To(ContainSubstring(maxPipelinesErr.Error()))
+		})
 	})
 
 	Context("When updating LogPipeline", func() {
-
 		It("Should create valid LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -155,7 +181,9 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(5)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
@@ -176,6 +204,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
@@ -201,8 +230,10 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should reject new update with invalid plugin usage of previously created LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(6)
 			pluginErr := errors.New("output plugin stdout is not allowed")
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(pluginErr).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(0)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
@@ -228,7 +259,6 @@ var _ = Describe("LogPipeline webhook", func() {
 			logPipeline := getLogPipeline()
 			err := k8sClient.Delete(ctx, logPipeline, client.GracePeriodSeconds(0))
 			Expect(err).NotTo(HaveOccurred())
-
 		})
 	})
 })

@@ -21,6 +21,9 @@ import (
 	"flag"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
@@ -65,10 +68,9 @@ var (
 	logFormat                  string
 	logLevel                   string
 	certDir                    string
-	supportedFilterPlugins     string
-	supportedOutputPlugins     string
 	deniedFilterPlugins        string
 	deniedOutputPlugins        string
+	maxPipelines               int
 )
 
 //nolint:gochecknoinits
@@ -90,8 +92,10 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var syncPeriod time.Duration
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.DurationVar(&syncPeriod, "sync-period", 1*time.Hour, "minimum frequency at which watched resources are reconciled")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
@@ -109,10 +113,9 @@ func main() {
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
-	flag.StringVar(&supportedFilterPlugins, "supported-filter-plugins", "", "Comma separated list of supported filter plugins. If empty, all filter plugins are allowed.")
-	flag.StringVar(&supportedOutputPlugins, "supported-output-plugins", "", "Comma separated list of supported output plugins. If empty, all output plugins are allowed.")
 	flag.StringVar(&deniedFilterPlugins, "denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
 	flag.StringVar(&deniedOutputPlugins, "denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
+	flag.IntVar(&maxPipelines, "max-pipelines", 5, "Maximum number of LogPipelines to be created. If 0, no limit is applied.")
 
 	flag.Parse()
 
@@ -134,6 +137,7 @@ func main() {
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,
@@ -179,13 +183,12 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
-		fluentbit.NewPluginValidator(
-			strings.SplitN(strings.ReplaceAll(supportedFilterPlugins, " ", ""), ",", len(supportedFilterPlugins)),
-			strings.SplitN(strings.ReplaceAll(supportedOutputPlugins, " ", ""), ",", len(supportedOutputPlugins)),
+		validation.NewVariablesValidator(mgr.GetClient()),
+		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		validation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-
+		validation.NewMaxPipelinesValidator(maxPipelines),
 		emitterConfig,
 		fs.NewWrapper(),
 	)
