@@ -4,14 +4,16 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"sync"
+
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
-	"io/ioutil"
-	"net/http"
-	"sync"
+
+	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 )
 
 func main() {
@@ -29,21 +31,10 @@ func main() {
 	log.Infof("Starting frog auth server application")
 	log.Infof("Config: %s", cfg.String())
 
-	oauthTokesCache := make(map[string]bool)
-	csrfTokensCache := make(map[string]bool)
-	mutex := &sync.RWMutex{}
-
-	apiRouter := mux.NewRouter()
-
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
-
-	test_api.AddAPIHandler(apiRouter, oauthTokesCache, csrfTokensCache, mutex, basicAuthCredentials)
-
 	oauthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
-	test_api.AddOAuthTokensHandler(apiRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
 
-	tokensRouter := mux.NewRouter()
-	test_api.AddOAuthTokensHandler(tokensRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
+	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oauthCredentials)
 
 	// TODO Use https://github.com/oklog/run instead.
 	// Note: it is used here: https://github.com/kyma-project/kyma/blob/main/components/central-application-connectivity-validator/cmd/centralapplicationconnectivityvalidator/centralapplicationconnectivityvalidator.go
@@ -52,14 +43,14 @@ func main() {
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.MtlsPort)
-		mtlsServer := newMTLSServer(cfg.CaCertPath, address, tokensRouter)
+		mtlsServer := newMTLSServer(cfg.CaCertPath, address, router)
 		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.ServerCertPath, cfg.ServerKeyPath))
 		wg.Done()
 	}()
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.Port)
-		log.Fatal(http.ListenAndServe(address, apiRouter))
+		log.Fatal(http.ListenAndServe(address, router))
 		wg.Done()
 	}()
 
