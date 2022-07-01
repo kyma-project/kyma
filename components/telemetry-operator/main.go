@@ -19,21 +19,24 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/go-logr/zapr"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
-	"k8s.io/apimachinery/pkg/types"
+
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -46,6 +49,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	//+kubebuilder:scaffold:imports
 )
@@ -206,6 +210,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&telemetrycontrollers.LogParserReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		os.Exit(1)
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

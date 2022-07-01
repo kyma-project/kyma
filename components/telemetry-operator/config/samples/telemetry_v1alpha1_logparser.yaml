@@ -1,0 +1,6 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogParser
+metadata:
+  name: logparser-sample
+spec:
+  # TODO(user): Add fields here
