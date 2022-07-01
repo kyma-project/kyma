@@ -1,5 +1,5 @@
 const {deprovisionSKR} = require('../../kyma-environment-broker');
-const {keb, kcp, director} = require('../helpers');
+const {keb, kcp} = require('../helpers');
 
 async function deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, ensureSuccess) {
   if (!skipProvisioning) {
@@ -22,6 +22,5 @@ async function deprovisionSKRInstance(options, timeout, ensureSuccess=true) {
 }
 
 module.exports = {
-  deprovisionSKRInstance,
   deprovisionAndUnregisterSKR,
 };

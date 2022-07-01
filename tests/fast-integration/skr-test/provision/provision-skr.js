@@ -66,7 +66,6 @@ async function provisionSKRInstance(options, timeout) {
 
 
 module.exports = {
-  provisionSKRInstance,
   getOrProvisionSKR,
 };
 
