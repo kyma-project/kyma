@@ -2,25 +2,9 @@ package main_test
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"net/http"
-	"testing"
-
+	"github.com/kyma-project/kyma/tests/components/application-connector/gateway/helper"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-func callToGateway(t *testing.T, entry v1alpha1.Entry) int {
-	t.Log("Calling", entry.CentralGatewayUrl)
-	res, err := http.Get(entry.CentralGatewayUrl)
-	assert.Nil(t, err)
-	body, err := ioutil.ReadAll(res.Body)
-	if err == nil && len(body) > 0 {
-		t.Log("Response", string(body))
-	}
-	return res.StatusCode
-}
 
 func (gs *GatewaySuite) TestPath() {
 	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "bad-path", v1.GetOptions{})
@@ -38,13 +22,13 @@ func (gs *GatewaySuite) TestPath() {
 
 				switch service.Name {
 				case "missingSrvApp":
-					code = callToGateway(gs.T(), entry)
+					code = helper.CallToGateway(gs.T(), entry)
 					gs.Equal(500, code)
 				case "missingSrv":
-					code = callToGateway(gs.T(), entry)
+					code = helper.CallToGateway(gs.T(), entry)
 					gs.Equal(500, code)
 				case "badTargetURL":
-					code = callToGateway(gs.T(), entry)
+					code = helper.CallToGateway(gs.T(), entry)
 					gs.Equal(404, code)
 				}
 			}
