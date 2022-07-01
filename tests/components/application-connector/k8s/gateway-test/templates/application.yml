@@ -9,15 +9,15 @@ spec:
   labels:
     app: test-app
   services:
-    - displayName: always ok
-      name: alwaysok
+    - displayName: unsecure
+      name: unsecure
       providerDisplayName: Rafał
       description: Always Ok in testapp
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/always-ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/unsecure"
     - displayName: basic
       name: basic
       providerDisplayName: Rafał
