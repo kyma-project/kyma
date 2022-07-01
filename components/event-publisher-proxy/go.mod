@@ -7,7 +7,6 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.10.1
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220628153305-4e32e8abea0f
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220620092658-f1f8e3668674
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220629063704-83cc2f69ed02
 	github.com/nats-io/nats-server/v2 v2.8.4
@@ -15,7 +14,7 @@ require (
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.2
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb
@@ -49,6 +48,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.14.4 // indirect
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220628153305-4e32e8abea0f // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
