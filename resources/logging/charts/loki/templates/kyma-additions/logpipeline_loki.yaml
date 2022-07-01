@@ -7,8 +7,8 @@ spec:
   parsers: []
   multilineParsers: []
   filters: []
-  outputs:
-    - content: |
+  output:
+    custom: |
         Name               grafana-loki
         Alias              loki-output
         Match              {{ .Values.kyma.logPipeline.match }}
@@ -36,5 +36,4 @@ spec:
           },
           "stream": "stream"
         }
-  secretRefs: []
 {{ end}}

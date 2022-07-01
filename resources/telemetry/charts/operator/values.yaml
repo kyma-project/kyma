@@ -89,12 +89,6 @@ deniedPlugins:
     - multiline
   output: []
 
-supportedPlugins:
-  filter: []
-  output:
-    - grafana-loki
-    - http
-    - forward
 syncPeriod: 1h
 maxLogPipelines: 3
 

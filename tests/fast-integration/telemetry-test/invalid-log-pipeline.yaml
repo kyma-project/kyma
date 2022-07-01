@@ -6,9 +6,11 @@ spec:
   parsers: [ ]
   multilineParsers: [ ]
   filters:
-    - content: |
+    - custom: |
         Name               abc
         Match              logpipeline-test.*
-  outputs: []
+  output:
+    custom: |
+      Name null
+      Match logpipeline-test.*   
   files: []
-  secretRefs: [ ]

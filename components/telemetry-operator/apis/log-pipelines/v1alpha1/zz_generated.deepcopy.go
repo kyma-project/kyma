@@ -148,11 +148,7 @@ func (in *LogPipelineSpec) DeepCopyInto(out *LogPipelineSpec) {
 		*out = make([]Filter, len(*in))
 		copy(*out, *in)
 	}
-	if in.Outputs != nil {
-		in, out := &in.Outputs, &out.Outputs
-		*out = make([]Output, len(*in))
-		copy(*out, *in)
-	}
+	out.Output = in.Output
 	if in.Files != nil {
 		in, out := &in.Files, &out.Files
 		*out = make([]FileMount, len(*in))
