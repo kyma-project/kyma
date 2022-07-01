@@ -12,7 +12,7 @@ const (
 	// Latency name of the latency metric
 	Latency = "event_publish_to_messaging_server_latency"
 	// EventTypePublishedMetricKey name of the eventType metric
-	EventTypePublishedMetricKey = "event_type_published"
+	EventTypePublishedMetricKey = "event_types_published"
 	// errorsHelp help for the errors metric
 	errorsHelp = "The total number of errors while sending Events to the messaging server"
 	// latencyHelp help for the latency metric
