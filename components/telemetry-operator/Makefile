@@ -53,6 +53,8 @@ manifests-local: controller-gen-local
 
 copy-crds-local: manifests-local
 	@cp ./config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml ./../../installation/resources/crds/telemetry/logpipelines.crd.yaml
+	@cp ./config/crd/bases/telemetry.kyma-project.io_logparsers.yaml ./../../installation/resources/crds/telemetry/logparsers.crd.yaml
+
 
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
