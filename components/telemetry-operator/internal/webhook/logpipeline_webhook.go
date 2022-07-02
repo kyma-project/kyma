@@ -115,24 +115,21 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 			},
 		}
 	}
+	var warnMsg []string
 
 	secretsFound := v.validateSecrets(ctx, logPipeline)
 	if !secretsFound {
-		warnMsg := "One or more secrets do not exist, the log pipeline will stay in pending state until the secrets are available"
-		return admission.Response{
-			AdmissionResponse: admissionv1.AdmissionResponse{
-				Allowed:  true,
-				Warnings: []string{warnMsg},
-			},
-		}
+		warnMsg = append(warnMsg, "One or more secrets do not exist. The LogPipeline stays in pending state until the secrets are available.")
+	}
+	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
+		warnMsg = append(warnMsg, "Caution: LogPipeline contains an unsupported custom filter or output. This means that you proceed without support!")
 	}
 
-	if logPipeline.Spec.EnableUnsupportedPlugins {
-		warnMsg := "'enableUnsupportedPlugin' is enabled which would allow unsupported plugins to be used!"
+	if len(warnMsg) != 0 {
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
 				Allowed:  true,
-				Warnings: []string{warnMsg},
+				Warnings: warnMsg,
 			},
 		}
 	}

@@ -80,8 +80,7 @@ func TestFilter(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Filters: []telemetryv1alpha1.Filter{
-				{
-					Content: `
+				{Custom: `
 	name               grep	`,
 				},
 			},
@@ -116,13 +115,12 @@ func TestOutput(t *testing.T) {
     storage.total_limit_size 1G
 
 `
+
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Outputs: []telemetryv1alpha1.Output{
-				{
-					Content: `
+			Output: telemetryv1alpha1.Output{
+				Custom: `
     name               http`,
-				},
 			},
 		},
 	}

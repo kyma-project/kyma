@@ -24,6 +24,8 @@ func TestNewDeployment(t *testing.T) {
 		LimitsMemory:    "128Mi",
 		Image:           "testImage",
 		ImagePullPolicy: "Always",
+		AppLogLevel:     "info",
+		AppLogFormat:    "json",
 	}
 	testCases := []struct {
 		name                  string
@@ -145,6 +147,77 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			}
 			backendConfig := env.GetBackendConfig()
 			envVars := getNATSEnvVars(tc.givenNatsConfig, backendConfig.PublisherConfig)
+
+			// ensure the right envs were set
+			for index, val := range tc.wantEnvs {
+				gotEnv := findEnvVar(envVars, index)
+				assert.NotNil(t, gotEnv)
+				assert.Equal(t, val, gotEnv.Value)
+			}
+		})
+	}
+}
+func Test_GetLogEnvVars(t *testing.T) {
+	testCases := []struct {
+		name      string
+		givenEnvs map[string]string
+		wantEnvs  map[string]string
+	}{
+		{
+			name: "APP_LOG_FORMAT should be text and APP_LOG_LEVEL should become the default info value",
+			givenEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+			},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+				"APP_LOG_LEVEL":  "info",
+			},
+		},
+		{
+			name: "APP_LOG_FORMAT should become default json and APP_LOG_LEVEL should be warning",
+			givenEnvs: map[string]string{
+				"APP_LOG_LEVEL": "warning",
+			},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "json",
+				"APP_LOG_LEVEL":  "warning",
+			},
+		},
+		{
+			name:      "APP_LOG_FORMAT and APP_LOG_LEVEL should take the default values",
+			givenEnvs: map[string]string{},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "json",
+				"APP_LOG_LEVEL":  "info",
+			},
+		},
+		{
+			name: "APP_LOG_FORMAT should be testFormat and APP_LOG_LEVEL should be error",
+			givenEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+				"APP_LOG_LEVEL":  "error",
+			},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+				"APP_LOG_LEVEL":  "error",
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			defer func() {
+				for k := range tc.givenEnvs {
+					err := os.Unsetenv(k)
+					require.NoError(t, err)
+				}
+			}()
+
+			for k, v := range tc.givenEnvs {
+				err := os.Setenv(k, v)
+				require.NoError(t, err)
+			}
+			backendConfig := env.GetBackendConfig()
+			envVars := getLogEnvVars(backendConfig.PublisherConfig)
 
 			// ensure the right envs were set
 			for index, val := range tc.wantEnvs {

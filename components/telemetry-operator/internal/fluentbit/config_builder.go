@@ -70,11 +70,12 @@ func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) s
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineSpecificConfig PipelineSpecificConfig) (string, error) {
 	var sb strings.Builder
 
-	if len(logPipeline.Spec.Outputs) > 0 {
+	if len(logPipeline.Spec.Output.Custom) > 0 {
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineSpecificConfig, logPipeline.Name)))
 	}
+
 	for _, filter := range logPipeline.Spec.Filters {
-		section, err := ParseSection(filter.Content)
+		section, err := ParseSection(filter.Custom)
 		if err != nil {
 			return "", err
 		}
@@ -83,8 +84,9 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineSpe
 
 		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
-	for _, output := range logPipeline.Spec.Outputs {
-		section, err := ParseSection(output.Content)
+
+	if len(logPipeline.Spec.Output.Custom) > 0 {
+		section, err := ParseSection(logPipeline.Spec.Output.Custom)
 		if err != nil {
 			return "", err
 		}
@@ -94,6 +96,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineSpe
 
 		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
 	}
+
 	return sb.String(), nil
 }
 

@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/cloudevents/sdk-go/v2/event"
@@ -18,7 +20,6 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,7 +58,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			testEnv := setupTestEnvironment(t)
-			natsServer, connection := testEnv.Server, testEnv.Connection
+			natsServer, connection, mockedLogger := testEnv.Server, testEnv.Connection, testEnv.Logger
 
 			defer func() {
 				natsServer.Shutdown()
@@ -72,7 +73,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 
 			// when
 			ctx := context.Background()
-			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, logrus.New())
+			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
 			if tc.givenNatsConnectionClosed {
 				connection.Close()
@@ -81,7 +82,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 			// then
 			status, err := sender.Send(ctx, ce)
 
-			testEnv.Logger.Errorf("err: %v", err)
+			testEnv.Logger.WithContext().Errorf("err: %v", err)
 			assert.Equal(t, tc.wantError, err != nil)
 			assert.Equal(t, tc.wantStatusCode, status)
 		})
@@ -155,7 +156,7 @@ func TestStreamExists(t *testing.T) {
 type TestEnvironment struct {
 	Connection *nats.Conn
 	Config     *env.NatsConfig
-	Logger     *logrus.Logger
+	Logger     *logger.Logger
 	Sender     *JetstreamMessageSender
 	Server     *server.Server
 	JsContext  *nats.JetStreamContext
@@ -171,20 +172,23 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	require.NoError(t, err)
 
 	natsConfig := CreateNatsJsConfig(natsServer.ClientURL())
-	logger := logrus.New()
+
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
+
 	jsCtx, err := connection.JetStream()
 	require.NoError(t, err)
 
 	sender := &JetstreamMessageSender{
 		connection: connection,
 		envCfg:     natsConfig,
-		logger:     logger,
+		logger:     mockedLogger,
 	}
 
 	return &TestEnvironment{
 		Connection: connection,
 		Config:     natsConfig,
-		Logger:     logger,
+		Logger:     mockedLogger,
 		Sender:     sender,
 		Server:     natsServer,
 		JsContext:  &jsCtx,

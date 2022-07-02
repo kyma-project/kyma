@@ -21,15 +21,14 @@ func NewOutputValidator() OutputValidator {
 
 func (v *outputValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
 
-	for _, output := range logPipeline.Spec.Outputs {
-		section, err := fluentbit.ParseSection(output.Content)
-		if err != nil {
-			return err
-		}
-
-		if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
-			return fmt.Errorf("configuring '%s' key in Fluent Bit Output is not allowed in log pipeline '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
-		}
+	section, err := fluentbit.ParseSection(logPipeline.Spec.Output.Custom)
+	if err != nil {
+		return err
 	}
+
+	if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
+		return fmt.Errorf("configuring '%s' key in Fluent Bit Output is not allowed in log pipeline '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
+	}
+
 	return nil
 }
