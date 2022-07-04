@@ -7,7 +7,6 @@ import (
 
 	"github.com/cucumber/godog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubectl/pkg/util/podutils"
 )
@@ -21,7 +20,7 @@ func InitializeScenarioKymaSystemSidecar(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
 	ctx.Step(`^there should be pods with istio sidecar in "([^"]*)" namespace$`, installedCase.kymaSystemPodsShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is created in "([^"]*)"$`, installedCase.deployHttpBinInKymaSystem)
-	ctx.Step(`^Httpbin deployment should be deployed and ready$`, installedCase.waitForHttpBinInKymaSystem)
+	ctx.Step(`^Httpbin deployment should be deployed and ready in "([^"]*)" namespace$`, installedCase.waitForHttpBinInKymaSystem)
 	ctx.Step(`^there should be istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from "([^"]*)"$`, installedCase.deleteHttpBinInKymaSystem)
 }
@@ -31,10 +30,15 @@ func (i *istioInstallledCase) kymaSystemPodsShouldHaveSidecar(targetNamespace st
 	if err != nil {
 		return err
 	}
-
+	var proxies []string
 	for _, pod := range pods.Items {
-		for _, container := range pod.Spec.Containers {
-			if container.Name != proxyName {
+		if !metav1.HasAnnotation(pod.ObjectMeta, "sidecar.istio.io/inject") {
+			for _, container := range pod.Spec.Containers {
+				if container.Name == proxyName {
+					proxies = append(proxies, pod.Name)
+				}
+			}
+			if len(proxies) == 0 {
 				return fmt.Errorf("istio sidecars should be deployed in %s", targetNamespace)
 			}
 		}
@@ -50,12 +54,11 @@ func (i *istioInstallledCase) httpBinPodShouldHaveSidecar(targetNamespace string
 		return err
 	}
 	for _, pod := range pods.Items {
-		for _, container := range pod.Spec.Containers {
-			if container.Name != proxyName {
-				return fmt.Errorf("httpbin should have Istio sidecar in %s", targetNamespace)
-			}
+		if !hasIstioProxy(pod.Spec.Containers) {
+			return fmt.Errorf("istio sidecars should be deployed in %s", targetNamespace)
 		}
 	}
+
 	return nil
 }
 

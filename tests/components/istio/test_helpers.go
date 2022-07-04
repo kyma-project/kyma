@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -71,4 +72,14 @@ func getGroupVersionResource(resource unstructured.Unstructured) schema.GroupVer
 		log.Fatal(err)
 	}
 	return mapping.Resource
+}
+
+func hasIstioProxy(containers []v1.Container) bool {
+	proxyImage := ""
+	for _, container := range containers {
+		if container.Name == proxyName {
+			proxyImage = container.Image
+		}
+	}
+	return proxyImage != ""
 }

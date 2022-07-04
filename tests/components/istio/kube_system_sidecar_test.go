@@ -33,10 +33,8 @@ func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
 	}
 
 	for _, pod := range pods.Items {
-		for _, container := range pod.Spec.Containers {
-			if container.Name == proxyName {
-				return fmt.Errorf("istio sidecars should not be deployed in %s", kubeSystemNamespace)
-			}
+		if hasIstioProxy(pod.Spec.Containers) {
+			return fmt.Errorf("istio sidecars should not be deployed in %s", kubeSystemNamespace)
 		}
 	}
 	return nil

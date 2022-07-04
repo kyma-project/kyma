@@ -109,7 +109,7 @@ func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.Defer
 
 func TestIstioInstalledEvaluation(t *testing.T) {
 	evalOpts := goDogOpts
-	evalOpts.Paths = []string{"features/istio_evaluation.feature", "features/kube_system_sidecar.feature", "features/namespace_disabled_sidecar.feature"}
+	evalOpts.Paths = []string{"features/istio_evaluation.feature", "features/kube_system_sidecar.feature", "features/namespace_disabled_sidecar.feature", "features/kyma_system_sidecar.feature"}
 
 	suite := godog.TestSuite{
 		Name:                evalProfile,
