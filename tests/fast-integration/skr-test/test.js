@@ -63,6 +63,7 @@ describe('SKR test', function() {
     await initK8sConfig(shoot);
   });
 
+
   // Run the OIDC tests
   oidcE2ETest(options, getShootInfoFunc);
 
