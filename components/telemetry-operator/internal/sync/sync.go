@@ -33,19 +33,20 @@ type FluentBitDaemonSetConfig struct {
 type LogPipelineSyncer struct {
 	client.Client
 	DaemonSetConfig         FluentBitDaemonSetConfig
-	EmitterConfig           fluentbit.EmitterConfig
+	PipelineConfig          fluentbit.PipelineConfig
+	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
 	SecretValidator         *secret.SecretHelper
 }
 
 func NewLogPipelineSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
-	emitterConfig fluentbit.EmitterConfig,
+	pipelineConfig fluentbit.PipelineConfig,
 ) *LogPipelineSyncer {
 	var lps LogPipelineSyncer
 	lps.Client = client
 	lps.DaemonSetConfig = daemonSetConfig
-	lps.EmitterConfig = emitterConfig
+	lps.PipelineConfig = pipelineConfig
 	lps.SecretValidator = secret.NewSecretHelper(client)
 	return &lps
 }
@@ -99,7 +100,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 	} else {
-		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.EmitterConfig)
+		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
 		if err != nil {
 			return false, err
 		}

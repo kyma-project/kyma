@@ -51,12 +51,15 @@ type LogPipelineReconciler struct {
 	unsupportedTotal   prometheus.Gauge
 }
 
-// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, emitterConfig fluentbit.EmitterConfig) *LogPipelineReconciler {
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
-	lpr.Syncer = sync.NewLogPipelineSyncer(client, daemonSetConfig, emitterConfig)
+	lpr.Syncer = sync.NewLogPipelineSyncer(client,
+		daemonSetConfig,
+		pipelineConfig,
+	)
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
 	// Metrics

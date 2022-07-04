@@ -92,6 +92,8 @@ deniedPlugins:
 syncPeriod: 1h
 maxLogPipelines: 3
 
+filesystemBufferLimit: 1G
+
 nodeSelector: {}
 
 tolerations: []

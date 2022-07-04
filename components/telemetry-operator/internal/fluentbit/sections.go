@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func parseSection(section string) (map[string]string, error) {
+func ParseSection(section string) (map[string]string, error) {
 	result := make(map[string]string)
 
 	for _, line := range strings.Split(section, "\n") {
