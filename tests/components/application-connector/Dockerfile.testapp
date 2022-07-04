@@ -1,0 +1,16 @@
+FROM eu.gcr.io/kyma-project/external/golang:1.18.2-alpine3.15 as builder
+
+WORKDIR /test-app/
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+
+RUN CGO_ENABLED=0 go build -v -o test-app ./cmd/test-gateway-app
+
+FROM scratch
+COPY --from=builder /test-app/test-app .
+ENTRYPOINT [ "/test-app" ]
+CMD []

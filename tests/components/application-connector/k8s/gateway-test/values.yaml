@@ -1,0 +1,5 @@
+saName: "test-account"
+namespace: "test"
+
+gatewayTestImage: ""
+mockImage: ""

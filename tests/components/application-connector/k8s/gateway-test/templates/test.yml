@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: connectivity-test
+  namespace: "{{ .Values.namespace }}"
+spec:
+  initContainers:
+    - name: wait-for-services
+      image: opsfleet/depends-on
+      args:
+        - "-service=test-app"
+  containers:
+    - name: connectivity-test
+      image: "{{ .Values.gatewayTestImage }}"
+      imagePullPolicy: Always
+  restartPolicy: Never
+  serviceAccountName: "{{ .Values.saName }}"
