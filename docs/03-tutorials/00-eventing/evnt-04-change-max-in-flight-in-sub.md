@@ -102,7 +102,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Max-In-Flight config
 
-Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for event of type: `order.received.v1`. We will set the `maxInFlightMessages` to `5`, so that the Eventing Services forwards maximum 5 events in parallel to the sink without waiting for a response.
+Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe for events of the type: `order.received.v1`. We will set the `maxInFlightMessages` to `5`, so that the Eventing Services forwards maximum 5 events in parallel to the sink without waiting for a response.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -180,7 +180,7 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with multiple events
 
-We created the `lastorder` Function, and created a Subscription for it to listen for `order.received.v1` events.
+We created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR.
 We will publish 15 events at once and see how the Eventing Service trigger the workload.
 In this example, we'll port-forward the Kyma Eventing Service to localhost.
 

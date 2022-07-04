@@ -92,7 +92,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Event type consisting of alphanumeric characters
 
-Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for event of type: `order.payment-success.v1`. Note that `order.payment-success.v1` contains a non-alphanumeric character (i.e. hyphen `-`).
+Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe for events of the type: `order.payment-success.v1`. Note that `order.payment-success.v1` contains a non-alphanumeric character (i.e. hyphen `-`).
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -162,8 +162,8 @@ Now, note that the returned cleaned event type `["sap.kyma.custom.myapp.order.pa
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function, and created a Subscription for it to listen for `order.payment-success.v1` events. 
-Now we will see that we can still publish events against the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
+We created the `lastorder` Function, and subscribed to the `order.payment-success.v1` events by creating a Subscription CR. 
+Now we will see that we can still publish events with the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
 In this example, we'll port-forward the Kyma Eventing Service to localhost.
 
 1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run:

@@ -1,5 +1,5 @@
 ---
-title: Create subscription listening to multiple event types
+title: Create subscription subscribing to multiple event types
 ---
 
 The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource definition (CRD) is used to subscribe to events. In this tutorial, we will show how to subscribe to one or more event types using the Kyma Subscription.
@@ -91,8 +91,8 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Multiple Filters
 
-Next, to subscribe to multiple events so that we can actually listen for them, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for events of two types: `order.received.v1` and `order.changed.v1`.
-All the events published with these event types will be forwarded to the `Sink` (i.e. HTTP endpoint) defined in the Subscription's Spec.
+Next, to subscribe to multiple events, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of two types: `order.received.v1` and `order.changed.v1`.
+All the published events of these types are then forwarded to an HTTP endpoint called `Sink`. You can define this endpoint in the Subscription's spec.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -161,7 +161,7 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function, and created a Subscription for it to listen for `order.received.v1` and `order.changed.v1` events. Now it's time to send events and trigger the Function.
+We created the `lastorder` Function, and subscribed to the `order.received.v1` and `order.changed.v1` events by creating a Subscription CR. Now it's time to publish the events and trigger the Function.
 In this example, we'll port-forward the Kyma Eventing Service to localhost.
 
 1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run:
