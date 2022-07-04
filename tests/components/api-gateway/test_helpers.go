@@ -120,7 +120,7 @@ func generateHTMLReport() {
 		Config: html.Data{
 			InputJsonPath:    cucumberFileName,
 			OutputHtmlFolder: "reports/",
-			Title:            "Kyma Istio component tests",
+			Title:            "Kyma API-Gateway component tests",
 			Metadata: models.Metadata{
 				Platform:   runtime.GOOS,
 				Parallel:   "Scenarios",
