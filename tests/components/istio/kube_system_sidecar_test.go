@@ -2,7 +2,6 @@ package istio
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"time"
 

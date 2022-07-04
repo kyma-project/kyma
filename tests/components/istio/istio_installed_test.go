@@ -130,7 +130,7 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 
 func TestIstioInstalledProduction(t *testing.T) {
 	prodOpts := goDogOpts
-	prodOpts.Paths = []string{"features/istio_production.feature", "features/kube_system_sidecar.feature", "features/namespace_disabled_sidecar.feature"}
+	prodOpts.Paths = []string{"features/istio_production.feature", "features/kube_system_sidecar.feature", "features/namespace_disabled_sidecar.feature", "features/kyma_system_sidecar.feature"}
 
 	suite := godog.TestSuite{
 		Name:                prodProfile,
@@ -253,6 +253,7 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
 	InitializeScenarioKubeSystemSidecar(ctx)
 	InitializeScenarioTargetNamespaceSidecar(ctx)
+	InitializeScenarioKymaSystemSidecar(ctx)
 }
 
 func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
@@ -269,6 +270,7 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
 	InitializeScenarioKubeSystemSidecar(ctx)
 	InitializeScenarioTargetNamespaceSidecar(ctx)
+	InitializeScenarioKymaSystemSidecar(ctx)
 }
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
