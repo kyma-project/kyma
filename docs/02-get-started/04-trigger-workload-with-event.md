@@ -95,7 +95,7 @@ kubectl get functions -n default lastorder
 ## Create a Subscription
 
 Next, to subscribe to an event, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe for an event of type `order.received.v1`. 
-All the events published on this event type will be forwarded to the `Sink` (i.e. HTTP endpoint) defined in the Subscription's Spec.
+All the published events of this type are then forwarded to an HTTP endpoint called `Sink`. You can define this endpoint in the Subscription's spec.
 
 <div tabs name="Create a Subscription" group="trigger-workload">
   <details open>
@@ -157,7 +157,7 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function, and subscribed for `order.received.v1` events by creating a Subscription CR. Now it's time to publish an event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost. 
+We created the `lastorder` Function and subscribed to the `order.received.v1` event by creating a Subscription CR. Now it's time to publish your event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost. 
 
 1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run: 
    ```bash
