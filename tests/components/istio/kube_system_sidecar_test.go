@@ -1,49 +1,17 @@
 package istio
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
 	"fmt"
-	"io"
-	"log"
-	"testing"
 	"time"
 
 	"github.com/cucumber/godog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/util/wait"
-	yamlutil "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/kubectl/pkg/util/podutils"
 )
-
-const (
-	kubeSystemNamespace = "kube-system"
-	proxyName           = "istio-proxy"
-)
-
-//go:embed test/httpbin.yaml
-var httpbin []byte
-
-func TestKubeSystemSidecar(t *testing.T) {
-	suite := godog.TestSuite{
-		Name:                kubeSystemNamespace,
-		ScenarioInitializer: InitializeScenarioKubeSystemSidecar,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/kube-system-sidecar.feature"},
-			TestingT: t,
-		},
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
-}
 
 func InitializeScenarioKubeSystemSidecar(ctx *godog.ScenarioContext) {
 	installedCase := istioInstallledCase{}
@@ -123,40 +91,4 @@ func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
 		}
 	}
 	return nil
-}
-
-func readManifestToUnstructured() ([]unstructured.Unstructured, error) {
-	var err error
-	var unstructList []unstructured.Unstructured
-
-	decoder := yamlutil.NewYAMLOrJSONDecoder(bytes.NewReader(httpbin), 200)
-	for {
-		var rawObj runtime.RawExtension
-		if err = decoder.Decode(&rawObj); err != nil {
-			break
-		}
-		obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(rawObj.Raw, nil, nil)
-		if err != nil {
-			break
-		}
-		unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
-		if err != nil {
-			break
-		}
-		unstructuredObj := unstructured.Unstructured{Object: unstructuredMap}
-		unstructList = append(unstructList, unstructuredObj)
-	}
-	if err != io.EOF {
-		return unstructList, err
-	}
-
-	return unstructList, nil
-}
-
-func getGroupVersionResource(resource unstructured.Unstructured) schema.GroupVersionResource {
-	mapping, err := mapper.RESTMapping(resource.GroupVersionKind().GroupKind(), resource.GroupVersionKind().Version)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return mapping.Resource
 }

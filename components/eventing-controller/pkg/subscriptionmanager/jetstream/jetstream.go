@@ -106,7 +106,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 	if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
 		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
 	}
-	sm.namedLogger().Info("started JetStream subscription manager")
+	sm.namedLogger().Info("Started JetStream subscription manager")
 	return nil
 }
 
@@ -152,19 +152,19 @@ func cleanup(backend handlers.JetStreamBackend, dynamicClient dynamic.Interface,
 		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
-			log.Errorw("update NATS subscription status failed", "error", err)
+			log.Errorw("Failed to update JetStream subscription status", "error", err)
 		}
 
 		// clean subscriptions from JetStream.
 		if jsBackend != nil {
 			if err := jsBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
-				log.Errorw("delete JetStream subscription failed", "error", err)
+				log.Errorw("Failed to delete JetStream subscription", "error", err)
 			}
 		}
 	}
 
-	logger.Debugw("cleanup process finished", "success", isCleanupSuccessful)
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
 	return nil
 }
 

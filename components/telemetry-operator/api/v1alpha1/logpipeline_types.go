@@ -16,9 +16,7 @@ limitations under the License.
 
 package v1alpha1
 
-import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -28,13 +26,12 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins,omitempty"`
-	Parsers                  []Parser          `json:"parsers,omitempty"`
-	MultiLineParsers         []MultiLineParser `json:"multilineParsers,omitempty"`
-	Filters                  []Filter          `json:"filters,omitempty"`
-	Outputs                  []Output          `json:"outputs,omitempty"`
-	Files                    []FileMount       `json:"files,omitempty"`
-	SecretRefs               []SecretReference `json:"secretRefs,omitempty"`
+	Parsers          []Parser            `json:"parsers,omitempty"`
+	MultiLineParsers []MultiLineParser   `json:"multilineParsers,omitempty"`
+	Filters          []Filter            `json:"filters,omitempty"`
+	Output           Output              `json:"output,omitempty"`
+	Files            []FileMount         `json:"files,omitempty"`
+	Variables        []VariableReference `json:"variables,omitempty"`
 }
 
 // Parser describes a Fluent Bit parser configuration section
@@ -47,14 +44,14 @@ type MultiLineParser struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Filter describes a Fluent Bit filter configuration section
+// Filter describes a Fluent Bit filter configuration
 type Filter struct {
-	Content string `json:"content,omitempty"`
+	Custom string `json:"custom,omitempty"`
 }
 
 // Output describes a Fluent Bit output configuration section
 type Output struct {
-	Content string `json:"content,omitempty"`
+	Custom string `json:"custom,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration
@@ -63,10 +60,20 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// SecretReference is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
-type SecretReference struct {
+// Variables is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
+type VariableReference struct {
+	Name      string        `json:"name,omitempty"`
+	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+}
+
+type ValueFromType struct {
+	SecretKey SecretKeyRef `json:"secretKeyRef,omitempty"`
+}
+
+type SecretKeyRef struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
+	Key       string `json:"key,omitempty"`
 }
 
 type LogPipelineConditionType string
@@ -80,6 +87,7 @@ const (
 const (
 	FluentBitDSRestartedReason        = "FluentBitDaemonSetRestarted"
 	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
+	SecretsNotPresent                 = "OneORMoreSecretsAreNotPresent"
 )
 
 // LogPipelineCondition contains details for the current condition of this LogPipeline
@@ -91,7 +99,8 @@ type LogPipelineCondition struct {
 
 // LogPipelineStatus defines the observed state of LogPipeline
 type LogPipelineStatus struct {
-	Conditions []LogPipelineCondition `json:"conditions,omitempty"`
+	Conditions      []LogPipelineCondition `json:"conditions,omitempty"`
+	UnsupportedMode bool                   `json:"unsupportedMode,omitempty"`
 }
 
 func NewLogPipelineCondition(reason string, condType LogPipelineConditionType) *LogPipelineCondition {
@@ -123,9 +132,9 @@ func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
 	lps.Conditions = append(newConditions, cond)
 }
 
-func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineConditionType) []LogPipelineCondition {
+func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineConditionType) []LogPipelineCondition {
 	var newConditions []LogPipelineCondition
-	for _, cond := range conds {
+	for _, cond := range conditions {
 		if cond.Type == condType {
 			continue
 		}
@@ -138,7 +147,7 @@ func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineCondit
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
-//+kubebuilder:printcolumn:name="Unsupported-Plugins",type=boolean,JSONPath=`.spec.enableUnsupportedPlugins`
+//+kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // LogPipeline is the Schema for the logpipelines API
