@@ -46,21 +46,17 @@ func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, l
 // or returns an error if the event-type parsing failed.
 func (c *cleaner) Clean(eventType string) (string, error) {
 	// format logger
-	log := c.namedLogger().With(
-		"prefix", c.eventTypePrefix,
-		"type", eventType,
-	)
+	log := c.namedLogger().With("prefix", c.eventTypePrefix, "type", eventType)
 
 	appName, event, version, err := parse(eventType, c.eventTypePrefix)
 	if err != nil {
-		log.Errorw("parse event-type failed", "error", err)
 		return "", err
 	}
 
 	// clean the application name
 	var eventTypeClean string
 	if appObj, err := c.applicationLister.Get(appName); err != nil {
-		log.Debugw("cannot find application", "application", appName)
+		log.Debugw("Cannot find application", "application", appName)
 		eventTypeClean = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
 	} else {
 		eventTypeClean = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
@@ -68,7 +64,7 @@ func (c *cleaner) Clean(eventType string) (string, error) {
 
 	// clean the event-type segments
 	eventTypeClean = cleanEventType(eventTypeClean)
-	log.Debugw("clean event-type",
+	log.Debugw("Cleaned event-type",
 		"before", eventType,
 		"after", eventTypeClean,
 	)
