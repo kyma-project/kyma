@@ -12,7 +12,8 @@ const {getEnvOrThrow, genRandom, debug} = require('../../utils');
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
-async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout) {
+async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout) {
+  let shoot;
   if (skipProvisioning) {
     console.log('Gather information from externally provisioned SKR and prepare resources');
     const instanceID = getEnvOrThrow('INSTANCE_ID');
@@ -32,6 +33,11 @@ async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningT
 
   console.log('Initiating K8s config...');
   await initK8sConfig(shoot);
+
+  return {
+    options,
+    shoot,
+  };
 }
 
 async function provisionSKRInstance(options, timeout) {

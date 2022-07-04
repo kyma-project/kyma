@@ -18,15 +18,18 @@ describe('SKR test', function() {
   this.timeout(globalTimeout);
   this.slow(slowTime);
 
-  const options = gatherOptions(); // with default values
-  let shoot;
+  let options = gatherOptions(); // with default values
+  let skr;
   const getShootInfoFunc = function() {
-    return shoot;
+    return skr.shoot;
   };
 
   before('Ensure SKR is provisioned', async function() {
     this.timeout(provisioningTimeout);
-    await getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout);
+    skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
+    console.log("OP", options)
+    options = skr.options;
+    console.log("OPP", options)
   });
 
   // Run the OIDC tests

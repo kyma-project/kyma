@@ -33,18 +33,18 @@ describe('SKR-Upgrade-test', function() {
   const customParams = {
     'kymaVersion': kymaVersion,
   };
-
-  const options = gatherOptions(
+  let options = gatherOptions(
       withCustomParams(customParams),
   );
-  let shoot;
+  let skr;
   const getShootInfoFunc = function() {
-    return shoot;
+    return skr.shoot;
   };
 
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
-    await getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout);
+    skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
+    options = skr.options;
   });
 
   // Run the OIDC tests
