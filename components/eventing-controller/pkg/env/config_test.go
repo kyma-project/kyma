@@ -1,7 +1,6 @@
 package env
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -23,16 +22,9 @@ func Test_GetConfig(t *testing.T) {
 		"BEB_NAMESPACE":              "/test",
 		"WEBHOOK_ACTIVATION_TIMEOUT": "60s",
 	}
-	defer func() {
-		for k := range envs {
-			err := os.Unsetenv(k)
-			g.Expect(err).ShouldNot(HaveOccurred())
-		}
-	}()
 
 	for k, v := range envs {
-		err := os.Setenv(k, v)
-		g.Expect(err).ShouldNot(HaveOccurred())
+		t.Setenv(k, v)
 	}
 	config := GetConfig()
 	// Ensure required variables can be set
