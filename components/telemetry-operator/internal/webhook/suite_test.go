@@ -26,8 +26,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	fluentbitmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/mocks"
 	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
+	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/validation/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -53,9 +53,11 @@ var (
 	ctx                   context.Context
 	cancel                context.CancelFunc
 	fsWrapperMock         *fsmocks.Wrapper
-	variableValidatorMock *fluentbitmocks.VariablesValidator
-	configValidatorMock   *fluentbitmocks.ConfigValidator
-	pluginValidatorMock   *fluentbitmocks.PluginValidator
+	variableValidatorMock *validationmocks.VariablesValidator
+	configValidatorMock   *validationmocks.ConfigValidator
+	pluginValidatorMock   *validationmocks.PluginValidator
+	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
+	outputValidatorMock   *validationmocks.OutputValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -106,15 +108,19 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	emitterConfig := fluentbit.EmitterConfig{
-		InputTag:    "kube",
-		BufferLimit: "10M",
-		StorageType: "filesystem",
+	pipelineConfig := fluentbit.PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
 	}
 
-	variableValidatorMock = &fluentbitmocks.VariablesValidator{}
-	configValidatorMock = &fluentbitmocks.ConfigValidator{}
-	pluginValidatorMock = &fluentbitmocks.PluginValidator{}
+	variableValidatorMock = &validationmocks.VariablesValidator{}
+	configValidatorMock = &validationmocks.ConfigValidator{}
+	pluginValidatorMock = &validationmocks.PluginValidator{}
+	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
+	outputValidatorMock = &validationmocks.OutputValidator{}
+
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
@@ -123,7 +129,9 @@ var _ = BeforeSuite(func() {
 		variableValidatorMock,
 		configValidatorMock,
 		pluginValidatorMock,
-		emitterConfig,
+		maxPipelinesValidator,
+		outputValidatorMock,
+		pipelineConfig,
 		fsWrapperMock,
 	)
 

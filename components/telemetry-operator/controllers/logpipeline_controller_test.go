@@ -37,8 +37,8 @@ var _ = Describe("LogPipeline controller", func() {
 		LogPipelineName                = "log-pipeline"
 		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
 		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
-		FluentBitFilterConfig          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
-		FluentBitOutputConfig          = "Name   stdout\nMatch   log-pipeline.*"
+		FluentBitFilterConfig          = "Name   grep\nmatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig          = "Name   stdout\nmatch   log-pipeline.*"
 		timeout                        = time.Second * 10
 		interval                       = time.Millisecond * 250
 	)
@@ -51,13 +51,15 @@ var _ = Describe("LogPipeline controller", func() {
     Emitter_Mem_Buf_Limit 10M
 
 [FILTER]
-    Name   grep
-    Match   *
-    Regex   $kubernetes['labels']['app'] my-deployment
+    match *
+    name grep
+    regex $kubernetes['labels']['app'] my-deployment
 
 [OUTPUT]
-    Name   stdout
-    Match   log-pipeline.*`
+    match log-pipeline.*
+    name stdout
+    storage.total_limit_size 1G`
+
 	var expectedFluentBitParserConfig = `[PARSER]
     Name   dummy_test
     Format   regex
@@ -165,11 +167,9 @@ var _ = Describe("LogPipeline controller", func() {
 				Content: FluentBitMultiLineParserConfig,
 			}
 			filter := telemetryv1alpha1.Filter{
-				Content: FluentBitFilterConfig,
+				Custom: FluentBitFilterConfig,
 			}
-			output := telemetryv1alpha1.Output{
-				Content: FluentBitOutputConfig,
-			}
+
 			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "telemetry.kyma-project.io/v1alpha1",
@@ -182,7 +182,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Parsers:          []telemetryv1alpha1.Parser{parser},
 					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
 					Filters:          []telemetryv1alpha1.Filter{filter},
-					Outputs:          []telemetryv1alpha1.Output{output},
+					Output:           telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:            []telemetryv1alpha1.FileMount{file},
 					Variables:        []telemetryv1alpha1.VariableReference{variableRefs},
 				},
@@ -201,7 +201,8 @@ var _ = Describe("LogPipeline controller", func() {
 				if err != nil {
 					return err.Error()
 				}
-				return strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
+				actualFluentBitConfig := strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
+				return actualFluentBitConfig
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
 
 			// Fluent Bit parsers config should be copied to ConfigMap
@@ -286,7 +287,23 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_operator_fluentbit_restarts_total") {
+					if strings.Contains(line, "telemetry_fluentbit_restarts_total") {
+						return true
+					}
+				}
+				return false
+			}, timeout, interval).Should(Equal(true))
+
+			Eventually(func() bool {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return false
+				}
+				defer resp.Body.Close()
+				scanner := bufio.NewScanner(resp.Body)
+				for scanner.Scan() {
+					line := scanner.Text()
+					if strings.Contains(line, "telemetry_plugins_unsupported_total") {
 						return true
 					}
 				}

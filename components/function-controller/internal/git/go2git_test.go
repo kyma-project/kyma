@@ -11,6 +11,7 @@ import (
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 const (
@@ -22,6 +23,10 @@ const (
 	trickyTagName  = "tricky1"
 	tagCommit      = "6eff122e8afb57a6f270285dc3bfcc9a4ef4b8ad"
 	secondCommitID = "8b27a9d6f148533773ae0666dc27c5b359b46553"
+
+	azureRepo   = "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function"
+	azureTag    = "python-tag"
+	azureCommit = "6dac23dd3b697970cf351101ff5c3e9733c2bdfc"
 )
 
 func TestNewGit2Go_LastCommit(t *testing.T) {
@@ -81,6 +86,20 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewGit2Go_LastCommitWithAzureTag(t *testing.T) {
+	//GIVEN
+	client := NewGit2Go(zap.L().Sugar())
+
+	//WHEN
+	commitID, err := client.LastCommit(Options{
+		URL:       azureRepo,
+		Reference: azureTag,
+	})
+	//THEN
+	require.NoError(t, err)
+	assert.Equal(t, azureCommit, commitID)
 }
 
 func TestGo2GitClient_Clone(t *testing.T) {

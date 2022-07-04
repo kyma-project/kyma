@@ -28,7 +28,7 @@ import (
 var _ JetStreamBackend = &JetStream{}
 
 const (
-	jsHandlerName          = "js-handler"
+	jsHandlerName          = "jetstream-handler"
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerAcKWait      = 30 * time.Second
@@ -234,9 +234,9 @@ func (js *JetStream) validateConfig() error {
 }
 
 func (js *JetStream) handleReconnect(_ *nats.Conn) {
-	js.namedLogger().Infow("called Reconnect handler for JetStream")
+	js.namedLogger().Infow("Called reconnect handler for JetStream")
 	if err := js.ensureStreamExists(); err != nil {
-		js.namedLogger().Errorw("ensure stream exists failed", "error", err)
+		js.namedLogger().Errorw("Failed to ensure the stream exists", "error", err)
 	}
 }
 
@@ -273,12 +273,12 @@ func (js *JetStream) initJSContext() error {
 func (js *JetStream) ensureStreamExists() error {
 	if info, err := js.jsCtx.StreamInfo(js.config.JSStreamName); err == nil {
 		// TODO: in case the stream exists, should we make sure all of its configs matches the stream config in the chart?
-		js.namedLogger().Infow("reusing existing Stream", "stream-info", info)
+		js.namedLogger().Infow("Reusing existing Stream", "stream-info", info)
 		return nil
 		// if nats server was restarted, the stream needs to be recreated for memory storage type
 		// and hence we get ErrConnectionClosed for the lost stream
 	} else if err != nats.ErrStreamNotFound {
-		js.namedLogger().Debugw("The connection to NATs server is not established!")
+		js.namedLogger().Debugw("The connection to NATS server is not established!")
 		return err
 	}
 	streamConfig, err := getStreamConfig(js.config)
@@ -344,7 +344,7 @@ func (js *JetStream) syncSubscriptionFilters(subscription *eventingv1alpha1.Subs
 				return err
 			}
 			log.Infow(
-				"deleted JetStream subscription because it was deleted from subscription filters",
+				"Deleted JetStream subscription because it was deleted from subscription filters",
 				"subscriptionSubject", key,
 				"jetStreamSubject", jsSub.Subject,
 			)
@@ -360,14 +360,15 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetstreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		log := log.With("subject", subject)
 
 		if existingNatsSub, ok := js.subscriptions[jsSubKey]; !ok {
 			continue
 		} else if existingNatsSub.IsValid() {
-			log.Debugw("skipping creating subscription on JetStream because it already exists", "subject", subject)
+			log.Debugw("Skipping creation subscription on JetStream because it already exists")
 			continue
 		}
-		log.Debugw("recreating subscription on JetStream because it was invalid", "subject", subject)
+		log.Debugw("Recreating subscription on JetStream because it was invalid")
 		// bind the existing consumer to a new subscription on JetStream
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
@@ -376,13 +377,13 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 		)
 		if err != nil {
 			if err != nats.ErrConsumerNotFound {
-				log.Errorw("failed to bind subscription to an existing consumer", "subject", subject, "error", err)
+				log.Errorw("Failed to bind subscription to an existing consumer", "error", err)
 			}
 			delete(js.subscriptions, jsSubKey)
 		} else {
 			// save recreated JetStream subscription in storage
 			js.subscriptions[jsSubKey] = jsSubscription
-			log.Debugw("recreated subscription on JetStream", "subject", subject)
+			log.Debugw("Recreated subscription on JetStream")
 		}
 	}
 }
@@ -393,6 +394,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetstreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		log := log.With("subject", subject)
 
 		if _, ok := js.subscriptions[jsSubKey]; ok {
 			continue
@@ -404,13 +406,13 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
 		if err != nil {
-			log.Errorw("failed to subscribe on JetStream", "subject", subject, "error", err)
+			log.Errorw("Failed to subscribe on JetStream", "error", err)
 			return err
 		}
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
 		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
-		log.Debugw("created subscription on JetStream", "subject", subject)
+		log.Debugw("Created subscription on JetStream")
 	}
 	return nil
 }
@@ -438,18 +440,18 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		// fetch sink info from storage
 		sinkValue, ok := js.sinks.Load(subKeyPrefix)
 		if !ok {
-			js.namedLogger().Errorw("cannot find sink url in storage", "keyPrefix", subKeyPrefix)
+			js.namedLogger().Errorw("Failed to find sink URL in storage", "keyPrefix", subKeyPrefix)
 			return
 		}
 		// convert interface type to string
 		sink, ok := sinkValue.(string)
 		if !ok {
-			js.namedLogger().Errorw("failed to convert sink value to string", "sinkValue", sinkValue)
+			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
-			js.namedLogger().Errorw("convert Jetstream message to CE failed", "error", err)
+			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return
 		}
 
@@ -459,13 +461,16 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		ctxWithCE := cev2.ContextWithTarget(ctxWithCancel, sink)
 		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
 
-		js.namedLogger().Debugw("sending the cloud event", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+		// decorate the logger with CloudEvent context
+		ceLogger := js.namedLogger().With("id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+
+		ceLogger.Debugw("Sending the CloudEvent")
 
 		// dispatch the event to sink
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
-			js.namedLogger().Errorw("failed to dispatch an event", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+			ceLogger.Errorw("Failed to dispatch the CloudEvent")
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
@@ -473,11 +478,11 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		// event was successfully dispatched, check if acknowledged by the NATS server
 		// if not, the message is redelivered.
 		if err := msg.Ack(); err != nil {
-			js.namedLogger().Errorw("failed to ACK an event on JetStream", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+			ceLogger.Errorw("Failed to ACK an event on JetStream")
 		}
 
 		js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
-		js.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+		ceLogger.Infow("CloudEvent was dispatched")
 	}
 }
 
@@ -497,7 +502,7 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub *nats.Subscription, j
 	if jsSub.IsValid() {
 		// unsubscribe will also delete the consumer on JS server
 		if err := jsSub.Unsubscribe(); err != nil {
-			log.Errorw("unsubscribe from JetStream failed", "error", err, "jsSub", jsSub)
+			log.Errorw("Failed to unsubscribe from JetStream", "error", err, "jsSub", jsSub)
 			return errors.Wrapf(err, "unsubscribe failed")
 		}
 	} else {
@@ -508,7 +513,7 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub *nats.Subscription, j
 	}
 
 	delete(js.subscriptions, jsSubKey)
-	log.Debugw("unsubscribe from JetStream succeeded", "subscriptionSubject", jsSubKey)
+	log.Debugw("Unsubscribed from JetStream", "subscriptionSubject", jsSubKey)
 
 	return nil
 }
@@ -522,7 +527,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 
 	if err := js.jsCtx.DeleteConsumer(js.config.JSStreamName, name); err != nil && err != nats.ErrConsumerNotFound {
 		// if it is not a Not Found error, then return error
-		log.Errorw("failed to delete consumer from JetStream", "error", err, "consumer", name)
+		log.Errorw("Failed to delete consumer from JetStream", "error", err, "consumer", name)
 		return err
 	}
 
@@ -533,7 +538,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 func (js *JetStream) checkJetStreamConnection(log *zap.SugaredLogger) error {
 	if js.conn.Status() != nats.CONNECTED {
 		if err := js.Initialize(js.connClosedHandler); err != nil {
-			log.Errorw("connect to JetStream failed", "status", js.conn.Status(), "error", err)
+			log.Errorw("Failed to connect to JetStream", "status", js.conn.Status(), "error", err)
 			return errors.Wrapf(err, "connect to JetStream failed")
 		}
 	}

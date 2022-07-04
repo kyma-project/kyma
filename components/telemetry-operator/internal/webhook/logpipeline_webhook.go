@@ -49,12 +49,16 @@ const (
 type LogPipelineValidator struct {
 	client.Client
 
-	fluentBitConfigMap types.NamespacedName
-	variablesValidator validation.VariablesValidator
-	configValidator    validation.ConfigValidator
-	pluginValidator    validation.PluginValidator
-	emitterConfig      fluentbit.EmitterConfig
-	fsWrapper          fs.Wrapper
+	fluentBitConfigMap       types.NamespacedName
+	variablesValidator       validation.VariablesValidator
+	configValidator          validation.ConfigValidator
+	pluginValidator          validation.PluginValidator
+	maxPipelinesValidator    validation.MaxPipelinesValidator
+	outputValidator          validation.OutputValidator
+	pipelineConfig           fluentbit.PipelineConfig
+	fluentBitMaxFSBufferSize string
+
+	fsWrapper fs.Wrapper
 
 	decoder *admission.Decoder
 }
@@ -66,7 +70,9 @@ func NewLogPipeLineValidator(
 	variablesValidator validation.VariablesValidator,
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
-	emitterConfig fluentbit.EmitterConfig,
+	maxPipelinesValidator validation.MaxPipelinesValidator,
+	outputValidator validation.OutputValidator,
+	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
 	return &LogPipelineValidator{
@@ -75,11 +81,13 @@ func NewLogPipeLineValidator(
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		variablesValidator: variablesValidator,
-		configValidator:    configValidator,
-		pluginValidator:    pluginValidator,
-		fsWrapper:          fsWrapper,
-		emitterConfig:      emitterConfig,
+		variablesValidator:    variablesValidator,
+		configValidator:       configValidator,
+		pluginValidator:       pluginValidator,
+		maxPipelinesValidator: maxPipelinesValidator,
+		outputValidator:       outputValidator,
+		fsWrapper:             fsWrapper,
+		pipelineConfig:        pipelineConfig,
 	}
 }
 
@@ -107,24 +115,21 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 			},
 		}
 	}
+	var warnMsg []string
 
 	secretsFound := v.validateSecrets(ctx, logPipeline)
 	if !secretsFound {
-		warnMsg := "One or more secrets do not exist, the log pipeline will stay in pending state until the secrets are available"
-		return admission.Response{
-			AdmissionResponse: admissionv1.AdmissionResponse{
-				Allowed:  true,
-				Warnings: []string{warnMsg},
-			},
-		}
+		warnMsg = append(warnMsg, "One or more secrets do not exist. The LogPipeline stays in pending state until the secrets are available.")
+	}
+	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
+		warnMsg = append(warnMsg, "Caution: LogPipeline contains an unsupported custom filter or output. This means that you proceed without support!")
 	}
 
-	if logPipeline.Spec.EnableUnsupportedPlugins {
-		warnMsg := "'enableUnsupportedPlugin' is enabled which would allow unsupported plugins to be used!"
+	if len(warnMsg) != 0 {
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
 				Allowed:  true,
-				Warnings: []string{warnMsg},
+				Warnings: warnMsg,
 			},
 		}
 	}
@@ -159,6 +164,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
+	if err = v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
+		log.Error(err, "Maximum number of log pipelines reached")
+		return err
+	}
+
 	if err = v.variablesValidator.Validate(ctx, logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate variables")
 		return err
@@ -166,6 +176,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	if err = v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate plugins")
+		return err
+	}
+
+	if err = v.outputValidator.Validate(logPipeline); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit output")
 		return err
 	}
 
@@ -203,7 +218,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.pipelineConfig)
 	if err != nil {
 		return []fs.File{}, err
 	}

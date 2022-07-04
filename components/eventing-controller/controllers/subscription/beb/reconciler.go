@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -75,7 +74,7 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 	cfg env.Config, cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials,
 	mapper handlers.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
-		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
+		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
 		panic(err)
 	}
 	return &Reconciler{
@@ -112,7 +111,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// bind fields to logger
 	log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
-	log.Debugw("received new reconcile request")
+	log.Debugw("Received new reconcile request")
 
 	// instantiate a return object
 	result := ctrl.Result{}
@@ -145,7 +144,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// sync the BEB Subscription with the Subscription CR
 	ready, err := r.syncBEBSubscription(subscription, apiRule, log)
 	if err != nil {
-		log.Errorw("sync BEB subscription failed", "error", err)
 		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
 			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
 		}
@@ -153,7 +151,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 	// if beb subscription is not ready, then requeue
 	if !ready {
-		log.Debugw("requeue reconciliation because BEB subscription is not ready")
+		log.Debugw("Requeuing reconciliation because BEB subscription is not ready")
 		result.RequeueAfter = time.Second * 2
 	}
 
@@ -196,7 +194,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 		if err := r.Update(ctx, newSubscription); err != nil {
 			return errors.Wrapf(err, "remove finalizer failed name: %s", Finalizer)
 		}
-		logger.Debugw("update subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
+		logger.Debugw("Updated subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
 	}
 
 	return nil
@@ -211,7 +209,7 @@ func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *event
 		}
 		// condition is modified, so emit an event
 		r.emitConditionEvent(newSubscription, condition)
-		logger.Debug("emitted condition event", condition)
+		logger.Debug("Emitted condition event", condition)
 	}
 }
 
@@ -224,10 +222,10 @@ func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubsc
 
 	// update the status for subscription in k8s
 	if err := r.Status().Update(ctx, newSubscription); err != nil {
-		logger.Errorw("update subscription status failed", "error", err)
+		logger.Errorw("Failed to update subscription status", "error", err)
 		return err
 	}
-	logger.Debugw("updated subscription status", "oldStatus", oldSubscription.Status, "newStatus", newSubscription.Status)
+	logger.Debugw("Updated subscription status", "oldStatus", oldSubscription.Status, "newStatus", newSubscription.Status)
 
 	return nil
 }
@@ -265,15 +263,13 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 
 // syncBEBSubscription delegates the subscription synchronization to the backend client. It returns true if the subscription is ready.
 func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, logger *zap.SugaredLogger) (bool, error) {
-	logger.Debug("sync subscription with BEB")
+	logger.Debug("Syncing subscription with BEB")
 
 	if apiRule == nil {
 		return false, errors.Errorf("APIRule is required")
 	}
 
 	if _, err := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
-		logger.Errorw("update BEB subscription failed", "error", err)
-
 		r.syncConditionSubscribed(subscription, false)
 		return false, err
 	}
@@ -281,7 +277,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	// check if the beb subscription is active
 	isActive, err := r.checkStatusActive(subscription)
 	if err != nil {
-		logger.Errorw("timeout at retry", "error", err)
+		logger.Errorw("Reached retry timeout", "error", err)
 		return false, err
 	}
 
@@ -314,7 +310,7 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subs
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha1.Subscription, isActive bool, logger *zap.SugaredLogger) {
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 	if !isActive {
-		logger.Debugw("wait for subscription to be active", "name", subscription.Name, "status", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
+		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, "")
 	}
 	r.replaceStatusCondition(subscription, condition)
@@ -336,7 +332,7 @@ func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alph
 
 // deleteBEBSubscription deletes the BEB subscription and updates the condition and k8s events
 func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
-	logger.Debug("delete BEB subscription")
+	logger.Debug("Deleting BEB subscription")
 	if err := r.Backend.DeleteSubscription(subscription); err != nil {
 		return err
 	}
@@ -431,7 +427,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 		events.Normal(r.recorder, subscription, events.ReasonCreate, "Create APIRule succeeded %s", desiredAPIRule.Name)
 		return desiredAPIRule, nil
 	}
-	logger.Debugw("reuse APIRule", "namespace", svcNs, "name", reusableAPIRule.Name, "service", svcName)
+	logger.Debugw("Reusing APIRule", "namespace", svcNs, "name", reusableAPIRule.Name, "service", svcName)
 
 	object.ApplyExistingAPIRuleAttributes(reusableAPIRule, desiredAPIRule)
 	if object.Semantic.DeepEqual(reusableAPIRule, desiredAPIRule) {
@@ -723,25 +719,24 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscript
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
-		r.namedLogger().Errorw("create unmanaged controller failed", "name", reconcilerName, "error", err)
+		r.namedLogger().Errorw("Failed to create unmanaged controller", "error", err)
 		return err
 	}
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("watch subscriptions failed", "error", err)
+		r.namedLogger().Errorw("Failed to watch subscriptions", "error", err)
 		return err
 	}
 
 	apiRuleEventHandler := &handler.EnqueueRequestForOwner{OwnerType: &eventingv1alpha1.Subscription{}, IsController: false}
 	if err := ctru.Watch(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, apiRuleEventHandler); err != nil {
-		r.namedLogger().Errorw("watch APIRule failed", "error", err)
+		r.namedLogger().Errorw("Failed to watch APIRule", "error", err)
 		return err
 	}
 
 	go func(r *Reconciler, c controller.Controller) {
 		if err := c.Start(r.ctx); err != nil {
-			r.namedLogger().Errorw("start controller failed", "name", reconcilerName, "error", err)
-			os.Exit(1)
+			r.namedLogger().Fatalw("Failed to start controller", "name", reconcilerName, "error", err)
 		}
 	}(r, ctru)
 
@@ -786,7 +781,7 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 
 func (r *Reconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
-	logger.Debug("add finalizer")
+	logger.Debug("Added finalizer to subscription")
 	return nil
 }
 
@@ -853,12 +848,12 @@ func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subs
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
 		var err error
 		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastFailedDelivery); err != nil {
-			r.namedLogger().Errorw("parse LastFailedDelivery failed", "error", err)
+			r.namedLogger().Errorw("Failed to parse LastFailedDelivery", "error", err)
 			return true, err
 		}
 		if len(subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery) > 0 {
 			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery); err != nil {
-				r.namedLogger().Errorw("parse LastSuccessfulDelivery failed", "error", err)
+				r.namedLogger().Errorw("Failed to parse LastSuccessfulDelivery", "error", err)
 				return true, err
 			}
 		}

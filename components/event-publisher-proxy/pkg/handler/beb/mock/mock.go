@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -17,7 +19,6 @@ import (
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -48,7 +49,7 @@ const (
 type BebHandlerMock struct {
 	ctx                 context.Context
 	cfg                 *env.BebConfig
-	logger              *logrus.Logger
+	logger              *logger.Logger
 	collector           *metrics.Collector
 	livenessEndpoint    string
 	readinessEndpoint   string
@@ -102,10 +103,13 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 		testingutils.WithEventTypePrefix(eventTypePrefix),
 	)
 
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
+
 	mock := &BebHandlerMock{
 		ctx:                 ctx,
 		cfg:                 cfg,
-		logger:              logrus.New(),
+		logger:              mockedLogger,
 		collector:           metrics.NewCollector(),
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", cfg.Port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", cfg.Port, health.ReadinessURI),
@@ -203,7 +207,8 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 		dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		informerFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicClient, time.Second, v1.NamespaceAll, nil)
 		genericInformer := informerFactory.ForResource(subscribed.GVR)
-		informers.WaitForCacheSyncOrDie(m.ctx, informerFactory)
+		mockedLogger, _ := logger.New("json", "info")
+		informers.WaitForCacheSyncOrDie(m.ctx, informerFactory, mockedLogger)
 		subscriptionLister := genericInformer.Lister()
 		m.subscribedProcessor = &subscribed.Processor{SubscriptionLister: &subscriptionLister, Config: m.cfg, Logger: m.logger}
 	}
