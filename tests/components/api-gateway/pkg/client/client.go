@@ -8,7 +8,17 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const kubeconfigEnvName = "KUBECONFIG"
+
 func loadKubeConfigOrDie() *rest.Config {
+	if kubeconfig, ok := os.LookupEnv(kubeconfigEnvName); ok {
+		cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			panic(err)
+		}
+		return cfg
+	}
+
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
 		if err != nil {

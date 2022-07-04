@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"context"
 	"log"
 
 	"github.com/avast/retry-go"
@@ -19,48 +20,48 @@ type Manager struct {
 }
 
 //CreateResource creates a given k8s resource
-func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
-	panicOnErr(retry.Do(func() error {
-		if _, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{}); err != nil {
+func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) error {
+	return retry.Do(func() error {
+		if _, err := client.Resource(resourceSchema).Namespace(namespace).Create(context.Background(), &manifest, metav1.CreateOptions{}); err != nil {
 			log.Printf("Error: %+v", err)
 			return err
 		}
 		return nil
-	}, m.RetryOptions...))
+	}, m.RetryOptions...)
 }
 
 //UpdateResource updates a given k8s resource
-func (m *Manager) UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, name string, updateTo unstructured.Unstructured) {
-	panicOnErr(retry.Do(func() error {
+func (m *Manager) UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, name string, updateTo unstructured.Unstructured) error{
+	return retry.Do(func() error {
 		time.Sleep(5 * time.Second) //TODO: delete after waiting for resource creation is implemented
-		toUpdate, err := client.Resource(resourceSchema).Namespace(namespace).Get(name, metav1.GetOptions{})
+		toUpdate, err := client.Resource(resourceSchema).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
 		updateTo.SetResourceVersion(toUpdate.GetResourceVersion())
-		_, err = client.Resource(resourceSchema).Namespace(namespace).Update(&updateTo, metav1.UpdateOptions{})
+		_, err = client.Resource(resourceSchema).Namespace(namespace).Update(context.Background(), &updateTo, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
 
 		return nil
-	}, m.RetryOptions...))
+	}, m.RetryOptions...)
 }
 
 //DeleteResource deletes a given k8s resource
-func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
-	panicOnErr(retry.Do(func() error {
+func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) error {
+	return retry.Do(func() error {
 		deletePolicy := metav1.DeletePropagationForeground
 		deleteOptions := &metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		}
-		if err := client.Resource(resourceSchema).Namespace(namespace).Delete(resourceName, deleteOptions); err != nil {
+		if err := client.Resource(resourceSchema).Namespace(namespace).Delete(context.Background(), resourceName, *deleteOptions); err != nil {
 			if !apierrors.IsNotFound(err) {
 				return err
 			}
 		}
 		return nil
-	}, m.RetryOptions...))
+	}, m.RetryOptions...)
 }
 
 //GetResource returns chosed k8s object
@@ -69,7 +70,7 @@ func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.Gr
 	err := retry.Do(
 		func() error {
 			var err error
-			res, err = client.Resource(resourceSchema).Namespace(namespace).Get(resourceName, metav1.GetOptions{})
+			res, err = client.Resource(resourceSchema).Namespace(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
 			if err != nil {
 				log.Printf("Error: %+v", err)
 				return err
@@ -99,8 +100,3 @@ func (m *Manager) GetStatus(client dynamic.Interface, resourceSchema schema.Grou
 	return status, nil
 }
 
-func panicOnErr(err error) {
-	if err != nil {
-		log.Panicf("Error: %+v", err)
-	}
-}

@@ -13,26 +13,38 @@ type Batch struct {
 	ResourceManager *Manager
 }
 
-func (b *Batch) CreateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
+func (b *Batch) CreateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) error {
 	for _, res := range resources {
 		resourceSchema, ns, _ := GetResourceSchemaAndNamespace(res)
 		b.ResourceManager.CreateResource(k8sClient, resourceSchema, ns, res)
-		b.ResourceManager.GetResource(k8sClient, resourceSchema, ns, res.GetName())
+		_, err := b.ResourceManager.GetResource(k8sClient, resourceSchema, ns, res.GetName())
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (b *Batch) UpdateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
+func (b *Batch) UpdateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) error {
 	for _, res := range resources {
 		resourceSchema, ns, _ := GetResourceSchemaAndNamespace(res)
-		b.ResourceManager.UpdateResource(k8sClient, resourceSchema, ns, res.GetName(), res)
+		err := b.ResourceManager.UpdateResource(k8sClient, resourceSchema, ns, res.GetName(), res)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (b *Batch) DeleteResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
+func (b *Batch) DeleteResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) error {
 	for _, res := range resources {
 		resourceSchema, ns, name := GetResourceSchemaAndNamespace(res)
-		b.ResourceManager.DeleteResource(k8sClient, resourceSchema, ns, name)
+		err := b.ResourceManager.DeleteResource(k8sClient, resourceSchema, ns, name)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func GetResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.GroupVersionResource, string, string) {
