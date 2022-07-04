@@ -11,7 +11,7 @@ spec:
     - displayName: basic
       name: basic
       providerDisplayName: Rafał
-      description: Basic Auth Pessimistic scenario
+      description: Should return 403
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -23,7 +23,7 @@ spec:
     - displayName: oauth-mtls
       name: oauth-mtls
       providerDisplayName: Rafał
-      description: mTLS OAuth Pessimistic Scenario
+      description: Should return 502
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -36,7 +36,7 @@ spec:
     - displayName: oauth
       name: oauth
       providerDisplayName: Rafał
-      description: OAuth Pessimistic Scenario
+      description: Should return 502
       id: "{{ uuidv4 }}"
       entries:
         - type: API
