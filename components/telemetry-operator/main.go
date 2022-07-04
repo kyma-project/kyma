@@ -23,8 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/go-logr/zapr"
@@ -200,7 +198,7 @@ func main() {
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
-	reconciler := telemetry.NewLogPipelineReconciler(
+	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
@@ -210,12 +208,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&telemetrycontrollers.LogParserReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	parserReconciler := telemetrycontrollers.NewLogParserReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		daemonSetConfig)
+	if err = parserReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
-		os.Exit(1)
+		os.Exit(1),
 	}
 	//+kubebuilder:scaffold:builder
 

@@ -18,19 +18,20 @@ package telemetry
 
 import (
 	"context"
-
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // LogParserReconciler reconciles a LogParser object
 type LogParserReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme             *runtime.Scheme
+	FluentBitDaemonSet types.NamespacedName
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers,verbs=get;list;watch;create;update;patch;delete
@@ -46,10 +47,18 @@ type LogParserReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
-func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
 
-	// TODO(user): your logic here
+func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig) *LogParserReconciler {
+	var lpr LogParserReconciler
+	lpr.Client = client
+	lpr.Scheme = scheme
+	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
+	return &lpr
+}
+
+func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+
+	log := logf.FromContext(ctx)
 
 	return ctrl.Result{}, nil
 }
