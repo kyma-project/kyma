@@ -7,7 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	"github.com/stretchr/testify/assert"
 
 	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
@@ -60,8 +61,10 @@ func TestNatsMessageSender(t *testing.T) {
 
 			ce := createCloudEvent(t)
 
+			mockedLogger, _ := logger.New("json", "info")
+
 			ctx := context.Background()
-			sender := NewNatsMessageSender(context.Background(), connection, logrus.New())
+			sender := NewNatsMessageSender(context.Background(), connection, mockedLogger)
 
 			if tc.givenNatsConnectionClosed {
 				connection.Close()

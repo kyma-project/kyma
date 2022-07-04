@@ -1,13 +1,16 @@
 package git
 
 import (
-	"io/ioutil"
+	"crypto/md5"
+	"fmt"
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 const (
@@ -34,11 +37,19 @@ type Git2GoClient struct {
 	fetcher
 }
 
-func NewGit2Go() *Git2GoClient {
+func NewGit2Go(logger *zap.SugaredLogger) *Git2GoClient {
 	return &Git2GoClient{
 		cloner:  &git2goCloner{},
-		fetcher: &git2goFetcher{},
+		fetcher: &git2goFetcher{logger: logger},
 	}
+}
+
+func mkRepoDir(options Options) (string, error) {
+	nameHash := md5.Sum([]byte(options.URL))
+	path := path.Join(tempDir, fmt.Sprintf("%x", nameHash))
+
+	err := os.MkdirAll(path, 0700)
+	return path, err
 }
 
 func (g *Git2GoClient) LastCommit(options Options) (string, error) {
@@ -48,18 +59,16 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 		return options.Reference, nil
 	}
 
-	tmpPath, err := ioutil.TempDir(tempDir, "fn-git")
+	// FIXME: This is NOT thread safe. If we ever decide to go with more than one worker, we need to refactor this. But for now it's fine.
+	repoDir, err := mkRepoDir(options)
 	if err != nil {
 		return "", errors.Wrap(err, "while creating temporary directory")
 	}
-	defer removeDir(tmpPath)
-
-	repo, err := g.fetchRepo(options, tmpPath)
+	repo, err := g.fetchRepo(options, repoDir)
 	if err != nil {
 		return "", errors.Wrap(err, "while fetching the repository")
 	}
 	defer repo.Free()
-
 	//branch
 	ref, err := g.lookupBranch(repo, options.Reference)
 	if err == nil {

@@ -128,7 +128,7 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 	var natsBackend *handlers.Nats
 	if natsBackend, ok = backend.(*handlers.Nats); !ok {
 		err := errors.New("convert backend handler to NATS handler failed")
-		logger.Errorw("no NATS backend exists", "error", err)
+		logger.Errorw("No NATS backend exists", "error", err)
 		return err
 	}
 
@@ -153,19 +153,19 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
-			log.Errorw("update NATS subscription status failed", "error", err)
+			log.Errorw("Failed to update NATS subscription status", "error", err)
 		}
 
 		// Clean subscriptions from NATS.
 		if natsBackend != nil {
 			if err := natsBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
-				log.Errorw("delete NATS subscription failed", "error", err)
+				log.Errorw("Failed to delete NATS subscription", "error", err)
 			}
 		}
 	}
 
-	logger.Debugw("cleanup process finished", "success", isCleanupSuccessful)
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
 	return nil
 }
 

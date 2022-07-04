@@ -42,3 +42,4 @@ spec:
   {{- if .Values.deployment.additional_service_yaml }}
   {{- toYaml .Values.deployment.additional_service_yaml | nindent 2  }}
   {{- end }}
+...
