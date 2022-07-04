@@ -27,7 +27,6 @@ const (
 	prodProfile            = "production"
 	deployedKymaProfileVar = "KYMA_PROFILE"
 	exportResultVar        = "EXPORT_RESULT"
-	junitFileName          = "junit-report.xml"
 	cucumberFileName       = "cucumber-report.json"
 )
 

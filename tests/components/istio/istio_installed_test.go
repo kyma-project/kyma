@@ -292,7 +292,7 @@ func getPodListReport(list *corev1.PodList) string {
 
 	p := returnedPodList{}
 	toMarshal, _ := json.Marshal(list)
-	json.Unmarshal(toMarshal, &p)
+	_ = json.Unmarshal(toMarshal, &p)
 	toPrint, _ := json.Marshal(p)
 	return string(pretty.Pretty(toPrint))
 }
