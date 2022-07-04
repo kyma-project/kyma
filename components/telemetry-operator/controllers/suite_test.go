@@ -101,7 +101,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	pipelineSpecificConfig := fluentbit.PipelineSpecificConfig{
+	pipelineConfig := fluentbit.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -112,7 +112,7 @@ var _ = BeforeSuite(func() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		pipelineSpecificConfig,
+		pipelineConfig,
 	)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())

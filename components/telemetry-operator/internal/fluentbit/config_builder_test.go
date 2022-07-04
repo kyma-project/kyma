@@ -51,7 +51,7 @@ func TestBuildConfigSectionFromMap(t *testing.T) {
 }
 
 func TestGenerateEmitter(t *testing.T) {
-	pipelineSpecificConfig := PipelineSpecificConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -66,7 +66,7 @@ Emitter_Name          test
 Emitter_Storage.type  filesystem
 Emitter_Mem_Buf_Limit 10M`
 
-	actual := generateEmitter(pipelineSpecificConfig, "test")
+	actual := generateEmitter(pipelineConfig, "test")
 	require.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
 
@@ -87,14 +87,14 @@ func TestFilter(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineSpecificConfig := PipelineSpecificConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := MergeSectionsConfig(logPipeline, pipelineSpecificConfig)
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 
@@ -125,14 +125,14 @@ func TestOutput(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineSpecificConfig := PipelineSpecificConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := MergeSectionsConfig(logPipeline, pipelineSpecificConfig)
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }

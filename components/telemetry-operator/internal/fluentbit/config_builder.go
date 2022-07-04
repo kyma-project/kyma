@@ -10,7 +10,7 @@ import (
 
 type ConfigHeader string
 
-type PipelineSpecificConfig struct {
+type PipelineConfig struct {
 	InputTag          string
 	MemoryBufferLimit string
 	StorageType       string
@@ -67,11 +67,11 @@ func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) s
 }
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineSpecificConfig PipelineSpecificConfig) (string, error) {
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 
 	if len(logPipeline.Spec.Output.Custom) > 0 {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineSpecificConfig, logPipeline.Name)))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 	}
 
 	for _, filter := range logPipeline.Spec.Filters {
@@ -92,7 +92,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineSpe
 		}
 
 		section[MatchKey] = getValidMatchCond(section, logPipeline.Name)
-		section[OutputStorageMaxSizeKey] = pipelineSpecificConfig.FsBufferLimit
+		section[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
 
 		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
 	}
@@ -124,6 +124,6 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 	return sb.String()
 }
 
-func generateEmitter(config PipelineSpecificConfig, logPipelineName string) string {
+func generateEmitter(config PipelineConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }

@@ -108,7 +108,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	pipelineSpecificConfig := fluentbit.PipelineSpecificConfig{
+	pipelineConfig := fluentbit.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -131,7 +131,7 @@ var _ = BeforeSuite(func() {
 		pluginValidatorMock,
 		maxPipelinesValidator,
 		outputValidatorMock,
-		pipelineSpecificConfig,
+		pipelineConfig,
 		fsWrapperMock,
 	)
 

@@ -153,7 +153,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineSpecificConfig := fluentbit.PipelineSpecificConfig{
+	pipelineConfig := fluentbit.PipelineConfig{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,
@@ -193,7 +193,7 @@ func main() {
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
 		validation.NewMaxPipelinesValidator(maxPipelines),
 		validation.NewOutputValidator(),
-		pipelineSpecificConfig,
+		pipelineConfig,
 		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(
@@ -204,7 +204,7 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		pipelineSpecificConfig)
+		pipelineConfig)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)

@@ -52,13 +52,13 @@ type LogPipelineReconciler struct {
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineSpecificConfig fluentbit.PipelineSpecificConfig) *LogPipelineReconciler {
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.Syncer = sync.NewLogPipelineSyncer(client,
 		daemonSetConfig,
-		pipelineSpecificConfig,
+		pipelineConfig,
 	)
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
