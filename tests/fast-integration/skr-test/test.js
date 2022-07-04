@@ -27,9 +27,7 @@ describe('SKR test', function() {
   before('Ensure SKR is provisioned', async function() {
     this.timeout(provisioningTimeout);
     skr = await getOrProvisionSKR(options, skipProvisioning, provisioningTimeout);
-    console.log("OP", options)
     options = skr.options;
-    console.log("OPP", options)
   });
 
   // Run the OIDC tests
