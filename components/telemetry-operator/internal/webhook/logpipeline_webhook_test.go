@@ -238,20 +238,17 @@ var _ = Describe("LogPipeline webhook", func() {
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
-
-			outputValidatorMock.On("Validate", mock.Anything).Return(nil).Times(1)
-			configErr := errors.New("Error in line 4: Invalid indentation level")
-			configValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(configErr).Times(1)
+			outputErr := errors.New("invalid output")
+			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(outputErr).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
 			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)
 			Expect(err).NotTo(HaveOccurred())
 
-			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
-				Name:    "3rd-file",
-				Content: "file content",
-			})
+			logPipeline.Spec.Output = telemetryv1alpha1.Output{
+				Custom: "invalid content",
+			}
 
 			err = k8sClient.Update(ctx, &logPipeline)
 
@@ -260,7 +257,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			errors.As(err, &status)
 
 			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
-			Expect(status.Status().Message).To(ContainSubstring(configErr.Error()))
+			Expect(status.Status().Message).To(ContainSubstring(outputErr.Error()))
 		})
 
 		It("Should reject new update with invalid plugin usage of previously created LogPipeline", func() {
