@@ -94,7 +94,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription
 
-Next, to subscribe to an event, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe for an event of type `order.received.v1`. 
+Next, to subscribe to events, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of the type `order.received.v1`. 
 All the published events of this type are then forwarded to an HTTP endpoint called `Sink`. You can define this endpoint in the Subscription's spec.
 
 <div tabs name="Create a Subscription" group="trigger-workload">
