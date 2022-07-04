@@ -1,5 +1,5 @@
 const k8s = require('@kubernetes/client-node');
-const {fromBase64, getEnvOrThrow, debug} = require('../utils');
+const {fromBase64, getEnvOrThrow} = require('../utils');
 
 const GARDENER_PROJECT = 'garden-kyma-dev';
 const COMPASS_ID_ANNOTATION_KEY = 'compass.provisioner.kyma-project.io/runtime-id';
@@ -30,12 +30,9 @@ class GardenerClient {
     const kc = new k8s.KubeConfig();
     if (config.kubeconfigPath) {
       kc.loadFromFile(config.kubeconfigPath);
-      debug("Loading from kubeconfig path")
     } else if (config.kubeconfig) {
       kc.loadFromString(config.kubeconfig);
-      debug("Loading kubeconfig from string")
     } else {
-      debug("Unable to load kubeconfig")
       throw new Error('Unable to create GardenerClient - no kubeconfig');
     }
 
@@ -48,7 +45,6 @@ class GardenerClient {
         `${shootName}.kubeconfig`,
         GARDENER_PROJECT,
     );
-    debug("Reading namespace secret")
     const shootResp = await this.dynamicAPI.read({
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
@@ -57,7 +53,6 @@ class GardenerClient {
         namespace: GARDENER_PROJECT,
       },
     });
-    debug("Reading shoot")
 
     return {
       name: shootName,
