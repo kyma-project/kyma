@@ -683,7 +683,7 @@ func TestChangeSubscription(t *testing.T) {
 
 			// when
 			t.Log("change and update the subscription")
-			utils.UpdateSubscriptionOnK8sWithFreshCopy(ens.TestEnsemble, ctx, subscription, func(sub *eventingv1alpha1.Subscription) error {
+			utils.UpdateSubscriptionOnK8sWithFreshCopy(ctx, ens.TestEnsemble, subscription, func(sub *eventingv1alpha1.Subscription) error {
 				tc.changeSubscription(sub)
 				return utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, sub)
 			}).Should(gomega.BeNil())

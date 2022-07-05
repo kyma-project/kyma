@@ -53,7 +53,7 @@ func UpdateSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.S
 }
 
 // UpdateSubscriptionOnK8sWithFreshCopy gets a fresh copy of the sub, changes it and updates it until the operation meets the caller expectation.
-func UpdateSubscriptionOnK8sWithFreshCopy(ens *TestEnsemble, ctx context.Context, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) gomega.GomegaAsyncAssertion {
+func UpdateSubscriptionOnK8sWithFreshCopy(ctx context.Context, ens *TestEnsemble, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) gomega.GomegaAsyncAssertion {
 	return ens.G.Eventually(func() error {
 
 		// get a fresh version of the Subscription
