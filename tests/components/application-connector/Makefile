@@ -22,7 +22,7 @@ test-skr: test-gateway
 test-gateway:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template k8s/gateway-test --set gatewayTestImage=$(GATEWAY_TEST_IMAGE),mockImage=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
-	sleep 180
+	sleep 600
 	@echo ""
 	@echo ""
 	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f | tee /dev/stderr | go-junit-report -set-exit-code > junit-report.xml
