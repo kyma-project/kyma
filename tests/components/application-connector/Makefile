@@ -1,8 +1,7 @@
 NAMESPACE ?= "test"
 
 DOCKER_TAG ?= "PR-14504"
-DOCKER_PUSH_REPOSITORY ?= "eu.gcr.io/"
-DOCKER_PUSH_DIRECTORY ?= "kyma-project"
+DOCKER_PUSH_REPOSITORY ?= "eu.gcr.io/kyma-project"
 
 GATEWAY_TEST_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
@@ -23,7 +22,7 @@ test-skr: test-gateway
 test-gateway:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template k8s/gateway-test --set gatewayTestImage=$(GATEWAY_TEST_IMAGE),mockImage=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
-	kubectl -n $(NAMESPACE) wait --for=jsonpath='{.status.phase}'=Running pod/connectivity-test --timeout 60s
+	sleep 40000
 	@echo ""
 	@echo ""
 	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f | tee /dev/stderr | go-junit-report -set-exit-code > junit-report.xml
