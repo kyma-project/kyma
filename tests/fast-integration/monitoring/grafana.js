@@ -79,34 +79,26 @@ async function assertGrafanaRedirectsInKyma1() {
 }
 
 async function setGrafanaProxy() {
-  const env = getEnvOrDefault('KYMA_MAJOR_VERSION', '2');
-  info('KYMA_MAJOR_VERSION env', env);
-  if (env === '2') {
-    await createProxySecretWithIPAllowlisting();
-    // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
-    // versions in the upgrade tests
-    await restartProxyPod();
-    await patchProxyDeployment('--reverse-proxy=true');
+  await createProxySecretWithIPAllowlisting();
+  // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
+  // versions in the upgrade tests
+  await restartProxyPod();
+  await patchProxyDeployment('--reverse-proxy=true');
 
-    info('Checking grafana redirect to grafana URL');
-    console.log('Checking grafana redirect to grafana URL');
-    const res = await checkGrafanaRedirect('https://grafana.', 200);
-    assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
-  } else {
-    info('Skipping setting Grafana Proxy for Kyma version unequal to 2');
-  }
+  info('Checking grafana redirect to grafana URL');
+  console.log('Checking grafana redirect to grafana URL');
+  const res = await checkGrafanaRedirect('https://grafana.', 200);
+  assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
 }
 
 async function resetGrafanaProxy(isSkr) {
-  if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
-    await deleteProxySecret();
-    await restartProxyPod();
+  await deleteProxySecret();
+  await restartProxyPod();
 
-    info('Checking grafana redirect to kyma docs');
-    const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
-    const res = await checkGrafanaRedirect(docsUrl, 403);
-    assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
-  }
+  info('Checking grafana redirect to kyma docs');
+  const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
+  const res = await checkGrafanaRedirect(docsUrl, 403);
+  assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
 }
 
 async function patchProxyDeployment(toRemove) {

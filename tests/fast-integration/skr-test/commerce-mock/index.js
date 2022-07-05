@@ -89,11 +89,7 @@ function commerceMockCleanup(testNamespace) {
 
 function checkAuditLogsForAWS() {
   it('Expose Grafana', async function() {
-    const start = Date.now();
     await exposeGrafana();
-    const duration = Date.now() - start;
-    console.log('checkAuditLogsForAWS', duration);
-    debug('checkAuditLogsForAWS', duration);
   });
 
   it('Check audit logs', async function() {

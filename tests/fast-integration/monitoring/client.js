@@ -30,7 +30,7 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   const grafanaUrl = await getGrafanaUrl();
   const datasourceId = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
   const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
-  debug('proxyGrafanaDatasource url: ', url);
+
   return retryPromise(async () => {
     if (debugMsg) {
       debug(debugMsg);
@@ -97,8 +97,6 @@ async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
   });
 
   try {
-    debug('checkIfGrafanaIsReachable url:', url); // TODO remove
-    console.log('[DEBUG] checkIfGrafanaIsReachable url:', url); // TODO remove
     const response = await axios.get(url, {httpsAgent: agent});
     if (response.status === httpErrorCode && response.request.res.responseUrl.includes(redirectURL)) {
       return true;

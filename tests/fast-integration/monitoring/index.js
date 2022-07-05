@@ -64,12 +64,23 @@ async function exposeGrafana() {
     return;
   }
 
+  if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '1') {
+    info('Skipping setting of Grafana Proxy for Kyma version 1');
+    return;
+  }
+
+
   await grafana.setGrafanaProxy();
 }
 
 async function unexposeGrafana(isSkr = false) {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
     info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
+    return;
+  }
+
+  if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '1') {
+    info('Skipping setting of Grafana Proxy for Kyma version 1');
     return;
   }
 

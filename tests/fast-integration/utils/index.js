@@ -1109,9 +1109,9 @@ function switchDebug(on = true) {
 }
 
 function debug(...args) {
-  // if (!isDebugEnabled()) {
-  //   return;
-  // }
+  if (!isDebugEnabled()) {
+    return;
+  }
   log('DEBUG', ...args);
 }
 
