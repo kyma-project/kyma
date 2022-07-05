@@ -1,7 +1,6 @@
 package test_api
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -9,7 +8,7 @@ import (
 )
 
 const (
-	csrfTokenHeader = "X-CSRF-Token"
+	csrfTokenHeader = "X-csrf-token"
 	csrfTokenCookie = "csrftokencookie"
 )
 
@@ -25,13 +24,7 @@ func NewCSRF() CSRFHandler {
 	}
 }
 
-func (ch *CSRFHandler) Token(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		handleError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err))
-		return
-	}
-
+func (ch *CSRFHandler) Token(w http.ResponseWriter, _ *http.Request) {
 	token := uuid.New().String()
 
 	ch.mutex.Lock()

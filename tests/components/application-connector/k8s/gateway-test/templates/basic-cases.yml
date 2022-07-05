@@ -56,6 +56,20 @@ spec:
             secretName: mtls-oauth-test
             authenticationUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtlsoauth/token"
             type: OAuthWithCert
+    - displayName: csrf basic
+      name: csrf-basic
+      providerDisplayName: Rafał
+      description: Basic Auth with CSRF Optimistic Scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/csrf-basic"
+          credentials:
+            secretName: csrf-basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
 ---
 apiVersion: v1
 kind: Secret
@@ -85,3 +99,13 @@ data:
   clientId: {{ "clientID" | b64enc }}
   key: {{ .Files.Get "certs/client.key" | b64enc }}
   crt: {{ .Files.Get "certs/client.crt" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: csrf-basic-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  password: {{ "passwd" | b64enc }}
+  username: {{ "user" | b64enc }}
