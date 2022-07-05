@@ -66,7 +66,7 @@ cat <<EOF | kubectl apply -f -
     source: |
       module.exports = {
         main: async function (event, context) {
-          console.log("Received event:", event.data);
+          console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
           return; 
         } 
       }
@@ -221,10 +221,6 @@ To verify that the event was properly delivered, check the logs of the Function:
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. Go to **Code** and find the **Replicas of the Function** section.
 3. Click on **View Logs**.
-4. You will see the received event in the logs:
-   ```
-   Received event: { orderCode: '3211213', orderAmount: '1250' }
-   ```
 
 </details>
   <details>
@@ -241,13 +237,14 @@ kubectl logs -f -n default \
     -o jsonpath="{.items[0].metadata.name}")
 ```
 
-You will see the received event in the logs:
-```
-Received event: { orderCode: '3211213', orderAmount: '1250' }
-```
-
   </details>
 </div>
+
+You will see the received event in the logs:
+```
+Received event:  { orderCode: '3211213', orderAmount: '1250' } , Event Type:  sap.kyma.custom.myapp.order.paymentsuccess.v1
+```
+Note that the `Event Type` of the received event is not the same as defined in the Subscription.
 
 ## Conclusion
 
