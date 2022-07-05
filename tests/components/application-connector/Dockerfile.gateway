@@ -3,7 +3,7 @@ FROM eu.gcr.io/kyma-project/external/golang:1.18.2-alpine3.15 as builder
 WORKDIR /connectivity-test/
 
 COPY go.mod go.sum ./
-go install github.com/jstemmer/go-junit-report/v2@latest
+RUN go install github.com/jstemmer/go-junit-report/v2@latest
 RUN go mod download && go mod verify
 
 COPY . .
