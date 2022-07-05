@@ -110,6 +110,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
         oidc: givenOidcConfig,
         administrators: options.kebUserId,
       };
+      console.log("SHOOT-before", shoot);
       const skr = await updateSKR(keb,
           kcp,
           gardener,
@@ -121,6 +122,8 @@ function oidcE2ETest(options, getShootInfoFunc) {
           false);
 
       shoot = skr.shoot;
+
+      console.log("SHOOT-after", shoot);
     });
 
     it('Should get Runtime Status after updating OIDC config and admins', async function() {
@@ -138,9 +141,9 @@ function oidcE2ETest(options, getShootInfoFunc) {
     });
 
     it('Assure only initial cluster admins are configured', async function() {
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);
-      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
     });
   });
 }
