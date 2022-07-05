@@ -76,7 +76,7 @@ function gatherOptions(...opts) {
       usernameClaim: 'email',
       usernamePrefix: 'acme-',
     },
-    kebUserId: [getEnvOrThrow('KEB_USER_ID')],
+    kebUserId: getEnvOrThrow('KEB_USER_ID'),
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
     customParams: null,
   };

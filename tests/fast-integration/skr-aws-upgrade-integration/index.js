@@ -54,9 +54,6 @@ describe('SKR-Upgrade-test', function() {
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
-  // Run the OIDC tests
-  oidcE2ETest(options, getShootInfoFunc);
-
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
   if (skipCleanup === 'FALSE') {
     after('Cleanup the resources', async function() {
