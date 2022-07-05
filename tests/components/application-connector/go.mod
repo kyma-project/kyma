@@ -3,6 +3,7 @@ module github.com/kyma-project/kyma/tests/components/application-connector
 go 1.18
 
 require (
+	github.com/go-http-utils/logger v0.0.0-20161128092850-f3a42dcdeae6
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
@@ -19,7 +20,6 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
-	github.com/go-http-utils/logger v0.0.0-20161128092850-f3a42dcdeae6 // indirect
 	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
@@ -31,7 +31,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/matoous/go-nanoid/v2 v2.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect

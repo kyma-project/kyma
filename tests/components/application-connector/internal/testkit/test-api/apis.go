@@ -47,6 +47,15 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oa
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
+	{
+		csrf := NewCSRF()
+		api.HandleFunc("/csrf/token", csrf.Token).Methods(http.MethodPost)
+
+		r := api.PathPrefix("/csrf").Subrouter()
+		r.Use(csrf.Middleware())
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
 
 	return router
 }
