@@ -182,9 +182,9 @@ The operation was successful if the returned status says `true`.
 
 We created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR.
 We will publish 15 events at once and see how the Eventing Service trigger the workload.
-In this example, we'll port-forward the Kyma Eventing Service to localhost.
+In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
 
-1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run:
+1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
@@ -221,7 +221,7 @@ In this example, we'll port-forward the Kyma Eventing Service to localhost.
        curl -v -X POST \
          -H "ce-specversion: 1.0" \
          -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
-         -H "ce-source: /default/io.kyma-project/custom" \
+         -H "ce-source: myapp" \
          -H "ce-eventtypeversion: v1" \
          -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851f${i}" \
          -H "content-type: application/json" \

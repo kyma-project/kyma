@@ -164,9 +164,9 @@ Now, note that the returned cleaned event type `["sap.kyma.custom.myapp.order.pa
 
 We created the `lastorder` Function, and subscribed to the `order.payment-success.v1` events by creating a Subscription CR. 
 Now we will see that we can still publish events with the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
-In this example, we'll port-forward the Kyma Eventing Service to localhost.
+In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) to localhost.
 
-1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run:
+1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
@@ -198,7 +198,7 @@ In this example, we'll port-forward the Kyma Eventing Service to localhost.
       curl -v -X POST \
            -H "ce-specversion: 1.0" \
            -H "ce-type: sap.kyma.custom.myapp.order.payment-success.v1" \
-           -H "ce-source: /default/io.kyma-project/custom" \
+           -H "ce-source: myapp" \
            -H "ce-eventtypeversion: v1" \
            -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851fc" \
            -H "content-type: application/json" \

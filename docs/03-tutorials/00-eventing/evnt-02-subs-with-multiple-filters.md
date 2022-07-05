@@ -92,7 +92,6 @@ kubectl get functions -n default lastorder
 ## Create a Subscription with Multiple Filters
 
 Next, to subscribe to multiple events, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of two types: `order.received.v1` and `order.changed.v1`.
-All the published events of these types are then forwarded to an HTTP endpoint called `Sink`. You can define this endpoint in the Subscription's spec.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -162,9 +161,9 @@ The operation was successful if the returned status says `true`.
 ## Trigger the workload with an event
 
 We created the `lastorder` Function, and subscribed to the `order.received.v1` and `order.changed.v1` events by creating a Subscription CR. Now it's time to publish the events and trigger the Function.
-In this example, we'll port-forward the Kyma Eventing Service to localhost.
+In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
 
-1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run:
+1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
@@ -196,7 +195,7 @@ In this example, we'll port-forward the Kyma Eventing Service to localhost.
        curl -v -X POST \
             -H "ce-specversion: 1.0" \
             -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
-            -H "ce-source: /default/io.kyma-project/custom" \
+            -H "ce-source: myapp" \
             -H "ce-eventtypeversion: v1" \
             -H "ce-id: cc99dcdd-6f6d-43d6-afef-d024eb276584" \
             -H "content-type: application/json" \
@@ -234,7 +233,7 @@ In this example, we'll port-forward the Kyma Eventing Service to localhost.
        curl -v -X POST \
             -H "ce-specversion: 1.0" \
             -H "ce-type: sap.kyma.custom.myapp.order.changed.v1" \
-            -H "ce-source: /default/io.kyma-project/custom" \
+            -H "ce-source: myapp" \
             -H "ce-eventtypeversion: v1" \
             -H "ce-id: 94064655-7e9e-4795-97a3-81bfd497aac6" \
             -H "content-type: application/json" \
