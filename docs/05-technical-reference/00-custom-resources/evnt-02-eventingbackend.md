@@ -2,7 +2,7 @@
 title: EventingBackend
 ---
 
-The EventingBackend custom resource definition (CRD) is used to show the current status of the Eventing backend. To get the up-to-date CRD and see the output in the YAML format, run this command:
+The `eventingbackends.eventing.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data used to manage eventing backends within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```shell
 kubectl get crd eventingbackends.eventing.kyma-project.io -o yaml
@@ -10,7 +10,7 @@ kubectl get crd eventingbackends.eventing.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample custom resource (CR) that the Eventing Controller creates by default when Kyma is deployed. It has an empty `spec` section.
+This is a sample EventingBackend custom resource (CR) that the Eventing Controller creates by default when Kyma is deployed. It has an empty `spec` section.
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
@@ -30,6 +30,23 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 | **status.backendType** | Specifies the backend type used. |
 | **status.conditions.code** | Conditions defines the ready status of the Eventing Controller and the Eventing Publisher Proxy. |
 | **status.eventingReady** | Current ready status of the Eventing Backend. |
+
+The `status` field of this CR looks like this:
+
+```shell
+status:
+  backendType: NATS
+  conditions:
+  - lastTransitionTime: "2022-07-05T06:07:57Z"
+    reason: Publisher proxy deployment ready
+    status: "True"
+    type: Publisher Proxy Ready
+  - lastTransitionTime: "2022-07-05T06:07:57Z"
+    reason: Subscription controller started
+    status: "True"
+    type: Subscription Controller Ready
+  eventingReady: true
+```
 
 ## Related resources and components
 
