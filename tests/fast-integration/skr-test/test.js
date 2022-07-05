@@ -5,7 +5,7 @@ const {
   provisionSKRInstance,
   director,
   commerceMockTest,
-  oidcE2ETest,
+  // oidcE2ETest,
 } = require('./index');
 const {
   getEnvOrThrow,
@@ -34,9 +34,9 @@ describe('SKR test', function() {
 
   let options = gatherOptions(); // with default values
   let shoot;
-  const getShootInfoFunc = function() {
-    return shoot;
-  };
+  // const getShootInfoFunc = function() {
+  //   return shoot;
+  // };
 
   before('Ensure SKR is provisioned', async function() {
     this.timeout(provisioningTimeout);
@@ -64,7 +64,7 @@ describe('SKR test', function() {
   });
 
   // Run the OIDC tests
-  oidcE2ETest(options, getShootInfoFunc);
+  // oidcE2ETest(options, getShootInfoFunc);
 
   // Run the commerce mock tests
   commerceMockTest(options);
