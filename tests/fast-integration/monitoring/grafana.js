@@ -79,24 +79,32 @@ async function assertGrafanaRedirectsInKyma1() {
 }
 
 async function setGrafanaProxy() {
+  info('before');
+  console.log('before');
   await createProxySecretWithIPAllowlisting();
+  console.log('after');
+  info('after');
   // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
   // versions in the upgrade tests
   info('Restarting Proxy Pod'); // TODO remove
+  console.log('Restarting Proxy Pod');
   await restartProxyPod();
   info('Patching Proxy Deployment');
   await patchProxyDeployment('--reverse-proxy=true');
 
   info('Checking grafana redirect to grafana URL');
+  console.log('Checking grafana redirect to grafana URL');
   const res = await checkGrafanaRedirect('https://grafana.', 200);
   assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
 }
 
 async function resetGrafanaProxy(isSkr) {
   await deleteProxySecret();
+  info('restart grafana proxy pod');
   await restartProxyPod();
 
   info('Checking grafana redirect to kyma docs');
+  console.log('Checking grafana redirect to kyma docs');
   const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
   const res = await checkGrafanaRedirect(docsUrl, 403);
   assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
@@ -160,6 +168,8 @@ async function deleteProxySecret() {
 }
 
 async function restartProxyPod() {
+  console.log('restartProxyPod start');
+  info('restartProxyPod start');
   const patchRep0 = [
     {
       op: 'replace',
@@ -185,6 +195,7 @@ async function restartProxyPod() {
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
   await waitForDeployment(kymaProxyDeployment, kymaNs);
+  info('restartProxyPod end');
 }
 
 async function checkGrafanaRedirect(redirectURL, httpStatus) {
