@@ -79,15 +79,9 @@ async function assertGrafanaRedirectsInKyma1() {
 }
 
 async function setGrafanaProxy() {
-  info('before');
-  console.log('before');
   await createProxySecretWithIPAllowlisting();
-  console.log('after');
-  info('after');
   // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
   // versions in the upgrade tests
-  info('Restarting Proxy Pod'); // TODO remove
-  console.log('Restarting Proxy Pod');
   await restartProxyPod();
   info('Patching Proxy Deployment');
   await patchProxyDeployment('--reverse-proxy=true');
@@ -168,7 +162,6 @@ async function deleteProxySecret() {
 }
 
 async function restartProxyPod() {
-  console.log('restartProxyPod start');
   info('restartProxyPod start');
   const patchRep0 = [
     {
@@ -180,6 +173,7 @@ async function restartProxyPod() {
   await patchDeployment(kymaProxyDeployment, kymaNs, patchRep0);
   const patchedDeploymentRep0 = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
   expect(patchedDeploymentRep0.body.spec.replicas).to.be.equal(0);
+  info('restartProxyPod after first patch');
 
   const patchRep1 = [
     {
@@ -191,10 +185,12 @@ async function restartProxyPod() {
   await patchDeployment(kymaProxyDeployment, kymaNs, patchRep1);
   const patchedDeploymentRep1 = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
   expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
-
+  info('restartProxyPod after second patch');
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
+  info('after sleeping');
   await waitForDeployment(kymaProxyDeployment, kymaNs);
+  info('after waiting for deployment');
   info('restartProxyPod end');
 }
 

@@ -30,9 +30,9 @@ function commerceMockTest(options) {
     if (options === undefined) {
       throw new Error('Empty configuration given');
     }
-    commerceMockTestPreparation(options);
-    commerceMockTests(options.testNS);
-    commerceMockCleanup(options.testNS);
+    // commerceMockTestPreparation(options);
+    // commerceMockTests(options.testNS);
+    // commerceMockCleanup(options.testNS);
 
     context('Check audit logs for AWS', function() {
       if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
@@ -45,47 +45,47 @@ function commerceMockTest(options) {
 }
 
 
-function commerceMockTestPreparation(options) {
-  it('CommerceMock test fixture should be ready', async function() {
-    await ensureCommerceMockWithCompassTestFixture(
-        director,
-        options.appName,
-        options.scenarioName,
-        'mocks',
-        options.testNS,
-        true,
-    );
-  });
-}
-
-// executes the actual commerce mock tests
-function commerceMockTests(testNamespace) {
-  it('in-cluster event should be delivered (structured and binary mode)', async function() {
-    await checkInClusterEventDelivery(testNamespace);
-  });
-
-  it('function should be reachable through secured API Rule', async function() {
-    await checkFunctionResponse(testNamespace);
-  });
-
-  it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-    await sendLegacyEventAndCheckResponse();
-  });
-
-  it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
-    await sendCloudEventStructuredModeAndCheckResponse();
-  });
-
-  it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
-    await sendCloudEventBinaryModeAndCheckResponse();
-  });
-}
-
-function commerceMockCleanup(testNamespace) {
-  it('CommerceMock test fixture should be deleted', async function() {
-    await deleteMockTestFixture('mocks', testNamespace);
-  });
-}
+// function commerceMockTestPreparation(options) {
+//   it('CommerceMock test fixture should be ready', async function() {
+//     await ensureCommerceMockWithCompassTestFixture(
+//         director,
+//         options.appName,
+//         options.scenarioName,
+//         'mocks',
+//         options.testNS,
+//         true,
+//     );
+//   });
+// }
+//
+// // executes the actual commerce mock tests
+// function commerceMockTests(testNamespace) {
+//   it('in-cluster event should be delivered (structured and binary mode)', async function() {
+//     await checkInClusterEventDelivery(testNamespace);
+//   });
+//
+//   it('function should be reachable through secured API Rule', async function() {
+//     await checkFunctionResponse(testNamespace);
+//   });
+//
+//   it('order.created.v1 legacy event should trigger the lastorder function', async function() {
+//     await sendLegacyEventAndCheckResponse();
+//   });
+//
+//   it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
+//     await sendCloudEventStructuredModeAndCheckResponse();
+//   });
+//
+//   it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+//     await sendCloudEventBinaryModeAndCheckResponse();
+//   });
+// }
+//
+// function commerceMockCleanup(testNamespace) {
+//   it('CommerceMock test fixture should be deleted', async function() {
+//     await deleteMockTestFixture('mocks', testNamespace);
+//   });
+// }
 
 function checkAuditLogsForAWS() {
   it('Expose Grafana', async function() {
@@ -107,6 +107,6 @@ function checkAuditLogsForAWS() {
 }
 
 module.exports = {
-  commerceMockTestPreparation,
+  // commerceMockTestPreparation,
   commerceMockTest,
 };
