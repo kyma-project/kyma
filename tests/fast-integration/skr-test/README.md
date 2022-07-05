@@ -56,6 +56,11 @@ KCP_TECH_USER_PASSWORD=
 KCP_MOTHERSHIP_API_URL=
 KCP_KUBECONFIG_API_URL=
 
+BTP_OPERATOR_CLIENTID=
+BTP_OPERATOR_CLIENTSECRET=
+BTP_OPERATOR_URL=
+BTP_OPERATOR_TOKENURL=
+
 AL_SERVICE_KEY= #must be a cloud foundry service key with the info about `UAA (User Account and Authentication)`. Learn more about [Managing Service Keys in Cloud Foundry](https://docs.cloudfoundry.org/devguide/services/service-keys.html).
 ```
 
