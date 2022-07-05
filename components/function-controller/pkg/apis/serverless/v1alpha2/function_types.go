@@ -233,6 +233,7 @@ const (
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:storageversion
 //+kubebuilder:printcolumn:name="Configured",type="string",JSONPath=".status.conditions[?(@.type=='ConfigurationReady')].status"
 //+kubebuilder:printcolumn:name="Built",type="string",JSONPath=".status.conditions[?(@.type=='BuildReady')].status"
 //+kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"
@@ -291,3 +292,5 @@ func (s *FunctionStatus) Condition(c ConditionType) *Condition {
 func (c *Condition) IsTrue() bool {
 	return c.Status == v1.ConditionTrue
 }
+
+func (f *Function) Hub() {}
