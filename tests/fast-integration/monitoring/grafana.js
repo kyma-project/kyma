@@ -79,6 +79,7 @@ async function assertGrafanaRedirectsInKyma1() {
 }
 
 async function setGrafanaProxy() {
+  console.log('in setGrafanaProxy');
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     await createProxySecretWithIPAllowlisting();
     // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
@@ -87,6 +88,7 @@ async function setGrafanaProxy() {
     await patchProxyDeployment('--reverse-proxy=true');
 
     info('Checking grafana redirect to grafana URL');
+    console.log('Checking grafana redirect to grafana URL');
     const res = await checkGrafanaRedirect('https://grafana.', 200);
     assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
   }
