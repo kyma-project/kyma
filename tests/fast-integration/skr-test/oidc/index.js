@@ -32,7 +32,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     });
 
     it('Assure initial cluster admin', async function() {
-      await ensureKymaAdminBindingExistsForUser(options.kebUserId); // default user id
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]); // default user id
     });
 
     it('Update SKR service instance with OIDC config', async function() {
@@ -71,7 +71,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     });
 
     it('Assure cluster admin is preserved', async function() {
-      await ensureKymaAdminBindingExistsForUser(options.kebUserId);
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
     });
 
     it('Update SKR service instance with new admins', async function() {
@@ -101,7 +101,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     it('Assure only new cluster admins are configured', async function() {
       await ensureKymaAdminBindingExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingExistsForUser(options.administrators1[1]);
-      await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId);
+      await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId[0]);
     });
 
     it('Update SKR service instance with initial OIDC config and admins', async function() {
@@ -140,7 +140,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     it('Assure only initial cluster admins are configured', async function() {
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);
-      await ensureKymaAdminBindingExistsForUser(options.kebUserId);
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
     });
   });
 }
