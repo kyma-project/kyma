@@ -78,7 +78,11 @@ function gatherOptions(...opts) {
     },
     kebUserId: getEnvOrThrow('KEB_USER_ID'),
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
-    customParams: null,
+    customParams: {
+      'name': 'dg-fit-test-1',
+      'kymaVersion': 'PR-14747',
+      'overridesVersion': '2.4.0-rc1',
+    },
   };
 
   opts.forEach((opt) => {
