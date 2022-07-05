@@ -31,7 +31,7 @@ func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema
 }
 
 //UpdateResource updates a given k8s resource
-func (m *Manager) UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, name string, updateTo unstructured.Unstructured) error{
+func (m *Manager) UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, name string, updateTo unstructured.Unstructured) error {
 	return retry.Do(func() error {
 		time.Sleep(5 * time.Second) //TODO: delete after waiting for resource creation is implemented
 		toUpdate, err := client.Resource(resourceSchema).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
@@ -81,7 +81,6 @@ func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.Gr
 		log.Panicf("Error: %+v", err)
 		return nil, err
 	}
-	log.Printf("Resource found: %+v", res.GetName())
 	return res, nil
 }
 
@@ -99,4 +98,3 @@ func (m *Manager) GetStatus(client dynamic.Interface, resourceSchema schema.Grou
 	}
 	return status, nil
 }
-

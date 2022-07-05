@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/jwt"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/resource"
+	"github.com/spf13/pflag"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -29,7 +30,13 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
+func init() {
+	godog.BindCommandLineFlags("godog.", &goDogOpts)
+}
+
 func TestMain(m *testing.M) {
+	pflag.Parse()
+	goDogOpts.Paths = pflag.Args()
 
 	if err := envconfig.Init(&conf); err != nil {
 		log.Fatalf("Unable to setup config: %v", err)
@@ -54,7 +61,7 @@ func TestMain(m *testing.M) {
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
-	namespace := fmt.Sprintf("api-gateway-test-%s", generateRandomString(6))
+	namespace = fmt.Sprintf("api-gateway-test-%s", generateRandomString(6))
 	randomSuffix6 := generateRandomString(6)
 	oauthSecretName := fmt.Sprintf("api-gateway-tests-secret-%s", randomSuffix6)
 	oauthClientName := fmt.Sprintf("api-gateway-tests-client-%s", randomSuffix6)
@@ -84,7 +91,8 @@ func TestMain(m *testing.M) {
 
 	helper = helpers.NewHelper(httpClient, commonRetryOpts)
 
-	k8sClient := client.GetDynamicClient()
+	client := client.GetDynamicClient()
+	k8sClient = client
 	resourceManager = &resource.Manager{RetryOptions: commonRetryOpts}
 
 	batch = &resource.Batch{
@@ -135,6 +143,17 @@ func TestMain(m *testing.M) {
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
+	// Get HydraClient Status
+	hydraClientResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(hydraClientResource[0])
+	clientStatus, err := resourceManager.GetStatus(k8sClient, hydraClientResourceSchema, ns, name)
+	errorStatus, ok := clientStatus["reconciliationError"].(map[string]interface{})
+	if err != nil || !ok {
+		t.Fatalf("Error retrieving Oauth2Client status: %+v | %+v", err, ok)
+	}
+	if len(errorStatus) != 0 {
+		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
+	}
+
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)
@@ -142,26 +161,4 @@ func TestMain(m *testing.M) {
 	}()
 
 	os.Exit(m.Run())
-}
-
-func TestApiGateway(t *testing.T) {
-	prodOpts := goDogOpts
-	prodOpts.Paths = []string{"features/unsecured_endpoint.feature"}
-
-	suite := godog.TestSuite{
-		Name:                "API-Gateway",
-		ScenarioInitializer: InitializeApiGatewayTests,
-		Options:             &prodOpts,
-	}
-
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
-	if os.Getenv(exportResultVar) == "true" {
-		generateHTMLReport()
-	}
-}
-
-func InitializeApiGatewayTests(ctx *godog.ScenarioContext) {
-	InitializeScenarioUnsecuredEndpoint(ctx)
 }

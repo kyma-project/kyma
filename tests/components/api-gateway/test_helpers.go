@@ -2,12 +2,10 @@ package api_gateway
 
 import (
 	"context"
-	"errors"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
-	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
@@ -26,14 +24,8 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"k8s.io/client-go/discovery"
-	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"k8s.io/client-go/restmapper"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 const (
@@ -53,6 +45,8 @@ const (
 	exportResultVar                = "EXPORT_RESULT"
 	junitFileName                  = "junit-report.xml"
 	cucumberFileName               = "cucumber-report.json"
+	anyToken                       = "any"
+	authorizationHeaderName        = "Authorization"
 )
 
 var (
@@ -85,6 +79,7 @@ type Config struct {
 	GatewayNamespace string        `envconfig:"TEST_GATEWAY_NAMESPACE,default=kyma-system"`
 	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` // Don't forget the unit!
 	IsMinikubeEnv    bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
+	TestConcurency   int           `envconfig:"TEST_CONCURENCY,default=1"`
 }
 
 func generateRandomString(length int) string {
@@ -134,41 +129,4 @@ func generateHTMLReport() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-}
-
-func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.DeferredDiscoveryRESTMapper) {
-	var kubeconfig string
-	if kConfig, ok := os.LookupEnv("KUBECONFIG"); !ok {
-		if home := homedir.HomeDir(); home != "" {
-			kubeconfig = filepath.Join(home, ".kube", "config")
-		}
-	} else {
-		kubeconfig = kConfig
-	}
-	_, err := os.Stat(kubeconfig)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			log.Fatalf("kubeconfig %s does not exist", kubeconfig)
-		}
-		log.Fatalf(err.Error())
-	}
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	k8sClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	dynClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	dc, err := discovery.NewDiscoveryClientForConfig(config)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-	return k8sClient, dynClient, mapper
 }

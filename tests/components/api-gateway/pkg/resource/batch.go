@@ -16,8 +16,11 @@ type Batch struct {
 func (b *Batch) CreateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) error {
 	for _, res := range resources {
 		resourceSchema, ns, _ := GetResourceSchemaAndNamespace(res)
-		b.ResourceManager.CreateResource(k8sClient, resourceSchema, ns, res)
-		_, err := b.ResourceManager.GetResource(k8sClient, resourceSchema, ns, res.GetName())
+		err := b.ResourceManager.CreateResource(k8sClient, resourceSchema, ns, res)
+		if err != nil {
+			return err
+		}
+		_, err = b.ResourceManager.GetResource(k8sClient, resourceSchema, ns, res.GetName())
 		if err != nil {
 			return err
 		}

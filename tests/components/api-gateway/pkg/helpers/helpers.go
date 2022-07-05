@@ -22,9 +22,23 @@ func NewHelper(c *http.Client, opts []retry.Option) *Helper {
 	}
 }
 
-func (h *Helper) CallEndpointsWithRetries(url string, predicate *StatusPredicate) error {
+// Returns error if the status code is not in between bounds of status predicate after retrying deadline is reached
+func (h *Helper) CallEndpointWithRetries(url string, predicate *StatusPredicate) error {
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
+	}, predicate.TestPredicate)
+}
+
+// Returns error if the status code is not in between bounds of status predicate after retrying deadline is reached
+func (h *Helper) CallEndpointWithHeadersWithRetries(headerValue string, headerName, url string, predicate *StatusPredicate) error {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set(headerName, headerValue)
+	return h.withRetries(func() (*http.Response, error) {
+		return h.client.Do(req)
 	}, predicate.TestPredicate)
 }
 
