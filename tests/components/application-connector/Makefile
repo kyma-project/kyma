@@ -2,6 +2,7 @@ NAMESPACE ?= "test"
 
 DOCKER_TAG ?= "PR-14743"
 DOCKER_PUSH_REPOSITORY ?= "eu.gcr.io/kyma-project"
+GOPATH ?= $(shell go env GOPATH)
 
 GATEWAY_TEST_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
@@ -20,12 +21,13 @@ test-os: test-gateway
 test-skr: test-gateway
 
 test-gateway:
+	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template k8s/gateway-test --set gatewayTestImage=$(GATEWAY_TEST_IMAGE),mockImage=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
-	sleep 600
+	sleep 180
 	@echo ""
 	@echo ""
-	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f | tee /dev/stderr | go-junit-report -set-exit-code > junit-report.xml
+	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f | tee /dev/stderr | $(GOPATH)/bin/go-junit-report -set-exit-code > junit-report.xml
 
 clean-gateway:
 	helm template k8s/gateway-test --set gatewayTestImage=$(GATEWAY_TEST_IMAGE),mockImage=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl delete -f -
