@@ -128,6 +128,7 @@ cat <<EOF | kubectl apply -f -
      name: lastorder-sub
      namespace: default
    spec:
+     sink: http://lastorder.default.svc.cluster.local
      filter:
        filters:
        - eventSource:
@@ -138,7 +139,6 @@ cat <<EOF | kubectl apply -f -
            property: type
            type: exact
            value: sap.kyma.custom.myapp.order.received.v1
-     sink: http://lastorder.default.svc.cluster.local
 EOF
 ```
 
@@ -147,7 +147,7 @@ To check that the Subscription was created and is ready, run:
 kubectl get subscriptions lastorder-sub -o=jsonpath="{.status.ready}"
 ```
 
-The operation was successful if the returned status says `true`.
+The operation was successful if the command returns `true`.
 
   </details>
 </div>
