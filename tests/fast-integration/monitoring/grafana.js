@@ -82,11 +82,12 @@ async function setGrafanaProxy() {
   await createProxySecretWithIPAllowlisting();
   // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
   // versions in the upgrade tests
+  info('Restarting Proxy Pod'); // TODO remove
   await restartProxyPod();
+  info('Patching Proxy Deployment');
   await patchProxyDeployment('--reverse-proxy=true');
 
   info('Checking grafana redirect to grafana URL');
-  console.log('Checking grafana redirect to grafana URL');
   const res = await checkGrafanaRedirect('https://grafana.', 200);
   assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
 }
