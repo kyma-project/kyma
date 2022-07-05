@@ -8,7 +8,7 @@ Subscriber is receiving irrelevant Events.
 
 ## Remedy
 
-As described in [Event Names guildelines](../../05-technical-reference/evnt-01-event-names.md), sometimes Eventing must modify the event names to filter out non-alphanumeric character to conform to Cloud Event specifications.
+As described in [Event Names guildelines](../../../05-technical-reference/evnt-01-event-names.md), sometimes Eventing must modify the event names to filter out non-alphanumeric character to conform to Cloud Event specifications.
 In some cases, it can lead to a naming collision which can result into Subscribers receiving irrelevant Events.
 
 Follow these steps to detect if it is the source of the problem:
@@ -30,4 +30,4 @@ Follow these steps to detect if it is the source of the problem:
     ```
     
     If you find that the `CleanEventType` is colliding with some other Subscription then a solution could be use a different Application or Event type name for your Subscription. 
-    Check out [Event Names guildelines](../../05-technical-reference/evnt-01-event-names.md) for more information.
+    Check out [Event Names guildelines](../../../05-technical-reference/evnt-01-event-names.md) for more information.
