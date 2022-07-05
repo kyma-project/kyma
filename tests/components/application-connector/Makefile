@@ -25,6 +25,7 @@ test-gateway:
 	sleep 180
 	@echo ""
 	@echo ""
+    GO111MODULE=off go get -u github.com/jstemmer/go-junit-report
 	kubectl -n $(NAMESPACE) logs pod/connectivity-test -f | tee /dev/stderr | go-junit-report -set-exit-code > junit-report.xml
 
 clean-gateway:
