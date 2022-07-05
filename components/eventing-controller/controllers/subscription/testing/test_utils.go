@@ -52,9 +52,9 @@ func UpdateSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.S
 	return ens.K8sClient.Update(ens.Ctx, subscription)
 }
 
-// UpdateSubscriptionOnK8sWithFreshCopy gets a fresh copy of the sub, changes it and updates it until the operation meets the caller expectation.
-func UpdateSubscriptionOnK8sWithFreshCopy(ctx context.Context, ens *TestEnsemble, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) gomega.GomegaAsyncAssertion {
-	return ens.G.Eventually(func() error {
+// UpdateSubscriptionOnK8sWithFreshCopy gets a fresh copy of the sub, changes it and updates it until the operation does not return an error.
+func UpdateSubscriptionOnK8sWithFreshCopy(ctx context.Context, ens *TestEnsemble, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) {
+	ens.G.Eventually(func() error {
 
 		// get a fresh version of the Subscription
 		lookupKey := types.NamespacedName{
@@ -68,7 +68,7 @@ func UpdateSubscriptionOnK8sWithFreshCopy(ctx context.Context, ens *TestEnsemble
 			return err
 		}
 		return nil
-	}, SmallTimeout, SmallPollingInterval)
+	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "error while updating the subscription")
 }
 
 func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {

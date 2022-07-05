@@ -686,7 +686,7 @@ func TestChangeSubscription(t *testing.T) {
 			utils.UpdateSubscriptionOnK8sWithFreshCopy(ctx, ens.TestEnsemble, subscription, func(sub *eventingv1alpha1.Subscription) error {
 				tc.changeSubscription(sub)
 				return utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, sub)
-			}).Should(gomega.BeNil())
+			})
 
 			// then
 			t.Log("testing the k8s subscription")
@@ -794,7 +794,6 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 	utils.StartTestEnv(ens)
 	startReconciler(eventTypePrefix, jsTestEnsemble)
 	utils.StartSubscriberSvc(ens)
-	// TODO: stop this via context: utils.StartSubscriberSvc(ens)
 
 	return jsTestEnsemble
 }
