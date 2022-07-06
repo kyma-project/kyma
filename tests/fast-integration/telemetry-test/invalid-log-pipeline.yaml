@@ -11,4 +11,5 @@ spec:
   output:
     custom: |
       Name null
+      Match logpipeline-test.*   
   files: []
