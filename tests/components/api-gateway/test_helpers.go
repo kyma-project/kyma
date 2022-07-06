@@ -130,7 +130,7 @@ func generateHTMLReport() {
 	html := gocure.HTML{
 		Config: html.Data{
 			InputJsonPath:    cucumberFileName,
-			OutputHtmlFolder: "reports/",
+			OutputHtmlFolder: "${ARTIFACTS}/reports/",
 			Title:            "Kyma API-Gateway component tests",
 			Metadata: models.Metadata{
 				Platform:   runtime.GOOS,
