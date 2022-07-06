@@ -2,7 +2,7 @@
 title: Publish legacy events using Kyma Eventing
 ---
 
-Kyma Eventing also supports sending and receiving of legacy events. In this tutorial we will show how to send legacy events using the Eventing Services.
+Kyma Eventing also supports sending and receiving of legacy events. In this tutorial we will show how to send legacy events.
 
 > **NOTE:** It is recommended to use [Cloud Events specification](https://cloudevents.io/) for sending and receiving events in Kyma.
 

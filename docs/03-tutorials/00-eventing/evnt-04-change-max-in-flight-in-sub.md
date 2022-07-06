@@ -102,7 +102,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Max-In-Flight config
 
-Next, create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. Subscribe for events of the type: `order.received.v1` and set the `maxInFlightMessages` to `5`, so that the Eventing Services forwards maximum 5 events in parallel to the sink without waiting for a response.
+Next, create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. Subscribe for events of the type: `order.received.v1` and set the `maxInFlightMessages` to `5`, so that Kyma Eventing forwards maximum 5 events in parallel to the sink without waiting for a response.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
