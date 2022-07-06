@@ -5,10 +5,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
 	"testing"
 )
 
-func CallToGateway(t *testing.T, entry v1alpha1.Entry) int {
+func codeFromGateway(t *testing.T, entry v1alpha1.Entry) int {
 	t.Log("Calling", entry.CentralGatewayUrl)
 	res, err := http.Get(entry.CentralGatewayUrl)
 	assert.Nil(t, err)
@@ -17,4 +19,26 @@ func CallToGateway(t *testing.T, entry v1alpha1.Entry) int {
 		t.Log("Response", string(body))
 	}
 	return res.StatusCode
+}
+
+func codeFromService(service v1alpha1.Service) (code int, err error) {
+	code = 0
+	re := regexp.MustCompile(`\d+$`)
+	if codeStr := re.FindString(service.Description); len(codeStr) > 0 {
+		code, err = strconv.Atoi(codeStr)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func GetCodes(t *testing.T, entry v1alpha1.Entry, service v1alpha1.Service) (actualCode, expectedCode int) {
+	expectedCode, err := codeFromService(service)
+	if err != nil {
+		t.Log("Error during getting the error code from description -> applicationCRD")
+		t.Fail()
+	}
+	actualCode = codeFromGateway(t, entry)
+	return
 }

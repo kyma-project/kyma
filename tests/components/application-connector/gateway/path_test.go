@@ -18,18 +18,18 @@ func (gs *GatewaySuite) TestPath() {
 					gs.T().Log("Skipping event entry")
 					continue
 				}
-				var code int
+				var actualCode, expectedCode int
 
 				switch service.Name {
 				case "missingSrvApp":
-					code = helper.CallToGateway(gs.T(), entry)
-					gs.Equal(500, code)
+					actualCode, expectedCode = helper.GetCodes(gs.T(), entry, service)
+					gs.Equal(expectedCode, actualCode)
 				case "missingSrv":
-					code = helper.CallToGateway(gs.T(), entry)
-					gs.Equal(500, code)
+					actualCode, expectedCode = helper.GetCodes(gs.T(), entry, service)
+					gs.Equal(expectedCode, actualCode)
 				case "badTargetURL":
-					code = helper.CallToGateway(gs.T(), entry)
-					gs.Equal(404, code)
+					actualCode, expectedCode = helper.GetCodes(gs.T(), entry, service)
+					gs.Equal(expectedCode, actualCode)
 				}
 			}
 		})

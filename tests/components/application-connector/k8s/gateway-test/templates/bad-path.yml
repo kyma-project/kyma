@@ -9,30 +9,30 @@ spec:
   labels:
     app: bad-path
   services:
-    - displayName: missingSrvApp
-      name: missingSrvApp
+    - displayName: missing-srv-app
+      name: missing-srv-app
       providerDisplayName: Rafał
-      description: Missing service and application name
+      description: Should return 500
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080"
-    - displayName: missingSrv
-      name: missingSrv
+    - displayName: missing-srv
+      name: missing-srv
       providerDisplayName: Rafał
-      description: Missing service
+      description: Should return 500
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/bad-path"
-    - displayName: badTargetURL
-      name: badTargetURL
+    - displayName: bad-target-url
+      name: bad-target-url
       providerDisplayName: Rafał
-      description: Bad targetURL
+      description: Should return 404
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://bad.bad.svc.cluster.local:8080/v1/api/unsecure/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/bad-path/badTargetURL"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/bad-path/bad-target-url"
