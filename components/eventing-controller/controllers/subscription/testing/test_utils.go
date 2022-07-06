@@ -52,8 +52,10 @@ func UpdateSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.S
 	return ens.K8sClient.Update(ens.Ctx, subscription)
 }
 
-// UpdateSubscriptionOnK8sWithFreshCopy gets a fresh copy of the sub, changes it and updates it until the operation does not return an error.
-func UpdateSubscriptionOnK8sWithFreshCopy(ctx context.Context, ens *TestEnsemble, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) {
+// EventuallyUpdateSubscriptionOnK8s updates a given sub on kubernetes side. In order to be resilient and avoid a conflict, the update operation is retried until the update succeeds.
+// To avoid a 409 conflict, the subscription CR data is read from the apiserver before a new update is performed.
+// This conflict can happen if another entity such as the eventing-controller changed the sub in the meantime.
+func EventuallyUpdateSubscriptionOnK8s(ctx context.Context, ens *TestEnsemble, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) {
 	ens.G.Eventually(func() error {
 
 		// get a fresh version of the Subscription
