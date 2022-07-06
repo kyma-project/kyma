@@ -2,8 +2,9 @@ package informers
 
 import (
 	"context"
-	"log"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -16,7 +17,7 @@ const (
 type waitForCacheSyncFunc func(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool
 
 // WaitForCacheSyncOrDie waits for the cache to sync. If sync fails everything stops
-func WaitForCacheSyncOrDie(ctx context.Context, dc dynamicinformer.DynamicSharedInformerFactory) {
+func WaitForCacheSyncOrDie(ctx context.Context, dc dynamicinformer.DynamicSharedInformerFactory, logger *logger.Logger) {
 	dc.Start(ctx.Done())
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultResyncPeriod)
@@ -24,7 +25,7 @@ func WaitForCacheSyncOrDie(ctx context.Context, dc dynamicinformer.DynamicShared
 
 	err := hasSynced(ctx, dc.WaitForCacheSync)
 	if err != nil {
-		log.Fatalf("Failed to sync informer caches: %v", err)
+		logger.WithContext().Fatalw("Failed to sync informer caches", "error", err)
 	}
 }
 

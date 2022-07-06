@@ -30,6 +30,9 @@ type PublisherConfig struct {
 	LimitsCPU         string `envconfig:"PUBLISHER_LIMITS_CPU" default:"100m"`
 	LimitsMemory      string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
 	PriorityClassName string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
+	// publisher takes the controller values
+	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
+	AppLogLevel  string `envconfig:"APP_LOG_LEVEL" default:"info"`
 }
 
 type DefaultSubscriptionConfig struct {

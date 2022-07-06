@@ -59,6 +59,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 		WithLabels(v1alpha1.BEBBackendType),
 		WithContainers(publisherConfig),
 		WithBEBEnvVars(publisherConfig),
+		WithLogEnvVars(publisherConfig),
 	)
 }
 func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
@@ -67,6 +68,7 @@ func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.P
 		WithLabels(v1alpha1.NatsBackendType),
 		WithContainers(publisherConfig),
 		WithNATSEnvVars(natsConfig, publisherConfig),
+		WithLogEnvVars(publisherConfig),
 		WithAffinity(),
 	)
 }
@@ -156,6 +158,16 @@ func WithContainers(publisherConfig env.PublisherConfig) DeployOpt {
 	}
 }
 
+func WithLogEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
+	return func(d *appsv1.Deployment) {
+		for i, container := range d.Spec.Template.Spec.Containers {
+			if strings.EqualFold(container.Name, PublisherName) {
+				d.Spec.Template.Spec.Containers[i].Env = append(d.Spec.Template.Spec.Containers[i].Env, getLogEnvVars(publisherConfig)...)
+			}
+		}
+	}
+}
+
 func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
@@ -165,6 +177,7 @@ func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherCon
 		}
 	}
 }
+
 func WithBEBEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
@@ -235,6 +248,13 @@ func getContainerPorts() []v1.ContainerPort {
 			Name:          publisherMetricsPortName,
 			ContainerPort: publisherMetricsPortNum,
 		},
+	}
+}
+
+func getLogEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
+	return []v1.EnvVar{
+		{Name: "APP_LOG_FORMAT", Value: publisherConfig.AppLogFormat},
+		{Name: "APP_LOG_LEVEL", Value: publisherConfig.AppLogLevel},
 	}
 }
 

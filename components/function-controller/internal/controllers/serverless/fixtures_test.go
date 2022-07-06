@@ -14,16 +14,16 @@ func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int, co
 	two := int32(maxReplicas)
 	//nolint:gosec
 	suffix := rand.Int()
-	labels := map[string]string{}
+	annotations := map[string]string{}
 	if continuousGitCheckout {
-		labels[continuousGitCheckoutLabel] = "true"
+		annotations[continuousGitCheckoutAnnotation] = "true"
 	}
 
 	return &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%d", name, suffix),
-			Namespace: namespace,
-			Labels:    labels,
+			Name:        fmt.Sprintf("%s-%d", name, suffix),
+			Namespace:   namespace,
+			Annotations: annotations,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
 			Type:    serverlessv1alpha1.SourceTypeGit,

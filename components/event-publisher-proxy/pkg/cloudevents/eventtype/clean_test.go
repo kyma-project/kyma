@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sirupsen/logrus"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
@@ -157,7 +158,8 @@ func TestCleaner(t *testing.T) {
 		},
 	}
 
-	logger := logrus.New()
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
 
 	for _, tc := range testCases {
 		tc := tc
@@ -165,7 +167,7 @@ func TestCleaner(t *testing.T) {
 			t.Parallel()
 			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
 			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, logger)
+			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, mockedLogger)
 			eventType, err := cleaner.Clean(tc.givenEventType)
 			require.Equal(t, tc.wantError, err != nil)
 			if !tc.wantError {
