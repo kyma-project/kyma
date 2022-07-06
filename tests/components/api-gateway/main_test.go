@@ -182,12 +182,14 @@ func TestApiGateway(t *testing.T) {
 		Options:             &apiGatewayOpts,
 	}
 
-	if unsecuredSuite.Run() != 0 {
-		t.Error("non-zero status returned, failed to run feature tests")
-	}
+	testExitCode := unsecuredSuite.Run()
 
 	if os.Getenv(exportResultVar) == "true" {
 		generateHTMLReport()
+	}
+
+	if testExitCode != 0 {
+		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
 }
 
