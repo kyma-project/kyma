@@ -13,14 +13,14 @@ const (
 )
 
 type CSRFHandler struct {
-	mutex        sync.RWMutex
-	tokens       map[string]bool
+	mutex  sync.RWMutex
+	tokens map[string]bool
 }
 
 func NewCSRF() CSRFHandler {
 	return CSRFHandler{
-		mutex:        sync.RWMutex{},
-		tokens:       make(map[string]bool),
+		mutex:  sync.RWMutex{},
+		tokens: make(map[string]bool),
 	}
 }
 
@@ -33,8 +33,8 @@ func (ch *CSRFHandler) Token(w http.ResponseWriter, _ *http.Request) {
 
 	w.Header().Set(csrfTokenHeader, token)
 	http.SetCookie(w, &http.Cookie{
-		Name:       csrfTokenCookie,
-		Value:      token,
+		Name:  csrfTokenCookie,
+		Value: token,
 	})
 
 	w.WriteHeader(http.StatusOK)
@@ -46,8 +46,8 @@ func (ch *CSRFHandler) BadToken(w http.ResponseWriter, _ *http.Request) {
 
 	w.Header().Set(csrfTokenHeader, token)
 	http.SetCookie(w, &http.Cookie{
-		Name:       csrfTokenCookie,
-		Value:      token,
+		Name:  csrfTokenCookie,
+		Value: token,
 	})
 
 	w.WriteHeader(http.StatusOK)
