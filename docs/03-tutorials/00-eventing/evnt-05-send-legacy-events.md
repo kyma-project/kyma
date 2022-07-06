@@ -8,8 +8,8 @@ Kyma Eventing also supports sending and receiving of legacy events. In this tuto
 
 ## Prerequisites
 
-1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) mentioned in the getting-started guide.
-2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) given in the getting-started guide.
+1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
+2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) in the Getting Started guide.
 
 ## Create a Subscription
 
@@ -102,7 +102,7 @@ You created the `lastorder` Function, and subscribed to the `order.received.v1` 
 
 ## Verify the legacy event delivery
 
-To verify that the event was properly delivered, check the logs of the Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) given in the getting-started guide.
+To verify that the event was properly delivered, check the logs of the Function (see [Verify the event delivery](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery)).
 
 You see the received event in the logs:
 ```

@@ -3,11 +3,11 @@ title: Changing Events Max-In-Flight in Subscriptions
 ---
 
 In this tutorial, you learn how to set idle "in-flight messages" limit in Kyma Subscriptions.
-The "in-flight messages" config defines the number of events that Eventing forwards in parallel to the sink, without waiting for a response. 
+The "in-flight messages" config defines the number of events that Kyma Eventing forwards in parallel to the sink, without waiting for a response. 
 
 ## Prerequisites
 
-Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) mentioned in the getting-started guide.
+Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
 
 ## Create a Function
 
@@ -173,13 +173,13 @@ The operation was successful if the returned status says `true`.
 ## Trigger the workload with multiple events
 
 You created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR.
-Next, publish 15 events at once and see how the Kyma Eventing trigger the workload.
+Next, publish 15 events at once and see how Kyma Eventing triggers the workload.
 
 1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Now publish 15 events to the Event Publisher Proxy Service. In another Terminal window run:
+2. Now publish 15 events to the Event Publisher Proxy Service. In another terminal window, run:
 
    <div tabs name="Publish an event" group="trigger-workload">
      <details open>
@@ -225,7 +225,7 @@ Next, publish 15 events at once and see how the Kyma Eventing trigger the worklo
 
 ## Verify the event delivery
 
-To verify that the events ware properly delivered, check the logs of the Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) given in the getting-started guide.
+To verify that the events ware properly delivered, check the logs of the Function (see [Verify the event delivery](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery)).
 
 You will see the received events in the logs as:
 ```
@@ -261,4 +261,4 @@ Completely processed event: { orderCode: '14' }
 Completely processed event: { orderCode: '15' }
 ```
 
-You can see that only 5 events at maximum were delivered to the Function in parallel and as soon as the Function completes the processing of the event and returns the response, the Kyma Eventing delivers the next in-line event to the Function. 
+You can see that only 5 events at maximum were delivered to the Function in parallel and as soon as the Function completes the processing of the event and returns the response, Kyma Eventing delivers the next in-line event to the Function. 
