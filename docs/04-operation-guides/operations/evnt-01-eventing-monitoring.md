@@ -13,6 +13,7 @@ Below is the list of Grafana Dashboards provided by Kyma Eventing:
 
 | Dashboard    |  Description |
 |-------------|:--------------|
+| **Eventing Pods** | Shows the information about compute, memory and network resources consumed by the Kyma Eventing Pods. |
 | **Eventing Delivery** | Shows the statistics of HTTP requests to application validator, event publisher proxy and NATS subscribers. |
 | **Eventing Delivery per Subscription** | Shows the successful and failed event delivery statistics per subscription. |
 | **Eventing Latency** | Shows the latency information in the Event delivery lifecycle from eventing publisher proxy to eventing backend servers and dispatcher to subscriber.  |
