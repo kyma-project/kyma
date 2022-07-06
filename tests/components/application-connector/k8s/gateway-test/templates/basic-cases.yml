@@ -63,13 +63,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/csrf-basic"
           credentials:
             secretName: csrf-basic-test
             type: Basic
             csrfInfo:
-              tokenEndpointURL: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+              tokenEndpointURL: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
 ---
 apiVersion: v1
 kind: Secret
