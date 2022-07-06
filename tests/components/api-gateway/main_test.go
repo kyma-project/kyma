@@ -174,8 +174,6 @@ func TestApiGateway(t *testing.T) {
 		return nil
 	})
 
-	apiGatewayOpts.Paths = []string{}
-
 	apiGatewayOpts.Concurrency = conf.TestConcurency
 
 	unsecuredSuite := godog.TestSuite{
