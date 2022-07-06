@@ -39,6 +39,7 @@ func TestValidateForbiddenFilters(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are not allowed")
 }
 
 func TestValidateForbiddenOutputs(t *testing.T) {
@@ -57,6 +58,7 @@ func TestValidateForbiddenOutputs(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), "plugin 'es' contains match condition. Match conditions are not allowed")
 }
 
 func TestValidateUnnamedOutputs(t *testing.T) {
@@ -64,7 +66,7 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				Custom: `
-    Match   *`,
+	Regex   $kubernetes['labels']['app'] my-deployment`,
 			},
 		},
 	}
@@ -74,6 +76,7 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), "configuration section does not have name attribute")
 }
 
 func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
@@ -81,8 +84,7 @@ func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				Custom: `
-    Name    http
-    Match   *`,
+    Name    http`,
 			},
 			Filters: []telemetryv1alpha1.Filter{
 				{Custom: `
@@ -98,55 +100,8 @@ func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 	sut := NewPluginValidator([]string{}, []string{})
 	err := sut.Validate(logPipeline, logPipelines)
 
-	assert.Contains(t, err.Error(), "plugin 'grep' with match condition '*' (match all) is not allowed")
-}
-
-func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
-	logPipeline := &telemetryv1alpha1.LogPipeline{
-		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Output: telemetryv1alpha1.Output{
-				Custom: `
-    Name    http
-    Match   abc`,
-			},
-		},
-	}
-	logPipeline.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{}
-
-	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
-
-	assert.Contains(t, err.Error(), " error validating output plugins: plugin 'http' with match condition 'abc' is not allowed. Valid match conditions are: 'foo' (current logpipeline name)")
-}
-
-func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
-	logPipeline1 := &telemetryv1alpha1.LogPipeline{
-		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Output: telemetryv1alpha1.Output{
-				Custom: `
-    Name    http
-    Match   foo.*`,
-			},
-		},
-	}
-	logPipeline1.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline1}}
-	logPipeline2 := &telemetryv1alpha1.LogPipeline{
-		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Output: telemetryv1alpha1.Output{
-				Custom: `
-    Name    http
-    Match   bar`,
-			},
-		},
-	}
-	logPipeline2.ObjectMeta = metav1.ObjectMeta{Name: "bar"}
-
-	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline2, logPipelines)
-
-	assert.Contains(t, err.Error(), "plugin 'http' with match condition 'bar' is not allowed. Valid match conditions are: 'bar' (current logpipeline name) or '[foo]' (other existing logpipelines names)")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are not allowed")
 }
 
 func TestValidatePipelineCreation(t *testing.T) {
@@ -154,8 +109,7 @@ func TestValidatePipelineCreation(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				Custom: `
-    Name    http
-    Match   foo.*`,
+    Name    http`,
 			},
 		},
 	}
@@ -174,7 +128,6 @@ func TestDeniedFilterPlugins(t *testing.T) {
 			Filters: []telemetryv1alpha1.Filter{
 				{Custom: `
     Name    lua
-    Match   foo.*
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
 			},
@@ -196,7 +149,6 @@ func TestDeniedOutputPlugins(t *testing.T) {
 			Output: telemetryv1alpha1.Output{
 				Custom: `
     Name    lua
-    Match   foo.*
     Regex   $kubernetes['labels']['app'] my-deployment`,
 			},
 		},

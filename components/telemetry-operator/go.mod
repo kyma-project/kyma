@@ -12,7 +12,6 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/spf13/afero v1.8.2
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d
 	k8s.io/api v0.24.0
 	k8s.io/apimachinery v0.24.0
 	k8s.io/client-go v0.24.0
