@@ -41,6 +41,19 @@ func (ch *CSRFHandler) Token(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
+func (ch *CSRFHandler) BadToken(w http.ResponseWriter, _ *http.Request) {
+	token := uuid.New().String()
+
+	w.Header().Set(csrfTokenHeader, token)
+	http.SetCookie(w, &http.Cookie{
+		Name:       csrfTokenCookie,
+		Value:      token,
+	})
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+}
+
 func (ch *CSRFHandler) Middleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

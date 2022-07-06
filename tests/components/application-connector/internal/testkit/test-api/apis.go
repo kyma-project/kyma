@@ -50,6 +50,7 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oa
 	{
 		csrf := NewCSRF()
 		api.HandleFunc("/csrf/token", csrf.Token).Methods(http.MethodGet)
+		api.HandleFunc("/csrf/bad-token", csrf.BadToken).Methods(http.MethodGet)
 
 		r := api.PathPrefix("/csrf-basic").Subrouter()
 		r.Use(csrf.Middleware())

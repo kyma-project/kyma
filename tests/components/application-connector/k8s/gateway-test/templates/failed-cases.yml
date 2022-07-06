@@ -46,6 +46,34 @@ spec:
             secretName: oauth-bad
             authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
+    - displayName: bad csrf token basic
+      name: bad-csrf-token-basic
+      providerDisplayName: Rafał
+      description: Basic Auth with a bad CSRF token should return 403
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/bad-csrf-token-basic"
+          credentials:
+            secretName: csrf-basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+    - displayName: bad csrf endpoint basic
+      name: bad-csrf-endpoint-basic
+      providerDisplayName: Rafał
+      description: Basic Auth with a bad CSRF token endpoint should return 502
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://failed-auth-cases.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/bad-csrf-endpoint-basic"
+          credentials:
+            secretName: csrf-basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
 ---
 apiVersion: v1
 kind: Secret
