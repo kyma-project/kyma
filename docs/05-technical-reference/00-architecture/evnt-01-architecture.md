@@ -38,6 +38,6 @@ Kyma now supports JetStream by default, which is a persistence offering from NAT
 
 The key advantages of JetStream over Core NATS are:
 
-- [At least once delivery of JetStream](../../03-tutorials/00-eventing/evnt-03-introduction-to-jetstream.md) compared to at most once delivery of NATS.
+- At least once delivery of JetStream compared to at most once delivery of NATS.
 - Streaming: Streams receive and store messages that are published and subscribers can consume these messages at any time.
 - Persistent stream storage: Messages are retained in the stream storage even when the NATS server is restarted.
