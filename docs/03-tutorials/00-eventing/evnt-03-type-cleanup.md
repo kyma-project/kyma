@@ -7,80 +7,58 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
 
 ## Prerequisites
 
-Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
+1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
+2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) in the Getting Started guide.
+3. For this tutorial, instead of the default code sample, replace the Function source with the following code:
 
-## Create a Function
+   <div tabs name="Deploy a Function" group="create-workload">
+     <details open>
+     <summary label="Kyma Dashboard">
+     Kyma Dashboard
+     </summary>
 
-First, create a sample Function that prints out the received event to console:
-
-<div tabs name="Deploy a Function" group="create-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. Go to **Namespaces** and select the default Namespace.
-2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, replace its source with the following code:
-    ```js
-    module.exports = {
-      main: async function (event, context) {
-        console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
-        return;
-      } 
-    }
-    ```
-5. Save your changes.
-6. Wait a few seconds for the Function to have status `RUNNING`.
-
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
-
-```bash
-cat <<EOF | kubectl apply -f -
-  apiVersion: serverless.kyma-project.io/v1alpha1
-  kind: Function
-  metadata:
-    labels:
-      serverless.kyma-project.io/build-resources-preset: local-dev
-      serverless.kyma-project.io/function-resources-preset: S
-      serverless.kyma-project.io/replicas-preset: S
-    name: lastorder
-    namespace: default
-  spec:
-    deps: '{ "dependencies": {}}'
-    maxReplicas: 1
-    minReplicas: 1
-    source: |
-      module.exports = {
-        main: async function (event, context) {
-          console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
-          return; 
-        } 
-      }
-EOF
-```
-
-If the resources were created successfully, the command returns this message:
-
-```bash
-function.serverless.kyma-project.io/lastorder created
-```
-
-To check the Function status, run:
-
-```bash
-kubectl get functions -n default lastorder
-```
-
-> **NOTE:** You might need to wait a few seconds for the Function to be ready.
-
-  </details>
-</div>
+   ```js
+   module.exports = {
+     main: async function (event, context) {
+       console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
+       return;
+     } 
+   }
+   ```
+       
+     </details>
+     <details>
+     <summary label="kubectl">
+     kubectl
+     </summary>
+   
+   ```bash
+   cat <<EOF | kubectl apply -f -
+     apiVersion: serverless.kyma-project.io/v1alpha1
+     kind: Function
+     metadata:
+       labels:
+         serverless.kyma-project.io/build-resources-preset: local-dev
+         serverless.kyma-project.io/function-resources-preset: S
+         serverless.kyma-project.io/replicas-preset: S
+       name: lastorder
+       namespace: default
+     spec:
+       deps: '{ "dependencies": {}}'
+       maxReplicas: 1
+       minReplicas: 1
+       source: |
+         module.exports = {
+           main: async function (event, context) {
+             console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
+             return; 
+           } 
+         }
+   EOF
+   ```
+   
+     </details>
+   </div>
 
 ## Create a Subscription with Event type consisting of alphanumeric characters
 

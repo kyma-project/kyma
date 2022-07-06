@@ -7,24 +7,16 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
 
 ## Prerequisites
 
-Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
+1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
+2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) in the Getting Started guide.
+3. For this tutorial, instead of the default code sample, replace the Function source with the following code. To simulate prolonged event processing, the Function waits for 5 seconds before returning the response.
 
-## Create a Function
-
-First, create a sample Function that prints out the received event to console.
-To simulate prolonged event processing, in this example, the Function waits for 5 seconds before returning the response.
-
-
-<div tabs name="Deploy a Function" group="create-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. Go to **Namespaces** and select the default Namespace.
-2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, replace its source with the following code:
+   <div tabs name="Deploy a Function" group="create-workload">
+     <details open>
+     <summary label="Kyma Dashboard">
+     Kyma Dashboard
+     </summary>
+   
    ```js
    module.exports = {
      main: async function (event, context) {
@@ -36,61 +28,43 @@ To simulate prolonged event processing, in this example, the Function waits for 
      } 
    }
    ```
-5. Save your changes.
-6. Wait a few seconds for the Function to have status `RUNNING`.
-
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
-
-```bash
-cat <<EOF | kubectl apply -f -
-  apiVersion: serverless.kyma-project.io/v1alpha1
-  kind: Function
-  metadata:
-    labels:
-      serverless.kyma-project.io/build-resources-preset: local-dev
-      serverless.kyma-project.io/function-resources-preset: S
-      serverless.kyma-project.io/replicas-preset: S
-    name: lastorder
-    namespace: default
-  spec:
-    deps: '{ "dependencies": {}}'
-    maxReplicas: 1
-    minReplicas: 1
-    source: |
-      module.exports = {
-        main: async function (event, context) {
-          console.log("Processing event:", event.data);
-          // sleep/wait for 5 seconds
-          await new Promise(r => setTimeout(r, 5 * 1000));
-          console.log("Completely processed event:", event.data);
-          return;
-        } 
-      }
-EOF
-```
-
-
-<br/>
-If the resources were created successfully, the command returns this message:
-
-```bash
-function.serverless.kyma-project.io/lastorder created
-```
-
-To check the Function status, run:
-
-```bash
-kubectl get functions -n default lastorder
-```
-
-> **NOTE:** You might need to wait a few seconds for the Function to be ready.
-
-  </details>
-</div>
+   
+     </details>
+     <details>
+     <summary label="kubectl">
+     kubectl
+     </summary>
+   
+   ```bash
+   cat <<EOF | kubectl apply -f -
+     apiVersion: serverless.kyma-project.io/v1alpha1
+     kind: Function
+     metadata:
+       labels:
+         serverless.kyma-project.io/build-resources-preset: local-dev
+         serverless.kyma-project.io/function-resources-preset: S
+         serverless.kyma-project.io/replicas-preset: S
+       name: lastorder
+       namespace: default
+     spec:
+       deps: '{ "dependencies": {}}'
+       maxReplicas: 1
+       minReplicas: 1
+       source: |
+         module.exports = {
+           main: async function (event, context) {
+             console.log("Processing event:", event.data);
+             // sleep/wait for 5 seconds
+             await new Promise(r => setTimeout(r, 5 * 1000));
+             console.log("Completely processed event:", event.data);
+             return;
+           } 
+         }
+   EOF
+   ```
+   
+     </details>
+   </div>
 
 ## Create a Subscription with Max-In-Flight config
 
