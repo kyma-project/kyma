@@ -42,7 +42,7 @@ metrics:
     nameSuffix: "-metrics"
   config:
     port: 8080
-    portName: "-metrics"
+    portName: metrics
     nameSuffix: "-metrics"
     interval: 30s
 

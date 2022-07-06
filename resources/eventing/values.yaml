@@ -35,12 +35,12 @@ global:
   domainName: "kyma.example.com"
 
   ports:
-    httpPrefix: http
+    httpPrefix: http-
 
   istio:
     proxy:
       statusPort: 15020
-      portName: "-status"
+      portName: status
 
   securityContext:
     allowPrivilegeEscalation: false
