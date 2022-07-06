@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -24,9 +25,15 @@ func NewHelper(c *http.Client, opts []retry.Option) *Helper {
 
 // Returns error if the status code is not in between bounds of status predicate after retrying deadline is reached
 func (h *Helper) CallEndpointWithRetries(url string, predicate *StatusPredicate) error {
-	return h.withRetries(func() (*http.Response, error) {
+	err := h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
 	}, predicate.TestPredicate)
+
+	if err != nil {
+		return fmt.Errorf("error calling endpoint %s err=%s", url, err)
+	}
+
+	return nil
 }
 
 // Returns error if the status code is not in between bounds of status predicate after retrying deadline is reached
@@ -37,9 +44,15 @@ func (h *Helper) CallEndpointWithHeadersWithRetries(headerValue string, headerNa
 	}
 
 	req.Header.Set(headerName, headerValue)
-	return h.withRetries(func() (*http.Response, error) {
+	err = h.withRetries(func() (*http.Response, error) {
 		return h.client.Do(req)
 	}, predicate.TestPredicate)
+
+	if err != nil {
+		return fmt.Errorf("error calling endpoint %s err=%s", url, err)
+	}
+
+	return nil
 }
 
 func (h *Helper) withRetries(httpCall func() (*http.Response, error), isResponseValid func(*http.Response) bool) error {
