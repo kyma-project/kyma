@@ -18,11 +18,11 @@ nats:
 metrics:
   config:
     port: 9090
-    portName: http-metrics
+    portName: "-metrics"
     nameSuffix: "-metrics"
     interval: 30s
 
 publisherProxy:
   config:
     port: 8080
-    portName: http-client
+    portName: "-client"
