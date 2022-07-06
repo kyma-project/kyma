@@ -22,7 +22,10 @@ all: help
 
 test: ## Run the tests of the project
 ifeq ($(EXPORT_RESULT), true)
+	echo "${ARTIFACTS}"
 	$(GOTEST) -v -race . --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
+ 	cp -v -r reports ${ARTIFACTS}/reports
+  	cp -v junit-report.xml ${ARTIFACTS}/junit-report.xml
 else
 	$(GOTEST) -v -race .
 endif
