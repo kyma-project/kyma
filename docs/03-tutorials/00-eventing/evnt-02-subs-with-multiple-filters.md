@@ -6,88 +6,8 @@ The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subs
 
 ## Prerequisites
 
-1. Provision a [Kyma Cluster](../../02-get-started/01-quick-install.md).
-2. (Optional) Deploy [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
-   ```bash
-   kyma dashboard
-   ```
-3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
-   ```bash
-   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
-   ```
-
-## Create a Workload
-
-First, create a sample Function that prints out the received event to console:
-
-<div tabs name="Deploy a Function" group="create-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. Go to **Namespaces** and select the default Namespace.
-2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function replace its source with the following code:
-    ```js
-    module.exports = {
-      main: async function (event, context) {
-        console.log("Received event:", event.data);
-        return;
-      } 
-    }
-    ```
-5. Save your changes.
-6. Wait a few seconds for the Function to have status `RUNNING`.
-
-  </details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
-
-```bash
-cat <<EOF | kubectl apply -f -
-  apiVersion: serverless.kyma-project.io/v1alpha1
-  kind: Function
-  metadata:
-    labels:
-      serverless.kyma-project.io/build-resources-preset: local-dev
-      serverless.kyma-project.io/function-resources-preset: S
-      serverless.kyma-project.io/replicas-preset: S
-    name: lastorder
-    namespace: default
-  spec:
-    deps: '{ "dependencies": {}}'
-    maxReplicas: 1
-    minReplicas: 1
-    source: |
-      module.exports = {
-        main: async function (event, context) {
-          console.log("Received event:", event.data);
-          return; 
-        } 
-      }
-EOF
-```
-
-If the resources were created successfully, the command returns this message:
-
-```bash
-function.serverless.kyma-project.io/lastorder created
-```
-
-To check the Function status, run:
-
-```bash
-kubectl get functions -n default lastorder
-```
-
-> **NOTE:** You might need to wait a few seconds for the Function to be ready.
-
-  </details>
-</div>
+1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) mentioned in the getting-started guide.
+2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) given in the getting-started guide.
 
 ## Create a Subscription with Multiple Filters
 
@@ -245,43 +165,10 @@ In the following example, you port-forward the [Event Publisher Proxy](../../05-
 
 ## Verify the event delivery
 
-To verify that the events were properly delivered, check the logs of the Function:
-
-<div tabs name="Verify the event delivery" group="verify-event">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
-4. You see the received event in the logs:
-   ```
-   Received event: { orderCode: '3211213', orderStatus: 'received' }
-   Received event: { orderCode: '3211213', orderStatus: 'changed' }
-   ```
-
-</details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
-Run: 
-
-```bash
-kubectl logs -f -n default \
-  $(kubectl get pod \
-    --field-selector=status.phase==Running \
-    -l serverless.kyma-project.io/function-name=lastorder \
-    -o jsonpath="{.items[0].metadata.name}")
-```
+To verify that the events were properly delivered, check the logs of the Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) given in the getting-started guide.
 
 You will see the received event in the logs:
 ```
 Received event: { orderCode: '3211213', orderStatus: 'received' }
 Received event: { orderCode: '3211213', orderStatus: 'changed' }
 ```
-
-  </details>
-</div>

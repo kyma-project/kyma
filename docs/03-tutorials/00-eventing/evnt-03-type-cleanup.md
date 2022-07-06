@@ -7,17 +7,9 @@ You learn how Eventing behaves when you create a [Subscription](../../05-technic
 
 ## Prerequisites
 
-1. Provision a [Kyma Cluster](../../02-get-started/01-quick-install.md).
-2. (Optional) Deploy [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
-   ```bash
-   kyma dashboard
-   ```
-3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
-   ```bash
-   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
-   ```
+Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) mentioned in the getting-started guide.
 
-## Create a Workload
+## Create a Function
 
 First, create a sample Function that prints out the received event to console:
 
@@ -34,7 +26,7 @@ First, create a sample Function that prints out the received event to console:
     ```js
     module.exports = {
       main: async function (event, context) {
-        console.log("Received event:", event.data);
+        console.log("Received event: ", event.data, ", Event Type: ", event.extensions.request.headers['ce-type']);
         return;
       } 
     }
@@ -209,35 +201,7 @@ Next, you see that you can still publish events with the original Event name (i.
 
 ## Verify the event delivery
 
-To verify that the event was properly delivered, check the logs of the Function:
-
-<div tabs name="Verify the event delivery" group="trigger-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
-
-</details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
-Run: 
-
-```bash
-kubectl logs -f -n default \
-  $(kubectl get pod \
-    --field-selector=status.phase==Running \
-    -l serverless.kyma-project.io/function-name=lastorder \
-    -o jsonpath="{.items[0].metadata.name}")
-```
-
-  </details>
-</div>
+To verify that the event was properly delivered, check the logs of the Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) given in the getting-started guide.
 
 You see the received event in the logs:
 ```

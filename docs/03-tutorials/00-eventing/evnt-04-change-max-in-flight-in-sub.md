@@ -7,17 +7,9 @@ The "in-flight messages" config defines the number of events that Eventing forwa
 
 ## Prerequisites
 
-1. Provision a [Kyma Cluster](../../02-get-started/01-quick-install.md).
-2. (Optional) Deploy [Kyma Dashboard](../../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
-   ```bash
-   kyma dashboard
-   ```
-3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
-   ```bash
-   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
-   ```
+Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) mentioned in the getting-started guide.
 
-## Create a Workload
+## Create a Function
 
 First, create a sample Function that prints out the received event to console.
 To simulate prolonged event processing, in this example, the Function waits for 5 seconds before returning the response.
@@ -181,13 +173,13 @@ The operation was successful if the returned status says `true`.
 ## Trigger the workload with multiple events
 
 You created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR.
-Next, publish 15 events at once and see how the Eventing Service trigger the workload.
+Next, publish 15 events at once and see how the Kyma Eventing trigger the workload.
 
 1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Now publish 15 events to the Eventing Service. In another Terminal window run:
+2. Now publish 15 events to the Event Publisher Proxy Service. In another Terminal window run:
 
    <div tabs name="Publish an event" group="trigger-workload">
      <details open>
@@ -233,34 +225,7 @@ Next, publish 15 events at once and see how the Eventing Service trigger the wor
 
 ## Verify the event delivery
 
-To verify that the events ware properly delivered, check the logs of the Function:
-
-<div tabs name="Verify the event delivery" group="trigger-workload">
-  <details open>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
-
-</details>
-  <details>
-  <summary label="kubectl">
-  kubectl
-  </summary>
-Run: 
-
-```bash
-kubectl logs -f -n default \
-  $(kubectl get pod \
-    --field-selector=status.phase==Running \
-    -l serverless.kyma-project.io/function-name=lastorder \
-    -o jsonpath="{.items[0].metadata.name}")
-```
-  </details>
-</div>
+To verify that the events ware properly delivered, check the logs of the Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) given in the getting-started guide.
 
 You will see the received events in the logs as:
 ```
@@ -296,4 +261,4 @@ Completely processed event: { orderCode: '14' }
 Completely processed event: { orderCode: '15' }
 ```
 
-You can see that only 5 events at maximum were delivered to the Function in parallel and as soon as the Function completes the processing of the event and returns the response, the Eventing Service delivers the next in-line event to the Function. 
+You can see that only 5 events at maximum were delivered to the Function in parallel and as soon as the Function completes the processing of the event and returns the response, the Kyma Eventing delivers the next in-line event to the Function. 
