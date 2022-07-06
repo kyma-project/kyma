@@ -527,7 +527,7 @@ func TestChangeSubscription(t *testing.T) {
 
 			// when
 			tc.changeSubscription(subscription)
-			g.Expect(utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, subscription)).ShouldNot(gomega.HaveOccurred())
+			g.Expect(ens.K8sClient.Update(ens.Ctx, subscription)).ShouldNot(gomega.HaveOccurred())
 
 			// then
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantAfter.K8sSubscription...)
