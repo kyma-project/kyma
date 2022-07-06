@@ -11,7 +11,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: {{ .Values.publisherProxy.config.port }}
       name: {{ .Values.publisherProxy.config.portName }}
 ---
 apiVersion: v1
@@ -25,7 +25,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: {{ .Values.publisherProxy.config.port }}
       name: {{ .Values.publisherProxy.config.portName }}
 ---
 apiVersion: v1

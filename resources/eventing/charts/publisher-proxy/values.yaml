@@ -24,4 +24,5 @@ metrics:
 
 publisherProxy:
   config:
+    port: 8080
     portName: http-client
