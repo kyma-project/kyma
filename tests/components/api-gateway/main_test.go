@@ -4,9 +4,11 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -161,4 +163,42 @@ func TestMain(m *testing.M) {
 	}()
 
 	os.Exit(m.Run())
+}
+
+func TestApiGateway(t *testing.T) {
+	apiGatewayOpts := goDogOpts
+
+	apiGatewayOpts.Paths = []string{}
+	filepath.Walk("features", func(path string, info fs.FileInfo, err error) error {
+		apiGatewayOpts.Paths = append(apiGatewayOpts.Paths, path)
+		return nil
+	})
+
+	apiGatewayOpts.Paths = []string{"features/oauth2_jwt_1path.feature"}
+
+	apiGatewayOpts.Concurrency = conf.TestConcurency
+
+	unsecuredSuite := godog.TestSuite{
+		Name:                "API-Gateway",
+		ScenarioInitializer: InitializeApiGatewayTests,
+		Options:             &apiGatewayOpts,
+	}
+
+	if unsecuredSuite.Run() != 0 {
+		t.Error("non-zero status returned, failed to run feature tests")
+	}
+
+	if os.Getenv(exportResultVar) == "true" {
+		generateHTMLReport()
+	}
+}
+
+func InitializeApiGatewayTests(ctx *godog.ScenarioContext) {
+	InitializeScenarioOAuth2Endpoint(ctx)
+	InitializeScenarioSecuredToUnsecuredEndpoint(ctx)
+	InitializeScenarioUnsecuredEndpoint(ctx)
+	InitializeScenarioUnsecuredToSecuredEndpoint(ctx)
+	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx)
+	InitializeScenarioOAuth2JWTOnePath(ctx)
+	InitializeScenarioOAuth2JWTTwoPaths(ctx)
 }

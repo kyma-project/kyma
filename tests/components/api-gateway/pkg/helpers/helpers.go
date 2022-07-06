@@ -69,7 +69,7 @@ func (h *Helper) withRetries(httpCall func() (*http.Response, error), isResponse
 	return nil
 }
 
-// StatusPredicate is a struct representing desired endpoint call status code, that is beetween LowerStatusBound and UpperStatusBound
+// StatusPredicate is a struct representing desired endpoint call response status code, that is between LowerStatusBound and UpperStatusBound
 type StatusPredicate struct {
 	LowerStatusBound int
 	UpperStatusBound int
