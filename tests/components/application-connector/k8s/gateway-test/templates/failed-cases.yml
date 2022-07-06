@@ -56,7 +56,7 @@ spec:
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/bad-csrf-token-basic"
           credentials:
-            secretName: csrf-basic-test
+            secretName: basic-test
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
@@ -70,7 +70,7 @@ spec:
           targetUrl: "http://failed-auth-cases.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/failed-auth-cases/bad-csrf-endpoint-basic"
           credentials:
-            secretName: csrf-basic-test
+            secretName: basic-test
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
