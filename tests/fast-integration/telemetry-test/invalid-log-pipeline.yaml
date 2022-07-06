@@ -8,6 +8,7 @@ spec:
   filters:
     - custom: |
         Name               abc
+        Match              logpipeline-test.*
   output:
     custom: |
       Name null
