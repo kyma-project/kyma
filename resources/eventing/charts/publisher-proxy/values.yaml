@@ -9,12 +9,6 @@ serviceAccount:
   # name defines optionally another name than the default name for the service account
   name: ""
 
-nats:
-  config:
-    port: 8080
-    portName: http
-    requestTimeout: "5s"
-
 metrics:
   config:
     port: 9090

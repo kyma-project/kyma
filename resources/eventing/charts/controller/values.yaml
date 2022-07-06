@@ -38,8 +38,6 @@ publisherProxy:
       memory: 64Mi
 
 metrics:
-  service:
-    nameSuffix: "-metrics"
   config:
     port: 8080
     portName: metrics
