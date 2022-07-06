@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: test-app
-  name: test-app
-  namespace: "{{.Values.namespace}}"
+    app: mock-application
+  name: mock-application
+  namespace: {{.Values.namespace}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-app
+      app: mock-application
   template:
     metadata:
       labels:
-        app: test-app
+        app: mock-application
     spec:
       containers:
-        - image: "{{ .Values.mockImage }}"
+        - image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.mockApplication) }}
           name: test-app
           ports:
             - containerPort: 8080
@@ -31,11 +31,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-app
-  namespace: "{{ .Values.namespace }}"
+  name: {{ .Values.mockServiceName}}
+  namespace: {{ .Values.namespace }}
 spec:
   selector:
-    app: test-app
+    app: {{ .Values.mockServiceName}}
   ports:
     - name: "http"
       protocol: TCP
