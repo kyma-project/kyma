@@ -26,11 +26,11 @@ This diagram explains the event flow in Kyma, from the moment an event source se
 
 ## Event Publisher Proxy
 
-Event Publisher Proxy receives legacy and Cloud Events and publishes them to the configured eventing backend. All the legacy events are automatically converted to Cloud Events.
+Event Publisher Proxy receives legacy and Cloud Events, and publishes them to the configured eventing backend. All the legacy events are automatically converted to Cloud Events.
 
 ## Eventing Controller
 
-Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription Custom Resources. When an event is received, it dispatches the message to the configured sink.
+Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription Custom Resources. When an event is received, Eventing Controller dispatches the message to the configured sink.
 
 ## JetStream
 

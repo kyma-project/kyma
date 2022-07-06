@@ -23,7 +23,7 @@ spec: {}
 
 ## Additional information
 
-When you fetch an existing EventingBackend CR, the Eventing Controller adds the **status** section which shows the current status of Kyma Eventing. This table lists the fields of the **status** section.
+When you fetch an existing EventingBackend CR, the Eventing Controller adds the **status** section, which shows the current status of Kyma Eventing. The following table lists the fields of the **status** section.
 
 | Field   |  Description |
 |:---|:---|
