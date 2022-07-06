@@ -174,8 +174,6 @@ func TestApiGateway(t *testing.T) {
 		return nil
 	})
 
-	apiGatewayOpts.Paths = []string{"features/oauth2_jwt_1path.feature"}
-
 	apiGatewayOpts.Concurrency = conf.TestConcurency
 
 	unsecuredSuite := godog.TestSuite{
