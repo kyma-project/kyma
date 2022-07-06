@@ -8,6 +8,7 @@ To access the Grafana Dashboard, we will port-forward the Grafana Service to loc
 ```bash
 kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
 ```
+Access the Grafana Dashboard on [localhost:8081](http://localhost:8081).
 
 Below is the list of Grafana Dashboards provided by Kyma Eventing:
 

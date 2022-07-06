@@ -14,17 +14,17 @@ title: Kyma Eventing - Basic Diagnostics
 
 Follow these steps to detect the source of the problem:
 
-### Step 1: Check the status of Check the Eventing backend CR
+### Step 1: Check the status of the Eventing backend CR
 
 Check the Eventing backend CR, if the field `EVENTINGREADY` is true:
    
 ```bash
-kubectl -n kyma-system get eventingBackend
+kubectl -n kyma-system get eventingbackends.eventing.kyma-project.io
 ```
 If `EVENTINGREADY` is false, check the exact reason of the error in the status of the CR by running the command:
 
 ```bash
-kubectl -n kyma-system get eventingBackend eventing-backend -o yaml
+kubectl -n kyma-system get eventingbackends.eventing.kyma-project.io eventing-backend -o yaml
 ```
 
 ### Step 2: Check the status of the Subscription
@@ -32,12 +32,12 @@ kubectl -n kyma-system get eventingBackend eventing-backend -o yaml
 Check the Subscription, if it is ready. Run the command:
 
 ```bash
-kubectl -n {NAMESPACE} get subscription {NAME}
+kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME}
 ```
 If the Subscription is not ready, check the exact reason of the error in the status of the Subscription by running the command:
 
 ```bash
-kubectl -n {NAMESPACE} get subscription {NAME} -o yaml
+kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME} -o yaml
 ```
 
 If there is a problem with the Subscription sink you will see the message that sink is not valid cluster local svc. 
@@ -51,22 +51,21 @@ Run the following command to get the configured `eventTypePrefix` in Eventing Se
 kubectl get configmaps -n kyma-system eventing -o jsonpath='{.data.eventTypePrefix}'
 ```
 
-### Step 3: Check if the Subscription sink is healthy.
+### Step 3: Check if the Event was published correctly
 
-Check the workload Url defined in the Subscription sink is correct and healthy to receive events.
-To get the sink from the Subscription, run this command:
+Check if sending an event returns an HTTP Status Code other than 2xx.
 
-```bash
-kubectl -n {NAMESPACE} get subscription {NAME} -o jsonpath='{.spec.sink}'
-```
+- If the HTTP Status Code was 4xx, then check if you are sending the Events in correct formats. Eventing supports two Event formats (i.e. legacy and cloud events), see the Eventing [tutorials](../../03-tutorials/00-eventing) section for more information.
 
-You can run the following commands to check the health of the sink:
+- If the HTTP Status Code was 5xx, then check the logs from the Eventing Publisher Proxy Pod for any errors. To fetch these logs, run this command:
+    ```bash
+    kubectl -n kyma-system logs -l app.kubernetes.io/instance=eventing,app.kubernetes.io/name=eventing-publisher-proxy
+    ```
 
-```bash
-kubectl -n default run --image=curlimages/curl --restart=Never sink-test-tmp -- curl --head {SINK_URL}
-kubectl -n default logs sink-test-tmp 
-kubectl -n default delete pod sink-test-tmp
-```
+- If the HTTP Status Code was 2xx, then verify if you are sending the event on same Event type as defined in the subscription.
+  ```bash
+  kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME} -o jsonpath='{.spec.filter.filters}'
+  ```
 
 ### Step 4: Check the eventing-controller logs.
 
@@ -77,31 +76,34 @@ To fetch these logs, run this command:
 kubectl -n kyma-system logs -l app.kubernetes.io/instance=eventing,app.kubernetes.io/name=controller
 ```
 
-Check for any error messages in the logs. 
+Check for any error messages in the logs.
 
 If the event dispatch log `"message":"event dispatched"` is not present for NATS backend, then the issue could be:
 
-1. The subscriber (i.e. sink) is not reachable.
+1. The subscriber (i.e. sink) is not reachable or the subscriber is not able to process the Event. Check the logs of the Subscriber instance.
 
 2. The event was not published in correct format.
 
 3. Eventing-controller is not able to connect to NATS Server.
 
-### Step 5: Check if the Event was published correctly
+### Step 5: Check if the Subscription sink is healthy.
 
-Check if sending an event returns an HTTP Status Code other than 2xx. 
+Check the workload Url defined in the Subscription sink is correct and healthy to receive events.
+To get the sink from the Subscription, run this command:
 
-- If the HTTP Status Code was 4xx, then check if you are sending the Events in correct formats. Eventing supports two Event formats (i.e. legacy and cloud events), see the Eventing [tutorials](../../03-tutorials/00-eventing) section for more information.
+```bash
+kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME} -o jsonpath='{.spec.sink}'
+```
 
-- If the HTTP Status Code was 5xx, then check the logs from the Eventing Publisher Proxy Pod for any errors. To fetch these logs, run this command:
-    ```bash
-    kubectl -n kyma-system logs -l app.kubernetes.io/instance=eventing,app.kubernetes.io/name=eventing-publisher-proxy
-    ```
-  
-- If the HTTP Status Code was 2xx, then verify if you are sending the event on same Event type as defined in the subscription.
-  ```bash
-  kubectl -n {NAMESPACE} get subscription {NAME} -o jsonpath='{.spec.filter.filters}' | jq
-  ```
+You can run the following commands to check the health of the sink:
+
+```bash
+kubectl -n default run --image=curlimages/curl --restart=Never sink-test-tmp -- curl --head {SINK_URL}
+kubectl -n default logs sink-test-tmp 
+kubectl -n default delete pod sink-test-tmp
+```
+
+If the returned HTTP Status Code is not 2xx, then check the logs of the Subscriber instance.
 
 ### Step 6: Check NATS JetStream status
 
