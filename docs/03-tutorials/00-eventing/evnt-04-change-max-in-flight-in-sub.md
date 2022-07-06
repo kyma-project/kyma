@@ -2,8 +2,8 @@
 title: Changing Events Max-In-Flight in Subscriptions
 ---
 
-In this tutorial, we will show how to set idle "in-flight messages" limit in Kyma Subscriptions.
-The "in-flight messages" config defines the number of events which will be forwarded in parallel to the sink by Eventing Services without waiting for a response. 
+In this tutorial, you learn how to set idle "in-flight messages" limit in Kyma Subscriptions.
+The "in-flight messages" config defines the number of events that Eventing forwards in parallel to the sink, without waiting for a response. 
 
 ## Prerequisites
 
@@ -19,7 +19,9 @@ The "in-flight messages" config defines the number of events which will be forwa
 
 ## Create a Workload
 
-First, create a sample Function that prints out the received event to console:
+First, create a sample Function that prints out the received event to console.
+To simulate prolonged event processing, in this example, the Function waits for 5 seconds before returning the response.
+
 
 <div tabs name="Deploy a Function" group="create-workload">
   <details open>
@@ -42,7 +44,6 @@ First, create a sample Function that prints out the received event to console:
      } 
    }
    ```
-   The Function will wait for 5 seconds before returning the response in order to simulate prolonged event processing.
 5. Save your changes.
 6. Wait a few seconds for the Function to have status `RUNNING`.
 
@@ -80,7 +81,6 @@ cat <<EOF | kubectl apply -f -
 EOF
 ```
 
-The Function will wait for 5 seconds before returning the response in order to simulate prolonged event processing.
 
 <br/>
 If the resources were created successfully, the command returns this message:
@@ -102,7 +102,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Max-In-Flight config
 
-Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe for events of the type: `order.received.v1`. We will set the `maxInFlightMessages` to `5`, so that the Eventing Services forwards maximum 5 events in parallel to the sink without waiting for a response.
+Next, create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. Subscribe for events of the type: `order.received.v1` and set the `maxInFlightMessages` to `5`, so that the Eventing Services forwards maximum 5 events in parallel to the sink without waiting for a response.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -180,11 +180,10 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with multiple events
 
-We created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR.
-We will publish 15 events at once and see how the Eventing Service trigger the workload.
-In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
+You created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR.
+Next, publish 15 events at once and see how the Eventing Service trigger the workload.
 
-1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
+1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```

@@ -2,8 +2,8 @@
 title: Event name cleanup in Subscriptions
 ---
 
-To conform to Cloud Event specifications, sometimes Eventing must modify the event names to filter out non-alphanumeric character. In this tutorial, we will show one such example of event name cleanup.
-We will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) having alphanumeric characters in the event names and see how Eventing behaves. You can read more about Event name format and cleanup [here](../../05-technical-reference/evnt-01-event-names.md).
+To conform to Cloud Event specifications, sometimes Eventing must modify the event names to filter out non-alphanumeric characters. This tutorial presents one example of event name cleanup.
+You learn how Eventing behaves when you create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) having alphanumeric characters in the event names. Read more about [Event name format and cleanup](../../05-technical-reference/evnt-01-event-names.md).
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Event type consisting of alphanumeric characters
 
-Next, we will create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe for events of the type: `order.payment-success.v1`. Note that `order.payment-success.v1` contains a non-alphanumeric character (i.e. hyphen `-`).
+Next, create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource and subscribe for events of the type: `order.payment-success.v1`. Note that `order.payment-success.v1` contains a non-alphanumeric character, the hyphen `-`.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -158,19 +158,18 @@ To check the Subscription cleaned Event type, run:
 kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.cleanEventTypes}"
 ```
 
-Now, note that the returned cleaned event type `["sap.kyma.custom.myapp.order.paymentsuccess.v1"]` does not contain the hyphen (i.e. `-`) in `payment-success` part, because Eventing services cleans out the non-alphanumeric characters from the Event name and uses the cleaned Event name in underlying Eventing-Backend.
+Note that the returned cleaned event type `["sap.kyma.custom.myapp.order.paymentsuccess.v1"]` does not contain the hyphen `-` in the `payment-success` part. That's because Eventing services cleans out the non-alphanumeric characters from the Event name and uses the cleaned Event name in the underlying Eventing backend.
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function, and subscribed to the `order.payment-success.v1` events by creating a Subscription CR. 
-Now we will see that we can still publish events with the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
-In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) to localhost.
+You created the `lastorder` Function, and subscribed to the `order.payment-success.v1` events by creating a Subscription CR. 
+Next, you see that you can still publish events with the original Event name (i.e. `order.payment-success.v1`) even though it contains the non-alphanumeric character, and it will trigger the Function.
 
-1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
+1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Now publish an event to trigger your function. In another Terminal window run:
+2. Publish an event to trigger your Function. In another terminal window, run:
 
    <div tabs name="Publish an event" group="trigger-workload">
      <details open>
@@ -240,7 +239,7 @@ kubectl logs -f -n default \
   </details>
 </div>
 
-You will see the received event in the logs:
+You see the received event in the logs:
 ```
 Received event:  { orderCode: '3211213', orderAmount: '1250' } , Event Type:  sap.kyma.custom.myapp.order.paymentsuccess.v1
 ```
@@ -248,5 +247,6 @@ Note that the `Event Type` of the received event is not the same as defined in t
 
 ## Conclusion
 
-We saw that Eventing services modifies the event names to filter out non-alphanumeric character to conform to Cloud Event specifications. But this modification is abstract to the user because the user can still publish and subscribe to the original Event names. 
-Only catch is that in some cases, it can lead to a naming collision as explained in [Event names](../../05-technical-reference/evnt-01-event-names.md).
+You see that Eventing services modify the event names to filter out non-alphanumeric character to conform to Cloud Event specifications. 
+
+> **CAUTION:** This cleanup modification is abstract; you can still publish and subscribe to the original Event names. However, in some cases, it can lead to a naming collision as explained in [Event names](../../05-technical-reference/evnt-01-event-names.md).

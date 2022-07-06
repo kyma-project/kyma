@@ -57,7 +57,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.protocol** | Yes | Must be set to `""`. |
 | **spec.protocolsettings** | Yes | Defines the Cloud Event protocol setting specification implementation. Must be set to `{}`. |
 | **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`.  |
-| **spec.config.maxInFlightMessages** | No | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. It is set to 10 by default.  |
+| **spec.config.maxInFlightMessages** | No | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. By default, it is set to 10.  |
 
 ## Related resources and components
 

@@ -153,13 +153,13 @@ The operation was successful if the command returns `true`.
 
 ## Publish a legacy event to trigger the workload
 
-We created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR. Now it's time to send an event and trigger the Function. In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
+You created the `lastorder` Function, and subscribed to the `order.received.v1` events by creating a Subscription CR. Now it's time to send an event and trigger the Function.
 
-1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
+1. Port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Now publish an event to trigger your Function. In another terminal window, run:
+2. Publish an event to trigger your Function. In another terminal window, run:
 
    ```bash
    curl -v -X POST \

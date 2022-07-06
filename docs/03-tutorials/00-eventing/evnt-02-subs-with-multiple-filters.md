@@ -2,7 +2,7 @@
 title: Create subscription subscribing to multiple event types
 ---
 
-The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource definition (CRD) is used to subscribe to events. In this tutorial, we will show how to subscribe to one or more event types using the Kyma Subscription.
+The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource definition (CRD) is used to subscribe to events. In this tutorial, you learn how to subscribe to one or more event types using the Kyma Subscription.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ First, create a sample Function that prints out the received event to console:
 1. Go to **Namespaces** and select the default Namespace.
 2. Go to **Workloads** > **Functions** and click **Create Function +**.
 3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, modify its source replacing it with this code:
+4. In the inline editor for the Function replace its source with the following code:
     ```js
     module.exports = {
       main: async function (event, context) {
@@ -91,7 +91,7 @@ kubectl get functions -n default lastorder
 
 ## Create a Subscription with Multiple Filters
 
-Next, to subscribe to multiple events, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of two types: `order.received.v1` and `order.changed.v1`.
+Next, to subscribe to multiple events, you need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. In the following example, you learn how to subscribe to events of two types: `order.received.v1` and `order.changed.v1`.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>
@@ -160,14 +160,14 @@ The operation was successful if the returned status says `true`.
 
 ## Trigger the workload with an event
 
-We created the `lastorder` Function, and subscribed to the `order.received.v1` and `order.changed.v1` events by creating a Subscription CR. Now it's time to publish the events and trigger the Function.
-In this example, we'll port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
+You created the `lastorder` Function, and subscribed to the `order.received.v1` and `order.changed.v1` events by creating a Subscription CR. Now it's time to publish the events and trigger the Function.
+In the following example, you port-forward the [Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost.
 
-1. Port-forward the Event Publisher Proxy Service to localhost. We will use port `3000`. Run:
+1. Port-forward the Event Publisher Proxy](../../05-technical-reference/00-architecture/evnt-01-architecture.md) Service to localhost, using port `3000`. Run:
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
-2. Publish an event of type `order.received.v1` to trigger your function. In another Terminal window run:
+2. Publish an event of type `order.received.v1` to trigger your Function. In another terminal window, run:
 
     <div tabs name="Publish an event" group="trigger-workload">
       <details open>
@@ -205,7 +205,7 @@ In this example, we'll port-forward the [Event Publisher Proxy](../../05-technic
       </details>
     </div>
 
-3. Now publish an event of type `order.changed.v1` to trigger your function.
+3. Now, publish an event of type `order.changed.v1` to trigger your Function.
 
     <div tabs name="Publish an event" group="trigger-workload2">
       <details open>
@@ -256,7 +256,7 @@ To verify that the events were properly delivered, check the logs of the Functio
 1. In Kyma Dashboard, return to the view of your `lastorder` Function.
 2. Go to **Code** and find the **Replicas of the Function** section.
 3. Click on **View Logs**.
-4. You will see the received event in the logs:
+4. You see the received event in the logs:
    ```
    Received event: { orderCode: '3211213', orderStatus: 'received' }
    Received event: { orderCode: '3211213', orderStatus: 'changed' }
