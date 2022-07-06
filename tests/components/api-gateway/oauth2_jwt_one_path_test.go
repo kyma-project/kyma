@@ -15,7 +15,7 @@ type oauthJWTOnePathScenario struct {
 }
 
 func InitializeScenarioOAuth2JWTOnePath(ctx *godog.ScenarioContext) {
-	mainScenario, err := CreateScenario(oauthStrategyApiruleFile, "oauth2-jwt-one-path")
+	mainScenario, err := CreateScenario(jwtAndOauthOnePathApiruleFile, "oauth2-jwt-one-path")
 	if err != nil {
 		t.Fatalf("could not initialize unsecure endpoint scenario err=%s", err)
 	}
