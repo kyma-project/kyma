@@ -365,7 +365,7 @@ func TestChangeSubscription(t *testing.T) {
 			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
 				reconcilertesting.AddFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1"), subscription)
 
-				// provoke an error by making the subscription unready
+				// induce an error by making the sink invalid
 				subscription.Spec.Sink = "invalid"
 			},
 			wantAfter: utils.Want{
@@ -429,7 +429,7 @@ func TestChangeSubscription(t *testing.T) {
 				subscription.Spec.Filter.Filters = nil
 				reconcilertesting.AddFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1"), subscription)
 
-				// provoke an error by making the subscription unready
+				// induce an error by making the sink invalid
 				subscription.Spec.Sink = "invalid"
 			},
 			wantAfter: utils.Want{
