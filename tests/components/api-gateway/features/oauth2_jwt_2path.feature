@@ -1,6 +1,6 @@
 Feature: Exposing different endpoints on one deployment with different authorization strategies (OAuth2 and JWT)
 
-  Scenario: Calling the secured OAuth2 endpoint without a token
+  Scenario: OAuth2JWTTwoPaths: Calling the secured OAuth2 endpoint without a token
     Given OAuth2JWTTwoPaths: There is a deployment secured with OAuth2 on path /headers and JWT on path /image
     Then OAuth2JWTTwoPaths: Calling the "/headers" endpoint without a token should result in status between 400 and 403
     And OAuth2JWTTwoPaths: Calling the "/image" endpoint without a token should result in status between 400 and 403

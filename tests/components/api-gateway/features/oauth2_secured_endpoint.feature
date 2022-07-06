@@ -1,4 +1,4 @@
-Feature: Calling secured OAuth2 API endpoint with different tokens
+Feature: Exposing an endpoint with OAuth2
 
   Scenario: OAuth2: Exposing an endpoint with OAuth2
     Given OAuth2: There is an endpoint secured with OAuth2 introspection

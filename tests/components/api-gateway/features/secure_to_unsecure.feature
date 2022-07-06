@@ -1,6 +1,6 @@
 Feature: Exposing unsecure API and then securing it with OAuth2
 
-  Scenario: Securing an unsecured API with OAuth2 and calling it without a token
+  Scenario: SecureToUnsecure: Securing an unsecured endpoint with OAuth2
     Given SecureToUnsecure: There is an endpoint secured with OAuth2
     And SecureToUnsecure: The endpoint is reachable
     When SecureToUnsecure: Endpoint is exposed with noop strategy
