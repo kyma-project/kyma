@@ -1,6 +1,5 @@
 NAMESPACE = test
 GOPATH ?= $(shell go env GOPATH)
-CHECK_POD_STATUS_CMD = $(shell kubectl get pod/application-gateway-test -n $(NAMESPACE) -ojsonpath='{ .status.phase}')
 
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
@@ -21,7 +20,7 @@ test-gateway:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template k8s/gateway-test | kubectl apply -f -
 
-	./wait-for-completion.sh
+	./wait-for-gateway-tests-finish.sh
 
 	@echo ""
 	@echo "Gateway test results:"
