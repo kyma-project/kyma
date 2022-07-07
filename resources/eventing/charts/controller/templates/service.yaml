@@ -7,7 +7,7 @@ spec:
   type: ClusterIP
   selector: {{- include "controller.selectorLabels" . | nindent 4 }}
   ports:
-    - name: {{ .Values.global.ports.httpPrefix }}{{ .Values.metrics.config.portName }}
+    - name: {{ .Values.global.ports.namePrefix }}{{ .Values.metrics.config.portName }}
       protocol: TCP
       port: 80
       targetPort: {{ .Values.metrics.config.port }}
@@ -21,7 +21,7 @@ spec:
   type: ClusterIP
   selector: {{- include "controller.selectorLabels" . | nindent 4 }}
   ports:
-    - name:  {{ .Values.global.ports.httpPrefix }}{{ .Values.global.istio.proxy.portName }}
+    - name:  {{ .Values.global.ports.namePrefix }}{{ .Values.global.istio.proxy.portName }}
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}

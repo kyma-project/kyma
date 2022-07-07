@@ -35,7 +35,7 @@ global:
   domainName: "kyma.example.com"
 
   ports:
-    httpPrefix: http-
+    namePrefix: http-
 
   istio:
     proxy:
