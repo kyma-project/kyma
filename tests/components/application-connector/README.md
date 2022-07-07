@@ -64,7 +64,7 @@ Image versions and the external service name used during testing can be set up i
       </details>
    </div>
 
-4. Run the tests:
+3. Run the tests:
 
    ```bash
    make test-gateway
