@@ -36,7 +36,7 @@ type LogPipelineSyncer struct {
 	PipelineConfig          fluentbit.PipelineConfig
 	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
-	SecretValidator         *secret.SecretHelper
+	SecretValidator         *secret.Helper
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -346,7 +346,7 @@ func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList)
 		if l.DeletionTimestamp != nil {
 			continue
 		}
-		if LogPipelineIsUnsupported(&l) {
+		if LogPipelineIsUnsupported(l) {
 			unsupportedPluginsTotal++
 		}
 
@@ -354,7 +354,7 @@ func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList)
 	return unsupportedPluginsTotal
 }
 
-func LogPipelineIsUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
+func LogPipelineIsUnsupported(pipeline telemetryv1alpha1.LogPipeline) bool {
 	if pipeline.Spec.Output.Custom != "" {
 		return true
 	}

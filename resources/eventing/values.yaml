@@ -34,10 +34,13 @@ global:
   # domainName is the global domain used in Kyma
   domainName: "kyma.example.com"
 
+  ports:
+    namePrefix: http-
+
   istio:
     proxy:
       statusPort: 15020
-      portName: http-status
+      portName: status
 
   securityContext:
     allowPrivilegeEscalation: false
