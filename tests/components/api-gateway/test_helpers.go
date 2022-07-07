@@ -130,7 +130,7 @@ func generateHTMLReport() {
 	htmlOutputDir := "reports/"
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
 		htmlOutputDir = fmt.Sprintf("%s/reports", artifactsDir)
-		os.Link("junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+		os.Rename("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 
 	html := gocure.HTML{
