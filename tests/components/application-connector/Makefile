@@ -9,9 +9,9 @@ MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(D
 test: test-gateway
 image: image-gateway-test
 clean: clean-gateway-test
-publish: publish-gateway-test publish-mock-app
 
-release: publish-gateway-test
+
+release: publish-gateway-test publish-mock-app
 test-os: test-gateway
 test-skr: test-gateway
 
