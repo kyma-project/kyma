@@ -185,7 +185,7 @@ func TestApiGateway(t *testing.T) {
 	testExitCode := unsecuredSuite.Run()
 
 	if os.Getenv(exportResultVar) == "true" {
-		generateHTMLReport()
+		generateReport()
 	}
 
 	if testExitCode != 0 {

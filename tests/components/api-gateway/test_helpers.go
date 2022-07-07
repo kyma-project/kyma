@@ -3,6 +3,7 @@ package api_gateway
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -126,11 +127,11 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 	return tokenOAUTH, err
 }
 
-func generateHTMLReport() {
+func generateReport() {
 	htmlOutputDir := "reports/"
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		htmlOutputDir = fmt.Sprintf("%s/reports", artifactsDir)
-		os.Rename("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+		htmlOutputDir = fmt.Sprintf("%s/reports/", artifactsDir)
+		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 
 	html := gocure.HTML{
@@ -239,4 +240,29 @@ func CreateTwoStepScenario(templateFileNameOne string, templateFileNameTwo strin
 	}
 
 	return &TwoStepScenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), apiResourceOne: accessRuleOne, apiResourceTwo: accessRuleTwo}, nil
+}
+
+func copy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }
