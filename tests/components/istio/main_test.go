@@ -40,7 +40,7 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 
 	suite := godog.TestSuite{
 		Name:                evalProfile,
-		ScenarioInitializer: InitializeScenarioEvalProfile,
+		ScenarioInitializer: InitializeScenarioIstioInstalled,
 		Options:             &evalOpts,
 	}
 
@@ -64,13 +64,14 @@ func TestIstioInstalledProduction(t *testing.T) {
 
 	suite := godog.TestSuite{
 		Name:                prodProfile,
-		ScenarioInitializer: InitializeScenarioProdProfile,
+		ScenarioInitializer: InitializeScenarioIstioInstalled,
 		Options:             &prodOpts,
 	}
 
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
 		t.Skip()
 	}
+
 	suiteExitCode := suite.Run()
 
 	if os.Getenv(exportResultVar) == "true" {

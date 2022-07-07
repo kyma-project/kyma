@@ -10,7 +10,7 @@ import (
 	"k8s.io/kubectl/pkg/util/podutils"
 )
 
-func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
+func InitializeScenarioIstioInstalled(ctx *godog.ScenarioContext) {
 	installedCase := istioInstallledCase{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		err := installedCase.getIstioPods()
@@ -23,20 +23,6 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
-	InitializeScenarioTargetNamespaceSidecar(ctx)
-}
-
-func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
-	installedCase := istioInstallledCase{}
-	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
-		err := installedCase.getIstioPods()
-		return ctx, err
-	})
-	ctx.Step(`^a running Kyma cluster with "([^"]*)" profile$`, installedCase.aRunningKymaClusterWithProfile)
-	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
-	ctx.Step(`^there is (\d+) pod for Ingress gateway$`, installedCase.thereIsPodForIngressGateway)
-	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
-	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
 	InitializeScenarioTargetNamespaceSidecar(ctx)
 }
