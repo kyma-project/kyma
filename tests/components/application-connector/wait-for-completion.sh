@@ -7,7 +7,7 @@ echo "Waiting for tests to finish"
 elapsedSeconds=0
 
 status=$(kubectl get pod/application-gateway-test -n $NAMESPACE -ojsonpath='{ .status.phase}')
-until [[ $status == Succeedeeeed || $status == Faileeeed ]]; do
+until [[ $status == Succeeded || $status == Failed ]]; do
   printf '.'
   sleep 5
   let "elapsedSeconds=elapsedSeconds+5"
