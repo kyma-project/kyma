@@ -1,54 +1,71 @@
-# Component tests of Application Connector
+# Component tests for Application Connector
 
-## Tests structure 
+These are the component tests for Application Connector.
 
-Test are structured as a monorepo with tests for modules:
+## Tests structure
+
+The test are structured as a monorepo with tests for the following modules:
 - Application Gateway
 
 ## Application Gateway tests
 
-Tests are executed on a Kyma cluster where tested Application Gateway is installed. 
+The tests are executed on a Kyma cluster where the tested Application Gateway is installed.
 
-The environment consists of Kubernetes pod running tests and Mock-Application simulating remote endpoints for tested Application Gateway.
+The environment consists of a Kubernetes Pod running the tests and a mock application simulating the remote endpoints for the tested Application Gateway.
 
-<!---TODO: Draw a simple diagram here--->
+![Application Gateway tests architecture](./assets/app-gateway-tests-architecture.svg)
 
-Test cases are defined as services in Application CRD.
+The test cases are defined as services in the Application CR.
 
-The whole test setup is deployed into Kyma cluster with helm template executed in the Makefile by the command `test-gateway`.  
- 
-Image versions, and external service name used during testing can be set up in Helm chart values file `k8s/gateway-test/values.yaml` 
+The whole test setup is deployed into the Kyma cluster with the Helm template executed in the Makefile by the command `test-gateway`.
 
-### Local Build of test images
+Image versions and the external service name used during testing can be set up in the Helm chart values file `k8s/gateway-test/values.yaml`.
 
-1. Setup DOCKER_TAG and DOCKER_PUSH_REPOSITORY in `local_build.sh` for your target Docker registry settings
-2. Run `local_build.sh`
+### Local build of test images
+
+<!-- To build the test images locally, perform these steps: -->
+
+1. Set up **DOCKER_TAG** and **DOCKER_PUSH_REPOSITORY** in `local_build.sh` for your target Docker registry settings.
+2. Build the test images:
+   ```bash
+   ./local_build.sh
+   ```
 
 ### Local execution
 
-1. Provision Kubernetes local cluster with k3d
+<!-- To run the tests locally, perform these steps: -->
 
-```shell
-kyma provision k3d
-```
-2. Install minimal set of components required to run Application Gateway with specific variant
+1. Provision a local Kubernetes cluster with k3d:
 
-For Application Gateway deployed as part of KymaOS cluster run:
+   ```shell
+   kyma provision k3d
+   ```
 
-```shell
-kyma deploy --components-file mini-kyma-os.yaml 
-```
+2. Install the minimal set of components required to run Application Gateway for either Kyma OS or SKR:
 
-For Application Gateway deployed as part of Managed SAP Kyma Runtime run:
+   <div tabs name="Kyma flavor" group="minimal-kyma-installation">
+      <details open>
+      <summary label="OS">
+      Kyma OS
+      </summary>
 
-```shell
-kyma deploy --components-file mini-kyma-skr.yaml 
-```
+   ```bash
+   kyma deploy --components-file mini-kyma-os.yaml
+   ```
+      </details>
+      <details>
+      <summary label="SKR">
+      SKR
+      </summary>
 
-3. Run command `make test-gateway`
+   ```bash
+   kyma deploy --components-file mini-kyma-skr.yaml 
+   ```
+      </details>
+   </div>
 
+4. Run the tests:
 
-
-
-
-
+   ```bash
+   make test-gateway
+   ```
