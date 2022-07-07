@@ -23,11 +23,13 @@ func (gs *GatewaySuite) TestSimpleCases() {
 				gs.T().Log("Calling", entry.CentralGatewayUrl)
 				res, err := http.Get(entry.CentralGatewayUrl)
 				gs.Nil(err)
-				body, err := ioutil.ReadAll(res.Body)
-				if err == nil && len(body) > 0 {
-					gs.T().Log("Response", string(body))
+				if err == nil {
+					body, err := ioutil.ReadAll(res.Body)
+					if err == nil && len(body) > 0 {
+						gs.T().Log("Response", string(body))
+					}
+					gs.Equal(200, res.StatusCode)
 				}
-				gs.Equal(200, res.StatusCode)
 			}
 		})
 	}
