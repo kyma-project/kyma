@@ -97,7 +97,7 @@ func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipelin
 	}
 
 	if hasMatchCondition(customSection) {
-		return fmt.Errorf("plugin '%s' contains match condition. Match conditions are not allowed", name)
+		return fmt.Errorf("plugin '%s' contains match condition. Match conditions are forbidden", name)
 	}
 
 	return nil

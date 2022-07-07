@@ -39,7 +39,7 @@ func TestValidateForbiddenFilters(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are not allowed")
+	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are forbidden")
 }
 
 func TestValidateForbiddenOutputs(t *testing.T) {
@@ -58,7 +58,7 @@ func TestValidateForbiddenOutputs(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "plugin 'es' contains match condition. Match conditions are not allowed")
+	assert.Contains(t, err.Error(), "plugin 'es' contains match condition. Match conditions are forbidden")
 }
 
 func TestValidateUnnamedOutputs(t *testing.T) {
@@ -101,7 +101,7 @@ func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are not allowed")
+	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are forbidden")
 }
 
 func TestValidatePipelineCreation(t *testing.T) {
