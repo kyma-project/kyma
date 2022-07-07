@@ -13,7 +13,7 @@ spec:
     matchNames:
       - {{ .Release.Namespace }}
   endpoints:
-    - port: {{ .Values.metrics.config.portName }}
+    - port: {{ .Values.global.ports.namePrefix }}{{ .Values.metrics.config.portName }}
       interval: {{ .Values.metrics.config.interval }}
       scheme: https
       tlsConfig: 
