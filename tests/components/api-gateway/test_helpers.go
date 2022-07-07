@@ -128,8 +128,9 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 
 func generateHTMLReport() {
 	htmlOutputDir := "reports/"
-	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok{
-		htmlOutputDir = fmt.Sprintf("%s/reports",artifactsDir)
+	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
+		htmlOutputDir = fmt.Sprintf("%s/reports", artifactsDir)
+		os.Link("junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 
 	html := gocure.HTML{
@@ -138,12 +139,12 @@ func generateHTMLReport() {
 			OutputHtmlFolder: htmlOutputDir,
 			Title:            "Kyma API-Gateway component tests",
 			Metadata: models.Metadata{
-				Platform:   runtime.GOOS,
-				TestEnvironment: "gcp-gardener",
-				Parallel:   "Scenarios",
-				Executed:   "Remote",
-				AppVersion: "main",
-				Browser:    "default",
+				Platform:        runtime.GOOS,
+				TestEnvironment: "Gardener GCP",
+				Parallel:        "Scenarios",
+				Executed:        "Remote",
+				AppVersion:      "main",
+				Browser:         "default",
 			},
 		},
 	}
