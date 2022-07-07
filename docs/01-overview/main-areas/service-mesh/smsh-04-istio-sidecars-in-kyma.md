@@ -16,7 +16,7 @@ Another benefit of having Istio proxies is related to tracing. Istio is performi
 
 Kiali is another tool that comes as [separate Kyma component](../../../05-technical-reference/00-architecture/obsv-04-architecture-kiali.md) and Kyma configures Istio to export metrics necessary to support Kiali features that facilitates managing, visualizing and troubleshooting your mesh.
 
-Moreover, Kyma provides [Istio specific dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for [Grafana (monitoring component)](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md) and together with metrics exposed by the sidecar proxy provides better visibility into workloads and mesh control plane performance.
+Moreover, Kyma provides [Istio specific dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for [Grafana (monitoring component)](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md) and together with metrics exposed by the Istio sidecar provides better visibility into workloads and mesh control plane performance.
 
 Being part of Istio service mesh enables all this advanced observability features, that would not be possible without advanced instrumentation code within your application.
 
