@@ -1,12 +1,10 @@
 # Istio component tests
 
-We have chosen to implement component tests with [cucumber/godog](https://github.com/cucumber/godog) library. 
-Please feel free to take a look at their repository to learn more about the framework.
+Istio component tests use the [cucumber/godog](https://github.com/cucumber/godog) library.
 
-## Requirements
+## Prerequisites
 
-In order to run these tests, you need to have:
-- Kubernetes installed and kubeconfig configured to point on this cluster
+- Kubernetes installed and kubeconfig configured to point to this cluster
 - Kyma installed with at least Istio component
 - Export environment variables, the only required is `KYMA_PROFILE`
 
@@ -23,20 +21,18 @@ These environment variables will determine how the tests are run in both prow an
 
 Having prepared environment variables simply run:
 
-`make test`
+```make test```
 
 We have also provided a Make target that will create k3d cluster, install Kyma on it and run the tests:
 
-`make test-k3d`
+```make test-k3d```
 
-## Create k3d cluster
+#### Prepare cluster on your local machine
 
-To provision k3d cluster on your local machine run:
+1. Create k3d cluster
 
-`make provision-k3d`
+```make provision-k3d```
 
-## Install Kyma
+2. Install Kyma with the Istio component on your cluster:
 
-To install Kyma with Istio component on your cluster run:
-
-`make kyma-istio-deploy`
+```make kyma-istio-deploy```
