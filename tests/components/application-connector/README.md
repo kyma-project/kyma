@@ -3,11 +3,11 @@
 ## Tests structure 
 
 Test are structured as a monorepo with tests for modules:
-- Central Application Gateway
+- Application Gateway
 
-## Central Application Gateway tests
+## Application Gateway tests
 
-Tests are executed on a Kyma cluster where tested Central Application Gateway is installed. 
+Tests are executed on a Kyma cluster where tested Application Gateway is installed. 
 
 The environment consists of Kubernetes pod running tests and Mock-Application simulating remote endpoints for tested Application Gateway.
 
