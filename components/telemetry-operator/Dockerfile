@@ -19,7 +19,7 @@ COPY internal/ internal/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
 
 # Use the fluent-bit image because we need the fluent-bit binary
-FROM eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.4-7114f989
+FROM eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.5-92c1c95e
 
 WORKDIR /
 COPY --from=builder /workspace/manager .

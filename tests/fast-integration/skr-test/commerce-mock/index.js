@@ -16,14 +16,14 @@ const {debug} = require('../../utils');
 const {director} = require('../provision/provision-skr');
 
 const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
-
-// const auditLogsThreshold = 4;
+// rate of audit events generated in 60 minutes. The value is derived from the actual prometheus query.
+// const auditLogsThreshold = 6;
 const testTimeout = 1000 * 60 * 30; // 30m
 
 // prepares all the resources required for commerce mock to be executed;
 // runs the actual tests and checks the audit logs in case of AWS plan
 function commerceMockTest(options) {
-  context('CommerceMock Test', async function() {
+  describe('CommerceMock Test', function() {
     this.timeout(testTimeout);
     if (options === undefined) {
       throw new Error('Empty configuration given');
@@ -32,7 +32,7 @@ function commerceMockTest(options) {
     commerceMockTests(options.testNS);
     commerceMockCleanup(options.testNS);
 
-    it('Check audit logs for AWS', async function() {
+    context('Check audit logs for AWS', function() {
       if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
         checkAuditLogsForAWS();
       } else {
@@ -86,14 +86,21 @@ function commerceMockCleanup(testNamespace) {
 }
 
 function checkAuditLogsForAWS() {
+  // it('Expose Grafana', async function() {
+  //   await exposeGrafana();
+  // });
+
   it('Check audit logs', async function() {
     const auditLogs = new AuditLogClient(AuditLogCreds.fromEnv());
     await checkAuditLogs(auditLogs, null);
   });
 
-  // // TODO: Enable checkAuditEventsThreshold again when fix is ready by Andreas Thaler
   // it('Amount of audit events must not exceed a certain threshold', async function() {
   //   await checkAuditEventsThreshold(auditLogsThreshold);
+  // });
+  //
+  // it('Unexpose Grafana', async function() {
+  //   await unexposeGrafana(true);
   // });
 }
 

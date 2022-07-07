@@ -18,13 +18,13 @@ package telemetry
 
 import (
 	"context"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // LogParserReconciler reconciles a LogParser object
@@ -58,7 +58,7 @@ func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemon
 
 func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
-	log := logf.FromContext(ctx)
+	//log := logf.FromContext(ctx)
 
 	return ctrl.Result{}, nil
 }

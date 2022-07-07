@@ -49,13 +49,16 @@ const (
 type LogPipelineValidator struct {
 	client.Client
 
-	fluentBitConfigMap    types.NamespacedName
-	variablesValidator    validation.VariablesValidator
-	configValidator       validation.ConfigValidator
-	pluginValidator       validation.PluginValidator
-	maxPipelinesValidator validation.MaxPipelinesValidator
-	emitterConfig         fluentbit.EmitterConfig
-	fsWrapper             fs.Wrapper
+	fluentBitConfigMap       types.NamespacedName
+	variablesValidator       validation.VariablesValidator
+	configValidator          validation.ConfigValidator
+	pluginValidator          validation.PluginValidator
+	maxPipelinesValidator    validation.MaxPipelinesValidator
+	outputValidator          validation.OutputValidator
+	pipelineConfig           fluentbit.PipelineConfig
+	fluentBitMaxFSBufferSize string
+
+	fsWrapper fs.Wrapper
 
 	decoder *admission.Decoder
 }
@@ -68,7 +71,8 @@ func NewLogPipeLineValidator(
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
 	maxPipelinesValidator validation.MaxPipelinesValidator,
-	emitterConfig fluentbit.EmitterConfig,
+	outputValidator validation.OutputValidator,
+	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
 	return &LogPipelineValidator{
@@ -81,8 +85,9 @@ func NewLogPipeLineValidator(
 		configValidator:       configValidator,
 		pluginValidator:       pluginValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
+		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
-		emitterConfig:         emitterConfig,
+		pipelineConfig:        pipelineConfig,
 	}
 }
 
@@ -174,6 +179,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
+	if err = v.outputValidator.Validate(logPipeline); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit output")
+		return err
+	}
+
 	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
@@ -208,7 +218,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.pipelineConfig)
 	if err != nil {
 		return []fs.File{}, err
 	}
