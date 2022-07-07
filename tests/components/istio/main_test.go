@@ -20,7 +20,7 @@ var goDogOpts = godog.Options{
 	Output:      colors.Colored(os.Stdout),
 	Format:      "pretty",
 	TestingT:    t,
-	Concurrency: 2,
+	Concurrency: 1,
 }
 
 func init() {
