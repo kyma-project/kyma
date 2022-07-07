@@ -1,6 +1,7 @@
 # Istio component tests
 
 We have chosen to implement component tests with [cucumber/godog](https://github.com/cucumber/godog) library.
+
 Please feel free to take a look at their repository to learn more about the framework.
 
 ## Requirements
@@ -23,17 +24,21 @@ Required:
 ### Start the test suite
 
 Having prepared environment variables simply run:
+
 `make test`
 
 We have also provided a Make target that will create k3d cluster, install Kyma on it and run the tests:
+
 `make test-k3d`
 
 ## Create k3d cluster
 
 To provision k3d cluster on your local machine run:
+
 `make provision-k3d`
 
 ## Install Kyma
 
 To install Kyma with Istio component on your cluster run:
+
 `make kyma-istio-deploy`
