@@ -1,7 +1,6 @@
 # Istio component tests
 
-We have chosen to implement component tests with [cucumber/godog](https://github.com/cucumber/godog) library.
-
+We have chosen to implement component tests with [cucumber/godog](https://github.com/cucumber/godog) library. 
 Please feel free to take a look at their repository to learn more about the framework.
 
 ## Requirements
@@ -15,7 +14,6 @@ In order to run these tests, you need to have:
 
 These environment variables will determine how the tests are run in both prow and your local machine.
 
-Required:
 - `KYMA_PROFILE`: Set this environment variable accordingly to the Kyma profile installed on the Kubernetes cluster. These values are: `evaluation` or `production`.
 - `EXPORT_RESULT`: Set this environment variable to `true` if you want to export test results to JUnit XML, Cucumber JSON and HTML report. Default value: `false`.
 
