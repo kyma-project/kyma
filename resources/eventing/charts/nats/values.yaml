@@ -8,6 +8,10 @@ nats:
   ports:
     client: 4222
     monitoring: 8222
+    cluster: 6222
+    metrics: 7777
+    leafnodes: 7422
+    gateways: 7522
 
   # Toggle profiling.
   # This enables nats-server pprof (profiling) port, so you can see goroutines

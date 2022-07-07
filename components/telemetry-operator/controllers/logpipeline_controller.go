@@ -112,7 +112,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 		}
@@ -144,7 +144,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
@@ -169,7 +169,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
 
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err

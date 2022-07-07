@@ -52,11 +52,11 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 	err := pv.validateFilters(logPipeline, logPipelines)
 	if err != nil {
-		return errors.Wrap(err, " error validating filter plugins")
+		return errors.Wrap(err, "error validating filter plugins")
 	}
-	err = pv.validateOutputs(logPipeline, logPipelines)
+	err = pv.validateOutput(logPipeline, logPipelines)
 	if err != nil {
-		return errors.Wrap(err, " error validating output plugins")
+		return errors.Wrap(err, "error validating output plugin")
 	}
 	return nil
 }
@@ -70,9 +70,9 @@ func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeli
 	return nil
 }
 
-func (pv *pluginValidator) validateOutputs(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
 	if len(pipeline.Spec.Output.Custom) == 0 {
-		return fmt.Errorf("No output is defined. You must define one output!")
+		return fmt.Errorf("no output is defined, you must define one output")
 	}
 	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
 		return err
