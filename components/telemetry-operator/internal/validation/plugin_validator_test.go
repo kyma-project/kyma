@@ -24,10 +24,12 @@ func TestValidateEmpty(t *testing.T) {
 func TestValidateForbiddenFilters(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Custom: ``,
+			},
 			Filters: []telemetryv1alpha1.Filter{
 				{Custom: `
-    Name    grep
-    Match   *
+    Name    lua
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
 			},
@@ -39,10 +41,49 @@ func TestValidateForbiddenFilters(t *testing.T) {
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
+	assert.Contains(t, err.Error(), "plugin 'lua' is not supported. ")
+}
+
+func TestValidateFiltersContainMatchCondition(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Filters: []telemetryv1alpha1.Filter{
+				{Custom: `
+    Name    grep
+    Match   *
+    Regex   $kubernetes['labels']['app'] my-deployment`,
+				},
+			},
+		},
+	}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	err := sut.Validate(logPipeline, logPipelines)
+
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are forbidden")
 }
 
 func TestValidateForbiddenOutputs(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Custom: `
+    Name    loki`,
+			},
+		},
+	}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
+
+	sut := NewPluginValidator([]string{}, []string{"loki", "http"})
+	err := sut.Validate(logPipeline, logPipelines)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "plugin 'loki' is not supported. ")
+}
+
+func TestValidateOutputContainsMatchCondition(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
@@ -54,7 +95,7 @@ func TestValidateForbiddenOutputs(t *testing.T) {
 	}
 	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
-	sut := NewPluginValidator([]string{}, []string{"loki", "http"})
+	sut := NewPluginValidator([]string{}, []string{})
 	err := sut.Validate(logPipeline, logPipelines)
 
 	require.Error(t, err)
