@@ -6,33 +6,39 @@ Istio component tests use the [cucumber/godog](https://github.com/cucumber/godog
 
 - Kubernetes installed and kubeconfig configured to point to this cluster
 - Kyma installed with at least Istio component
-- Export environment variables, the only required is `KYMA_PROFILE`
+- Environment variables exported (the only required environment variable is `KYMA_PROFILE`)
 
-## Environment variables
+### Environment variables
 
-These environment variables will determine how the tests are run in both prow and your local machine.
+These environment variables determine how the tests are run on both Prow and your local machine:
 
-- `KYMA_PROFILE`: Set this environment variable accordingly to the Kyma profile installed on the Kubernetes cluster. These values are: `evaluation` or `production`.
-- `EXPORT_RESULT`: Set this environment variable to `true` if you want to export test results to JUnit XML, Cucumber JSON and HTML report. Default value: `false`.
+- `KYMA_PROFILE` - set this environment variable accordingly to the Kyma profile installed on the Kubernetes cluster. The possible values are `evaluation` or `production`.
+- `EXPORT_RESULT` - set this environment variable to `true` if you want to export test results to JUnit XML, Cucumber JSON, and HTML report. The default value is `false`.
 
-## Executing tests
+## Usage
 
 ### Start the test suite
 
-Having prepared environment variables simply run:
+Having met all the requirements simply run:
 
 ```make test```
+
+#### Prepare cluster on your local machine
 
 We have also provided a Make target that will create k3d cluster, install Kyma on it and run the tests:
 
 ```make test-k3d```
 
-#### Prepare cluster on your local machine
+The steps are as follows:
 
-1. Create k3d cluster
+1. Provision a k3d cluster on your local machine:
 
 ```make provision-k3d```
 
 2. Install Kyma with the Istio component on your cluster:
 
 ```make kyma-istio-deploy```
+
+3. Run the tests:
+
+```make test```
