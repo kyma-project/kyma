@@ -18,7 +18,7 @@ Kiali is another tool that comes as [separate Kyma component](../../../05-techni
 
 Moreover, Kyma provides [Istio specific dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for [Grafana (monitoring component)](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md) and together with metrics exposed by the sidecar proxy provides better visibility into workloads and mesh control plane performance.
 
-The sidecar proxy enables all the advanced observability, that would not be possible without instrumentation code within your application that could complicate your domain code.
+Being part of Istio service mesh enables all this advanced observability features, that would not be possible without advanced instrumentation code within your application.
 
 ## Traffic management
 
