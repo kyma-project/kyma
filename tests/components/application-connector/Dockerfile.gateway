@@ -1,9 +1,8 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.18.2-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
 
-WORKDIR /connectivity-test/
+WORKDIR /gateway-test/
 
 COPY go.mod go.sum ./
-RUN go install github.com/jstemmer/go-junit-report/v2@latest
 RUN go mod download && go mod verify
 
 COPY . .
@@ -12,7 +11,6 @@ RUN CGO_ENABLED=0 go test -v -c -o test ./gateway/
 
 FROM scratch
 
-COPY --from=builder /connectivity-test/test /
-COPY --from=builder /go/bin/go-junit-report /
+COPY --from=builder /gateway-test/test /
 ENTRYPOINT [ "/test" ]
 CMD ["-test.v"]
