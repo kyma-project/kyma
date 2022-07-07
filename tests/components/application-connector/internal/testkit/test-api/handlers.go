@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func alwaysOk(w http.ResponseWriter, r *http.Request) {
+func alwaysOk(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -33,5 +33,9 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res) // TODO: Handle error
+	err = json.NewEncoder(w).Encode(res)
+
+	if err != nil {
+		log.Println("Couldn't encode the response body to JSON:", r.URL)
+	}
 }
