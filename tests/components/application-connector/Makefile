@@ -10,7 +10,6 @@ test: test-gateway
 image: image-gateway-test
 clean: clean-gateway-test
 
-
 release: publish-gateway-test publish-mock-app
 test-os: test-gateway
 test-skr: test-gateway
