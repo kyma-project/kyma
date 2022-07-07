@@ -5,7 +5,7 @@
 Test are structured as a monorepo with tests for modules:
 - Central Application Gateway
 
-##Central Application Gateway tests
+## Central Application Gateway tests
 
 Tests are executed on a Kyma cluster where tested Central Application Gateway is installed. 
 
