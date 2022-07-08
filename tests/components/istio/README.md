@@ -28,3 +28,5 @@ If you don't have a cluster, you can run the tests on your local machine. To do 
 ```
 make test-k3d
 ```
+
+This command creates a k3d cluster on your local machine, installs Kyma on it, and runs the tests.
