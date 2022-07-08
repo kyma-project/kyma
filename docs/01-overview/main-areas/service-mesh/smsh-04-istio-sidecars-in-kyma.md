@@ -12,7 +12,7 @@ Another security benefit of having sidecar proxy is possibility to perform reque
 
 ## Observability
 
-Another benefit of having Istio proxies is related to tracing. Istio is performing global tracing and forwarding acquired data to the [Kyma's tracing component](../../../01-overview/main-areas/service-mesh/smsh-04-istio-sidecars-in-kyma.md) with using [Zipkin protocol](https://zipkin.io). You can read more about the process in the [Tracing Architecture](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) section.
+Another benefit of having Istio proxies is related to tracing. Istio is performing global tracing and forwarding acquired data to the [Kyma's tracing component](../../../01-overview/main-areas/observability/obsv-03-tracing-in-kyma.md) using [Zipkin protocol](https://zipkin.io). You can read more about the process in the [Tracing Architecture](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) section.
 
 Kiali is another tool that comes as [separate Kyma component](../../../05-technical-reference/00-architecture/obsv-04-architecture-kiali.md) and Kyma configures Istio to export metrics necessary to support Kiali features that facilitates managing, visualizing and troubleshooting your mesh.
 
