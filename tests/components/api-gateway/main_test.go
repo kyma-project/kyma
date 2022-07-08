@@ -1,6 +1,7 @@
 package api_gateway
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
@@ -29,6 +30,8 @@ import (
 
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/manifestprocessor"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
@@ -156,12 +159,6 @@ func TestMain(m *testing.M) {
 		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
 	}
 
-	// defer deleting namespace (it will also delete all remaining resources in that namespace)
-	defer func() {
-		time.Sleep(time.Second * 3)
-		resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
-	}()
-
 	os.Exit(m.Run())
 }
 
@@ -177,12 +174,16 @@ func TestApiGateway(t *testing.T) {
 	apiGatewayOpts.Concurrency = conf.TestConcurency
 
 	unsecuredSuite := godog.TestSuite{
-		Name:                "API-Gateway",
+		Name:                 "API-Gateway",
 		TestSuiteInitializer: InitializeApiGatewayTests,
-		Options:             &apiGatewayOpts,
+		Options:              &apiGatewayOpts,
 	}
 
 	testExitCode := unsecuredSuite.Run()
+
+	//Remove namespace
+	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
+	k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
 
 	if os.Getenv(exportResultVar) == "true" {
 		generateReport()
