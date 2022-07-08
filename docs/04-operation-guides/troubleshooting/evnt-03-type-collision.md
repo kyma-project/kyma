@@ -1,19 +1,21 @@
 ---
-title: Subscriber receiving irrelevant Events
+title: Subscriber receives irrelevant events
 ---
 
-## Symptom(s)
+## Symptom
 
-Subscriber is receiving irrelevant Events. 
+Subscriber receives irrelevant events. 
+
+## Cause
+
+As described in the [event names](../../05-technical-reference/evnt-01-event-names.md) guidelines, sometimes Eventing must modify the event names to filter out non-alphanumeric character to conform to Cloud Event specifications.
+In some cases, it can lead to a naming collision, which can result into subscribers receiving irrelevant events.
 
 ## Remedy
 
-As described in [Event Names guildelines](../../05-technical-reference/evnt-01-event-names.md), sometimes Eventing must modify the event names to filter out non-alphanumeric character to conform to Cloud Event specifications.
-In some cases, it can lead to a naming collision which can result into Subscribers receiving irrelevant Events.
+Follow these steps to detect if naming collision is the source of the problem:
 
-Follow these steps to detect if it is the source of the problem:
-
-1. Get the Clean Event Types from the status of the Subscription.
+1. Get the clean event types from the status of the Subscription.
  
     ```bash
     kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME} -o jsonpath='{.status.cleanEventTypes}'
@@ -25,5 +27,5 @@ Follow these steps to detect if it is the source of the problem:
     kubectl get subscriptions.eventing.kyma-project.io -A | grep {CLEAN_EVENT_TYPE}
     ```
     
-    If you find that the `CleanEventType` is colliding with some other Subscription then a solution could be use a different Application or Event type name for your Subscription. 
-    Check out [Event Names guildelines](../../05-technical-reference/evnt-01-event-names.md) for more information.
+3. If you find that the `CleanEventType` collides with some other Subscription, use a different Application or event type name for your Subscription. 
+Check out the [event names](../../05-technical-reference/evnt-01-event-names.md) guidelines.
