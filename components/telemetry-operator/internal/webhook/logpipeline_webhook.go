@@ -122,7 +122,9 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 		warnMsg = append(warnMsg, "One or more secrets do not exist. The LogPipeline stays in pending state until the secrets are available.")
 	}
 	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
-		warnMsg = append(warnMsg, "Caution: LogPipeline contains an unsupported custom filter or output. This means that you proceed without support!")
+		helpText := "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/"
+		msg := fmt.Sprintf("Logpipeline '%s' uses unsupported custom filters or outputs. Please consider changing the pipeline to use supported filters or output as described in the documentation: %s", logPipeline.Name, helpText)
+		warnMsg = append(warnMsg, msg)
 	}
 
 	if len(warnMsg) != 0 {
