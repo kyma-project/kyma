@@ -23,16 +23,12 @@ Image versions and the external service name used during testing can be set up i
 
 ### Local build of test images
 
-<!-- To build the test images locally, perform these steps: -->
-
 1. In the main folder build the test images.
    ```bash
-   ./scripts/local-build.sh <DOCKER_TAG> <DOCKER_PUSH_REPOSITORY>
+   ./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
    ```
 
 ### Local execution
-
-<!-- To run the tests locally, perform these steps: -->
 
 1. Provision a local Kubernetes cluster with k3d:
 
