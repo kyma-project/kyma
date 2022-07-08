@@ -15,7 +15,7 @@ release: publish-gateway-test publish-mock-app
 test-gateway:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	helm template resources/gateway-test | kubectl apply -f -
+	helm template resources/charts/gateway-test | kubectl apply -f -
 
 	./scripts/wait-for-gateway-tests-finish.sh
 

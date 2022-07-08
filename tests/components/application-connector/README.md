@@ -49,7 +49,7 @@ Image versions and the external service name used during testing can be set up i
       </summary>
 
    ```bash
-   kyma deploy --components-file mini-kyma-os.yaml
+   kyma deploy --components-file ./resources/installation-config/mini-kyma-os.yaml
    ```
       </details>
       <details>
@@ -58,7 +58,7 @@ Image versions and the external service name used during testing can be set up i
       </summary>
 
    ```bash
-   kyma deploy --components-file mini-kyma-skr.yaml 
+   kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml 
    ```
       </details>
    </div>
