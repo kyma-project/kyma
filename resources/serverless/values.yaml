@@ -76,7 +76,7 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14718"
+      version: "PR-14736"
     function_webhook:
       name: "function-webhook"
       version: "PR-14718"
