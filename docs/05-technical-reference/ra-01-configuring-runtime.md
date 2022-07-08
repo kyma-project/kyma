@@ -19,8 +19,8 @@ Runtime-specific LabelDefinitions are Event Gateway URL and Runtime Console URL.
 
 The data mapping between Director and Kyma looks as follows: 
 
-| **Director (Compass)**    | **Kyma**                  |
-|---------------------------|---------------------------|
-| Application               | Application CR            |
-| API Bundle                | service in Application CR |
-| API definition            | entry under the service   |
+| **Director (Compass)**    | **Kyma**                      |
+|---------------------------|-------------------------------|
+| Application               | Application CR                |
+| API Bundle                | service in the Application CR |
+| API Definition            | entry under the service       |
