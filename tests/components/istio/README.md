@@ -29,7 +29,7 @@ We have also provided a Make target that will create k3d cluster, install Kyma o
 
 ```make test-k3d```
 
-The steps are as follows:
+This command creates a k3d cluster on your local machine, installs Kyma on it, and runs the tests.
 
 1. Provision a k3d cluster on your local machine:
 
