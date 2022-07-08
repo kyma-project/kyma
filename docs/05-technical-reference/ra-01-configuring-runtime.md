@@ -22,5 +22,5 @@ The data mapping between Director and Kyma looks as follows:
 | **Director (Compass)**    | **Kyma**                      |
 |---------------------------|-------------------------------|
 | Application               | Application CR                |
-| API Bundle                | service in the Application CR |
-| API Definition            | entry under the service       |
+| API Bundle                | Service in the Application CR |
+| API Definition            | Entry under the service       |
