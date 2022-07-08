@@ -11,15 +11,13 @@ image: image-gateway-test
 clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
-test-os: test-gateway
-test-skr: test-gateway
 
 test-gateway:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	helm template k8s/gateway-test | kubectl apply -f -
+	helm template resources/gateway-test | kubectl apply -f -
 
-	./wait-for-gateway-tests-finish.sh
+	./scripts/wait-for-gateway-tests-finish.sh
 
 	@echo ""
 	@echo "Gateway test results:"
