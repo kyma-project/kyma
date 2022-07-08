@@ -21,22 +21,6 @@ The placeholders in the URLs map to the following:
 - `SERVICE_NAME` represents the API Definition.
 - `TAGRET_PATH` is the destination API URL.
 
---------
-
-- For the Standalone mode, they are:
-  - URL: `http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH}`
-  - Port: `8080`
-  
-- For the Compass mode, they are:
-  - URL: `http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH}`
-  - Port: `8082`
-
-Where:
-
-- `APP_NAME` is the name of the Application CR.
-- `SERVICE_NAME` represents the API Definition.
-- `TAGRET_PATH` is the destination API URL.
-
 ## Proxying requests
 <!-- TODO: describe the structure of the Secret storing credentials -->
 Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
