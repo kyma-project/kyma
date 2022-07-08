@@ -19,7 +19,7 @@ These environment variables determine how the tests are run on both Prow and you
 
 ### Start the test suite
 
-Having met all the requirements simply run:
+To start the test suite, run:
 
 ```make test```
 
