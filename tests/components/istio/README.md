@@ -17,7 +17,6 @@ These environment variables determine how the tests are run on both Prow and you
 
 ## Usage
 
-### Start the test suite
 
 To start the test suite, run:
 
