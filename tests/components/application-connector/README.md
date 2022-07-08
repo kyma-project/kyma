@@ -25,10 +25,9 @@ Image versions and the external service name used during testing can be set up i
 
 <!-- To build the test images locally, perform these steps: -->
 
-1. Set up **DOCKER_TAG** and **DOCKER_PUSH_REPOSITORY** in `local_build.sh` for your target Docker registry settings.
-2. Build the test images:
+1. Build the test images:
    ```bash
-   ./local_build.sh
+   ./local_build.sh <DOCKER_TAG> <DOCKER_PUSH_REPOSITORY>
    ```
 
 ### Local execution
