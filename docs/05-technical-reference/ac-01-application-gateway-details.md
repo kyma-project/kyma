@@ -4,55 +4,28 @@ title: Application Gateway details
 
 Application Gateway is an intermediary component between a Function or a service and an external API.
 
+## Application Gateway URL
+
+To call a remote system's API from a workload with Application Gateway, you use the URL to the `central-application-gateway.kyma-system` service at an appropriate port and with a respective suffix to access the API of a specific application.
+
+The suffix and the port number differ depending on whether you're using Kyma in the [Standalone or Compass mode](../01-overview/main-areas/application-connectivity/README.md):
+
+| **Kyma mode** | **Application Gateway URL** |
+|-----------|-------------------------|
+| Standalone | `http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH}` |
+| Compass | `http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH}` |
+
+The placeholders in the URLs map to the following:
+
+- `APP_NAME` is the name of the Application CR.
+- `SERVICE_NAME` represents the API Definition.
+- `TARGET_PATH` is the destination API URL.
+
 ## Proxying requests
-<!-- TODO: describe the structure of the Secret storing credentials -->
-Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 
-An example **CONFIGURATION** for APIs secured with OAuth looks as follows:
+Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in the [Application CR](00-custom-resources/ac-01-application.md) and Kubernetes Secrets.
 
-```json
-{
-    "credentials": {
-        "clientId": "{OAUTH_CLIENT_ID}",
-        "clientSecret": "{OAUTH_CLIENT_SECRET}",
-        "requestParameters": {},
-        "tokenUrl": "{OAUTH_TOKEN_URL}"
-    },
-    "csrfConfig": {
-        "tokenUrl": "{CSRF_TOKEN_URL}"
-    },
-    "requestParameters": {
-        "headers": {
-            "Content-Type": ["application/json"]
-        },
-        "queryParameters": {
-            "limit": ["50"]
-        }
-    }
-}
-```
-
-An example **CONFIGURATION** for APIs secured with BasicAuth looks as follows:
-
-```json
-{
-    "credentials": {
-      "username":"{USERNAME}",
-      "password":"{PASSWORD}"
-    },
-    "csrfConfig": {
-        "tokenUrl": "{CSRF_TOKEN_URL}"
-    },
-    "requestParameters": {
-        "headers": {
-            "Content-Type": ["application/json"]
-        },
-        "queryParameters": {
-            "limit": ["50"]
-        }
-    }
-}
-```
+For examples of configurations and Secrets, see the [tutorial on registering a secured API](../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md).
 
 > **NOTE:** All APIs defined in a single Secret use the same configuration - the same credentials, CSRF tokens, and request parameters.
 
