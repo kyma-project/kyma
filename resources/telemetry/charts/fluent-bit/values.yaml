@@ -313,7 +313,7 @@ config:
     [INPUT]
         Name tail
         Path /var/log/containers/*.log
-        multiline.parser docker, cri
+        multiline.parser docker, cri, go, python, java
         Tag tele.*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
