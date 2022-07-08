@@ -102,6 +102,7 @@ spec:
 EOF
   kubectl apply -f "$PWD/ory-hydra-login-consent.yaml"
   echo "App deployed"
+  rm "$PWD/ory-hydra-login-consent.yaml"
 }
 
 check_required_envs
