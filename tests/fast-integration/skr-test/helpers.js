@@ -1,13 +1,13 @@
 const uuid = require('uuid');
 const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
-const {keb, gardener, director} = require('./provision/provision-skr');
-const {
-  scenarioExistsInCompass,
-  addScenarioInCompass,
-  isRuntimeAssignedToScenario,
-  assignRuntimeToScenario,
-} = require('../compass');
 const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
+const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
+const {GardenerClient, GardenerConfig} = require('../gardener');
+const {KCPWrapper, KCPConfig} = require('../kcp/client');
+
+const keb = new KEBClient(KEBConfig.fromEnv());
+const gardener = new GardenerClient(GardenerConfig.fromEnv());
+const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 const testNS = 'skr-test';
 
@@ -98,40 +98,13 @@ function gatherOptions(...opts) {
 
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
-  let shoot;
-  try {
-    shoot = await keb.getSKR(instanceID);
-  } catch (e) {
-    throw new Error(`Cannot fetch the shoot: ${e.toString()}`);
-  }
-  const shootName = shoot.dashboard_url.split('.')[1];
+  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  const objRuntimeStatus = JSON.parse(runtimeStatus);
+  expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
+  const shootName = objRuntimeStatus.data[0].shootName;
 
   console.log(`Fetching SKR info for shoot: ${shootName}`);
   return await gardener.getShoot(shootName);
-}
-
-async function prepareCompassResources(shoot, options) {
-  // check if compass scenario setup is needed
-  const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, options.scenarioName);
-  if (compassScenarioAlreadyExist) {
-    console.log(`Compass scenario with the name ${options.scenarioName} already exist, do not register it again`);
-  } else {
-    console.log('Assigning SKR to scenario in Compass');
-    // Create a new scenario (systems/formations) in compass for this test
-    await addScenarioInCompass(director, options.scenarioName);
-  }
-
-  // check if assigning the runtime to the scenario is needed
-  const runtimeAssignedToScenario = await isRuntimeAssignedToScenario(director,
-      shoot.compassID,
-      options.scenarioName);
-  if (!runtimeAssignedToScenario) {
-    console.log('Assigning Runtime to a compass scenario');
-    // map scenario to target SKR
-    await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
-  } else {
-    console.log('Runtime %s is already assigned to the %s compass scenario', shoot.compassID, options.scenarioName);
-  }
 }
 
 async function initK8sConfig(shoot) {
@@ -143,9 +116,11 @@ async function initK8sConfig(shoot) {
 }
 
 module.exports = {
+  keb,
+  kcp,
+  gardener,
   testNS,
   getSKRConfig,
-  prepareCompassResources,
   initK8sConfig,
   gatherOptions,
   withInstanceID,
