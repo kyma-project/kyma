@@ -17,7 +17,7 @@ Each Runtime Agent can fetch the configurations for Runtimes that belong to its 
 Runtime Agent reports back to the Director the Runtime-specific [LabelDefinitions](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-04-labels.md#labeldefinitions), which represent Runtime configuration, together with their values.
 Runtime-specific LabelDefinitions are Event Gateway URL and Runtime Console URL.
 
-The data representation in Director is mapped to the data representation in Kyma as follows: 
+The data mapping between Director and Kyma looks as follows: 
 
 | **Director (Compass)**    | **Kyma**                  |
 |---------------------------|---------------------------|
