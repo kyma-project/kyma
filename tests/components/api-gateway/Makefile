@@ -27,6 +27,9 @@ else
 	$(GOTEST) -v -race .
 endif
 
+## Prerequisites:
+setup: ## Setup local installation with the same configuration as pipeline
+	./prepare_local.sh
 ## Help:
 help: ## Show this help.
 	@echo ''
