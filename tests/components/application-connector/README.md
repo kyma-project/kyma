@@ -25,9 +25,9 @@ Image versions and the external service name used during testing can be set up i
 
 <!-- To build the test images locally, perform these steps: -->
 
-1. Build the test images:
+1. In the main folder build the test images.
    ```bash
-   ./local_build.sh <DOCKER_TAG> <DOCKER_PUSH_REPOSITORY>
+   ./scripts/local-build.sh <DOCKER_TAG> <DOCKER_PUSH_REPOSITORY>
    ```
 
 ### Local execution
