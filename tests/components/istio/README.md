@@ -25,7 +25,7 @@ Having met all the requirements simply run:
 
 #### Prepare cluster on your local machine
 
-We have also provided a Make target that will create k3d cluster, install Kyma on it and run the tests:
+If you don't have a cluster, you can run the tests on your local machine. To do so, run:
 
 ```make test-k3d```
 
