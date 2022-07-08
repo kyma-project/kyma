@@ -25,7 +25,7 @@ The placeholders in the URLs map to the following:
 
 Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in [Application CR](00-custom-resources/ac-01-application.md) and Kubernetes Secrets.
 
-For example configurations and Secrets, see the [tutorial on registering a secured API](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-application-connectivity/ac-04-register-secured-api/).
+For example configurations and Secrets, see the [tutorial on registering a secured API](../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md).
 
 > **NOTE:** All APIs defined in a single Secret use the same configuration - the same credentials, CSRF tokens, and request parameters.
 
