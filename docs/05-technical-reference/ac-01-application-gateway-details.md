@@ -4,6 +4,26 @@ title: Application Gateway details
 
 Application Gateway is an intermediary component between a Function or a service and an external API.
 
+## Application Gateway URL
+
+To call a remote system's API from a workload with Application Gateway, you use the URL to the `central-application-gateway.kyma-system` service at an appropriate port and with a respective suffix to access the API of a specific application.
+
+The suffix and the port number differ depending on whether you're using Kyma in the [Standalone or Compass mode](../01-overview/main-areas/application-connectivity/README.md). 
+
+- For the Standalone mode, they are:
+  - URL: `http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH}`
+  - Port: `8080`
+  
+- For the Compass mode, they are:
+  - URL: `http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH}`
+  - Port: `8082`
+
+Where:
+
+- `APP_NAME` is the name of the Application CR.
+- `SERVICE_NAME` represents the API Definition.
+- `TAGRET_PATH` is the destination API URL.
+
 ## Proxying requests
 <!-- TODO: describe the structure of the Secret storing credentials -->
 Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
