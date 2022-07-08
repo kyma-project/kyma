@@ -11,19 +11,6 @@ function check_required_envs() {
     fi
 }
 
-function prepare_test_environments() {
-  echo "Prepare test environment variables"
-
-  # Preparing needed environment variables for API Gateway tests, these can be moved later on.
-  export TEST_HYDRA_ADDRESS="https://oauth2.${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com"
-  export TEST_REQUEST_TIMEOUT="120"
-  export TEST_REQUEST_DELAY="10"
-  export TEST_DOMAIN="${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com" 
-  export TEST_CLIENT_TIMEOUT=30s
-  export TEST_CONCURENCY="1"
-  export EXPORT_RESULT="true"
-}
-
 function configure_ory_hydra() {
   echo "Prepare test environment variables"
 
@@ -118,4 +105,3 @@ EOF
 check_required_envs
 deploy_login_consent_app
 configure_ory_hydra
-prepare_test_environments
