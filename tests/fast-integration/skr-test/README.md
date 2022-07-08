@@ -14,9 +14,9 @@ You can use the SKR test in two modes - with and without provisioning.
 
 In this mode, the test executes the following steps:
 
-1. Provision SKR cluster
-2. Run OIDC Test
-4. De-provision the SKR instance and clean the resources.
+1. Provision an SKR cluster.
+2. Run the OIDC test.
+3. Deprovision the SKR instance and clean up the resources.
 
 ### Without Provisioning.
 
@@ -25,11 +25,11 @@ In this mode the test additionally needs the following environment variables:
 - `INSTANCE_ID` the uuid of the provisioned SKR instance
 
 In this mode, the test executes the following steps:
-1. Ensure SKR exists
-2. Run OIDC Test
-4. Clean the resources
+1. Ensure the SKR exists.
+2. Run the OIDC test.
+3. Clean up the resources.
  
-**NOTE:** The SKR test additionally contains a stand-alone script, which you can use to register the resources.
+>**NOTE:** The SKR test additionally contains a stand-alone script that you can use to register the resources.
 
 ## Test execution
 
