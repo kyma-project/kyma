@@ -224,7 +224,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscribed,
 							eventingv1alpha1.ConditionReasonSubscriptionCreationFailed,
-							v1.ConditionFalse, "")),
+							v1.ConditionFalse, "prefix not found")),
 						reconcilertesting.HaveCleanEventTypesEmpty(),
 					))
 				})
@@ -747,7 +747,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting a subscription not created condition")
-			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, v1.ConditionFalse, "")
+			message := "create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a BEB subscription\"}\n"
+			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, v1.ConditionFalse, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotCreatedCondition),

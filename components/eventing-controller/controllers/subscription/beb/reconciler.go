@@ -272,7 +272,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	if _, err := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
-		r.syncConditionSubscribed(subscription, false)
+		r.syncConditionSubscribed(subscription, err)
 		return false, err
 	}
 
@@ -284,7 +284,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	// sync the condition: ConditionSubscribed
-	r.syncConditionSubscribed(subscription, true)
+	r.syncConditionSubscribed(subscription, nil)
 
 	// sync the condition: ConditionSubscriptionActive
 	r.syncConditionSubscriptionActive(subscription, isActive, logger)
@@ -296,13 +296,13 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 }
 
 // syncConditionSubscribed syncs the condition ConditionSubscribed
-func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subscription, isSubscribed bool) {
-	message := ""
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, "")
-	if isSubscribed {
-		// Include the BEB subscription ID in the Condition message
-		message = eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
-		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
+func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subscription, err error) {
+	// Include the BEB subscription ID in the Condition message
+	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
+	if err != nil {
+		message = err.Error()
+		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
 	}
 
 	r.replaceStatusCondition(subscription, condition)

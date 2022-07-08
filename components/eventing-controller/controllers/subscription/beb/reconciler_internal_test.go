@@ -215,11 +215,11 @@ func Test_getRequiredConditions(t *testing.T) {
 
 func Test_syncConditionSubscribed(t *testing.T) {
 	currentTime := metav1.Now()
-
+	errorMessage := "error message"
 	var testCases = []struct {
 		name              string
 		givenSubscription *eventingv1alpha1.Subscription
-		givenIsSubscribed bool
+		givenError        error
 		wantCondition     eventingv1alpha1.Condition
 	}{
 		{
@@ -244,12 +244,13 @@ func Test_syncConditionSubscribed(t *testing.T) {
 				}
 				return subscription
 			}(),
-			givenIsSubscribed: false,
+			givenError: errors.New(errorMessage),
 			wantCondition: eventingv1alpha1.Condition{
 				Type:               eventingv1alpha1.ConditionSubscribed,
 				LastTransitionTime: currentTime,
 				Status:             corev1.ConditionFalse,
 				Reason:             eventingv1alpha1.ConditionReasonSubscriptionCreationFailed,
+				Message:            errorMessage,
 			},
 		},
 		{
@@ -274,7 +275,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 				}
 				return subscription
 			}(),
-			givenIsSubscribed: true,
+			givenError: nil,
 			wantCondition: eventingv1alpha1.Condition{
 				Type:               eventingv1alpha1.ConditionSubscribed,
 				LastTransitionTime: currentTime,
@@ -296,7 +297,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 			subscription := tc.givenSubscription
 
 			// when
-			r.syncConditionSubscribed(subscription, tc.givenIsSubscribed)
+			r.syncConditionSubscribed(subscription, tc.givenError)
 
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
