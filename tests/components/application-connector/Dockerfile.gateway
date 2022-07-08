@@ -7,10 +7,10 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN CGO_ENABLED=0 go test -v -c -o test ./gateway/
+RUN CGO_ENABLED=0 go test -v -c -o gateway-test ./test/application-gateway/
 
 FROM scratch
 
-COPY --from=builder /gateway-test/test /
-ENTRYPOINT [ "/test" ]
+COPY --from=builder /gateway-test/gateway-test /
+ENTRYPOINT [ "/gateway-test" ]
 CMD ["-test.v"]

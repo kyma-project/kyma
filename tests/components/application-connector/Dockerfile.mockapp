@@ -1,6 +1,6 @@
 FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
 
-WORKDIR /test-app/
+WORKDIR /mock-app/
 
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
@@ -8,9 +8,9 @@ RUN go mod download && go mod verify
 COPY . .
 
 
-RUN CGO_ENABLED=0 go build -v -o test-app ./cmd/test-gateway-app
+RUN CGO_ENABLED=0 go build -v -o mock-app ./tools/external-api-mock-app
 
 FROM scratch
-COPY --from=builder /test-app/test-app .
-ENTRYPOINT [ "/test-app" ]
+COPY --from=builder /mock-app/mock-app .
+ENTRYPOINT [ "/mock-app" ]
 CMD []
