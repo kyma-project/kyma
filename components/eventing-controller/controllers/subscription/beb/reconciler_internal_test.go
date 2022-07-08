@@ -321,6 +321,9 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+					SubscriptionStatus: "Paused",
+				}
 
 				// mark ConditionSubscriptionActive conditions as true
 				subscription.Status.Conditions = []eventingv1alpha1.Condition{
@@ -343,6 +346,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				LastTransitionTime: currentTime,
 				Status:             corev1.ConditionFalse,
 				Reason:             eventingv1alpha1.ConditionReasonSubscriptionNotActive,
+				Message:            "current subscription status: Paused",
 			},
 		},
 		{
@@ -351,6 +355,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{}
 
 				// mark ConditionSubscriptionActive conditions as false
 				subscription.Status.Conditions = []eventingv1alpha1.Condition{
@@ -393,7 +398,6 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			subscription := tc.givenSubscription
-			subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{}
 			log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
 
 			// when

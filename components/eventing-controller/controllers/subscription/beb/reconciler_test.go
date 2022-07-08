@@ -271,7 +271,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				eventingv1alpha1.ConditionAPIRuleStatus,
 				eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady,
 				v1.ConditionFalse,
-				"",
+				"sink URL scheme should be 'http' or 'https'",
 			)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -825,7 +825,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscription not active condition")
-			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse, "")
+			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse, "current subscription status: Paused")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotActiveCondition),
