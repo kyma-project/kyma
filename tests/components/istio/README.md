@@ -17,26 +17,14 @@ These environment variables determine how the tests are run on both Prow and you
 
 ## Usage
 
-
 To start the test suite, run:
 
-```make test```
-
+```
+make test
+```
 
 If you don't have a cluster, you can run the tests on your local machine. To do so, run:
 
-```make test-k3d```
-
-This command creates a k3d cluster on your local machine, installs Kyma on it, and runs the tests.
-
-1. Provision a k3d cluster on your local machine:
-
-```make provision-k3d```
-
-2. Install Kyma with the Istio component on your cluster:
-
-```make kyma-istio-deploy```
-
-3. Run the tests:
-
-```make test```
+```
+make test-k3d
+```
