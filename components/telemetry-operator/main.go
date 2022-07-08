@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/go-logr/zapr"
@@ -140,6 +142,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
@@ -206,7 +213,8 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		pipelineConfig)
+		pipelineConfig,
+		restartsTotal)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
@@ -218,6 +226,10 @@ func main() {
 		daemonSetConfig)
 	if err = parserReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		os.Exit(1)
+	}
+	if err = (&telemetryv1alpha1.LogParser{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "LogParser")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

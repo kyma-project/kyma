@@ -29,7 +29,7 @@ type LogParserSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Parser is an example field of LogParser. Edit logparser_types.go to remove/update
-	Parser string `json:"foo,omitempty"`
+	Parser string `json:"parser,omitempty"`
 }
 
 // LogParserStatus defines the observed state of LogParser
@@ -59,6 +59,7 @@ type LogParserList struct {
 	Items           []LogParser `json:"items"`
 }
 
+//nolint:gochecknoinits
 func init() {
 	SchemeBuilder.Register(&LogParser{}, &LogParserList{})
 }

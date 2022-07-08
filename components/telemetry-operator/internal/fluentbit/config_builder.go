@@ -109,15 +109,17 @@ func getValidMatchCond(section map[string]string, logPipelineName string) string
 }
 
 // MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
-func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
+func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 	var sb strings.Builder
-	for _, logPipeline := range logPipelines.Items {
-		if logPipeline.DeletionTimestamp == nil {
-			for _, parser := range logPipeline.Spec.Parsers {
-				sb.WriteString(BuildConfigSection(ParserConfigHeader, parser.Content))
-			}
-			for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
-				sb.WriteString(BuildConfigSection(MultiLineParserConfigHeader, multiLineParser.Content))
+	for _, logParser := range logParsers.Items {
+		var parser string
+		if logParser.DeletionTimestamp == nil {
+			if len(logParser.Spec.Parser) > 0 {
+				if !strings.Contains(logParser.Spec.Parser, "name") {
+					name := fmt.Sprintf("Name %s", logParser.Name)
+					parser = fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
+					sb.WriteString(BuildConfigSection(ParserConfigHeader, parser))
+				}
 			}
 		}
 	}

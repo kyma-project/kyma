@@ -2,13 +2,12 @@ package sync
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -16,9 +15,7 @@ import (
 )
 
 const (
-	parsersConfigMapKey        = "parsers.conf"
 	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
-	parserConfigMapFinalizer   = "FLUENT_BIT_PARSERS_CONFIG_MAP"
 	filesFinalizer             = "FLUENT_BIT_FILES"
 )
 
@@ -37,6 +34,7 @@ type LogPipelineSyncer struct {
 	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
 	SecretValidator         *secret.Helper
+	Utils                   *kubernetes.Utils
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -48,6 +46,7 @@ func NewLogPipelineSyncer(client client.Client,
 	lps.DaemonSetConfig = daemonSetConfig
 	lps.PipelineConfig = pipelineConfig
 	lps.SecretValidator = secret.NewSecretHelper(client)
+	lps.Utils = kubernetes.NewUtils(client)
 	return &lps
 }
 
@@ -59,11 +58,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		log.Error(err, "Failed to sync Sections ConfigMap")
 		return false, err
 	}
-	parsersChanged, err := s.syncParsersConfigMap(ctx, logPipeline)
-	if err != nil {
-		log.Error(err, "Failed to sync Parsers ConfigMap")
-		return false, err
-	}
+
 	filesChanged, err := s.syncFilesConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
@@ -79,13 +74,13 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		log.Error(err, "Failed to sync unsupported mode metrics")
 		return false, err
 	}
-	return sectionsChanged || parsersChanged || filesChanged || variablesChanged, nil
+	return sectionsChanged || filesChanged || variablesChanged, nil
 }
 
-// Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
+// Synchronize LogPipeline with ConfigMap of FluentBitUtils sections (Input, Filter and Output).
 func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.getOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitSectionsConfigMap)
+	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitSectionsConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -141,84 +136,10 @@ func (s *LogPipelineSyncer) syncUnsupportedPluginsTotal(ctx context.Context) err
 	return nil
 }
 
-// Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
-func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := logf.FromContext(ctx)
-	cm, err := s.getOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
-	if err != nil {
-		return false, err
-	}
-
-	changed := false
-	var logPipelines telemetryv1alpha1.LogPipelineList
-
-	if logPipeline.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
-			log.Info("Deleting fluent bit parsers config")
-
-			err = s.List(ctx, &logPipelines)
-			if err != nil {
-				return false, err
-			}
-
-			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
-			if fluentBitParsersConfig == "" {
-				cm.Data = nil
-			} else {
-				data := make(map[string]string)
-				data[parsersConfigMapKey] = fluentBitParsersConfig
-				cm.Data = data
-			}
-			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
-			changed = true
-		}
-	} else {
-		err = s.List(ctx, &logPipelines)
-		if err != nil {
-			return false, err
-		}
-
-		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
-		if fluentBitParsersConfig == "" {
-			if cm.Data == nil {
-				return false, nil
-			}
-			cm.Data = nil
-		} else {
-
-			if cm.Data == nil {
-				data := make(map[string]string)
-				data[parsersConfigMapKey] = fluentBitParsersConfig
-				cm.Data = data
-				changed = true
-			} else {
-				if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
-					cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
-					changed = true
-				}
-			}
-			if !controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
-				log.Info("Adding finalizer")
-				controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
-				changed = true
-			}
-		}
-	}
-
-	if !changed {
-		return false, nil
-	}
-	if err = s.Update(ctx, &cm); err != nil {
-		return false, err
-	}
-
-	return changed, nil
-}
-
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.getOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitFilesConfigMap)
+	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitFilesConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -262,7 +183,7 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 // syncVariables copies referenced secrets to global Fluent Bit environment secret.
 func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 	log := logf.FromContext(ctx)
-	oldSecret, err := s.getOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
+	oldSecret, err := s.Utils.GetOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
 	if err != nil {
 		return false, err
 	}
@@ -311,33 +232,6 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 		return false, err
 	}
 	return needsSecretUpdate, nil
-}
-
-func (s *LogPipelineSyncer) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
-	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: name.Name, Namespace: name.Namespace}}
-	err := s.getOrCreate(ctx, &cm)
-	if err != nil {
-		return corev1.ConfigMap{}, err
-	}
-	return cm, nil
-}
-
-func (s *LogPipelineSyncer) getOrCreateSecret(ctx context.Context, name types.NamespacedName) (corev1.Secret, error) {
-	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name.Name, Namespace: name.Namespace}}
-	err := s.getOrCreate(ctx, &secret)
-	if err != nil {
-		return corev1.Secret{}, err
-	}
-	return secret, nil
-}
-
-// Gets or creates the given obj in the Kubernetes cluster. obj must be a struct pointer so that obj can be updated with the content returned by the Server.
-func (s *LogPipelineSyncer) getOrCreate(ctx context.Context, obj client.Object) error {
-	err := s.Get(ctx, client.ObjectKeyFromObject(obj), obj)
-	if err != nil && errors.IsNotFound(err) {
-		return s.Create(ctx, obj)
-	}
-	return err
 }
 
 func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList) int {

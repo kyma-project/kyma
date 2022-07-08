@@ -18,13 +18,16 @@ package telemetry
 
 import (
 	"context"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parsers"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
+	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // LogParserReconciler reconciles a LogParser object
@@ -32,6 +35,9 @@ type LogParserReconciler struct {
 	client.Client
 	Scheme             *runtime.Scheme
 	FluentBitDaemonSet types.NamespacedName
+	Parser             parsers.LogParserSyncer
+	FluentBitUtils     *kubernetes.FluentBitUtils
+	restartsTotal      prometheus.Counter
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers,verbs=get;list;watch;create;update;patch;delete
@@ -48,17 +54,39 @@ type LogParserReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 
-func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig) *LogParserReconciler {
+func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
 	var lpr LogParserReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
+	lpr.FluentBitUtils = kubernetes.NewFluentBit(client)
+	lpr.restartsTotal = restartsTotal
+
+	prometheus.MustRegister(lpr.restartsTotal)
 	return &lpr
 }
 
 func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := logf.FromContext(ctx)
+	var logParser telemetryv1alpha1.LogParser
+	if err := r.Get(ctx, req.NamespacedName, &logParser); err != nil {
+		log.Info("Ignoring deleted LogParser")
+		// Ignore not-found errors since we can get them on deleted requests
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	//log := logf.FromContext(ctx)
+	var changed, err = r.Parser.SyncParsersConfigMap(ctx, &logParser)
+	if err != nil {
+		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
+	}
+
+	if changed {
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
+		if err = r.FluentBitUtils.RestartFluentBit(ctx, r.restartsTotal); err != nil {
+			log.Error(err, "Failed restarting fluent bit daemon set")
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
