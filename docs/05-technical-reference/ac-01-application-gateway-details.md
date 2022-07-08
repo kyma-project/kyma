@@ -19,7 +19,7 @@ The placeholders in the URLs map to the following:
 
 - `APP_NAME` is the name of the Application CR.
 - `SERVICE_NAME` represents the API Definition.
-- `TAGRET_PATH` is the destination API URL.
+- `TARGET_PATH` is the destination API URL.
 
 ## Proxying requests
 <!-- TODO: describe the structure of the Secret storing credentials -->
