@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+TEST_ORY_IMAGE="eu.gcr.io/kyma-project/incubator/test-hydra-login-consent:d6e6d3bc"
+
 function check_required_envs() {
     if [[ -z ${CLUSTER_NAME} ]]; then
             echo "You need to export CLUSTER_NAME as in CLUSTER_NAME.GARDENER_KYMA_PROW_PROJECT_NAME.shoot.canary.k8s-hana.ondemand.com" 
