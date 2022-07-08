@@ -22,54 +22,10 @@ The placeholders in the URLs map to the following:
 - `TARGET_PATH` is the destination API URL.
 
 ## Proxying requests
-<!-- TODO: describe the structure of the Secret storing credentials -->
-Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 
-An example **CONFIGURATION** for APIs secured with OAuth looks as follows:
+Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in [Application CR](00-custom-resources/ac-01-application.md) and Kubernetes Secrets.
 
-```json
-{
-    "credentials": {
-        "clientId": "{OAUTH_CLIENT_ID}",
-        "clientSecret": "{OAUTH_CLIENT_SECRET}",
-        "requestParameters": {},
-        "tokenUrl": "{OAUTH_TOKEN_URL}"
-    },
-    "csrfConfig": {
-        "tokenUrl": "{CSRF_TOKEN_URL}"
-    },
-    "requestParameters": {
-        "headers": {
-            "Content-Type": ["application/json"]
-        },
-        "queryParameters": {
-            "limit": ["50"]
-        }
-    }
-}
-```
-
-An example **CONFIGURATION** for APIs secured with BasicAuth looks as follows:
-
-```json
-{
-    "credentials": {
-      "username":"{USERNAME}",
-      "password":"{PASSWORD}"
-    },
-    "csrfConfig": {
-        "tokenUrl": "{CSRF_TOKEN_URL}"
-    },
-    "requestParameters": {
-        "headers": {
-            "Content-Type": ["application/json"]
-        },
-        "queryParameters": {
-            "limit": ["50"]
-        }
-    }
-}
-```
+For example configurations and Secrets, see the [tutorial on registering a secured API](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-application-connectivity/ac-04-register-secured-api/).
 
 > **NOTE:** All APIs defined in a single Secret use the same configuration - the same credentials, CSRF tokens, and request parameters.
 
