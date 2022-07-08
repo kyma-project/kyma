@@ -23,7 +23,6 @@ Having met all the requirements simply run:
 
 ```make test```
 
-#### Prepare cluster on your local machine
 
 If you don't have a cluster, you can run the tests on your local machine. To do so, run:
 
