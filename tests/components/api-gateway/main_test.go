@@ -178,7 +178,7 @@ func TestApiGateway(t *testing.T) {
 
 	unsecuredSuite := godog.TestSuite{
 		Name:                "API-Gateway",
-		ScenarioInitializer: InitializeApiGatewayTests,
+		TestSuiteInitializer: InitializeApiGatewayTests,
 		Options:             &apiGatewayOpts,
 	}
 
@@ -193,12 +193,12 @@ func TestApiGateway(t *testing.T) {
 	}
 }
 
-func InitializeApiGatewayTests(ctx *godog.ScenarioContext) {
-	InitializeScenarioOAuth2Endpoint(ctx)
-	InitializeScenarioSecuredToUnsecuredEndpoint(ctx)
-	InitializeScenarioUnsecuredEndpoint(ctx)
-	InitializeScenarioUnsecuredToSecuredEndpoint(ctx)
-	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx)
-	InitializeScenarioOAuth2JWTOnePath(ctx)
-	InitializeScenarioOAuth2JWTTwoPaths(ctx)
+func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
+	InitializeScenarioOAuth2Endpoint(ctx.ScenarioContext())
+	InitializeScenarioSecuredToUnsecuredEndpoint(ctx.ScenarioContext())
+	InitializeScenarioUnsecuredEndpoint(ctx.ScenarioContext())
+	InitializeScenarioUnsecuredToSecuredEndpoint(ctx.ScenarioContext())
+	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx.ScenarioContext())
+	InitializeScenarioOAuth2JWTOnePath(ctx.ScenarioContext())
+	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
 }
