@@ -2,6 +2,7 @@ package api_gateway
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -21,13 +22,16 @@ import (
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/jwt"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/resource"
+	"github.com/tidwall/pretty"
 	"gitlab.com/rodrigoodhin/gocure/models"
 	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
@@ -265,4 +269,28 @@ func copy(src, dst string) (int64, error) {
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
+}
+
+func getPodListReport() string {
+	type returnedPodList struct {
+		PodList []struct {
+			Metadata struct {
+				Name              string `json:"name"`
+				CreationTimestamp string `json:"creationTimestamp"`
+			} `json:"metadata"`
+			Status struct {
+				Phase string `json:"phase"`
+			} `json:"status"`
+		} `json:"items"`
+	}
+
+	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
+
+	list, _ := k8sClient.Resource(res).Namespace("").List(context.Background(), v1.ListOptions{})
+
+	p := returnedPodList{}
+	toMarshal, _ := json.Marshal(list)
+	json.Unmarshal(toMarshal, &p)
+	toPrint, _ := json.Marshal(p)
+	return string(pretty.Pretty(toPrint))
 }

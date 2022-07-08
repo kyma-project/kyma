@@ -189,7 +189,8 @@ func TestApiGateway(t *testing.T) {
 	}
 
 	if testExitCode != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
+		podReport := getPodListReport()
+		t.Fatalf("non-zero status returned, failed to run feature tests, Pod list: %s\n", podReport)
 	}
 }
 
