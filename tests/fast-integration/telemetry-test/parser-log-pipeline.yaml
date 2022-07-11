@@ -11,14 +11,7 @@ spec:
         Time_Format %Y-%m-%dT%H:%M:%S %z
   output:
     custom: |
-      Name               grafana-loki
-      Alias              loki-output
-      Url                http://logging-loki:3100/loki/api/v1/push
-      Labels             {job="telemetry-fluent-bit"}
-      RemoveKeys         kubernetes, stream
-      LineFormat         json
-      LogLevel           warn
-      LabelMapPath       /files/labelmap.json
+      Name               stdout
   filters:
     - custom: |
         Name    grep

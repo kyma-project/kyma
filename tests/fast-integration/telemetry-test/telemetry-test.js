@@ -98,8 +98,11 @@ describe('Telemetry Operator tests', function() {
   it('Should accept the valid logs', async () => {
     try {
       await k8sApply(parserLogPipelineCR, telemetryNamespace);
-      
+      // need to somehow deploy function
       // await axios.post(`https://json-parser-test.${host}`);
+      //assert.correct
+    } catch {
+      assert.fail('Should receive a valud responce')
     }
   });
 
