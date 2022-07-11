@@ -102,7 +102,7 @@ containers:
     {{- end }}
   {{- if .Values.exporter.enabled }}
   - name: exporter
-    image: lindnerb/exporter:latest
+    image: teneroy1/exporter:latest
     {{- with .Values.exporter.resources }}
     resources:
       {{- toYaml . | nindent 6 }}
