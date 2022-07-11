@@ -117,7 +117,7 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 
 	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
 		helpText := "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/"
-		msg := fmt.Sprintf("Logpipeline '%s' uses unsupported custom filters or outputs. Please consider changing the pipeline to use supported filters or output as described in the documentation: %s", logPipeline.Name, helpText)
+		msg := fmt.Sprintf("Logpipeline '%s' uses unsupported custom filters or outputs. We recommend changing the pipeline to use supported filters or output. See the documentation: %s", logPipeline.Name, helpText)
 		warnMsg = append(warnMsg, msg)
 	}
 
