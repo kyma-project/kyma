@@ -17,7 +17,7 @@ func (gs *GatewaySuite) TestSimpleCases() {
 		gs.Run(service.DisplayName, func() {
 			for _, entry := range service.Entries {
 				if entry.Type != "API" {
-					gs.T().Log("Skipping event entry")
+					gs.T().Log("Skipping event entry.")
 					continue
 				}
 				gs.T().Log("Calling", entry.CentralGatewayUrl)
