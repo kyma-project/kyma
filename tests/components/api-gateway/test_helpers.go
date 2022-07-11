@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
@@ -133,10 +135,6 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 
 func generateReport() {
 	htmlOutputDir := "reports/"
-	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		htmlOutputDir = fmt.Sprintf("%s/", artifactsDir)
-		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
-	}
 
 	html := gocure.HTML{
 		Config: html.Data{
@@ -157,6 +155,15 @@ func generateReport() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+
+	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
+		filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+			copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
+			return nil
+		})
+		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+	}
+
 }
 
 func getApiRules() string {
