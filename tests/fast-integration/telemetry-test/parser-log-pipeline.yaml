@@ -1,0 +1,25 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: logpipeline-sample
+spec:
+  parsers:
+    - content: |
+        Name        docker
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S %z
+  output:
+    custom: |
+      Name               grafana-loki
+      Alias              loki-output
+      Url                http://logging-loki:3100/loki/api/v1/push
+      Labels             {job="telemetry-fluent-bit"}
+      RemoveKeys         kubernetes, stream
+      LineFormat         json
+      LogLevel           warn
+      LabelMapPath       /files/labelmap.json
+  filters:
+    - custom: |
+        Name    grep
+        Regex $kubernetes['namespace_name'] default

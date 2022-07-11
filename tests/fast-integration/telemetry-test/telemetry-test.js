@@ -13,9 +13,18 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
+const { checkFunctionResponse } = require('../test/fixtures/commerce-mock');
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
+const parserLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
+const lastorderFunctionYaml = fs.readFileSync(
+  path.join(__dirname, './json-function.yaml'),
+  {
+    encoding: 'utf8',
+  },
+);
+
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -83,6 +92,14 @@ describe('Telemetry Operator tests', function() {
       expect(e.body.message).to.have.string('denied the request');
       const errMsg = 'section \'abc\' tried to instance a plugin name that don\'t exists';
       expect(e.body.message).to.have.string(errMsg);
+    }
+  });
+
+  it('Should accept the valid logs', async () => {
+    try {
+      await k8sApply(parserLogPipelineCR, telemetryNamespace);
+      
+      // await axios.post(`https://json-parser-test.${host}`);
     }
   });
 
