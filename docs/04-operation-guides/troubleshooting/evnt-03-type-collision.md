@@ -8,8 +8,8 @@ Subscriber receives irrelevant events.
 
 ## Cause
 
-As described in the [event names](../../05-technical-reference/evnt-01-event-names.md) guidelines, sometimes Eventing must modify the event names to filter out non-alphanumeric character to conform to Cloud Event specifications.
-In some cases, it can lead to a naming collision, which can result into subscribers receiving irrelevant events.
+To conform to Cloud Event specifications, Eventing modifies the event names to filter out non-alphanumeric characters. For details, see [event name cleanup](../../05-technical-reference/evnt-01-event-names.md#event-name-cleanup).
+In some cases, it can lead to a naming collision, which can cause subscribers to receive irrelevant events.
 
 ## Remedy
 
@@ -28,4 +28,3 @@ Follow these steps to detect if naming collision is the source of the problem:
     ```
     
 3. If you find that the `CleanEventType` collides with some other Subscription, use a different Application or event type name for your Subscription. 
-Check out the [event names](../../05-technical-reference/evnt-01-event-names.md) guidelines.
