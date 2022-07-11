@@ -18,6 +18,7 @@ This list shows the available Istio components and addons. Check which of those 
 
 These configuration changes are applied to customize Istio for use with Kyma:
 
+- Both [Istio control plane and data plane](https://istio.io/latest/docs/ops/deployment/architecture/) use distroless images. To learn more, read about [Harden Docker Container Images](https://istio.io/latest/docs/ops/configuration/security/harden-docker-images/).
 - Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces. See how to [disable sidecar proxy injection](../../../04-operation-guides/operations/smsh-01-istio-disable-sidecar-injection.md).
 - Resource requests and limits for Istio sidecars are modified to best suit the needs of the evaluation and production profiles.
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide in a STRICT mode.
