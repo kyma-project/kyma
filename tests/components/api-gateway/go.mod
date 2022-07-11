@@ -21,7 +21,6 @@ require (
 	github.com/cucumber/godog v0.12.5
 	github.com/spf13/pflag v1.0.5
 	github.com/tidwall/pretty v1.2.0
-	k8s.io/api v0.24.2
 )
 
 require (

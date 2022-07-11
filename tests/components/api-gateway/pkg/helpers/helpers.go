@@ -1,12 +1,15 @@
 package helpers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/dynamic"
 )
 
 //const testToken = "ZYqT86bNtVT-QViFpKGsmlnKGpovxVCQ8cMGsQQVU8A.WQC8MchDy-uyW2iIdqW7m26yZwmGAk_I6cR-YO-IiPY"
@@ -90,4 +93,33 @@ type StatusPredicate struct {
 
 func (s *StatusPredicate) TestPredicate(response *http.Response) bool {
 	return response.StatusCode >= s.LowerStatusBound && response.StatusCode <= s.UpperStatusBound
+}
+
+func (h *Helper) APIRuleWithRetries(retriable func(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) (*unstructured.Unstructured, error), k8sClient dynamic.Interface, resources []unstructured.Unstructured) error {
+	return retry.Do(func() error {
+		type status struct {
+			Status struct {
+				APIRuleStatus struct {
+					Code string `json:"code"`
+				} `json:"APIRuleStatus"`
+			} `json:"status"`
+		}
+		res, err := retriable(k8sClient, resources...)
+		if err != nil {
+			return err
+		}
+
+		js, err := json.Marshal(res)
+		if err != nil {
+			return err
+		}
+
+		apiStatus := status{}
+
+		json.Unmarshal(js, &apiStatus)
+		if apiStatus.Status.APIRuleStatus.Code != "OK" {
+			return errors.New("APIRule status not ok")
+		}
+		return nil
+	}, h.opts...)
 }

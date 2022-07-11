@@ -134,7 +134,7 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 func generateReport() {
 	htmlOutputDir := "reports/"
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		htmlOutputDir = fmt.Sprintf("%s/reports/", artifactsDir)
+		htmlOutputDir = artifactsDir
 		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 
@@ -182,7 +182,7 @@ func CreateScenario(templateFileName string, namePrefix string) (*Scenario, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to process common manifest files, details %s", err.Error())
 	}
-	err = batch.CreateResources(k8sClient, commonResources...)
+	_, err = batch.CreateResources(k8sClient, commonResources...)
 
 	if err != nil {
 		return nil, err
@@ -219,7 +219,7 @@ func CreateTwoStepScenario(templateFileNameOne string, templateFileNameTwo strin
 	if err != nil {
 		return nil, fmt.Errorf("failed to process common manifest files, details %s", err.Error())
 	}
-	err = batch.CreateResources(k8sClient, commonResources...)
+	_, err = batch.CreateResources(k8sClient, commonResources...)
 
 	if err != nil {
 		return nil, err

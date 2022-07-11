@@ -25,7 +25,7 @@ func InitializeScenarioUnsecuredEndpoint(ctx *godog.ScenarioContext) {
 }
 
 func (u *unsecuredScenario) thereIsAnUnsecuredEndpoint() error {
-	return batch.CreateResources(k8sClient, u.apiResource...)
+	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, u.apiResource)
 }
 
 func (u *unsecuredScenario) callingTheEndpointWithAnyTokenShouldResultInStatusbetween(arg1, arg2 int) error {

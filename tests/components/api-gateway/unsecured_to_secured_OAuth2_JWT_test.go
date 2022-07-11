@@ -31,7 +31,7 @@ func InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx *godog.ScenarioContext)
 }
 
 func (u *unsecureToSecureScenarioJWT) thereIsAnUnsecuredAPI() error {
-	return batch.CreateResources(k8sClient, u.apiResourceOne...)
+	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, u.apiResourceOne)
 }
 
 func (u *unsecureToSecureScenarioJWT) theEndpointIsReachable() error {
@@ -39,7 +39,7 @@ func (u *unsecureToSecureScenarioJWT) theEndpointIsReachable() error {
 }
 
 func (u *unsecureToSecureScenarioJWT) secureWithOAuth2JWT() error {
-	return batch.UpdateResources(k8sClient, u.apiResourceTwo...)
+	return helper.APIRuleWithRetries(batch.UpdateResources, k8sClient, u.apiResourceTwo)
 }
 
 func (u *unsecureToSecureScenarioJWT) callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween(path string, lower int, higher int) error {

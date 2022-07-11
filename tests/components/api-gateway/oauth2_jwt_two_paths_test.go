@@ -29,7 +29,7 @@ func InitializeScenarioOAuth2JWTTwoPaths(ctx *godog.ScenarioContext) {
 }
 
 func (o *oauthJWTTwoPathsScenario) thereIsAnOauth2Endpoint() error {
-	return batch.CreateResources(k8sClient, o.apiResource...)
+	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, o.apiResource)
 }
 
 func (o *oauthJWTTwoPathsScenario) callingTheEndpointWithValidTokenShouldResultInStatusBeetween(path, tokenType string, lower, higher int) error {

@@ -29,7 +29,7 @@ func InitializeScenarioUnsecuredToSecuredEndpoint(ctx *godog.ScenarioContext) {
 }
 
 func (u *unsecureToSecureScenario) thereIsAnUnsecuredAPI() error {
-	return batch.CreateResources(k8sClient, u.apiResourceOne...)
+	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, u.apiResourceOne)
 }
 
 func (u *unsecureToSecureScenario) theEndpointIsReachable() error {
@@ -37,7 +37,7 @@ func (u *unsecureToSecureScenario) theEndpointIsReachable() error {
 }
 
 func (u *unsecureToSecureScenario) secureWithOAuth2() error {
-	return batch.UpdateResources(k8sClient, u.apiResourceTwo...)
+	return helper.APIRuleWithRetries(batch.UpdateResources, k8sClient, u.apiResourceTwo)
 }
 
 func (u *unsecureToSecureScenario) callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween(lower int, higher int) error {
