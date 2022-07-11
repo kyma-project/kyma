@@ -134,7 +134,7 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 func generateReport() {
 	htmlOutputDir := "reports/"
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		htmlOutputDir = artifactsDir
+		htmlOutputDir = fmt.Sprintf("%s/", artifactsDir)
 		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 

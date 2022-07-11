@@ -12,7 +12,8 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-//const testToken = "ZYqT86bNtVT-QViFpKGsmlnKGpovxVCQ8cMGsQQVU8A.WQC8MchDy-uyW2iIdqW7m26yZwmGAk_I6cR-YO-IiPY"
+// RetriableApiRule wraps any function that modifies or creates an APIRule
+type RetriableApiRule func(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) (*unstructured.Unstructured, error)
 
 type Helper struct {
 	client *http.Client
@@ -95,7 +96,8 @@ func (s *StatusPredicate) TestPredicate(response *http.Response) bool {
 	return response.StatusCode >= s.LowerStatusBound && response.StatusCode <= s.UpperStatusBound
 }
 
-func (h *Helper) APIRuleWithRetries(retriable func(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) (*unstructured.Unstructured, error), k8sClient dynamic.Interface, resources []unstructured.Unstructured) error {
+// APIRuleWithRetries retries RetriableApiRule function until APIRuleStatus is OK or retry deadline is reached
+func (h *Helper) APIRuleWithRetries(retriable RetriableApiRule, k8sClient dynamic.Interface, resources []unstructured.Unstructured) error {
 	return retry.Do(func() error {
 		type status struct {
 			Status struct {
