@@ -31,7 +31,6 @@ type ConvertingWebHook struct {
 var _ http.Handler = &ConvertingWebHook{}
 
 func NewConvertingWebHook(client ctrlclient.Client, scheme *runtime.Scheme) *ConvertingWebHook {
-	scheme.Convert()
 	decoder, _ := conversion.NewDecoder(scheme)
 	return &ConvertingWebHook{
 		client:  client,

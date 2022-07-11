@@ -261,7 +261,6 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 	failurePolicy := admissionregistrationv1.Fail
 	matchPolicy := admissionregistrationv1.Equivalent
 	reinvocationPolicy := admissionregistrationv1.NeverReinvocationPolicy
-	scope := admissionregistrationv1.AllScopes
 	sideEffects := admissionregistrationv1.SideEffectClassNone
 
 	return admissionregistrationv1.MutatingWebhook{
@@ -283,27 +282,8 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 		FailurePolicy:      &failurePolicy,
 		MatchPolicy:        &matchPolicy,
 		ReinvocationPolicy: &reinvocationPolicy,
-		Rules: []admissionregistrationv1.RuleWithOperations{
-			{
-				Rule: admissionregistrationv1.Rule{
-					APIGroups: []string{
-						serverlessAPIGroup,
-					},
-					APIVersions: []string{
-						DepricatedServerlessAPIVersion,
-					},
-					Resources: []string{"functions", "functions/status"},
-					Scope:     &scope,
-				},
-				Operations: []admissionregistrationv1.OperationType{
-					admissionregistrationv1.Create,
-					admissionregistrationv1.Update,
-					admissionregistrationv1.Connect,
-				},
-			},
-		},
-		SideEffects:    &sideEffects,
-		TimeoutSeconds: pointer.Int32(30),
+		SideEffects:        &sideEffects,
+		TimeoutSeconds:     pointer.Int32(30),
 	}
 }
 
