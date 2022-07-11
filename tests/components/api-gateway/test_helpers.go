@@ -159,6 +159,15 @@ func generateReport() {
 	}
 }
 
+func getApiRules() string {
+	res := schema.GroupVersionResource{Group: "gateway.kyma-project.io", Version: "v1alpha1", Resource: "apirules"}
+	list, _ := k8sClient.Resource(res).List(context.Background(), v1.ListOptions{})
+
+	toPrint, _ := json.Marshal(list)
+
+	return string(pretty.Pretty(toPrint))
+}
+
 func CreateScenario(templateFileName string, namePrefix string) (*Scenario, error) {
 	testID := generateRandomString(testIDLength)
 

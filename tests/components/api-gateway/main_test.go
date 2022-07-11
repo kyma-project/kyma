@@ -181,6 +181,9 @@ func TestApiGateway(t *testing.T) {
 
 	testExitCode := unsecuredSuite.Run()
 
+	podReport := getPodListReport()
+	apiRules := getApiRules()
+
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
 	k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
@@ -190,8 +193,7 @@ func TestApiGateway(t *testing.T) {
 	}
 
 	if testExitCode != 0 {
-		podReport := getPodListReport()
-		t.Fatalf("non-zero status returned, failed to run feature tests, Pod list: %s\n", podReport)
+		t.Fatalf("non-zero status returned, failed to run feature tests, Pod list: %s\n APIRules: %s\n", podReport, apiRules)
 	}
 }
 
