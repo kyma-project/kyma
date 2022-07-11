@@ -100,8 +100,23 @@ containers:
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
-  {{- if .Values.extraContainers }}
-    {{- toYaml .Values.extraContainers | nindent 2 }}
+  {{- if .Values.exporter.enabled }}
+  - name: exporter
+    image: lindnerb/exporter:latest
+    {{- with .Values.exporter.resources }}
+    resources:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+    ports:
+    - name: http-metrics
+      containerPort: 2021
+      protocol: TCP
+    env:
+      - name: MAX_FSBUFFER_SIZE
+        value: "500000000"
+    volumeMounts:
+      - name: varfluentbit
+        mountPath: /data
   {{- end }}
 volumes:
   - name: config

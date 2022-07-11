@@ -24,6 +24,9 @@ spec:
       {{- if and (eq .Values.service.type "NodePort") (.Values.service.nodePort) }}
       nodePort: {{ .Values.service.nodePort }}
       {{- end }}
+    {{- if .Values.exporter.containerPorts }}
+    {{- toYaml .Values.exporter.containerPorts | nindent 4 }}
+    {{- end }}
   {{- if .Values.extraPorts }}
     {{- range .Values.extraPorts }}
     - name: {{ .name }}
