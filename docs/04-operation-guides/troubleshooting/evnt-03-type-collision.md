@@ -27,4 +27,4 @@ Follow these steps to detect if naming collision is the source of the problem:
     kubectl get subscriptions.eventing.kyma-project.io -A | grep {CLEAN_EVENT_TYPE}
     ```
     
-3. If you find that the `CleanEventType` collides with some other Subscription, use a different Application or event type name for your Subscription. 
+3. If you find that the `CleanEventType` collides with some other Subscription, a solution for this would be to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains any non-alphanumeric character, the underlying Eventing services clean it and use the cleaned label. 

@@ -5,8 +5,11 @@ title: Monitoring Kyma Eventing
 Kyma Eventing provides several Grafana Dashboards so you can monitor statistics and other information for the Eventing backbone in real time.
 
 1. To access the Grafana Dashboard, port-forward the Grafana Service to localhost:
+
    ```bash
    kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
+   ```
+
 2. Access the Grafana Dashboard on [localhost:8081](http://localhost:8081).
 
 3. Select the Grafana Dashboard with the desired information about Kyma Eventing:

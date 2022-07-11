@@ -120,10 +120,3 @@ Follow these steps to detect the source of the problem:
     ```
 
 2. Check if the stream and consumers exist in NATS JetStream by following the [JetStream troubleshooting guide](evnt-02-jetstream-troubleshooting.md).
-
-
-
-
-
-
-
