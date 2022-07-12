@@ -99,3 +99,36 @@ func Test_reconciler_reconcile(t *testing.T) {
 		})
 	}
 }
+
+func dummyFunctionForTest_stateFnName(_ context.Context, r *reconciler, s *systemState) stateFn {
+	return nil
+}
+
+func Test_stateFnName(t *testing.T) {
+	type fields struct {
+		fn stateFn
+	}
+	tests := []struct {
+		name    string
+		fn      stateFn
+		want    string
+		wantErr error
+	}{
+		{
+			name: "1",
+			fn:   dummyFunctionForTest_stateFnName,
+			want: "dummyFunctionForTest_stateFnName",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &reconciler{
+				fn: tt.fn,
+			}
+
+			got := m.stateFnName()
+
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
