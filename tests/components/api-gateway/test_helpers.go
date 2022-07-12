@@ -79,12 +79,12 @@ var goDogOpts = godog.Options{
 }
 
 type Config struct {
-	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS"`
+	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS,default=https://oauth2.local.kyma.dev"`
 	User             string        `envconfig:"TEST_USER_EMAIL,default=admin@kyma.cx"`
 	Pwd              string        `envconfig:"TEST_USER_PASSWORD,default=1234"`
 	ReqTimeout       uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
 	ReqDelay         uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
-	Domain           string        `envconfig:"TEST_DOMAIN"`
+	Domain           string        `envconfig:"TEST_DOMAIN, default=local.kyma.dev"`
 	GatewayName      string        `envconfig:"TEST_GATEWAY_NAME,default=kyma-gateway"`
 	GatewayNamespace string        `envconfig:"TEST_GATEWAY_NAMESPACE,default=kyma-system"`
 	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` // Don't forget the unit!
