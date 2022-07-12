@@ -1,0 +1,42 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: test-app
+  namespace: {{ .Values.namespace }}
+spec:
+  description: This is the test service
+  skipVerify: true
+  labels:
+    app: test-app
+  services:
+    - displayName: always ok
+      name: alwaysok
+      providerDisplayName: AlwaysOK
+      description: Always Ok in testapp
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/always-ok"
+    - displayName: basic
+      name: basic
+      providerDisplayName: Basic
+      description: Basic Auth Optimistic scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/basic"
+          credentials:
+            secretName: basic-test
+            type: Basic
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  password: {{ "passwd" | b64enc }}
+  username: {{ "user" | b64enc }}

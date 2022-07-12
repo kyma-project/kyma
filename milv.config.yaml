@@ -48,7 +48,7 @@ files:
   - path: "./kyma/docs/04-operation-guides/troubleshooting/evnt-02-jetstream-troubleshooting.md"
     config:
       external-links-to-ignore: [ "https://grafana.com/grafana/dashboards/14725" ]
-  - path: "./kyma/docs/migration-guide-2.3-2.4.md"
+  - path: "./kyma/docs/05-technical-reference/ac-01-application-gateway-details.md"
     config:
-      external-links-to-ignore: [ "https://github.com/kyma-project/kyma/blob/release-2.4/docs/assets/2.3-2.4-cleanup-orphaned-svcat-resources.sh" ]
-#TODO: remove this entry for migration guide 2.3-2.4 together with the migration guide after 2.4 release
+      external-links-to-ignore: [ "http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH",
+      "http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH"]

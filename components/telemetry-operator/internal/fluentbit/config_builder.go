@@ -80,7 +80,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 			return "", err
 		}
 
-		section[MatchKey] = getValidMatchCond(section, logPipeline.Name)
+		section[MatchKey] = generateMatchCondition(logPipeline.Name)
 
 		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
@@ -91,7 +91,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 			return "", err
 		}
 
-		section[MatchKey] = getValidMatchCond(section, logPipeline.Name)
+		section[MatchKey] = generateMatchCondition(logPipeline.Name)
 		section[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
 
 		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
@@ -100,11 +100,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 	return sb.String(), nil
 }
 
-func getValidMatchCond(section map[string]string, logPipelineName string) string {
-	if matchCond, hasKey := section["match"]; hasKey {
-		return matchCond
-	}
-
+func generateMatchCondition(logPipelineName string) string {
 	return fmt.Sprintf("%s.*", logPipelineName)
 }
 

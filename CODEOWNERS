@@ -75,6 +75,7 @@
 /tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
 
+
 # Fast Integration Tests
 /tests/fast-integration @lindnerby @skhalash @voigt @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @piotrmiskiewicz @szwedm @wozniakjan @ralikio @hanngos @tillknuesting @chrkl
 /tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @PK85 @piotrmiskiewicz @szwedm @wozniakjan @ralikio @hanngos @tillknuesting
@@ -90,6 +91,7 @@
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /tests/components/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /tests/components/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/tests/components/application-connector @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 
 # performance tests
 /tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh

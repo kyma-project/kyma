@@ -2,156 +2,29 @@ package istio
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log"
 	"os"
-	"path/filepath"
-	"runtime"
-	"testing"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/colors"
-	"github.com/pkg/errors"
-	"github.com/spf13/pflag"
-	"github.com/tidwall/pretty"
-	"gitlab.com/rodrigoodhin/gocure/models"
-	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
-	"gitlab.com/rodrigoodhin/gocure/report/html"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/discovery/cached/memory"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/restmapper"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 	"k8s.io/kubectl/pkg/util/podutils"
 )
 
-var t *testing.T
-var goDogOpts = godog.Options{
-	Output:   colors.Colored(os.Stdout),
-	Format:   "pretty",
-	TestingT: t,
-}
+func InitializeScenarioIstioInstalled(ctx *godog.ScenarioContext) {
+	installedCase := istioInstallledCase{}
+	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
+		err := installedCase.getIstioPods()
+		return ctx, err
+	})
 
-func init() {
-	godog.BindCommandLineFlags("godog.", &goDogOpts)
-}
-
-func generateHTMLReport() {
-	html := gocure.HTML{
-		Config: html.Data{
-			InputJsonPath:    cucumberFileName,
-			OutputHtmlFolder: "reports/",
-			Title:            "Kyma Istio component tests",
-			Metadata: models.Metadata{
-				TestEnvironment: os.Getenv(deployedKymaProfileVar),
-				Platform:        runtime.GOOS,
-				Parallel:        "Scenarios",
-				Executed:        "Remote",
-				AppVersion:      "main",
-				Browser:         "default",
-			},
-		},
-	}
-	err := html.Generate()
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-}
-
-func TestMain(m *testing.M) {
-	pflag.Parse()
-	goDogOpts.Paths = pflag.Args()
-	k8sClient, dynamicClient, mapper = initK8sClient()
-	os.Exit(m.Run())
-}
-
-func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.DeferredDiscoveryRESTMapper) {
-	var kubeconfig string
-	if kConfig, ok := os.LookupEnv("KUBECONFIG"); !ok {
-		if home := homedir.HomeDir(); home != "" {
-			kubeconfig = filepath.Join(home, ".kube", "config")
-		}
-	} else {
-		kubeconfig = kConfig
-	}
-	_, err := os.Stat(kubeconfig)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			log.Fatalf("kubeconfig %s does not exist", kubeconfig)
-		}
-		log.Fatalf(err.Error())
-	}
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	k8sClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	dynClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	dc, err := discovery.NewDiscoveryClientForConfig(config)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-	return k8sClient, dynClient, mapper
-}
-
-func TestIstioInstalledEvaluation(t *testing.T) {
-	evalOpts := goDogOpts
-	evalOpts.Paths = []string{"features/istio_evaluation.feature", "features/kube_system_sidecar.feature", "features/namespace_disabled_sidecar.feature", "features/kyma_system_sidecar.feature"}
-
-	suite := godog.TestSuite{
-		Name:                evalProfile,
-		ScenarioInitializer: InitializeScenarioEvalProfile,
-		Options:             &evalOpts,
-	}
-
-	if suite.Name != os.Getenv(deployedKymaProfileVar) {
-		t.Skip()
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
-	if os.Getenv(exportResultVar) == "true" {
-		generateHTMLReport()
-	}
-}
-
-func TestIstioInstalledProduction(t *testing.T) {
-	prodOpts := goDogOpts
-	prodOpts.Paths = []string{"features/istio_production.feature", "features/kube_system_sidecar.feature", "features/namespace_disabled_sidecar.feature", "features/kyma_system_sidecar.feature"}
-
-	suite := godog.TestSuite{
-		Name:                prodProfile,
-		ScenarioInitializer: InitializeScenarioProdProfile,
-		Options:             &prodOpts,
-	}
-
-	if suite.Name != os.Getenv(deployedKymaProfileVar) {
-		t.Skip()
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
-	if os.Getenv(exportResultVar) == "true" {
-		generateHTMLReport()
-	}
-}
-
-type istioInstallledCase struct {
-	pilotPods     *corev1.PodList
-	ingressGwPods *corev1.PodList
+	ctx.Step(`^a running Kyma cluster with "([^"]*)" profile$`, installedCase.aRunningKymaClusterWithProfile)
+	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
+	ctx.Step(`^there is (\d+) pod for Ingress gateway$`, installedCase.thereIsPodForIngressGateway)
+	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
+	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
+	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
+	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
+	InitializeScenarioTargetNamespaceSidecar(ctx)
 }
 
 func (i *istioInstallledCase) getIstioPods() error {
@@ -237,62 +110,4 @@ func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error
 		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d\n Pod list: %v", len(i.pilotPods.Items), numberOfPodsRequired, getPodListReport(i.pilotPods))
 	}
 	return nil
-}
-
-func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
-	installedCase := istioInstallledCase{}
-	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
-		err := installedCase.getIstioPods()
-		return ctx, err
-	})
-	ctx.Step(`^a running Kyma cluster with "([^"]*)" profile$`, installedCase.aRunningKymaClusterWithProfile)
-	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
-	ctx.Step(`^there is (\d+) pod for Ingress gateway$`, installedCase.thereIsPodForIngressGateway)
-	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
-	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
-	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
-	InitializeScenarioKubeSystemSidecar(ctx)
-	InitializeScenarioTargetNamespaceSidecar(ctx)
-	InitializeScenarioKymaSystemSidecar(ctx)
-}
-
-func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
-	installedCase := istioInstallledCase{}
-	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
-		err := installedCase.getIstioPods()
-		return ctx, err
-	})
-	ctx.Step(`^a running Kyma cluster with "([^"]*)" profile$`, installedCase.aRunningKymaClusterWithProfile)
-	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
-	ctx.Step(`^there is (\d+) pod for Ingress gateway$`, installedCase.thereIsPodForIngressGateway)
-	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
-	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
-	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
-	InitializeScenarioKubeSystemSidecar(ctx)
-	InitializeScenarioTargetNamespaceSidecar(ctx)
-	InitializeScenarioKymaSystemSidecar(ctx)
-}
-
-func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
-	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
-}
-
-func getPodListReport(list *corev1.PodList) string {
-	type returnedPodList struct {
-		PodList []struct {
-			Metadata struct {
-				Name              string `json:"name"`
-				CreationTimestamp string `json:"creationTimestamp"`
-			} `json:"metadata"`
-			Status struct {
-				Phase string `json:"phase"`
-			} `json:"status"`
-		} `json:"items"`
-	}
-
-	p := returnedPodList{}
-	toMarshal, _ := json.Marshal(list)
-	_ = json.Unmarshal(toMarshal, &p)
-	toPrint, _ := json.Marshal(p)
-	return string(pretty.Pretty(toPrint))
 }

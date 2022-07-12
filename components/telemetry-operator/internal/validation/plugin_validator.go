@@ -96,22 +96,10 @@ func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipelin
 		}
 	}
 
-	matchCondition := getMatchCondition(customSection)
-	if matchCondition == "" {
-		return nil
-	}
-	if matchCondition == "*" {
-		return fmt.Errorf("plugin '%s' with match condition '*' (match all) is not allowed", name)
+	if hasMatchCondition(customSection) {
+		return fmt.Errorf("plugin '%s' contains match condition. Match conditions are forbidden", name)
 	}
 
-	if isValid, logPipelinesNames := isMatchCondValid(matchCondition, pipeline.Name, pipelines); !isValid {
-		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", pipeline.Name)
-		if len(logPipelinesNames) > 0 {
-			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
-		}
-		return fmt.Errorf("plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
-			name, matchCondition, validLogPipelinesNames)
-	}
 	return nil
 }
 
@@ -122,27 +110,11 @@ func getCustomName(custom map[string]string) (string, error) {
 	return "", fmt.Errorf("configuration section does not have name attribute")
 }
 
-func getMatchCondition(section map[string]string) string {
-	if matchCond, hasKey := section["match"]; hasKey {
-		return matchCond
+func hasMatchCondition(section map[string]string) bool {
+	if _, hasKey := section["match"]; hasKey {
+		return true
 	}
-	return ""
-}
-
-func isMatchCondValid(matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
-	if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
-		return true, nil
-	}
-
-	var pipelineNames []string
-	for _, l := range logPipelines.Items {
-		if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", l.Name)) {
-			return true, nil
-		}
-		pipelineNames = append(pipelineNames, l.Name)
-	}
-
-	return false, pipelineNames
+	return false
 }
 
 func parseSection(section string) (map[string]string, error) {
