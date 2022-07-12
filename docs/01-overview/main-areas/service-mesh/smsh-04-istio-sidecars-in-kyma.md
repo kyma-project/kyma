@@ -32,7 +32,7 @@ To improve the resiliency of your applications, you can use [mirroring](https://
 
 ### Resiliency
 
-Application resiliency is an important topic within traffic management functionalities. Traditionally resiliency features like timeouts, retries and circuit breakers were implemented by application libraries, however with service mesh you can delegate that tasks to the mesh and the same configuration options will work regardless of the programming language of your application. You can read more about it in [Network resilience and testing](https://istio.io/latest/docs/concepts/traffic-management/#network-resilience-and-testing)
+Application resiliency is an important topic within traffic management. Traditionally, resiliency features like timeouts, retries, and circuit breakers were implemented by application libraries. However, with service mesh, you can delegate such tasks to the mesh, and the same configuration options will work regardless of the programming language of your application. You can read more about it in [Network resilience and testing](https://istio.io/latest/docs/concepts/traffic-management/#network-resilience-and-testing).
 
 ## Sidecar proxy behavior during Kyma upgrade.
 
