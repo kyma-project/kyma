@@ -35,7 +35,7 @@ test-k3d: ## Prepare k3d and run tests
 	export TEST_DOMAIN="local.kyma.dev" 
 	export TEST_CLIENT_TIMEOUT=30s
 	export TEST_CONCURENCY="8"
-	export EXPORT_RESULT="true
+	export EXPORT_RESULT="true"
 
 	./prepare_local.sh
 
