@@ -2,7 +2,9 @@
 title: Istio sidecars in Kyma and why you want them
 ---
 
-Istio installed as part of Kyma has [default configuration](./smsh-02-default-istio-setup-in-kyma.md) with automatic Istio proxy sidecar injection enabled by default. It means that all pods of your workloads (Deployments, StatefulSets and other) will get their own sidecar proxy container running next to your application (provided your workload is not in `istio-system` or `kube-system` namespace). This is a requirement for the resource to be a part of Istio service mesh. It has numerous benefits, mentioned below, that you get out of the box, but are complex to manage without this feature.
+By default, Istio installed as part of Kyma [is configured](./smsh-02-default-istio-setup-in-kyma.md) with automatic Istio proxy sidecar injection enabled. This means that all Pods of your workloads (such as deployments and StatefulSets; except any workloads in the `istio-system` or `kube-system` Namespaces) get their own sidecar proxy container running next to your application. With an Istio sidecar, the resource becomes part of Istio service mesh, which brings the following benefits that would be complex to manage otherwise.
+
+
 
 ## Secure communication
 
