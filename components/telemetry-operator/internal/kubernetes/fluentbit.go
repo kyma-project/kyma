@@ -16,9 +16,10 @@ type FluentBitUtils struct {
 	FluentBitDaemonSet types.NamespacedName
 }
 
-func NewFluentBit(client client.Client) *FluentBitUtils {
+func NewFluentBit(client client.Client, fluenbitDaemonSet types.NamespacedName) *FluentBitUtils {
 	return &FluentBitUtils{
-		client: client,
+		client:             client,
+		FluentBitDaemonSet: fluenbitDaemonSet,
 	}
 }
 

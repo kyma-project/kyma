@@ -18,10 +18,10 @@ package telemetry
 
 import (
 	"context"
+	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parsers"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -35,7 +35,7 @@ type LogParserReconciler struct {
 	client.Client
 	Scheme             *runtime.Scheme
 	FluentBitDaemonSet types.NamespacedName
-	Parser             parsers.LogParserSyncer
+	Parser             *parsers.LogParserSyncer
 	FluentBitUtils     *kubernetes.FluentBitUtils
 	restartsTotal      prometheus.Counter
 }
@@ -54,12 +54,13 @@ type LogParserReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 
-func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
+func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig parsers.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
 	var lpr LogParserReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
-	lpr.FluentBitUtils = kubernetes.NewFluentBit(client)
+	lpr.FluentBitUtils = kubernetes.NewFluentBit(client, daemonSetConfig.FluentBitDaemonSetName)
+	lpr.Parser = parsers.NewLogParserSyncer(client, daemonSetConfig)
 	lpr.restartsTotal = restartsTotal
 
 	prometheus.MustRegister(lpr.restartsTotal)
@@ -82,9 +83,46 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if changed {
 		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
+
+		if err = r.Update(ctx, &logParser); err != nil {
+			log.Error(err, "Failed updating log parser")
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
+		}
+
 		if err = r.FluentBitUtils.RestartFluentBit(ctx, r.restartsTotal); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
+		}
+
+		condition := telemetryv1alpha1.NewLogParserCondition(
+			telemetryv1alpha1.FluentBitDSRestartedReason,
+			telemetryv1alpha1.LogParserPending,
+		)
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+	}
+
+	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
+		var ready bool
+		ready, err = r.FluentBitUtils.IsFluentBitDaemonSetReady(ctx)
+		if err != nil {
+			log.Error(err, "Failed to check fluent bit readiness")
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+		if !ready {
+			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
+
+		condition := telemetryv1alpha1.NewLogParserCondition(
+			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
+			telemetryv1alpha1.LogParserRunning,
+		)
+
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
 
@@ -96,4 +134,37 @@ func (r *LogParserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogParser{}).
 		Complete(r)
+}
+
+func (r *LogParserReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogParserCondition) error {
+	log := logf.FromContext(ctx)
+
+	var logParser telemetryv1alpha1.LogParser
+	if err := r.Get(ctx, name, &logParser); err != nil {
+		log.Error(err, "Failed getting log parser")
+		return err
+	}
+
+	// Do not update status if the log pipeline is being deleted
+	if logParser.DeletionTimestamp != nil {
+		return nil
+	}
+
+	// If the log parser had a running condition and then was modified, all conditions are removed.
+	// In this case, condition tracking starts off from the beginning.
+	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) != nil &&
+		condition.Type == telemetryv1alpha1.LogParserPending {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", name.Name, condition.Type))
+		logParser.Status.Conditions = []telemetryv1alpha1.LogParserCondition{}
+	} else {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", name.Name, condition.Type))
+	}
+
+	logParser.Status.SetCondition(*condition)
+
+	if err := r.Status().Update(ctx, &logParser); err != nil {
+		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
+		return err
+	}
+	return nil
 }

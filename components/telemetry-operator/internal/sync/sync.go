@@ -22,7 +22,6 @@ const (
 type FluentBitDaemonSetConfig struct {
 	FluentBitDaemonSetName     types.NamespacedName
 	FluentBitSectionsConfigMap types.NamespacedName
-	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 }

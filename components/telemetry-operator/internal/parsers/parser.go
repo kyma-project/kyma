@@ -17,6 +17,7 @@ const (
 )
 
 type FluentBitDaemonSetConfig struct {
+	FluentBitDaemonSetName    types.NamespacedName
 	FluentBitParsersConfigMap types.NamespacedName
 }
 type LogParserSyncer struct {

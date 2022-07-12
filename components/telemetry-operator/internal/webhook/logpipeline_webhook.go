@@ -228,11 +228,11 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		Data: sectionsConfig,
 	})
 
-	var logPipelines telemetryv1alpha1.LogPipelineList
-	if err := v.List(ctx, &logPipelines); err != nil {
+	var logparsers telemetryv1alpha1.LogParserList
+	if err := v.List(ctx, &logparsers); err != nil {
 		return nil, err
 	}
-	parsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
+	parsersConfig := fluentbit.MergeParsersConfig(&logparsers)
 	configFiles = append(configFiles, fs.File{
 		Path: fluentBitParsersConfigDirectory,
 		Name: fluentBitParsersConfigMapKey,

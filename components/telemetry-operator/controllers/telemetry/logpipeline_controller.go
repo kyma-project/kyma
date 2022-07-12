@@ -69,7 +69,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	lpr.FluentBitUtils = kubernetes.NewFluentBit(client)
+	lpr.FluentBitUtils = kubernetes.NewFluentBit(client, daemonSetConfig.FluentBitDaemonSetName)
 
 	metrics.Registry.MustRegister(lpr.restartsTotal)
 	metrics.Registry.MustRegister(lpr.unsupportedTotal)
