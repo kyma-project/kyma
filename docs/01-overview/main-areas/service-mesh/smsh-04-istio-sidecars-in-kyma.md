@@ -34,6 +34,6 @@ To improve the resiliency of your applications, you can use [mirroring](https://
 
 Application resiliency is an important topic within traffic management. Traditionally, resiliency features like timeouts, retries, and circuit breakers were implemented by application libraries. However, with service mesh, you can delegate such tasks to the mesh, and the same configuration options will work regardless of the programming language of your application. You can read more about it in [Network resilience and testing](https://istio.io/latest/docs/concepts/traffic-management/#network-resilience-and-testing).
 
-## Sidecar proxy behavior during Kyma upgrade.
+## Sidecar proxy behavior during Kyma upgrade
 
 When upgrading Kyma we want to have full compatibility of existing workloads with the upgraded version of Istio. To achieve that we try to perform `rollout restart` of the workloads whenever possible because this ensures that newest version of sidecar proxy will be injected into the pods. There are exceptions when it's not possible to restart workloads and this behaviour is described in [troubleshooting guide](https://kyma-project.io/docs/kyma/latest/04-operation-guides/troubleshooting/apix-09-upgrade-sidecar-proxy#cause) 
