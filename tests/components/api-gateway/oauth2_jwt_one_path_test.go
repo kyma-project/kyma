@@ -29,6 +29,7 @@ func InitializeScenarioOAuth2JWTOnePath(ctx *godog.ScenarioContext) {
 }
 
 func (o *oauthJWTOnePathScenario) thereIsAnOauth2Endpoint() error {
+	print("test")
 	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, o.apiResource)
 }
 
