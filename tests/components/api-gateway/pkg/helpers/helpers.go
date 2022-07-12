@@ -96,30 +96,30 @@ func (s *StatusPredicate) TestPredicate(response *http.Response) bool {
 	return response.StatusCode >= s.LowerStatusBound && response.StatusCode <= s.UpperStatusBound
 }
 
-// APIRuleWithRetries awaits status OK on API Rule
+// APIRuleWithRetries retries RetriableApiRule function until APIRuleStatus is OK or retry deadline is reached
 func (h *Helper) APIRuleWithRetries(retriable RetriableApiRule, k8sClient dynamic.Interface, resources []unstructured.Unstructured) error {
-	type status struct {
-		Status struct {
-			APIRuleStatus struct {
-				Code string `json:"code"`
-			} `json:"APIRuleStatus"`
-		} `json:"status"`
-	}
-	res, err := retriable(k8sClient, resources...)
-	if err != nil {
-		return err
-	}
-
-	js, err := json.Marshal(res)
-	if err != nil {
-		return err
-	}
-
 	return retry.Do(func() error {
+		type status struct {
+			Status struct {
+				APIRuleStatus struct {
+					Code string `json:"code"`
+				} `json:"APIRuleStatus"`
+			} `json:"status"`
+		}
+		res, err := retriable(k8sClient, resources...)
+		if err != nil {
+			return err
+		}
+
+		js, err := json.Marshal(res)
+		if err != nil {
+			return err
+		}
+
 		apiStatus := status{}
 
 		json.Unmarshal(js, &apiStatus)
-		if apiStatus.Status.APIRuleStatus.Code != "OK" {
+		if apiStatus.Status.APIRuleStatus.Code == "ERROR" {
 			return errors.New("APIRule status not ok")
 		}
 		return nil
