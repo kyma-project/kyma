@@ -28,7 +28,7 @@ Being part of Istio service mesh enables all these advanced observability featur
 
 [Traffic Shifting](https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/) and [Request Routing](https://istio.io/latest/docs/tasks/traffic-management/request-routing/) allows developers to release their software using techniques like canary releases and A/B testing to make release process faster and more reliable.
 
-[Mirroring](https://istio.io/latest/docs/tasks/traffic-management/mirroring/) and [Fault Injection](https://istio.io/latest/docs/tasks/traffic-management/fault-injection/) can be used for testing and audit purposes to improve resiliency of your applications.
+To improve the resiliency of your applications, you can use [mirroring](https://istio.io/latest/docs/tasks/traffic-management/mirroring/) and [fault injection](https://istio.io/latest/docs/tasks/traffic-management/fault-injection/) for testing and audit purposes.
 
 ### Resiliency
 
