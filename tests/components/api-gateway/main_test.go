@@ -62,6 +62,7 @@ func TestMain(m *testing.M) {
 			},
 			Timeout: conf.ClientTimeout,
 		}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	oauthClientID := generateRandomString(OauthClientIDLength)

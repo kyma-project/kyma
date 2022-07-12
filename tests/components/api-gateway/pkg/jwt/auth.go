@@ -22,6 +22,7 @@ func Authenticate(oauthClientID string, config oidcHydraConfig) (string, error) 
 		Timeout: config.ClientConfig.TimeoutSeconds,
 		Jar:     jar,
 	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	idTokenProvider := newOidcHydraTestFlow(httpClient, config)
 	token, err := idTokenProvider.fetchIdToken()
