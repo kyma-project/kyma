@@ -203,7 +203,7 @@ func CreateScenario(templateFileName string, namePrefix string) (*Scenario, erro
 		Domain           string
 		GatewayName      string
 		GatewayNamespace string
-	}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
 		GatewayNamespace: conf.GatewayNamespace})
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
@@ -240,7 +240,7 @@ func CreateTwoStepScenario(templateFileNameOne string, templateFileNameTwo strin
 		Domain           string
 		GatewayName      string
 		GatewayNamespace string
-	}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
 		GatewayNamespace: conf.GatewayNamespace})
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
@@ -253,7 +253,7 @@ func CreateTwoStepScenario(templateFileNameOne string, templateFileNameTwo strin
 		Domain           string
 		GatewayName      string
 		GatewayNamespace string
-	}{Namespace: namespace, NamePrefix: "oauth2", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
 		GatewayNamespace: conf.GatewayNamespace})
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
