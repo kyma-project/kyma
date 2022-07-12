@@ -39,7 +39,7 @@ test-k3d: ## Prepare k3d and run tests
 
 	./prepare_local.sh
 
-	test
+	make test
 
 ## Prerequisites:
 setup: ## Setup local installation with the same configuration as pipeline
