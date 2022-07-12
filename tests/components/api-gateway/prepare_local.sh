@@ -4,8 +4,8 @@ TEST_ORY_IMAGE="eu.gcr.io/kyma-project/incubator/test-hydra-login-consent:d6e6d3
 
 function check_required_envs() {
     if [[ -z ${KYMA_DOMAIN} ]]; then
-            echo "You need to export KYMA_DOMAIN"
-            exit 
+            echo "KYMA_DOMAIN not exported, fallback to default k3d local.kyma.dev"
+            export KYMA_DOMAIN=local.kyma.dev
     fi
 }
 
