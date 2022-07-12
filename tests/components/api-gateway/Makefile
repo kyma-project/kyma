@@ -27,6 +27,20 @@ else
 	$(GOTEST) -v -race .
 endif
 
+test-k3d: ## Prepare k3d and run tests
+	export KYMA_DOMAIN="local.kyma.dev"
+	export TEST_HYDRA_ADDRESS="https://oauth2.local.kyma.dev"
+	export TEST_REQUEST_TIMEOUT="120"
+	export TEST_REQUEST_DELAY="10"
+	export TEST_DOMAIN="local.kyma.dev" 
+	export TEST_CLIENT_TIMEOUT=30s
+	export TEST_CONCURENCY="8"
+	export EXPORT_RESULT="true
+
+	./prepare_local.sh
+
+	test
+
 ## Prerequisites:
 setup: ## Setup local installation with the same configuration as pipeline
 	./prepare_local.sh

@@ -3,12 +3,8 @@
 TEST_ORY_IMAGE="eu.gcr.io/kyma-project/incubator/test-hydra-login-consent:d6e6d3bc"
 
 function check_required_envs() {
-    if [[ -z ${CLUSTER_NAME} ]]; then
-            echo "You need to export CLUSTER_NAME as in CLUSTER_NAME.GARDENER_KYMA_PROW_PROJECT_NAME.shoot.canary.k8s-hana.ondemand.com" 
-            exit 
-    fi
-    if [[ -z ${GARDENER_KYMA_PROW_PROJECT_NAME} ]]; then
-            echo "You need to export GARDENER_KYMA_PROW_PROJECT_NAME as in CLUSTER_NAME.GARDENER_KYMA_PROW_PROJECT_NAME.shoot.canary.k8s-hana.ondemand.com" 
+    if [[ -z ${KYMA_DOMAIN} ]]; then
+            echo "You need to export KYMA_DOMAIN"
             exit 
     fi
 }
@@ -17,10 +13,10 @@ function configure_ory_hydra() {
   echo "Prepare test environment variables"
 
   kubectl -n kyma-system set env deployment ory-hydra LOG_LEAK_SENSITIVE_VALUES="true"
-  kubectl -n kyma-system set env deployment ory-hydra URLS_LOGIN="https://ory-hydra-login-consent.${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com/login"
-  kubectl -n kyma-system set env deployment ory-hydra URLS_CONSENT="https://ory-hydra-login-consent.${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com/consent"
-  kubectl -n kyma-system set env deployment ory-hydra URLS_SELF_ISSUER="https://oauth2.${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com/"
-  kubectl -n kyma-system set env deployment ory-hydra URLS_SELF_PUBLIC="https://oauth2.${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com/"
+  kubectl -n kyma-system set env deployment ory-hydra URLS_LOGIN="https://ory-hydra-login-consent.${KYMA_DOMAIN}/login"
+  kubectl -n kyma-system set env deployment ory-hydra URLS_CONSENT="https://ory-hydra-login-consent.${KYMA_DOMAIN}/consent"
+  kubectl -n kyma-system set env deployment ory-hydra URLS_SELF_ISSUER="https://oauth2.${KYMA_DOMAIN}/"
+  kubectl -n kyma-system set env deployment ory-hydra URLS_SELF_PUBLIC="https://oauth2.${KYMA_DOMAIN}/"
   kubectl -n kyma-system rollout restart deployment ory-hydra
   kubectl -n kyma-system rollout status deployment ory-hydra
 }
@@ -87,7 +83,7 @@ spec:
   gateways:
   - kyma-system/kyma-gateway
   hosts:
-  - ory-hydra-login-consent.${CLUSTER_NAME}.${GARDENER_KYMA_PROW_PROJECT_NAME}.shoot.canary.k8s-hana.ondemand.com
+  - ory-hydra-login-consent.${KYMA_DOMAIN}
   http:
   - match:
     - uri:
