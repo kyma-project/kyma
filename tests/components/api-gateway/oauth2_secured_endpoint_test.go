@@ -27,7 +27,7 @@ func InitializeScenarioOAuth2Endpoint(ctx *godog.ScenarioContext) {
 }
 
 func (o *oauth2Scenario) thereIsAnOauth2Endpoint() error {
-	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, o.apiResource)
+	return helper.APIRuleWithRetries(batch.CreateResources, batch.UpdateResources, k8sClient, o.apiResource)
 }
 
 func (o *oauth2Scenario) callingTheEndpointWithValidTokenShouldResultInStatusBeetween(lower, higher int) error {

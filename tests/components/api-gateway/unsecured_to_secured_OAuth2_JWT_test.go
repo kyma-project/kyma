@@ -15,7 +15,7 @@ type unsecureToSecureScenarioJWT struct {
 }
 
 func InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx *godog.ScenarioContext) {
-	mainScenario, err := CreateTwoStepScenario(noAccessStrategyApiruleFile, jwtAndOauthStrategyApiruleFile, "unsecured-to-secured-jwt-two-paths")
+	mainScenario, err := CreateTwoStepScenario(noAccessStrategyApiruleFile, jwtAndOauthStrategyApiruleFile, "u2s-jwt-two-paths")
 	if err != nil {
 		t.Fatalf("could not initialize unsecure endpoint scenario err=%s", err)
 	}
@@ -31,7 +31,7 @@ func InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx *godog.ScenarioContext)
 }
 
 func (u *unsecureToSecureScenarioJWT) thereIsAnUnsecuredAPI() error {
-	return helper.APIRuleWithRetries(batch.CreateResources, k8sClient, u.apiResourceOne)
+	return helper.APIRuleWithRetries(batch.CreateResources, batch.UpdateResources, k8sClient, u.apiResourceOne)
 }
 
 func (u *unsecureToSecureScenarioJWT) theEndpointIsReachable() error {
@@ -39,7 +39,7 @@ func (u *unsecureToSecureScenarioJWT) theEndpointIsReachable() error {
 }
 
 func (u *unsecureToSecureScenarioJWT) secureWithOAuth2JWT() error {
-	return helper.APIRuleWithRetries(batch.UpdateResources, k8sClient, u.apiResourceTwo)
+	return helper.APIRuleWithRetries(batch.UpdateResources, batch.UpdateResources, k8sClient, u.apiResourceTwo)
 }
 
 func (u *unsecureToSecureScenarioJWT) callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween(path string, lower int, higher int) error {
