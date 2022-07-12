@@ -13,7 +13,7 @@ type oauth2Scenario struct {
 }
 
 func InitializeScenarioOAuth2Endpoint(ctx *godog.ScenarioContext) {
-	mainScenario, err := CreateScenario(oauthStrategyApiruleFile, "oauth2")
+	mainScenario, err := CreateScenario(oauthStrategyApiruleFile, "oauth2-secured")
 	if err != nil {
 		t.Fatalf("could not initialize unsecure endpoint scenario err=%s", err)
 	}
