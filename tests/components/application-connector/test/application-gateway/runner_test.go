@@ -5,7 +5,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var applications = []string{"basic-cases", "path-cases", "k8s-test"}
+var applications = []string{"positive-authorisation", "path-related-error-handling", "kubernetes-resources-error-handling"}
 
 func (gs *GatewaySuite) TestCases() {
 

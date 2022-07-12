@@ -1,13 +1,13 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: path-cases
+  name: path-related-error-handling
   namespace: "{{ .Values.namespace }}"
 spec:
   description: Test cases with incorrect path
   skipVerify: true
   labels:
-    app: path-cases
+    app: path-related-error-handling
   services:
     - displayName: missing-srv-app
       name: missing-srv-app
@@ -26,13 +26,13 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/path-cases"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/path-related-error-handling"
     - displayName: non-existing-target-url
       name: non-existing-target-url
       providerDisplayName: Kyma
-      description: Should return 502 when target url was typed incorrect
+      description: Should return 502 when target url is not resolvable
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://bad.bad.svc.cluster.local:8080/v1/api/unsecure/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/path-cases/non-existing-target-url"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/path-related-error-handling/non-existing-target-url"
