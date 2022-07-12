@@ -1,0 +1,54 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: k8s-test
+  namespace: "{{ .Values.namespace }}"
+spec:
+  description: Test cases related to Kubernetes resources
+  skipVerify: true
+  labels:
+    app: k8s-test
+  services:
+    - displayName: application-doesnt-exist
+      name: application-doesnt-exist
+      providerDisplayName: Kyma
+      description: Should return 500 when application doesnt exist
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/where-is-app/idk"
+    - displayName: service-doesnt-exist
+      name: service-doesnt-exist
+      providerDisplayName: Kyma
+      description: Should return 404 when service doesnt exist
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/k8s-test/where-is-service"
+    - displayName: missing-secret-oauth
+      name: missing-secret-oauth
+      providerDisplayName: Kyma
+      description: Should return 500 when secret containing oAuth credentials is missing in the cluster
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/k8s-test/missing-secret-oauth"
+          credentials:
+            secretName: where-is-the-secret
+            authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
+            type: OAuth
+    - displayName: missing-secret-basic-auth
+      name: missing-secret-basic-auth
+      providerDisplayName: Kyma
+      description: Should return 500 when secret containing Basic Auth credentials is missing in the cluster
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/k8s-test/missing-secret-basic-auth"
+          credentials:
+            secretName: where-is-the-secret
+            type: Basic

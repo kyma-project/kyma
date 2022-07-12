@@ -5,9 +5,9 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var applications = []string{"basic-cases", "path-cases"}
+var applications = []string{"basic-cases", "path-cases", "k8s-test"}
 
-func (gs *GatewaySuite) TestApplicationCases() {
+func (gs *GatewaySuite) TestCases() {
 
 	for _, app := range applications {
 		app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), app, v1.GetOptions{})
