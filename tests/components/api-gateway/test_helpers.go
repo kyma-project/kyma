@@ -156,7 +156,7 @@ func generateReport() {
 		log.Fatalf(err.Error())
 	}
 
-	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
+	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok && conf.Domain != "local.kyma.dev" {
 		filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
 			copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
 			return nil
