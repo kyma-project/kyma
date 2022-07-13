@@ -32,6 +32,4 @@ If the event name contains more than two segments, Eventing combines them into t
 
 If the Application name contains any non-alphanumeric character `[^a-zA-Z0-9]+`, the underlying Eventing services use a clean name with alphanumeric characters only `[a-zA-Z0-9]+`; for example, `system-prod` becomes `systemprod`.
 
-This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected.
-
-A solution for this is to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains any non-alphanumeric character, the underlying Eventing services clean it and use the cleaned label.
+This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected. Take a look into this [troubleshooting guide](../04-operation-guides/troubleshooting/evnt-03-type-collision.md) for more information.

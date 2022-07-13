@@ -1,5 +1,5 @@
 ---
-title: JetStream backend troubleshooting
+title: NATS JetStream backend troubleshooting
 ---
 
 ## Symptom
@@ -8,7 +8,7 @@ Events were not received by the consumers.
 
 ## Remedy
 
-1. Follow the basic troubleshooting steps as mentioned in [Eventing Troubleshooting](./evnt-01-eventing-troubleshooting.md) guide.
+1. Follow the diagnostic steps as mentioned in [Eventing Troubleshooting](evnt-01-eventing-troubleshooting.md).
 
 2. Use the [nats CLI](https://github.com/nats-io/natscli) to check if the stream was created:
 
