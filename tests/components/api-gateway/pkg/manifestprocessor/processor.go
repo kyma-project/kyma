@@ -25,12 +25,12 @@ func parseManifest(input []byte) (*unstructured.Unstructured, error) {
 	return resource, nil
 }
 
-func getManifestsFromFile(fileName string, directory string, separator string) []string {
+func getManifestsFromFile(fileName string, directory string, separator string) ([]string, error) {
 	data, err := ioutil.ReadFile(path.Join(directory, fileName))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return strings.Split(string(data), separator)
+	return strings.Split(string(data), separator), nil
 }
 
 func convert(inputYAML []string) ([]string, error) {
@@ -47,22 +47,26 @@ func convert(inputYAML []string) ([]string, error) {
 	return result, nil
 }
 
-func parseTemplateWithData(templateRaw string, data interface{}) string {
+func parseTemplateWithData(templateRaw string, data interface{}) (string, error) {
 	tmpl, err := template.New("tmpl").Parse(templateRaw)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	var resource bytes.Buffer
 	err = tmpl.Execute(&resource, data)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return resource.String()
+	return resource.String(), nil
 }
 
 //ParseFromFile parse simple yaml manifests
 func ParseFromFile(fileName string, directory string, separator string) ([]unstructured.Unstructured, error) {
-	manifests, err := convert(getManifestsFromFile(fileName, directory, separator))
+	manifestArray, err := getManifestsFromFile(fileName, directory, separator)
+	if err != nil {
+		return nil, err
+	}
+	manifests, err := convert(manifestArray)
 	if err != nil {
 		return nil, err
 	}
@@ -79,13 +83,20 @@ func ParseFromFile(fileName string, directory string, separator string) ([]unstr
 
 //ParseFromFileWithTemplate parse manifests with goTemplate support
 func ParseFromFileWithTemplate(fileName string, directory string, separator string, templateData interface{}) ([]unstructured.Unstructured, error) {
-	manifestsRaw, err := convert(getManifestsFromFile(fileName, directory, separator))
+	manifestArray, err := getManifestsFromFile(fileName, directory, separator)
+	if err != nil {
+		return nil, err
+	}
+	manifestsRaw, err := convert(manifestArray)
 	if err != nil {
 		return nil, err
 	}
 	var resources []unstructured.Unstructured
 	for _, raw := range manifestsRaw {
-		man := parseTemplateWithData(raw, templateData)
+		man, err := parseTemplateWithData(raw, templateData)
+		if err != nil {
+			return nil, err
+		}
 		res, err := parseManifest([]byte(man))
 		if err != nil {
 			return nil, err
