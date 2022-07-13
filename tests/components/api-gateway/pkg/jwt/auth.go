@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"crypto/tls"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 
@@ -12,7 +11,7 @@ import (
 func Authenticate(oauthClientID string, config oidcHydraConfig) (string, error) {
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	httpClient := &http.Client{

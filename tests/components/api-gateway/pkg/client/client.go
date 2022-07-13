@@ -10,34 +10,39 @@ import (
 
 const kubeconfigEnvName = "KUBECONFIG"
 
-func loadKubeConfigOrDie() *rest.Config {
+func loadKubeConfigOrDie() (*rest.Config, error) {
 	if kubeconfig, ok := os.LookupEnv(kubeconfigEnvName); ok {
 		cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		return cfg
+		return cfg, nil
 	}
 
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		return cfg
+		return cfg, nil
 	}
 
 	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return cfg
+	return cfg, nil
 }
 
-func GetDynamicClient() dynamic.Interface {
-	client, err := dynamic.NewForConfig(loadKubeConfigOrDie())
+func GetDynamicClient() (dynamic.Interface, error) {
+	config, err := loadKubeConfigOrDie()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return client
+
+	client, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }

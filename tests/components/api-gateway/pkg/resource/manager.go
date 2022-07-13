@@ -2,7 +2,7 @@ package resource
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/avast/retry-go"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -23,7 +23,6 @@ type Manager struct {
 func (m *Manager) CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) error {
 	return retry.Do(func() error {
 		if _, err := client.Resource(resourceSchema).Namespace(namespace).Create(context.Background(), &manifest, metav1.CreateOptions{}); err != nil {
-			log.Printf("Error: %+v", err)
 			return err
 		}
 		return nil
@@ -72,13 +71,11 @@ func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.Gr
 			var err error
 			res, err = client.Resource(resourceSchema).Namespace(namespace).Get(context.Background(), resourceName, metav1.GetOptions{})
 			if err != nil {
-				log.Printf("Error: %+v", err)
 				return err
 			}
 			return nil
 		}, m.RetryOptions...)
 	if err != nil {
-		log.Panicf("Error: %+v", err)
 		return nil, err
 	}
 	return res, nil
@@ -88,13 +85,11 @@ func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.Gr
 func (m *Manager) GetStatus(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) (map[string]interface{}, error) {
 	obj, err := m.GetResource(client, resourceSchema, namespace, resourceName)
 	if err != nil {
-		log.Panicf("Error: %+v", err)
 		return nil, err
 	}
 	status, found, err := unstructured.NestedMap(obj.Object, "status")
 	if err != nil || !found {
-		log.Panicf("Error: Could not retrive status, or status not found:\n %+v", err)
-		return nil, err
+		return nil, fmt.Errorf("could not retrive status, or status not found:\n %+v", err)
 	}
 	return status, nil
 }

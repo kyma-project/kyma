@@ -97,7 +97,10 @@ func TestMain(m *testing.M) {
 
 	helper = helpers.NewHelper(httpClient, commonRetryOpts)
 
-	client := client.GetDynamicClient()
+	client, err  := client.GetDynamicClient()
+	if err != nil {
+		t.Fatal(err)
+	}
 	k8sClient = client
 	resourceManager = &resource.Manager{RetryOptions: commonRetryOpts}
 
@@ -118,7 +121,7 @@ func TestMain(m *testing.M) {
 		OauthSecretName:   oauthSecretName,
 	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// delete test namespace if the previous test namespace persists
@@ -142,7 +145,7 @@ func TestMain(m *testing.M) {
 		OauthSecretName: oauthSecretName,
 	})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	log.Printf("Creating hydra client resources")
 	batch.CreateResources(k8sClient, hydraClientResource...)
