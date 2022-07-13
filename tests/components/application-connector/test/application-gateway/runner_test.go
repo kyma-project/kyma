@@ -7,7 +7,7 @@ import (
 
 var applications = []string{"positive-authorisation", "path-related-error-handling", "kubernetes-resources-error-handling"}
 
-func (gs *GatewaySuite) TestCases() {
+func (gs *GatewaySuite) TestGetRequest() {
 
 	for _, app := range applications {
 		app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), app, v1.GetOptions{})
