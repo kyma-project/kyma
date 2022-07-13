@@ -2,10 +2,11 @@ package jetstream
 
 import (
 	"context"
-	"github.com/stretchr/testify/mock"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
