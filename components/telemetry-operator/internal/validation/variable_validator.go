@@ -56,7 +56,7 @@ func validateMandatoryFieldsAreEmpty(vr telemetryv1alpha1.VariableReference) boo
 func findConflictingVariables(logPipeLine *telemetryv1alpha1.LogPipeline, vr telemetryv1alpha1.VariableReference, existingPipelineName string) error {
 	for _, v := range logPipeLine.Spec.Variables {
 		if v.Name == vr.Name {
-			return fmt.Errorf("variable with name '%s' has a been previously used in pipeline '%s'", v.Name, existingPipelineName)
+			return fmt.Errorf("Variable name must be globally unique. Variable '%s' is used in pipeline '%s'", v.Name, existingPipelineName)
 		}
 	}
 	return nil
