@@ -5,6 +5,9 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"path"
 	"strings"
 	"time"
 
@@ -31,12 +34,32 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	// So, we create a "serverClient" that would read from the API directly.
 	// We only use it here, this only runs at start up, so it shouldn't be to much for the API
 	serverClient, err := ctrlclient.New(ctrl.GetConfigOrDie(), ctrlclient.Options{})
+	_ = apiextensionsv1.AddToScheme(serverClient.Scheme())
 	if err != nil {
 		return errors.Wrap(err, "failed to create a server client")
 	}
 	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName); err != nil {
 		return errors.Wrap(err, "failed to ensure webhook secret")
 	}
+
+	crd := &apiextensionsv1.CustomResourceDefinition{}
+	err = serverClient.Get(ctx, types.NamespacedName{Name: "functions.serverless.kyma-project.io"}, crd)
+	if err != nil {
+		return errors.Wrap(err, "failed to get function crd")
+	}
+
+	certPath := path.Join(DefaultCertDir, CertFile)
+	caBundle, err := ioutil.ReadFile(certPath)
+	if err != nil {
+		return errors.Wrapf(err, "failed to read caBundel file: %s", certPath)
+	}
+	crd.Spec.Conversion.Webhook.ClientConfig.CABundle = caBundle
+
+	err = serverClient.Update(ctx, crd)
+	if err != nil {
+		return errors.Wrap(err, "while updating CRD with Conversion webhook caBundle")
+	}
+
 	return nil
 }
 
