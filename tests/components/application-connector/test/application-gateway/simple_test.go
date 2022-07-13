@@ -9,7 +9,7 @@ import (
 )
 
 func (gs *GatewaySuite) TestSimpleCases() {
-	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "test-app", v1.GetOptions{})
+	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "oauth-test-app", v1.GetOptions{})
 
 	gs.Nil(err)
 
