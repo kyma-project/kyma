@@ -8,7 +8,7 @@ You upgraded Kyma and mesh connectivity is broken.
 
 ## Cause
 
-By default, Kyma has sidecar injection enabled - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read the document about [disabling Istio sidecar proxy injection](../operations/smsh-01-istio-disable-sidecar-injection.md).
+By default, Kyma has sidecar injection enabled - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read the document about [disabling Istio sidecar proxy injection](../../operations/smsh-01-istio-disable-sidecar-injection.md).
 
 The sidecar version in Pods must match the installed Istio version. Otherwise, mesh connectivity may be broken.
 This issue may appear during Kyma upgrade. When Kyma is upgraded to a new version along with a new Istio version, existing sidecars injected into Pods remain in an original version.

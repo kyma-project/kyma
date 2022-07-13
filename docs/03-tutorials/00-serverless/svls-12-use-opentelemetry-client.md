@@ -62,6 +62,6 @@ Follows these steps:
    http://localhost:16686
    ```
 
-   > **NOTE:** By default, only 1% of the requests are sent to Jaeger for the trace recording. To increase this number see the [Jaeger doesn't show the traces you want to see](../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md) page.
+   > **NOTE:** By default, only 1% of the requests are sent to Jaeger for the trace recording. To increase this number see the [Jaeger doesn't show the traces you want to see](../../04-operation-guides/troubleshooting/observability/obsv-02-troubleshoot-jaeger-shows-few-traces.md) page.
 
 4. Choose your Deployment's name from the **Service** list and click **Find Traces**

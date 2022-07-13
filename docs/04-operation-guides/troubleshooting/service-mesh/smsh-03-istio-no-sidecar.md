@@ -8,7 +8,7 @@ A Pod doesn't have a sidecar but you did not disable sidecar injection on purpos
 
 ## Cause
 
-By default, Kyma has sidecar injection enabled - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read the document about [disabling Istio sidecar proxy injection](../operations/smsh-01-istio-disable-sidecar-injection.md).
+By default, Kyma has sidecar injection enabled - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read the document about [disabling Istio sidecar proxy injection](../../operations/smsh-01-istio-disable-sidecar-injection.md).
 
 ## Remedy
 
