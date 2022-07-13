@@ -22,18 +22,44 @@ spec:
             secretName: oauth-test
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
-    - displayName: oauth
-      name: oauth
+    - displayName: nonexistent oauth secret
+      name: nonexistent-oauth-secret
+      providerDisplayName: OAuth
+      description: Should return 500 for OAuth with a nonexistent secret
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/oauth-test-app/nonexistent-oauth-secret"
+          credentials:
+            secretName: nonexistent-oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+    - displayName: bad oauth token
+      name: bad-oauth-token
       providerDisplayName: OAuth
       description: Should return 403 for OAuth with a wrong token
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/oauth-test-app/oauth"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/oauth-test-app/bad-oauth-token"
           credentials:
             secretName: oauth-test
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/bad-token"
+            type: OAuth
+    - displayName: wrong oauth secret
+      name: wrong-oauth-secret
+      providerDisplayName: OAuth
+      description: Should return 403 for OAuth with a wrong secret
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/oauth-test-app/wrong-oauth-secret"
+          credentials:
+            secretName: wrong-oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
 ---
 apiVersion: v1
@@ -44,3 +70,12 @@ metadata:
 data:
   clientId: {{ "clientID" | b64enc }}
   clientSecret: {{ "clientSecret" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wrong-oauth-test
+  namespace: kyma-integration
+data:
+  clientId: {{ "clientID" | b64enc }}
+  clientSecret: {{ "bad secret" | b64enc }}
