@@ -3,8 +3,8 @@ module github.com/kyma-project/kyma/tests/components/application-connector
 go 1.18
 
 require (
+	github.com/go-http-utils/logger v0.0.0-20161128092850-f3a42dcdeae6
 	github.com/google/uuid v1.1.2
-
 	github.com/gorilla/mux v1.8.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
 	github.com/pkg/errors v0.9.1
