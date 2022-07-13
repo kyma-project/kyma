@@ -14,6 +14,6 @@ You can disable sidecar proxy injection for either an entire Namespace or a sing
 
 * To disable sidecar proxy injection for a Deployment, add this annotation to the Deployment configuration file: `sidecar.istio.io/inject: "false"`
 
-Read the [Istio documentation](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) to learn more about sidecar proxy injection.
+Read the [Istio documentation](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) to learn more about sidecar proxy injection and consider [benefits of having the sidecar container inside your application pod](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md).
 
 If there are issues with the Istio sidecar, you can check whether there is an [issue with the sidecar injection](../troubleshooting/smsh-03-istio-no-sidecar.md) or a [mismatching Istio version](../troubleshooting/smsh-04-istio-sidecar-version.md).
