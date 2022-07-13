@@ -157,19 +157,25 @@ func generateReport() {
 		log.Fatalf(err.Error())
 	}
 
+	err = filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+		data, err1 := os.ReadFile(path)
+		if err1 != nil {
+			return err
+		}
+		gohtml.FormatBytes(data)
+		os.WriteFile(path, data, fs.FileMode(0644))
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		err := filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
-			data, err1 := os.ReadFile(path)
-			if err1 != nil {
-				return err
-			}
-			gohtml.FormatBytes(data)
-			os.WriteFile(fmt.Sprintf("%s/report.html", artifactsDir),data,os.ModeAppend)
+		filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+			copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
 			return nil
 		})
-		if err != nil {
-			log.Fatalf(err.Error())
-		}
 		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 
