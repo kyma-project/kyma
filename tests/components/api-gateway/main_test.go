@@ -177,13 +177,13 @@ func TestApiGateway(t *testing.T) {
 
 	apiGatewayOpts.Concurrency = conf.TestConcurency
 
-	unsecuredSuite := godog.TestSuite{
+	apigatewaySuite := godog.TestSuite{
 		Name:                 "API-Gateway",
 		TestSuiteInitializer: InitializeApiGatewayTests,
 		Options:              &apiGatewayOpts,
 	}
 
-	testExitCode := unsecuredSuite.Run()
+	testExitCode := apigatewaySuite.Run()
 
 	podReport := getPodListReport()
 	apiRules := getApiRules()
