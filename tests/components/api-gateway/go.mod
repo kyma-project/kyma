@@ -10,7 +10,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.11.11 // indirect
 	github.com/vrischmann/envconfig v1.3.0
 	gitlab.com/rodrigoodhin/gocure v0.0.0-20220301084845-20a07464f4f0
-	golang.org/x/net v0.0.0-20220630215102-69896b714898
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
@@ -48,6 +48,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/tdewolff/parse/v2 v2.6.0 // indirect
+	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect

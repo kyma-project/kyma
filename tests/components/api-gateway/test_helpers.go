@@ -25,6 +25,7 @@ import (
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/resource"
 	"github.com/tidwall/pretty"
+	"github.com/yosssi/gohtml"
 	"gitlab.com/rodrigoodhin/gocure/models"
 	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
 
@@ -156,11 +157,19 @@ func generateReport() {
 		log.Fatalf(err.Error())
 	}
 
-	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok && conf.Domain != "local.kyma.dev" {
-		filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
-			copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
+	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
+		err := filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+			data, err1 := os.ReadFile(path)
+			if err1 != nil {
+				return err
+			}
+			gohtml.FormatBytes(data)
+			os.WriteFile(fmt.Sprintf("%s/report.html", artifactsDir),data,os.ModeAppend)
 			return nil
 		})
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
 		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 	}
 
