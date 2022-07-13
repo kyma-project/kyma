@@ -1,0 +1,33 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: oauth-test-app
+  namespace: {{ .Values.namespace }}
+spec:
+  description: This is the test service
+  skipVerify: true
+  labels:
+    app: oauth-test-app
+  services:
+    - displayName: oauth
+      name: oauth
+      providerDisplayName: OAuth
+      description: Should return 200 for OAuth optimistic scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/oauth-test-app/oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth-test
+  namespace: kyma-integration
+data:
+  clientId: {{ "clientID" | b64enc }}
+  clientSecret: {{ "clientSecret" | b64enc }}
