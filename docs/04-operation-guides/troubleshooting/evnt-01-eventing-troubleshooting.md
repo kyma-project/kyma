@@ -48,10 +48,9 @@ Follow these steps to detect the source of the problem:
     kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME} -o yaml
     ```
 
-3. If there is a problem with the Subscription sink, you see a message that the sink is not a valid cluster local svc. 
-   Verify if the sink is a valid HTTP endpoint, for example: `test.test.svc.cluster.local`.
+    If the status of the Subscription informs you that the sink is not a valid cluster local svc, investigate the Subscription sink. Verify if the sink is a valid HTTP endpoint, for example: `test.test.svc.cluster.local`.
 
-4. Check if the event type defined in the Subscription is correctly formatted as specified in the [event names](../../05-technical-reference/evnt-01-event-names.md) guidelines.
+3. Check if the event type defined in the Subscription is correctly formatted as specified in the [event names](../../05-technical-reference/evnt-01-event-names.md) guidelines.
    Also, check if the event type is using the correct `eventTypePrefix`. The event type must start with the `eventTypePrefix`. Run the following command to get the configured `eventTypePrefix` in Eventing Services:
 
     ```bash
@@ -120,3 +119,6 @@ Follow these steps to detect the source of the problem:
     ```
 
 2. Check if the stream and consumers exist in NATS JetStream by following the [JetStream troubleshooting guide](evnt-02-jetstream-troubleshooting.md).
+
+
+If you can't find a solution, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to our [Slack channel](http://slack.kyma-project.io/) to get direct support from the community.
