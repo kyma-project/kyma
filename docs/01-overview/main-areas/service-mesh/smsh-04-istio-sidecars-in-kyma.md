@@ -22,15 +22,15 @@ Furthermore, Istio proxies improve tracing: Istio performs global tracing and fo
 
 Kiali is another tool that comes as [separate Kyma component](../../../05-technical-reference/00-architecture/obsv-04-architecture-kiali.md); and Kyma configures Istio to export metrics necessary to support Kiali features that facilitate managing, visualizing, and troubleshooting your service mesh.
 
-Moreover, Kyma provides [Istio specific dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for [Grafana (monitoring component)](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md) and together with metrics exposed by the Istio sidecar provides better visibility into workloads and mesh control plane performance.
+Moreover, Kyma provides [Istio-specific Grafana dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for the [monitoring component](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md). Together with metrics exposed by the Istio sidecar, you get better visibility into workloads and the mesh control plane performance.
 
 Being part of Istio service mesh enables all these advanced observability features, which would not be possible without advanced instrumentation code within your application.
 
 ## Traffic management
 
-[Traffic management](https://istio.io/latest/docs/concepts/traffic-management/) is an important feature of service mesh and having the sidecar injected into every workload makes this feature available without additional configuration.
+[Traffic management](https://istio.io/latest/docs/concepts/traffic-management/) is an important feature of service mesh. If you have the sidecar injected into every workload, you can use this traffic management without additional configuration.
 
-[Traffic Shifting](https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/) and [Request Routing](https://istio.io/latest/docs/tasks/traffic-management/request-routing/) allows developers to release their software using techniques like canary releases and A/B testing to make release process faster and more reliable.
+With [traffic shifting](https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/) and [request routing](https://istio.io/latest/docs/tasks/traffic-management/request-routing/), developers can use techniques like canary releases and A/B testing to make their software release process faster and more reliable.
 
 To improve the resiliency of your applications, you can use [mirroring](https://istio.io/latest/docs/tasks/traffic-management/mirroring/) and [fault injection](https://istio.io/latest/docs/tasks/traffic-management/fault-injection/) for testing and audit purposes.
 
