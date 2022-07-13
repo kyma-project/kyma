@@ -1,4 +1,4 @@
-Feature: Calling unsecured API endpoint
+Feature: Exposing an unsecured endpoint
 
   Scenario: Unsecured: Calling an unsecured API endpoint
     Given Unsecured: There is an unsecured endpoint
