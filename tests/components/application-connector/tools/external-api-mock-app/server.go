@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -28,11 +32,51 @@ func main() {
 	log.Infof("Config: %s", cfg.String())
 
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
+	oauthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
 
-	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials)
+	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oauthCredentials)
 
-	address := fmt.Sprintf(":%d", cfg.Port)
-	log.Fatal(http.ListenAndServe(address, router))
+	// TODO Use https://github.com/oklog/run instead.
+	// Note: it is used here: https://github.com/kyma-project/kyma/blob/main/components/central-application-connectivity-validator/cmd/centralapplicationconnectivityvalidator/centralapplicationconnectivityvalidator.go
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		address := fmt.Sprintf(":%d", cfg.MtlsPort)
+		mtlsServer := newMTLSServer(cfg.CaCertPath, address, router)
+		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.ServerCertPath, cfg.ServerKeyPath))
+		wg.Done()
+	}()
+
+	go func() {
+		address := fmt.Sprintf(":%d", cfg.Port)
+		log.Fatal(http.ListenAndServe(address, router))
+		wg.Done()
+	}()
+
+	wg.Wait()
+}
+
+func newMTLSServer(caCertPath, address string, handler http.Handler) *http.Server {
+	// Create a CA certificate pool and add cert.pem to it
+	caCert, err := ioutil.ReadFile(caCertPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// Create the TLS Config with the CA pool and enable Client certificate validation
+	tlsConfig := &tls.Config{
+		ClientCAs:  caCertPool,
+		ClientAuth: tls.RequireAndVerifyClientCert,
+	}
+
+	return &http.Server{
+		Addr:      address,
+		Handler:   handler,
+		TLSConfig: tlsConfig,
+	}
 }
 
 func exitOnError(err error, context string) {

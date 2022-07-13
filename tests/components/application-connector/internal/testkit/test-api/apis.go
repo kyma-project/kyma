@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oauthCred OAuthCredentials) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
@@ -26,6 +26,15 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials) ht
 	{
 		r := api.PathPrefix("/basic").Subrouter()
 		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+	{
+		oauth := NewOAuth(oauthCred.ClientID, oauthCred.ClientSecret)
+		api.HandleFunc("/mtlsoauth/token", oauth.MTLSToken).Methods(http.MethodPost)
+
+		r := api.PathPrefix("/mtlsoauth").Subrouter()
+		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
