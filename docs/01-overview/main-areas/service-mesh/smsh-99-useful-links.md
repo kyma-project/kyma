@@ -6,7 +6,7 @@ If you're interested in learning more about Service Mesh in Kyma, follow these l
 
 - Learn about the benefits of having your workload enrolled to the service mesh:
  
-  - [Istio sidecars in Kyma and why you want them](./smsh-04-istio-sidecars-in-kyma.md)
+  - [Istio sidecars in Kyma and why you want them](./smsh-03-istio-sidecars-in-kyma.md)
 
 - Perform some simple and more advanced tasks:
 
