@@ -21,7 +21,6 @@ require (
 	github.com/cucumber/godog v0.12.5
 	github.com/spf13/pflag v1.0.5
 	github.com/tidwall/pretty v1.2.0
-	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 )
 
 require (

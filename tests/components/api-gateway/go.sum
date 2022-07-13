@@ -569,8 +569,6 @@ github.com/valyala/tcplisten v1.0.0/go.mod h1:T0xQ8SeCZGxckz9qRXTfG43PvQ/mcWh7Fw
 github.com/vrischmann/envconfig v1.3.0 h1:4XIvQTXznxmWMnjouj0ST5lFo/WAYf5Exgl3x82crEk=
 github.com/vrischmann/envconfig v1.3.0/go.mod h1:bbvxFYJdRSpXrhS63mBFtKJzkDiNkyArOLXtY6q0kuI=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
-github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4 h1:0sw0nJM544SpsihWx1bkXdYLQDlzRflMgFJQ4Yih9ts=
-github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4/go.mod h1:+ccdNT0xMY1dtc5XBxumbYfOUhmduiGudqaDgD2rVRE=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

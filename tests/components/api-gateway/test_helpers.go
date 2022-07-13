@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"testing"
 	"time"
@@ -25,7 +26,6 @@ import (
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/resource"
 	"github.com/tidwall/pretty"
-	"github.com/yosssi/gohtml"
 	"gitlab.com/rodrigoodhin/gocure/models"
 	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
 
@@ -162,7 +162,13 @@ func generateReport() {
 		if err1 != nil {
 			return err
 		}
-		formatted := gohtml.FormatBytes(data)
+
+		//Format all patterns like "&lt" to not be replaced later
+		find := regexp.MustCompile(`&\w\w`)
+		formatted := find.ReplaceAllFunc(data, func(b []byte) []byte {
+			return []byte{b[0], ' ', b[1], b[2]}
+		})
+
 		os.WriteFile(path, formatted, fs.FileMode(02))
 		return nil
 	})
