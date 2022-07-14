@@ -90,7 +90,7 @@ func main() {
 	whs.Register(resources.FunctionConvertWebhookPath,
 		webhook.NewConvertingWebHook(
 			mgr.GetClient(),
-			mgr.GetScheme(),
+			scheme,
 		),
 	)
 

@@ -31,6 +31,7 @@ type ConvertingWebHook struct {
 var _ http.Handler = &ConvertingWebHook{}
 
 func NewConvertingWebHook(client ctrlclient.Client, scheme *runtime.Scheme) *ConvertingWebHook {
+	//TODO: change signature of method scheme -> decoder
 	decoder, _ := conversion.NewDecoder(scheme)
 	return &ConvertingWebHook{
 		client:  client,
@@ -55,51 +56,39 @@ func NewConvertingWebHook(client ctrlclient.Client, scheme *runtime.Scheme) *Con
 func (w *ConvertingWebHook) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	convertReview := &apix.ConversionReview{}
 	buf, _ := ioutil.ReadAll(req.Body)
-	logrus.Infof("req : %#v", string(buf))
 
 	err := json.NewDecoder(bytes.NewReader(buf)).Decode(convertReview)
 	if err != nil {
-		// log.Error(err, "failed to read conversion request")
+		logrus.Error(err, "failed to read conversion request")
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	logrus.Infof("decode : %#v", convertReview.Request)
 
 	conversionResponse, err := w.handleConvertRequest(convertReview.Request)
-	logrus.Infof("conversion : %v", err)
-	// logrus.Infof(" conversionResponse %#v", conversionResponse)
 
 	if err != nil {
-		// log.Error(err, "failed to convert", "request", convertReview.Request.UID)
+		logrus.Error(err, "failed to convert", "request", convertReview.Request.UID)
 		convertReview.Response = errored(err)
 	} else {
 		convertReview.Response = conversionResponse
 	}
 	convertReview.Response.UID = convertReview.Request.UID
 	convertReview.Request = nil
-	logrus.Infof("before encode")
 
 	err = json.NewEncoder(resp).Encode(convertReview)
 	if err != nil {
-		logrus.Infof("shit happened here ")
-		// log.Error(err, "failed to write response")
+		logrus.Error(err, "failed to write response")
 		return
 	}
-	logrus.Infof("the end")
-
 }
 
 func (w *ConvertingWebHook) handleConvertRequest(req *apix.ConversionRequest) (*apix.ConversionResponse, error) {
-	logrus.Infof("the obj is %v ", req)
-
 	if req == nil {
 		return nil, fmt.Errorf("conversion request is nil")
 	}
 	var objects []runtime.RawExtension
 
 	for _, obj := range req.Objects {
-		logrus.Infof("the obj is %v ", obj)
-
 		src, gvk, err := w.decoder.Decode(obj.Raw)
 		if err != nil {
 			return nil, err
@@ -112,8 +101,6 @@ func (w *ConvertingWebHook) handleConvertRequest(req *apix.ConversionRequest) (*
 		if err != nil {
 			return nil, err
 		}
-		logrus.Infof("the dest is %v ", dst)
-
 		objects = append(objects, runtime.RawExtension{Object: dst})
 	}
 	return &apix.ConversionResponse{
@@ -146,15 +133,19 @@ func (w *ConvertingWebHook) allocateDstObject(apiVersion, kind string) (runtime.
 func (w *ConvertingWebHook) convertFunction(src, dst runtime.Object) error {
 	in, ok := src.(*serverlessv1alpha1.Function)
 	if !ok {
-		return fmt.Errorf("failed to cast function")
+		srcGVK := src.GetObjectKind().GroupVersionKind()
+		logrus.Warnf("unsupported convert source version %s ", srcGVK)
+		return nil
 	}
 
-	out := src.(*serverlessv1alpha2.Function)
+	out, ok := dst.(*serverlessv1alpha2.Function)
 	if !ok {
-		return fmt.Errorf("failed to cast function")
+		dstGVK := dst.GetObjectKind().GroupVersionKind()
+		logrus.Warnf("unsupported convert destination version %s ", dstGVK)
+		return nil
 	}
 	out.ObjectMeta = in.ObjectMeta
-	out.TypeMeta = in.TypeMeta
+	//out.TypeMeta = in.TypeMeta
 
 	if err := w.convertSpec(&in.Spec, &out.Spec, in.Namespace); err != nil {
 		return err
@@ -162,6 +153,7 @@ func (w *ConvertingWebHook) convertFunction(src, dst runtime.Object) error {
 
 	w.convertStatus(&in.Status, &out.Status)
 
+	//TODO: clean me???
 	// fBytes, err := json.Marshal(out)
 	// if err != nil {
 	// 	return admission.Errored(http.StatusInternalServerError, err)
