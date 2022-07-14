@@ -27,7 +27,7 @@ const (
 	CertFile        = "server-cert.pem"
 	KeyFile         = "server-key.pem"
 	DefaultCertDir  = "/tmp/k8s-webhook-server/serving-certs"
-	functionCRDName = "functions.serverless.kyma-project.io"
+	FunctionCRDName = "functions.serverless.kyma-project.io"
 )
 
 func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string) error {
@@ -36,10 +36,13 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	// So, we create a "serverClient" that would read from the API directly.
 	// We only use it here, this only runs at start up, so it shouldn't be to much for the API
 	serverClient, err := ctrlclient.New(ctrl.GetConfigOrDie(), ctrlclient.Options{})
-	_ = apiextensionsv1.AddToScheme(serverClient.Scheme())
 	if err != nil {
 		return errors.Wrap(err, "failed to create a server client")
 	}
+	if err := apiextensionsv1.AddToScheme(serverClient.Scheme()); err != nil {
+		return errors.Wrap(err, "while adding apiextensions.v1 schema to k8s client")
+	}
+
 	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName); err != nil {
 		return errors.Wrap(err, "failed to ensure webhook secret")
 	}
@@ -79,7 +82,7 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 
 func AddCertToConversionWebhook(ctx context.Context, client ctrlclient.Client, caBundle []byte) error {
 	crd := &apiextensionsv1.CustomResourceDefinition{}
-	err := client.Get(ctx, types.NamespacedName{Name: functionCRDName}, crd)
+	err := client.Get(ctx, types.NamespacedName{Name: FunctionCRDName}, crd)
 	if err != nil {
 		return errors.Wrap(err, "failed to get function crd")
 	}

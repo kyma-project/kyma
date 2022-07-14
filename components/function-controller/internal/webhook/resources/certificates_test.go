@@ -274,7 +274,7 @@ func TestUpdateCRD(t *testing.T) {
 		"Correct crd": {
 			input: &apiextensionsv1.CustomResourceDefinition{
 				ObjectMeta: v1.ObjectMeta{
-					Name: functionCRDName,
+					Name: FunctionCRDName,
 				},
 				Spec: apiextensionsv1.CustomResourceDefinitionSpec{
 					Conversion: &apiextensionsv1.CustomResourceConversion{
@@ -287,7 +287,7 @@ func TestUpdateCRD(t *testing.T) {
 		"CRD without conversion part": {
 			input: &apiextensionsv1.CustomResourceDefinition{
 				ObjectMeta: v1.ObjectMeta{
-					Name: functionCRDName,
+					Name: FunctionCRDName,
 				},
 				Spec: apiextensionsv1.CustomResourceDefinitionSpec{},
 			},
@@ -296,7 +296,7 @@ func TestUpdateCRD(t *testing.T) {
 		"CRD without conversion webhook part": {
 			input: &apiextensionsv1.CustomResourceDefinition{
 				ObjectMeta: v1.ObjectMeta{
-					Name: functionCRDName,
+					Name: FunctionCRDName,
 				},
 				Spec: apiextensionsv1.CustomResourceDefinitionSpec{
 					Conversion: &apiextensionsv1.CustomResourceConversion{},
@@ -307,7 +307,7 @@ func TestUpdateCRD(t *testing.T) {
 		"CRD without conversion webhook client config part": {
 			input: &apiextensionsv1.CustomResourceDefinition{
 				ObjectMeta: v1.ObjectMeta{
-					Name: functionCRDName,
+					Name: FunctionCRDName,
 				},
 				Spec: apiextensionsv1.CustomResourceDefinitionSpec{
 					Conversion: &apiextensionsv1.CustomResourceConversion{
@@ -335,7 +335,7 @@ func TestUpdateCRD(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				updatedCRD := &apiextensionsv1.CustomResourceDefinition{}
-				require.NoError(t, client.Get(ctx, types.NamespacedName{Name: functionCRDName}, updatedCRD))
+				require.NoError(t, client.Get(ctx, types.NamespacedName{Name: FunctionCRDName}, updatedCRD))
 				require.Equal(t, testCaBundle, updatedCRD.Spec.Conversion.Webhook.ClientConfig.CABundle)
 			}
 		})
