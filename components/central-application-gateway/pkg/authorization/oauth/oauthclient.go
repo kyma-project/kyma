@@ -138,7 +138,8 @@ func (c *client) requestToken(clientID, clientSecret, authURL string, headers, q
 func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
+			Certificates:       []tls.Certificate{cert},
+			InsecureSkipVerify: true,
 		},
 	}
 	client := &http.Client{Transport: transport}
