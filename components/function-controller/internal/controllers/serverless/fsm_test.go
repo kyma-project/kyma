@@ -115,7 +115,7 @@ func Test_stateFnName(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "1",
+			name: "function name is short",
 			fn:   dummyFunctionForTest_stateFnName,
 			want: "dummyFunctionForTest_stateFnName",
 		},
