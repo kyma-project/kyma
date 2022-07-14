@@ -1,7 +1,7 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LogPipeline
 metadata:
-  name: logpipeline-sample
+  name: json-parser-stdout-pipeline
 spec:
   parsers:
     - content: |
