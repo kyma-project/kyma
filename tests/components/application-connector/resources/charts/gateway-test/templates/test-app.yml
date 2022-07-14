@@ -2,24 +2,25 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: mock-application
-  name: mock-application
+    app: {{ .Values.mockServiceName}}
+  name: {{ .Values.mockServiceName}}
   namespace: {{.Values.namespace}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mock-application
+      app: {{ .Values.mockServiceName}}
   template:
     metadata:
       annotations:
+        traffic.sidecar.istio.io/includeInboundPorts: "*"
         traffic.sidecar.istio.io/excludeInboundPorts: "8090"
       labels:
-        app: mock-application
+        app: {{ .Values.mockServiceName}}
     spec:
       containers:
         - image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.mockApplication) }}
-          name: test-app
+          name: {{ .Values.mockServiceName}}
           env:
             - name: APP_CACERTPATH
               value: "/etc/secret-volume/ca.crt"
@@ -57,3 +58,6 @@ spec:
     - name: "http"
       protocol: TCP
       port: 8080
+    - name: "https"
+      protocol: TCP
+      port: 8090

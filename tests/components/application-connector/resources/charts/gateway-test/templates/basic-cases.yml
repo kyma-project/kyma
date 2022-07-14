@@ -37,11 +37,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtlsoauth/ok"
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/mtlsoauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/mtls-oauth"
           credentials:
             secretName: mtls-oauth-test
-            authenticationUrl: "https://test-app.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtlsoauth/token"
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtlsoauth/token"
             type: OAuthWithCert
 ---
 apiVersion: v1
