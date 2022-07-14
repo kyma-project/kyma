@@ -36,7 +36,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/emicklei/go-restful v2.9.5+incompatible // indirect
+	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -97,5 +97,8 @@ require (
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.1
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
+
+exclude github.com/emicklei/go-restful v2.9.5+incompatible // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
