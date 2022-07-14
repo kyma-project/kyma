@@ -6,11 +6,12 @@ metadata:
 spec:
   template:
     spec:
-      containers:
+      initContainers:
         - name: wait-for-services
           image: opsfleet/depends-on
           args:
             - "-service={{ .Values.mockServiceName}}"
+      containers:
         - name: application-gateway-test
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.gatewayTest) }}
           imagePullPolicy: Always
