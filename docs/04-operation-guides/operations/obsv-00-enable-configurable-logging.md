@@ -7,7 +7,7 @@ title: Enable the telemetry component (beta feature)
 <!-- Briefly provide background information for the task so that the users understand the purpose of the task and what they will gain by completing the task correctly. This section should be brief and does not replace or recreate a concept topic on the same subject, although the context section might include some conceptual information.
 -->
 
-With Kyma's telemetry component, you can provide your custom configuration for Fluent Bit, for example, to integrate with vendors like [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. This enables you to integrate Kyma's logging backend with your own observability systems outside the Kyma cluster.
+With Kyma's [telemetry component](./../../01-overview/main-areas/observability/obsv-04-telemetry-in-kyma.md), you can provide your custom configuration for Fluent Bit. This enables you to integrate Kyma's logging backend with your own observability systems outside the Kyma cluster.
 
 The new telemetry component ships a new Fluent Bit installation alongside with the new telemetry component, which will support the dynamic configuration of the Fluent Bit. By default, it will not ship any logs.
 The new `global.telemetry.enabled` flag on the logging component disables the existing Fluent Bit installation. Furthermore, it activates a new Log Pipeline resource to enable log shipment to the existing Loki stack.

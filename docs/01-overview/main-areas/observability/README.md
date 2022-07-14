@@ -18,7 +18,7 @@ Kyma collects telemetry data with several in-cluster components:
 
 The collected telemetry data are exposed so that you can view and analyze them with observability tools.
 
-As a beta feature, Kyma ships the telemetry component, which supports providing your own output configuration for Fluent Bit. With this, you can integrate your own observability systems outside the Kyma cluster with the Kyma backend.
+As a beta feature, Kyma ships the [telemetry component](./obsv-04-telemetry-in-kyma.md), which supports providing your own output configuration for for application logs. With this, you can integrate your own observability systems outside the Kyma cluster with the Kyma backend.
 
 ## Analyzing data
 

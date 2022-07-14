@@ -4,7 +4,7 @@ title: Logging Architecture
 
 ## Architecture diagram
 
-![Logging architecture in Kyma](./assets/obsv-logging-architecture.svg)
+![Logging architecture in Kyma](./assets/obsv-logging-architecture.drawio.svg)
 
 ## Process flow
 
@@ -17,12 +17,12 @@ title: Logging Architecture
 
 ## Telemetry Component (beta feature)
 
-![](./assets/obsv-configurable-logging-architecture.svg)
+![](./assets/obsv-configurable-logging-architecture.drawio.svg)
 
-Kyma's classic in-cluster logging features (1-6) are unchanged, but with the integration of Kyma's telemetry component, you can use additional functionality:
+Kyma's classic in-cluster logging features (1-6) are unchanged, but with the integration of Kyma's [telemetry component](./../../01-overview/main-areas/observability/obsv-04-telemetry-in-kyma.md), you can use additional functionality:
 
 7. The telemetry component provides your custom output configuration for Fluent Bit.
 8. As specified in your configuration, Fluent Bit sends the log data to observability systems outside the Kyma cluster.
 9. The user accesses the external observability system to analyze and vizualize the logs.
 
-Learn how to [enable configurable logging](../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
+Learn how to [enable the telemetry component](../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
