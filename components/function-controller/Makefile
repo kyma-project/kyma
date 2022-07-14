@@ -142,7 +142,6 @@ install-webhook-k3d: build-image-function-webhook
 
 	k3d image import $(WEBHOOK_NAME):$(HASH_TAG) -c kyma
 	kubectl set image deployment serverless-webhook-svc -n kyma-system webhook=$(WEBHOOK_NAME):$(HASH_TAG)
-	kubectl delete pod -n kyma-system -l app.kubernetes.io/name=serverless-webhook --force
 ######## builder init container image
 
 JOBINIT_NAME = function-build-init
