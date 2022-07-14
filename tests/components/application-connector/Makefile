@@ -2,7 +2,7 @@ NAMESPACE = test
 GOPATH ?= $(shell go env GOPATH)
 
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
-MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
+MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/test-app:$(DOCKER_TAG)"
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway image-mock-app publish-mock-app
 
