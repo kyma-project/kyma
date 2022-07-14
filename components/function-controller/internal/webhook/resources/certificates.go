@@ -6,10 +6,11 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"path"
 	"strings"
 	"time"
+
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -23,9 +24,10 @@ import (
 )
 
 const (
-	CertFile       = "server-cert.pem"
-	KeyFile        = "server-key.pem"
-	DefaultCertDir = "/tmp/k8s-webhook-server/serving-certs"
+	CertFile        = "server-cert.pem"
+	KeyFile         = "server-key.pem"
+	DefaultCertDir  = "/tmp/k8s-webhook-server/serving-certs"
+	functionCRDName = "functions.serverless.kyma-project.io"
 )
 
 func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string) error {
@@ -42,24 +44,15 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 		return errors.Wrap(err, "failed to ensure webhook secret")
 	}
 
-	crd := &apiextensionsv1.CustomResourceDefinition{}
-	err = serverClient.Get(ctx, types.NamespacedName{Name: "functions.serverless.kyma-project.io"}, crd)
-	if err != nil {
-		return errors.Wrap(err, "failed to get function crd")
-	}
-
 	certPath := path.Join(DefaultCertDir, CertFile)
 	caBundle, err := ioutil.ReadFile(certPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read caBundel file: %s", certPath)
 	}
-	crd.Spec.Conversion.Webhook.ClientConfig.CABundle = caBundle
 
-	err = serverClient.Update(ctx, crd)
-	if err != nil {
-		return errors.Wrap(err, "while updating CRD with Conversion webhook caBundle")
+	if err := AddCertToConversionWebhook(ctx, serverClient, caBundle); err != nil {
+		return errors.Wrap(err, "while adding CaBundle to Conversion Webhook for function CRD")
 	}
-
 	return nil
 }
 
@@ -82,6 +75,40 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 		return errors.Wrap(err, "failed to update secret")
 	}
 	return nil
+}
+
+func AddCertToConversionWebhook(ctx context.Context, client ctrlclient.Client, caBundle []byte) error {
+	crd := &apiextensionsv1.CustomResourceDefinition{}
+	err := client.Get(ctx, types.NamespacedName{Name: functionCRDName}, crd)
+	if err != nil {
+		return errors.Wrap(err, "failed to get function crd")
+	}
+
+	if contains, msg := containsConversionWebhookClientConfig(crd); !contains {
+		return errors.Errorf("while validating CRD to be CaBundle injectable,: %s", msg)
+	}
+
+	crd.Spec.Conversion.Webhook.ClientConfig.CABundle = caBundle
+	err = client.Update(ctx, crd)
+	if err != nil {
+		return errors.Wrap(err, "while updating CRD with Conversion webhook caBundle")
+	}
+	return nil
+}
+
+func containsConversionWebhookClientConfig(crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
+	if crd.Spec.Conversion == nil {
+		return false, "conversion not found in function CRD"
+	}
+
+	if crd.Spec.Conversion.Webhook == nil {
+		return false, "conversion webhook not found in function CRD"
+	}
+
+	if crd.Spec.Conversion.Webhook.ClientConfig == nil {
+		return false, "client config for conversion webhook not found in function CRD"
+	}
+	return true, ""
 }
 
 func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
