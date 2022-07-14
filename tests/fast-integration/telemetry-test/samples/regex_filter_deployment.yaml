@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: regex-parser-testing-service
+  namespace: default
+  labels:
+    app: regex-parser-testing-service
+    example: regex-parser-testing-service
+  annotations:
+    fluentbit.io/parser: regex-my-parser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: regex-parser-testing-service
+      example: regex-parser-testing-service
+  template:
+    metadata:
+      labels:
+        app: regex-parser-testing-service
+        example: regex-parser-testing-service
+      annotations:
+        fluentbit.io/parser: regex-my-parser
+    spec:
+      containers:
+        - name: regex-parser-testing-service
+          image: "teneroy1/regexlogs:latest"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 20m
+              memory: 32Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi

@@ -15,16 +15,11 @@ const {
 } = require('../monitoring');
 const { checkFunctionResponse } = require('../test/fixtures/commerce-mock');
 const telemetryNamespace = 'kyma-system';
+const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
-const parserLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
-const lastorderFunctionYaml = fs.readFileSync(
-  path.join(__dirname, './json-function.yaml'),
-  {
-    encoding: 'utf8',
-  },
-);
-
+const parserLogPipelineCR = loadResourceFromFile('./samples/telemetry_v1alpha1_logpipeline_regex_parser_loki.yaml');
+const fooBarDeployment = loadResourceFromFile('./samples/regex_filter_deployment.yaml')
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -98,11 +93,11 @@ describe('Telemetry Operator tests', function() {
   it('Should accept the valid logs', async () => {
     try {
       await k8sApply(parserLogPipelineCR, telemetryNamespace);
-      // need to somehow deploy function
-      // await axios.post(`https://json-parser-test.${host}`);
-      //assert.correct
-    } catch {
-      assert.fail('Should receive a valud responce')
+      await k8sApply(fooBarDeployment, defaultNamespace);
+      //const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+      assert.isTrue(true, 'A');
+    } catch (e) {
+      assert.fail(e.body.message)
     }
   });
 
