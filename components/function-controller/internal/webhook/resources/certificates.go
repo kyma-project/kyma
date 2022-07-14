@@ -50,7 +50,7 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	certPath := path.Join(DefaultCertDir, CertFile)
 	caBundle, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to read caBundel file: %s", certPath)
+		return errors.Wrapf(err, "failed to read caBundle file: %s", certPath)
 	}
 
 	if err := AddCertToConversionWebhook(ctx, serverClient, caBundle); err != nil {
