@@ -37,9 +37,9 @@ const (
 	domain = "domain.com"
 )
 
-// Test the return values of the Reconcile() method of the reconciler. This is important, as it dictates whether the
-// reconciliation should be requeued by Controller Runtime, and if so with how much initial delay.
-// Returning error or a `Result{Requeue: true}` would cause the reconciliation to be requeued.
+// TestReconciler_Reconcile tests the return values of the Reconcile() method of the reconciler.
+// This is important, as it dictates whether the reconciliation should be requeued by Controller Runtime,
+// and if so with how much initial delay. Returning error or a `Result{Requeue: true}` would cause the reconciliation to be requeued.
 // Everything else is mocked since we are only interested in the logic of the Reconcile method and not the reconciler dependencies.
 func TestReconciler_Reconcile(t *testing.T) {
 	ctx := context.Background()
@@ -128,7 +128,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
-			reconciler := testCase.givenReconcilerSetup()
+			reconciler := tc.givenReconcilerSetup()
 			r := ctrl.Request{NamespacedName: k8stypes.NamespacedName{
 				Namespace: tc.givenSubscription.Namespace,
 				Name:      tc.givenSubscription.Name,
