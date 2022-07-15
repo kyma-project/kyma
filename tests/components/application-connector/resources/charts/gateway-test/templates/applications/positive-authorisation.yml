@@ -1,32 +1,32 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: test-app
+  name: positive-authorisation
   namespace: {{ .Values.namespace }}
 spec:
-  description: This is the test service
+  description: Authorisation
   skipVerify: true
   labels:
-    app: test-app
+    app: positive-authorisation
   services:
-    - displayName: always ok
-      name: alwaysok
+    - displayName: unsecure-always-ok
+      name: unsecure-always-ok
       providerDisplayName: AlwaysOK
-      description: Always Ok in testapp
+      description: Should return 200 when calling unprotected endpoint
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/always-ok"
-    - displayName: basic
-      name: basic
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecure-always-ok"
+    - displayName: basic-auth-ok
+      name: basic-auth-ok
       providerDisplayName: Basic
-      description: Basic Auth Optimistic scenario
+      description: Should return 200 when calling endpoint protected with Basic Auth
       id: "{{ uuidv4 }}"
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/basic"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-ok"
           credentials:
             secretName: basic-test
             type: Basic
