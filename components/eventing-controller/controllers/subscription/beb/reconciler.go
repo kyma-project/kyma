@@ -313,7 +313,7 @@ func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alp
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 	if !isActive {
 		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
-		message := fmt.Sprintf("current subscription status: %s", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
+		message := "Waiting for subscription to be active"
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
 	}
 	r.replaceStatusCondition(subscription, condition)

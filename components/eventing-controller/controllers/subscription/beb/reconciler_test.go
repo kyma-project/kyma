@@ -271,7 +271,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				eventingv1alpha1.ConditionAPIRuleStatus,
 				eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady,
 				v1.ConditionFalse,
-				"sink URL scheme should be 'http' or 'https'",
+				sink.MissingSchemeErrMsg,
 			)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
