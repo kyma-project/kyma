@@ -53,10 +53,12 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 describe('Telemetry Operator tests', function() {
   before('Expose Grafana', async () => {
+    console.log("START!")
     await exposeGrafana();
   });
 
   after('Unexpose Grafana', async () => {
+    console.log("STOP!")
     await unexposeGrafana();
   });
 
