@@ -20,7 +20,6 @@ const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
 const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml')
-const resourceLoadingPromise = 
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -52,13 +51,29 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
+async function prepareEnvironment() {
+  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace); 
+  const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
+  await logPipelinePromise;
+  await deploymentPromise;
+}
+
+async function cleanEnvironment() {
+  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace); 
+  const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
+  await logPipelinePromise;
+  await deploymentPromise;
+}
+
 describe('Telemetry Operator tests', function() {
   before('Expose Grafana', async () => {
     await exposeGrafana();
+    await prepareEnvironment();
   });
 
   after('Unexpose Grafana', async () => {
     await unexposeGrafana();
+    await cleanEnvironment();
   });
 
   it('Operator should be ready', async () => {
@@ -99,8 +114,6 @@ describe('Telemetry Operator tests', function() {
 
   it('Should parse the logs using regex', async () => {
     try {
-      await k8sApply(parserLogPipelineCR, telemetryNamespace);
-      await k8sApply(fooBarDeployment, defaultNamespace);
       const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
       assert.isTrue(logsPresent, 'No parsed logs present in Loki');
