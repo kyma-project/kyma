@@ -22,8 +22,17 @@ spec:
     spec:
       containers:
         - name: regex-parser-testing-service
-          image: "teneroy1/regexlogs:latest"
+          image: "alpine:3.16.0"
           imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - | 
+              while true
+              do
+                  echo "foo bar $(date)"
+                  sleep 10
+              done
           resources:
             limits:
               cpu: 20m

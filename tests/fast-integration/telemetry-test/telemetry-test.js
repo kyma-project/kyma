@@ -20,6 +20,7 @@ const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
 const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml')
+const resourceLoadingPromise = 
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -90,6 +91,12 @@ describe('Telemetry Operator tests', function() {
     }
   });
 
+  it('Should push the logs to the loki output', async () => {
+    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
+    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+    assert.isTrue(logsPresent, 'No logs present in Loki');
+  });
+
   it('Should parse the logs using regex', async () => {
     try {
       await k8sApply(parserLogPipelineCR, telemetryNamespace);
@@ -100,12 +107,6 @@ describe('Telemetry Operator tests', function() {
     } catch (e) {
       assert.fail(e.body.message)
     }
-  });
-
-  it('Should push the logs to the loki output', async () => {
-    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
-    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-    assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 });
 
