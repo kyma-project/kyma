@@ -53,12 +53,10 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 describe('Telemetry Operator tests', function() {
   before('Expose Grafana', async () => {
-    console.log("START!")
     await exposeGrafana();
   });
 
   after('Unexpose Grafana', async () => {
-    console.log("STOP!")
     await unexposeGrafana();
   });
 
@@ -96,8 +94,9 @@ describe('Telemetry Operator tests', function() {
     try {
       await k8sApply(parserLogPipelineCR, telemetryNamespace);
       await k8sApply(fooBarDeployment, defaultNamespace);
-      //const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-      assert.isTrue(true, 'A');
+      const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
+      const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+      assert.isTrue(trlogsPresentue, 'No parsed logs present in Loki');
     } catch (e) {
       assert.fail(e.body.message)
     }
