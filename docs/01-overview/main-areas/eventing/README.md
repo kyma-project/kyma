@@ -2,4 +2,10 @@
 title: What is Eventing in Kyma?
 ---
 
-Eventing allows you to easily integrate external applications with Kyma. Under the hood, it implements [NATS](https://docs.nats.io/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
+Eventing in Kyma is an area that:
+
+- allows users to easily connect external applications with Kyma.
+- implements [NATS JetStream](https://docs.nats.io/) internally within the cluster, to ensure Kyma receives business events from external sources.
+- triggers business flows using workloads such as Functions or services.
+- enables users to use events to implement asynchronous flows within Kyma, as the source and the sink can be inside Kyma.
+- simplifies sending events using HTTP POST requests.
