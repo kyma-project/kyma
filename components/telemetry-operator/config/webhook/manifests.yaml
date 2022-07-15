@@ -3,26 +3,36 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  creationTimestamp: null
-  name: validating-webhook-configuration
+  labels:
+    app.kubernetes.io/name: telemetry-operator-webhook
+    app.kubernetes.io/instance: telemetry
+    kyma-project.io/component: controller
+    control-plane: telemetry-operator
+  name: validation.webhook.telemetry.kyma-project.io
 webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: system
-      path: /validate-telemetry-kyma-project-io-v1alpha1-logparser
-  failurePolicy: Fail
-  name: vlogparser.kb.io
-  rules:
-  - apiGroups:
-    - telemetry.kyma-project.io
-    apiVersions:
-    - v1alpha1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - logparsers
-  sideEffects: None
+  - admissionReviewVersions:
+      - v1beta1
+      - v1
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: telemetry-operator-webhook
+        namespace: kyma-system
+        path: /validate-logpipeline
+        port: 443
+    failurePolicy: Fail
+    matchPolicy: Exact
+    name: validation.webhook.telemetry.kyma-project.io
+    rules:
+      - apiGroups:
+          - telemetry.kyma-project.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - logpipelines
+        scope: '*'
+    sideEffects: None
+    timeoutSeconds: 30

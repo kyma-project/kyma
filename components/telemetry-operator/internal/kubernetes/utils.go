@@ -21,7 +21,7 @@ func NewUtils(client client.Client) *Utils {
 
 func (u *Utils) GetOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: name.Name, Namespace: name.Namespace}}
-	err := u.getOrCreate(ctx, &cm)
+	err := u.GetOrCreate(ctx, &cm)
 	if err != nil {
 		return corev1.ConfigMap{}, err
 	}
@@ -30,7 +30,7 @@ func (u *Utils) GetOrCreateConfigMap(ctx context.Context, name types.NamespacedN
 
 func (u *Utils) GetOrCreateSecret(ctx context.Context, name types.NamespacedName) (corev1.Secret, error) {
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: name.Name, Namespace: name.Namespace}}
-	err := u.getOrCreate(ctx, &secret)
+	err := u.GetOrCreate(ctx, &secret)
 	if err != nil {
 		return corev1.Secret{}, err
 	}
@@ -38,7 +38,7 @@ func (u *Utils) GetOrCreateSecret(ctx context.Context, name types.NamespacedName
 }
 
 // Gets or creates the given obj in the Kubernetes cluster. obj must be a struct pointer so that obj can be updated with the content returned by the Server.
-func (u *Utils) getOrCreate(ctx context.Context, obj client.Object) error {
+func (u *Utils) GetOrCreate(ctx context.Context, obj client.Object) error {
 	err := u.client.Get(ctx, client.ObjectKeyFromObject(obj), obj)
 	if err != nil && errors.IsNotFound(err) {
 		return u.client.Create(ctx, obj)

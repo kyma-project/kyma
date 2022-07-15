@@ -54,9 +54,9 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		Name:    "1st-file",
 		Content: "file-content",
 	}
-	parser := telemetryv1alpha1.Parser{
-		Content: "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+)$",
-	}
+	//parser := telemetryv1alpha1.Parser{
+	//	Content: "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+)$",
+	//}
 	output := telemetryv1alpha1.Output{
 		Custom: "Name   stdout\nMatch   dummy_test.*",
 	}
@@ -70,9 +70,8 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 			Namespace: testLogPipeline.Namespace,
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Parsers: []telemetryv1alpha1.Parser{parser},
-			Output:  telemetryv1alpha1.Output{Custom: output.Custom},
-			Files:   []telemetryv1alpha1.FileMount{file},
+			Output: telemetryv1alpha1.Output{Custom: output.Custom},
+			Files:  []telemetryv1alpha1.FileMount{file},
 		},
 	}
 

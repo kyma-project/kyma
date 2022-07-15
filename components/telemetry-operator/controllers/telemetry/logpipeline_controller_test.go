@@ -60,17 +60,17 @@ var _ = Describe("LogPipeline controller", func() {
     name stdout
     storage.total_limit_size 1G`
 
-	var expectedFluentBitParserConfig = `[PARSER]
-    Name   dummy_test
-    Format   regex
-    Regex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
-
-[MULTILINE_PARSER]
-    Name          multiline-custom-regex
-    Type          regex
-    Flush_timeout 1000
-    Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
-    Rule      "cont"          "/^\s+at.*/"                     "cont"`
+	//	var expectedFluentBitParserConfig = `[PARSER]
+	//    Name   dummy_test
+	//    Format   regex
+	//    Regex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
+	//
+	//[MULTILINE_PARSER]
+	//    Name          multiline-custom-regex
+	//    Type          regex
+	//    Flush_timeout 1000
+	//    Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
+	//    Rule      "cont"          "/^\s+at.*/"                     "cont"`
 
 	var expectedSecret = make(map[string][]byte)
 	expectedSecret["myKey"] = []byte("value")
@@ -160,12 +160,12 @@ var _ = Describe("LogPipeline controller", func() {
 				Name:      "myKey",
 				ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: secretRef},
 			}
-			parser := telemetryv1alpha1.Parser{
-				Content: FluentBitParserConfig,
-			}
-			multiLineParser := telemetryv1alpha1.MultiLineParser{
-				Content: FluentBitMultiLineParserConfig,
-			}
+			//parser := telemetryv1alpha1.Parser{
+			//	Content: FluentBitParserConfig,
+			//}
+			//multiLineParser := telemetryv1alpha1.MultiLineParser{
+			//	Content: FluentBitMultiLineParserConfig,
+			//}
 			filter := telemetryv1alpha1.Filter{
 				Custom: FluentBitFilterConfig,
 			}
@@ -179,12 +179,12 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
-					Parsers:          []telemetryv1alpha1.Parser{parser},
-					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
-					Filters:          []telemetryv1alpha1.Filter{filter},
-					Output:           telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
-					Files:            []telemetryv1alpha1.FileMount{file},
-					Variables:        []telemetryv1alpha1.VariableReference{variableRefs},
+					//Parsers:          []telemetryv1alpha1.Parser{parser},
+					//MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
+					Filters:   []telemetryv1alpha1.Filter{filter},
+					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
+					Files:     []telemetryv1alpha1.FileMount{file},
+					Variables: []telemetryv1alpha1.VariableReference{variableRefs},
 				},
 			}
 			Expect(k8sClient.Create(ctx, loggingConfiguration)).Should(Succeed())
@@ -205,20 +205,20 @@ var _ = Describe("LogPipeline controller", func() {
 				return actualFluentBitConfig
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
 
-			// Fluent Bit parsers config should be copied to ConfigMap
-			Eventually(func() string {
-				cmFileName := "parsers.conf"
-				configMapLookupKey := types.NamespacedName{
-					Name:      daemonSetConfig.FluentBitParsersConfigMap.Name,
-					Namespace: daemonSetConfig.FluentBitParsersConfigMap.Namespace,
-				}
-				var fluentBitParsersCm corev1.ConfigMap
-				err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitParsersCm)
-				if err != nil {
-					return err.Error()
-				}
-				return strings.TrimRight(fluentBitParsersCm.Data[cmFileName], "\n")
-			}, timeout, interval).Should(Equal(expectedFluentBitParserConfig))
+			//// Fluent Bit parsers config should be copied to ConfigMap
+			//Eventually(func() string {
+			//	cmFileName := "parsers.conf"
+			//	configMapLookupKey := types.NamespacedName{
+			//		Name:      daemonSetConfig.FluentBitParsersConfigMap.Name,
+			//		Namespace: daemonSetConfig.FluentBitParsersConfigMap.Namespace,
+			//	}
+			//	var fluentBitParsersCm corev1.ConfigMap
+			//	err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitParsersCm)
+			//	if err != nil {
+			//		return err.Error()
+			//	}
+			//	return strings.TrimRight(fluentBitParsersCm.Data[cmFileName], "\n")
+			//}, timeout, interval).Should(Equal(expectedFluentBitParserConfig))
 
 			// File content should be copied to ConfigMap
 			Eventually(func() string {

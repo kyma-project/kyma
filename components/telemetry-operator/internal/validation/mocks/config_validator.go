@@ -4,6 +4,7 @@ package mocks
 
 import (
 	context "context"
+	"fmt"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -44,6 +45,9 @@ func (_m *ConfigValidator) RunCmd(ctx context.Context, name string, args ...stri
 // Validate provides a mock function with given fields: ctx, configFilePath
 func (_m *ConfigValidator) Validate(ctx context.Context, configFilePath string) error {
 	ret := _m.Called(ctx, configFilePath)
+
+	fmt.Println("aaaaaaaaa")
+	fmt.Println("aaaaaaaaa")
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {

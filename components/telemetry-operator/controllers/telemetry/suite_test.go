@@ -18,6 +18,7 @@ package telemetry
 
 import (
 	"context"
+	"github.com/prometheus/client_golang/prometheus"
 	"path/filepath"
 	"testing"
 
@@ -43,9 +44,9 @@ var (
 	daemonSetConfig = sync.FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "default"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "logging-fluent-bit-sections", Namespace: "default"},
-		FluentBitParsersConfigMap:  types.NamespacedName{Name: "logging-fluent-bit-parsers", Namespace: "default"},
-		FluentBitFilesConfigMap:    types.NamespacedName{Name: "logging-fluent-bit-files", Namespace: "default"},
-		FluentBitEnvSecret:         types.NamespacedName{Name: "logging-fluent-bit-env", Namespace: "default"},
+		//FluentBitParsersConfigMap:  types.NamespacedName{Name: "logging-fluent-bit-parsers", Namespace: "default"},
+		FluentBitFilesConfigMap: types.NamespacedName{Name: "logging-fluent-bit-files", Namespace: "default"},
+		FluentBitEnvSecret:      types.NamespacedName{Name: "logging-fluent-bit-env", Namespace: "default"},
 	}
 )
 
@@ -107,12 +108,17 @@ var _ = BeforeSuite(func() {
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
 
 	reconciler := NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
 		pipelineConfig,
+		restartsTotal,
 	)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
