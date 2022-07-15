@@ -77,5 +77,5 @@ metadata:
   name: wrong-oauth-test
   namespace: kyma-integration
 data:
-  clientId: {{ "clientID" | b64enc }}
+  clientId: {{ "bad id" | b64enc }}
   clientSecret: {{ "bad secret" | b64enc }}
