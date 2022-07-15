@@ -381,7 +381,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &minReplicas,
+			Replicas: s.instance.Spec.ScaleConfig.MinReplicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
@@ -563,14 +563,14 @@ func (s *systemState) defaultReplicas() (int32, int32) {
 	var min = int32(1)
 	var max int32
 	spec := s.instance.Spec
-	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
-		min = *spec.MinReplicas
+	if spec.ScaleConfig.MinReplicas != nil && *spec.ScaleConfig.MinReplicas > 0 {
+		min = *spec.ScaleConfig.MinReplicas
 	}
 	// special case
-	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+	if spec.ScaleConfig.MaxReplicas == nil || min > *spec.ScaleConfig.MaxReplicas {
 		max = min
 	} else {
-		max = *spec.MaxReplicas
+		max = *spec.ScaleConfig.MaxReplicas
 	}
 	return min, max
 }

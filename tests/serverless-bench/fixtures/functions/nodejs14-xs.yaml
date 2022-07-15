@@ -5,8 +5,9 @@ metadata:
     serverless.kyma-project.io/function-resources-preset: XS
   name: nodejs14-xs
 spec:
-  maxReplicas: 1
-  minReplicas: 1
+  scaleConfig:
+    maxReplicas: 1
+    minReplicas: 1
   runtime: nodejs14
   source:
     inline:

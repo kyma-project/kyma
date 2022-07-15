@@ -105,6 +105,14 @@ type ResourceRequirements struct {
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
+type ScaleConfig struct {
+	// +kubebuilder:validation:Minimum:=1
+	MinReplicas *int32 `json:"minReplicas,omitempty"`
+
+	// +kubebuilder:validation:Minimum:=1
+	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+}
+
 type ResourceConfiguration struct {
 	// +optional
 	Build ResourceRequirements `json:"build"`
@@ -136,11 +144,8 @@ type FunctionSpec struct {
 	// +optional
 	ResourceConfiguration ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=1
-	MinReplicas *int32 `json:"minReplicas,omitempty"`
-
-	// +kubebuilder:validation:Minimum:=1
-	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+	// +optional
+	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
 	// +optional
 	Template Template `json:"template,omitempty"`

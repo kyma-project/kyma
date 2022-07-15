@@ -87,8 +87,10 @@ func TestValidatingWebHook_Handle(t *testing.T) {
         }
       }
     },
-    "maxReplicas": 1,
-    "minReplicas": 1,
+	"scaleConfig": {
+		"maxReplicas": 1,
+    	"minReplicas": 1
+	},
     "runtime": "python39",
     "source": {
       "gitRepository": {
