@@ -51,7 +51,7 @@ spec:
     - displayName: wrong oauth secret
       name: wrong-oauth-secret
       providerDisplayName: OAuth
-      description: Should return 403 for OAuth with a wrong secret
+      description: Should return 502 for OAuth with a wrong secret
       id: "{{ uuidv4 }}"
       entries:
         - type: API
