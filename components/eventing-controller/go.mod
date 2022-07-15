@@ -25,7 +25,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
 	k8s.io/api v0.24.2
-	k8s.io/apimachinery v0.24.2
+	k8s.io/apimachinery v0.24.3
 	k8s.io/client-go v0.24.2
 	sigs.k8s.io/controller-runtime v0.12.3
 )
