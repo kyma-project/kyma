@@ -17,9 +17,9 @@ const { checkFunctionResponse } = require('../test/fixtures/commerce-mock');
 const telemetryNamespace = 'kyma-system';
 const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
-const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
-const parserLogPipelineCR = loadResourceFromFile('./samples/telemetry_v1alpha1_logpipeline_regex_parser_loki.yaml');
-const fooBarDeployment = loadResourceFromFile('./samples/regex_filter_deployment.yaml')
+const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
+const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
+const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml')
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -96,7 +96,7 @@ describe('Telemetry Operator tests', function() {
       await k8sApply(fooBarDeployment, defaultNamespace);
       const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-      assert.isTrue(trlogsPresentue, 'No parsed logs present in Loki');
+      assert.isTrue(logsPresent, 'No parsed logs present in Loki');
     } catch (e) {
       assert.fail(e.body.message)
     }

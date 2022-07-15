@@ -1,14 +1,17 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LogPipeline
 metadata:
-  name: json-parser-loki-pipeline
+  name: regex-parser-loki-pipeline
 spec:
   parsers:
     - content: |
-        Name        docker
-        Format      json
-        Time_Key    time
-        Time_Format %Y-%m-%dT%H:%M:%S %z
+        Name   regex-my-parser
+        Format regex
+        Regex  ^(?<user>[^ ]*) (?<pass>[^ ]*)$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+        Types code:integer size:integer
+
   output:
     custom: |
       Name               grafana-loki
@@ -37,7 +40,3 @@ spec:
           },
           "stream": "stream"
         }
-  filters:
-    - custom: |
-        Name    grep
-        Regex $kubernetes['namespace_name'] default
