@@ -827,7 +827,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscription not active condition")
 			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-				eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse, "current subscription status: Paused")
+				eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse, "Waiting for subscription to be active")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotActiveCondition),

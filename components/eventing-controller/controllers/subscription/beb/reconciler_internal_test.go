@@ -347,7 +347,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				LastTransitionTime: currentTime,
 				Status:             corev1.ConditionFalse,
 				Reason:             eventingv1alpha1.ConditionReasonSubscriptionNotActive,
-				Message:            "current subscription status: Paused",
+				Message:            "Waiting for subscription to be active",
 			},
 		},
 		{
