@@ -19,6 +19,7 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
@@ -30,7 +31,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	admissionv1 "k8s.io/api/admission/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -58,6 +58,8 @@ type LogPipelineValidator struct {
 	pipelineConfig           fluentbit.PipelineConfig
 	fluentBitMaxFSBufferSize string
 
+	utils *kubernetes.Utils
+
 	fsWrapper fs.Wrapper
 
 	decoder *admission.Decoder
@@ -75,6 +77,8 @@ func NewLogPipeLineValidator(
 	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
+	fmt.Println("ssssss")
+	utils := kubernetes.NewUtils(client)
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
@@ -88,6 +92,7 @@ func NewLogPipeLineValidator(
 		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
+		utils:                 utils,
 	}
 }
 
@@ -146,7 +151,7 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}()
 
-	configFiles, err := v.getFluentBitConfig(ctx, currentBaseDirectory, logPipeline)
+	configFiles, err := v.utils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig)
 	if err != nil {
 		return err
 	}
@@ -192,55 +197,55 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 	return nil
 }
 
-func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) ([]fs.File, error) {
-	var configFiles []fs.File
-	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
-	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
-	fluentBitFilesDirectory := currentBaseDirectory + "/files"
-
-	var generalCm corev1.ConfigMap
-	if err := v.Get(ctx, v.fluentBitConfigMap, &generalCm); err != nil {
-		return nil, err
-	}
-	for key, data := range generalCm.Data {
-		configFiles = append(configFiles, fs.File{
-			Path: currentBaseDirectory,
-			Name: key,
-			Data: data,
-		})
-	}
-
-	for _, file := range logPipeline.Spec.Files {
-		configFiles = append(configFiles, fs.File{
-			Path: fluentBitFilesDirectory,
-			Name: file.Name,
-			Data: file.Content,
-		})
-	}
-
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.pipelineConfig)
-	if err != nil {
-		return []fs.File{}, err
-	}
-	configFiles = append(configFiles, fs.File{
-		Path: fluentBitSectionsConfigDirectory,
-		Name: logPipeline.Name + ".conf",
-		Data: sectionsConfig,
-	})
-
-	var logparsers telemetryv1alpha1.LogParserList
-	if err := v.List(ctx, &logparsers); err != nil {
-		return nil, err
-	}
-	parsersConfig := fluentbit.MergeParsersConfig(&logparsers)
-	configFiles = append(configFiles, fs.File{
-		Path: fluentBitParsersConfigDirectory,
-		Name: fluentBitParsersConfigMapKey,
-		Data: parsersConfig,
-	})
-
-	return configFiles, nil
-}
+//func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) ([]fs.File, error) {
+//	var configFiles []fs.File
+//	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
+//	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
+//	fluentBitFilesDirectory := currentBaseDirectory + "/files"
+//
+//	var generalCm corev1.ConfigMap
+//	if err := v.Get(ctx, v.fluentBitConfigMap, &generalCm); err != nil {
+//		return nil, err
+//	}
+//	for key, data := range generalCm.Data {
+//		configFiles = append(configFiles, fs.File{
+//			Path: currentBaseDirectory,
+//			Name: key,
+//			Data: data,
+//		})
+//	}
+//
+//	for _, file := range logPipeline.Spec.Files {
+//		configFiles = append(configFiles, fs.File{
+//			Path: fluentBitFilesDirectory,
+//			Name: file.Name,
+//			Data: file.Content,
+//		})
+//	}
+//
+//	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.pipelineConfig)
+//	if err != nil {
+//		return []fs.File{}, err
+//	}
+//	configFiles = append(configFiles, fs.File{
+//		Path: fluentBitSectionsConfigDirectory,
+//		Name: logPipeline.Name + ".conf",
+//		Data: sectionsConfig,
+//	})
+//
+//	var logparsers telemetryv1alpha1.LogParserList
+//	if err := v.List(ctx, &logparsers); err != nil {
+//		return nil, err
+//	}
+//	parsersConfig := fluentbit.MergeParsersConfig(&logparsers)
+//	configFiles = append(configFiles, fs.File{
+//		Path: fluentBitParsersConfigDirectory,
+//		Name: fluentBitParsersConfigMapKey,
+//		Data: parsersConfig,
+//	})
+//
+//	return configFiles, nil
+//}
 
 func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
