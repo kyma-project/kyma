@@ -12,5 +12,5 @@ images:
     version: "PR-14804"
 
   mockApplication:
-    name: "test-app"
+    name: "mock-app"
     version: "PR-14804"
