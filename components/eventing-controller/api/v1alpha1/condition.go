@@ -219,13 +219,14 @@ func (s *SubscriptionStatus) GetConditionAPIRuleStatus() corev1.ConditionStatus 
 	return corev1.ConditionUnknown
 }
 
-func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
-	reason := ConditionReasonAPIRuleStatusNotReady
-	status := corev1.ConditionFalse
+func (s *SubscriptionStatus) SetConditionAPIRuleStatus(err error) {
+	reason := ConditionReasonAPIRuleStatusReady
+	status := corev1.ConditionTrue
 	message := ""
-	if ready {
-		reason = ConditionReasonAPIRuleStatusReady
-		status = corev1.ConditionTrue
+	if err != nil {
+		reason = ConditionReasonAPIRuleStatusNotReady
+		status = corev1.ConditionFalse
+		message = err.Error()
 	}
 
 	newConditions := []Condition{MakeCondition(ConditionAPIRuleStatus, reason, status, message)}

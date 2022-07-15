@@ -134,6 +134,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// sync APIRule for the desired subscription
 	apiRule, err := r.syncAPIRule(ctx, subscription, log)
+	// sync the condition: ConditionAPIRuleStatus
+	subscription.Status.SetConditionAPIRuleStatus(err)
 	if !recerrors.IsSkippable(err) {
 		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
 			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
@@ -270,7 +272,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	if _, err := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
-		r.syncConditionSubscribed(subscription, false)
+		r.syncConditionSubscribed(subscription, err)
 		return false, err
 	}
 
@@ -282,7 +284,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	// sync the condition: ConditionSubscribed
-	r.syncConditionSubscribed(subscription, true)
+	r.syncConditionSubscribed(subscription, nil)
 
 	// sync the condition: ConditionSubscriptionActive
 	r.syncConditionSubscriptionActive(subscription, isActive, logger)
@@ -294,13 +296,13 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 }
 
 // syncConditionSubscribed syncs the condition ConditionSubscribed
-func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subscription, isSubscribed bool) {
-	message := ""
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, "")
-	if isSubscribed {
-		// Include the BEB subscription ID in the Condition message
-		message = eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
-		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
+func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subscription, err error) {
+	// Include the BEB subscription ID in the Condition message
+	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
+	if err != nil {
+		message = err.Error()
+		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
 	}
 
 	r.replaceStatusCondition(subscription, condition)
@@ -311,7 +313,8 @@ func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alp
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 	if !isActive {
 		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
-		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, "")
+		message := "Waiting for subscription to be active"
+		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
 	}
 	r.replaceStatusCondition(subscription, condition)
 }
@@ -364,16 +367,15 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 	// check if the apiRule is ready
 	apiRuleReady := computeAPIRuleReadyStatus(apiRule)
 
-	// sync the condition: ConditionAPIRuleStatus
-	subscription.Status.SetConditionAPIRuleStatus(apiRuleReady)
 	// set subscription sink only if the APIRule is ready
 	if apiRuleReady {
 		if err := setSubscriptionStatusExternalSink(subscription, apiRule); err != nil {
 			return apiRule, errors.Wrapf(err, "set subscription status externalSink failed namespace:%s name:%s", subscription.Namespace, subscription.Name)
 		}
+		return apiRule, nil
 	}
 
-	return apiRule, nil
+	return apiRule, recerrors.NewSkippable(errors.Errorf("apiRule %s is not ready", apiRule.Name))
 }
 
 // createOrUpdateAPIRule create new or update existing APIRule for the given subscription.
@@ -646,7 +648,6 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	// reset the status for apiRule
 	subscription.Status.APIRuleName = ""
 	subscription.Status.ExternalSink = ""
-	subscription.Status.SetConditionAPIRuleStatus(false)
 }
 
 // getRequiredConditions removes the non-required conditions from the subscription  and adds any missing required-conditions
