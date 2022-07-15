@@ -46,18 +46,8 @@ func NewOAuth(clientID, clientSecret string) OAuthHandler {
 }
 
 func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		handleError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err))
-		return
-	}
-
-	clientID := r.FormValue(clientIDKey)
-	clientSecret := r.FormValue(clientSecretKey)
-	grantType := r.FormValue(grantTypeKey)
-
-	if !oh.verifyClient(clientID, clientSecret) || grantType != "client_credentials" {
-		handleError(w, http.StatusForbidden, "Client verification failed")
+	if ok, status, message := oh.isRequestValid(r); !ok {
+		handleError(w, status, message)
 		return
 	}
 
@@ -69,7 +59,6 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 
 	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		handleError(w, http.StatusInternalServerError, "Failed to encode token response")
@@ -79,18 +68,8 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 }
 
 func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		handleError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err))
-		return
-	}
-
-	clientID := r.FormValue(clientIDKey)
-	clientSecret := r.FormValue(clientSecretKey)
-	grantType := r.FormValue(grantTypeKey)
-
-	if !oh.verifyClient(clientID, clientSecret) || grantType != "client_credentials" {
-		handleError(w, http.StatusForbidden, "Client verification failed")
+	if ok, status, message := oh.isRequestValid(r); !ok {
+		handleError(w, status, message)
 		return
 	}
 
@@ -98,7 +77,6 @@ func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
 
 	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		handleError(w, http.StatusInternalServerError, "Failed to encode token response")
@@ -136,6 +114,23 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func (oh *OAuthHandler) isRequestValid(r *http.Request) (bool, int, string) {
+	err := r.ParseForm()
+	if err != nil {
+		return false, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err)
+	}
+
+	clientID := r.FormValue(clientIDKey)
+	clientSecret := r.FormValue(clientSecretKey)
+	grantType := r.FormValue(grantTypeKey)
+
+	if !oh.verifyClient(clientID, clientSecret) || grantType != "client_credentials" {
+		return false, http.StatusForbidden, "Client verification failed"
+	}
+
+	return true, 0, ""
 }
 
 func (oh *OAuthHandler) verifyClient(id, secret string) bool {

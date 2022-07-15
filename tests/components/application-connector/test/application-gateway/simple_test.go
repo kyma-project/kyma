@@ -28,7 +28,7 @@ func (gs *GatewaySuite) TestSimpleCases() {
 					if err == nil && len(body) > 0 {
 						gs.T().Log("Response", string(body))
 					}
-					gs.Equal(200, res.StatusCode)
+					gs.Equal(200, res.StatusCode, service.Description)
 				}
 			}
 		})
