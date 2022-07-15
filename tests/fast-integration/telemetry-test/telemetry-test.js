@@ -118,7 +118,7 @@ describe('Telemetry Operator tests', function() {
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
       assert.isTrue(logsPresent, 'No parsed logs present in Loki');
     } catch (e) {
-      assert.fail(e.body.message)
+      assert.fail(e)
     }
   });
 });
