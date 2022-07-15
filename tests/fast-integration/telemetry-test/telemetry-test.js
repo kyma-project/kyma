@@ -90,7 +90,7 @@ describe('Telemetry Operator tests', function() {
     }
   });
 
-  it('Should accept the valid logs', async () => {
+  it('Should parse the logs using regex', async () => {
     try {
       await k8sApply(parserLogPipelineCR, telemetryNamespace);
       await k8sApply(fooBarDeployment, defaultNamespace);

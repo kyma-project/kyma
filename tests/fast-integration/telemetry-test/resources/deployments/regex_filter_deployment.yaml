@@ -6,8 +6,6 @@ metadata:
   labels:
     app: regex-parser-testing-service
     example: regex-parser-testing-service
-  annotations:
-    fluentbit.io/parser: regex-my-parser
 spec:
   replicas: 1
   selector:
