@@ -1,13 +1,13 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: kubernetes-resources-error-handling
+  name: missing-resources-error-handling
   namespace: "{{ .Values.namespace }}"
 spec:
-  description: Test cases related to Kubernetes resources
+  description: Missing resources
   skipVerify: true
   labels:
-    app: kubernetes-resources-error-handling
+    app: missing-resources-error-handling
   services:
     - displayName: application-doesnt-exist
       name: application-doesnt-exist
@@ -26,7 +26,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/kubernetes-resources-error-handling/where-is-service"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/where-is-service"
     - displayName: missing-secret-oauth
       name: missing-secret-oauth
       providerDisplayName: Kyma
@@ -35,7 +35,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/kubernetes-resources-error-handling/missing-secret-oauth"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/missing-secret-oauth"
           credentials:
             secretName: where-is-the-secret
             authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
@@ -48,7 +48,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/kubernetes-resources-error-handling/missing-secret-basic-auth"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/missing-secret-basic-auth"
           credentials:
             secretName: where-is-the-secret
             type: Basic
@@ -60,7 +60,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/kubernetes-resources-error-handling/missing-secret-oauth-mtls"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/missing-secret-oauth-mtls"
           credentials:
             secretName: where-is-the-secret
             authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
@@ -73,7 +73,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/kubernetes-resources-error-handling/missing-secret-certgen-mtls"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/missing-secret-certgen-mtls"
           credentials:
             secretName: where-is-the-secret
             type: CertificateGen
@@ -85,8 +85,17 @@ spec:
       entries:
         - type: API
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/kubernetes-resources-error-handling/missing-request-parameters-header"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/missing-request-parameters-header"
           requestParametersSecretName: where-are-the-paramterers
           credentials:
             secretName: where-is-the-secret
             type: Basic
+    - displayName: non-existing-target-url
+      name: non-existing-target-url
+      providerDisplayName: Kyma
+      description: Should return 502 when target url is not resolvable
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://bad.bad.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/missing-resources-error-handling/non-existing-target-url"

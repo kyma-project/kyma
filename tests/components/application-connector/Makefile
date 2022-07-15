@@ -12,19 +12,7 @@ clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway:
-	@echo $(GOPATH)/bin/go-junit-report --help
-	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	helm template resources/charts/gateway-test --set gatewayTest=$(GATEWAY_TEST_IMAGE),mockApplication=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
-
-	kubectl wait --for=condition=complete --timeout=2m -n $(NAMESPACE) job/application-gateway-test
-	@echo ""
-	@echo "Gateway test results:"
-
-	./scripts/check-pod-logs.sh
-
-	helm template resources/charts/gateway-test  | kubectl delete -f -
-	kubectl delete ns $(NAMESPACE) --ignore-not-found
+test-gateway: test-gateway-debug clean-gateway-test
 
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
