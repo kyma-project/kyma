@@ -51,4 +51,4 @@ files:
   - path: "./kyma/docs/05-technical-reference/ac-01-application-gateway-details.md"
     config:
       external-links-to-ignore: [ "http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH",
-      "http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH"]
+      "http://central-application-gateway.kyma-system:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH"]
