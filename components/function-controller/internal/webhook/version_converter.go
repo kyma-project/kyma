@@ -1,11 +1,9 @@
 package webhook
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -17,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	controllerruntime "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
@@ -54,20 +53,19 @@ func NewConvertingWebHook(client ctrlclient.Client, scheme *runtime.Scheme) *Con
 // }
 
 func (w *ConvertingWebHook) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
-	convertReview := &apix.ConversionReview{}
-	buf, _ := ioutil.ReadAll(req.Body)
+	log := controllerruntime.Log.WithName("Converting webhook")
 
-	err := json.NewDecoder(bytes.NewReader(buf)).Decode(convertReview)
+	convertReview := &apix.ConversionReview{}
+	err := json.NewDecoder(req.Body).Decode(convertReview)
 	if err != nil {
-		logrus.Error(err, "failed to read conversion request")
+		log.Error(err, "failed to read conversion request")
 		resp.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	conversionResponse, err := w.handleConvertRequest(convertReview.Request)
-
 	if err != nil {
-		logrus.Error(err, "failed to convert", "request", convertReview.Request.UID)
+		log.Error(err, "failed to convert", "request", convertReview.Request.UID)
 		convertReview.Response = errored(err)
 	} else {
 		convertReview.Response = conversionResponse
@@ -77,7 +75,7 @@ func (w *ConvertingWebHook) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 
 	err = json.NewEncoder(resp).Encode(convertReview)
 	if err != nil {
-		logrus.Error(err, "failed to write response")
+		log.Error(err, "failed to write response")
 		return
 	}
 }
@@ -93,10 +91,23 @@ func (w *ConvertingWebHook) handleConvertRequest(req *apix.ConversionRequest) (*
 		if err != nil {
 			return nil, err
 		}
+		logrus.Infof("-----------------------------------------the source is %#v ", src.GetObjectKind().GroupVersionKind())
+		// if src.GetObjectKind().GroupVersionKind().Version == serverlessv1alpha2.GroupVersion.Version {
+		// 	logrus.Infof("-----------------------------------------reverse conversion is not supported")
+
+		// 	return &apix.ConversionResponse{
+		// 		UID:              req.UID,
+		// 		ConvertedObjects: []runtime.RawExtension{{Object: src}},
+		// 		Result: metav1.Status{
+		// 			Status: string(metav1.StatusSuccess),
+		// 		},
+		// 	}, nil
+		// }
 		dst, err := w.allocateDstObject(req.DesiredAPIVersion, gvk.Kind)
 		if err != nil {
 			return nil, err
 		}
+
 		err = w.convertFunction(src, dst)
 		if err != nil {
 			return nil, err
