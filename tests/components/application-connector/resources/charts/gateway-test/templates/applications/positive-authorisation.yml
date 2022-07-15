@@ -4,7 +4,7 @@ metadata:
   name: positive-authorisation
   namespace: {{ .Values.namespace }}
 spec:
-  description: This is the test service
+  description: Authorisation
   skipVerify: true
   labels:
     app: positive-authorisation
