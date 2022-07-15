@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -13,6 +14,13 @@ import (
 func executeGetRequest(t *testing.T, entry v1alpha1.Entry) int {
 	t.Log("Calling", entry.CentralGatewayUrl)
 	res, err := http.Get(entry.CentralGatewayUrl)
+
+	if err == nil {
+		body, err := ioutil.ReadAll(res.Body)
+		if err == nil && len(body) > 0 {
+			t.Log("Response", string(body))
+		}
+	}
 	assert.Nil(t, err)
 	return res.StatusCode
 }
