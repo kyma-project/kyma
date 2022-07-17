@@ -238,6 +238,9 @@ func main() {
 		fluentBitConfigMap,
 		fluentBitNs,
 		validation.NewparserValidator(),
+		pipelineConfig,
+		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",

@@ -19,7 +19,11 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,57 +34,29 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// log is for logging in this package.
-//var logparserlog = logf.Log.WithName("logparser-resource")
-
-//func (r *v1alpha1.LogParser) SetupWebhookWithManager(mgr ctrl.Manager) error {
-//	return ctrl.NewWebhookManagedBy(mgr).
-//		For(r).
-//		Complete()
-//}
-
-//// TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-//
-//// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//
-//var _ webhook.Validator = &v1alpha1.LogParser{}
-//
-//// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-//func (r *v1alpha1.LogParser) ValidateCreate() error {
-//	logparserlog.Info("validate create", "name", r.Name)
-//
-//	// TODO(user): fill in your validation logic upon object creation.
-//	return nil
-//}
-//
-//// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-//func (r *v1alpha1.LogParser) ValidateUpdate(old runtime.Object) error {
-//	logparserlog.Info("validate update", "name", r.Name)
-//
-//	// TODO(user): fill in your validation logic upon object update.
-//	return nil
-//}
-//
-//// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-//func (r *v1alpha1.LogParser) ValidateDelete() error {
-//	logparserlog.Info("validate delete", "name", r.Name)
-//
-//	// TODO(user): fill in your validation logic upon object deletion.
-//	return nil
-//}
-
 //+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
 type LogparserValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
 	parserValidator    validation.ParserValidator
+	pipelineConfig     fluentbit.PipelineConfig
+	configValidator    validation.ConfigValidator
+	fsWrapper          fs.Wrapper
 
 	decoder *admission.Decoder
 }
 
-func NewLogParserValidator(client client.Client, fluentBitConfigMap string, namespace string, parserValidator validation.ParserValidator) *LogparserValidator {
-	fmt.Println("aaaaaaaaaaaaaaaaaaaaaaaa")
+func NewLogParserValidator(
+	client client.Client,
+	fluentBitConfigMap string,
+	namespace string,
+	parserValidator validation.ParserValidator,
+	pipelineConfig fluentbit.PipelineConfig,
+	configValidator validation.ConfigValidator,
+	fsWrapper fs.Wrapper,
+
+) *LogparserValidator {
 	return &LogparserValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
@@ -88,6 +64,9 @@ func NewLogParserValidator(client client.Client, fluentBitConfigMap string, name
 			Namespace: namespace,
 		},
 		parserValidator: parserValidator,
+		pipelineConfig:  pipelineConfig,
+		configValidator: configValidator,
+		fsWrapper:       fsWrapper,
 	}
 }
 
@@ -118,5 +97,36 @@ func (v *LogparserValidator) Handle(ctx context.Context, req admission.Request) 
 }
 
 func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *telemetryv1alpha1.LogParser) error {
-	return v.validateLogParser(ctx, logParser)
+	log := logf.FromContext(ctx)
+	err := v.parserValidator.Validate(logParser)
+	if err != nil {
+		return err
+	}
+
+	utils := kubernetes.NewUtils(v.Client)
+	var pipeLine *telemetryv1alpha1.LogPipeline
+	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
+
+	configFiles, err := utils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
+	if err != nil {
+		return err
+	}
+	log.Info("Fluent Bit config files count", "count", len(configFiles))
+	for _, configFile := range configFiles {
+		if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
+			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
+			return err
+		}
+	}
+	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit config")
+		return err
+	}
+
+	return nil
+}
+
+func (v *LogparserValidator) InjectDecoder(d *admission.Decoder) error {
+	v.decoder = d
+	return nil
 }

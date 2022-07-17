@@ -58,8 +58,6 @@ type LogPipelineValidator struct {
 	pipelineConfig           fluentbit.PipelineConfig
 	fluentBitMaxFSBufferSize string
 
-	utils *kubernetes.Utils
-
 	fsWrapper fs.Wrapper
 
 	decoder *admission.Decoder
@@ -77,8 +75,6 @@ func NewLogPipeLineValidator(
 	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
-	fmt.Println("ssssss")
-	utils := kubernetes.NewUtils(client)
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
@@ -92,7 +88,6 @@ func NewLogPipeLineValidator(
 		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
-		utils:                 utils,
 	}
 }
 
@@ -151,10 +146,18 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}()
 
-	configFiles, err := v.utils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig)
+	utils := kubernetes.NewUtils(v.Client)
+	var parser *telemetryv1alpha1.LogParser
+
+	configFiles, err := utils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
 	if err != nil {
 		return err
 	}
+
+	//configFiles, err := v.getFluentBitConfig(ctx, currentBaseDirectory, logPipeline)
+	//if err != nil {
+	//	return err
+	//}
 
 	log.Info("Fluent Bit config files count", "count", len(configFiles))
 	for _, configFile := range configFiles {
@@ -212,6 +215,27 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 //			Path: currentBaseDirectory,
 //			Name: key,
 //			Data: data,
+//		})
+//	}
+//	var logPipeLines telemetryv1alpha1.LogPipelineList
+//
+//	for _, l := range logPipeLines.Items {
+//		for _, file := range l.Spec.Files {
+//			configFiles = append(configFiles, fs.File{
+//				Path: fluentBitFilesDirectory,
+//				Name: file.Name,
+//				Data: file.Content,
+//			})
+//		}
+//
+//		sectionsConfig, err := fluentbit.MergeSectionsConfig(&l, v.pipelineConfig)
+//		if err != nil {
+//			return []fs.File{}, err
+//		}
+//		configFiles = append(configFiles, fs.File{
+//			Path: fluentBitSectionsConfigDirectory,
+//			Name: logPipeline.Name + ".conf",
+//			Data: sectionsConfig,
 //		})
 //	}
 //

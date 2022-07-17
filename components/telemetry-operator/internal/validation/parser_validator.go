@@ -7,7 +7,7 @@ import (
 
 //go:generate mockery --name ParserValidator --filename parser_validator.go
 type ParserValidator interface {
-	Validate(logParser *telemetryv1alpha1.LogParser, logParsers *telemetryv1alpha1.LogParserList) error
+	Validate(logParser *telemetryv1alpha1.LogParser) error
 }
 
 type parserValidator struct {
@@ -17,7 +17,7 @@ func NewparserValidator() *parserValidator {
 	return &parserValidator{}
 }
 
-func (v *parserValidator) Validate(logParser *telemetryv1alpha1.LogParser, logParsers *telemetryv1alpha1.LogParserList) error {
+func (v *parserValidator) Validate(logParser *telemetryv1alpha1.LogParser) error {
 	section, err := parseSection(logParser.Spec.Parser)
 	if err != nil {
 		return err
