@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/tokencache"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
-	log "github.com/sirupsen/logrus"
 )
 
 type oauthStrategy struct {
+	tokenCache        tokencache.TokenCache
 	oauthClient       OAuthClient
 	clientId          string
 	clientSecret      string
@@ -18,8 +21,9 @@ type oauthStrategy struct {
 	requestParameters *RequestParameters
 }
 
-func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url string, requestParameters *RequestParameters) oauthStrategy {
+func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url string, requestParameters *RequestParameters, tokenCache tokencache.TokenCache) oauthStrategy {
 	return oauthStrategy{
+		tokenCache:        tokenCache,
 		oauthClient:       oauthClient,
 		clientId:          clientId,
 		clientSecret:      clientSecret,
@@ -30,7 +34,7 @@ func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url strin
 
 func (o oauthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc) apperrors.AppError {
 	headers, queryParameters := o.requestParameters.unpack()
-	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters)
+	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters, o.tokenCache)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
 		return err

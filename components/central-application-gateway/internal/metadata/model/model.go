@@ -46,3 +46,7 @@ type APIIdentifier struct {
 	Service     string
 	Entry       string
 }
+
+func (api APIIdentifier) String() string {
+	return api.Application + api.Service + api.Entry
+}

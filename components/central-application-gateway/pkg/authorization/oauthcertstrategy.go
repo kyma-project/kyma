@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 )
 
 type oauthWithCertStrategy struct {
+	tokenCache        tokencache.TokenCache
 	oauthClient       OAuthClient
 	clientId          string
 	certificate       []byte
@@ -21,8 +23,9 @@ type oauthWithCertStrategy struct {
 	requestParameters *RequestParameters
 }
 
-func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, certificate, privateKey []byte, url string, requestParameters *RequestParameters) oauthWithCertStrategy {
+func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, certificate, privateKey []byte, url string, requestParameters *RequestParameters, tokenCache tokencache.TokenCache) oauthWithCertStrategy {
 	return oauthWithCertStrategy{
+		tokenCache:        tokenCache,
 		oauthClient:       oauthClient,
 		clientId:          clientId,
 		certificate:       certificate,
@@ -38,7 +41,7 @@ func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.Se
 		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())
 	}
 	headers, queryParameters := o.requestParameters.unpack()
-	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.url, cert, headers, queryParameters)
+	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.url, cert, headers, queryParameters, o.tokenCache)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
 		return apperrors.Internal("Failed to get token: %s", err.Error())

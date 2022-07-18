@@ -92,7 +92,7 @@ func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry
 		return nil, err
 	}
 	clientCertificate := clientcert.NewClientCertificate(nil)
-	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
+	authorizationStrategy := p.newAuthorizationStrategy(apiIdentifier.String(), serviceAPI.Credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
 	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, apiIdentifier.Service, serviceAPI.SkipVerify, authorizationStrategy, csrfTokenStrategy, clientCertificate, p.proxyTimeout)
 	if err != nil {
@@ -102,8 +102,8 @@ func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry
 	return p.cache.Put(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry, proxy, authorizationStrategy, csrfTokenStrategy, clientCertificate), nil
 }
 
-func (p *proxy) newAuthorizationStrategy(credentials *authorization.Credentials) authorization.Strategy {
-	return p.authorizationStrategyFactory.Create(credentials)
+func (p *proxy) newAuthorizationStrategy(cacheName string, credentials *authorization.Credentials) authorization.Strategy {
+	return p.authorizationStrategyFactory.Create(credentials, cacheName)
 }
 
 func (p *proxy) newCSRFTokenStrategy(authorizationStrategy authorization.Strategy, credentials *authorization.Credentials) csrf.TokenStrategy {
