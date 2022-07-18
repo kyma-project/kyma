@@ -14,13 +14,13 @@ const (
 
 type CSRFHandler struct {
 	mutex  sync.RWMutex
-	tokens map[string]bool
+	tokens map[string]interface{}
 }
 
 func NewCSRF() CSRFHandler {
 	return CSRFHandler{
 		mutex:  sync.RWMutex{},
-		tokens: make(map[string]bool),
+		tokens: make(map[string]interface{}),
 	}
 }
 
@@ -28,7 +28,7 @@ func (ch *CSRFHandler) Token(w http.ResponseWriter, _ *http.Request) {
 	token := uuid.New().String()
 
 	ch.mutex.Lock()
-	ch.tokens[token] = true
+	ch.tokens[token] = nil
 	ch.mutex.Unlock()
 
 	w.Header().Set(csrfTokenHeader, token)
@@ -68,7 +68,7 @@ func (ch *CSRFHandler) Middleware() mux.MiddlewareFunc {
 			ch.mutex.RUnlock()
 
 			if !found {
-				handleError(w, http.StatusForbidden, "Invalid token from the header")
+				handleError(w, http.StatusForbidden, "Invalid CSRF token from the header")
 				return
 			}
 
@@ -83,7 +83,7 @@ func (ch *CSRFHandler) Middleware() mux.MiddlewareFunc {
 			ch.mutex.RUnlock()
 
 			if !found {
-				handleError(w, http.StatusForbidden, "Invalid token from the cookie")
+				handleError(w, http.StatusForbidden, "Invalid CSRF token from the cookie")
 				return
 			}
 
