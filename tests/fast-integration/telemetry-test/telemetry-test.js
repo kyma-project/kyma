@@ -50,28 +50,28 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-async function prepareEnvironment() {
-  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
-  const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
-  await logPipelinePromise;
-  await deploymentPromise;
-}
+// async function prepareEnvironment() {
+//   const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
+//   const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
+//   await logPipelinePromise;
+//   await deploymentPromise;
+// }
 
-async function cleanEnvironment() {
-  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
-  const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
-  await logPipelinePromise;
-  await deploymentPromise;
-}
+// async function cleanEnvironment() {
+//   const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
+//   const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
+//   await logPipelinePromise;
+//   await deploymentPromise;
+// }
 
 describe('Telemetry Operator tests', function() {
   before('Expose Grafana', async () => {
-    await prepareEnvironment();
+    // await prepareEnvironment();
     await exposeGrafana();
   });
 
   after('Unexpose Grafana', async () => {
-    await cleanEnvironment();
+    // await cleanEnvironment();
     await unexposeGrafana();
   });
 
@@ -113,6 +113,8 @@ describe('Telemetry Operator tests', function() {
 
   it('Should parse the logs using regex', async () => {
     try {
+      k8sApply(parserLogPipelineCR, telemetryNamespace);
+      k8sApply(fooBarDeployment, defaultNamespace);
       const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
       assert.isTrue(logsPresent, 'No parsed logs present in Loki');
