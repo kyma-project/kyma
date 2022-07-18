@@ -19,7 +19,7 @@ test-gateway-debug:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test --set gatewayTest=$(GATEWAY_TEST_IMAGE),mockApplication=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
 
-	kubectl wait --for=condition=complete --timeout=2m -n $(NAMESPACE) job/application-gateway-test
+	-kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-gateway-test
 	@echo ""
 	@echo "Gateway test results:"
 
