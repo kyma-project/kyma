@@ -28,8 +28,9 @@ func main() {
 	log.Infof("Config: %s", cfg.String())
 
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
+	oAuthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
 
-	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials)
+	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials)
 
 	address := fmt.Sprintf(":%d", cfg.Port)
 	log.Fatal(http.ListenAndServe(address, router))

@@ -11,12 +11,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
+
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
+
+	{
+		api.HandleFunc("/oauth/token", oauth.Token).Methods(http.MethodPost)
+		api.HandleFunc("/oauth/bad-token", oauth.BadToken).Methods(http.MethodPost)
+	}
 
 	{
 		r := api.PathPrefix("/unsecure").Subrouter()
@@ -26,6 +33,12 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials) ht
 	{
 		r := api.PathPrefix("/basic").Subrouter()
 		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+	{
+		r := api.PathPrefix("/oauth").Subrouter()
+		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
