@@ -12,13 +12,13 @@ type ParserValidator struct {
 	mock.Mock
 }
 
-// Validate provides a mock function with given fields: logParser, logParsers
-func (_m *ParserValidator) Validate(logParser *v1alpha1.LogParser, logParsers *v1alpha1.LogParserList) error {
-	ret := _m.Called(logParser, logParsers)
+// Validate provides a mock function with given fields: logParser
+func (_m *ParserValidator) Validate(logParser *v1alpha1.LogParser) error {
+	ret := _m.Called(logParser)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*v1alpha1.LogParser, *v1alpha1.LogParserList) error); ok {
-		r0 = rf(logParser, logParsers)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.LogParser) error); ok {
+		r0 = rf(logParser)
 	} else {
 		r0 = ret.Error(0)
 	}

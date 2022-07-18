@@ -58,6 +58,7 @@ var (
 	pluginValidatorMock   *validationmocks.PluginValidator
 	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
 	outputValidatorMock   *validationmocks.OutputValidator
+	parserValidatorMock   *validationmocks.ParserValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -95,7 +96,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
-	// start webhook server using Manager
+	// start logPipeline webhook server using Manager
 	webhookInstallOptions := &testEnv.WebhookInstallOptions
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
@@ -120,6 +121,7 @@ var _ = BeforeSuite(func() {
 	pluginValidatorMock = &validationmocks.PluginValidator{}
 	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
+	parserValidatorMock = &validationmocks.ParserValidator{}
 
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
@@ -134,11 +136,26 @@ var _ = BeforeSuite(func() {
 		pipelineConfig,
 		fsWrapperMock,
 	)
+	logParserValidator := NewLogParserValidator(
+
+		mgr.GetClient(),
+		FluentBitConfigMapName,
+		ControllerNamespace,
+		parserValidatorMock,
+		pipelineConfig,
+		configValidatorMock,
+		fsWrapperMock,
+	)
 
 	By("registering LogPipeline webhook")
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
+	By("registering LogParser webhook")
+
+	mgr.GetWebhookServer().Register(
+		"/validate-logparser",
+		&k8sWebhook.Admission{Handler: logParserValidator})
 
 	//+kubebuilder:scaffold:webhook
 
