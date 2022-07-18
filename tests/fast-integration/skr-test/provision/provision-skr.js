@@ -8,6 +8,7 @@ const {
   debug,
   kcp,
   gardener,
+  keb,
 } = require('../helpers');
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
