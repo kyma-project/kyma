@@ -14,11 +14,11 @@ const {
   unexposeGrafana,
 } = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
-//const defaultNamespace = 'default';
+// const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
-//const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
-//const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
+// const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
+// const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
