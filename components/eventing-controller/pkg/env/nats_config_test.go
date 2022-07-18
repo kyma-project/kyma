@@ -2,7 +2,6 @@ package env
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -27,14 +26,8 @@ func Test_GetNatsConfig(t *testing.T) {
 		"IDLE_CONN_TIMEOUT":       fmt.Sprintf("%v", idleConnTimeout),
 	}
 
-	defer func() {
-		for k := range envs {
-			require.NoError(t, os.Unsetenv(k))
-		}
-	}()
-
 	for k, v := range envs {
-		require.NoError(t, os.Setenv(k, v))
+		t.Setenv(k, v)
 	}
 
 	maxReconnects, reconnectWait := 1, time.Second

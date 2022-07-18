@@ -66,13 +66,13 @@ func TestSinkValidator(t *testing.T) {
 		{
 			name:                  "With no existing svc in the cluster",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			wantErrString:         "sink is not valid cluster local svc, failed with error",
+			wantErrString:         "sink is not a valid cluster local svc, failed with error",
 		},
 		{
 			name:                  "With no existing svc in the cluster, service has the wrong name",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
 			givenSvcNameToCreate:  "test", // wrong name
-			wantErrString:         "sink is not valid cluster local svc, failed with error",
+			wantErrString:         "sink is not a valid cluster local svc, failed with error",
 		},
 		{
 			name:                  "With correct format but missing scheme",

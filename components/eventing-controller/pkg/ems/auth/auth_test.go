@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -17,15 +16,9 @@ const (
 )
 
 func TestAuthenticator(t *testing.T) {
-	if err := os.Setenv("CLIENT_ID", "foo"); err != nil {
-		t.Errorf("error while setting env var CLIENT_ID")
-	}
-	if err := os.Setenv("CLIENT_SECRET", "foo"); err != nil {
-		t.Errorf("error while setting env var CLIENT_SECRET")
-	}
-	if err := os.Setenv("TOKEN_ENDPOINT", "foo"); err != nil {
-		t.Errorf("error while setting env var TOKEN_ENDPOINT")
-	}
+	t.Setenv("CLIENT_ID", "foo")
+	t.Setenv("CLIENT_SECRET", "foo")
+	t.Setenv("TOKEN_ENDPOINT", "foo")
 	cfg := env.Config{}
 	// authenticate
 	client := NewAuthenticatedClient(cfg)

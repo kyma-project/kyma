@@ -2,8 +2,6 @@
 title: Configuring the Runtime
 ---
 
-<!-- TODO: mention that Compass Runtime Agent fetches credentials from the Director and creates Secrets used by Application Gateway -->
-
 > **NOTE:** To represent API and Event Definitions of the Applications connected to a Runtime, we recommend that you use the Open Service Broker API.
 
 Runtime Agent periodically requests for the configuration of its Runtime from Compass.

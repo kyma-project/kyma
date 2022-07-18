@@ -321,6 +321,12 @@ config:
         DB /data/flb_kube.db
         storage.type  filesystem
 
+    [INPUT]
+        Name tail
+        Path /null.log
+        Tag null.*
+        Alias dummy
+
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
     [FILTER]
@@ -335,7 +341,8 @@ config:
   outputs: |
     [OUTPUT]
         Name null
-        Match tele.*
+        Match null.*
+        Alias dummy
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]

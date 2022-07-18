@@ -1,0 +1,84 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: positive-authorisation
+  namespace: {{ .Values.namespace }}
+spec:
+  description: Authorisation
+  skipVerify: true
+  labels:
+    app: positive-authorisation
+  services:
+    - displayName: unsecure-always-ok
+      name: unsecure-always-ok
+      providerDisplayName: AlwaysOK
+      description: Should return 200 when calling unprotected endpoint
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecure-always-ok"
+    - displayName: basic-auth-ok
+      name: basic-auth-ok
+      providerDisplayName: Basic
+      description: Should return 200 when calling endpoint protected with Basic Auth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-ok"
+          credentials:
+            secretName: basic-test
+            type: Basic
+    - displayName: csrf basic
+      name: csrf-basic
+      providerDisplayName: Basic with CSRF
+      description: Should return 200 for Basic Auth with CSRF optimistic scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/csrf-basic"
+          credentials:
+            secretName: basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: bad csrf token basic
+      name: bad-csrf-token-basic
+      providerDisplayName: Basic with CSRF
+      description: Should return 403 for Basic Auth with a bad CSRF token
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/bad-csrf-token-basic"
+          credentials:
+            secretName: basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+    - displayName: bad csrf endpoint basic
+      name: bad-csrf-endpoint-basic
+      providerDisplayName: Basic with CSRF
+      description: Should return 502 for Basic Auth with a bad CSRF token endpoint
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/bad-csrf-endpoint-basic"
+          credentials:
+            secretName: basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  password: {{ "passwd" | b64enc }}
+  username: {{ "user" | b64enc }}

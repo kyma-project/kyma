@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"os"
 	"testing"
 
 	"github.com/vrischmann/envconfig"
@@ -14,11 +13,8 @@ import (
 )
 
 func TestFunctionSpec_validateResources(t *testing.T) {
-	g := gomega.NewWithT(t)
-	err := os.Setenv("RESERVED_ENVS", "K_CONFIGURATION")
-	g.Expect(err).ShouldNot(gomega.HaveOccurred())
-	err = os.Setenv("FUNCTION_REPLICAS_MIN_VALUE", "1")
-	g.Expect(err).ShouldNot(gomega.HaveOccurred())
+	t.Setenv("RESERVED_ENVS", "K_CONFIGURATION")
+	t.Setenv("FUNCTION_REPLICAS_MIN_VALUE", "1")
 
 	for testName, testData := range map[string]struct {
 		givenFunc              Function
