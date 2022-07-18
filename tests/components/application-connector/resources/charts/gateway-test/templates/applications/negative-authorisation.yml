@@ -1,0 +1,57 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: negative-authorisation
+  namespace: {{ .Values.namespace }}
+spec:
+  description: Negative authorisation
+  skipVerify: true
+  labels:
+    app: negative-authorisation
+  services:
+    - displayName: bad oauth token
+      name: bad-oauth-token
+      providerDisplayName: OAuth
+      description: Should return 403 for OAuth with a wrong token
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-oauth-token"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/bad-token"
+            type: OAuth
+    - displayName: wrong oauth secret
+      name: wrong-oauth-secret
+      providerDisplayName: OAuth
+      description: Should return 502 for OAuth with a wrong secret
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/wrong-oauth-secret"
+          credentials:
+            secretName: wrong-oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  clientId: {{ "clientID" | b64enc }}
+  clientSecret: {{ "clientSecret" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wrong-oauth-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  clientId: {{ "bad id" | b64enc }}
+  clientSecret: {{ "bad secret" | b64enc }}

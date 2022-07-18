@@ -30,6 +30,19 @@ spec:
           credentials:
             secretName: basic-test
             type: Basic
+    - displayName: oauth
+      name: oauth
+      providerDisplayName: OAuth
+      description: Should return 200 when calling endpoint protected with OAuth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
 ---
 apiVersion: v1
 kind: Secret
@@ -40,3 +53,13 @@ type: Opaque
 data:
   password: {{ "passwd" | b64enc }}
   username: {{ "user" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  clientId: {{ "clientID" | b64enc }}
+  clientSecret: {{ "clientSecret" | b64enc }}
