@@ -8,7 +8,7 @@ require (
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/zap v1.21.0
 	k8s.io/apimachinery v0.24.2

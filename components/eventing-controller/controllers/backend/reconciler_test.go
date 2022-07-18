@@ -618,16 +618,11 @@ func ensurePublisherProxyDeploymentUpdated(ctx context.Context, opts ...deployme
 
 		err = k8sClient.Update(ctx, d)
 		Expect(err).Should(BeNil())
-	})
-
-	By("Making sure publisher proxy deployment ResourceVersion is changed", func() {
-		Eventually(publisherProxyDeploymentResourceVersionGetter(ctx), timeout, pollingInterval).ShouldNot(Equal(resourceVersionBeforeUpdate))
-
-		d, err := publisherProxyDeploymentGetter(ctx)()
-		Expect(err).Should(BeNil())
-		Expect(d).ShouldNot(BeNil())
-
 		resourceVersionAfterUpdate = d.ResourceVersion
+
+		// make sure publisher proxy deployment ResourceVersion is changed
+		Expect(resourceVersionAfterUpdate).ShouldNot(Equal(resourceVersionBeforeUpdate))
+		Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).ShouldNot(Equal(resourceVersionBeforeUpdate))
 	})
 
 	return resourceVersionAfterUpdate
@@ -787,7 +782,7 @@ func eventuallyPublisherProxySecret(ctx context.Context) AsyncAssertion {
 		}
 		secret := new(corev1.Secret)
 		if err := k8sClient.Get(ctx, lookupKey, secret); err != nil {
-			defaultLogger.WithContext().Errorf("fetch publisher proxy secret %s failed: %v", lookupKey.String(), err)
+			defaultLogger.WithContext().Errorf("Failed to fetch Event Publisher secret %s: %v", lookupKey.String(), err)
 			return nil
 		}
 		return secret

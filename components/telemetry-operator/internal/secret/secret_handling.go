@@ -12,17 +12,17 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type SecretHelper struct {
+type Helper struct {
 	client client.Client
 }
 
-func NewSecretHelper(client client.Client) *SecretHelper {
-	return &SecretHelper{
+func NewSecretHelper(client client.Client) *Helper {
+	return &Helper{
 		client: client,
 	}
 }
 
-func (s *SecretHelper) ValidateSecretsExist(ctx context.Context, logpipeline *telemetryv1alpha1.LogPipeline) bool {
+func (s *Helper) ValidateSecretsExist(ctx context.Context, logpipeline *telemetryv1alpha1.LogPipeline) bool {
 	for _, v := range logpipeline.Spec.Variables {
 		_, err := s.FetchSecret(ctx, v.ValueFrom)
 		if err != nil {
@@ -32,7 +32,7 @@ func (s *SecretHelper) ValidateSecretsExist(ctx context.Context, logpipeline *te
 	return true
 }
 
-func (s *SecretHelper) FetchSecret(ctx context.Context, fromType telemetryv1alpha1.ValueFromType) (*corev1.Secret, error) {
+func (s *Helper) FetchSecret(ctx context.Context, fromType telemetryv1alpha1.ValueFromType) (*corev1.Secret, error) {
 	log := logf.FromContext(ctx)
 
 	secretKey := fromType.SecretKey

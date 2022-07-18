@@ -1,0 +1,16 @@
+serviceAccountName: "test-account"
+namespace: "test"
+
+mockServiceName: "mock-application"
+
+containerRegistry:
+  path: "eu.gcr.io/kyma-project"
+
+images:
+  gatewayTest:
+    name: "gateway-test"
+    version: "PR-14791"
+
+  mockApplication:
+    name: "mock-app"
+    version: "PR-14743"

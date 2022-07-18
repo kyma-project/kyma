@@ -111,13 +111,13 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	var statusChanged = false
 	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
-		log.Errorw("get Kyma subscription internal view failed", ErrorLogKey, err)
+		log.Errorw("Failed to get Kyma subscription internal view", ErrorLogKey, err)
 		return false, err
 	}
 
 	newEv2Hash, err := getHash(sEv2)
 	if err != nil {
-		log.Errorw("get Kyma subscription hash failed", ErrorLogKey, err)
+		log.Errorw("Failed to get Kyma subscription hash", ErrorLogKey, err)
 		return false, err
 	}
 
@@ -139,10 +139,10 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("get BEB subscription failed", BEBSubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
+			log.Errorw("Failed to get BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
 			httpStatusNotFoundError := errors.New(strconv.Itoa(http.StatusNotFound))
 			if errors.As(err, &httpStatusNotFoundError) {
-				log.Infow("Recreate the BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name)
+				log.Infow("Recreating BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name)
 				bebSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
 				if err != nil {
 					return false, err
@@ -155,7 +155,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		sEms := getInternalView4Ems(bebSubscription)
 		newEmsHash, err := getHash(sEms)
 		if err != nil {
-			log.Errorw("get BEB subscription hash failed", ErrorLogKey, err)
+			log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 			return false, err
 		}
 		if newEmsHash != subscription.Status.Emshash {
@@ -188,37 +188,37 @@ func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
-		log.Errorw("delete BEB subscription failed", ErrorLogKey, err)
+		log.Errorw("Failed to delete BEB subscription", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// clean the application name segment in the subscription event-types from none-alphanumeric characters
 	if err := cleanEventTypes(subscription, cleaner); err != nil {
-		log.Errorw("clean application name in the subscription event-types failed", ErrorLogKey, err)
+		log.Errorw("Failed to clean application name in the subscription event-types", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", ErrorLogKey, err)
+		log.Errorw("Failed to create BEB subscription", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", ErrorLogKey, err)
+		log.Errorw("Failed to get BEB subscription", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// get the new hash
 	sEMS := getInternalView4Ems(bebSubscription)
 	if err != nil {
-		log.Errorw("get BEB subscription internal view failed", ErrorLogKey, err)
+		log.Errorw("Failed to get BEB subscription internal view", ErrorLogKey, err)
 	}
 	newEmsHash, err := getHash(sEMS)
 	if err != nil {
-		log.Errorw("get BEB subscription hash failed", ErrorLogKey, err)
+		log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
@@ -228,21 +228,21 @@ func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 func (b *BEB) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, error) {
 	// clean the application name segment in the subscription event-types from none-alphanumeric characters
 	if err := cleanEventTypes(subscription, cleaner); err != nil {
-		log.Errorw("clean application name in the subscription event-types failed", ErrorLogKey, err)
+		log.Errorw("Failed to clean application name in the subscription event-types", ErrorLogKey, err)
 		return nil, err
 	}
 
 	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", ErrorLogKey, err)
+		log.Errorw("Failed to create BEB subscription", ErrorLogKey, err)
 		return nil, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", ErrorLogKey, err)
+		log.Errorw("Failed to get BEB subscription", ErrorLogKey, err)
 		return nil, err
 	}
 

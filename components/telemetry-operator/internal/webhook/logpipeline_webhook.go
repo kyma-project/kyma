@@ -35,8 +35,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 )
 
 const (
@@ -49,13 +47,16 @@ const (
 type LogPipelineValidator struct {
 	client.Client
 
-	fluentBitConfigMap    types.NamespacedName
-	variablesValidator    validation.VariablesValidator
-	configValidator       validation.ConfigValidator
-	pluginValidator       validation.PluginValidator
-	maxPipelinesValidator validation.MaxPipelinesValidator
-	emitterConfig         fluentbit.EmitterConfig
-	fsWrapper             fs.Wrapper
+	fluentBitConfigMap       types.NamespacedName
+	variablesValidator       validation.VariablesValidator
+	configValidator          validation.ConfigValidator
+	pluginValidator          validation.PluginValidator
+	maxPipelinesValidator    validation.MaxPipelinesValidator
+	outputValidator          validation.OutputValidator
+	pipelineConfig           fluentbit.PipelineConfig
+	fluentBitMaxFSBufferSize string
+
+	fsWrapper fs.Wrapper
 
 	decoder *admission.Decoder
 }
@@ -68,7 +69,8 @@ func NewLogPipeLineValidator(
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
 	maxPipelinesValidator validation.MaxPipelinesValidator,
-	emitterConfig fluentbit.EmitterConfig,
+	outputValidator validation.OutputValidator,
+	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper) *LogPipelineValidator {
 
 	return &LogPipelineValidator{
@@ -81,8 +83,9 @@ func NewLogPipeLineValidator(
 		configValidator:       configValidator,
 		pluginValidator:       pluginValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
+		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
-		emitterConfig:         emitterConfig,
+		pipelineConfig:        pipelineConfig,
 	}
 }
 
@@ -112,12 +115,10 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 	}
 	var warnMsg []string
 
-	secretsFound := v.validateSecrets(ctx, logPipeline)
-	if !secretsFound {
-		warnMsg = append(warnMsg, "One or more secrets do not exist. The LogPipeline stays in pending state until the secrets are available.")
-	}
 	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
-		warnMsg = append(warnMsg, "Caution: LogPipeline contains an unsupported custom filter or output. This means that you proceed without support!")
+		helpText := "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/"
+		msg := fmt.Sprintf("Logpipeline '%s' uses unsupported custom filters or outputs. We recommend changing the pipeline to use supported filters or output. See the documentation: %s", logPipeline.Name, helpText)
+		warnMsg = append(warnMsg, msg)
 	}
 
 	if len(warnMsg) != 0 {
@@ -174,6 +175,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
+	if err = v.outputValidator.Validate(logPipeline); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit output")
+		return err
+	}
+
 	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
@@ -208,7 +214,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.pipelineConfig)
 	if err != nil {
 		return []fs.File{}, err
 	}
@@ -235,9 +241,4 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
-}
-
-func (v *LogPipelineValidator) validateSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) bool {
-	secVal := secret.NewSecretHelper(v.Client)
-	return secVal.ValidateSecretsExist(ctx, logPipeline)
 }

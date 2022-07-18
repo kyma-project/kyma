@@ -51,12 +51,15 @@ type LogPipelineReconciler struct {
 	unsupportedTotal   prometheus.Gauge
 }
 
-// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, emitterConfig fluentbit.EmitterConfig) *LogPipelineReconciler {
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
-	lpr.Syncer = sync.NewLogPipelineSyncer(client, daemonSetConfig, emitterConfig)
+	lpr.Syncer = sync.NewLogPipelineSyncer(client,
+		daemonSetConfig,
+		pipelineConfig,
+	)
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
 	// Metrics
@@ -109,7 +112,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 		}
@@ -141,7 +144,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
@@ -166,7 +169,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(&logPipeline)
+		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
 
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err

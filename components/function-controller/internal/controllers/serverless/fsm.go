@@ -64,8 +64,7 @@ loop:
 			m.err = ctx.Err()
 			break loop
 		default:
-			m.log.With("stateFn", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name()).
-				Info("next state")
+			m.log.With("stateFn", m.stateFnName()).Info("next state")
 
 			m.fn = m.fn(ctx, m, &state)
 
@@ -78,6 +77,13 @@ loop:
 		Info("reconciliation result")
 
 	return m.result, m.err
+}
+
+func (m *reconciler) stateFnName() string {
+	fullName := runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name()
+	splitFullName := strings.Split(fullName, ".")
+	shortName := splitFullName[len(splitFullName)-1]
+	return shortName
 }
 
 var (

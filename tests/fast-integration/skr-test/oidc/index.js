@@ -8,7 +8,7 @@ const {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
 } = require('../../utils');
-const {keb, kcp, gardener} = require('../provision/provision-skr');
+const {keb, kcp, gardener} = require('../helpers');
 
 const updateTimeout = 1000 * 60 * 20; // 20m
 

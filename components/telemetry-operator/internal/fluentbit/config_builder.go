@@ -2,6 +2,7 @@ package fluentbit
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
@@ -9,10 +10,11 @@ import (
 
 type ConfigHeader string
 
-type EmitterConfig struct {
-	InputTag    string
-	BufferLimit string
-	StorageType string
+type PipelineConfig struct {
+	InputTag          string
+	MemoryBufferLimit string
+	StorageType       string
+	FsBufferLimit     string
 }
 
 const (
@@ -20,6 +22,8 @@ const (
 	MultiLineParserConfigHeader ConfigHeader = "[MULTILINE_PARSER]"
 	FilterConfigHeader          ConfigHeader = "[FILTER]"
 	OutputConfigHeader          ConfigHeader = "[OUTPUT]"
+	MatchKey                    string       = "match"
+	OutputStorageMaxSizeKey     string       = "storage.total_limit_size"
 	EmitterTemplate             string       = `
 name                  rewrite_tag
 match                 %s.*
@@ -43,44 +47,61 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	return sb.String()
 }
 
+func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
+	// Sort maps for idempotent results
+	keys := make([]string, 0, len(section))
+	for k := range section {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var sb strings.Builder
+	sb.WriteString(string(header))
+	sb.WriteByte('\n')
+	for _, key := range keys {
+		sb.WriteString("    " + key + " " + section[key] + "\n") // 4 indentations
+	}
+	sb.WriteByte('\n')
+
+	return sb.String()
+}
+
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig) (string, error) {
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 
 	if len(logPipeline.Spec.Output.Custom) > 0 {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline.Name)))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 	}
+
 	for _, filter := range logPipeline.Spec.Filters {
-		filterSection, err := ensureMatchCondIsValid(filter.Custom, logPipeline.Name)
+		section, err := ParseSection(filter.Custom)
 		if err != nil {
 			return "", err
 		}
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, filterSection))
+
+		section[MatchKey] = generateMatchCondition(logPipeline.Name)
+
+		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
 
 	if len(logPipeline.Spec.Output.Custom) > 0 {
-		outputSection, err := ensureMatchCondIsValid(logPipeline.Spec.Output.Custom, logPipeline.Name)
+		section, err := ParseSection(logPipeline.Spec.Output.Custom)
 		if err != nil {
 			return "", err
 		}
-		sb.WriteString(BuildConfigSection(OutputConfigHeader, outputSection))
+
+		section[MatchKey] = generateMatchCondition(logPipeline.Name)
+		section[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
+
+		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
 	}
 
 	return sb.String(), nil
 }
 
-func ensureMatchCondIsValid(content, logPipelineName string) (string, error) {
-	section, err := parseSection(content)
-	if err != nil {
-		return "", err
-	}
-
-	matchCond := getMatchCondition(section)
-	if matchCond == "" {
-		content += fmt.Sprintf("\nMatch              %s.*", logPipelineName)
-	}
-
-	return content, nil
+func generateMatchCondition(logPipelineName string) string {
+	return fmt.Sprintf("%s.*", logPipelineName)
 }
 
 // MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
@@ -99,13 +120,6 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 	return sb.String()
 }
 
-func generateEmitter(emitterConfig EmitterConfig, logPipelineName string) string {
-	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipelineName, logPipelineName, emitterConfig.StorageType, emitterConfig.BufferLimit)
-}
-
-func getMatchCondition(section map[string]string) string {
-	if matchCond, hasKey := section["match"]; hasKey {
-		return matchCond
-	}
-	return ""
+func generateEmitter(config PipelineConfig, logPipelineName string) string {
+	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }

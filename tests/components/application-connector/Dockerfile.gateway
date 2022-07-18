@@ -1,0 +1,16 @@
+FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
+
+WORKDIR /gateway-test/
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+RUN CGO_ENABLED=0 go test -v -c -o gateway-test ./test/application-gateway/
+
+FROM scratch
+
+COPY --from=builder /gateway-test/gateway-test /
+ENTRYPOINT [ "/gateway-test" ]
+CMD ["-test.v"]

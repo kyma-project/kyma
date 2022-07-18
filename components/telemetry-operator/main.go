@@ -63,8 +63,9 @@ var (
 	fluentBitPath              string
 	fluentBitPluginDirectory   string
 	fluentBitInputTag          string
-	fluentBitBufferLimit       string
+	fluentBitMemoryBufferLimit string
 	fluentBitStorageType       string
+	fluentBitFsBufferLimit     string
 	logFormat                  string
 	logLevel                   string
 	certDir                    string
@@ -108,8 +109,9 @@ func main() {
 	flag.StringVar(&fluentBitPath, "fluent-bit-path", "fluent-bit/bin/fluent-bit", "Fluent Bit binary path")
 	flag.StringVar(&fluentBitPluginDirectory, "fluent-bit-plugin-directory", "fluent-bit/lib", "Fluent Bit plugin directory")
 	flag.StringVar(&fluentBitInputTag, "fluent-bit-input-tag", "tele", "Fluent Bit base tag of the input to use")
-	flag.StringVar(&fluentBitBufferLimit, "fluent-bit-buffer-limit", "10M", "Fluent Bit buffer limit per log pipeline")
+	flag.StringVar(&fluentBitMemoryBufferLimit, "fluent-bit-memory-buffer-limit", "10M", "Fluent Bit memory buffer limit per log pipeline")
 	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
+	flag.StringVar(&fluentBitFsBufferLimit, "fluent-bit-filesystem-buffer-limit", "1G", "Fluent Bit filesystem buffer limit per log pipeline")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
@@ -151,10 +153,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	emitterConfig := fluentbit.EmitterConfig{
-		InputTag:    fluentBitInputTag,
-		BufferLimit: fluentBitBufferLimit,
-		StorageType: fluentBitStorageType,
+	pipelineConfig := fluentbit.PipelineConfig{
+		InputTag:          fluentBitInputTag,
+		MemoryBufferLimit: fluentBitMemoryBufferLimit,
+		StorageType:       fluentBitStorageType,
+		FsBufferLimit:     fluentBitFsBufferLimit,
 	}
 
 	daemonSetConfig := sync.FluentBitDaemonSetConfig{
@@ -189,7 +192,8 @@ func main() {
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
 		validation.NewMaxPipelinesValidator(maxPipelines),
-		emitterConfig,
+		validation.NewOutputValidator(),
+		pipelineConfig,
 		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(
@@ -200,7 +204,7 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		emitterConfig)
+		pipelineConfig)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)

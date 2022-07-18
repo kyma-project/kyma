@@ -57,6 +57,7 @@ var (
 	configValidatorMock   *validationmocks.ConfigValidator
 	pluginValidatorMock   *validationmocks.PluginValidator
 	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
+	outputValidatorMock   *validationmocks.OutputValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -107,16 +108,19 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	emitterConfig := fluentbit.EmitterConfig{
-		InputTag:    "kube",
-		BufferLimit: "10M",
-		StorageType: "filesystem",
+	pipelineConfig := fluentbit.PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
 	}
 
 	variableValidatorMock = &validationmocks.VariablesValidator{}
 	configValidatorMock = &validationmocks.ConfigValidator{}
 	pluginValidatorMock = &validationmocks.PluginValidator{}
 	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
+	outputValidatorMock = &validationmocks.OutputValidator{}
+
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
@@ -126,7 +130,8 @@ var _ = BeforeSuite(func() {
 		configValidatorMock,
 		pluginValidatorMock,
 		maxPipelinesValidator,
-		emitterConfig,
+		outputValidatorMock,
+		pipelineConfig,
 		fsWrapperMock,
 	)
 

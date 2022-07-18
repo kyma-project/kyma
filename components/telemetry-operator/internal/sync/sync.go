@@ -33,19 +33,20 @@ type FluentBitDaemonSetConfig struct {
 type LogPipelineSyncer struct {
 	client.Client
 	DaemonSetConfig         FluentBitDaemonSetConfig
-	EmitterConfig           fluentbit.EmitterConfig
+	PipelineConfig          fluentbit.PipelineConfig
+	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
-	SecretValidator         *secret.SecretHelper
+	SecretValidator         *secret.Helper
 }
 
 func NewLogPipelineSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
-	emitterConfig fluentbit.EmitterConfig,
+	pipelineConfig fluentbit.PipelineConfig,
 ) *LogPipelineSyncer {
 	var lps LogPipelineSyncer
 	lps.Client = client
 	lps.DaemonSetConfig = daemonSetConfig
-	lps.EmitterConfig = emitterConfig
+	lps.PipelineConfig = pipelineConfig
 	lps.SecretValidator = secret.NewSecretHelper(client)
 	return &lps
 }
@@ -99,7 +100,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 	} else {
-		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.EmitterConfig)
+		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
 		if err != nil {
 			return false, err
 		}
@@ -345,7 +346,7 @@ func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList)
 		if l.DeletionTimestamp != nil {
 			continue
 		}
-		if LogPipelineIsUnsupported(&l) {
+		if LogPipelineIsUnsupported(l) {
 			unsupportedPluginsTotal++
 		}
 
@@ -353,7 +354,7 @@ func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList)
 	return unsupportedPluginsTotal
 }
 
-func LogPipelineIsUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
+func LogPipelineIsUnsupported(pipeline telemetryv1alpha1.LogPipeline) bool {
 	if pipeline.Spec.Output.Custom != "" {
 		return true
 	}

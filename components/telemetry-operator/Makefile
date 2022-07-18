@@ -79,6 +79,9 @@ test-local: manifests-local generate-local fmt-local vet-local envtest
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
+lint: ## Run various linters
+	../../hack/verify-lint.sh .
+
 tls.key:
 	@openssl genrsa -out tls.key 4096
 
