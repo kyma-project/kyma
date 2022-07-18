@@ -5,7 +5,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var applications = []string{"positive-authorisation", "path-related-error-handling", "missing-resources-error-handling", "oauth-test-app"}
+var applications = []string{"positive-authorisation", "negative-authorisation", "path-related-error-handling", "missing-resources-error-handling"}
 
 func (gs *GatewaySuite) TestGetRequest() {
 
