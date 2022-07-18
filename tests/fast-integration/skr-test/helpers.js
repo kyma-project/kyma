@@ -155,7 +155,6 @@ module.exports = {
   kcp,
   gardener,
   getSKRConfig,
-  initK8sConfig,
   gatherOptions,
   withInstanceID,
   withAppName,
