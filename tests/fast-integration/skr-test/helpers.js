@@ -1,9 +1,10 @@
 const uuid = require('uuid');
-const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
-const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
 const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const k8s = require('@kubernetes/client-node');
+const fs = require('fs');
+const os = require('os');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -115,6 +116,61 @@ async function initK8sConfig(shoot) {
   await initializeK8sClient({kubeconfig: shoot.kubeconfig});
 }
 
+function getEnvOrThrow(key) {
+  if (!process.env[key]) {
+    throw new Error(`Env ${key} not present`);
+  }
+
+  return process.env[key];
+}
+
+function genRandom(len) {
+  let res = '';
+  const chrs = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < len; i++) {
+    res += chrs.charAt(Math.floor(Math.random() * chrs.length));
+  }
+
+  return res;
+}
+
+function debug(...args) {
+  if (!isDebugEnabled()) {
+    return;
+  }
+  log('DEBUG', ...args);
+}
+
+function initializeK8sClient(opts) {
+  opts = opts || {};
+  try {
+    if (opts.kubeconfigPath) {
+      kc.loadFromFile(opts.kubeconfigPath);
+    } else if (opts.kubeconfig) {
+      kc.loadFromString(opts.kubeconfig);
+    } else {
+      kc.loadFromDefault();
+    }
+
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+    k8sLog = new k8s.Log(kc);
+    watch = new k8s.Watch(kc);
+    k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
+  } catch (err) {
+    console.log(err.message);
+  }
+}
+
+async function saveKubeconfig(kubeconfig) {
+  if (!fs.existsSync(`${os.homedir()}/.kube`)) {
+    fs.mkdirSync(`${os.homedir()}/.kube`, true);
+  }
+  fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig);
+}
+
 module.exports = {
   keb,
   kcp,
@@ -130,4 +186,9 @@ module.exports = {
   withTestNS,
   withSuffix,
   withCustomParams,
+  getEnvOrThrow,
+  genRandom,
+  debug,
+  initializeK8sClient,
+  saveKubeconfig,
 };

@@ -7,8 +7,10 @@ const {
   keb,
   kcp,
   gardener,
+  getEnvOrThrow,
+  genRandom,
+  debug,
 } = require('../helpers');
-const {getEnvOrThrow, genRandom, debug} = require('../../utils');
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
