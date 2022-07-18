@@ -25,8 +25,6 @@ helmValues:
         requests:
           cpu: 10m
           memory: 10Mi
-  # This configuration is only temporary and will be removed in kyma version 2.7.x.
-    sidecarMigration: true
   gateways:
     istio-ingressgateway:
       autoscaleEnabled: true
@@ -138,3 +136,5 @@ global:
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
+  # This configuration is only temporary and will be removed in kyma version 2.7.x.
+    sidecarMigration: true
