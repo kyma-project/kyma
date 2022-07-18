@@ -26,7 +26,7 @@ global:
   images:
     fluent_bit:
       name: fluent-bit
-      version: "1.9.6-fdfefada"
+      version: 1.9.6-fdfefada
       directory: tpi
     loki:
       name: loki
