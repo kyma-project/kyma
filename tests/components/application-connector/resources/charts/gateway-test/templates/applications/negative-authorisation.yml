@@ -19,7 +19,7 @@ spec:
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-basic"
           credentials:
-            secretName: basic-test
+            secretName: basic-test-negative-case
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
@@ -33,7 +33,7 @@ spec:
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-basic"
           credentials:
-            secretName: basic-test
+            secretName: basic-test-negative-case
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
@@ -41,7 +41,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: basic-test
+  name: basic-test-negative-case
   namespace: kyma-integration
 type: Opaque
 data:
