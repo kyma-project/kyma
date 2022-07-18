@@ -13,6 +13,7 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
+const { checkFunctionResponse } = require('../test/fixtures/commerce-mock');
 const telemetryNamespace = 'kyma-system';
 const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
