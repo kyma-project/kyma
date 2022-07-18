@@ -13,13 +13,12 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
-const { checkFunctionResponse } = require('../test/fixtures/commerce-mock');
 const telemetryNamespace = 'kyma-system';
 const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
-const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml')
+const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -52,14 +51,14 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 }
 
 async function prepareEnvironment() {
-  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace); 
+  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
   const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
   await logPipelinePromise;
   await deploymentPromise;
 }
 
 async function cleanEnvironment() {
-  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace); 
+  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
   const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
   await logPipelinePromise;
   await deploymentPromise;
@@ -118,7 +117,7 @@ describe('Telemetry Operator tests', function() {
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
       assert.isTrue(logsPresent, 'No parsed logs present in Loki');
     } catch (e) {
-      assert.fail(e)
+      assert.fail(e);
     }
   });
 });
