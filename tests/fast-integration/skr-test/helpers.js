@@ -107,14 +107,6 @@ async function getSKRConfig(instanceID) {
   return await gardener.getShoot(shootName);
 }
 
-async function initK8sConfig(shoot) {
-  console.log('Should save kubeconfig for the SKR to ~/.kube/config');
-  await saveKubeconfig(shoot.kubeconfig);
-
-  console.log('Should initialize K8s client');
-  await initializeK8sClient({kubeconfig: shoot.kubeconfig});
-}
-
 function getEnvOrThrow(key) {
   if (!process.env[key]) {
     throw new Error(`Env ${key} not present`);
