@@ -64,13 +64,13 @@ async function cleanEnvironment() {
   await deploymentPromise;
 }
 
-describe('Telemetry Operator tests', function() {
+describe('Telemetry Operator tests, prepare the environment', function() {
   before('Expose Grafana', async () => {
     await prepareEnvironment();
     await exposeGrafana();
   });
 
-  after('Unexpose Grafana', async () => {
+  after('Unexpose Grafana, clean the environment', async () => {
     await cleanEnvironment();
     await unexposeGrafana();
   });
