@@ -86,6 +86,7 @@
 /tests/fast-integration/skr-nightly @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
 /tests/fast-integration/skr-svcat-migration-test @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
 /tests/fast-integration/skr-test @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
+/tests/fast-integration/smctl @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
 
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
