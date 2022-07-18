@@ -19,7 +19,7 @@ spec:
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-oauth-token"
           credentials:
-            secretName: oauth-test
+            secretName: oauth-test-negative-case
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/bad-token"
             type: OAuth
     - displayName: wrong oauth secret
@@ -39,7 +39,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: oauth-test
+  name: oauth-test-negative-case
   namespace: kyma-integration
 type: Opaque
 data:
