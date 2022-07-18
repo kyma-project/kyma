@@ -114,11 +114,15 @@ describe('Telemetry Operator tests', function() {
   it('Should parse the logs using regex', async () => {
     try {
       k8sApply(parserLogPipelineCR, telemetryNamespace);
+      console.log("1");
       k8sApply(fooBarDeployment, defaultNamespace);
+      console.log("2");
       const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+      console.log("3");
       assert.isTrue(logsPresent, 'No parsed logs present in Loki');
     } catch (e) {
+      console.log(e);
       assert.fail(e);
     }
   });
