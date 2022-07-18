@@ -30,7 +30,7 @@ spec:
             - | 
               while true
               do
-                  echo "foo bar $(date)"
+                  echo "foo bar"
                   sleep 10
               done
           resources:
