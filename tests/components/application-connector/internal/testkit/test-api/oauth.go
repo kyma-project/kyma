@@ -25,15 +25,13 @@ const (
 type OauthResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
-	ExpiresIn   int    `json:"expires_in"`
-	Scope       string `json:"scope"`
 }
 
 type OAuthHandler struct {
 	clientID     string
 	clientSecret string
 	mutex        sync.RWMutex
-	tokens       map[string]bool
+	tokens       map[string]interface{}
 }
 
 func NewOAuth(clientID, clientSecret string) OAuthHandler {
@@ -41,7 +39,7 @@ func NewOAuth(clientID, clientSecret string) OAuthHandler {
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		mutex:        sync.RWMutex{},
-		tokens:       make(map[string]bool),
+		tokens:       make(map[string]interface{}),
 	}
 }
 
@@ -54,10 +52,10 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	token := uuid.New().String()
 
 	oh.mutex.Lock()
-	oh.tokens[token] = true
+	oh.tokens[token] = nil
 	oh.mutex.Unlock()
 
-	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
+	response := OauthResponse{AccessToken: token, TokenType: "bearer"}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -75,7 +73,7 @@ func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
 
 	token := uuid.New().String()
 
-	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
+	response := OauthResponse{AccessToken: token, TokenType: "bearer"}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
