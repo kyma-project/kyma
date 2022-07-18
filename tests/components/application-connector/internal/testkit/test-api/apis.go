@@ -19,10 +19,13 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
 	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
+	csrf := NewCSRF()
 
 	{
 		api.HandleFunc("/oauth/token", oauth.Token).Methods(http.MethodPost)
 		api.HandleFunc("/oauth/bad-token", oauth.BadToken).Methods(http.MethodPost)
+		api.HandleFunc("/csrf/token", csrf.Token).Methods(http.MethodGet)
+		api.HandleFunc("/csrf/bad-token", csrf.BadToken).Methods(http.MethodGet)
 	}
 
 	{
@@ -39,6 +42,13 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	{
 		r := api.PathPrefix("/oauth").Subrouter()
 		r.Use(oauth.Middleware())
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+	{
+		r := api.PathPrefix("/csrf-basic").Subrouter()
+		r.Use(csrf.Middleware())
+		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}

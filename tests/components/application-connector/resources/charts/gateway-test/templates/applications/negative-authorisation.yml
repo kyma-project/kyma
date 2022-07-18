@@ -35,6 +35,44 @@ spec:
             secretName: wrong-oauth-test
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
+    - displayName: bad csrf token basic
+      name: bad-csrf-token-basic
+      providerDisplayName: Basic with CSRF
+      description: Should return 403 for Basic Auth with a bad CSRF token
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-basic"
+          credentials:
+            secretName: basic-test-negative-case
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+    - displayName: bad csrf endpoint basic
+      name: bad-csrf-endpoint-basic
+      providerDisplayName: Basic with CSRF
+      description: Should return 502 for Basic Auth with a bad CSRF token endpoint
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-basic"
+          credentials:
+            secretName: basic-test-negative-case
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-test-negative-case
+  namespace: kyma-integration
+type: Opaque
+data:
+  password: {{ "passwd" | b64enc }}
+  username: {{ "user" | b64enc }}
 ---
 apiVersion: v1
 kind: Secret
