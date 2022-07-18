@@ -65,12 +65,12 @@ async function cleanEnvironment() {
 }
 
 describe('Telemetry Operator tests', function() {
-  before('Expose Grafana, prepare deployments and pipelines', async () => {
+  before('Expose Grafana', async () => {
     await exposeGrafana();
     await prepareEnvironment();
   });
 
-  after('Unexpose Grafana, remove deployments and pipelines', async () => {
+  after('Unexpose Grafana', async () => {
     await unexposeGrafana();
     await cleanEnvironment();
   });
