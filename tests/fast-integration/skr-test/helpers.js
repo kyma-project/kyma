@@ -2,15 +2,14 @@ const uuid = require('uuid');
 const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const os = require('os');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
-
 const testNS = 'skr-test';
+const DEBUG = process.env.DEBUG === 'true';
 
 function withInstanceID(instanceID) {
   return function(options) {
@@ -135,33 +134,21 @@ function genRandom(len) {
 }
 
 function debug(...args) {
-  if (!isDebugEnabled()) {
+  if (!DEBUG) {
     return;
   }
   log('DEBUG', ...args);
 }
 
-function initializeK8sClient(opts) {
-  opts = opts || {};
-  try {
-    if (opts.kubeconfigPath) {
-      kc.loadFromFile(opts.kubeconfigPath);
-    } else if (opts.kubeconfig) {
-      kc.loadFromString(opts.kubeconfig);
-    } else {
-      kc.loadFromDefault();
-    }
-
-    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
-    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
-    k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
-    k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
-    k8sLog = new k8s.Log(kc);
-    watch = new k8s.Watch(kc);
-    k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
-  } catch (err) {
-    console.log(err.message);
+function log(prefix, ...args) {
+  if (args.length === 0) {
+    return;
   }
+
+  args = [...args];
+  const fmt = `[${prefix}] ` + args[0];
+  args = args.slice(1);
+  console.log.apply(console, [fmt, ...args]);
 }
 
 async function saveKubeconfig(kubeconfig) {
@@ -175,7 +162,6 @@ module.exports = {
   keb,
   kcp,
   gardener,
-  testNS,
   getSKRConfig,
   initK8sConfig,
   gatherOptions,
@@ -189,6 +175,6 @@ module.exports = {
   getEnvOrThrow,
   genRandom,
   debug,
-  initializeK8sClient,
   saveKubeconfig,
+  log,
 };

@@ -1,15 +1,13 @@
 const {
-  initK8sConfig,
   getSKRConfig,
   withSuffix,
   withInstanceID,
   gatherOptions,
-  keb,
-  kcp,
-  gardener,
   getEnvOrThrow,
   genRandom,
   debug,
+  kcp,
+  gardener,
 } = require('../helpers');
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
@@ -33,8 +31,8 @@ async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout)
     shoot = await provisionSKRInstance(options, provisioningTimeout);
   }
 
-  console.log('Initiating K8s config...');
-  await initK8sConfig(shoot);
+  // console.log('Initiating K8s config...');
+  // await initK8sConfig(shoot);
 
   return {
     options,
