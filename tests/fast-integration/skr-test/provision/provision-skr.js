@@ -9,10 +9,11 @@ const {
   kcp,
   gardener,
   keb,
+  initK8sConfig,
 } = require('../helpers');
+
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
-const {initK8sConfig} = require('../../utils');
 
 async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout) {
   let shoot;

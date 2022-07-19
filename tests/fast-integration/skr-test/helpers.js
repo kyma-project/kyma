@@ -150,6 +150,14 @@ async function saveKubeconfig(kubeconfig) {
   fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig);
 }
 
+async function initK8sConfig(shoot) {
+  console.log('Should save kubeconfig for the SKR to ~/.kube/config');
+  await saveKubeconfig(shoot.kubeconfig);
+
+  console.log('Should initialize K8s client');
+  await initializeK8sClient({kubeconfig: shoot.kubeconfig});
+}
+
 module.exports = {
   keb,
   kcp,
@@ -168,4 +176,5 @@ module.exports = {
   debug,
   saveKubeconfig,
   log,
+  initK8sConfig,
 };
