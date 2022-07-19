@@ -11,7 +11,6 @@ To learn more about how Eventing works, see:
 - [EventingBackend CR](../../../05-technical-reference/00-custom-resources/evnt-02-eventingbackend.md) - describes the EventingBackend custom resource, which shows the current status of Kyma Eventing.
 - [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) - describes the Subscription custom resource, which you need to subscribe to events.
 - [Cloud Events](https://cloudevents.io/) - provides information about the Cloud Events specification used in Kyma.
-- [NATS](https://nats.io/) - provides more information about the backend technology behind Eventing in Kyma.
 - [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream) - provides more information about the backend technology behind Eventing in Kyma. [Eventing Architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md#jet-stream) provides details on the new functionalities and higher qualities of service on top of Core NATS.
 
 To perform tasks with Eventing, go through these tutorials:
