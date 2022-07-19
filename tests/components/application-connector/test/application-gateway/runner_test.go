@@ -2,10 +2,11 @@ package application_gateway
 
 import (
 	"context"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var applications = []string{"positive-authorisation", "negative-authorisation", "path-related-error-handling", "missing-resources-error-handling"}
+var applications = []string{"positive-authorisation", "negative-authorisation", "path-related-error-handling", "missing-resources-error-handling", "proxy-cases"}
 
 func (gs *GatewaySuite) TestGetRequest() {
 
@@ -28,7 +29,7 @@ func (gs *GatewaySuite) TestGetRequest() {
 							gs.T().Fail()
 						}
 
-						actualCode := executeGetRequest(gs.T(), entry)
+						actualCode, _ := executeGetRequest(gs.T(), entry)
 
 						gs.Equal(expectedCode, actualCode)
 					}
