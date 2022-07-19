@@ -1,7 +1,6 @@
 package test_api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -25,10 +24,6 @@ const (
 	grantTypeKey    = "grant_type"
 	tokenLifetime   = "token_lifetime"
 	defaultTokenTTL = 5 * time.Minute
-)
-
-const (
-	CtxOAuthToken ContextKey = iota
 )
 
 type OauthResponse struct {
@@ -138,24 +133,9 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), CtxOAuthToken, token)
-
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r)
 		})
 	}
-}
-
-func (oh *OAuthHandler) Deauth(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value(CtxOAuthToken).(string)
-	if !ok {
-		handleError(w, http.StatusUnauthorized, "Deauth called without valid OAuth")
-		return
-	}
-
-	oh.mutex.Lock()
-	defer oh.mutex.Unlock()
-	delete(oh.tokens, token)
-	w.WriteHeader(http.StatusOK)
 }
 
 func (oh *OAuthHandler) isRequestValid(r *http.Request) (bool, int, string) {

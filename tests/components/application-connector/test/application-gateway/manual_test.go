@@ -7,25 +7,21 @@ import (
 
 func (gs *GatewaySuite) TestManual() {
 	gs.Run("OAuth token renewal", func() {
-		url := gatewayURL("manual", "oauth-short")
+		url := gatewayURL("manual", "oauth-short") + "/ok"
 		gs.T().Log("Url:", url)
 
-		req, err := http.NewRequest(http.MethodDelete, url+"/deauth", nil)
-		gs.Nil(err)
-
 		// Authorize, then call endpoint
-		// that deauthorizes token used to call it
-		res, err := http.DefaultClient.Do(req)
+		res, err := http.Get(url)
 		logBody(gs.T(), res.Body)
-		gs.Nil(err, "Deauth request failed")
-		gs.Equal(200, res.StatusCode, "Deauth request failed")
+		gs.Nil(err, "First request failed")
+		gs.Equal(200, res.StatusCode, "First request failed")
 
 		time.Sleep(10 * time.Second) // wait for token to expire
 
-		// Call endpoint requiring authoization
-		res, err = http.Get(url + "/ok")
+		// Call endpoint, requiring token renewall
+		res, err = http.Get(url)
 		logBody(gs.T(), res.Body)
-		gs.Nil(err, "Ok request failed")
-		gs.Equal(200, res.StatusCode, "Ok request failed")
+		gs.Nil(err, "Second request failed")
+		gs.Equal(200, res.StatusCode, "Second request failed")
 	})
 }
