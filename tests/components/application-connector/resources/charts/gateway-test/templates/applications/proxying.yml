@@ -45,12 +45,3 @@ spec:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/203"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-cases/code-203"
-    - displayName: timeout
-      name: timeout
-      providerDisplayName: timeout
-      description: Should return 504 when target times out
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/timeout"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-cases/timeout"
