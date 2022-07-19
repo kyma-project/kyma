@@ -86,6 +86,7 @@ var _ = BeforeSuite(func() {
 	cfg, err := testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
+	time.Sleep(60 * time.Second)
 
 	err = v1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
@@ -136,26 +137,11 @@ var _ = BeforeSuite(func() {
 		pipelineConfig,
 		fsWrapperMock,
 	)
-	logParserValidator := NewLogParserValidator(
-
-		mgr.GetClient(),
-		FluentBitConfigMapName,
-		ControllerNamespace,
-		parserValidatorMock,
-		pipelineConfig,
-		configValidatorMock,
-		fsWrapperMock,
-	)
 
 	By("registering LogPipeline webhook")
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
-	By("registering LogParser webhook")
-
-	mgr.GetWebhookServer().Register(
-		"/validate-logparser",
-		&k8sWebhook.Admission{Handler: logParserValidator})
 
 	//+kubebuilder:scaffold:webhook
 
@@ -183,7 +169,7 @@ var _ = BeforeSuite(func() {
 	err = createResources()
 	Expect(err).NotTo(HaveOccurred())
 
-}, 60)
+}, 180)
 
 var _ = AfterSuite(func() {
 	cancel()

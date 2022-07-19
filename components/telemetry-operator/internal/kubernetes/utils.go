@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
@@ -81,7 +82,7 @@ func (u *Utils) GetFluentBitConfig(ctx context.Context,
 	}
 	// Build the config from all the exiting pipelines
 	for _, logPipeline := range logPipelines.Items {
-		configFiles, err = appendConfigFile(configFiles, &logPipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
+		configFiles, err = appendConfigFile(configFiles, logPipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
 		if err != nil {
 			return []fs.File{}, err
 		}
@@ -103,20 +104,12 @@ func (u *Utils) GetFluentBitConfig(ctx context.Context,
 		Data: parsersConfig,
 	})
 
-	//if parser != nil {
-	//	parsersConfig = fluentbit.MergeParsersConfig(&logParsers)
-	//	configFiles = append(configFiles, fs.File{
-	//		Path: fluentBitParsersConfigDirectory,
-	//		Name: fluentBitParsersConfigMapKey,
-	//		Data: parsersConfig,
-	//	})
-
 	return configFiles, nil
 }
 
 func appendConfigFile(
 	configFiles []fs.File,
-	logPipeline *telemetryv1alpha1.LogPipeline,
+	logPipeline telemetryv1alpha1.LogPipeline,
 	pipelineConfig fluentbit.PipelineConfig,
 	fluentBitSectionsConfigDirectory string,
 	fluentBitFilesDirectory string) ([]fs.File, error) {
@@ -128,7 +121,7 @@ func appendConfigFile(
 		})
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, pipelineConfig)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(&logPipeline, pipelineConfig)
 	if err != nil {
 		return []fs.File{}, err
 	}

@@ -19,6 +19,8 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
@@ -28,7 +30,6 @@ import (
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -73,7 +74,6 @@ func NewLogParserValidator(
 func (v *LogparserValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	log := logf.FromContext(ctx)
 
-	log.Info("I am invoked !!!!!")
 	logParser := &telemetryv1alpha1.LogParser{}
 	if err := v.decoder.Decode(req, logParser); err != nil {
 		log.Error(err, "Failed to decode LogParser")

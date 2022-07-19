@@ -19,6 +19,7 @@ package telemetry
 import (
 	"context"
 	"fmt"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parsers"

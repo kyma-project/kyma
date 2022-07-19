@@ -19,8 +19,9 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 

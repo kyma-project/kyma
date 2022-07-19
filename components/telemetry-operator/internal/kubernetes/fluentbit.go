@@ -3,12 +3,13 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"time"
 )
 
 type FluentBitUtils struct {

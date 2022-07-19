@@ -19,8 +19,9 @@ package telemetry
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"

@@ -18,9 +18,10 @@ package telemetry
 
 import (
 	"context"
-	"github.com/prometheus/client_golang/prometheus"
 	"path/filepath"
 	"testing"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"

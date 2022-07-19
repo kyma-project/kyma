@@ -19,16 +19,17 @@ package main
 import (
 	"errors"
 	"flag"
+	"os"
+	"strings"
+	"time"
+
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parsers"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
-	"os"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
-	"strings"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -237,7 +238,7 @@ func main() {
 	logParserValidator := webhook.NewLogParserValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		validation.NewparserValidator(),
+		validation.NewParserValidator(),
 		pipelineConfig,
 		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fs.NewWrapper(),

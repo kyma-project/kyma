@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
