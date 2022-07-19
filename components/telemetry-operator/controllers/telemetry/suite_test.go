@@ -19,6 +19,7 @@ package telemetry
 import (
 	"context"
 	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -113,6 +114,7 @@ var _ = BeforeSuite(func() {
 		Name: "telemetry_fluentbit_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
+	metrics.Registry.MustRegister(restartsTotal)
 
 	reconciler := NewLogPipelineReconciler(
 		mgr.GetClient(),

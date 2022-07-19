@@ -34,13 +34,11 @@ import (
 
 var _ = Describe("LogPipeline controller", func() {
 	const (
-		LogPipelineName                = "log-pipeline"
-		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
-		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
-		FluentBitFilterConfig          = "Name   grep\nRegex   $kubernetes['labels']['app'] my-deployment"
-		FluentBitOutputConfig          = "Name   stdout\n"
-		timeout                        = time.Second * 10
-		interval                       = time.Millisecond * 250
+		LogPipelineName       = "log-pipeline"
+		FluentBitFilterConfig = "Name   grep\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig = "Name   stdout\n"
+		timeout               = time.Second * 10
+		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
     name                  rewrite_tag
@@ -59,18 +57,6 @@ var _ = Describe("LogPipeline controller", func() {
     match log-pipeline.*
     name stdout
     storage.total_limit_size 1G`
-
-	//	var expectedFluentBitParserConfig = `[PARSER]
-	//    Name   dummy_test
-	//    Format   regex
-	//    Regex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
-	//
-	//[MULTILINE_PARSER]
-	//    Name          multiline-custom-regex
-	//    Type          regex
-	//    Flush_timeout 1000
-	//    Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
-	//    Rule      "cont"          "/^\s+at.*/"                     "cont"`
 
 	var expectedSecret = make(map[string][]byte)
 	expectedSecret["myKey"] = []byte("value")
@@ -160,12 +146,6 @@ var _ = Describe("LogPipeline controller", func() {
 				Name:      "myKey",
 				ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: secretRef},
 			}
-			//parser := telemetryv1alpha1.Parser{
-			//	Content: FluentBitParserConfig,
-			//}
-			//multiLineParser := telemetryv1alpha1.MultiLineParser{
-			//	Content: FluentBitMultiLineParserConfig,
-			//}
 			filter := telemetryv1alpha1.Filter{
 				Custom: FluentBitFilterConfig,
 			}
@@ -179,8 +159,6 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
-					//Parsers:          []telemetryv1alpha1.Parser{parser},
-					//MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
 					Filters:   []telemetryv1alpha1.Filter{filter},
 					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:     []telemetryv1alpha1.FileMount{file},
@@ -204,21 +182,6 @@ var _ = Describe("LogPipeline controller", func() {
 				actualFluentBitConfig := strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
 				return actualFluentBitConfig
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
-
-			//// Fluent Bit parsers config should be copied to ConfigMap
-			//Eventually(func() string {
-			//	cmFileName := "parsers.conf"
-			//	configMapLookupKey := types.NamespacedName{
-			//		Name:      daemonSetConfig.FluentBitParsersConfigMap.Name,
-			//		Namespace: daemonSetConfig.FluentBitParsersConfigMap.Namespace,
-			//	}
-			//	var fluentBitParsersCm corev1.ConfigMap
-			//	err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitParsersCm)
-			//	if err != nil {
-			//		return err.Error()
-			//	}
-			//	return strings.TrimRight(fluentBitParsersCm.Data[cmFileName], "\n")
-			//}, timeout, interval).Should(Equal(expectedFluentBitParserConfig))
 
 			// File content should be copied to ConfigMap
 			Eventually(func() string {
