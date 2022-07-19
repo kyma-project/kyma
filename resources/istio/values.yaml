@@ -1,114 +1,113 @@
 ---
+istioOperator:
+  values:
+    global:
+      priorityClassName: "kyma-system-priority"
+      imagePullPolicy: IfNotPresent
+      proxy:
+        readinessFailureThreshold: 40
+        readinessInitialDelaySeconds: 5
+        readinessPeriodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
 
+      proxy_init:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+    gateways:
+      istio-ingressgateway:
+        autoscaleEnabled: true
 
-helmValues:
-  global:
-    priorityClassName: "kyma-system-priority"
-    imagePullPolicy: IfNotPresent
-    proxy:
-      readinessFailureThreshold: 40
-      readinessInitialDelaySeconds: 5
-      readinessPeriodSeconds: 5
-      resources:
-        requests:
-          cpu: 100m
-          memory: 64Mi
-        limits:
-          cpu: 250m
-          memory: 256Mi
+    sidecarInjectorWebhook:
+      enableNamespacesByDefault: true
+      objectSelector:
+        autoInject: true
+        enabled: false
+      rewriteAppHTTPProbe: true
 
-    proxy_init:
-      resources:
-        limits:
-          cpu: 100m
-          memory: 50Mi
-        requests:
-          cpu: 10m
-          memory: 10Mi
-  gateways:
-    istio-ingressgateway:
-      autoscaleEnabled: true
+  meshConfig:
+    accessLogFile: /dev/stdout
+    accessLogEncoding: JSON
+    trustDomain: cluster.local
+    defaultConfig:
+      holdApplicationUntilProxyStarts: true
+      tracing:
+        sampling: 1
+        zipkin:
+          address: "zipkin.kyma-system:9411"
+    enablePrometheusMerge: false
+    enableTracing: "{{ .Values.global.tracing.enabled }}"
 
-  sidecarInjectorWebhook:
-    enableNamespacesByDefault: true
-    objectSelector:
-      autoInject: true
+  components:
+    egressGateways:
       enabled: false
-    rewriteAppHTTPProbe: true
+      config:
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 120Mi
 
-meshConfig:
-  accessLogFile: /dev/stdout
-  accessLogEncoding: JSON
-  trustDomain: cluster.local
-  defaultConfig:
-    holdApplicationUntilProxyStarts: true
-    tracing:
-      sampling: 1
-      zipkin:
-        address: "zipkin.kyma-system:9411"
-  enablePrometheusMerge: false
-  enableTracing: "{{ .Values.global.tracing.enabled }}"
+    ingressGateways:
+      enabled: true
+      config:
+        hpaSpec:
+          maxReplicas: 5
+          minReplicas: 1
+          metrics:
+            - resource:
+                name: cpu
+                targetAverageUtilization: 80
+              type: Resource
+            - resource:
+                name: memory
+                targetAverageUtilization: 80
+              type: Resource
+        securityContext:
+          runAsUser: 65534
+          runAsNonRoot: true
+          runAsGroup: 65534
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 0
 
-components:
-  egressGateways:
-    enabled: false
-    config:
-      resources:
-        limits:
-          cpu: 2000m
-          memory: 1024Mi
-        requests:
-          cpu: 100m
-          memory: 120Mi
-
-  ingressGateways:
-    enabled: true
-    config:
-      hpaSpec:
-        maxReplicas: 5
-        minReplicas: 1
-        metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
-          - resource:
-              name: memory
-              targetAverageUtilization: 80
-            type: Resource
-      securityContext:
-        runAsUser: 65534
-        runAsNonRoot: true
-        runAsGroup: 65534
-      resources:
-        limits:
-          cpu: 2000m
-          memory: 1024Mi
-        requests:
-          cpu: 100m
-          memory: 128Mi
-      strategy:
-        rollingUpdate:
-          maxSurge: 100%
-          maxUnavailable: 0
-
-  pilot:
-    enabled: true
-    config:
-      env:
-        - name: PILOT_HTTP10
-          value: "1"
-      resources:
-        limits:
-          cpu: 500m
-          memory: 1024Mi
-        requests:
-          cpu: 100m
-          memory: 512Mi
-      securityContext:
-        runAsUser: 65534
-        runAsNonRoot: true
-        runAsGroup: 65534
+    pilot:
+      enabled: true
+      config:
+        env:
+          - name: PILOT_HTTP10
+            value: "1"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        securityContext:
+          runAsUser: 65534
+          runAsNonRoot: true
+          runAsGroup: 65534
 
 monitoring:
   enabled: true

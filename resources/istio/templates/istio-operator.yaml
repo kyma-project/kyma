@@ -10,17 +10,17 @@ spec:
   profile: default
   components:
     egressGateways:
-    - enabled: {{ .Values.components.egressGateways.enabled }}
+    - enabled: {{ .Values.istioOperator.egressGateways.enabled }}
       k8s:
-{{- toYaml .Values.components.egressGateways.config | nindent 8}}
+{{- toYaml .Values.istioOperator.egressGateways.config | nindent 8}}
       name: istio-egressgateway
     ingressGateways:
-    - enabled: {{ .Values.components.ingressGateways.enabled }}
+    - enabled: {{ .Values.istioOperator.components.ingressGateways.enabled }}
       k8s:
-{{- toYaml .Values.components.ingressGateways.config | nindent 8}}
+{{- toYaml .Values.istioOperator.components.ingressGateways.config | nindent 8}}
       name: istio-ingressgateway
     pilot:
-      enabled: {{ .Values.components.pilot.enabled }}
+      enabled: {{ .Values.istioOperator.components.pilot.enabled }}
       k8s:
         podAnnotations:
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
@@ -30,21 +30,21 @@ spec:
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.
-{{- toYaml .Values.components.pilot.config | nindent 8}}
+{{- toYaml .Values.istioOperator.components.pilot.config | nindent 8}}
   meshConfig:
-{{- tpl (toYaml .Values.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
+{{- tpl (toYaml .Values.istioOperator.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
 
   values:
     global:
-{{- toYaml .Values.helmValues.global | nindent 8 }}
+{{- toYaml .Values.istioOperator.values.global | nindent 8 }}
     pilot:
-{{- toYaml .Values.helmValues.pilot | nindent 8 }}
+{{- toYaml .Values.istioOperator.values.pilot | nindent 8 }}
     sidecarInjectorWebhook:
-{{- toYaml .Values.helmValues.sidecarInjectorWebhook | nindent 8 }}
+{{- toYaml .Values.istioOperator.values.sidecarInjectorWebhook | nindent 8 }}
     gateways:
       istio-ingressgateway:
         name: istio-ingressgateway
-        autoscaleEnabled: {{ index .Values "helmValues" "gateways" "istio-ingressgateway" "autoscaleEnabled" }}
+        autoscaleEnabled: {{ index .Values "istioOperator" "values" "gateways" "istio-ingressgateway" "autoscaleEnabled" }}
         podAnnotations:
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.
