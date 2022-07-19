@@ -105,7 +105,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  validatorErr,
+			wantReconcileError:  nil,
 		},
 		{
 			name:              "Return error and default Result{} when backend sync returns error",
@@ -143,7 +143,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 			wantReconcileError:  validatorErr,
 		},
 		{
-			name:              "Return nil and RequeueAfter two seconds when the BEB subscription is Paused",
+			name:              "Return nil and RequeueAfter when the BEB subscription is Paused",
 			givenSubscription: testSubPaused,
 			givenReconcilerSetup: func() *Reconciler {
 				te := setupTestEnvironment(t, testSubPaused)
@@ -152,7 +152,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{
-				RequeueAfter: time.Second * 2,
+				RequeueAfter: requeueAfterDuration,
 			},
 			wantReconcileError: nil,
 		},
