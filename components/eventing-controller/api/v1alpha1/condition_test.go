@@ -18,7 +18,7 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 		{
 			name: "Conditions empty",
 			givenConditions: func() []Condition {
-				return makeSubscriptionConditions()
+				return MakeSubscriptionConditions()
 			}(),
 		},
 		{

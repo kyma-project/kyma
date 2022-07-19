@@ -19,7 +19,7 @@ const (
 	ConditionControllerReady     ConditionType = "Subscription Controller Ready"
 )
 
-var allSubscriptionConditions = makeSubscriptionConditions()
+var allSubscriptionConditions = MakeSubscriptionConditions()
 
 type Condition struct {
 	Type               ConditionType          `json:"type,omitempty"`
@@ -78,7 +78,7 @@ func initializeConditions(initialConditions, currentConditions []Condition) []Co
 
 // InitializeConditions sets unset Subscription conditions to Unknown
 func (s *SubscriptionStatus) InitializeConditions() {
-	initialConditions := makeSubscriptionConditions()
+	initialConditions := MakeSubscriptionConditions()
 	s.Conditions = initializeConditions(initialConditions, s.Conditions)
 }
 
@@ -129,8 +129,8 @@ func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
 	return false
 }
 
-// makeSubscriptionConditions creates a map of all conditions which the Subscription should have.
-func makeSubscriptionConditions() []Condition {
+// MakeSubscriptionConditions creates a map of all conditions which the Subscription should have.
+func MakeSubscriptionConditions() []Condition {
 	conditions := []Condition{
 		{
 			Type:               ConditionAPIRuleStatus,
