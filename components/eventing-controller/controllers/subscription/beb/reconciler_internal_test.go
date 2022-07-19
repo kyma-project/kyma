@@ -53,13 +53,22 @@ func TestReconciler_Reconcile(t *testing.T) {
 		reconcilertesting.WithFinalizers([]string{Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
-		reconcilertesting.WithEmsSubscriptionStatusActive(),
+		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
 	)
 	// A subscription marked for deletion.
 	testSubUnderDeletion := reconcilertesting.NewSubscription("sub2", "test",
 		reconcilertesting.WithNonZeroDeletionTimestamp(),
 		reconcilertesting.WithFinalizers([]string{Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
+	)
+
+	// A subscription with the correct Finalizer, conditions and status Paused for reconciliation with the backend.
+	testSubPaused := reconcilertesting.NewSubscription("sub3", "test",
+		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
+		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
+		reconcilertesting.WithValidSink("test", "test-svc"),
+		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusPaused)),
 	)
 
 	backendSyncErr := errors.New("backend sync error")
@@ -86,6 +95,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
+		},
+		{
+			name:              "Return nil and default Result{} when the subscription does not exist on the cluster",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  validatorErr,
 		},
 		{
 			name:              "Return error and default Result{} when backend sync returns error",
@@ -121,6 +141,20 @@ func TestReconciler_Reconcile(t *testing.T) {
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  validatorErr,
+		},
+		{
+			name:              "Return nil and RequeueAfter two seconds when the BEB subscription is Paused",
+			givenSubscription: testSubPaused,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t, testSubPaused)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{
+				RequeueAfter: time.Second * 2,
+			},
+			wantReconcileError: nil,
 		},
 	}
 	for _, testCase := range testCases {
@@ -186,6 +220,7 @@ func Test_isInDeletion(t *testing.T) {
 		})
 	}
 }
+
 func Test_replaceStatusCondition(t *testing.T) {
 	var testCases = []struct {
 		name              string

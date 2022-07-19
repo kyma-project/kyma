@@ -280,10 +280,10 @@ func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
 	}
 }
 
-func WithEmsSubscriptionStatusActive() SubscriptionOpt {
+func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
 		sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
-			SubscriptionStatus: string(types.SubscriptionStatusActive),
+			SubscriptionStatus: status,
 		}
 	}
 }

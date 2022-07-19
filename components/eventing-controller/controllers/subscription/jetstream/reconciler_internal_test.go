@@ -83,6 +83,17 @@ func TestReconciler_Reconcile(t *testing.T) {
 			wantReconcileError:  nil,
 		},
 		{
+			name:              "Return nil and default Result{} when the subscription does not exist on the cluster",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				te.Backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, happyCleaner, defaultSubConfig, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  nil,
+		},
+		{
 			name:              "Return error and default Result{} when backend sync returns error",
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() *Reconciler {
