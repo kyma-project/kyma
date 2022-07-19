@@ -14,9 +14,16 @@ spec:
     listKind: LogParserList
     plural: logparsers
     singular: logparser
-  scope: Namespaced
+  scope: Cluster
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[-1].type
+      name: Status
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: LogParser is the Schema for the logparsers API
@@ -43,6 +50,21 @@ spec:
             type: object
           status:
             description: LogParserStatus defines the observed state of LogParser
+            properties:
+              conditions:
+                items:
+                  description: LogParserCondition contains details for the current
+                    condition of this LogParser
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    reason:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: array
             type: object
         type: object
     served: true
