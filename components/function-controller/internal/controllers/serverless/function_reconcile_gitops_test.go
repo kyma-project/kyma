@@ -703,7 +703,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{Name: "git-fn", Namespace: testNamespace},
 			Spec: serverlessv1alpha2.FunctionSpec{
 				Source: serverlessv1alpha2.Source{
-					GitRepository: serverlessv1alpha2.GitRepositorySource{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
 						Repository: serverlessv1alpha2.Repository{
 							BaseDir:   "dir",
 							Reference: "ref",
@@ -783,7 +783,7 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 			Spec: serverlessv1alpha2.FunctionSpec{
 				Runtime: rtm,
 				Source: serverlessv1alpha2.Source{
-					GitRepository: serverlessv1alpha2.GitRepositorySource{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
 						Repository: serverlessv1alpha2.Repository{
 							BaseDir:   "dir",
 							Reference: "ref",

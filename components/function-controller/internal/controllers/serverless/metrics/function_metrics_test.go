@@ -29,7 +29,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 			Spec: serverlessv1alpha2.FunctionSpec{
 				Runtime: serverlessv1alpha2.Python39,
 				Source: serverlessv1alpha2.Source{
-					GitRepository: serverlessv1alpha2.GitRepositorySource{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
 						URL: "repo-url",
 					},
 				},
@@ -76,7 +76,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 			Spec: serverlessv1alpha2.FunctionSpec{
 				Runtime: serverlessv1alpha2.Python39,
 				Source: serverlessv1alpha2.Source{
-					GitRepository: serverlessv1alpha2.GitRepositorySource{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
 						URL: "repo-url",
 					},
 				},
@@ -109,7 +109,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 			Spec: serverlessv1alpha2.FunctionSpec{
 				Runtime: serverlessv1alpha2.Python39,
 				Source: serverlessv1alpha2.Source{
-					GitRepository: serverlessv1alpha2.GitRepositorySource{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
 						URL: "repo-url",
 					},
 				},

@@ -27,7 +27,7 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 		},
 		Spec: serverlessv1alpha2.FunctionSpec{
 			Source: serverlessv1alpha2.Source{
-				GitRepository: serverlessv1alpha2.GitRepositorySource{
+				GitRepository: &serverlessv1alpha2.GitRepositorySource{
 					URL: "https://mock.repo/kyma/test",
 					Repository: serverlessv1alpha2.Repository{
 						BaseDir:   "/",
@@ -84,7 +84,7 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 		},
 		Spec: serverlessv1alpha2.FunctionSpec{
 			Source: serverlessv1alpha2.Source{
-				Inline: serverlessv1alpha2.InlineSource{
+				Inline: &serverlessv1alpha2.InlineSource{
 					Source:       "module.exports = {main: function(event, context) {return 'Hello World.'}}",
 					Dependencies: "   ",
 				},

@@ -37,7 +37,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
 					Source: serverlessv1alpha2.Source{
-						Inline: serverlessv1alpha2.InlineSource{
+						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "fn-source",
 							Dependencies: "",
 						},
@@ -542,6 +542,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{Name: functionName},
 					Spec: serverlessv1alpha2.FunctionSpec{
 						Runtime: testCase.Runtime,
+						Source:  serverlessv1alpha2.Source{Inline: &serverlessv1alpha2.InlineSource{}},
 					},
 				},
 			}
