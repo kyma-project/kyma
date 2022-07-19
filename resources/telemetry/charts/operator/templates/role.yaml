@@ -43,6 +43,7 @@ rules:
   - telemetry.kyma-project.io
   resources:
   - logpipelines
+  - logparsers
   verbs:
   - create
   - delete
@@ -55,12 +56,14 @@ rules:
   - telemetry.kyma-project.io
   resources:
   - logpipelines/finalizers
+  - logparsers/finalizers
   verbs:
   - update
 - apiGroups:
   - telemetry.kyma-project.io
   resources:
   - logpipelines/status
+  - logpiparsers/status
   verbs:
   - get
   - patch
