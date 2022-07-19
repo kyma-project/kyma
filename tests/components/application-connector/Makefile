@@ -19,11 +19,15 @@ test-gateway-debug:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test --set gatewayTest=$(GATEWAY_TEST_IMAGE),mockApplication=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
 
-	-kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-gateway-test
-	@echo ""
-	@echo "Gateway test results:"
-
-	./scripts/check-pod-logs.sh
+	if kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Success! Results:"; \
+	./scripts/check-pod-logs.sh; \
+	else \
+	echo "Tests failed! Results:"; \
+	./scripts/check-pod-logs.sh; \
+	$(MAKE) clean-gateway-test; \
+	exit 1; \
+	fi
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test  | kubectl delete -f -
