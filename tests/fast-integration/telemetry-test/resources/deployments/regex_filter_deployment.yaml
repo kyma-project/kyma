@@ -18,7 +18,7 @@ spec:
         app: regex-parser-testing-service
         example: regex-parser-testing-service
       annotations:
-        fluentbit.io/parser: regex-my-parser
+        fluentbit.io/parser: my-regex-parser
     spec:
       containers:
         - name: regex-parser-testing-service
