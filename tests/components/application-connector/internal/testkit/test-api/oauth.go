@@ -1,6 +1,7 @@
 package test_api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -20,6 +21,10 @@ const (
 	clientIDKey     = "client_id"
 	clientSecretKey = "client_secret"
 	grantTypeKey    = "grant_type"
+)
+
+const (
+	OAuthToken ContextKey = iota
 )
 
 type OauthResponse struct {
@@ -88,13 +93,13 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				handleError(w, http.StatusForbidden, "Authorization header missing")
+				handleError(w, http.StatusUnauthorized, "Authorization header missing")
 				return
 			}
 
 			splitToken := strings.Split(authHeader, "Bearer")
 			if len(splitToken) != 2 {
-				handleError(w, http.StatusForbidden, "Bearer token missing")
+				handleError(w, http.StatusUnauthorized, "Bearer token missing")
 				return
 			}
 
@@ -105,13 +110,28 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 			oh.mutex.RUnlock()
 
 			if !found {
-				handleError(w, http.StatusForbidden, "Invalid token")
+				handleError(w, http.StatusUnauthorized, "Invalid token")
 				return
 			}
 
-			next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), OAuthToken, token)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func (oh *OAuthHandler) Deauth(w http.ResponseWriter, r *http.Request) {
+	token, ok := r.Context().Value(OAuthToken).(string)
+	if !ok {
+		handleError(w, http.StatusUnauthorized, "Deauth called without valid OAuth")
+		return
+	}
+
+	oh.mutex.Lock()
+	defer oh.mutex.Unlock()
+	delete(oh.tokens, token)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (oh *OAuthHandler) isRequestValid(r *http.Request) (bool, int, string) {

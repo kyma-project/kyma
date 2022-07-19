@@ -44,6 +44,7 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
+		r.HandleFunc("/deauth", oauth.Deauth).Methods(http.MethodDelete)
 	}
 	{
 		r := api.PathPrefix("/csrf-basic").Subrouter()

@@ -8,6 +8,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type ContextKey int
+
 func BasicAuth(user, pass string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
