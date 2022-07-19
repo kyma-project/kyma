@@ -2,7 +2,6 @@ package application_gateway
 
 import (
 	"context"
-	"io/ioutil"
 	"strconv"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,6 +12,7 @@ func (gs *GatewaySuite) TestResponseBody() {
 	gs.Nil(err)
 	for _, service := range app.Spec.Services {
 		gs.Run(service.Description, func() {
+			http := NewHttpCli(gs.T())
 			for _, entry := range service.Entries {
 				if entry.Type != "API" {
 					gs.T().Log("Skipping event entry")
@@ -25,14 +25,13 @@ func (gs *GatewaySuite) TestResponseBody() {
 					gs.T().Fail()
 				}
 
-				actualCode, res := executeGetRequest(gs.T(), entry)
+				res, body, err := http.Get(entry.CentralGatewayUrl)
+				gs.Nil(err, "Request failed")
 
-				body, err := ioutil.ReadAll(res.Body)
-				gs.Nil(err)
 				codeStr := strconv.Itoa(expectedCode)
-				gs.Equal(codeStr, string(body))
 
-				gs.Equal(expectedCode, actualCode)
+				gs.Equal(codeStr, string(body), "Incorrect body")
+				gs.Equal(expectedCode, res.StatusCode, "Incorrect response code")
 			}
 		})
 	}

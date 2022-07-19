@@ -17,6 +17,8 @@ func (gs *GatewaySuite) TestGetRequest() {
 		gs.Run(app.Spec.Description, func() {
 			for _, service := range app.Spec.Services {
 				gs.Run(service.Description, func() {
+					http := NewHttpCli(gs.T())
+
 					for _, entry := range service.Entries {
 						if entry.Type != "API" {
 							gs.T().Log("Skipping event entry")
@@ -29,9 +31,9 @@ func (gs *GatewaySuite) TestGetRequest() {
 							gs.T().Fail()
 						}
 
-						actualCode, _ := executeGetRequest(gs.T(), entry)
-
-						gs.Equal(expectedCode, actualCode)
+						res, _, err := http.Get(entry.CentralGatewayUrl)
+						gs.Nil(err, "Request failed")
+						gs.Equal(expectedCode, res.StatusCode, "Incorrect response code")
 					}
 				})
 			}
