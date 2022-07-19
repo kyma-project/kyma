@@ -57,15 +57,6 @@ spec:
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
-    - displayName: timeout
-      name: timeout
-      providerDisplayName: timeout
-      description: Should return 504 when target times out
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/timeout"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/timeout"
 ---
 apiVersion: v1
 kind: Secret
