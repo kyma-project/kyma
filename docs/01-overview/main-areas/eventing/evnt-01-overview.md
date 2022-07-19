@@ -11,16 +11,22 @@ The key benefits of PubSub are:
 - scale publishers and subscribers easily.
 - asynchronous communication.
 
-## Eventing in Kyma
+## Eventing in Kyma in a nutshell
 
-Eventing in Kyma is used to send and receive events from applications. For example, you can subscribe to events from an external application, and when the user performs an action there, you can trigger your Function or microservice. To subscribe to events, you need to use the Kyma [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md). 
+The objective of Eventing in Kyma is to simplify the process of publishing and subscribing to events. Kyma uses proven Eventing backend technology such as [NATS JetStream](https://docs.nats.io/), so that the user can achieve a seamless experience with their end-to-end business flow. The user does not have to implement or integrate any intermediate backend or protocol. Eventing in Kyma from a user's perspective works as follows:
 
-[NATS JetStream](https://docs.nats.io/) is the default backend used in Kyma to process and send events to subscribers. Read [Eventing architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md) to know more about the eventing flow in Kyma.
+ - Offer an HTTP end point, for example a lambda function to receive the events.
+ - Specify the events the user is interested in using the Kyma [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md).
+ - Send Legacy or [Cloud Events](https://cloudevents.io/) to configured HTTP end points on our [Event Publishing Proxy](https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy) service.
+   - `/publish` for Cloud Events.
+   - `<application_name>/v1/events` for Legacy events.
+ 
+Read [Eventing architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md) to know more about the eventing flow in Kyma.
 
 ## Glossary for Eventing
 
 - **Event Types**
-  - `Legacy Events`: These are events or messages published to Kyma, that do not conform to the [Cloud Events specification](https://cloudevents.io/). All legacy events published to Kyma are always converted to Cloud Events.
+  - `Legacy Events`: These are events or messages published to Kyma, that do not conform to the [Cloud Events specification](https://cloudevents.io/). All legacy events published to Kyma are always converted to Cloud Events. The legacy event format is deprecated.
   - `Cloud Events`: Kyma supports [Cloud Events](https://cloudevents.io/) - a common specification for describing event data. The specification is currently under [CNCF](https://www.cncf.io/).
 - **Streams and Consumers**
   - `Streams`: A Stream stores messages for the published events. In Kyma, we use only one stream, with _**file**_ storage, for all the events. You can configure the retention and delivery policies for the stream, depending on the use case.
