@@ -19,8 +19,9 @@ package telemetry
 import (
 	"context"
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"testing"
+
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
 
