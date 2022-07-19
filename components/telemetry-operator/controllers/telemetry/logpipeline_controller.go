@@ -72,7 +72,6 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	})
 	lpr.FluentBitUtils = kubernetes.NewFluentBit(client, daemonSetConfig.FluentBitDaemonSetName)
 
-	metrics.Registry.MustRegister(lpr.restartsTotal)
 	metrics.Registry.MustRegister(lpr.unsupportedTotal)
 
 	return &lpr
@@ -129,7 +128,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
 
 		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")

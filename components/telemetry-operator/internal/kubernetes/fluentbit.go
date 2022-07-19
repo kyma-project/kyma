@@ -26,7 +26,9 @@ func NewFluentBit(client client.Client, fluenbitDaemonSet types.NamespacedName) 
 
 // Delete all Fluent Bit pods to apply new configuration.
 func (f *FluentBitUtils) RestartFluentBit(ctx context.Context, restartsTotal prometheus.Counter) error {
+
 	log := logf.FromContext(ctx)
+	log.Info("got counter", "restarts", restartsTotal)
 	var ds appsv1.DaemonSet
 	if err := f.client.Get(ctx, f.FluentBitDaemonSet, &ds); err != nil {
 		log.Error(err, "Failed getting fluent bit DaemonSet")

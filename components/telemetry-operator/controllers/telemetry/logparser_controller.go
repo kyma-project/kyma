@@ -64,7 +64,6 @@ func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemon
 	lpr.Parser = parsers.NewLogParserSyncer(client, daemonSetConfig)
 	lpr.restartsTotal = restartsTotal
 
-	prometheus.MustRegister(lpr.restartsTotal)
 	return &lpr
 }
 
@@ -83,7 +82,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to loparser change")
 
 		if err = r.Update(ctx, &logParser); err != nil {
 			log.Error(err, "Failed updating log parser")
@@ -100,7 +99,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			telemetryv1alpha1.LogParserPending,
 		)
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
-			return ctrl.Result{RequeueAfter: requeueTime}, err
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 	}
 

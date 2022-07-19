@@ -49,6 +49,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -144,6 +145,7 @@ func main() {
 		Name: "telemetry_fluentbit_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
+	metrics.Registry.MustRegister(restartsTotal)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
