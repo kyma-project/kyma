@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -21,22 +22,32 @@ const (
 	clientIDKey     = "client_id"
 	clientSecretKey = "client_secret"
 	grantTypeKey    = "grant_type"
+	tokenLifetime   = "token_lifetime"
 )
 
 const (
-	OAuthToken ContextKey = iota
+	CtxOAuthToken ContextKey = iota
 )
 
 type OauthResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
+	ExpiresIn   int64  `json:"expires_in,omitempty"`
+}
+
+type OAuthToken struct {
+	exp time.Time
+}
+
+func (token OAuthToken) Valid() bool {
+	return token.exp.After(time.Now())
 }
 
 type OAuthHandler struct {
 	clientID     string
 	clientSecret string
 	mutex        sync.RWMutex
-	tokens       map[string]interface{}
+	tokens       map[string]OAuthToken
 }
 
 func NewOAuth(clientID, clientSecret string) OAuthHandler {
@@ -44,7 +55,7 @@ func NewOAuth(clientID, clientSecret string) OAuthHandler {
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		mutex:        sync.RWMutex{},
-		tokens:       make(map[string]interface{}),
+		tokens:       make(map[string]OAuthToken),
 	}
 }
 
@@ -55,12 +66,19 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := uuid.New().String()
+	ttl := 5 * time.Minute
+
+	if ttlStr := r.URL.Query().Get(tokenLifetime); ttlStr != "" {
+		if ttlOrErr, err := time.ParseDuration(ttlStr); err == nil { // TODO: Nesting ugly 🤮
+			ttl = ttlOrErr
+		}
+	}
 
 	oh.mutex.Lock()
-	oh.tokens[token] = nil
+	oh.tokens[token] = OAuthToken{exp: time.Now().Add(ttl)}
 	oh.mutex.Unlock()
 
-	response := OauthResponse{AccessToken: token, TokenType: "bearer"}
+	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: int64(ttl.Seconds())}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -106,15 +124,15 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 			token := strings.TrimSpace(splitToken[1])
 
 			oh.mutex.RLock()
-			_, found := oh.tokens[token]
+			data, found := oh.tokens[token]
 			oh.mutex.RUnlock()
 
-			if !found {
+			if !found || !data.Valid() {
 				handleError(w, http.StatusUnauthorized, "Invalid token")
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), OAuthToken, token)
+			ctx := context.WithValue(r.Context(), CtxOAuthToken, token)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -122,7 +140,7 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 }
 
 func (oh *OAuthHandler) Deauth(w http.ResponseWriter, r *http.Request) {
-	token, ok := r.Context().Value(OAuthToken).(string)
+	token, ok := r.Context().Value(CtxOAuthToken).(string)
 	if !ok {
 		handleError(w, http.StatusUnauthorized, "Deauth called without valid OAuth")
 		return

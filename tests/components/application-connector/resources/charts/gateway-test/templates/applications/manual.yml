@@ -1,0 +1,23 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: manual
+  namespace: "{{ .Values.namespace }}"
+spec:
+  description: Endpoints for manual tests
+  skipVerify: true
+  labels:
+    app: manual-tests
+  services:
+    - displayName: oauth-short
+      name: oauth-short
+      providerDisplayName: Kyma
+      description: Valid oauth configuration with 5s token
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace }}.svc.cluster.local:8080/v1/api/oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace }}.svc.cluster.local:8080/v1/api/oauth/token?token_lifetime=5s"
+            type: OAuth
