@@ -45,7 +45,7 @@ webhooks:
     service:
       name: {{ include "operator.fullname" . }}-webhook
       namespace: {{ .Release.Namespace }}
-      path: /validate-logpipeline
+      path: /validate-logparser
       port: 443
   failurePolicy: Fail
   matchPolicy: Exact
