@@ -7,7 +7,6 @@ MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
 TEST_TIMEOUT = "2m"
 
-
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
 test: test-gateway
@@ -16,22 +15,39 @@ clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway: disable-sidecar-for-mtls-test generate-certs test-gateway-debug clean-gateway-test enable-sidecar-after-mtls-test
+test-gateway: create-resources disable-sidecar-for-mtls-test generate-certs
+	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Success! Results:"; \
+	./scripts/check-pod-logs.sh; \
+	$(MAKE) clean-gateway-test; \
+  $(MAKE) enable-sidecar-after-mtls-test; \
+	else \
+	echo "Tests failed! Results:"; \
+	./scripts/check-pod-logs.sh; \
+	$(MAKE) clean-gateway-test; \
+  $(MAKE) enable-sidecar-after-mtls-test; \
+	exit 0; \
+	fi
 
-test-gateway-debug:
-	@echo $(GOPATH)/bin/go-junit-report --help
+test-gateway-debug: create-resources disable-sidecar-for-mtls-test generate-certs
+	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Success! Results:"; \
+	./scripts/check-pod-logs.sh; \
+  $(MAKE) enable-sidecar-after-mtls-test; \
+	else \
+	echo "Tests failed! Results:"; \
+	./scripts/check-pod-logs.sh; \
+  $(MAKE) enable-sidecar-after-mtls-test; \
+	exit 0; \
+	fi
+
+create-resources:
+	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
 	helm template resources/charts/gateway-test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
-
-	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test
-	@echo ""
-	@echo "Gateway test results:"
-
-	./scripts/check-pod-logs.sh
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test  | kubectl delete -f -
@@ -59,5 +75,3 @@ enable-sidecar-after-mtls-test:
 generate-certs:
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
-
-
