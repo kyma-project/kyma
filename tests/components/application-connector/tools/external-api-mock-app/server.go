@@ -17,8 +17,8 @@ func main() {
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	exitOnError(err, "Failed to load Authorization server config")
 	//TODO: Init it correctly
-	cfg.RequestHeaders = map[string][]string{}
-	cfg.RequestQueryParameters = map[string][]string{}
+	cfg.RequestHeaders = map[string][]string{"hkey1":{"hval1"},"hkey2":{"hval21","hval22"}}
+	cfg.RequestQueryParameters = map[string][]string{"qkey1":{"qval1"},"qkey2":{"qval21","qval22"}}
 
 	logLevel, err := log.ParseLevel(cfg.LogLevel)
 	if err != nil {

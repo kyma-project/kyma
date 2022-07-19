@@ -114,5 +114,5 @@ metadata:
   namespace: kyma-integration
 type: Opaque
 data:
-  headers: {{ '{"hkey1":["wrong-value"],"wrong-key":["hval22"]}' | b64enc }}
-  queryParameters: {{ '{"wrong-key":["qval1"],"qkey2":["qval21","qval22","additional-value"]}' | b64enc }}
+  headers: {{ "{'hkey1':['wrong-value'],'wrong-key':['hval22']}" | b64enc }}
+  queryParameters: {{ "{'wrong-key':['qval1'],'qkey2':['qval21','qval22','additional-value']}" | b64enc }}
