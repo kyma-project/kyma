@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -77,11 +79,10 @@ func TestReconciler_Reconcile(t *testing.T) {
 			name:              "Return nil and default Result{} when there is no error from the reconciler dependencies",
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() *Reconciler {
-				te := setupTestEnvironment(t)
-				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te := setupTestEnvironment(t, testSub)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
-				return NewReconciler(ctx, fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -90,11 +91,10 @@ func TestReconciler_Reconcile(t *testing.T) {
 			name:              "Return error and default Result{} when backend sync returns error",
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() *Reconciler {
-				te := setupTestEnvironment(t)
-				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te := setupTestEnvironment(t, testSub)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(false, backendSyncErr)
-				return NewReconciler(ctx, fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendSyncErr,
@@ -103,11 +103,10 @@ func TestReconciler_Reconcile(t *testing.T) {
 			name:              "Return error and default Result{} when backend delete returns error",
 			givenSubscription: testSubUnderDeletion,
 			givenReconcilerSetup: func() *Reconciler {
-				te := setupTestEnvironment(t)
-				fakeClient := te.clientBuilder.WithObjects(testSubUnderDeletion).Build()
+				te := setupTestEnvironment(t, testSubUnderDeletion)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
 				te.backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
-				return NewReconciler(ctx, fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendDeleteErr,
@@ -116,10 +115,9 @@ func TestReconciler_Reconcile(t *testing.T) {
 			name:              "Return error and default Result{} when validator returns error",
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() *Reconciler {
-				te := setupTestEnvironment(t)
-				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te := setupTestEnvironment(t, testSub)
 				te.backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  validatorErr,
@@ -881,20 +879,20 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 
 // testEnvironment provides mocked resources for tests.
 type testEnvironment struct {
-	clientBuilder *fake.ClientBuilder
-	backend       *mocks.BEBBackend
-	logger        *eventinglogger.Logger
-	recorder      *record.FakeRecorder
-	cfg           env.Config
-	credentials   *handlers.OAuth2ClientCredentials
-	mapper        handlers.NameMapper
-	cleaner       eventtype.Cleaner
+	fakeClient  client.Client
+	backend     *mocks.BEBBackend
+	logger      *eventinglogger.Logger
+	recorder    *record.FakeRecorder
+	cfg         env.Config
+	credentials *handlers.OAuth2ClientCredentials
+	mapper      handlers.NameMapper
+	cleaner     eventtype.Cleaner
 }
 
 // setupTestEnvironment is a testEnvironment constructor
-func setupTestEnvironment(t *testing.T) *testEnvironment {
+func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment {
 	mockedBackend := &mocks.BEBBackend{}
-	fakeClientBuilder := createFakeClientBuilder(t)
+	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()
 	recorder := &record.FakeRecorder{}
 	defaultLogger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
@@ -906,14 +904,14 @@ func setupTestEnvironment(t *testing.T) *testEnvironment {
 	cleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
 
 	return &testEnvironment{
-		clientBuilder: fakeClientBuilder,
-		backend:       mockedBackend,
-		logger:        defaultLogger,
-		recorder:      recorder,
-		cfg:           emptyConfig,
-		credentials:   credentials,
-		mapper:        nameMapper,
-		cleaner:       cleaner,
+		fakeClient:  fakeClient,
+		backend:     mockedBackend,
+		logger:      defaultLogger,
+		recorder:    recorder,
+		cfg:         emptyConfig,
+		credentials: credentials,
+		mapper:      nameMapper,
+		cleaner:     cleaner,
 	}
 }
 
