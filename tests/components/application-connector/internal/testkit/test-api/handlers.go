@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -51,4 +52,18 @@ func resCode(w http.ResponseWriter, r *http.Request) {
 	code, _ := strconv.Atoi(codeStr) // can't error, because path has a pattern
 	w.WriteHeader(code)
 	w.Write([]byte(codeStr))
+}
+
+func timeout(w http.ResponseWriter, r *http.Request) {
+	c := r.Context().Done()
+	if c == nil {
+		log.Println("Context has no timeout, sleeping for 2 minutes")
+		time.Sleep(2 * time.Minute)
+		return
+	}
+	log.Println("Context timeout, waiting until done")
+
+	_ = <-c
+
+	alwaysOk(w, r)
 }
