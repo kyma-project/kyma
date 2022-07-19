@@ -98,5 +98,5 @@ metadata:
   namespace: kyma-integration
 type: Opaque
 data:
-  headers: {{ '{"hkey1":["hval1"],"hkey2":["hval21","hval22"]}' | b64enc }}
-  queryParameters: {{ '{"qkey1":["qval1"],"qkey2":["qval21","qval22"]}' | b64enc }}
+  headers: {{ "{'hkey1':['hval1'],'hkey2':['hval21','hval22']}" | b64enc }}
+  queryParameters: {{ "{'qkey1':['qval1'],'qkey2':['qval21','qval22']}" | b64enc }}
