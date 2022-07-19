@@ -11,6 +11,9 @@ type Config struct {
 	BasicAuthPassword string `envconfig:"default=passwd"`
 	OAuthClientID     string `envconfig:"default=clientID"`
 	OAuthClientSecret string `envconfig:"default=clientSecret"`
+	//TODO:
+	RequestHeaders         map[string][]string `envconfig:""`
+	RequestQueryParameters map[string][]string `envconfig:""`
 }
 
 func (c *Config) String() string {

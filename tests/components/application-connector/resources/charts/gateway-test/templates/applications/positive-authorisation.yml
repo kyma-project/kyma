@@ -57,6 +57,19 @@ spec:
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: basic-auth-with-request-parameters
+      name: basic-auth-with-request-parameters
+      providerDisplayName: Basic
+      description: Should return 200 when calling endpoint protected with Basic Auth with additional request parameters
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-with-request-parameters"
+          requestParametersSecretName: request-parameters-test
+          credentials:
+            secretName: basic-test
+            type: Basic
 ---
 apiVersion: v1
 kind: Secret
@@ -77,3 +90,13 @@ type: Opaque
 data:
   clientId: {{ "clientID" | b64enc }}
   clientSecret: {{ "clientSecret" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: request-parameters-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  headers: {{ '{"hkey1":["hval1"],"hkey2":["hval21","hval22"]}' | b64enc }}
+  queryParameters: {{ '{"qkey1":["qval1"],"qkey2":["qval21","qval22"]}' | b64enc }}

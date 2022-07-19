@@ -16,6 +16,9 @@ func main() {
 	cfg := Config{}
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	exitOnError(err, "Failed to load Authorization server config")
+	//TODO: Init it correctly
+	cfg.RequestHeaders = map[string][]string{}
+	cfg.RequestQueryParameters = map[string][]string{}
 
 	logLevel, err := log.ParseLevel(cfg.LogLevel)
 	if err != nil {
@@ -29,8 +32,9 @@ func main() {
 
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
 	oAuthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
+	expectedRequestParameters := test_api.ExpectedRequestParameters{Headers: cfg.RequestHeaders, QueryParameters: cfg.RequestQueryParameters}
 
-	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials)
+	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials, expectedRequestParameters)
 
 	address := fmt.Sprintf(":%d", cfg.Port)
 	log.Fatal(http.ListenAndServe(address, router))

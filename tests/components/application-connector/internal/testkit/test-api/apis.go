@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
@@ -52,6 +52,13 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
+	{
+		r := api.PathPrefix("/request-parameters-basic").Subrouter()
+		r.Use(RequestParameters(expectedRequestParameters.Headers, expectedRequestParameters.QueryParameters))
+		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
 
 	return router
 }
@@ -59,6 +66,11 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 type BasicAuthCredentials struct {
 	User     string
 	Password string
+}
+
+type ExpectedRequestParameters struct {
+	Headers         map[string][]string
+	QueryParameters map[string][]string
 }
 
 func handleError(w http.ResponseWriter, code int, format string, a ...interface{}) {
