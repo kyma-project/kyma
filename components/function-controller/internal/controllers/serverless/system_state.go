@@ -55,7 +55,7 @@ func (s *systemState) buildImageAddress(registryAddress string) string {
 	if isGitType {
 		imageTag = calculateGitImageTag(&s.instance)
 	} else {
-		imageTag = calculateImageTag(&s.instance)
+		imageTag = calculateInlineImageTag(&s.instance)
 	}
 	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, s.instance.Namespace, s.instance.Name, imageTag)
 }

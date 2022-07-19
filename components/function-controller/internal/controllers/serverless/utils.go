@@ -279,10 +279,10 @@ func getConditionReason(conditions []serverlessv1alpha2.Condition, conditionType
 	return ""
 }
 
-func calculateImageTag(instance *serverlessv1alpha2.Function) string {
+func calculateInlineImageTag(instance *serverlessv1alpha2.Function) string {
 	hash := sha256.Sum256([]byte(strings.Join([]string{
 		string(instance.GetUID()),
-		fmt.Sprintf("%v", instance.Spec.Source),
+		fmt.Sprintf("%v", *instance.Spec.Source.Inline),
 		string(instance.Status.Runtime),
 	}, "-")))
 

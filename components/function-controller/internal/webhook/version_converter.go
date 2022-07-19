@@ -196,7 +196,7 @@ func (w *ConvertingWebHook) convertSpec(in *serverlessv1alpha1.FunctionSpec, out
 		}
 
 		out.Source = serverlessv1alpha2.Source{
-			GitRepository: serverlessv1alpha2.GitRepositorySource{
+			GitRepository: &serverlessv1alpha2.GitRepositorySource{
 				URL: repo.Spec.URL,
 				Auth: &serverlessv1alpha2.RepositoryAuth{
 					Type:       serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type),
@@ -210,7 +210,7 @@ func (w *ConvertingWebHook) convertSpec(in *serverlessv1alpha1.FunctionSpec, out
 		}
 	} else {
 		out.Source = serverlessv1alpha2.Source{
-			Inline: serverlessv1alpha2.InlineSource{
+			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       in.Source,
 				Dependencies: in.Deps,
 			},

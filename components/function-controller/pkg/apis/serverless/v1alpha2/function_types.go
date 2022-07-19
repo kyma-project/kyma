@@ -40,16 +40,11 @@ const (
 	FunctionTypeGit    FunctionType = "git"
 )
 
-var (
-	ZeroGitRepository = GitRepositorySource{}
-	ZeroInline        = InlineSource{}
-)
-
 type Source struct {
 	// +optional
-	GitRepository GitRepositorySource `json:"gitRepository,omitempty"`
+	GitRepository *GitRepositorySource `json:"gitRepository,omitempty"`
 	// +optional
-	Inline InlineSource `json:"inline,omitempty"`
+	Inline *InlineSource `json:"inline,omitempty"`
 }
 
 type InlineSource struct {
@@ -253,10 +248,10 @@ func (f *Function) TypeOf(t FunctionType) bool {
 	switch t {
 
 	case FunctionTypeInline:
-		return f.Spec.Source.Inline != ZeroInline
+		return f.Spec.Source.Inline != nil
 
 	case FunctionTypeGit:
-		return f.Spec.Source.GitRepository != ZeroGitRepository
+		return f.Spec.Source.GitRepository != nil
 
 	default:
 		return false
