@@ -7,7 +7,7 @@ import (
 
 func (gs *GatewaySuite) TestManual() {
 	gs.Run("OAuth token renewal", func() {
-		url := gatewayUrl("manual", "oauth-short")
+		url := gatewayURL("manual", "oauth-short")
 		gs.T().Log("Url:", url)
 
 		req, err := http.NewRequest(http.MethodDelete, url+"/deauth", nil)

@@ -14,6 +14,8 @@ import (
 )
 
 func logBody(t *testing.T, body io.Reader) {
+	t.Helper()
+
 	buf, err := ioutil.ReadAll(body)
 	if err == nil && len(buf) > 0 {
 		t.Log("Body:", string(buf))
@@ -21,6 +23,8 @@ func logBody(t *testing.T, body io.Reader) {
 }
 
 func executeGetRequest(t *testing.T, entry v1alpha1.Entry) int {
+	t.Helper()
+
 	t.Log("Calling", entry.CentralGatewayUrl)
 	res, err := http.Get(entry.CentralGatewayUrl)
 
@@ -39,6 +43,6 @@ func getExpectedHTTPCode(service v1alpha1.Service) (int, error) {
 	return 0, errors.New("Bad configuration")
 }
 
-func gatewayUrl(app, service string) string {
+func gatewayURL(app, service string) string {
 	return "http://central-application-gateway.kyma-system:8080/" + app + "/" + service
 }

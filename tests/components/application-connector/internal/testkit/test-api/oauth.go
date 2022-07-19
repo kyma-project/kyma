@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 type OAuthCredentials struct {
@@ -23,6 +24,7 @@ const (
 	clientSecretKey = "client_secret"
 	grantTypeKey    = "grant_type"
 	tokenLifetime   = "token_lifetime"
+	defaultTokenTTL = 5 * time.Minute
 )
 
 const (
@@ -66,11 +68,15 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := uuid.New().String()
-	ttl := 5 * time.Minute
+	ttl := defaultTokenTTL
 
 	if ttlStr := r.URL.Query().Get(tokenLifetime); ttlStr != "" {
-		if ttlOrErr, err := time.ParseDuration(ttlStr); err == nil { // TODO: Nesting ugly 🤮
+		ttlOrErr, err := time.ParseDuration(ttlStr)
+		if err == nil {
+			log.Info("Received valid OAuth TTL:", ttlOrErr)
 			ttl = ttlOrErr
+		} else {
+			log.Error("Received invalid OAuth TTL:", err)
 		}
 	}
 
