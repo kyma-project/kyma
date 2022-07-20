@@ -17,7 +17,7 @@
 
 /common @Tomasz-Smelcerz-SAP @strekm @akgalwas @janmedrek @piotrmiskiewicz
 # Logging library
-/common/logging @franpog859 @dbadura @janmedrek
+/common/logging @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 
 /components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
