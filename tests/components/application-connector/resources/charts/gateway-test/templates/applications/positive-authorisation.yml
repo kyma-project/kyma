@@ -98,7 +98,7 @@ metadata:
   namespace: kyma-integration
 type: Opaque
 data:
-  # {"hkey1":["hval1"],"hkey2":["hval21","hval22"]}
-  headers: eyJoa2V5MSI6WyJodmFsMSJdLCJoa2V5MiI6WyJodmFsMjEiLCJodmFsMjIiXX0K
-  # {"qkey1":["qval1"],"qkey2":["qval21","qval22"]}
-  queryParameters: eyJxa2V5MSI6WyJxdmFsMSJdLCJxa2V5MiI6WyJxdmFsMjEiLCJxdmFsMjIiXX0K
+  # {"Hkey1":["Hval1"],"Hkey2":["Hval21","Hval22"]}
+  headers: eyJIa2V5MSI6WyJIdmFsMSJdLCJIa2V5MiI6WyJIdmFsMjEiLCJIdmFsMjIiXX0K
+  # {"Qkey1":["Qval1"],"Qkey2":["Qval21","Qval22"]}
+  queryParameters: eyJRa2V5MSI6WyJRdmFsMSJdLCJRa2V5MiI6WyJRdmFsMjEiLCJRdmFsMjIiXX0K

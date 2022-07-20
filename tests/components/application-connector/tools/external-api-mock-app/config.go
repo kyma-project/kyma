@@ -23,8 +23,8 @@ func NewConfig() *Config {
 		BasicAuthPassword:      "passwd",
 		OAuthClientID:          "clientID",
 		OAuthClientSecret:      "clientSecret",
-		RequestHeaders:         map[string][]string{"hkey1": {"hval1"}, "hkey2": {"hkey21", "hkey22"}},
-		RequestQueryParameters: map[string][]string{"qkey1": {"qval1"}, "qkey2": {"qkey21", "qkey22"}},
+		RequestHeaders:         map[string][]string{"Hkey1": {"Hval1"}, "Hkey2": {"Hkey21", "Hkey22"}},
+		RequestQueryParameters: map[string][]string{"Qkey1": {"Qval1"}, "Qkey2": {"Qkey21", "Qkey22"}},
 	}
 }
 

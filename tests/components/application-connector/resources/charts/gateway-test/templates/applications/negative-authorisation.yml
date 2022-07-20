@@ -114,7 +114,7 @@ metadata:
   namespace: kyma-integration
 type: Opaque
 data:
-  # {"hkey1":["wrong-value"],"wrong-key":["hval22"]}
-  headers: eyJoa2V5MSI6WyJ3cm9uZy12YWx1ZSJdLCJ3cm9uZy1rZXkiOlsiaHZhbDIyIl19Cg==
-  # {"wrong-key":["qval1"],"qkey2":["qval21","qval22","additional-value"]}
-  queryParameters: eyJ3cm9uZy1rZXkiOlsicXZhbDEiXSwicWtleTIiOlsicXZhbDIxIiwicXZhbDIyIiwiYWRkaXRpb25hbC12YWx1ZSJdfQo=
+  # {"Hkey1":["Wrong-value"],"Wrong-key":["Hval22"]}
+  headers: eyJIa2V5MSI6WyJXcm9uZy12YWx1ZSJdLCJXcm9uZy1rZXkiOlsiSHZhbDIyIl19Cg==
+  # {"Wrong-key":["Qval1"],"Qkey2":["Qval21","Qval22","Additional-value"]}
+  queryParameters: eyJXcm9uZy1rZXkiOlsiUXZhbDEiXSwiUWtleTIiOlsiUXZhbDIxIiwiUXZhbDIyIiwiQWRkaXRpb25hbC12YWx1ZSJdfQo=
