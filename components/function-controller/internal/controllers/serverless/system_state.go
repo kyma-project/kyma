@@ -17,6 +17,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const DefaultDeploymentReplicas int32 = 1
+
 type SystemState interface{}
 
 // TODO extract interface
@@ -367,6 +369,11 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
+	minReplicas := DefaultDeploymentReplicas
+	if s.instance.Spec.MinReplicas != nil {
+		minReplicas = *s.instance.Spec.MinReplicas
+	}
+
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -374,7 +381,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: s.instance.Spec.MinReplicas,
+			Replicas: &minReplicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable

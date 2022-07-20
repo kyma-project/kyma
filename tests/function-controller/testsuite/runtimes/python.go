@@ -6,11 +6,6 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-var (
-	minReplicas int32 = 1
-	maxReplicas int32 = 2
-)
-
 func BasicPythonFunction(msg string, runtime serverlessv1alpha1.Runtime) serverlessv1alpha1.FunctionSpec {
 	src := fmt.Sprintf(`import arrow 
 def main(event, context):
@@ -20,9 +15,7 @@ def main(event, context):
 arrow==0.15.8`
 
 	return serverlessv1alpha1.FunctionSpec{
-		Runtime:     runtime,
-		MinReplicas: &minReplicas,
-		MaxReplicas: &maxReplicas,
+		Runtime: runtime,
 		Source: serverlessv1alpha1.Source{
 			Inline: &serverlessv1alpha1.InlineSource{
 				Source:       src,
@@ -43,9 +36,7 @@ arrow==0.15.8
 kyma-pypi-test==1.0.0`
 
 	return serverlessv1alpha1.FunctionSpec{
-		Runtime:     runtime,
-		MinReplicas: &minReplicas,
-		MaxReplicas: &maxReplicas,
+		Runtime: runtime,
 		Source: serverlessv1alpha1.Source{
 			Inline: &serverlessv1alpha1.InlineSource{
 				Source:       src,
