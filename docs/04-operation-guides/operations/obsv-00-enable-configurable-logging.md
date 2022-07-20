@@ -1,5 +1,5 @@
 ---
-title: Enable the telemetry component (beta feature)
+title: Enable the telemetry component (alpha feature)
 ---
 
 ## Context
@@ -14,7 +14,7 @@ The new `global.telemetry.enabled` flag on the logging component disables the ex
 
 To compare Kyma's classic logging setup with the extended functionality, see the [logging architecture document](../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md).
 
-> **CAUTION:** To enable the telemetry component, you must change your Kyma installation; you can't do it on the fly. This is a beta feature, proceed with caution.
+> **CAUTION:** To enable the telemetry component, you must change your Kyma installation; you can't do it on the fly. This is an alpha feature, proceed with caution.
 
 ## Prerequisites
 

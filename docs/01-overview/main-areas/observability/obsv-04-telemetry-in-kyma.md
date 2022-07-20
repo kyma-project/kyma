@@ -1,5 +1,5 @@
 ---
-title: Telemetry (beta)
+title: Telemetry (alpha)
 ---
 
 ## Kyma's telemetry component
@@ -8,7 +8,7 @@ The focus of Kyma's observability functionality is the pre-integrated collection
 
 For now, the telemetry component supports the logging domain only. You get a log collector (Fluent Bit) and you can configure the log shipment with external systems using runtime configuration with a dedicated Kubernetes API (CRD). With that, for example, you can integrate with vendors like [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. Kyma's optional `logging` component complements the telemetry component, providing `Loki` as pre-configured log backend.
 
-The telemetry component is in a beta state and needs an [explicit installation](./../../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
+The telemetry component is in an alpha state and needs an [explicit installation](./../../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
 
 ## Architecture
 
