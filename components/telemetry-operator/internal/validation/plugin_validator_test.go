@@ -204,6 +204,41 @@ func TestDeniedOutputPlugins(t *testing.T) {
 	assert.Contains(t, err.Error(), "error validating output plugin: plugin 'lua' is not supported. ")
 }
 
+func TestContainsNoOutputPlugins(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{},
+		}}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.Validate(logPipeline, logPipelines)
+
+	require.Error(t, result)
+	require.Contains(t, result.Error(), "no output is defined, you must define one output")
+}
+
+func TestContainsMultipleOutputPlugins(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Custom: `Name	http`,
+				HTTP: telemetryv1alpha1.HTTPOutput{
+					Host: telemetryv1alpha1.ValueType{
+						Value: "localhost",
+					},
+				},
+			},
+		}}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.Validate(logPipeline, logPipelines)
+
+	require.Error(t, result)
+	require.Contains(t, result.Error(), "multiple output plugins are defined, you must define only one output")
+}
+
 func TestContainsCustomPluginWithCustomFilter(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{

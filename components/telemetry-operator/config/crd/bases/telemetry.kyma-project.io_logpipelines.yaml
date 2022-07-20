@@ -70,6 +70,73 @@ spec:
                 properties:
                   custom:
                     type: string
+                  http:
+                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    properties:
+                      compress:
+                        type: string
+                      format:
+                        type: string
+                      host:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      password:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      port:
+                        type: string
+                      tls:
+                        type: string
+                      tlsVerify:
+                        type: string
+                      uri:
+                        type: string
+                      user:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                    type: object
                 type: object
               variables:
                 items:

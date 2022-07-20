@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -47,8 +48,25 @@ func (s *Helper) FetchSecret(ctx context.Context, fromType telemetryv1alpha1.Val
 
 	return &referencedSecret, nil
 }
-func IsSecretRef(fromType telemetryv1alpha1.ValueFromType) bool {
-	return fromType.SecretKey.Name != "" && fromType.SecretKey.Key != ""
+
+func (s *Helper) CopySecretData(ctx context.Context, valueFrom telemetryv1alpha1.ValueFromType, targetKey string, secretData map[string][]byte) error {
+	log := logf.FromContext(ctx)
+	var referencedSecret *corev1.Secret
+	referencedSecret, err := s.FetchSecret(ctx, valueFrom)
+	if err != nil {
+		log.Error(err, "unable to find secret")
+		return err
+	}
+	// Check if any secret has been changed
+	fetchedSecretData, err := FetchSecretData(*referencedSecret, valueFrom, targetKey)
+	if err != nil {
+		log.Error(err, "unable to fetch secret data")
+		return err
+	}
+	for k, v := range fetchedSecretData {
+		secretData[k] = v
+	}
+	return nil
 }
 
 func CheckIfSecretHasChanged(newSecret, oldSecret map[string][]byte) bool {
@@ -63,14 +81,21 @@ func CheckIfSecretHasChanged(newSecret, oldSecret map[string][]byte) bool {
 	return false
 }
 
-func FetchSecretData(referencedSecret corev1.Secret, secretRef telemetryv1alpha1.VariableReference) (map[string][]byte, error) {
-	valFrom := secretRef.ValueFrom
+func FetchSecretData(referencedSecret corev1.Secret, valFrom telemetryv1alpha1.ValueFromType, targetKey string) (map[string][]byte, error) {
 	data := make(map[string][]byte)
-	for k, v := range referencedSecret.Data {
-		if k == valFrom.SecretKey.Key {
-			data[secretRef.Name] = v
-			return data, nil
-		}
+	if v, found := referencedSecret.Data[valFrom.SecretKey.Key]; found {
+		data[targetKey] = v
+		return data, nil
 	}
 	return data, fmt.Errorf("the key '%s' cannot be found in the given secret '%s'", valFrom.SecretKey.Key, referencedSecret.Name)
+}
+
+// GenerateVariableName generates env variable name for a given secret reference by concatenating pipeline name, namespace, secret name and secret key.
+// Dots and dashes are replaced by underscores to be compliant with env variable name requirements.
+func GenerateVariableName(secretRef telemetryv1alpha1.SecretKeyRef, pipelineName string) string {
+	result := fmt.Sprintf("%s_%s_%s_%s", pipelineName, secretRef.Namespace, secretRef.Name, secretRef.Key)
+	result = strings.ToUpper(result)
+	result = strings.Replace(result, ".", "_", -1)
+	result = strings.Replace(result, "-", "_", -1)
+	return result
 }

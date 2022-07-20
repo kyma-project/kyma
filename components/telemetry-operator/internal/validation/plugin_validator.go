@@ -38,11 +38,6 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 	if logPipeline.Spec.Output.Custom != "" {
 		return true
 	}
-	for _, f := range logPipeline.Spec.Filters {
-		if f.Custom != "" {
-			return true
-		}
-	}
 	return false
 }
 
@@ -71,11 +66,29 @@ func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeli
 }
 
 func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
-	if len(pipeline.Spec.Output.Custom) == 0 {
-		return fmt.Errorf("no output is defined, you must define one output")
+	if err := checkSingleOutputPlugin(pipeline.Spec.Output); err != nil {
+		return err
 	}
 	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
 		return err
+	}
+	return nil
+}
+
+func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
+	outputPluginCount := 0
+	if len(output.Custom) != 0 {
+		outputPluginCount++
+	}
+	if output.HTTP.Host.IsDefined() {
+		outputPluginCount++
+	}
+
+	if outputPluginCount == 0 {
+		return fmt.Errorf("no output is defined, you must define one output")
+	}
+	if outputPluginCount > 1 {
+		return fmt.Errorf("multiple output plugins are defined, you must define only one output")
 	}
 	return nil
 }
