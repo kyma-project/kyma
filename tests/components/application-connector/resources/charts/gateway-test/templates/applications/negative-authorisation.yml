@@ -12,7 +12,7 @@ spec:
     - displayName: bad oauth token
       name: bad-oauth-token
       providerDisplayName: OAuth
-      description: Should return 403 for OAuth with a wrong token
+      description: Should return 401 for OAuth with a wrong token
       id: "{{ uuidv4 }}"
       entries:
         - type: API
