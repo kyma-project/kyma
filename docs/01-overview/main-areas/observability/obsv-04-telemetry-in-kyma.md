@@ -122,6 +122,8 @@ In the example, three filters are added, which are executed in sequence. Differe
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in secrets, the `LogPipeline` supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
 
+To leverage data provided by a Kubernetes Secrets in a custom output definition, use placeholder expressions for the data provided by the Secret and then specify the actual mapping to the keys of the Secret in the `variables` section, like in:
+
 ```yaml
 kind: LogPipeline
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -133,19 +135,21 @@ spec:
   output:
     custom: |
       Name               http
-      Host               ${HTTP_ENDPOINT} # Defined in Secret
-      HTTP_User          ${HTTP_USER} # Defined in Secret
-      HTTP_Password      ${HTTP_PASSWORD} # Defined in Secret
+      Host               ${ENDPOINT} # Defined in Secret
+      HTTP_User          ${USER} # Defined in Secret
+      HTTP_Password      ${PASSWORD} # Defined in Secret
       Tls                On
   variables:
-    - name: HTTP_ENDPOINT
+    - name: ENDPOINT
       valueFrom:
         secretKeyRef:
         - name: http-backend-credentials
           namespace: default
-          key: HTTP_ENDPOINT
+          key: ENDPOINT
     ...
 ```
+
+The related secret need to fullfil the referenced name and namespace and need to contain the mapped key as in:
 
 ```yaml
 kind: Secret
@@ -219,35 +223,41 @@ metadata:
 spec:
 ```
 
-## LogPipeline specification
+## LogPipeline.spec attribute
 
 For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logpipeline_types.go).
 
-| 1. Parameter | 2. Parameter | 3. Parameter | Type | Description |
-|-|-|-|-|-|
-|**spec** | | | | **The "spec" parameter (modifiable) holds the pipeline definition.**|
-| | filters | | []object | A list of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence as defined. They are executed before logs are buffered, and with that, will not be executed on retries.|
-| | | custom | string | The actual filter definition in the syntax of Fluent Bit.|
-| | output | | object | A [Fluent Bit outputs](https://docs.fluentbit.io/manual/pipeline/outputs).|
-| | | custom | string | The actual output definition in the syntax of Fluent Bit.|
-| | variables | | []object | A list of mappings from Kubernetes secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
-| | | name | string | Name of the variable to map. |
-| | | valueFrom/secretKeyRef | object | Reference to a key in a secret. `name` and `namespace` of the secret as well as the name of the  `key` needs to be provided |
-| | files | | []object | A list of text snippets that are mounted as files to Fluent Bit, so that they are available for reference in filters and outputs. The mounted snippet is available under the `/files` folder.|
-| | | name | string | The file name under which the snippet is mounted. The resulting path will be `/files/<name>`. |
-| | | content | string | The actual text snippet to mount as file.|
-|**status** | | | | **The "status" parameter (not modifiable) holds relevant information about the status of the pipeline. |
-| | conditions | | []object | An array of conditions describing the status of the pipeline.
-| | | lastTransitionTime | []object | An array of conditions describing the status of the pipeline.
-| | | reason | []object | An array of conditions describing the status of the pipeline.
-| | | type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
+| Parameter | Type | Description |
+|-|-|-|
+| filters | []object | A list of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence as defined. They are executed before logs are buffered, and with that, will not be executed on retries.|
+| filters[].custom | string | The actual filter definition in the syntax of Fluent Bit.|
+| output | object | A [Fluent Bit outputs](https://docs.fluentbit.io/manual/pipeline/outputs).|
+| output.custom | string | The actual output definition in the syntax of Fluent Bit.|
+| variables | | []object | A list of mappings from Kubernetes secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
+| variables[].name | string | Name of the variable to map. |
+| variables[].valueFrom.secretKeyRef | object | Reference to a key in a secret. `name` and `namespace` of the secret as well as the name of the `key` needs to be provided |
+| files | []object | A list of text snippets that are mounted as files to Fluent Bit, so that they are available for reference in filters and outputs. The mounted snippet is available under the `/files` folder.|
+| files[].name | string | The file name under which the snippet is mounted. The resulting path will be `/files/<name>`. |
+| files[].content | string | The actual text snippet to mount as file.|
 
-## LogParser specification
-| 1. Parameter | 2. Parameter | 3. Parameter | Type | Description |
-|-|-|-|-|-|
-|**spec** | | | | **The "spec" parameter (modifiable) holds the parser definition.**|
-| | parser | | object | A [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipelines filters section. |
-| | | content | string | The actual parser definition in the syntax of Fluent Bit. |
+## LogPipeline.status attribute
+
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logpipeline_types.go).
+
+| Parameter | Type | Description |
+|-|-|-|
+| conditions | []object | An array of conditions describing the status of the pipeline.
+| conditions[].lastTransitionTime | []object | An array of conditions describing the status of the pipeline.
+| conditions[].reason | []object | An array of conditions describing the status of the pipeline.
+| conditions[].type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
+
+## LogParser.spec attribute
+For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logparser_types.go).
+
+| Parameter | Type | Description |
+|-|-|-|
+| parser | object | A [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipelines filters section. |
+| parser.content | string | The actual parser definition in the syntax of Fluent Bit. |
 ## Log record processing
 
 After a log record has been read, it is preprocessed by some central configuration sections like the `kubernetes` filter. Thus, when a record is ready to be processed by the sections defined in the LogPipeline definition, it will have several attributes available for processing and shipment.
@@ -283,10 +293,11 @@ The central pipeline tails the log message from a log file managed by the contai
 ```
 
 The attributes in the example have the following meaning:
+
 | Attribute | Description |
 |-|-|
 | time | The timestamp generated by the container runtime at the moment the log was written to the log file |
-| stream | The stream to which the application wrote the log, either `stdout` or `stderr`
+| stream | The stream to which the application wrote the log, either `stdout` or `stderr` |
 | _p | Indicates if the log message is partial (`P`) or final (`F`). Optional, dependent on container runtime. Because a CRI multiline parser is applied for the tailing phase, all multi-lines on container runtime level are aggregated already and no partial entries should be left. |
 | log | The raw and unparsed log message |
 
