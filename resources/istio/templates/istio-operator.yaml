@@ -10,9 +10,9 @@ spec:
   profile: default
   components:
     egressGateways:
-    - enabled: {{ .Values.istioOperator.components.egressGateways.enabled }}
+    - enabled: {{ .Values.istioOperator.egressGateways.enabled }}
       k8s:
-{{- toYaml .Values.istioOperator.components.egressGateways.config | nindent 8}}
+{{- toYaml .Values.istioOperator.egressGateways.config | nindent 8}}
       name: istio-egressgateway
     ingressGateways:
     - enabled: {{ .Values.istioOperator.components.ingressGateways.enabled }}
