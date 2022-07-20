@@ -1,6 +1,8 @@
 package teststep
 
 import (
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
@@ -48,11 +50,6 @@ func (f newFunction) OnError() error {
 
 var _ step.Step = newFunction{}
 
-type stepEmptyFunction struct {
-	name string
-	fn   function.Function
-}
-
 type updateFunc struct {
 	name     string
 	funcData *function.FunctionData
@@ -91,3 +88,42 @@ func (u updateFunc) OnError() error {
 }
 
 var _ step.Step = updateFunc{}
+
+type newFunctionv1alpha1 struct {
+	name string
+	spec serverlessv1alpha1.FunctionSpec
+	fn   *v1alpha1.Function
+	log  *logrus.Entry
+}
+
+func CreateFunctionV1Alpha1(log *logrus.Entry, fn *v1alpha1.Function, name string, spec serverlessv1alpha1.FunctionSpec) step.Step {
+	return newFunctionv1alpha1{
+		fn:   fn,
+		name: name,
+		spec: spec,
+		log:  log.WithField(step.LogStepKey, name),
+	}
+}
+
+func (f newFunctionv1alpha1) Name() string {
+	return f.name
+}
+
+func (f newFunctionv1alpha1) Run() error {
+	if err := f.fn.Create(f.spec); err != nil {
+		return errors.Wrapf(err, "while creating function: %s", f.name)
+	}
+
+	f.log.Infof("Function Created, Waiting for ready status")
+	return errors.Wrapf(f.fn.WaitForStatusRunning(), "while waiting for function: %s, to be ready:", f.name)
+}
+
+func (f newFunctionv1alpha1) Cleanup() error {
+	return errors.Wrapf(f.fn.Delete(), "while deleting function: %s", f.name)
+}
+
+func (f newFunctionv1alpha1) OnError() error {
+	return f.fn.LogResource()
+}
+
+var _ step.Step = newFunction{}

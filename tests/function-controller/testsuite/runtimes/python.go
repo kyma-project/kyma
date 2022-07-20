@@ -15,9 +15,9 @@ def main(event, context):
 arrow==0.15.8`
 
 	return serverlessv1alpha2.FunctionSpec{
-		Runtime:     runtime,
+		Runtime: runtime,
 		Source: serverlessv1alpha2.Source{
-			Inline: serverlessv1alpha2.InlineSource{
+			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       src,
 				Dependencies: dpd,
 			},
@@ -36,9 +36,9 @@ arrow==0.15.8
 kyma-pypi-test==1.0.0`
 
 	return serverlessv1alpha2.FunctionSpec{
-		Runtime:     runtime,
+		Runtime: runtime,
 		Source: serverlessv1alpha2.Source{
-			Inline: serverlessv1alpha2.InlineSource{
+			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       src,
 				Dependencies: dpd,
 			},

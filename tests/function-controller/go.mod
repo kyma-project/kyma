@@ -23,7 +23,7 @@ require (
 
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
-	github.com/kyma-project/kyma/components/function-controller => github.com/dbadura/kyma/components/function-controller v0.0.0-20220720064318-f6871d552caf
+	github.com/kyma-project/kyma/components/function-controller => github.com/kyma-project/kyma/components/function-controller v0.0.0-20220720140802-d83ba49c0ad4
 	//github.com/kyma-project/kyma/components/function-controller => ../../components/function-controller
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
