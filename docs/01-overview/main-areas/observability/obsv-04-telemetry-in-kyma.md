@@ -10,7 +10,7 @@ For now, the telemetry component supports the logging domain only. You get a log
 
 ## Prerequisites
 
-- The telemetry component is in an alpha state. You must [explicitly install it](./../../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
+- The telemetry component is in an alpha state. You must [explicitly install it](./../../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md).
 - Your application must log to `stdout` or `stderr`.
 
 ## Architecture

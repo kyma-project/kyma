@@ -25,4 +25,4 @@ Kyma's classic in-cluster logging features (1-6) are unchanged, but with the int
 8. As specified in your configuration, Fluent Bit sends the log data to observability systems outside the Kyma cluster.
 9. The user accesses the external observability system to analyze and vizualize the logs.
 
-Learn how to [enable the telemetry component](../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
+Learn how to [enable the telemetry component](../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md).
