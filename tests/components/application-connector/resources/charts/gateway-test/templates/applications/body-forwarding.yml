@@ -1,0 +1,38 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: body-forwarding
+  namespace: "{{ .Values.namespace }}"
+spec:
+  description: body forwarding with various methods
+  skipVerify: true
+  labels:
+    app: body-forwarding
+  services:
+    - displayName: post
+      name: post
+      providerDisplayName: post
+      description: POST
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/body-forwarding/post"
+    - displayName: delete
+      name: delete
+      providerDisplayName: delete
+      description: DELETE
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/body-forwarding/delete"
+    - displayName: put
+      name: put
+      providerDisplayName: put
+      description: PUT
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/body-forwarding/put"

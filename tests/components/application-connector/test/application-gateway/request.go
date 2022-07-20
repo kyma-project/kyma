@@ -1,6 +1,7 @@
 package application_gateway
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"regexp"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
+
+	test_api "github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 )
 
 type LogHttp struct {
@@ -58,4 +61,10 @@ func getExpectedHTTPCode(service v1alpha1.Service) (int, error) {
 
 func gatewayURL(app, service string) string {
 	return "http://central-application-gateway.kyma-system:8080/" + app + "/" + service
+}
+
+func unmarshalBody(body []byte) (test_api.EchoResponse, error) {
+	res := test_api.EchoResponse{}
+	err := json.Unmarshal(body, &res)
+	return res, err
 }
