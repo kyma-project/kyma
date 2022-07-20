@@ -1,6 +1,4 @@
 ---
-
-
 helmValues:
   global:
     priorityClassName: "kyma-system-priority"
