@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-http-utils/logger"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 func BasicAuth(user, pass string) mux.MiddlewareFunc {
@@ -55,6 +56,8 @@ func RequestParameters(expectedHeaders, expectedQueryParameters map[string][]str
 			//		return
 			//	}
 			//}
+			log.Warnf("r.Header: %v\nexpectedHeaders: %v", r.Header, expectedHeaders)
+			log.Warnf("r.URL.Query(): %v\nexpectedQueryParameters: %v", r.URL.Query(), expectedQueryParameters)
 			if !reflect.DeepEqual(r.Header, expectedHeaders) || !reflect.DeepEqual(r.URL.Query(), expectedQueryParameters) {
 				handleError(w, http.StatusBadRequest, "Incorrect headers or query parameters")
 				return
