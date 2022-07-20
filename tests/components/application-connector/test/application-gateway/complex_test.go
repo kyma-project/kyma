@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (gs *GatewaySuite) TestManual() {
+func (gs *GatewaySuite) TestComplex() {
 	gs.Run("OAuth token renewal", func() {
 		url := gatewayURL("complex-cases", "oauth-expired-token-renewal")
 		gs.T().Log("Url:", url)
