@@ -4,19 +4,19 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 )
 
 type newFunction struct {
 	name string
-	spec v1alpha2.FunctionSpec
+	spec serverlessv1alpha2.FunctionSpec
 	fn   *function.Function
 	log  *logrus.Entry
 }
 
-func CreateFunction(log *logrus.Entry, fn *function.Function, name string, spec v1alpha2.FunctionSpec) step.Step {
+func CreateFunction(log *logrus.Entry, fn *function.Function, name string, spec serverlessv1alpha2.FunctionSpec) step.Step {
 	return newFunction{
 		fn:   fn,
 		name: name,
@@ -57,11 +57,11 @@ type updateFunc struct {
 	name     string
 	funcData *function.FunctionData
 	fn       *function.Function
-	spec     v1alpha2.FunctionSpec
+	spec     serverlessv1alpha2.FunctionSpec
 	log      *logrus.Entry
 }
 
-func UpdateFunction(log *logrus.Entry, fn *function.Function, name string, spec v1alpha2.FunctionSpec) step.Step {
+func UpdateFunction(log *logrus.Entry, fn *function.Function, name string, spec serverlessv1alpha2.FunctionSpec) step.Step {
 	return updateFunc{
 		fn:   fn,
 		spec: spec,
