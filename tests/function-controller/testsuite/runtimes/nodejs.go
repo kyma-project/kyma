@@ -9,9 +9,7 @@ import (
 
 func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	return serverlessv1alpha2.FunctionSpec{
-		Runtime:     rtm,
-		MinReplicas: &minReplicas,
-		MaxReplicas: &maxReplicas,
+		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
@@ -23,9 +21,7 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 
 func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	return serverlessv1alpha2.FunctionSpec{
-		Runtime:     rtm,
-		MinReplicas: &minReplicas,
-		MaxReplicas: &maxReplicas,
+		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
@@ -43,9 +39,7 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 	dpd := `{ "name": "hellowithconfigmapsecretenvs", "version": "0.0.1", "dependencies": { } }`
 
 	return serverlessv1alpha2.FunctionSpec{
-		Runtime:     rtm,
-		MinReplicas: &minReplicas,
-		MaxReplicas: &minReplicas,
+		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       src,
