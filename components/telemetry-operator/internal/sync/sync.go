@@ -77,7 +77,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 	return sectionsChanged || filesChanged || variablesChanged, nil
 }
 
-// Synchronize LogPipeline with ConfigMap of FluentBitUtils sections (Input, Filter and Output).
+// Synchronize LogPipeline with ConfigMap of DaemonSetUtils sections (Input, Filter and Output).
 func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitSectionsConfigMap)

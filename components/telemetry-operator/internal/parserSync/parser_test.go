@@ -1,4 +1,4 @@
-package parsers
+package parserSync
 
 import (
 	"context"

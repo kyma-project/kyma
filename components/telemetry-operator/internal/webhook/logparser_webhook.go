@@ -25,7 +25,6 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,11 +102,11 @@ func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *t
 		return err
 	}
 
-	utils := kubernetes.NewUtils(v.Client)
+	fbUtils := fluentbit.NewDaemonSetUtils(v.Client, v.fluentBitConfigMap)
 	var pipeLine *telemetryv1alpha1.LogPipeline
 	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
 
-	configFiles, err := utils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
+	configFiles, err := fbUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
 	if err != nil {
 		return err
 	}

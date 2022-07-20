@@ -54,9 +54,6 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		Name:    "1st-file",
 		Content: "file-content",
 	}
-	//parser := telemetryv1alpha1.Parser{
-	//	Content: "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+)$",
-	//}
 	output := telemetryv1alpha1.Output{
 		Custom: "Name   stdout\nMatch   dummy_test.*",
 	}

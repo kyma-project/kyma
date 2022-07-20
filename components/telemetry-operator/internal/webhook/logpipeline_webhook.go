@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/google/uuid"
@@ -147,18 +145,13 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}()
 
-	utils := kubernetes.NewUtils(v.Client)
+	fbUtils := fluentbit.NewDaemonSetUtils(v.Client, v.fluentBitConfigMap)
 	var parser *telemetryv1alpha1.LogParser
 
-	configFiles, err := utils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
+	configFiles, err := fbUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
 	if err != nil {
 		return err
 	}
-
-	//configFiles, err := v.getFluentBitConfig(ctx, currentBaseDirectory, logPipeline)
-	//if err != nil {
-	//	return err
-	//}
 
 	log.Info("Fluent Bit config files count", "count", len(configFiles))
 	for _, configFile := range configFiles {

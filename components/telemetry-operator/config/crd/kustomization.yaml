@@ -3,7 +3,7 @@
 # It should be run by config/default
 resources:
   - bases/telemetry.kyma-project.io_logpipelines.yaml
-- bases/telemetry.kyma-project.io_logparsers.yaml
+  - bases/telemetry.kyma-project.io_logparsers.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

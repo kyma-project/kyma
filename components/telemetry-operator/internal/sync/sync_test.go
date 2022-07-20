@@ -20,9 +20,8 @@ var (
 	daemonSetConfig = FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "cm-ns"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "section-cm", Namespace: "cm-ns"},
-		//FluentBitParsersConfigMap:  types.NamespacedName{Name: "parsers-cm", Namespace: "cm-ns"},
-		FluentBitFilesConfigMap: types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
-		FluentBitEnvSecret:      types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
+		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
+		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
 	pipelineConfig = fluentbit.PipelineConfig{
 		InputTag:          "kube",

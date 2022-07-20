@@ -104,19 +104,15 @@ func generateMatchCondition(logPipelineName string) string {
 	return fmt.Sprintf("%s.*", logPipelineName)
 }
 
-// MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
+// MergeParsersConfig merges Fluent Bit parsers to a single Fluent Bit configuration.
 func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 	var sb strings.Builder
 	for _, logParser := range logParsers.Items {
 		var parser string
 		if logParser.DeletionTimestamp == nil {
-			if len(logParser.Spec.Parser) > 0 {
-				if !strings.Contains(logParser.Spec.Parser, "name") {
-					name := fmt.Sprintf("Name %s", logParser.Name)
-					parser = fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
-					sb.WriteString(BuildConfigSection(ParserConfigHeader, parser))
-				}
-			}
+			name := fmt.Sprintf("Name %s", logParser.Name)
+			parser = fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
+			sb.WriteString(BuildConfigSection(ParserConfigHeader, parser))
 		}
 	}
 	return sb.String()

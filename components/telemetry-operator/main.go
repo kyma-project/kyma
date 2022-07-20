@@ -19,13 +19,13 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 	"os"
 	"strings"
 	"time"
 
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parsers"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -188,7 +188,7 @@ func main() {
 			Namespace: fluentBitNs,
 		},
 	}
-	parserDaemonSetConfig := parsers.FluentBitDaemonSetConfig{
+	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName: types.NamespacedName{
 			Namespace: fluentBitNs,
 			Name:      fluentBitDaemonSet,

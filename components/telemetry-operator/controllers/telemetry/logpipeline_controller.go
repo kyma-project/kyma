@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
@@ -50,10 +48,10 @@ type LogPipelineReconciler struct {
 	FluentBitDaemonSet types.NamespacedName
 	restartsTotal      prometheus.Counter
 	unsupportedTotal   prometheus.Gauge
-	FluentBitUtils     *kubernetes.FluentBitUtils
+	FluentBitUtils     *fluentbit.DaemonSetUtils
 }
 
-// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBitUtils config arguments
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given DaemonSetUtils config arguments
 func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
@@ -70,7 +68,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	lpr.FluentBitUtils = kubernetes.NewFluentBit(client, daemonSetConfig.FluentBitDaemonSetName)
+	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName)
 
 	metrics.Registry.MustRegister(lpr.unsupportedTotal)
 

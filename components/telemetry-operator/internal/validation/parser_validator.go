@@ -19,6 +19,9 @@ func NewParserValidator() ParserValidator {
 }
 
 func (v *parserValidator) Validate(logParser *telemetryv1alpha1.LogParser) error {
+	if len(logParser.Spec.Parser) == 0 {
+		return fmt.Errorf("log parser '%s' has no parser defined", logParser.Name)
+	}
 	section, err := parseSection(logParser.Spec.Parser)
 	if err != nil {
 		return err

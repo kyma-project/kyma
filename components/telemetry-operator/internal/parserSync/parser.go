@@ -1,4 +1,4 @@
-package parsers
+package parserSync
 
 import (
 	"context"
@@ -37,7 +37,7 @@ func NewLogParserSyncer(client client.Client,
 	return &lps
 }
 
-// Synchronize LogPipeline with ConfigMap of FluentBitUtils parsers (Parser and MultiLineParser).
+// Synchronize LogPipeline with ConfigMap of DaemonSetUtils parsers (Parser and MultiLineParser).
 func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
