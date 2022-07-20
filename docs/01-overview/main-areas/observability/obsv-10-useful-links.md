@@ -11,7 +11,7 @@ If you're interested in learning more about the Observability area, check out th
 
 - See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) the services Grafana, Jaeger, and Kiali.
 
-- Learn how to [use the telemetry component](../../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md) (alpha feature).
+- Learn how to [use the telemetry component](../../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md) (alpha feature).
 
 - Troubleshoot Observability-related issues:
   - [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
