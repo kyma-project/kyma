@@ -5,15 +5,27 @@ import (
 )
 
 type Config struct {
-	LogLevel          string `envconfig:"default=info"`
-	Port              int    `envconfig:"default=8080"`
-	BasicAuthUser     string `envconfig:"default=user"`
-	BasicAuthPassword string `envconfig:"default=passwd"`
-	OAuthClientID     string `envconfig:"default=clientID"`
-	OAuthClientSecret string `envconfig:"default=clientSecret"`
-	//TODO:
-	RequestHeaders         map[string][]string `envconfig:"optional"`
-	RequestQueryParameters map[string][]string `envconfig:"optional"`
+	LogLevel               string
+	Port                   int
+	BasicAuthUser          string
+	BasicAuthPassword      string
+	OAuthClientID          string
+	OAuthClientSecret      string
+	RequestHeaders         map[string][]string
+	RequestQueryParameters map[string][]string
+}
+
+func NewConfig() *Config {
+	return &Config{
+		LogLevel:               "info",
+		Port:                   8080,
+		BasicAuthUser:          "user",
+		BasicAuthPassword:      "passwd",
+		OAuthClientID:          "clientID",
+		OAuthClientSecret:      "clientSecret",
+		RequestHeaders:         map[string][]string{"hkey1": {"hval1"}, "hkey2": {"hkey21", "hkey22"}},
+		RequestQueryParameters: map[string][]string{"qkey1": {"qval1"}, "qkey2": {"qkey21", "qkey22"}},
+	}
 }
 
 func (c *Config) String() string {

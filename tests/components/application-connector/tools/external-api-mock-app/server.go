@@ -5,21 +5,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/vrischmann/envconfig"
-
-	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 )
 
 func main() {
-	cfg := Config{}
-	err := envconfig.InitWithPrefix(&cfg, "APP")
-	exitOnError(err, "Failed to load Authorization server config")
-	//TODO: Init it correctly
-	cfg.RequestHeaders = map[string][]string{"hkey1":{"hval1"},"hkey2":{"hval21","hval22"}}
-	cfg.RequestQueryParameters = map[string][]string{"qkey1":{"qval1"},"qkey2":{"qval21","qval22"}}
-
+	cfg := NewConfig()
 	logLevel, err := log.ParseLevel(cfg.LogLevel)
 	if err != nil {
 		log.Warnf("Invalid log level: '%s', defaulting to 'info'", cfg.LogLevel)
