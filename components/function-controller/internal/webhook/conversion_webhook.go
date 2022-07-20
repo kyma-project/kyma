@@ -177,7 +177,8 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	out.Runtime = serverlessv1alpha2.Runtime(in.Runtime)
 	out.RuntimeImageOverride = in.RuntimeImageOverride
 
-	//TODO: out.ResourceConfiguration / profile
+	//TODO: out.Profile
+	//TODO out.CustomRuntimeCOnfiguration
 	out.ResourceConfiguration = serverlessv1alpha2.ResourceConfiguration{
 		Build: serverlessv1alpha2.ResourceRequirements{
 			Resources: in.BuildResources,
@@ -199,7 +200,6 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 		if err != nil {
 			return err
 		}
-
 		out.Source = serverlessv1alpha2.Source{
 			GitRepository: &serverlessv1alpha2.GitRepositorySource{
 				URL: repo.Spec.URL,
@@ -273,6 +273,7 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 		out.Source = in.Source.Inline.Source
 		out.Deps = in.Source.Inline.Dependencies
 	} else {
+		out.Type = serverlessv1alpha1.SourceTypeGit
 		// check repo name in the annotations,
 		if repoName == "" {
 			// create a random name git repo with the information. This is not supposed to happen, it's just a precaution.
