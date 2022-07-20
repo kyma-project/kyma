@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-http-utils/logger"
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -62,7 +61,7 @@ type BasicAuthCredentials struct {
 }
 
 func handleError(w http.ResponseWriter, code int, format string, a ...interface{}) {
-	err := errors.New(fmt.Sprintf(format, a...))
+	err := fmt.Errorf(format, a...)
 	log.Error(err)
 	w.WriteHeader(code)
 }
