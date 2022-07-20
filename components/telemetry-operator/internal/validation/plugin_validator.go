@@ -58,7 +58,7 @@ func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, 
 
 func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
 	for _, filterPlugin := range pipeline.Spec.Filters {
-		if err := checkIfPluginIsValid(filterPlugin.Custom, pipeline, pv.deniedFilterPlugins, pipelines); err != nil {
+		if err := validateCustomOutput(filterPlugin.Custom, pv.deniedFilterPlugins, pipelines); err != nil {
 			return err
 		}
 	}
@@ -69,7 +69,7 @@ func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipelin
 	if err := checkSingleOutputPlugin(pipeline.Spec.Output); err != nil {
 		return err
 	}
-	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
+	if err := validateCustomOutput(pipeline.Spec.Output.Custom, pv.deniedOutputPlugins, pipelines); err != nil {
 		return err
 	}
 	return nil
@@ -93,7 +93,11 @@ func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
 	return nil
 }
 
-func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipeline, denied []string, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func validateCustomOutput(content string, denied []string, pipelines *telemetryv1alpha1.LogPipelineList) error {
+	if content == "" {
+		return nil
+	}
+
 	customSection, err := parseSection(content)
 	if err != nil {
 		return err
