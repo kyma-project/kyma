@@ -7,7 +7,7 @@ import (
 
 func (gs *GatewaySuite) TestManual() {
 	gs.Run("OAuth token renewal", func() {
-		url := gatewayURL("manual", "oauth-short") + "/ok"
+		url := gatewayURL("complex-cases", "oauth-expired-token-renewal")
 		gs.T().Log("Url:", url)
 
 		// Authorize, then call endpoint

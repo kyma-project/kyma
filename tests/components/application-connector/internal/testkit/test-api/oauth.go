@@ -19,11 +19,11 @@ type OAuthCredentials struct {
 }
 
 const (
-	clientIDKey     = "client_id"
-	clientSecretKey = "client_secret"
-	grantTypeKey    = "grant_type"
-	tokenLifetime   = "token_lifetime"
-	defaultTokenTTL = 5 * time.Minute
+	clientIDKey           = "client_id"
+	clientSecretKey       = "client_secret"
+	grantTypeKey          = "grant_type"
+	tokenLifetime         = "token_lifetime"
+	defaultTokenExpiresIn = 5 * time.Minute
 )
 
 type OauthResponse struct {
@@ -63,23 +63,23 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := uuid.New().String()
-	ttl := defaultTokenTTL
+	exp := defaultTokenExpiresIn
 
 	if ttlStr := r.URL.Query().Get(tokenLifetime); ttlStr != "" {
-		ttlOrErr, err := time.ParseDuration(ttlStr)
+		parsedEXP, err := time.ParseDuration(ttlStr)
 		if err == nil {
-			log.Info("Received valid OAuth TTL:", ttlOrErr)
-			ttl = ttlOrErr
+			log.Info("Received valid OAuth expiresIn:", parsedEXP)
+			exp = parsedEXP
 		} else {
-			log.Error("Received invalid OAuth TTL:", err)
+			log.Error("Received invalid OAuth expiresIn:", err)
 		}
 	}
 
 	oh.mutex.Lock()
-	oh.tokens[token] = OAuthToken{exp: time.Now().Add(ttl)}
+	oh.tokens[token] = OAuthToken{exp: time.Now().Add(exp)}
 	oh.mutex.Unlock()
 
-	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: int64(ttl.Seconds())}
+	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: int64(exp.Seconds())}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
