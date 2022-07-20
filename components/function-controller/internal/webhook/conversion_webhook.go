@@ -269,7 +269,7 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 	out.Labels = in.Template.Labels
 
 	// TODO: clean check
-	if in.Source.GitRepository.URL == "" {
+	if in.Source.GitRepository == nil {
 		out.Source = in.Source.Inline.Source
 		out.Deps = in.Source.Inline.Dependencies
 	} else {

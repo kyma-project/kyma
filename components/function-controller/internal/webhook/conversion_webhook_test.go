@@ -106,7 +106,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
-						Inline: serverlessv1alpha2.InlineSource{
+						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
@@ -148,7 +148,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
-						Inline: serverlessv1alpha2.InlineSource{
+						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
@@ -256,7 +256,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
-						GitRepository: serverlessv1alpha2.GitRepositorySource{
+						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: testGitRepo.Spec.URL,
 							Repository: serverlessv1alpha2.Repository{
 								BaseDir:   "/code/",
@@ -342,7 +342,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
-						GitRepository: serverlessv1alpha2.GitRepositorySource{
+						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: testGitRepo.Spec.URL,
 							Repository: serverlessv1alpha2.Repository{
 								BaseDir:   "/code/",
