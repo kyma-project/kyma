@@ -60,9 +60,7 @@ async function provisionSKRInstance(options, timeout) {
         timeout);
 
     debug('SKR is provisioned!');
-    const shoot = skr.shoot;
-
-    return shoot;
+    return skr.shoot;
   } catch (e) {
     throw new Error(`Provisioning failed: ${e.toString(), e.stack}`);
   } finally {
