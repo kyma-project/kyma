@@ -19,10 +19,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"

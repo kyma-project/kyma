@@ -75,29 +75,23 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 		}
 
 		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParser)
-		if fluentBitParsersConfig == "" {
-			if cm.Data == nil {
-				return false, nil
-			}
-			cm.Data = nil
+		if cm.Data == nil {
+			data := make(map[string]string)
+			data[parsersConfigMapKey] = fluentBitParsersConfig
+			cm.Data = data
+			changed = true
 		} else {
-			if cm.Data == nil {
-				data := make(map[string]string)
-				data[parsersConfigMapKey] = fluentBitParsersConfig
-				cm.Data = data
-				changed = true
-			} else {
-				if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
-					cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
-					changed = true
-				}
-			}
-			if !controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
-				log.Info("Adding finalizer")
-				controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
+			if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
+				cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
 				changed = true
 			}
 		}
+		if !controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
+			log.Info("Adding finalizer")
+			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
+			changed = true
+		}
+
 	}
 
 	if !changed {

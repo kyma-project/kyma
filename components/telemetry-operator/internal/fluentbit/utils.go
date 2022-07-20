@@ -3,10 +3,11 @@ package fluentbit
 import (
 	"context"
 	"fmt"
+	"time"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"k8s.io/api/core/v1"
-	"time"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"

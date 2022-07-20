@@ -19,6 +19,7 @@ package telemetry
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
