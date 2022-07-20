@@ -81,7 +81,6 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 			}
 			cm.Data = nil
 		} else {
-
 			if cm.Data == nil {
 				data := make(map[string]string)
 				data[parsersConfigMapKey] = fluentBitParsersConfig
