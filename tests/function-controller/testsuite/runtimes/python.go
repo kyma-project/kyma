@@ -24,7 +24,7 @@ arrow==0.15.8`
 		MinReplicas: &minReplicas,
 		MaxReplicas: &maxReplicas,
 		Source: serverlessv1alpha1.Source{
-			Inline: serverlessv1alpha1.InlineSource{
+			Inline: &serverlessv1alpha1.InlineSource{
 				Source:       src,
 				Dependencies: dpd,
 			},
@@ -47,7 +47,7 @@ kyma-pypi-test==1.0.0`
 		MinReplicas: &minReplicas,
 		MaxReplicas: &maxReplicas,
 		Source: serverlessv1alpha1.Source{
-			Inline: serverlessv1alpha1.InlineSource{
+			Inline: &serverlessv1alpha1.InlineSource{
 				Source:       src,
 				Dependencies: dpd,
 			},
