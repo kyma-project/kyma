@@ -25,7 +25,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{},
+						GitRepository: &v1alpha2.GitRepositorySource{},
 					},
 					Runtime: v1alpha2.NodeJs12,
 				},
@@ -37,7 +37,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "1",
 							},
@@ -53,7 +53,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "1",
 							},
@@ -69,7 +69,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "1",
 							},
@@ -93,7 +93,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "2",
 							},
@@ -126,7 +126,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "2",
 								BaseDir:   "base_dir",
@@ -147,7 +147,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "branch",
 							},
@@ -167,7 +167,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			fn: v1alpha2.Function{
 				Spec: v1alpha2.FunctionSpec{
 					Source: v1alpha2.Source{
-						GitRepository: v1alpha2.GitRepositorySource{
+						GitRepository: &v1alpha2.GitRepositorySource{
 							Repository: v1alpha2.Repository{
 								Reference: "2",
 							},

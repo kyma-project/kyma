@@ -56,6 +56,7 @@ func (fn *Function) getBasicValidations() []validationFunction {
 		fn.Spec.validateReplicas,
 		fn.Spec.validateFunctionResources,
 		fn.Spec.validateBuildResources,
+		fn.Spec.validateSources,
 	}
 }
 
@@ -190,6 +191,21 @@ func (spec *FunctionSpec) validateBuildResources(vc *ValidationConfig) error {
 	minCPU := resource.MustParse(vc.BuildJob.Resources.MinRequestCPU)
 
 	return validateResources(spec.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.build.resources")
+}
+
+func (spec *FunctionSpec) validateSources(vc *ValidationConfig) error {
+	sources := 0
+	if spec.Source.GitRepository != nil {
+		sources++
+	}
+
+	if spec.Source.Inline != nil {
+		sources++
+	}
+	if sources == 1 {
+		return nil
+	}
+	return errors.Errorf("spec.source should contains only 1 configuration of function")
 }
 
 func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) error {

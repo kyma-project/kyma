@@ -16,14 +16,14 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	k8s.io/api v0.23.5
-	k8s.io/apimachinery v0.23.5
-	k8s.io/client-go v0.23.5
+	k8s.io/api v0.24.0
+	k8s.io/apimachinery v0.24.0
+	k8s.io/client-go v0.24.0
 )
 
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
-	github.com/kyma-project/kyma/components/function-controller => github.com/m00g3n/kyma/components/function-controller v0.0.0-20220620100657-5307df4b86a7
+	github.com/kyma-project/kyma/components/function-controller => github.com/dbadura/kyma/components/function-controller v0.0.0-20220720064318-f6871d552caf
 	//github.com/kyma-project/kyma/components/function-controller => ../../components/function-controller
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a

@@ -42,7 +42,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -83,7 +83,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source:       "test-source",
 							Dependencies: " { test }     \t\n",
 						},
@@ -137,13 +137,52 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			},
 			expectedError: gomega.BeNil(),
 		},
+		"Should return error when more than one source is filled": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs12,
+					Source: Source{
+						Inline: &InlineSource{
+							Source:       "test-source",
+							Dependencies: "{}",
+						},
+						GitRepository: &GitRepositorySource{URL: "fake-url", Repository: Repository{
+							BaseDir:   "/",
+							Reference: "ref",
+						}},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"source",
+				),
+			),
+		},
+		"Should return error when source is not filled": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs12,
+					Source:  Source{},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"source",
+				),
+			),
+		},
 		"Should return error on deps validation": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source:       "test-source",
 							Dependencies: "{",
 						},
@@ -163,7 +202,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -192,7 +231,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -217,7 +256,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -238,7 +277,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -259,7 +298,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -295,7 +334,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -343,7 +382,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					MaxReplicas: pointer.Int32(0),
 					Runtime:     NodeJs12,
 					Source: Source{
-						Inline: InlineSource{
+						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
@@ -394,7 +433,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: Source{
-						GitRepository: GitRepositorySource{
+						GitRepository: &GitRepositorySource{
 							URL: "test-source",
 							Repository: Repository{
 								BaseDir:   "/",
@@ -440,7 +479,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source: Source{
-						GitRepository: GitRepositorySource{
+						GitRepository: &GitRepositorySource{
 							URL: "testme",
 						},
 					},
