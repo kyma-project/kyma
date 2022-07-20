@@ -88,7 +88,7 @@ func main() {
 	whs.KeyName = resources.KeyFile
 
 	whs.Register(resources.FunctionConvertWebhookPath,
-		webhook.NewConvertingWebHook(
+		webhook.NewConvertingWebhook(
 			mgr.GetClient(),
 			scheme,
 		),

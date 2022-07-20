@@ -21,7 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
 
-type ConvertingWebHook struct {
+type ConvertingWebhook struct {
 	scheme  *runtime.Scheme
 	client  ctrlclient.Client
 	decoder *conversion.Decoder
@@ -32,13 +32,13 @@ const (
 	v1alpha1GitRepoNameAnnotation = "serverless.kyma-project.io/v1alpha1GitRepoName"
 )
 
-var _ http.Handler = &ConvertingWebHook{}
+var _ http.Handler = &ConvertingWebhook{}
 
-func NewConvertingWebHook(client ctrlclient.Client, scheme *runtime.Scheme) *ConvertingWebHook {
+func NewConvertingWebhook(client ctrlclient.Client, scheme *runtime.Scheme) *ConvertingWebhook {
 	//TODO: change signature of method scheme -> decoder
 	decoder, _ := conversion.NewDecoder(scheme)
 	log := controllerruntime.Log.WithName("Converting webhook")
-	return &ConvertingWebHook{
+	return &ConvertingWebhook{
 		client:  client,
 		scheme:  scheme,
 		decoder: decoder,
@@ -46,7 +46,7 @@ func NewConvertingWebHook(client ctrlclient.Client, scheme *runtime.Scheme) *Con
 	}
 }
 
-func (w *ConvertingWebHook) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (w *ConvertingWebhook) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	convertReview := &apix.ConversionReview{}
 	err := json.NewDecoder(req.Body).Decode(convertReview)
 	if err != nil {
@@ -72,7 +72,7 @@ func (w *ConvertingWebHook) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 	}
 }
 
-func (w *ConvertingWebHook) handleConvertRequest(req *apix.ConversionRequest) (*apix.ConversionResponse, error) {
+func (w *ConvertingWebhook) handleConvertRequest(req *apix.ConversionRequest) (*apix.ConversionResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("conversion request is nil")
 	}
@@ -103,7 +103,7 @@ func (w *ConvertingWebHook) handleConvertRequest(req *apix.ConversionRequest) (*
 	}, nil
 }
 
-func (w *ConvertingWebHook) allocateDstObject(apiVersion, kind string) (runtime.Object, error) {
+func (w *ConvertingWebhook) allocateDstObject(apiVersion, kind string) (runtime.Object, error) {
 	gvk := schema.FromAPIVersionAndKind(apiVersion, kind)
 
 	obj, err := w.scheme.New(gvk)
@@ -122,7 +122,7 @@ func (w *ConvertingWebHook) allocateDstObject(apiVersion, kind string) (runtime.
 	return obj, nil
 }
 
-func (w *ConvertingWebHook) convertFunction(src, dst runtime.Object) error {
+func (w *ConvertingWebhook) convertFunction(src, dst runtime.Object) error {
 	// v1alpha1 -> v1alpha2
 	if in, ok := src.(*serverlessv1alpha1.Function); ok {
 		out, ok := dst.(*serverlessv1alpha2.Function)
@@ -170,7 +170,7 @@ func (w *ConvertingWebHook) convertFunction(src, dst runtime.Object) error {
 	return nil
 }
 
-func (w *ConvertingWebHook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionSpec, out *serverlessv1alpha2.FunctionSpec, namespace string) error {
+func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionSpec, out *serverlessv1alpha2.FunctionSpec, namespace string) error {
 	out.Env = in.Env
 	out.MaxReplicas = in.MaxReplicas
 	out.MinReplicas = in.MaxReplicas
@@ -228,7 +228,7 @@ func (w *ConvertingWebHook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	return nil
 }
 
-func (w *ConvertingWebHook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionStatus, out *serverlessv1alpha2.FunctionStatus) {
+func (w *ConvertingWebhook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionStatus, out *serverlessv1alpha2.FunctionStatus) {
 	out.Repository = serverlessv1alpha2.Repository(in.Repository)
 	out.Commit = in.Commit
 	out.Runtime = serverlessv1alpha2.RuntimeExtended(in.Runtime)
@@ -256,7 +256,7 @@ func errored(err error) *apix.ConversionResponse {
 	}
 }
 
-func (w *ConvertingWebHook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionSpec, out *serverlessv1alpha1.FunctionSpec, repoName, functionName, namespace string) error {
+func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionSpec, out *serverlessv1alpha1.FunctionSpec, repoName, functionName, namespace string) error {
 	out.Env = in.Env
 	out.MaxReplicas = in.MaxReplicas
 	out.MinReplicas = in.MaxReplicas
@@ -304,7 +304,7 @@ func (w *ConvertingWebHook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 	return nil
 }
 
-func (w *ConvertingWebHook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, out *serverlessv1alpha1.FunctionStatus) {
+func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, out *serverlessv1alpha1.FunctionStatus) {
 	out.Repository = serverlessv1alpha1.Repository(in.Repository)
 	out.Commit = in.Commit
 	out.Runtime = serverlessv1alpha1.RuntimeExtended(in.Runtime)
