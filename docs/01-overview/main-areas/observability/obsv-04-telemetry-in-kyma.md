@@ -4,24 +4,25 @@ title: Telemetry (alpha)
 
 ## Kyma's telemetry component
 
-The focus of Kyma's observability functionality is the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. Lightweight in-cluster backends can be installed with dedicated observability components.
+Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
 
-For now, the telemetry component supports the logging domain only. You get a log collector (Fluent Bit) and you can configure the log shipment with external systems using runtime configuration with a dedicated Kubernetes API (CRD). With that, for example, you can integrate with vendors like [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. Kyma's optional `logging` component complements the telemetry component, providing `Loki` as pre-configured log backend.
+For now, the telemetry component supports the logging domain only. You get a log collector (Fluent Bit) and you can configure the log shipment with external systems using runtime configuration with a dedicated Kubernetes API (CRD). With that, you can integrate with vendors such as [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. Kyma's optional `logging` component complements the telemetry component, providing `Loki` as pre-configured log backend.
 
-The telemetry component is in an alpha state and needs an [explicit installation](./../../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
+## Prerequisites
+
+- The telemetry component is in an alpha state. You must [explicitly install it](./../../../04-operation-guides/operations/obsv-00-enable-configurable-logging.md).
+- Your application must log to `stdout` or `stderr`.
 
 ## Architecture
 
 ### Telemetry component
 
-The telemetry component ships [Fluent Bit](https://fluentbit.io/) as a log collector. It is responsible for collecting all application logs of the cluster workload reliably and shipping them to a backend.
-
-The only prerequisite in your application is to log to `stdout` or `stderr`.
+The telemetry component provides [Fluent Bit](https://fluentbit.io/) as a log collector. Fluent Bit collects all application logs of the cluster workload and ships them to a backend.
 
 ![Telemetry Architecture](./assets/telemetry-logging-arch.drawio.svg)
 
 1. Container logs are stored by Kubernetes container runtime under the `var/log` directory and its subdirectories.
-2. The collector runs as a Daemon Set (one instance per node), detects any new log files in the folder, and tails them using a filesystem buffer for reliability.
+2. The collector runs as a DaemonSet (one instance per node), detects any new log files in the folder, and tails them using a filesystem buffer for reliability.
 3. The collector queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
 4. The telemetry component configures Fluent Bit with your custom output configuration.
 5. If Kyma's `logging` component is installed, the operator configures the shipment to the in-cluster Loki instance automatically.
@@ -35,21 +36,21 @@ Kyma's telemetry component brings a predefined setup of the Fluent Bit DaemonSet
 
 ![Pipeline Concept](./assets/telemetry-logging-pipelines.drawio.svg)
 
-A central `tail` input plugin reads the application logs.
+1. A central `tail` input plugin reads the application logs.
 
-The application logs are enriched by a `kubernetes` filter. Then, for every `LogPipeline` definition, a `rewrite_tag` filter is generated, which uses a dedicated `tag` with name `<logpipeline>.*`, followed by the custom configuration defined in the `LogPipeline` resource. You can add your own filters to the default filters.
+2. The application logs are enriched by a `kubernetes` filter. Then, for every `LogPipeline` definition, a `rewrite_tag` filter is generated, which uses a dedicated `tag` with name `<logpipeline>.*`, followed by the custom configuration defined in the `LogPipeline` resource. You can add your own filters to the default filters.
 
-Based on the default and custom filters, you get the desired output for each `LogPipeline`.
+3. Based on the default and custom filters, you get the desired output for each `LogPipeline`.
 
 This approach assures a reliable buffer management and isolation of pipelines, while keeping flexibility on customizations.
 
 ### Telemetry Operator
 
-The `LogPipeline` resource is managed by the `Telemetry Operator`, a typical Kubernetes operator responsible for managing the custom parts of the Fluent Bit configuration.
+The LogPipeline resource is managed by the `Telemetry Operator`, a typical Kubernetes operator responsible for managing the custom parts of the Fluent Bit configuration.
 
 ![Operator resources](./assets/telemetry-operator-resources.drawio.svg)
 
-The `Telemetry Operator` watches all Log Pipeline resources and related secrets. Whenever the configuration changes, it validates the configuration (with a Validating Webhook) and generates a new configuration for the Fluent Bit DaemonSet, where several ConfigMaps for the different aspects of the configuration are generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the DaemonSet as well.
+The `Telemetry Operator` watches all Log Pipeline resources and related secrets. Whenever the configuration changes, it validates the configuration (with a [validating webhook](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)) and generates a new configuration for the Fluent Bit DaemonSet, where several ConfigMaps for the different aspects of the configuration are generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the DaemonSet as well.
 
 ## Set up the LogPipeline
 
@@ -119,7 +120,7 @@ In the example, three filters are added, which are executed in sequence. Differe
 
 ### Step 3: Add authentication details from secrets
 
-Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in secrets, the `LogPipeline` supports the reference of Secrets. The key/value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
+Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in secrets, the `LogPipeline` supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
 
 ```yaml
 kind: LogPipeline
@@ -158,7 +159,8 @@ stringData:
 ```
 
 ### Step 4: Rotate the secret
-A Secret being referenced via the `secretKeyRef` construct as used in Step 3 can be rotated in a manual or automated way (by updating the actual secret values while keeping the actual keys stable). The LogPipeline is watching the referenced secrets and will detect changes to them. At the moment, the periodic watch is happening only once in an hour. To enforce the detection, just annotate the LogPipeline for example with
+A Secret being referenced with the `secretKeyRef` construct as used in the previous can be rotated manually or automatically. For automatic rotation, update the actual secret values and keep the keys stable.  
+Once an hour, the LogPipeline watches the referenced secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
 ```yaml
 kind: LogPipeline
@@ -175,7 +177,7 @@ Typically, you want to have your logs shipped in a structured format already, so
 By default, a LogPipeline will try to parse all logs as JSON document and enrich the record with the parsed attributes on the root record. Thus, logging in JSON format in the application results in structured log records.
 Sometimes, logging in JSON is not an option (the log configuration is not under your control) and the logs are in an unstructured or plain format. To adjust this, you can define your custom [parser](https://docs.fluentbit.io/manual/concepts/data-pipeline/parser) and either activate it with a filter or a Pod annotation.
 
-The following example defines a parser named `dummy_test` via a dedicated `LogParser` resource type:
+The following example defines a parser named `dummy_test` using a dedicated `LogParser` resource type:
 
 ```yaml
 kind: LogParser
@@ -188,7 +190,9 @@ spec:
       Format regex
       Regex ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
 ```
-The parser will the be referenced by name in a filter of the pipeline. Here, the parser will be activated for all logs og the pipeline.
+
+The parser is referenced by name in a filter of the pipeline and is activated for all logs of the pipeline.
+
 ```yaml
 kind: LogPipeline
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -203,7 +207,7 @@ spec:
     ...
 ```
 
-Instead of defining a filter, you can [annotate](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) your workload in the following way. Here, the parser will be activated only for the annotated workload.
+Instead of defining a filter, you can [annotate](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) your workload in the following way. Here, the parser is activated only for the annotated workload.
 
 ```yaml
 apiVersion: v1
@@ -217,7 +221,7 @@ spec:
 
 ## LogPipeline specification
 
-The actual specification can be found in [GitHub](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logpipeline_types.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logpipeline_types.go).
 
 | 1. Parameter | 2. Parameter | 3. Parameter | Type | Description |
 |-|-|-|-|-|
@@ -354,7 +358,7 @@ As per `LogPipeline` definition, a dedicated [rewrite_tag](https://docs.fluentbi
 
 ## Limitations
 
-Currently there are following limitations for LogPipelines which are served by Fluent Bit:
+Currently there are the following limitations for LogPipelines that are served by Fluent Bit:
 
 ### Fluent Bit plugins
 
@@ -365,9 +369,13 @@ You cannot enable the following plugins, because they potentially harm the stabi
 - Rewrite_Tag Filter
 
 ### Buffer limits
-Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs. The oldest logs are dropped if the limit is reached.
+
+Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs. The oldest logs are dropped when the limit is reached.
 
 ### Throughput
-Each Fluent Bit pod can process up to 10 MB/s of logs for a single log pipeline. With multiple pipelines, the throughput per pipeline is reduced. The used logging backend or performance characteristics of the output plugin might limit the throughput earlier.
+
+Each Fluent Bit Pod can process up to 10 MB/s of logs for a single log pipeline. With multiple pipelines, the throughput per pipeline is reduced. The used logging backend or performance characteristics of the output plugin might limit the throughput earlier.
+
 ### Max amount of pipelines - CPU/Mem constraints
-Not more than 5 log pipelines when using the production profile or 3 with the evaluation profile.
+
+Not more than 5 log pipelines when using the production profile, or 3 with the evaluation profile.

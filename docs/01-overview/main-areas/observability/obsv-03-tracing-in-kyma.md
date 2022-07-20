@@ -4,7 +4,7 @@ title: Tracing
 
 ## Overview
 
-With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of a request chain going through your distributed applications. This information helps you to, for example, troubleshoot your applications, or optimize the latency and performance of your solution.
+For in-cluster tracing, Kyma uses [Jaeger](https://github.com/jaegertracing). With this distributed tracing system, you can analyze the path of a request chain going through your distributed applications. This information helps you to, for example, troubleshoot your applications, or optimize the latency and performance of your solution.
 
 ## Limitations
 
