@@ -104,7 +104,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	}
 	// Build the config from all the exiting pipelines
 	for _, logPipeline := range logPipelines.Items {
-		configFiles, err = appendConfigFile(configFiles, logPipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
+		configFiles, err = appendFBConfigFile(configFiles, logPipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
 		if err != nil {
 			return []fs.File{}, err
 		}
@@ -128,7 +128,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 
 	return configFiles, nil
 }
-func appendConfigFile(
+func appendFBConfigFile(
 	configFiles []fs.File,
 	logPipeline telemetryv1alpha1.LogPipeline,
 	pipelineConfig PipelineConfig,
