@@ -97,8 +97,6 @@ metadata:
   name: request-parameters-test
   namespace: kyma-integration
 type: Opaque
-data:
-  # {"Hkey1":["Hval1"],"Hkey2":["Hval21","Hval22"]}
-  headers: eyJIa2V5MSI6WyJIdmFsMSJdLCJIa2V5MiI6WyJIdmFsMjEiLCJIdmFsMjIiXX0K
-  # {"Qkey1":["Qval1"],"Qkey2":["Qval21","Qval22"]}
-  queryParameters: eyJRa2V5MSI6WyJRdmFsMSJdLCJRa2V5MiI6WyJRdmFsMjEiLCJRdmFsMjIiXX0K
+stringData: |-
+  headers: {"Hkey1":["Hval1"],"Hkey2":["Hval21","Hval22"]}
+  queryParameters: {"Qkey1":["Qval1"],"Qkey2":["Qval21","Qval22"]}

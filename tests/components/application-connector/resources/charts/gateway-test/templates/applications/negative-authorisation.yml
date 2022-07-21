@@ -113,8 +113,6 @@ metadata:
   name: wrong-request-parameters-test
   namespace: kyma-integration
 type: Opaque
-data:
-  # {"Hkey1":["Wrong-value"],"Wrong-key":["Hval22"]}
-  headers: eyJIa2V5MSI6WyJXcm9uZy12YWx1ZSJdLCJXcm9uZy1rZXkiOlsiSHZhbDIyIl19Cg==
-  # {"Wrong-key":["Qval1"],"Qkey2":["Qval21","Qval22","Additional-value"]}
-  queryParameters: eyJXcm9uZy1rZXkiOlsiUXZhbDEiXSwiUWtleTIiOlsiUXZhbDIxIiwiUXZhbDIyIiwiQWRkaXRpb25hbC12YWx1ZSJdfQo=
+stringData: |-
+  headers: {"Hkey1":["Wrong-value"],"Wrong-key":["Hval22"]}
+  queryParameters: {"Wrong-key":["Qval1"],"Qkey2":["Qval21","Qval22","Additional-value"]}
