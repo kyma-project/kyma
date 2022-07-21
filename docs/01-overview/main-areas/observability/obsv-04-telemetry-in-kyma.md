@@ -22,8 +22,8 @@ The telemetry component provides [Fluent Bit](https://fluentbit.io/) as a log co
 ![Telemetry Architecture](./assets/telemetry-logging-arch.drawio.svg)
 
 1. Container logs are stored by Kubernetes container runtime under the `var/log` directory and its subdirectories.
-2. The collector runs as a DaemonSet (one instance per node), detects any new log files in the folder, and tails them using a filesystem buffer for reliability.
-3. The collector queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
+2. Fluent Bit runs as a DaemonSet (one instance per node), detects any new log files in the folder, and tails them using a filesystem buffer for reliability.
+3. Fluent Bit queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
 4. The telemetry component configures Fluent Bit with your custom output configuration.
 5. If Kyma's `logging` component is installed, the operator configures the shipment to the in-cluster Loki instance automatically.
 6. As specified in your custom configuration, Fluent Bit sends the log data to observability systems outside the Kyma cluster.
