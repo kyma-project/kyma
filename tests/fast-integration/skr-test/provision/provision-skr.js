@@ -1,14 +1,17 @@
 const {
-  initK8sConfig,
   getSKRConfig,
   withSuffix,
   withInstanceID,
   gatherOptions,
-  keb,
+  getEnvOrThrow,
+  genRandom,
+  debug,
   kcp,
   gardener,
+  keb,
+  initK8sConfig,
 } = require('../helpers');
-const {getEnvOrThrow, genRandom, debug} = require('../../utils');
+
 const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
@@ -57,9 +60,7 @@ async function provisionSKRInstance(options, timeout) {
         timeout);
 
     debug('SKR is provisioned!');
-    const shoot = skr.shoot;
-
-    return shoot;
+    return skr.shoot;
   } catch (e) {
     throw new Error(`Provisioning failed: ${e.toString(), e.stack}`);
   } finally {

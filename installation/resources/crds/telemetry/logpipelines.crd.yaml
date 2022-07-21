@@ -65,30 +65,12 @@ spec:
                       type: string
                   type: object
                 type: array
-              multilineParsers:
-                items:
-                  description: MultiLineParser describes a Fluent Bit multiline parser
-                    configuration section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
               output:
                 description: Output describes a Fluent Bit output configuration section
                 properties:
                   custom:
                     type: string
                 type: object
-              parsers:
-                items:
-                  description: Parser describes a Fluent Bit parser configuration
-                    section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
               variables:
                 items:
                   description: Variables is a pointer to a Kubernetes secret that

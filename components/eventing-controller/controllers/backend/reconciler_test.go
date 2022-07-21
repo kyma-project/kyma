@@ -667,8 +667,8 @@ func bebSecretExists(ctx context.Context) bool {
 	return len(secretList.Items) > 0
 }
 
-// creates a secret containing the oauth2 credentials that is expected to be
-// created by the Hydra operator
+// createOAuth2Secret creates a secret containing the oauth2 credentials that is expected to be
+// created by the Hydra operator.
 func createOAuth2Secret(ctx context.Context, clientID, clientSecret []byte) {
 	sec := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go

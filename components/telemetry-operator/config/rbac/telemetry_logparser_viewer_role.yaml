@@ -1,0 +1,20 @@
+# permissions for end users to view logparsers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logparser-viewer-role
+rules:
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logparsers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logparsers/status
+  verbs:
+  - get
