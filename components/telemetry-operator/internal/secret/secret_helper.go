@@ -30,6 +30,24 @@ func (s *Helper) ValidateSecretsExist(ctx context.Context, logpipeline *telemetr
 			return false
 		}
 	}
+	if logpipeline.Spec.Output.HTTP.Host.ValueFrom.IsSecretRef() {
+		_, err := s.FetchSecret(ctx, logpipeline.Spec.Output.HTTP.Host.ValueFrom)
+		if err != nil {
+			return false
+		}
+	}
+	if logpipeline.Spec.Output.HTTP.User.ValueFrom.IsSecretRef() {
+		_, err := s.FetchSecret(ctx, logpipeline.Spec.Output.HTTP.User.ValueFrom)
+		if err != nil {
+			return false
+		}
+	}
+	if logpipeline.Spec.Output.HTTP.Password.ValueFrom.IsSecretRef() {
+		_, err := s.FetchSecret(ctx, logpipeline.Spec.Output.HTTP.Password.ValueFrom)
+		if err != nil {
+			return false
+		}
+	}
 	return true
 }
 
