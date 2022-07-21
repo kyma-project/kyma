@@ -31,6 +31,8 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 		r := api.PathPrefix("/unsecure").Subrouter()
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
+		r.HandleFunc("/code/{code:[0-9]+}", resCode)
+		r.HandleFunc("/timeout", timeout)
 	}
 	{
 		r := api.PathPrefix("/basic").Subrouter()
