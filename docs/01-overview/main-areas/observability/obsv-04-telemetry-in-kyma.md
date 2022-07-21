@@ -90,7 +90,7 @@ The `Telemetry Operator` watches all LogPipeline resources and related Secrets. 
 
 ### Step 2: Add filters
 
-To enrich logs with attributes or drop whole lines, add filters to the existing pipeline:
+To enrich logs with attributes or drop whole lines, add filters to the existing pipeline. In the following example, three filters are added, which are executed in sequence.
 
 ```yaml
 kind: LogPipeline
@@ -112,9 +112,9 @@ spec:
     ...
 ```
 
-In the example, three filters are added, which are executed in sequence. Different types of [Fluent Bit filter](https://docs.fluentbit.io/manual/concepts/data-pipeline/filter) are supported. The example uses the [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) and the [record_modifier](https://docs.fluentbit.io/manual/pipeline/filters/record-modifier) filter.
+ The telemetry operator supports different types of [Fluent Bit filter](https://docs.fluentbit.io/manual/concepts/data-pipeline/filter). The example uses the [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) and the [record_modifier](https://docs.fluentbit.io/manual/pipeline/filters/record-modifier) filter.
 
-- The first filter keeps all log records that have the `kubernetes.labels.app` attribute set with value `my-deployment`; all other logs are discarded. The `kubernetes` attribute is available for every log record. See [here](#kubernetes-filter-metadata) for more details.
+- The first filter keeps all log records that have the `kubernetes.labels.app` attribute set with value `my-deployment`; all other logs are discarded. The `kubernetes` attribute is available for every log record. See [Kubernetes filter (metadata)](#kubernetes-filter-metadata) for more details.
 - The second filter drops all log records fulfilling the given rule. Here, typical Namespaces are dropped based on the `kubernetes` attribute.
 - A log record is modified by adding a new attribute. Here, a constant attribute is added to every log record for recording the actual cluster node name at the record for later filtering in the backend system. As value, a placeholder is used referring to a Kubernetes-specific environment variable.
 
