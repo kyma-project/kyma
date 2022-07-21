@@ -33,7 +33,7 @@ func RequestParameters(expectedHeaders, expectedQueryParameters map[string][]str
 			for key, expectedVals := range expectedHeaders {
 				actualVals := r.Header.Values(key)
 				if !containsAllValues(actualVals, expectedVals) {
-					handleError(w, http.StatusBadRequest, "Incorrect additional headers")
+					handleError(w, http.StatusBadRequest, "Incorrect additional headers. Expected %s header to contain %v, but found %v", key, expectedVals, actualVals)
 					return
 				}
 			}
@@ -42,7 +42,7 @@ func RequestParameters(expectedHeaders, expectedQueryParameters map[string][]str
 			for key, expectedVals := range expectedQueryParameters {
 				actualVals := queryParameters[key]
 				if !containsAllValues(actualVals, expectedVals) {
-					handleError(w, http.StatusBadRequest, "Incorrect additional query parameters")
+					handleError(w, http.StatusBadRequest, "Incorrect additional query parameters. Expected %s query parameter to contain %v, but found %v", key, expectedVals, actualVals)
 					return
 				}
 			}
@@ -58,7 +58,7 @@ func Logger(out io.Writer, t logger.Type) mux.MiddlewareFunc {
 	}
 }
 
-func containsAllValues(a, b []string) bool {
+func containsAllValues[T comparable](a, b []T) bool {
 	for _, bVal := range b {
 		for _, aVal := range a {
 			if bVal == aVal {
