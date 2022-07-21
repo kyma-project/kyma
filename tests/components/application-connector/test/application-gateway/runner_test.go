@@ -87,7 +87,10 @@ func (gs *GatewaySuite) TestBodyPerMethod() {
 					continue
 				}
 
-				req, err := http.NewRequest(service.Description, entry.CentralGatewayUrl, strings.NewReader(service.Description))
+				method := service.Description
+				bodyBuf := strings.NewReader(service.Description)
+
+				req, err := http.NewRequest(method, entry.CentralGatewayUrl, bodyBuf)
 				gs.Nil(err, "Preparing request failed")
 
 				_, body, err := httpCli.Do(req)

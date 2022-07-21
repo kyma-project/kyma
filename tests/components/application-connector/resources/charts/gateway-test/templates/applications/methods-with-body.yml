@@ -1,10 +1,12 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: body-forwarding
+  name: methods-with-body
   namespace: "{{ .Values.namespace }}"
 spec:
-  description: body forwarding with various methods
+  description: |-
+    Verify if methods, specified by `descritpion`,
+    are correctly forwarded, including their body
   skipVerify: true
   labels:
     app: body-forwarding
