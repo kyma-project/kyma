@@ -44,7 +44,12 @@ func (v *configValidator) RunCmd(ctx context.Context, name string, args ...strin
 }
 
 func (v *configValidator) Validate(ctx context.Context, configFilePath string) error {
+
 	fluentBitArgs := []string{"--dry-run", "--quiet", "--config", configFilePath}
+
+	if strings.Contains(configFilePath, "parsers.conf") {
+		fluentBitArgs = []string{"--dry-run", "--quiet", "-R", configFilePath}
+	}
 	plugins, err := listPlugins(v.PluginDirectory)
 	if err != nil {
 		return err
@@ -99,11 +104,16 @@ func extractError(output string) string {
 		return r2Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
-	r3 := regexp.MustCompile(`.*(?P<label>\[error]\s)(?P<description>.+)`)
+	r3 := regexp.MustCompile(`.*(?P<label>\[error]\s\[parser]\s)(?P<description>.+)(\sin.+)`)
 	if r3Matches := r3.FindStringSubmatch(output); r3Matches != nil {
-		return r3Matches[2] // 0: complete output, 1: label, 2: description
+		return r3Matches[2] // 0: complete output, 1: label, 2: description 3: file name
 	}
 
-	r4 := regexp.MustCompile(`error.+`)
-	return r4.FindString(output)
+	r4 := regexp.MustCompile(`.*(?P<label>\[error]\s)(?P<description>.+)`)
+	if r4Matches := r4.FindStringSubmatch(output); r4Matches != nil {
+		return r4Matches[2] // 0: complete output, 1: label, 2: description
+	}
+
+	r5 := regexp.MustCompile(`error.+`)
+	return r5.FindString(output)
 }
