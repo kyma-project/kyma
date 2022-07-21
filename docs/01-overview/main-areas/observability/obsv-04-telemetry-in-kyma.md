@@ -38,7 +38,7 @@ Kyma's telemetry component brings a predefined setup of the Fluent Bit DaemonSet
 
 1. A central `tail` input plugin reads the application logs.
 
-2. The application logs are enriched by a `kubernetes` filter. Then, for every `LogPipeline` definition, a `rewrite_tag` filter is generated, which uses a dedicated `tag` with name `<logpipeline>.*`, followed by the custom configuration defined in the `LogPipeline` resource. You can add your own filters to the default filters.
+2. The application logs are enriched by a `kubernetes` filter. Then, for every LogPipeline definition, a `rewrite_tag` filter is generated, which uses a dedicated `tag` with name `<logpipeline>.*`, followed by the custom configuration defined in the LogPipeline resource. You can add your own filters to the default filters.
 
 3. Based on the default and custom filters, you get the desired output for each `LogPipeline`.
 
@@ -50,7 +50,7 @@ The LogPipeline resource is managed by the `Telemetry Operator`, a typical Kuber
 
 ![Operator resources](./assets/telemetry-operator-resources.drawio.svg)
 
-The `Telemetry Operator` watches all Log Pipeline resources and related secrets. Whenever the configuration changes, it validates the configuration (with a [validating webhook](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)) and generates a new configuration for the Fluent Bit DaemonSet, where several ConfigMaps for the different aspects of the configuration are generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the DaemonSet as well.
+The `Telemetry Operator` watches all LogPipeline resources and related Secrets. Whenever the configuration changes, it validates the configuration (with a [validating webhook](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)) and generates a new configuration for the Fluent Bit DaemonSet, where several ConfigMaps for the different aspects of the configuration are generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the DaemonSet as well.
 
 ## Set up the LogPipeline
 
@@ -80,7 +80,7 @@ The `Telemetry Operator` watches all Log Pipeline resources and related secrets.
    kubectl apply -f path/to/my-log-pipeline.yaml
    ```
 
-3. Check that the status of the pipeline in your cluster is `Ready`:
+3. Check that the status of the LogPipeline in your cluster is `Ready`:
 
    ```bash
    kubectl get logpipeline
@@ -118,11 +118,11 @@ In the example, three filters are added, which are executed in sequence. Differe
 - The second filter drops all log records fulfilling the given rule. Here, typical Namespaces are dropped based on the `kubernetes` attribute.
 - A log record is modified by adding a new attribute. Here, a constant attribute is added to every log record for recording the actual cluster node name at the record for later filtering in the backend system. As value, a placeholder is used referring to a Kubernetes-specific environment variable.
 
-### Step 3: Add authentication details from secrets
+### Step 3: Add authentication details from Secrets
 
-Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in secrets, the `LogPipeline` supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
+Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the `LogPipeline` supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
 
-To leverage data provided by a Kubernetes Secrets in a custom output definition, use placeholder expressions for the data provided by the Secret and then specify the actual mapping to the keys of the Secret in the `variables` section, like in:
+To leverage data provided by a Kubernetes Secrets in a custom output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the keys of the Secret in the `variables` section, like in the following example:
 
 ```yaml
 kind: LogPipeline
@@ -149,7 +149,7 @@ spec:
     ...
 ```
 
-The related secret need to fullfil the referenced name and namespace and need to contain the mapped key as in:
+The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
 
 ```yaml
 kind: Secret
@@ -162,9 +162,9 @@ stringData:
   HTTP_PASSWORD: XXX
 ```
 
-### Step 4: Rotate the secret
-A Secret being referenced with the `secretKeyRef` construct as used in the previous can be rotated manually or automatically. For automatic rotation, update the actual secret values and keep the keys stable.  
-Once an hour, the LogPipeline watches the referenced secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
+### Step 4: Rotate the Secret
+A Secret being referenced with the `secretKeyRef` construct as used in the previous can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.  
+Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
 ```yaml
 kind: LogPipeline
@@ -233,9 +233,9 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | filters[].custom | string | The actual filter definition in the syntax of Fluent Bit.|
 | output | object | A [Fluent Bit outputs](https://docs.fluentbit.io/manual/pipeline/outputs).|
 | output.custom | string | The actual output definition in the syntax of Fluent Bit.|
-| variables | | []object | A list of mappings from Kubernetes secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
+| variables | | []object | A list of mappings from Kubernetes Secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
 | variables[].name | string | Name of the variable to map. |
-| variables[].valueFrom.secretKeyRef | object | Reference to a key in a secret. `name` and `namespace` of the secret as well as the name of the `key` needs to be provided |
+| variables[].valueFrom.secretKeyRef | object | Reference to a key in a secret. `name` and `namespace` of the Secret, as well as the name of the `key`, must be provided |
 | files | []object | A list of text snippets that are mounted as files to Fluent Bit, so that they are available for reference in filters and outputs. The mounted snippet is available under the `/files` folder.|
 | files[].name | string | The file name under which the snippet is mounted. The resulting path will be `/files/<name>`. |
 | files[].content | string | The actual text snippet to mount as file.|
@@ -385,8 +385,9 @@ Fluent Bit buffers up to 1 GB of logs if a configured output cannot receive logs
 
 ### Throughput
 
-Each Fluent Bit Pod can process up to 10 MB/s of logs for a single log pipeline. With multiple pipelines, the throughput per pipeline is reduced. The used logging backend or performance characteristics of the output plugin might limit the throughput earlier.
+Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. With multiple pipelines, the throughput per pipeline is reduced. The used logging backend or performance characteristics of the output plugin might limit the throughput earlier.
 
 ### Max amount of pipelines - CPU/Mem constraints
 
-Not more than 5 log pipelines when using the production profile, or 3 with the evaluation profile.
+In the production profile, no more than 5 LogPipelines. 
+In the evaluation profile, no more than 3 LogPipelines.
