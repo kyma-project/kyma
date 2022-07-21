@@ -188,39 +188,51 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	out.Spec.Template = serverlessv1alpha2.Template{
 		Labels: in.Spec.Labels,
 	}
-	if in.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		repo := &serverlessv1alpha1.GitRepository{}
-		err := w.client.Get(context.Background(),
-			types.NamespacedName{
-				Name:      in.Spec.Source,
-				Namespace: in.Namespace,
-			}, repo)
-		if err != nil {
-			return errors.Wrap(err, "while getting git repository")
-		}
-		out.Spec.Source = serverlessv1alpha2.Source{
-			GitRepository: &serverlessv1alpha2.GitRepositorySource{
-				URL: repo.Spec.URL,
+	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
+		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
+	}
+	return nil
+}
 
-				Repository: serverlessv1alpha2.Repository{
-					BaseDir:   in.Spec.BaseDir,
-					Reference: in.Spec.Reference,
-				},
-			},
-		}
-
-		if repo.Spec.Auth != nil {
-			out.Spec.Source.GitRepository.Auth = &serverlessv1alpha2.RepositoryAuth{
-				Type:       serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type),
-				SecretName: repo.Spec.Auth.SecretName,
-			}
-		}
-	} else {
+func (w *ConvertingWebhook) convertSourceV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
+	if in.Spec.Type != serverlessv1alpha1.SourceTypeGit {
 		out.Spec.Source = serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       in.Spec.Source,
 				Dependencies: in.Spec.Deps,
 			},
+		}
+		return nil
+	}
+
+	return w.convertGitRepositoryV1Alpha1ToV1Alpha2(in, out)
+}
+
+func (w *ConvertingWebhook) convertGitRepositoryV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
+	repo := &serverlessv1alpha1.GitRepository{}
+	err := w.client.Get(context.Background(),
+		types.NamespacedName{
+			Name:      in.Spec.Source,
+			Namespace: in.Namespace,
+		}, repo)
+	if err != nil {
+		return errors.Wrap(err, "while getting git repository")
+	}
+	out.Spec.Source = serverlessv1alpha2.Source{
+		GitRepository: &serverlessv1alpha2.GitRepositorySource{
+			URL: repo.Spec.URL,
+
+			Repository: serverlessv1alpha2.Repository{
+				BaseDir:   in.Spec.BaseDir,
+				Reference: in.Spec.Reference,
+			},
+		},
+	}
+
+	if repo.Spec.Auth != nil {
+		out.Spec.Source.GitRepository.Auth = &serverlessv1alpha2.RepositoryAuth{
+			Type:       serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type),
+			SecretName: repo.Spec.Auth.SecretName,
 		}
 	}
 	return nil
@@ -276,45 +288,67 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 
 	out.Spec.Labels = in.Spec.Template.Labels
 
+	return w.convertSourceV1Alpha2ToV1Alpha1(in, out)
+}
+
+func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
+	if in.Spec.Source.GitRepository == nil {
+		out.Spec.Source = in.Spec.Source.Inline.Source
+		out.Spec.Deps = in.Spec.Source.Inline.Dependencies
+		return nil
+	}
+	out.Spec.Type = serverlessv1alpha1.SourceTypeGit
+
 	repoName := ""
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
 	}
 
-	if in.Spec.Source.GitRepository == nil {
-		out.Spec.Source = in.Spec.Source.Inline.Source
-		out.Spec.Deps = in.Spec.Source.Inline.Dependencies
-	} else {
-		out.Spec.Type = serverlessv1alpha1.SourceTypeGit
-		// check repo name in the annotations,
-		if repoName == "" {
-			// create a random name git repo with the information. This is not supposed to happen, it's just a precaution.
-			repo := &serverlessv1alpha1.GitRepository{
-				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: fmt.Sprintf("%s-", in.Name),
-					Namespace:    in.Namespace,
-				},
-				Spec: serverlessv1alpha1.GitRepositorySpec{
-					URL: in.Spec.Source.GitRepository.URL,
-				},
-			}
-			if in.Spec.Source.GitRepository.Auth != nil {
-				repo.Spec.Auth = &serverlessv1alpha1.RepositoryAuth{
-					Type:       serverlessv1alpha1.RepositoryAuthType(in.Spec.Source.GitRepository.Auth.Type),
-					SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
-				}
-			}
-			if err := w.client.Create(context.Background(), repo); err != nil {
-				return errors.Wrap(err, "failed to create GitRepository")
-			}
-			repoName = repo.GetName()
+	// check repo name in the annotations,
+	if repoName == "" {
+		var err error
+		// create a custom-named git repo with the information. This is not supposed to happen, it's just a precaution.
+		repoName, err = w.recreateGitRepoObjectFromFunction(in)
+		if err != nil {
+			return errors.Wrap(err, "while recreating GitRepository")
 		}
-		out.Spec.Source = repoName
-		out.Spec.Reference = in.Spec.Source.GitRepository.Reference
-		out.Spec.BaseDir = in.Spec.Source.GitRepository.BaseDir
+	}
+	out.Spec.Source = repoName
+	out.Spec.Reference = in.Spec.Source.GitRepository.Reference
+	out.Spec.BaseDir = in.Spec.Source.GitRepository.BaseDir
+	return nil
+}
+
+func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1alpha2.Function) (string, error) {
+	repoName := recreatedRepoName(in.Name)
+
+	repo := &serverlessv1alpha1.GitRepository{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: repoName,
+			Namespace:    in.Namespace,
+		},
+		Spec: serverlessv1alpha1.GitRepositorySpec{
+			URL: in.Spec.Source.GitRepository.URL,
+		},
 	}
 
-	return nil
+	if in.Spec.Source.GitRepository.Auth != nil {
+		repo.Spec.Auth = &serverlessv1alpha1.RepositoryAuth{
+			Type:       serverlessv1alpha1.RepositoryAuthType(in.Spec.Source.GitRepository.Auth.Type),
+			SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
+		}
+	}
+
+	if err := w.client.Create(context.Background(), repo); err != nil {
+		return "", errors.Wrap(err, "failed to create GitRepository")
+	}
+
+	return repoName, nil
+
+}
+
+func recreatedRepoName(functionName string) string {
+	return fmt.Sprintf("%s-recreate-repo", functionName)
 }
 
 func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, out *serverlessv1alpha1.FunctionStatus) {
