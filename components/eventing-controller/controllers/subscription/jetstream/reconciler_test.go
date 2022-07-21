@@ -98,11 +98,13 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+				reconcilertesting.WithFinalizers([]string{}),
 			},
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
 				},
 				NatsSubscription: []gomegatypes.GomegaMatcher{
 					natstesting.BeExistingSubscription(),
@@ -213,7 +215,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},

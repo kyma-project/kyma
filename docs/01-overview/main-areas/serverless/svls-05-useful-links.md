@@ -16,9 +16,9 @@ If you're interested in learning more about the Serverless area, follow these li
 
 - Troubleshoot Serverless-related issues when:
 
-   - [Functions won't build](../../../04-operation-guides/troubleshooting/svls-01-cannot-build-functions.md)
-   - [Container fails](../../../04-operation-guides/troubleshooting/svls-02-failing-function-container.md)
-   - [Debugger stops](../../../04-operation-guides/troubleshooting/svls-03-function-debugger-in-strange-location.md)
+   - [Functions won't build](../../../04-operation-guides/troubleshooting/serverless/svls-01-cannot-build-functions.md)
+   - [Container fails](../../../04-operation-guides/troubleshooting/serverless/svls-02-failing-function-container.md)
+   - [Debugger stops](../../../04-operation-guides/troubleshooting/serverless/svls-03-function-debugger-in-strange-location.md)
 
 - Analyze Function specification and configuration files:
 

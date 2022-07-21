@@ -1,0 +1,104 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: positive-authorisation
+  namespace: {{ .Values.namespace }}
+spec:
+  description: Authorisation
+  skipVerify: true
+  labels:
+    app: positive-authorisation
+  services:
+    - displayName: unsecure-always-ok
+      name: unsecure-always-ok
+      providerDisplayName: AlwaysOK
+      description: Should return 200 when calling unprotected endpoint
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecure-always-ok"
+    - displayName: basic-auth-ok
+      name: basic-auth-ok
+      providerDisplayName: Basic
+      description: Should return 200 when calling endpoint protected with Basic Auth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-ok"
+          credentials:
+            secretName: basic-test
+            type: Basic
+    - displayName: oauth
+      name: oauth
+      providerDisplayName: OAuth
+      description: Should return 200 when calling endpoint protected with OAuth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+    - displayName: csrf basic
+      name: csrf-basic
+      providerDisplayName: Basic with CSRF
+      description: Should return 200 for Basic Auth with CSRF optimistic scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-basic"
+          credentials:
+            secretName: basic-test
+            type: Basic
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: basic-auth-with-request-parameters
+      name: basic-auth-with-request-parameters
+      providerDisplayName: Basic
+      description: Should return 200 when calling endpoint protected with Basic Auth with additional request parameters
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-with-request-parameters"
+          requestParametersSecretName: request-parameters-test
+          credentials:
+            secretName: basic-test
+            type: Basic
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  password: {{ "passwd" | b64enc }}
+  username: {{ "user" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth-test
+  namespace: kyma-integration
+type: Opaque
+data:
+  clientId: {{ "clientID" | b64enc }}
+  clientSecret: {{ "clientSecret" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: request-parameters-test
+  namespace: kyma-integration
+type: Opaque
+stringData:
+  headers: |-
+    {"Hkey1":["Hval1"],"Hkey2":["Hval21","Hval22"]}
+  queryParameters: |-
+    {"Qkey1":["Qval1"],"Qkey2":["Qval21","Qval22"]}

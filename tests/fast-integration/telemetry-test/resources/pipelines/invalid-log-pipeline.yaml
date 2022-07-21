@@ -3,8 +3,6 @@ kind: LogPipeline
 metadata:
   name: logpipeline-test
 spec:
-  parsers: [ ]
-  multilineParsers: [ ]
   filters:
     - custom: |
         Name               abc

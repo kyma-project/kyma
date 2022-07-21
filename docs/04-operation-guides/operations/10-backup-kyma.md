@@ -41,10 +41,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
   Gardener
   </summary>
 
-### Prerequisites
-
-  - Gardener **Azure** supports CSI drivers as of Kubernetes version 1.21.
-
 ### Steps
 
   1. Create a Volume Snapshot Class with the correct driver:
@@ -175,7 +171,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220525-4bd6d72e
+            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220720-94f56c6a
             command:
               - /bin/bash
               - -c

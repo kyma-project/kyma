@@ -10,7 +10,7 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 >**CAUTION:** As of version 1.20, [Kubernetes deprecated Docker](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) as a container runtime in favor of [containerd](https://containerd.io/). Due to a different way in which containerd handles certificate authorities, Kyma's built-in Docker registry does not work correctly on clusters running with a self-signed TLS certificate on top of Kubernetes installation where containerd is used as a container runtime. If that is your case, either upgrade the cluster to use Docker instead of containerd, generate a valid TLS certificate for your Kyma instance or [configure an external Docker registry](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-07-set-external-registry/).
 
-- [Kubernetes](https://kubernetes.io/docs/setup/) (recommended versions 1.20 and 1.21)
+- [Kubernetes](https://kubernetes.io/docs/setup/) (recommended versions 1.22 and 1.23)
   - [k3d](https://k3d.io) (for local installation only, v5.0.0 or higher)
 - [Kyma CLI](https://github.com/kyma-project/cli)
 
