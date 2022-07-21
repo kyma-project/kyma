@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
@@ -124,4 +126,12 @@ func TestMergeSubsConfigs(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInitializeCleanEventTypes(t *testing.T) {
+	s := Subscription{}
+	require.Nil(t, s.Status.CleanEventTypes)
+
+	s.Status.InitializeCleanEventTypes()
+	require.NotNil(t, s.Status.CleanEventTypes)
 }

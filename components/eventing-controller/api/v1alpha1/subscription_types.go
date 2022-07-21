@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -185,8 +187,7 @@ type SubscriptionStatus struct {
 	Ready bool `json:"ready"`
 
 	// CleanEventTypes defines the filter's event types after cleanup for use with the configured backend
-	// +optional
-	CleanEventTypes []string `json:"cleanEventTypes,omitempty"`
+	CleanEventTypes []string `json:"cleanEventTypes"`
 
 	// Ev2hash defines the hash for the Subscription custom resource
 	// +optional
@@ -233,6 +234,18 @@ type Subscription struct {
 	Status SubscriptionStatus `json:"status,omitempty"`
 }
 
+// MarshalJSON implements the json.Marshaler interface.
+// If the SubscriptionStatus.CleanEventTypes is nil, it will be initialized to an empty slice of stings.
+// It is needed because the Kubernetes APIServer will reject requests containing null in the JSON payload.
+func (s Subscription) MarshalJSON() ([]byte, error) {
+	type Alias Subscription
+	a := (Alias)(s)
+	if a.Status.CleanEventTypes == nil {
+		a.Status.InitializeCleanEventTypes()
+	}
+	return json.Marshal(a)
+}
+
 // +kubebuilder:object:root=true
 
 // SubscriptionList contains a list of Subscription
@@ -240,6 +253,11 @@ type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Subscription `json:"items"`
+}
+
+// InitializeCleanEventTypes initializes the SubscriptionStatus.CleanEventTypes with an empty slice of strings.
+func (s *SubscriptionStatus) InitializeCleanEventTypes() {
+	s.CleanEventTypes = []string{}
 }
 
 func init() { //nolint:gochecknoinits
