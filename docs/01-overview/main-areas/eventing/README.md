@@ -3,6 +3,7 @@ title: What is Eventing in Kyma?
 ---
 
 With Kyma Eventing, you can focus on your business workflows and trigger them with events to implement asynchronous flows within Kyma.
+
 Kyma Eventing uses the following technology:
 - [NATS JetStream](https://docs.nats.io/) as backend within the cluster
 - [HTTP POST](https://www.w3schools.com/tags/ref_httpmethods.asp) requests to simplify sending and receiving events
