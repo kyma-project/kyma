@@ -49,6 +49,11 @@ var _ = Describe("LogPipeline controller", func() {
     Emitter_Mem_Buf_Limit 10M
 
 [FILTER]
+    name                  record_modifier
+    match                 log-pipeline.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[FILTER]
     match log-pipeline.*
     name grep
     regex $kubernetes['labels']['app'] my-deployment
