@@ -6,7 +6,7 @@ pjConfigs:
   prowJobs:
     kyma-project:
       kyma:
-        - pjName: pre-kyma-validate-dockerfiles
+        - pjName: pre-kyma-inrepo-validate-dockerfiles
 prConfigs:
   kyma-project:
     test-infra:
