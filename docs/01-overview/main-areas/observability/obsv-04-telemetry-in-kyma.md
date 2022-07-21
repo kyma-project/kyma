@@ -6,7 +6,7 @@ title: Telemetry (alpha)
 
 Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
 
-For now, the telemetry component supports the logging domain only. You get a log collector (Fluent Bit) and you can configure the log shipment with external systems using runtime configuration with a dedicated Kubernetes API (CRD). With that, you can integrate with vendors such as [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. Kyma's optional `logging` component complements the telemetry component, providing `Loki` as pre-configured log backend.
+To support the logging domain, the telemetry component provides a log collector, Fluent Bit. You can configure the log shipment with external systems using runtime configuration with a dedicated Kubernetes API (CRD). With that, you can integrate with vendors such as [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. Kyma's optional `logging` component complements the telemetry component, providing `Loki` as pre-configured log backend.
 
 ## Prerequisites
 
@@ -163,6 +163,7 @@ stringData:
 ```
 
 ### Step 4: Rotate the Secret
+
 A Secret being referenced with the `secretKeyRef` construct as used in the previous can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.  
 Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
@@ -223,7 +224,9 @@ metadata:
 spec:
 ```
 
-## LogPipeline.spec attribute
+## Parameters
+
+### LogPipeline.spec attribute
 
 For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logpipeline_types.go).
 
@@ -240,7 +243,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | files[].name | string | The file name under which the snippet is mounted. The resulting path will be `/files/<name>`. |
 | files[].content | string | The actual text snippet to mount as file.|
 
-## LogPipeline.status attribute
+### LogPipeline.status attribute
 
 For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logpipeline_types.go).
 
@@ -251,7 +254,8 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | conditions[].reason | []object | An array of conditions describing the status of the pipeline.
 | conditions[].type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
 
-## LogParser.spec attribute
+### LogParser.spec attribute
+
 For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logparser_types.go).
 
 | Parameter | Type | Description |
@@ -259,7 +263,7 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 | parser | object | A [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipelines filters section. |
 | parser.content | string | The actual parser definition in the syntax of Fluent Bit. |
 
-## LogParser.status attribute
+### LogParser.status attribute
 
 For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logparser_types.go).
 
@@ -401,5 +405,5 @@ Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. 
 
 ### Max amount of pipelines - CPU/Mem constraints
 
-In the production profile, no more than 5 LogPipelines. 
+In the production profile, no more than 5 LogPipelines.  
 In the evaluation profile, no more than 3 LogPipelines.
