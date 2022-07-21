@@ -88,8 +88,9 @@ func listPlugins(pluginPath string) ([]string, error) {
 // Thereby, it supports the following error patterns:
 // 1. [<time>] [error] [config] error in path/to/file.conf:3: <msg>
 // 2. [<time>] [error] [config] <msg>
-// 3. [<time>] [error] <msg>
-// 4. error<msg>
+// 3. [<time>] [error] [parser] <msg> in path/to/file.conf
+// 4. [<time>] [error] <msg>
+// 5. error<msg>
 func extractError(output string) string {
 	rColors := regexp.MustCompile(ansiColorsRegex)
 	output = rColors.ReplaceAllString(output, "")
