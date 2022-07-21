@@ -9,9 +9,9 @@ SUBJECT =  "/C=PL/ST=A/O=SAP/CN=$(APP_URL)"
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway image-mock-app publish-mock-app
 
-test: test-gateway
+test: disable-sidecar-for-mtls-test generate-certs test-gateway
 image: image-gateway-test
-clean: clean-gateway-test
+clean: enable-sidecar-after-mtls-test clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
@@ -47,22 +47,12 @@ publish-mock-app: image-mock-app
 image-mock-app:
 	docker build -t $(MOCK_APP_IMAGE) -f Dockerfile.mockapp .
 
-certs:
-	echo "For app at $(APP_URL)"
-	openssl version
-	openssl req -newkey rsa:2048 -nodes -x509 -days 365 -out $(GATEWAY_TEST_CERTS_DIR/ca.crt) -keyout $(GATEWAY_TEST_CERTS_DIR/ca.key) -subj $(SUBJECT)
-	openssl genrsa -out $(GATEWAY_TEST_CERTS_DIR)/server.key 2048
+disable-sidecar-for-mtls-test:
+	kubectl annotate pod traffic.sidecar.istio.io/excludeOutboundPorts=8090 -l app=central-application-gateway -n kyma-system
 
-	openssl req -new \
-    -key $(GATEWAY_TEST_CERTS_DIR)/server.key \
-    -subj $(SUBJECT) \
-    -reqexts SAN \
-    -config <(cat /etc/ssl/openssl.cnf \
-        <(printf "\n[SAN]\nsubjectAltName=DNS:test-app.test.svc.cluster.local")) \
-    -out server.csr
-#
-#	openssl x509 -req -days 365 -CA ca.crt -CAkey ca.key -CAcreateserial \                                                                                           ✔  11336  12:54:57
-#  	-extensions SAN \
-#  	-extfile <(cat /etc/ssl/openssl.cnf \
-#    <(printf "\n[SAN]\nsubjectAltName=DNS:test-app.test.svc.cluster.local")) \
-#  	-in server-ext.csr -out server-clearext.crt
+enable-sidecar-after-mtls-test:
+	kubectl annotate pod traffic.sidecar.istio.io/excludeOutboundPorts- -l app=central-application-gateway -n kyma-system
+
+generate-certs:
+	echo "Generating certificate for $(APP_URL)"
+	./scripts/generate-self-signed-certs.sh $(APP_URL)
