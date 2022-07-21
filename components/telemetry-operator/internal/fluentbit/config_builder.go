@@ -30,6 +30,10 @@ Rule                  $log "^.*$" %s.$TAG true
 Emitter_Name          %s
 Emitter_Storage.type  %s
 Emitter_Mem_Buf_Limit %s`
+	PermanentFilterTemplate string = `
+name                  record_modifier
+match                 %s.*
+Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 )
 
 func BuildConfigSection(header ConfigHeader, content string) string {
@@ -72,6 +76,8 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 	if len(logPipeline.Spec.Output.Custom) > 0 {
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 	}
+
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Custom)
@@ -119,4 +125,8 @@ func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 
 func generateEmitter(config PipelineConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
+}
+
+func generatePermanentFilter(logPipelineName string) string {
+	return fmt.Sprintf(PermanentFilterTemplate, logPipelineName)
 }

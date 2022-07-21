@@ -70,8 +70,23 @@ Emitter_Mem_Buf_Limit 10M`
 	require.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
 
+func TestGeneratePermanentFilter(t *testing.T) {
+	expected := `
+name                  record_modifier
+match                 foo.*
+Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
+
+	actual := generatePermanentFilter("foo")
+	require.Equal(t, expected, actual, "Fluent Bit Permanent parser config is invalid")
+}
+
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
+    name                  record_modifier
+    match                 foo.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[FILTER]
     match foo.*
     name grep
 
@@ -109,6 +124,11 @@ func TestOutput(t *testing.T) {
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
 
+[FILTER]
+    name                  record_modifier
+    match                 foo.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
 [OUTPUT]
     match foo.*
     name http
@@ -133,6 +153,42 @@ func TestOutput(t *testing.T) {
 	}
 
 	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+}
+
+func TestPermanentFilter(t *testing.T) {
+	expected := `[FILTER]
+    name                  record_modifier
+    match                 foo.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+`
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{},
+	}
+	logPipeline.Name = "foo"
+	pipelineConfig := PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+
+	expected = `[FILTER]
+    name                  record_modifier
+    match                 bar.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+`
+
+	logPipeline.Name = "bar"
+	actual, err = MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }
