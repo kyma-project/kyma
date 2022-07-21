@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -45,31 +46,34 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 // because of using denied plugins or errors in match conditions
 // for filters or outputs.
 func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	err := pv.validateFilters(logPipeline, logPipelines)
+	err := pv.validateFilters(logPipeline)
 	if err != nil {
 		return errors.Wrap(err, "error validating filter plugins")
 	}
-	err = pv.validateOutput(logPipeline, logPipelines)
+	err = pv.validateOutput(logPipeline)
 	if err != nil {
 		return errors.Wrap(err, "error validating output plugin")
 	}
 	return nil
 }
 
-func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline) error {
 	for _, filterPlugin := range pipeline.Spec.Filters {
-		if err := validateCustomOutput(filterPlugin.Custom, pv.deniedFilterPlugins, pipelines); err != nil {
+		if err := validateCustomOutput(filterPlugin.Custom, pv.deniedFilterPlugins); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipeline) error {
 	if err := checkSingleOutputPlugin(pipeline.Spec.Output); err != nil {
 		return err
 	}
-	if err := validateCustomOutput(pipeline.Spec.Output.Custom, pv.deniedOutputPlugins, pipelines); err != nil {
+	if err := validateCustomOutput(pipeline.Spec.Output.Custom, pv.deniedOutputPlugins); err != nil {
+		return err
+	}
+	if err := validateHTTPOutput(pipeline.Spec.Output.HTTP); err != nil {
 		return err
 	}
 	return nil
@@ -93,7 +97,7 @@ func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
 	return nil
 }
 
-func validateCustomOutput(content string, denied []string, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func validateCustomOutput(content string, denied []string) error {
 	if content == "" {
 		return nil
 	}
@@ -118,6 +122,26 @@ func validateCustomOutput(content string, denied []string, pipelines *telemetryv
 	}
 
 	return nil
+}
+
+func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
+	if httpOutput.Host.Value != "" && !validHostname(httpOutput.Host.Value) {
+		return fmt.Errorf("invalid hostname '%s'", httpOutput.Host.Value)
+	}
+	if httpOutput.URI != "" && !strings.HasPrefix(httpOutput.URI, "/") {
+		return fmt.Errorf("uri has to start with /")
+	}
+	return nil
+}
+
+func validHostname(host string) bool {
+	host = strings.Trim(host, " ")
+
+	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
+	if re.MatchString(host) {
+		return true
+	}
+	return false
 }
 
 func getCustomName(custom map[string]string) (string, error) {

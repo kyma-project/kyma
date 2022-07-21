@@ -280,3 +280,46 @@ func TestContainsCustomPluginWithoutAny(t *testing.T) {
 
 	require.False(t, result)
 }
+
+func TestValidHostname(t *testing.T) {
+	require.True(t, validHostname("localhost"))
+	require.True(t, validHostname("logging-loki"))
+	require.True(t, validHostname("logging-loki.kyma-system.svc.cluster.local"))
+	require.False(t, validHostname("https://logging-loki.kyma-system.svc.cluster.local"))
+	require.False(t, validHostname("logging-loki.kyma-system.svc.cluster.local:443"))
+	require.False(t, validHostname("!@#$$%"))
+}
+
+func TestValidateHTTPOutput(t *testing.T) {
+	output := telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "localhost",
+		},
+	}
+	require.NoError(t, validateHTTPOutput(output))
+
+	output = telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "localhost",
+		},
+		URI: "/my-path",
+	}
+	require.NoError(t, validateHTTPOutput(output))
+
+	output = telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "http://localhost",
+		},
+		URI: "/my-path",
+	}
+	require.Error(t, validateHTTPOutput(output))
+
+	output = telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "localhost",
+		},
+		URI: "broken-uri",
+	}
+	require.Error(t, validateHTTPOutput(output))
+
+}
