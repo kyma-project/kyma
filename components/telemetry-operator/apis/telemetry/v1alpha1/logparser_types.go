@@ -28,7 +28,7 @@ type LogParserSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Parser is an example field of LogParser. Edit logparser_types.go to remove/update
+	// Parser allows defining user defined parsers to be applied to the logs
 	Parser string `json:"parser,omitempty"`
 }
 

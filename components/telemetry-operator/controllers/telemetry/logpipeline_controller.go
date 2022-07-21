@@ -51,7 +51,7 @@ type LogPipelineReconciler struct {
 	FluentBitUtils     *fluentbit.DaemonSetUtils
 }
 
-// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given DaemonSetUtils config arguments
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
 func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client

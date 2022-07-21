@@ -46,18 +46,18 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 	}
 
 	changed := false
-	var logParser telemetryv1alpha1.LogParserList
+	var logParsers telemetryv1alpha1.LogParserList
 
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
 
-			err = s.List(ctx, &logParser)
+			err = s.List(ctx, &logParsers)
 			if err != nil {
 				return false, err
 			}
 
-			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParser)
+			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 			if fluentBitParsersConfig == "" {
 				cm.Data = nil
 			} else {
@@ -69,12 +69,12 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 			changed = true
 		}
 	} else {
-		err = s.List(ctx, &logParser)
+		err = s.List(ctx, &logParsers)
 		if err != nil {
 			return false, err
 		}
 
-		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParser)
+		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[parsersConfigMapKey] = fluentBitParsersConfig

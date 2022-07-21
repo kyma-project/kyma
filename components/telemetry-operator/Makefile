@@ -51,9 +51,10 @@ help: ## Display this help.
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
-copy-crds-local: manifests-local
+copy-manifests-local: manifests-local
 	@cp ./config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml ./../../installation/resources/crds/telemetry/logpipelines.crd.yaml
 	@cp ./config/crd/bases/telemetry.kyma-project.io_logparsers.yaml ./../../installation/resources/crds/telemetry/logparsers.crd.yaml
+	@cp ./config/rbac/role.yaml ./../../resources/telemetry/charts/operator/templates/role.yaml
 
 
 generate-local: controller-gen-local
