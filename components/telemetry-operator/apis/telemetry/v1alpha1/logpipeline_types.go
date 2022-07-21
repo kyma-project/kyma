@@ -26,22 +26,10 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Parsers          []Parser            `json:"parsers,omitempty"`
-	MultiLineParsers []MultiLineParser   `json:"multilineParsers,omitempty"`
-	Filters          []Filter            `json:"filters,omitempty"`
-	Output           Output              `json:"output,omitempty"`
-	Files            []FileMount         `json:"files,omitempty"`
-	Variables        []VariableReference `json:"variables,omitempty"`
-}
-
-// Parser describes a Fluent Bit parser configuration section
-type Parser struct {
-	Content string `json:"content,omitempty"`
-}
-
-// MultiLineParser describes a Fluent Bit multiline parser configuration section
-type MultiLineParser struct {
-	Content string `json:"content,omitempty"`
+	Filters   []Filter            `json:"filters,omitempty"`
+	Output    Output              `json:"output,omitempty"`
+	Files     []FileMount         `json:"files,omitempty"`
+	Variables []VariableReference `json:"variables,omitempty"`
 }
 
 // Filter describes a Fluent Bit filter configuration

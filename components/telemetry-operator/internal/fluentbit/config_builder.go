@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 type ConfigHeader string
@@ -104,17 +104,15 @@ func generateMatchCondition(logPipelineName string) string {
 	return fmt.Sprintf("%s.*", logPipelineName)
 }
 
-// MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
-func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
+// MergeParsersConfig merges Fluent Bit parsers to a single Fluent Bit configuration.
+func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 	var sb strings.Builder
-	for _, logPipeline := range logPipelines.Items {
-		if logPipeline.DeletionTimestamp == nil {
-			for _, parser := range logPipeline.Spec.Parsers {
-				sb.WriteString(BuildConfigSection(ParserConfigHeader, parser.Content))
-			}
-			for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
-				sb.WriteString(BuildConfigSection(MultiLineParserConfigHeader, multiLineParser.Content))
-			}
+	for _, logParser := range logParsers.Items {
+		var parser string
+		if logParser.DeletionTimestamp == nil {
+			name := fmt.Sprintf("Name %s", logParser.Name)
+			parser = fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
+			sb.WriteString(BuildConfigSection(ParserConfigHeader, parser))
 		}
 	}
 	return sb.String()
