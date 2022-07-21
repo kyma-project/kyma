@@ -2,6 +2,8 @@ package v1alpha1
 
 import (
 	"context"
+	"time"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -13,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	"time"
 )
 
 type Function struct {

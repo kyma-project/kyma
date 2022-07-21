@@ -2,9 +2,10 @@ package runtimes
 
 import (
 	"fmt"
+	"net/url"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
-	"net/url"
 )
 
 type FunctionSimpleTestConfig struct {
