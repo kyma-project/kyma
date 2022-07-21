@@ -2,7 +2,6 @@ package application_gateway
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -10,29 +9,43 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 )
 
-func logBody(t *testing.T, body io.Reader) {
-	t.Helper()
-
-	buf, err := ioutil.ReadAll(body)
-	if err == nil && len(buf) > 0 {
-		t.Log("Body:", string(buf))
-	}
+type LogHttp struct {
+	t       *testing.T
+	httpCli *http.Client
 }
 
-func executeGetRequest(t *testing.T, entry v1alpha1.Entry) int {
-	t.Helper()
+func NewHttpCli(t *testing.T) LogHttp {
+	return LogHttp{t: t, httpCli: &http.Client{}}
+}
 
-	t.Log("Calling", entry.CentralGatewayUrl)
-	res, err := http.Get(entry.CentralGatewayUrl)
-
-	if err == nil {
-		logBody(t, res.Body)
+func (c LogHttp) Get(url string) (resp *http.Response, body []byte, err error) {
+	c.t.Helper()
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return
 	}
-	assert.Nil(t, err)
-	return res.StatusCode
+
+	return c.Do(req)
+
+}
+
+func (c LogHttp) Do(req *http.Request) (res *http.Response, body []byte, err error) {
+	c.t.Helper()
+	c.t.Logf("%s %s", req.Method, req.URL)
+
+	res, err = c.httpCli.Do(req)
+	if err != nil {
+		return
+	}
+
+	body, err = io.ReadAll(res.Body)
+	if err == nil && len(body) > 0 {
+		c.t.Logf("Body: %s", body)
+	}
+
+	return
 }
 
 func getExpectedHTTPCode(service v1alpha1.Service) (int, error) {
