@@ -38,7 +38,7 @@ type LogParserReconciler struct {
 	Scheme             *runtime.Scheme
 	FluentBitDaemonSet types.NamespacedName
 	Parser             *parserSync.LogParserSyncer
-	FluentBitUtils     *fluentbit.DaemonSetUtils
+	DaemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
 func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig parserSync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
@@ -46,7 +46,7 @@ func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemon
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
-	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
+	lpr.DaemonSetUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
 	lpr.Parser = parserSync.NewLogParserSyncer(client, daemonSetConfig)
 
 	return &lpr
@@ -80,7 +80,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
-		if err = r.FluentBitUtils.RestartFluentBit(ctx); err != nil {
+		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
@@ -96,7 +96,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
 		var ready bool
-		ready, err = r.FluentBitUtils.IsFluentBitDaemonSetReady(ctx)
+		ready, err = r.DaemonSetUtils.IsFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
 			return ctrl.Result{RequeueAfter: requeueTime}, err
