@@ -1,4 +1,4 @@
-package application_gateway_test
+package application_gateway
 
 import (
 	"net/http"

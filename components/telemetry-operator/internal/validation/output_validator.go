@@ -3,7 +3,7 @@ package validation
 import (
 	"fmt"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
@@ -27,7 +27,7 @@ func (v *outputValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) e
 	}
 
 	if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
-		return fmt.Errorf("log pipeline '%s' contains forbidden configuration key '%s'", fluentbit.OutputStorageMaxSizeKey, logPipeline.Name)
+		return fmt.Errorf("log pipeline '%s' contains forbidden configuration key '%s'", logPipeline.Name, fluentbit.OutputStorageMaxSizeKey)
 	}
 
 	return nil

@@ -23,30 +23,34 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
+
+	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-logr/zapr"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -138,6 +142,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+	metrics.Registry.MustRegister(restartsTotal)
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
@@ -169,16 +179,23 @@ func main() {
 			Name:      fluentBitSectionsConfigMap,
 			Namespace: fluentBitNs,
 		},
-		FluentBitParsersConfigMap: types.NamespacedName{
-			Name:      fluentBitParsersConfigMap,
-			Namespace: fluentBitNs,
-		},
+
 		FluentBitFilesConfigMap: types.NamespacedName{
 			Name:      fluentBitFilesConfigMap,
 			Namespace: fluentBitNs,
 		},
 		FluentBitEnvSecret: types.NamespacedName{
 			Name:      fluentBitEnvSecret,
+			Namespace: fluentBitNs,
+		},
+	}
+	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName: types.NamespacedName{
+			Namespace: fluentBitNs,
+			Name:      fluentBitDaemonSet,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      fluentBitParsersConfigMap,
 			Namespace: fluentBitNs,
 		},
 	}
@@ -195,21 +212,45 @@ func main() {
 		validation.NewOutputValidator(),
 		pipelineConfig,
 		fs.NewWrapper(),
+		restartsTotal,
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
-	reconciler := controllers.NewLogPipelineReconciler(
+	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		pipelineConfig)
+		pipelineConfig,
+		restartsTotal)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
+	parserReconciler := telemetrycontrollers.NewLogParserReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		parserDaemonSetConfig,
+		restartsTotal)
+	if err = parserReconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		os.Exit(1)
+	}
+
+	logParserValidator := webhook.NewLogParserValidator(mgr.GetClient(),
+		fluentBitConfigMap,
+		fluentBitNs,
+		validation.NewParserValidator(),
+		pipelineConfig,
+		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		fs.NewWrapper(),
+		restartsTotal,
+	)
+	mgr.GetWebhookServer().Register(
+		"/validate-logparser",
+		&k8sWebhook.Admission{Handler: logParserValidator})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

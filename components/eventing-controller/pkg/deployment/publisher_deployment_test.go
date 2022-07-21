@@ -2,15 +2,12 @@ package deployment
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -134,16 +131,8 @@ func Test_GetNATSEnvVars(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			defer func() {
-				for k := range tc.givenEnvs {
-					err := os.Unsetenv(k)
-					require.NoError(t, err)
-				}
-			}()
-
 			for k, v := range tc.givenEnvs {
-				err := os.Setenv(k, v)
-				require.NoError(t, err)
+				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
 			envVars := getNATSEnvVars(tc.givenNatsConfig, backendConfig.PublisherConfig)
@@ -205,16 +194,8 @@ func Test_GetLogEnvVars(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			defer func() {
-				for k := range tc.givenEnvs {
-					err := os.Unsetenv(k)
-					require.NoError(t, err)
-				}
-			}()
-
 			for k, v := range tc.givenEnvs {
-				err := os.Setenv(k, v)
-				require.NoError(t, err)
+				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
 			envVars := getLogEnvVars(backendConfig.PublisherConfig)
@@ -256,16 +237,8 @@ func Test_GetBEBEnvVars(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			defer func() {
-				for k := range tc.givenEnvs {
-					err := os.Unsetenv(k)
-					require.NoError(t, err)
-				}
-			}()
-
 			for k, v := range tc.givenEnvs {
-				err := os.Setenv(k, v)
-				require.NoError(t, err)
+				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
 			envVars := getBEBEnvVars(backendConfig.PublisherConfig)

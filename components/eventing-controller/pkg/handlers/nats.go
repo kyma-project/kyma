@@ -327,7 +327,7 @@ func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, 
 		if cev2protocol.IsACK(result) {
 			return result
 		}
-		n.namedLogger().Errorw("Failed to CloudEvent dispatch", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
+		n.namedLogger().Errorw("Failed to dispatch CloudEvent", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
 		// Try again?
 		if err := params.Backoff(ctx, retry+1); err != nil {
 			// do not try again.
