@@ -225,7 +225,7 @@ spec:
 
 ## LogPipeline.spec attribute
 
-For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logpipeline_types.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logpipeline_types.go).
 
 | Parameter | Type | Description |
 |-|-|-|
@@ -233,7 +233,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | filters[].custom | string | The actual filter definition in the syntax of Fluent Bit.|
 | output | object | A [Fluent Bit outputs](https://docs.fluentbit.io/manual/pipeline/outputs).|
 | output.custom | string | The actual output definition in the syntax of Fluent Bit.|
-| variables | | []object | A list of mappings from Kubernetes Secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
+| variables | []object | A list of mappings from Kubernetes Secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
 | variables[].name | string | Name of the variable to map. |
 | variables[].valueFrom.secretKeyRef | object | Reference to a key in a secret. `name` and `namespace` of the Secret, as well as the name of the `key`, must be provided |
 | files | []object | A list of text snippets that are mounted as files to Fluent Bit, so that they are available for reference in filters and outputs. The mounted snippet is available under the `/files` folder.|
@@ -242,7 +242,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 ## LogPipeline.status attribute
 
-For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logpipeline_types.go).
+For details, see the [LogPipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logpipeline_types.go).
 
 | Parameter | Type | Description |
 |-|-|-|
@@ -252,12 +252,24 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | conditions[].type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
 
 ## LogParser.spec attribute
-For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/api/v1alpha1/logparser_types.go).
+For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logparser_types.go).
 
 | Parameter | Type | Description |
 |-|-|-|
 | parser | object | A [Fluent Bit Parsers](https://docs.fluentbit.io/manual/pipeline/parsers). The parser specified here has no effect until it is referenced by a [Pod annotation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) on your workload or by a [Parser Filter](https://docs.fluentbit.io/manual/pipeline/filters/parser) defined in a pipelines filters section. |
 | parser.content | string | The actual parser definition in the syntax of Fluent Bit. |
+
+## LogParser.status attribute
+
+For details, see the [LogParser specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/logparser_types.go).
+
+| Parameter | Type | Description |
+|-|-|-|
+| conditions | []object | An array of conditions describing the status of the parser.
+| conditions[].lastTransitionTime | []object | An array of conditions describing the status of the parser.
+| conditions[].reason | []object | An array of conditions describing the status of the parser.
+| conditions[].type | enum | The possible transition types are:<br>- Running: The parser is ready and usable.<br>- Pending: The parser is being activated. |
+
 ## Log record processing
 
 After a log record has been read, it is preprocessed by some central configuration sections like the `kubernetes` filter. Thus, when a record is ready to be processed by the sections defined in the LogPipeline definition, it will have several attributes available for processing and shipment.
