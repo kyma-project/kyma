@@ -1,12 +1,12 @@
 presubmits:
-  - name: pre-kyma-validate-dockerfiles
+  - name: pre-kyma-inrepo-validate-dockerfiles
     annotations:
       pipeline.trigger: "pr-submit"
     labels:
       prow.k8s.io/pubsub.project: "sap-kyma-prow"
       prow.k8s.io/pubsub.runID: "pre-kyma-validate-dockerfiles"
       prow.k8s.io/pubsub.topic: "prowjobs"
-    run_if_changed: '.*Dockerfile$'
+    run_if_changed: '/this/path/not/exist/Dockerfile$'
     skip_report: false
     decorate: true
     cluster: untrusted-workload
