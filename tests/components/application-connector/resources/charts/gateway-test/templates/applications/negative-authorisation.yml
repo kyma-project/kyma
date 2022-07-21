@@ -91,5 +91,5 @@ metadata:
   namespace: kyma-integration
 type: Opaque
 data:
-  clientId: {{ "bad id" | b64enc }}
-  clientSecret: {{ "bad secret" | b64enc }}
+  clientId: { { "clientID" | b64enc }}
+  clientSecret: {{ "clientSecret" | b64enc }}
