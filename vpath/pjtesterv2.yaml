@@ -2,4 +2,4 @@ pjConfigs:
   prowJobs:
     kyma-project:
       kyma:
-        - pjName: pre--kyma-validate-dockerfiles
+        - pjName: pre-kyma-validate-dockerfiles
