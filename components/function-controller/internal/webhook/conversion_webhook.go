@@ -81,16 +81,16 @@ func (w *ConvertingWebhook) handleConvertRequest(req *apix.ConversionRequest) (*
 	for _, obj := range req.Objects {
 		src, gvk, err := w.decoder.Decode(obj.Raw)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while decoding conversion request object")
 		}
 		dst, err := w.allocateDstObject(req.DesiredAPIVersion, gvk.Kind)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while allocating Dest object")
 		}
 
 		err = w.convertFunction(src, dst)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while applying function conversion")
 		}
 		objects = append(objects, runtime.RawExtension{Object: dst})
 	}
@@ -108,12 +108,12 @@ func (w *ConvertingWebhook) allocateDstObject(apiVersion, kind string) (runtime.
 
 	obj, err := w.scheme.New(gvk)
 	if err != nil {
-		return obj, err
+		return obj, errors.Wrap(err, "while generating object")
 	}
 
 	t, err := meta.TypeAccessor(obj)
 	if err != nil {
-		return obj, err
+		return obj, errors.Wrap(err, "while accessing object type")
 	}
 
 	t.SetAPIVersion(apiVersion)
@@ -123,105 +123,103 @@ func (w *ConvertingWebhook) allocateDstObject(apiVersion, kind string) (runtime.
 }
 
 func (w *ConvertingWebhook) convertFunction(src, dst runtime.Object) error {
+	switch src.(type) {
 	// v1alpha1 -> v1alpha2
-	if in, ok := src.(*serverlessv1alpha1.Function); ok {
-		out, ok := dst.(*serverlessv1alpha2.Function)
-		if !ok {
-			dstGVK := dst.GetObjectKind().GroupVersionKind()
-			return fmt.Errorf("unsupported convert destination version %s ", dstGVK)
-		}
-		out.ObjectMeta = in.ObjectMeta
-
-		if in.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-			if out.Annotations != nil {
-				out.Annotations[v1alpha1GitRepoNameAnnotation] = in.Spec.Source
-			} else {
-				out.Annotations = map[string]string{v1alpha1GitRepoNameAnnotation: in.Spec.Source}
-			}
-		}
-
-		if err := w.convertSpecV1Alpha1ToV1Alpha2(&in.Spec, &out.Spec, in.Namespace); err != nil {
-			return err
-		}
-
-		w.convertStatusV1Alpha1ToV1Alpha2(&in.Status, &out.Status)
-
-		// v1alpha2 -> v1alpha1
-	} else if in, ok := src.(*serverlessv1alpha2.Function); ok {
-		out, ok := dst.(*serverlessv1alpha1.Function)
-		if !ok {
-			dstGVK := dst.GetObjectKind().GroupVersionKind()
-			return fmt.Errorf("unsupported convert destination version %s ", dstGVK)
-		}
-		out.ObjectMeta = in.ObjectMeta
-		repoName := ""
-		if in.Annotations != nil {
-			repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
-		}
-		if err := w.convertSpecV1Alpha2ToV1Alpha1(&in.Spec, &out.Spec, repoName, in.Name, in.Namespace); err != nil {
-			return err
-		}
-
-		w.convertStatusV1Alpha2ToV1Alpha1(&in.Status, &out.Status)
-	} else {
+	case *serverlessv1alpha1.Function:
+		return w.convertFunctionV1Alpha1ToV1Alpha2(src, dst)
+	// v1alpha2 -> v1alpha1
+	case *serverlessv1alpha2.Function:
+		return w.convertFunctionV1Alpha2ToV1Alpha1(src, dst)
+	default:
 		dstGVK := dst.GetObjectKind().GroupVersionKind()
 		return fmt.Errorf("unsupported convert source version %s ", dstGVK)
 	}
+}
+
+// v1alpha1 -> v1alpha2
+func (w *ConvertingWebhook) convertFunctionV1Alpha1ToV1Alpha2(src, dst runtime.Object) error {
+	in := src.(*serverlessv1alpha1.Function)
+
+	out, ok := dst.(*serverlessv1alpha2.Function)
+	if !ok {
+		dstGVK := dst.GetObjectKind().GroupVersionKind()
+		return fmt.Errorf("unsupported convert destination version %s ", dstGVK)
+	}
+
+	out.ObjectMeta = in.ObjectMeta
+	applyV1Alpha1ToV1Alpha2Annotations(in, out)
+
+	if err := w.convertSpecV1Alpha1ToV1Alpha2(in, out); err != nil {
+		return errors.Wrap(err, "while converting function spec from v1alpha1 to v1alpha2")
+	}
+
+	w.convertStatusV1Alpha1ToV1Alpha2(&in.Status, &out.Status)
 	return nil
 }
 
-func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionSpec, out *serverlessv1alpha2.FunctionSpec, namespace string) error {
-	out.Env = in.Env
-	out.MaxReplicas = in.MaxReplicas
-	out.MinReplicas = in.MaxReplicas
-	out.Runtime = serverlessv1alpha2.Runtime(in.Runtime)
-	out.RuntimeImageOverride = in.RuntimeImageOverride
+func applyV1Alpha1ToV1Alpha2Annotations(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
+	if in.Spec.Type == serverlessv1alpha1.SourceTypeGit {
+		if out.Annotations != nil {
+			out.Annotations[v1alpha1GitRepoNameAnnotation] = in.Spec.Source
+		} else {
+			out.Annotations = map[string]string{v1alpha1GitRepoNameAnnotation: in.Spec.Source}
+		}
+	}
+}
+
+func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
+	out.Spec.Env = in.Spec.Env
+	out.Spec.MaxReplicas = in.Spec.MaxReplicas
+	out.Spec.MinReplicas = in.Spec.MaxReplicas
+	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
+	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
 	//TODO: out.Profile
 	//TODO out.CustomRuntimeCOnfiguration
-	out.ResourceConfiguration = serverlessv1alpha2.ResourceConfiguration{
+
+	out.Spec.ResourceConfiguration = serverlessv1alpha2.ResourceConfiguration{
 		Build: serverlessv1alpha2.ResourceRequirements{
-			Resources: in.BuildResources,
+			Resources: in.Spec.BuildResources,
 		},
 		Function: serverlessv1alpha2.ResourceRequirements{
-			Resources: in.Resources,
+			Resources: in.Spec.Resources,
 		},
 	}
-	out.Template = serverlessv1alpha2.Template{
-		Labels: in.Labels,
+	out.Spec.Template = serverlessv1alpha2.Template{
+		Labels: in.Spec.Labels,
 	}
-	if in.Type == serverlessv1alpha1.SourceTypeGit {
+	if in.Spec.Type == serverlessv1alpha1.SourceTypeGit {
 		repo := &serverlessv1alpha1.GitRepository{}
 		err := w.client.Get(context.Background(),
 			types.NamespacedName{
-				Name:      in.Source,
-				Namespace: namespace,
+				Name:      in.Spec.Source,
+				Namespace: in.Namespace,
 			}, repo)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "while getting git repository")
 		}
-		out.Source = serverlessv1alpha2.Source{
+		out.Spec.Source = serverlessv1alpha2.Source{
 			GitRepository: &serverlessv1alpha2.GitRepositorySource{
 				URL: repo.Spec.URL,
 
 				Repository: serverlessv1alpha2.Repository{
-					BaseDir:   in.BaseDir,
-					Reference: in.Reference,
+					BaseDir:   in.Spec.BaseDir,
+					Reference: in.Spec.Reference,
 				},
 			},
 		}
 
 		if repo.Spec.Auth != nil {
-			out.Source.GitRepository.Auth = &serverlessv1alpha2.RepositoryAuth{
+			out.Spec.Source.GitRepository.Auth = &serverlessv1alpha2.RepositoryAuth{
 				Type:       serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type),
 				SecretName: repo.Spec.Auth.SecretName,
 			}
 		}
 	} else {
-		out.Source = serverlessv1alpha2.Source{
+		out.Spec.Source = serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
-				Source:       in.Source,
-				Dependencies: in.Deps,
+				Source:       in.Spec.Source,
+				Dependencies: in.Spec.Deps,
 			},
 		}
 	}
@@ -235,7 +233,6 @@ func (w *ConvertingWebhook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alph
 	out.RuntimeImageOverride = in.RuntimeImageOverride
 
 	out.Conditions = []serverlessv1alpha2.Condition{}
-
 	for _, c := range in.Conditions {
 		out.Conditions = append(out.Conditions, serverlessv1alpha2.Condition{
 			Type:               serverlessv1alpha2.ConditionType(c.Type),
@@ -247,49 +244,64 @@ func (w *ConvertingWebhook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alph
 	}
 }
 
-func errored(err error) *apix.ConversionResponse {
-	return &apix.ConversionResponse{
-		Result: metav1.Status{
-			Status:  metav1.StatusFailure,
-			Message: err.Error(),
-		},
+// v1alpha2 -> v1alpha1
+func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.Object) error {
+	in := src.(*serverlessv1alpha2.Function)
+
+	out, ok := dst.(*serverlessv1alpha1.Function)
+	if !ok {
+		dstGVK := dst.GetObjectKind().GroupVersionKind()
+		return fmt.Errorf("unsupported convert destination version %s ", dstGVK)
 	}
+
+	out.ObjectMeta = in.ObjectMeta
+
+	if err := w.convertSpecV1Alpha2ToV1Alpha1(in, out); err != nil {
+		return errors.Wrap(err, "while converting function spec from v1alpha2 to v1alpha1")
+	}
+
+	w.convertStatusV1Alpha2ToV1Alpha1(&in.Status, &out.Status)
+	return nil
 }
 
-func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionSpec, out *serverlessv1alpha1.FunctionSpec, repoName, functionName, namespace string) error {
-	out.Env = in.Env
-	out.MaxReplicas = in.MaxReplicas
-	out.MinReplicas = in.MaxReplicas
-	out.Runtime = serverlessv1alpha1.Runtime(in.Runtime)
-	out.RuntimeImageOverride = in.RuntimeImageOverride
+func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
+	out.Spec.Env = in.Spec.Env
+	out.Spec.MaxReplicas = in.Spec.MaxReplicas
+	out.Spec.MinReplicas = in.Spec.MaxReplicas
+	out.Spec.Runtime = serverlessv1alpha1.Runtime(in.Spec.Runtime)
+	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
-	out.BuildResources = in.ResourceConfiguration.Build.Resources
-	out.Resources = in.ResourceConfiguration.Function.Resources
+	out.Spec.BuildResources = in.Spec.ResourceConfiguration.Build.Resources
+	out.Spec.Resources = in.Spec.ResourceConfiguration.Function.Resources
 
-	out.Labels = in.Template.Labels
+	out.Spec.Labels = in.Spec.Template.Labels
 
-	// TODO: clean check
-	if in.Source.GitRepository == nil {
-		out.Source = in.Source.Inline.Source
-		out.Deps = in.Source.Inline.Dependencies
+	repoName := ""
+	if in.Annotations != nil {
+		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
+	}
+
+	if in.Spec.Source.GitRepository == nil {
+		out.Spec.Source = in.Spec.Source.Inline.Source
+		out.Spec.Deps = in.Spec.Source.Inline.Dependencies
 	} else {
-		out.Type = serverlessv1alpha1.SourceTypeGit
+		out.Spec.Type = serverlessv1alpha1.SourceTypeGit
 		// check repo name in the annotations,
 		if repoName == "" {
 			// create a random name git repo with the information. This is not supposed to happen, it's just a precaution.
 			repo := &serverlessv1alpha1.GitRepository{
 				ObjectMeta: metav1.ObjectMeta{
-					GenerateName: fmt.Sprintf("%s-", functionName),
-					Namespace:    namespace,
+					GenerateName: fmt.Sprintf("%s-", in.Name),
+					Namespace:    in.Namespace,
 				},
 				Spec: serverlessv1alpha1.GitRepositorySpec{
-					URL: in.Source.GitRepository.URL,
+					URL: in.Spec.Source.GitRepository.URL,
 				},
 			}
-			if in.Source.GitRepository.Auth != nil {
+			if in.Spec.Source.GitRepository.Auth != nil {
 				repo.Spec.Auth = &serverlessv1alpha1.RepositoryAuth{
-					Type:       serverlessv1alpha1.RepositoryAuthType(in.Source.GitRepository.Auth.Type),
-					SecretName: in.Source.GitRepository.Auth.SecretName,
+					Type:       serverlessv1alpha1.RepositoryAuthType(in.Spec.Source.GitRepository.Auth.Type),
+					SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
 				}
 			}
 			if err := w.client.Create(context.Background(), repo); err != nil {
@@ -297,9 +309,9 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 			}
 			repoName = repo.GetName()
 		}
-		out.Source = repoName
-		out.Reference = in.Source.GitRepository.Reference
-		out.BaseDir = in.Source.GitRepository.BaseDir
+		out.Spec.Source = repoName
+		out.Spec.Reference = in.Spec.Source.GitRepository.Reference
+		out.Spec.BaseDir = in.Spec.Source.GitRepository.BaseDir
 	}
 
 	return nil
@@ -321,5 +333,14 @@ func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alph
 			Reason:             serverlessv1alpha1.ConditionReason(c.Reason),
 			Message:            c.Message,
 		})
+	}
+}
+
+func errored(err error) *apix.ConversionResponse {
+	return &apix.ConversionResponse{
+		Result: metav1.Status{
+			Status:  metav1.StatusFailure,
+			Message: err.Error(),
+		},
 	}
 }
