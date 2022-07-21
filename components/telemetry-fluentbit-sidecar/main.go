@@ -12,6 +12,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+type directory struct {
+	name string
+	size int64
+}
+
 // TODO pass as arg or get from env
 const logPath = "../data/log/flb-storage/"
 
@@ -82,3 +87,5 @@ func dirSize(path string) (int64, error) {
 	})
 	return size, err
 }
+
+// func listDirs(path string) (returns an array of dirs)  // iterate through dir, for every subfolder calls dirSize
