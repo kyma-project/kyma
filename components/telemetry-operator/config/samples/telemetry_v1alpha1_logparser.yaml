@@ -8,4 +8,4 @@ spec:
     Regex  ^(?<user>[^ ]*) (?<pass>[^ ]*)$
     Time_Key time
     Time_Format %d/%b/%Y:%H:%M:%S %z
-    Types code:integer size:integer
+    Types user:string pass:string
