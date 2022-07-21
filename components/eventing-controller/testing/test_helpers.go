@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
@@ -23,6 +24,9 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
+	ce "github.com/cloudevents/sdk-go/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 )
 
 const (
@@ -61,6 +65,19 @@ const (
 
 	JSStreamName = "kyma"
 )
+
+// CloudEvent returns the pointer to a simple CloudEvent for testing purpose.
+func CloudEvent() (*ce.Event, error) {
+	return cehelper.NewEvent(
+		cehelper.WithSubject(CloudEventType),
+		cehelper.WithSpecVersion(CloudEventSpecVersion),
+		cehelper.WithID(CloudEventSpecVersion),
+		cehelper.WithSource(CloudEventSource),
+		cehelper.WithType(CloudEventType),
+		cehelper.WithData(ce.ApplicationJSON, CloudEventData),
+		cehelper.WithTime(time.Now()),
+	)
+}
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
 

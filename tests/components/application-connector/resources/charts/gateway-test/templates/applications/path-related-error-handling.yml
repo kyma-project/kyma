@@ -16,7 +16,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080"
     - displayName: missing-srv
       name: missing-srv
@@ -25,5 +25,5 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/path-related-error-handling"

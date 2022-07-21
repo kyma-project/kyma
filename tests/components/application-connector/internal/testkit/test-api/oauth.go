@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 type OAuthCredentials struct {
@@ -17,21 +19,32 @@ type OAuthCredentials struct {
 }
 
 const (
-	clientIDKey     = "client_id"
-	clientSecretKey = "client_secret"
-	grantTypeKey    = "grant_type"
+	clientIDKey           = "client_id"
+	clientSecretKey       = "client_secret"
+	grantTypeKey          = "grant_type"
+	tokenLifetime         = "token_lifetime"
+	defaultTokenExpiresIn = 5 * time.Minute
 )
 
 type OauthResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
+	ExpiresIn   int64  `json:"expires_in,omitempty"`
+}
+
+type OAuthToken struct {
+	exp time.Time
+}
+
+func (token OAuthToken) Valid() bool {
+	return token.exp.After(time.Now())
 }
 
 type OAuthHandler struct {
 	clientID     string
 	clientSecret string
 	mutex        sync.RWMutex
-	tokens       map[string]interface{}
+	tokens       map[string]OAuthToken
 }
 
 func NewOAuth(clientID, clientSecret string) OAuthHandler {
@@ -39,7 +52,7 @@ func NewOAuth(clientID, clientSecret string) OAuthHandler {
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		mutex:        sync.RWMutex{},
-		tokens:       make(map[string]interface{}),
+		tokens:       make(map[string]OAuthToken),
 	}
 }
 
@@ -50,12 +63,23 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := uuid.New().String()
+	exp := defaultTokenExpiresIn
+
+	if ttlStr := r.URL.Query().Get(tokenLifetime); ttlStr != "" {
+		parsedEXP, err := time.ParseDuration(ttlStr)
+		if err == nil {
+			log.Info("Received valid OAuth expiresIn:", parsedEXP)
+			exp = parsedEXP
+		} else {
+			log.Error("Received invalid OAuth expiresIn:", err)
+		}
+	}
 
 	oh.mutex.Lock()
-	oh.tokens[token] = nil
+	oh.tokens[token] = OAuthToken{exp: time.Now().Add(exp)}
 	oh.mutex.Unlock()
 
-	response := OauthResponse{AccessToken: token, TokenType: "bearer"}
+	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: int64(exp.Seconds())}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -88,24 +112,24 @@ func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				handleError(w, http.StatusForbidden, "Authorization header missing")
+				handleError(w, http.StatusUnauthorized, "Authorization header missing")
 				return
 			}
 
 			splitToken := strings.Split(authHeader, "Bearer")
 			if len(splitToken) != 2 {
-				handleError(w, http.StatusForbidden, "Bearer token missing")
+				handleError(w, http.StatusUnauthorized, "Bearer token missing")
 				return
 			}
 
 			token := strings.TrimSpace(splitToken[1])
 
 			oh.mutex.RLock()
-			_, found := oh.tokens[token]
+			data, found := oh.tokens[token]
 			oh.mutex.RUnlock()
 
-			if !found {
-				handleError(w, http.StatusForbidden, "Invalid token")
+			if !found || !data.Valid() {
+				handleError(w, http.StatusUnauthorized, "Invalid token")
 				return
 			}
 

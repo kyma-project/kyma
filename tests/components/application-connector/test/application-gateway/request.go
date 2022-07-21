@@ -55,3 +55,7 @@ func getExpectedHTTPCode(service v1alpha1.Service) (int, error) {
 	}
 	return 0, errors.New("Bad configuration")
 }
+
+func gatewayURL(app, service string) string {
+	return "http://central-application-gateway.kyma-system:8080/" + app + "/" + service
+}
