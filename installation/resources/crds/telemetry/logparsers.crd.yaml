@@ -44,8 +44,8 @@ spec:
             description: LogParserSpec defines the desired state of LogParser
             properties:
               parser:
-                description: Parser is an example field of LogParser. Edit logparser_types.go
-                  to remove/update
+                description: Parser allows defining user defined parsers to be applied
+                  to the logs
                 type: string
             type: object
           status:

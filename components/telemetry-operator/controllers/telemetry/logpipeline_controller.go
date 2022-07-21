@@ -47,7 +47,7 @@ type LogPipelineReconciler struct {
 	Syncer             *sync.LogPipelineSyncer
 	FluentBitDaemonSet types.NamespacedName
 	unsupportedTotal   prometheus.Gauge
-	FluentBitUtils     *fluentbit.DaemonSetUtils
+	DaemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
@@ -65,7 +65,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
+	lpr.DaemonSetUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
 
 	metrics.Registry.MustRegister(lpr.unsupportedTotal)
 
@@ -130,7 +130,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
-		if err = r.FluentBitUtils.RestartFluentBit(ctx); err != nil {
+		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
@@ -149,7 +149,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
 		var ready bool
-		ready, err = r.FluentBitUtils.IsFluentBitDaemonSetReady(ctx)
+		ready, err = r.DaemonSetUtils.IsFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
 			return ctrl.Result{RequeueAfter: requeueTime}, err
