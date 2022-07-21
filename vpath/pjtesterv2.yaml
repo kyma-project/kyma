@@ -7,3 +7,7 @@ pjConfigs:
     kyma-project:
       kyma:
         - pjName: pre-kyma-inrepo-validate-dockerfiles
+prConfigs:
+  kyma-project:
+    kyma:
+      prNumber: 14865
