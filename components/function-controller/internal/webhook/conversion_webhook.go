@@ -303,7 +303,6 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
 	}
-
 	// check repo name in the annotations,
 	if repoName == "" {
 		var err error
@@ -324,8 +323,8 @@ func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1al
 
 	repo := &serverlessv1alpha1.GitRepository{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: repoName,
-			Namespace:    in.Namespace,
+			Name:      repoName,
+			Namespace: in.Namespace,
 		},
 		Spec: serverlessv1alpha1.GitRepositorySpec{
 			URL: in.Spec.Source.GitRepository.URL,
@@ -338,7 +337,6 @@ func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1al
 			SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
 		}
 	}
-
 	if err := w.client.Create(context.Background(), repo); err != nil {
 		return "", errors.Wrap(err, "failed to create GitRepository")
 	}
@@ -348,7 +346,7 @@ func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1al
 }
 
 func recreatedRepoName(functionName string) string {
-	return fmt.Sprintf("%s-recreate-repo", functionName)
+	return fmt.Sprintf("%s-recreated-repo", functionName)
 }
 
 func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, out *serverlessv1alpha1.FunctionStatus) {

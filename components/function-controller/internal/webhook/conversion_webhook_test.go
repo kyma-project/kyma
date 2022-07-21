@@ -1,6 +1,7 @@
 package webhook
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -11,6 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -38,11 +41,12 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepo).Build()
 	w := NewConvertingWebhook(client, scheme)
 	tests := []struct {
-		name        string
-		src         runtime.Object
-		wantDst     runtime.Object
-		wantVersion string
-		wantErr     bool
+		name          string
+		src           runtime.Object
+		wantDst       runtime.Object
+		wantVersion   string
+		wantErr       bool
+		checkRecreate bool
 	}{
 		{
 			name: "v1alpha1 to v1alpha2 inline function",
@@ -274,38 +278,6 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 		},
 		{
 			name: "v1alpha2 to v1alpha1 Git function",
-			wantDst: &serverlessv1alpha1.Function{
-				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
-				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
-					Resources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("100m"),
-							corev1.ResourceMemory: resource.MustParse("128Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("50m"),
-							corev1.ResourceMemory: resource.MustParse("64Mi"),
-						},
-					},
-					BuildResources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("200m"),
-							corev1.ResourceMemory: resource.MustParse("200Mi"),
-						},
-					},
-					Type:   serverlessv1alpha1.SourceTypeGit,
-					Source: testRepoName,
-					Repository: serverlessv1alpha1.Repository{
-						BaseDir:   "/code/",
-						Reference: "main",
-					},
-				},
-			},
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test", Namespace: "test",
@@ -356,6 +328,124 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("200m"),
+							corev1.ResourceMemory: resource.MustParse("200Mi"),
+						},
+					},
+					Type:   serverlessv1alpha1.SourceTypeGit,
+					Source: testRepoName,
+					Repository: serverlessv1alpha1.Repository{
+						BaseDir:   "/code/",
+						Reference: "main",
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name:          "v1alpha2 to v1alpha1 Git function - missing git repository",
+			checkRecreate: true,
+
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test", Namespace: "test",
+				},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
+						Build: serverlessv1alpha2.ResourceRequirements{
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+						Function: serverlessv1alpha2.ResourceRequirements{
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("100m"),
+									corev1.ResourceMemory: resource.MustParse("128Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						GitRepository: &serverlessv1alpha2.GitRepositorySource{
+							URL: testGitRepo.Spec.URL,
+							Repository: serverlessv1alpha2.Repository{
+								BaseDir:   "/code/",
+								Reference: "main",
+							},
+							Auth: &serverlessv1alpha2.RepositoryAuth{
+								Type:       serverlessv1alpha2.RepositoryAuthType(testGitRepo.Spec.Auth.Type),
+								SecretName: testGitRepo.Spec.Auth.SecretName,
+							},
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("200m"),
+							corev1.ResourceMemory: resource.MustParse("200Mi"),
+						},
+					},
+					Type:   serverlessv1alpha1.SourceTypeGit,
+					Source: "test-recreated-repo",
+					Repository: serverlessv1alpha1.Repository{
+						BaseDir:   "/code/",
+						Reference: "main",
+					},
+				},
+			},
+
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
 	}
@@ -368,10 +458,24 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			}
 			if _, ok := tt.wantDst.(*serverlessv1alpha1.Function); ok {
 				require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec, dst.(*serverlessv1alpha1.Function).Spec)
+
+				if tt.checkRecreate {
+					validateRecreatedRepo(t,
+						client,
+						tt.src.(*serverlessv1alpha2.Function),
+						*tt.src.(*serverlessv1alpha2.Function).Spec.Source.GitRepository.Auth)
+
+					require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec.BaseDir,
+						dst.(*serverlessv1alpha1.Function).Spec.BaseDir)
+
+					require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec.Reference,
+						dst.(*serverlessv1alpha1.Function).Spec.Reference)
+				}
 			} else if _, ok := tt.wantDst.(*serverlessv1alpha2.Function); ok {
 				require.Equal(t, tt.wantDst.(*serverlessv1alpha2.Function).Spec, dst.(*serverlessv1alpha2.Function).Spec)
 
 				require.NoError(t, checkGitRepoAnnotation(dst.(*serverlessv1alpha2.Function), testRepoName))
+
 			}
 		})
 	}
@@ -386,4 +490,19 @@ func checkGitRepoAnnotation(f *serverlessv1alpha2.Function, repoName string) err
 		return fmt.Errorf("can't find the GitRepo annotation or the value is incorrect")
 	}
 	return nil
+}
+
+func validateRecreatedRepo(t *testing.T, client ctrlclient.Client, f *serverlessv1alpha2.Function, authConfig serverlessv1alpha2.RepositoryAuth) {
+	repoName := recreatedRepoName(f.Name)
+	repo := &serverlessv1alpha1.GitRepository{}
+	err := client.Get(context.Background(), types.NamespacedName{
+		Name:      repoName,
+		Namespace: f.Namespace,
+	}, repo)
+
+	require.NoError(t, err)
+	require.NotNil(t, repo)
+
+	require.Equal(t, authConfig.SecretName, repo.Spec.Auth.SecretName)
+	require.Equal(t, authConfig.Type, serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type))
 }
