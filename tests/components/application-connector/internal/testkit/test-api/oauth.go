@@ -89,6 +89,37 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (oh *OAuthHandler) MTLSToken(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		handleError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err))
+		return
+	}
+
+	id := r.FormValue(clientIDKey)
+	grantType := r.FormValue(grantTypeKey)
+
+	if r.TLS == nil || id != oh.clientID || grantType != "client_credentials" {
+		log.Println("tls", r.TLS, "id", id, "grant", grantType)
+		w.WriteHeader(http.StatusForbidden)
+		// TODO: respond with error
+		return
+	}
+
+	token := uuid.New().String()
+	exp := defaultTokenExpiresIn
+
+	oh.mutex.Lock()
+	oh.tokens[token] = OAuthToken{exp: time.Now().Add(exp)}
+	oh.mutex.Unlock()
+
+	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response) // TODO: Handle error
+}
+
 func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
 	if ok, status, message := oh.isRequestValid(r); !ok {
 		handleError(w, status, message)

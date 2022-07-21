@@ -57,6 +57,29 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	return router
 }
 
+func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials) http.Handler {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
+	api := router.PathPrefix("/v1/api").Subrouter()
+	api.Use(Logger(logOut, logger.DevLoggerType))
+
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
+
+	{
+		api.HandleFunc("/mtls-oauth/token", oauth.MTLSToken).Methods(http.MethodPost)
+	}
+
+	{
+		r := api.PathPrefix("/mtls").Subrouter()
+		r.Use(oauth.Middleware())
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+
+	return router
+}
+
 type BasicAuthCredentials struct {
 	User     string
 	Password string
