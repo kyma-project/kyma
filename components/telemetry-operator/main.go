@@ -212,6 +212,7 @@ func main() {
 		validation.NewOutputValidator(),
 		pipelineConfig,
 		fs.NewWrapper(),
+		restartsTotal,
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
@@ -245,6 +246,7 @@ func main() {
 		pipelineConfig,
 		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fs.NewWrapper(),
+		restartsTotal,
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",

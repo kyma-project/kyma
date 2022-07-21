@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
@@ -44,7 +46,8 @@ type LogparserValidator struct {
 	configValidator    validation.ConfigValidator
 	fsWrapper          fs.Wrapper
 
-	decoder *admission.Decoder
+	decoder        *admission.Decoder
+	daemonSetUtils *fluentbit.DaemonSetUtils
 }
 
 func NewLogParserValidator(
@@ -55,18 +58,21 @@ func NewLogParserValidator(
 	pipelineConfig fluentbit.PipelineConfig,
 	configValidator validation.ConfigValidator,
 	fsWrapper fs.Wrapper,
-
+	restartsTotal prometheus.Counter,
 ) *LogparserValidator {
+	fluentBitConfigMapNamespacedName := types.NamespacedName{
+		Name:      fluentBitConfigMap,
+		Namespace: namespace,
+	}
+	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
 	return &LogparserValidator{
-		Client: client,
-		fluentBitConfigMap: types.NamespacedName{
-			Name:      fluentBitConfigMap,
-			Namespace: namespace,
-		},
-		parserValidator: parserValidator,
-		pipelineConfig:  pipelineConfig,
-		configValidator: configValidator,
-		fsWrapper:       fsWrapper,
+		Client:             client,
+		fluentBitConfigMap: fluentBitConfigMapNamespacedName,
+		parserValidator:    parserValidator,
+		pipelineConfig:     pipelineConfig,
+		configValidator:    configValidator,
+		fsWrapper:          fsWrapper,
+		daemonSetUtils:     daemonSetUtils,
 	}
 }
 
@@ -102,11 +108,10 @@ func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *t
 		return err
 	}
 
-	fbUtils := fluentbit.NewDaemonSetUtils(v.Client, v.fluentBitConfigMap)
 	var pipeLine *telemetryv1alpha1.LogPipeline
 	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
 
-	configFiles, err := fbUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
+	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
 	if err != nil {
 		return err
 	}

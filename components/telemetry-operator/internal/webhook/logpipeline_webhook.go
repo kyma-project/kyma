@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/google/uuid"
@@ -59,7 +61,8 @@ type LogPipelineValidator struct {
 
 	fsWrapper fs.Wrapper
 
-	decoder *admission.Decoder
+	decoder        *admission.Decoder
+	daemonSetUtils *fluentbit.DaemonSetUtils
 }
 
 func NewLogPipeLineValidator(
@@ -72,14 +75,17 @@ func NewLogPipeLineValidator(
 	maxPipelinesValidator validation.MaxPipelinesValidator,
 	outputValidator validation.OutputValidator,
 	pipelineConfig fluentbit.PipelineConfig,
-	fsWrapper fs.Wrapper) *LogPipelineValidator {
+	fsWrapper fs.Wrapper,
+	restartsTotal prometheus.Counter) *LogPipelineValidator {
+	fluentBitConfigMapNamespacedName := types.NamespacedName{
+		Name:      fluentBitConfigMap,
+		Namespace: namespace,
+	}
+	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
 
 	return &LogPipelineValidator{
-		Client: client,
-		fluentBitConfigMap: types.NamespacedName{
-			Name:      fluentBitConfigMap,
-			Namespace: namespace,
-		},
+		Client:                client,
+		fluentBitConfigMap:    fluentBitConfigMapNamespacedName,
 		variablesValidator:    variablesValidator,
 		configValidator:       configValidator,
 		pluginValidator:       pluginValidator,
@@ -87,6 +93,7 @@ func NewLogPipeLineValidator(
 		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
+		daemonSetUtils:        daemonSetUtils,
 	}
 }
 
@@ -145,10 +152,9 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}()
 
-	fbUtils := fluentbit.NewDaemonSetUtils(v.Client, v.fluentBitConfigMap)
 	var parser *telemetryv1alpha1.LogParser
 
-	configFiles, err := fbUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
+	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
 	if err != nil {
 		return err
 	}

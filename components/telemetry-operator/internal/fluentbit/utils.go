@@ -19,19 +19,20 @@ import (
 type DaemonSetUtils struct {
 	client             client.Client
 	FluentBitDaemonSet types.NamespacedName
+	restartsTotal      prometheus.Counter
 }
 
-func NewDaemonSetUtils(client client.Client, fluenbitDaemonSet types.NamespacedName) *DaemonSetUtils {
+func NewDaemonSetUtils(client client.Client, fluenbitDaemonSet types.NamespacedName, restartsTotal prometheus.Counter) *DaemonSetUtils {
 	return &DaemonSetUtils{
 		client:             client,
 		FluentBitDaemonSet: fluenbitDaemonSet,
+		restartsTotal:      restartsTotal,
 	}
 }
 
 // Delete all Fluent Bit pods to apply new configuration.
-func (f *DaemonSetUtils) RestartFluentBit(ctx context.Context, restartsTotal prometheus.Counter) error {
+func (f *DaemonSetUtils) RestartFluentBit(ctx context.Context) error {
 	log := logf.FromContext(ctx)
-	log.Info("got counter", "restarts", restartsTotal)
 	var ds appsv1.DaemonSet
 	if err := f.client.Get(ctx, f.FluentBitDaemonSet, &ds); err != nil {
 		log.Error(err, "Failed getting fluent bit DaemonSet")
@@ -48,7 +49,7 @@ func (f *DaemonSetUtils) RestartFluentBit(ctx context.Context, restartsTotal pro
 		log.Error(err, "Failed to patch Fluent Bit to trigger rolling update")
 		return err
 	}
-	restartsTotal.Inc()
+	f.restartsTotal.Inc()
 	return nil
 }
 

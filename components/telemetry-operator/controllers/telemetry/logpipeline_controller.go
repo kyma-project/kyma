@@ -46,7 +46,6 @@ type LogPipelineReconciler struct {
 	Scheme             *runtime.Scheme
 	Syncer             *sync.LogPipelineSyncer
 	FluentBitDaemonSet types.NamespacedName
-	restartsTotal      prometheus.Counter
 	unsupportedTotal   prometheus.Gauge
 	FluentBitUtils     *fluentbit.DaemonSetUtils
 }
@@ -62,13 +61,11 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	)
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
-	// Metrics
-	lpr.restartsTotal = restartsTotal
 	lpr.unsupportedTotal = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName)
+	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
 
 	metrics.Registry.MustRegister(lpr.unsupportedTotal)
 
@@ -133,7 +130,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
-		if err = r.FluentBitUtils.RestartFluentBit(ctx, r.restartsTotal); err != nil {
+		if err = r.FluentBitUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}

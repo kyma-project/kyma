@@ -39,7 +39,6 @@ type LogParserReconciler struct {
 	FluentBitDaemonSet types.NamespacedName
 	Parser             *parserSync.LogParserSyncer
 	FluentBitUtils     *fluentbit.DaemonSetUtils
-	restartsTotal      prometheus.Counter
 }
 
 func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig parserSync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
@@ -47,9 +46,8 @@ func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemon
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
-	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName)
+	lpr.FluentBitUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
 	lpr.Parser = parserSync.NewLogParserSyncer(client, daemonSetConfig)
-	lpr.restartsTotal = restartsTotal
 
 	return &lpr
 }
@@ -82,7 +80,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
-		if err = r.FluentBitUtils.RestartFluentBit(ctx, r.restartsTotal); err != nil {
+		if err = r.FluentBitUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
