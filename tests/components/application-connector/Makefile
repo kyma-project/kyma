@@ -4,14 +4,14 @@ GOPATH ?= $(shell go env GOPATH)
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
 GATEWAY_TEST_CERTS_DIR ?= ./resources/charts/gateway-test/certs
-APP_URL = "mock-app.test.svc.cluster.local"
+APP_URL = "mock-application.test.svc.cluster.local"
 SUBJECT =  "/C=PL/ST=A/O=SAP/CN=$(APP_URL)"
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
 test: disable-sidecar-for-mtls-test generate-certs test-gateway
 image: image-gateway-test
-clean: enable-sidecar-after-mtls-test clean-gateway-test
+clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
