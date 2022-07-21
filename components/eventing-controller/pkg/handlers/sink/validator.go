@@ -84,7 +84,7 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) erro
 	if _, err := getClusterLocalService(s.ctx, s.client, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
 			events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
-			return fmt.Errorf("sink is not valid cluster local svc, failed with error: %w", err)
+			return fmt.Errorf("sink is not a valid cluster local svc, failed with error: %w", err)
 		}
 
 		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)

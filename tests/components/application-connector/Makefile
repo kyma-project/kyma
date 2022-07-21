@@ -1,4 +1,4 @@
-NAMESPACE = test
+NAMESPACE ?= test
 GOPATH ?= $(shell go env GOPATH)
 
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
@@ -7,7 +7,7 @@ GATEWAY_TEST_CERTS_DIR ?= ./resources/charts/gateway-test/certs
 APP_URL = "mock-app.test.svc.cluster.local"
 SUBJECT =  "/C=PL/ST=A/O=SAP/CN=$(APP_URL)"
 
-.PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway image-mock-app publish-mock-app
+.PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app
 
 test: disable-sidecar-for-mtls-test generate-certs test-gateway
 image: image-gateway-test
@@ -15,24 +15,21 @@ clean: enable-sidecar-after-mtls-test clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway:
+test-gateway: test-gateway-debug clean-gateway-test
+
+test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	helm template resources/charts/gateway-test | kubectl apply -f -
+	helm template resources/charts/gateway-test --set gatewayTest=$(GATEWAY_TEST_IMAGE),mockApplication=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
 
-	./scripts/wait-for-gateway-tests-finish.sh
-
+	-kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-gateway-test
 	@echo ""
 	@echo "Gateway test results:"
-ifeq ($(EXPORT_RESULT), true)
-	kubectl -n $(NAMESPACE) logs pod/application-gateway-test -f | tee /dev/stderr | $(GOPATH)/bin/go-junit-report -set-exit-code > junit-report.xml
-else
-	kubectl -n $(NAMESPACE) logs pod/application-gateway-test
-endif
 
+	./scripts/check-pod-logs.sh
 
 clean-gateway-test:
-	helm template k8s/gateway-test  | kubectl delete -f -
+	helm template resources/charts/gateway-test  | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
 
 publish-gateway-test: image-gateway-test

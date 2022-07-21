@@ -1,7 +1,7 @@
 serviceAccountName: "test-account"
 namespace: "test"
 
-mockServiceName: "test-app"
+mockServiceName: "mock-application"
 
 containerRegistry:
   path: "eu.gcr.io/kyma-project"

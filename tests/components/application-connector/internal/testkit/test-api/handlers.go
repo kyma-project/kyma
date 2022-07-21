@@ -5,6 +5,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func alwaysOk(w http.ResponseWriter, _ *http.Request) {
@@ -38,4 +42,28 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Couldn't encode the response body to JSON:", r.URL)
 	}
+}
+
+// resCode should only be used in paths with `code`
+// parameter, that is a valid int
+func resCode(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	codeStr := vars["code"]          // must exist, because path has a pattern
+	code, _ := strconv.Atoi(codeStr) // can't error, because path has a pattern
+	w.WriteHeader(code)
+	w.Write([]byte(codeStr))
+}
+
+func timeout(w http.ResponseWriter, r *http.Request) {
+	c := r.Context().Done()
+	if c == nil {
+		log.Println("Context has no timeout, sleeping for 2 minutes")
+		time.Sleep(2 * time.Minute)
+		return
+	}
+	log.Println("Context timeout, waiting until done")
+
+	_ = <-c
+
+	alwaysOk(w, r)
 }

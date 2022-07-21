@@ -13,7 +13,7 @@ The suffix and the port number differ depending on whether you're using Kyma in 
 | **Kyma mode** | **Application Gateway URL** |
 |-----------|-------------------------|
 | Standalone | `http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH}` |
-| Compass | `http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH}` |
+| Compass | `http://central-application-gateway.kyma-system:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH}` |
 
 The placeholders in the URLs map to the following:
 
