@@ -49,7 +49,7 @@ The [monitoring chart](https://github.com/kyma-project/kyma/blob/main/resources/
 
 The whole implementation of our monitoring solution is built around [Istio's observability best practices](https://istio.io/latest/docs/ops/best-practices/observability/).
 
-## Default setup
+### Default setup
 
 ![Prometheus Setup](./assets/obsv-prometheus-setup.svg)
 
