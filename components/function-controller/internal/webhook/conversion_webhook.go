@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
 
@@ -337,8 +338,9 @@ func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1al
 			SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
 		}
 	}
-	if err := w.client.Create(context.Background(), repo); err != nil {
-		return "", errors.Wrap(err, "failed to create GitRepository")
+
+	if _, err := controllerutil.CreateOrUpdate(context.Background(), w.client, repo, func() error { return nil }); err != nil {
+		return "", errors.Wrap(err, "failed to createOrUpdate GitRepository")
 	}
 
 	return repoName, nil
