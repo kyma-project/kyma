@@ -5,18 +5,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/vrischmann/envconfig"
-
-	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 )
 
 func main() {
-	cfg := Config{}
-	err := envconfig.InitWithPrefix(&cfg, "APP")
-	exitOnError(err, "Failed to load Authorization server config")
-
+	cfg := NewConfig()
 	logLevel, err := log.ParseLevel(cfg.LogLevel)
 	if err != nil {
 		log.Warnf("Invalid log level: '%s', defaulting to 'info'", cfg.LogLevel)
@@ -29,8 +24,9 @@ func main() {
 
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
 	oAuthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
+	expectedRequestParameters := test_api.ExpectedRequestParameters{Headers: cfg.RequestHeaders, QueryParameters: cfg.RequestQueryParameters}
 
-	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials)
+	router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials, expectedRequestParameters)
 
 	address := fmt.Sprintf(":%d", cfg.Port)
 	log.Fatal(http.ListenAndServe(address, router))

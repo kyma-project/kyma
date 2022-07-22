@@ -14,8 +14,11 @@ const {
   unexposeGrafana,
 } = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
+const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
-const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
+const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
+const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
+const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -47,12 +50,28 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-describe('Telemetry Operator tests', function() {
+async function prepareEnvironment() {
+  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
+  const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
+  await logPipelinePromise;
+  await deploymentPromise;
+}
+
+async function cleanEnvironment() {
+  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
+  const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
+  await logPipelinePromise;
+  await deploymentPromise;
+}
+
+describe('Telemetry Operator tests, prepare the environment', function() {
   before('Expose Grafana', async () => {
+    await prepareEnvironment();
     await exposeGrafana();
   });
 
-  after('Unexpose Grafana', async () => {
+  after('Unexpose Grafana, clean the environment', async () => {
+    await cleanEnvironment();
     await unexposeGrafana();
   });
 
@@ -90,6 +109,16 @@ describe('Telemetry Operator tests', function() {
     const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
+  });
+
+  it('Should parse the logs using regex', async () => {
+    try {
+      const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
+      const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+      assert.isTrue(logsPresent, 'No parsed logs present in Loki');
+    } catch (e) {
+      assert.fail(e);
+    }
   });
 });
 

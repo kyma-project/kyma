@@ -42,6 +42,32 @@ rules:
 - apiGroups:
   - telemetry.kyma-project.io
   resources:
+  - logparsers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logparsers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logparsers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
   - logpipelines
   verbs:
   - create

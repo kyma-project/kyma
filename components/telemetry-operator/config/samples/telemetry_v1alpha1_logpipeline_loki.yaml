@@ -3,8 +3,6 @@ kind: LogPipeline
 metadata:
   name: loki
 spec:
-  parsers: [ ]
-  multilineParsers: []
   filters: []
   output:
     custom: |

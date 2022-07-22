@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
@@ -20,7 +20,6 @@ var (
 	daemonSetConfig = FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "cm-ns"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "section-cm", Namespace: "cm-ns"},
-		FluentBitParsersConfigMap:  types.NamespacedName{Name: "parsers-cm", Namespace: "cm-ns"},
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
@@ -40,7 +39,7 @@ func TestGetOrCreateWithConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndN
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "some-cm", Namespace: "cm-ns"}}
-	err := sut.getOrCreate(context.Background(), &cm)
+	err := sut.Utils.GetOrCreate(context.Background(), &cm)
 
 	require.NoError(t, err)
 	require.Equal(t, "some-cm", cm.Name)
@@ -54,7 +53,7 @@ func TestGetOrCreateWithConfigMapAnyOtherErrorPropagates(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "some-cm", Namespace: "cm-ns"}}
-	err := sut.getOrCreate(context.Background(), &cm)
+	err := sut.Utils.GetOrCreate(context.Background(), &cm)
 
 	require.Error(t, err)
 }
@@ -67,7 +66,7 @@ func TestGetOrCreateWithSecretIsNotFoundCreatesNewWithGivenNamespacedNameAndNoEr
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "some-secret", Namespace: "secret-ns"}}
-	err := sut.getOrCreate(context.Background(), &secret)
+	err := sut.Utils.GetOrCreate(context.Background(), &secret)
 
 	require.NoError(t, err)
 	require.Equal(t, "some-secret", secret.Name)
@@ -81,7 +80,7 @@ func TestGetOrCreateWithSecretAnyOtherErrorPropagates(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "some-secret", Namespace: "secret-ns"}}
-	err := sut.getOrCreate(context.Background(), &secret)
+	err := sut.Utils.GetOrCreate(context.Background(), &secret)
 
 	require.Error(t, err)
 }
@@ -94,19 +93,6 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
-
-	require.Error(t, err)
-	require.Equal(t, result, false)
-}
-
-func TestSyncParsersConfigMapErrorClientErrorReturnsError(t *testing.T) {
-	mockClient := &mocks.Client{}
-	badReqErr := errors.NewBadRequest("")
-	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
-
-	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncParsersConfigMap(context.Background(), &lp)
 
 	require.Error(t, err)
 	require.Equal(t, result, false)

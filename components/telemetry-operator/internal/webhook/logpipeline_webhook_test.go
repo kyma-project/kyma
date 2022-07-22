@@ -1,7 +1,7 @@
 package webhook
 
 import (
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -54,9 +54,6 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 		Name:    "1st-file",
 		Content: "file-content",
 	}
-	parser := telemetryv1alpha1.Parser{
-		Content: "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+)$",
-	}
 	output := telemetryv1alpha1.Output{
 		Custom: "Name   stdout\nMatch   dummy_test.*",
 	}
@@ -70,9 +67,8 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 			Namespace: testLogPipeline.Namespace,
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Parsers: []telemetryv1alpha1.Parser{parser},
-			Output:  telemetryv1alpha1.Output{Custom: output.Custom},
-			Files:   []telemetryv1alpha1.FileMount{file},
+			Output: telemetryv1alpha1.Output{Custom: output.Custom},
+			Files:  []telemetryv1alpha1.FileMount{file},
 		},
 	}
 
@@ -209,7 +205,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should update previously created valid LogPipeline", func() {
-			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(5)
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(7)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
@@ -233,7 +229,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject new update of previously created LogPipeline", func() {
-			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(6)
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(9)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
@@ -261,7 +257,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject new update with invalid plugin usage of previously created LogPipeline", func() {
-			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(6)
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(9)
 			pluginErr := errors.New("output plugin stdout is not allowed")
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
