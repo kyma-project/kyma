@@ -196,17 +196,16 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 }
 
 func (w *ConvertingWebhook) convertSourceV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
-	if in.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		out.Spec.Source = serverlessv1alpha2.Source{
-			Inline: &serverlessv1alpha2.InlineSource{
-				Source:       in.Spec.Source,
-				Dependencies: in.Spec.Deps,
-			},
-		}
-		return nil
+	if in.Spec.Type == serverlessv1alpha1.SourceTypeGit {
+		return w.convertGitRepositoryV1Alpha1ToV1Alpha2(in, out)
 	}
-
-	return w.convertGitRepositoryV1Alpha1ToV1Alpha2(in, out)
+	out.Spec.Source = serverlessv1alpha2.Source{
+		Inline: &serverlessv1alpha2.InlineSource{
+			Source:       in.Spec.Source,
+			Dependencies: in.Spec.Deps,
+		},
+	}
+	return nil
 }
 
 func (w *ConvertingWebhook) convertGitRepositoryV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
