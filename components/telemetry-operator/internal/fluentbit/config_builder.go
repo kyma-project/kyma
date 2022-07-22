@@ -20,13 +20,12 @@ type PipelineConfig struct {
 }
 
 const (
-	ParserConfigHeader          ConfigHeader = "[PARSER]"
-	MultiLineParserConfigHeader ConfigHeader = "[MULTILINE_PARSER]"
-	FilterConfigHeader          ConfigHeader = "[FILTER]"
-	OutputConfigHeader          ConfigHeader = "[OUTPUT]"
-	MatchKey                    string       = "match"
-	OutputStorageMaxSizeKey     string       = "storage.total_limit_size"
-	EmitterTemplate             string       = `
+	ParserConfigHeader      ConfigHeader = "[PARSER]"
+	FilterConfigHeader      ConfigHeader = "[FILTER]"
+	OutputConfigHeader      ConfigHeader = "[OUTPUT]"
+	MatchKey                string       = "match"
+	OutputStorageMaxSizeKey string       = "storage.total_limit_size"
+	EmitterTemplate         string       = `
 name                  rewrite_tag
 match                 %s.*
 Rule                  $log "^.*$" %s.$TAG true

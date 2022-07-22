@@ -122,7 +122,8 @@ func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *t
 			return err
 		}
 	}
-	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers" + "/parsers.conf"
+	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s", fluentBitParsersConfigDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
