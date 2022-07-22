@@ -327,19 +327,23 @@ func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1al
 			Name:      repoName,
 			Namespace: in.Namespace,
 		},
-		Spec: serverlessv1alpha1.GitRepositorySpec{
-			URL: in.Spec.Source.GitRepository.URL,
-		},
+	}
+	spec := serverlessv1alpha1.GitRepositorySpec{
+		URL: in.Spec.Source.GitRepository.URL,
 	}
 
 	if in.Spec.Source.GitRepository.Auth != nil {
-		repo.Spec.Auth = &serverlessv1alpha1.RepositoryAuth{
+		spec.Auth = &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthType(in.Spec.Source.GitRepository.Auth.Type),
 			SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
 		}
 	}
-
-	if _, err := controllerutil.CreateOrUpdate(context.Background(), w.client, repo, func() error { return nil }); err != nil {
+	_, err := controllerutil.CreateOrUpdate(context.Background(), w.client, repo,
+		func() error {
+			repo.Spec = spec
+			return nil
+		})
+	if err != nil {
 		return "", errors.Wrap(err, "failed to createOrUpdate GitRepository")
 	}
 
