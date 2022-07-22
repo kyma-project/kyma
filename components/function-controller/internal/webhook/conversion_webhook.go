@@ -299,11 +299,11 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	}
 	out.Spec.Type = serverlessv1alpha1.SourceTypeGit
 
+	// check repo name in the annotations,
 	repoName := ""
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
 	}
-	// check repo name in the annotations,
 	if repoName == "" {
 		var err error
 		// create a custom-named git repo with the information. This is not supposed to happen, it's just a precaution.

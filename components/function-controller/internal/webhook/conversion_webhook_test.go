@@ -54,6 +54,54 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
 					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+			},
+			wantDst: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 inline function",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha1 to v1alpha2 inline function - with Resources",
+			src: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -120,7 +168,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 inline function",
+			name: "v1alpha2 to v1alpha1 inline function - with ResourceConfiguration",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
@@ -196,28 +244,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
 					Runtime: serverlessv1alpha1.Nodejs12,
-					Resources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("100m"),
-							corev1.ResourceMemory: resource.MustParse("128Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("50m"),
-							corev1.ResourceMemory: resource.MustParse("64Mi"),
-						},
-					},
-					BuildResources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("200m"),
-							corev1.ResourceMemory: resource.MustParse("200Mi"),
-						},
-					},
-					Type:   serverlessv1alpha1.SourceTypeGit,
-					Source: testRepoName,
+					Type:    serverlessv1alpha1.SourceTypeGit,
+					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
 						BaseDir:   "/code/",
 						Reference: "main",
@@ -232,32 +260,6 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("300m"),
-									corev1.ResourceMemory: resource.MustParse("300Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("200m"),
-									corev1.ResourceMemory: resource.MustParse("200Mi"),
-								},
-							},
-						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("100m"),
-									corev1.ResourceMemory: resource.MustParse("128Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("50m"),
-									corev1.ResourceMemory: resource.MustParse("64Mi"),
-								},
-							},
-						},
-					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
@@ -286,32 +288,6 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("300m"),
-									corev1.ResourceMemory: resource.MustParse("300Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("200m"),
-									corev1.ResourceMemory: resource.MustParse("200Mi"),
-								},
-							},
-						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("100m"),
-									corev1.ResourceMemory: resource.MustParse("128Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("50m"),
-									corev1.ResourceMemory: resource.MustParse("64Mi"),
-								},
-							},
-						},
-					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
@@ -332,28 +308,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
 					Runtime: serverlessv1alpha1.Nodejs12,
-					Resources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("100m"),
-							corev1.ResourceMemory: resource.MustParse("128Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("50m"),
-							corev1.ResourceMemory: resource.MustParse("64Mi"),
-						},
-					},
-					BuildResources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("200m"),
-							corev1.ResourceMemory: resource.MustParse("200Mi"),
-						},
-					},
-					Type:   serverlessv1alpha1.SourceTypeGit,
-					Source: testRepoName,
+					Type:    serverlessv1alpha1.SourceTypeGit,
+					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
 						BaseDir:   "/code/",
 						Reference: "main",
@@ -371,32 +327,6 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					Name: "test", Namespace: "test",
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("300m"),
-									corev1.ResourceMemory: resource.MustParse("300Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("200m"),
-									corev1.ResourceMemory: resource.MustParse("200Mi"),
-								},
-							},
-						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("100m"),
-									corev1.ResourceMemory: resource.MustParse("128Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("50m"),
-									corev1.ResourceMemory: resource.MustParse("64Mi"),
-								},
-							},
-						},
-					},
 					Runtime: serverlessv1alpha2.NodeJs12,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
@@ -417,28 +347,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
 					Runtime: serverlessv1alpha1.Nodejs12,
-					Resources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("100m"),
-							corev1.ResourceMemory: resource.MustParse("128Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("50m"),
-							corev1.ResourceMemory: resource.MustParse("64Mi"),
-						},
-					},
-					BuildResources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("200m"),
-							corev1.ResourceMemory: resource.MustParse("200Mi"),
-						},
-					},
-					Type:   serverlessv1alpha1.SourceTypeGit,
-					Source: "test-recreated-repo",
+					Type:    serverlessv1alpha1.SourceTypeGit,
+					Source:  "test-recreated-repo",
 					Repository: serverlessv1alpha1.Repository{
 						BaseDir:   "/code/",
 						Reference: "main",
@@ -520,32 +430,6 @@ func TestConvertingWebhook_convertFunctionWithGitConfigUpdates(t *testing.T) {
 			Name: "test", Namespace: "test",
 		},
 		Spec: serverlessv1alpha2.FunctionSpec{
-			ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-				Build: serverlessv1alpha2.ResourceRequirements{
-					Resources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("300m"),
-							corev1.ResourceMemory: resource.MustParse("300Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("200m"),
-							corev1.ResourceMemory: resource.MustParse("200Mi"),
-						},
-					},
-				},
-				Function: serverlessv1alpha2.ResourceRequirements{
-					Resources: corev1.ResourceRequirements{
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("100m"),
-							corev1.ResourceMemory: resource.MustParse("128Mi"),
-						},
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("50m"),
-							corev1.ResourceMemory: resource.MustParse("64Mi"),
-						},
-					},
-				},
-			},
 			Runtime: serverlessv1alpha2.NodeJs12,
 			Source: serverlessv1alpha2.Source{
 				GitRepository: &serverlessv1alpha2.GitRepositorySource{
