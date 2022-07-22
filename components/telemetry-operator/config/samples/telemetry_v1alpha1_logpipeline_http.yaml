@@ -11,7 +11,13 @@ spec:
             name: mockserver-host
             namespace: mockserver
             key: host
+      user:
+        value: "user"
+      password:
+        value: "not-required"
       port: "9880"
+      uri: "/"
+      format: "json"
       tls:
         disabled: true
         skipCertificateValidation: true
