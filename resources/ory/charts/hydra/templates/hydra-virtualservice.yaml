@@ -9,7 +9,7 @@ spec:
   hosts:
     - oauth2.{{ .Values.global.domainName }}
   http:
-    {{- if .Values.hydra.service.admin.enabled }}
+    {{- if .Values.service.admin.enabled }}
     - match:
         - uri:
             exact: "/oauth2/introspect"
@@ -17,9 +17,9 @@ spec:
         - destination:
             host: {{ include "hydra.fullname" . }}-hydra-admin
             port:
-              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+              number: {{ .Values.hydra.config.serve.admin.port }}
     {{- end -}}
-    {{- if .Values.hydra.service.public.enabled }}
+    {{- if .Values.service.public.enabled }}
     - match:
         - uri:
             prefix: "/.well-known"
@@ -31,5 +31,5 @@ spec:
         - destination:
             host: {{ include "hydra.fullname" . }}-hydra-public
             port:
-              number: {{ .Values.hydra.hydra.config.serve.public.port }}
+              number: {{ .Values.hydra.config.serve.public.port }}
     {{- end -}}

@@ -11,3 +11,9 @@ dependencies:
   - name: gcloud-sqlproxy
     version: 0.19.7
     condition: global.ory.hydra.persistence.gcloud.enabled
+  - name: oathkeeper
+    version: 0.5.7
+    condition: oathkeeper.enabled
+  - name: hydra
+    version: 0.5.5
+    condition: hydra.enabled
