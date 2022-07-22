@@ -178,9 +178,7 @@ metadata:
 
 ### Step 5: Add a parser
 
-Typically, you want to have your logs shipped in a structured format already, so that a backend like OpenSearch can immediately index the content according to the log attributes.
-By default, a LogPipeline tries to parse all logs as a JSON document and enrich the record with the parsed attributes on the root record. Thus, logging in JSON format in the application results in structured log records.
-Sometimes, logging in JSON is not an option (the log configuration is not under your control) and the logs are in an unstructured or plain format. To adjust this, you can define your custom [parser](https://docs.fluentbit.io/manual/concepts/data-pipeline/parser) and either activate it with a filter or a Pod annotation.
+Typically, you want to have your logs shipped in a structured format already, so that a backend like OpenSearch can immediately index the content according to the log attributes. By default, a LogPipeline tries to parse all logs as a JSON document and enrich the record with the parsed attributes on the root record. Thus, logging in JSON format in the application results in structured log records. Sometimes, logging in JSON is not an option (the log configuration is not under your control) and the logs are in an unstructured or plain format. To adjust this, you can define your custom [parser](https://docs.fluentbit.io/manual/concepts/data-pipeline/parser) and either activate it with a filter or a Pod annotation.
 
 The following example defines a parser named `dummy_test` using a dedicated `LogParser` resource type:
 
