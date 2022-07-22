@@ -1,13 +1,16 @@
 package git
 
 import (
-	"io/ioutil"
+	"crypto/md5"
+	"fmt"
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 const (
@@ -25,14 +28,28 @@ type cloner interface {
 	git2goClone(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error)
 }
 
-type Git2GoClient struct {
-	cloner
+type fetcher interface {
+	git2goFetch(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error)
 }
 
-func NewGit2Go() *Git2GoClient {
+type Git2GoClient struct {
+	cloner
+	fetcher
+}
+
+func NewGit2Go(logger *zap.SugaredLogger) *Git2GoClient {
 	return &Git2GoClient{
-		cloner: &git2goCloner{},
+		cloner:  &git2goCloner{},
+		fetcher: &git2goFetcher{logger: logger},
 	}
+}
+
+func mkRepoDir(options Options) (string, error) {
+	nameHash := md5.Sum([]byte(options.URL))
+	path := path.Join(tempDir, fmt.Sprintf("%x", nameHash))
+
+	err := os.MkdirAll(path, 0700)
+	return path, err
 }
 
 func (g *Git2GoClient) LastCommit(options Options) (string, error) {
@@ -42,17 +59,16 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 		return options.Reference, nil
 	}
 
-	tmpPath, err := ioutil.TempDir(tempDir, "fn-git")
+	// FIXME: This is NOT thread safe. If we ever decide to go with more than one worker, we need to refactor this. But for now it's fine.
+	repoDir, err := mkRepoDir(options)
 	if err != nil {
 		return "", errors.Wrap(err, "while creating temporary directory")
 	}
-	defer removeDir(tmpPath)
-
-	repo, err := g.cloneRepo(options, tmpPath)
+	repo, err := g.fetchRepo(options, repoDir)
 	if err != nil {
-		return "", errors.Wrap(err, "while cloning the repository")
+		return "", errors.Wrap(err, "while fetching the repository")
 	}
-
+	defer repo.Free()
 	//branch
 	ref, err := g.lookupBranch(repo, options.Reference)
 	if err == nil {
@@ -61,7 +77,6 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	if !git2go.IsErrorCode(err, git2go.ErrNotFound) {
 		return "", errors.Wrap(err, "while lookup branch")
 	}
-
 	//tag
 	commit, err := g.lookupTag(repo, options.Reference)
 	if err != nil {
@@ -75,6 +90,7 @@ func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "while cloning the repository")
 	}
+	defer repo.Free()
 
 	oid, err := git2go.NewOid(options.Reference)
 	if err != nil {
@@ -105,6 +121,13 @@ func (g *Git2GoClient) cloneRepo(opts Options, path string) (*git2go.Repository,
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
 	return g.cloner.git2goClone(opts.URL, path, authCallbacks)
+}
+func (g *Git2GoClient) fetchRepo(opts Options, path string) (*git2go.Repository, error) {
+	authCallbacks, err := GetAuth(opts.Auth)
+	if err != nil {
+		return nil, errors.Wrap(err, "while getting authentication opts")
+	}
+	return g.fetcher.git2goFetch(opts.URL, path, authCallbacks)
 }
 
 func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {

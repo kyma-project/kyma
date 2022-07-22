@@ -24,7 +24,7 @@ By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can st
   </summary>
 
   ```bash
-  kubectl -n kyma-system port-forward svc/kiali-server 20001:20001
+  kubectl -n kyma-system port-forward svc/kiali 20001:20001
   ```
 
   </details>

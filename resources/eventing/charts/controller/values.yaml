@@ -21,7 +21,7 @@ resources:
     cpu: 300m
     memory: 100Mi
   requests:
-    cpu: 100m
+    cpu: 10m
     memory: 20Mi
 
 publisherProxy:
@@ -34,15 +34,13 @@ publisherProxy:
       cpu: 100m
       memory: 128Mi
     requests:
-      cpu: 32m
+      cpu: 10m
       memory: 64Mi
 
 metrics:
-  service:
-    nameSuffix: "-metrics"
   config:
     port: 8080
-    portName: http-metrics
+    portName: metrics
     nameSuffix: "-metrics"
     interval: 30s
 
@@ -78,8 +76,8 @@ jetstream:
   # Configs for the stream used for storing events
   # Name of the JetStream stream where all events are stored.
   streamName: sap
-  # Subject prefix for the JetStream stream when eventTypePrefix is not provided.
-  subjectPrefix: kyma
+  # Number of replicas for JetStream stream (max: 5)
+  streamReplicas: 1
   # Retention policy determines when messages are deleted from the stream:
   # (more info https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy):
   # - interest: When all known observables have acknowledged a message, it can be removed.

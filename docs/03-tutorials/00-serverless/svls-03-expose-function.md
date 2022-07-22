@@ -9,7 +9,7 @@ When you complete this tutorial, you get a Function that:
 - Is available on an unsecured endpoint (**handler** set to `noop` in the API Rule CR).
 - Accepts the `GET`, `POST`, `PUT`, and `DELETE` methods.
 
->**NOTE:** To learn more about securing your Function, see the [Expose and secure a workload with OAuth2](../00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [Expose and secure a workload with JWT](../00-api-exposure/apix-04-expose-and-secure-workload-jwt.md) tutorials.
+>**NOTE:** To learn more about securing your Function, see the [Expose and secure a workload with OAuth2](../00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [Expose and secure a workload with JWT](../00-api-exposure/apix-05-expose-and-secure-workload-jwt.md) tutorials.
 
 >**TIP:** Read also about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 

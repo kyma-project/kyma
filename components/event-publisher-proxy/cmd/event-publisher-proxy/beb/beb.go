@@ -3,12 +3,13 @@ package beb
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"go.uber.org/zap"
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only used in a development setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -25,17 +26,22 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
 
+const (
+	bebBackend       = "beb"
+	bebCommanderName = bebBackend + "-commander"
+)
+
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
 	envCfg           *env.BebConfig
-	logger           *logrus.Logger
+	logger           *logger.Logger
 	metricsCollector *metrics.Collector
 	opts             *options.Options
 }
 
 // NewCommander creates the Commander for publisher to BEB.
-func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logrus.Logger) *Commander {
+func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
 		metricsCollector: metricsCollector,
 		logger:           logger,
@@ -47,7 +53,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 // Init implements the Commander interface and initializes the publisher to BEB.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		c.logger.Errorf("Read BEB configuration failed with error: %s", err)
+		c.namedLogger().Errorw("Failed to read configuration", "error", err)
 		return err
 	}
 	return nil
@@ -55,7 +61,7 @@ func (c *Commander) Init() error {
 
 // Start implements the Commander interface and starts the publisher.
 func (c *Commander) Start() error {
-	c.logger.Infof("Starting Event Publisher to BEB, envCfg: %v; opts: %#v", c.envCfg.String(), c.opts)
+	c.namedLogger().Infow("Starting Event Publisher", "configuration", c.envCfg.String(), "startup arguments", c.opts)
 
 	// configure message receiver
 	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
@@ -94,9 +100,9 @@ func (c *Commander) Start() error {
 		Logger:             c.logger,
 	}
 	// Sync informer cache or die
-	c.logger.Info("Waiting for informers caches to sync")
-	informers.WaitForCacheSyncOrDie(ctx, subDynamicSharedInfFactory)
-	c.logger.Info("Informers are synced successfully")
+	c.namedLogger().Info("Waiting for informers caches to sync")
+	informers.WaitForCacheSyncOrDie(ctx, subDynamicSharedInfFactory, c.logger)
+	c.namedLogger().Info("Informers were successfully synced")
 
 	// configure event type cleaner
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
@@ -104,10 +110,10 @@ func (c *Commander) Start() error {
 	// start handler which blocks until it receives a shutdown signal
 	if err := beb.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
-		c.logger.Errorf("Start handler failed with error: %s", err)
+		c.namedLogger().Errorw("Failed to start handler", "error", err)
 		return err
 	}
-	c.logger.Info("Shutdown the Event Publisher Proxy")
+	c.namedLogger().Info("Event Publisher was shut down")
 	return nil
 }
 
@@ -115,4 +121,8 @@ func (c *Commander) Start() error {
 func (c *Commander) Stop() error {
 	c.cancel()
 	return nil
+}
+
+func (c *Commander) namedLogger() *zap.SugaredLogger {
+	return c.logger.WithContext().Named(bebCommanderName).With("backend", bebBackend)
 }

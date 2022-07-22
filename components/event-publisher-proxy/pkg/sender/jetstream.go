@@ -6,13 +6,19 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"go.uber.org/zap"
 
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
+)
+
+const (
+	natsBackend         = "nats"
+	jestreamHandlerName = "jetstream-handler"
 )
 
 // compile time check
@@ -21,13 +27,13 @@ var _ GenericSender = &JetstreamMessageSender{}
 // JetstreamMessageSender is responsible for sending messages over HTTP.
 type JetstreamMessageSender struct {
 	ctx        context.Context
-	logger     *logrus.Logger
+	logger     *logger.Logger
 	connection *nats.Conn
 	envCfg     *env.NatsConfig
 }
 
 // NewJetstreamMessageSender returns a new NewJetstreamMessageSender instance with the given nats connection.
-func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NatsConfig, logger *logrus.Logger) *JetstreamMessageSender {
+func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NatsConfig, logger *logger.Logger) *JetstreamMessageSender {
 	return &JetstreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 
@@ -61,10 +67,10 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	}
 
 	// send the event
-	s.logger.Infof("Sending to NATS in Jetstream mode: %v, stream name: %s", event, s.envCfg.JSStreamName)
+	s.namedLogger().Infof("Sending event:%v to backend, stream name:%s", event, s.envCfg.JSStreamName)
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
-		s.logger.Errorf("Cannot send event to NATS Jetsteram: %v", err)
+		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusNoContent, nil
@@ -77,10 +83,10 @@ func (s *JetstreamMessageSender) streamExists(connection *nats.Conn) (bool, erro
 		return false, err
 	}
 	if info, err := jsCtx.StreamInfo(s.envCfg.JSStreamName); err == nil {
-		s.logger.Infof("Stream %s exists, using it for publishing", info.Config.Name)
+		s.namedLogger().Infof("Stream %s exists, using it for publishing", info.Config.Name)
 		return true, nil
 	} else if err != nats.ErrStreamNotFound {
-		s.logger.Debug("The connection to NATs server is not established!")
+		s.namedLogger().Debug("The connection to NATS server is not established!")
 		return false, err
 	}
 	return false, nats.ErrStreamNotFound
@@ -109,8 +115,9 @@ func (s *JetstreamMessageSender) eventToNatsMsg(event *event.Event) (*nats.Msg, 
 
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *JetstreamMessageSender) getJsSubjectToPublish(subject string) string {
-	if strings.HasPrefix(subject, s.envCfg.JSStreamSubjectPrefix) {
-		return subject
-	}
-	return fmt.Sprintf("%s.%s", s.envCfg.JSStreamSubjectPrefix, subject)
+	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
+}
+
+func (s *JetstreamMessageSender) namedLogger() *zap.SugaredLogger {
+	return s.logger.WithContext().Named(jestreamHandlerName).With("backend", natsBackend, "jetstream enabled", true)
 }

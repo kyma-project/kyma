@@ -1,8 +1,0 @@
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: func-sb-svcat-html5-apps-repo-1
-spec:
-  instanceRef:
-    name: svcat-html5-apps-repo-1

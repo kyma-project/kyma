@@ -1,11 +1,26 @@
 package beb
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	k8stypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/record"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -14,16 +29,148 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	domain = "domain.com"
 )
+
+// TestReconciler_Reconcile tests the return values of the Reconcile() method of the reconciler.
+// This is important, as it dictates whether the reconciliation should be requeued by Controller Runtime,
+// and if so with how much initial delay. Returning error or a `Result{Requeue: true}` would cause the reconciliation to be requeued.
+// Everything else is mocked since we are only interested in the logic of the Reconcile method and not the reconciler dependencies.
+func TestReconciler_Reconcile(t *testing.T) {
+	ctx := context.Background()
+	req := require.New(t)
+
+	// A subscription with the correct Finalizer, conditions and status ready for reconciliation with the backend.
+	testSub := reconcilertesting.NewSubscription("sub1", "test",
+		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
+		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
+		reconcilertesting.WithValidSink("test", "test-svc"),
+		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
+	)
+	// A subscription marked for deletion.
+	testSubUnderDeletion := reconcilertesting.NewSubscription("sub2", "test",
+		reconcilertesting.WithNonZeroDeletionTimestamp(),
+		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
+	)
+
+	// A subscription with the correct Finalizer, conditions and status Paused for reconciliation with the backend.
+	testSubPaused := reconcilertesting.NewSubscription("sub3", "test",
+		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
+		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
+		reconcilertesting.WithValidSink("test", "test-svc"),
+		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusPaused)),
+	)
+
+	backendSyncErr := errors.New("backend sync error")
+	backendDeleteErr := errors.New("backend delete error")
+	validatorErr := errors.New("invalid sink")
+	happyValidator := sink.ValidatorFunc(func(s *eventingv1alpha1.Subscription) error { return nil })
+	unhappyValidator := sink.ValidatorFunc(func(s *eventingv1alpha1.Subscription) error { return validatorErr })
+
+	var testCases = []struct {
+		name                 string
+		givenSubscription    *eventingv1alpha1.Subscription
+		givenReconcilerSetup func() *Reconciler
+		wantReconcileResult  ctrl.Result
+		wantReconcileError   error
+	}{
+		{
+			name:              "Return nil and default Result{} when there is no error from the reconciler dependencies",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t, testSub)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  nil,
+		},
+		{
+			name:              "Return nil and default Result{} when the subscription does not exist on the cluster",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  nil,
+		},
+		{
+			name:              "Return error and default Result{} when backend sync returns error",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t, testSub)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(false, backendSyncErr)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  backendSyncErr,
+		},
+		{
+			name:              "Return error and default Result{} when backend delete returns error",
+			givenSubscription: testSubUnderDeletion,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t, testSubUnderDeletion)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  backendDeleteErr,
+		},
+		{
+			name:              "Return error and default Result{} when validator returns error",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t, testSub)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, unhappyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  validatorErr,
+		},
+		{
+			name:              "Return nil and RequeueAfter when the BEB subscription is Paused",
+			givenSubscription: testSubPaused,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t, testSubPaused)
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+				return NewReconciler(ctx, te.fakeClient, te.logger, te.recorder, te.cfg, te.cleaner, te.backend, te.credentials, te.mapper, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{
+				RequeueAfter: requeueAfterDuration,
+			},
+			wantReconcileError: nil,
+		},
+	}
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			reconciler := tc.givenReconcilerSetup()
+			r := ctrl.Request{NamespacedName: k8stypes.NamespacedName{
+				Namespace: tc.givenSubscription.Namespace,
+				Name:      tc.givenSubscription.Name,
+			}}
+			res, err := reconciler.Reconcile(context.Background(), r)
+			req.Equal(res, tc.wantReconcileResult)
+			req.Equal(err, tc.wantReconcileError)
+		})
+	}
+}
 
 func Test_isInDeletion(t *testing.T) {
 	var testCases = []struct {
@@ -73,6 +220,7 @@ func Test_isInDeletion(t *testing.T) {
 		})
 	}
 }
+
 func Test_replaceStatusCondition(t *testing.T) {
 	var testCases = []struct {
 		name              string
@@ -215,11 +363,11 @@ func Test_getRequiredConditions(t *testing.T) {
 
 func Test_syncConditionSubscribed(t *testing.T) {
 	currentTime := metav1.Now()
-
+	errorMessage := "error message"
 	var testCases = []struct {
 		name              string
 		givenSubscription *eventingv1alpha1.Subscription
-		givenIsSubscribed bool
+		givenError        error
 		wantCondition     eventingv1alpha1.Condition
 	}{
 		{
@@ -244,12 +392,13 @@ func Test_syncConditionSubscribed(t *testing.T) {
 				}
 				return subscription
 			}(),
-			givenIsSubscribed: false,
+			givenError: errors.New(errorMessage),
 			wantCondition: eventingv1alpha1.Condition{
 				Type:               eventingv1alpha1.ConditionSubscribed,
 				LastTransitionTime: currentTime,
 				Status:             corev1.ConditionFalse,
 				Reason:             eventingv1alpha1.ConditionReasonSubscriptionCreationFailed,
+				Message:            errorMessage,
 			},
 		},
 		{
@@ -274,7 +423,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 				}
 				return subscription
 			}(),
-			givenIsSubscribed: true,
+			givenError: nil,
 			wantCondition: eventingv1alpha1.Condition{
 				Type:               eventingv1alpha1.ConditionSubscribed,
 				LastTransitionTime: currentTime,
@@ -296,7 +445,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 			subscription := tc.givenSubscription
 
 			// when
-			r.syncConditionSubscribed(subscription, tc.givenIsSubscribed)
+			r.syncConditionSubscribed(subscription, tc.givenError)
 
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
@@ -321,6 +470,9 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+					SubscriptionStatus: "Paused",
+				}
 
 				// mark ConditionSubscriptionActive conditions as true
 				subscription.Status.Conditions = []eventingv1alpha1.Condition{
@@ -343,6 +495,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				LastTransitionTime: currentTime,
 				Status:             corev1.ConditionFalse,
 				Reason:             eventingv1alpha1.ConditionReasonSubscriptionNotActive,
+				Message:            "Waiting for subscription to be active",
 			},
 		},
 		{
@@ -351,6 +504,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{}
 
 				// mark ConditionSubscriptionActive conditions as false
 				subscription.Status.Conditions = []eventingv1alpha1.Condition{
@@ -436,7 +590,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 					},
 				}
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "invalid",
 					LastFailedDelivery:       "invalid",
 					LastFailedDeliveryReason: "",
@@ -474,7 +628,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				}
 				// set EmsSubscriptionStatus
 				// LastFailedDelivery is latest
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDeliveryReason: "abc",
@@ -512,7 +666,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				}
 				// set EmsSubscriptionStatus
 				// LastSuccessfulDelivery is latest
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -569,7 +723,7 @@ func Test_checkStatusActive(t *testing.T) {
 			subscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusActive),
 				}
 				return subscription
@@ -583,7 +737,7 @@ func Test_checkStatusActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.FailedActivation = currentTime.Format(time.RFC3339)
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusActive),
 				}
 				return subscription
@@ -596,7 +750,7 @@ func Test_checkStatusActive(t *testing.T) {
 			subscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusPaused),
 				}
 				return subscription
@@ -610,7 +764,7 @@ func Test_checkStatusActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.FailedActivation = currentTime.Format(time.RFC3339)
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusPaused),
 				}
 				return subscription
@@ -624,7 +778,7 @@ func Test_checkStatusActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.FailedActivation = currentTime.Add(time.Minute * -1).Format(time.RFC3339)
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusPaused),
 				}
 				return subscription
@@ -661,7 +815,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "",
 					LastFailedDelivery:       "",
 					LastFailedDeliveryReason: "",
@@ -676,7 +830,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "",
 					LastFailedDelivery:       "invalid",
 					LastFailedDeliveryReason: "",
@@ -691,7 +845,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "invalid",
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -706,7 +860,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -721,7 +875,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -754,4 +908,52 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			}
 		})
 	}
+}
+
+// helper functions and structs
+
+// testEnvironment provides mocked resources for tests.
+type testEnvironment struct {
+	fakeClient  client.Client
+	backend     *mocks.BEBBackend
+	logger      *eventinglogger.Logger
+	recorder    *record.FakeRecorder
+	cfg         env.Config
+	credentials *handlers.OAuth2ClientCredentials
+	mapper      handlers.NameMapper
+	cleaner     eventtype.Cleaner
+}
+
+// setupTestEnvironment is a testEnvironment constructor
+func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment {
+	mockedBackend := &mocks.BEBBackend{}
+	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()
+	recorder := &record.FakeRecorder{}
+	defaultLogger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	if err != nil {
+		t.Fatalf("initialize logger failed: %v", err)
+	}
+	emptyConfig := env.Config{}
+	credentials := &handlers.OAuth2ClientCredentials{}
+	nameMapper := handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
+	cleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
+
+	return &testEnvironment{
+		fakeClient:  fakeClient,
+		backend:     mockedBackend,
+		logger:      defaultLogger,
+		recorder:    recorder,
+		cfg:         emptyConfig,
+		credentials: credentials,
+		mapper:      nameMapper,
+		cleaner:     cleaner,
+	}
+}
+
+func createFakeClientBuilder(t *testing.T) *fake.ClientBuilder {
+	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
+	require.NoError(t, err)
+	err = apigatewayv1alpha1.AddToScheme(scheme.Scheme)
+	require.NoError(t, err)
+	return fake.NewClientBuilder().WithScheme(scheme.Scheme)
 }

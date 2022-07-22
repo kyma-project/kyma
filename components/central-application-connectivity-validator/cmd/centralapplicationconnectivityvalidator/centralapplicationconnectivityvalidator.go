@@ -104,8 +104,6 @@ func main() {
 		options.eventingPathPrefixEvents,
 		options.eventingPublisherHost,
 		options.eventingDestinationPath,
-		options.appRegistryPathPrefix,
-		options.appRegistryHost,
 		idCache,
 		log)
 

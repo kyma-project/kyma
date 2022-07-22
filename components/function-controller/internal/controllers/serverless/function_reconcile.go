@@ -2,26 +2,23 @@ package serverless
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -38,34 +35,34 @@ type StatsCollector interface {
 }
 
 type FunctionReconciler struct {
-	Log            logr.Logger
-	client         resource.Client
-	recorder       record.EventRecorder
-	config         FunctionConfig
-	scheme         *runtime.Scheme
-	gitOperator    GitOperator
-	statsCollector StatsCollector
-	healthCh       chan bool
+	Log               *zap.SugaredLogger
+	client            resource.Client
+	recorder          record.EventRecorder
+	config            FunctionConfig
+	gitOperator       GitOperator
+	statsCollector    StatsCollector
+	healthCh          chan bool
+	initStateFunction stateFn
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
+func NewFunction(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		Log:            log.WithName("controllers").WithName("function"),
-		client:         client,
-		recorder:       recorder,
-		config:         config,
-		gitOperator:    gitOperator,
-		healthCh:       healthCh,
-		statsCollector: statsCollector,
+		Log:               log.Named("controllers").Named("function"),
+		client:            client,
+		recorder:          recorder,
+		config:            config,
+		gitOperator:       gitOperator,
+		healthCh:          healthCh,
+		statsCollector:    statsCollector,
+		initStateFunction: stateFnInitialize,
 	}
 }
 
 func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Controller, error) {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("function-controller").
-		For(&serverlessv1alpha1.Function{}).
+		For(&serverlessv1alpha1.Function{}, builder.WithPredicates(predicate.Funcs{UpdateFunc: IsNotFunctionStatusUpdate(r.Log)})).
 		Owns(&corev1.ConfigMap{}).
-		Owns(&batchv1.Job{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
@@ -99,161 +96,56 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		r.healthCh <- true
 		return ctrl.Result{}, nil
 	}
-	instance := &serverlessv1alpha1.Function{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
+
+	var instance serverlessv1alpha1.Function
+
+	err := r.client.Get(ctx, request.NamespacedName, &instance)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
-	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind,
-		"name", instance.GetName(),
-		"namespace", instance.GetNamespace(),
-		"version", instance.GetGeneration())
 
 	if !instance.DeletionTimestamp.IsZero() {
 		return ctrl.Result{}, nil
 	}
 
-	var configMaps corev1.ConfigMapList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
-		log.Error(err, "Cannot list ConfigMaps")
-		return ctrl.Result{}, err
-	}
+	zapLog := r.Log.With(
+		"kind", instance.GetObjectKind().GroupVersionKind().Kind,
+		"name", instance.GetName(),
+		"namespace", instance.GetNamespace(),
+		"version", instance.GetGeneration())
 
-	var jobs batchv1.JobList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &jobs); err != nil {
-		log.Error(err, "Cannot list Jobs")
-		return ctrl.Result{}, err
-	}
-
-	var runtimeConfigMap corev1.ConfigMapList
-	labels := map[string]string{
-		kubernetes.ConfigLabel:  kubernetes.RuntimeLabelValue,
-		kubernetes.RuntimeLabel: string(instance.Spec.Runtime),
-	}
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
-		log.Error(err, "Cannot list runtime configmap")
-		return ctrl.Result{}, err
-	}
-
-	if len(runtimeConfigMap.Items) != 1 {
-		return ctrl.Result{}, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
-	}
-
-	var deployments appsv1.DeploymentList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &deployments); err != nil {
-		log.Error(err, "Cannot list Deployments")
-		return ctrl.Result{}, err
-	}
-
-	var services corev1.ServiceList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &services); err != nil {
-		log.Error(err, "Cannot list Services")
-		return ctrl.Result{}, err
-	}
-
-	var hpas autoscalingv1.HorizontalPodAutoscalerList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
-		log.Error(err, "Cannot list HorizontalPodAutoscalers")
-		return ctrl.Result{}, err
-	}
-
-	dockerConfig, err := r.readDockerConfig(ctx, instance)
+	dockerCfg, err := r.readDockerConfig(ctx, &instance)
 	if err != nil {
-		log.Error(err, "Cannot read Docker registry configuration")
 		return ctrl.Result{}, err
 	}
 
-	gitOptions, err := r.readGITOptions(ctx, instance)
-	if err != nil {
-		if updateErr := r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Reading git options failed: %v", err),
-		}); updateErr != nil {
-			log.Error(err, "Reading git options failed")
-			return ctrl.Result{}, errors.Wrap(updateErr, "while updating status")
-		}
-		return ctrl.Result{}, err
+	stateReconciler := reconciler{
+		fn:  r.initStateFunction,
+		log: zapLog,
+		k8s: k8s{
+			client:         r.client,
+			recorder:       r.recorder,
+			statsCollector: r.statsCollector,
+		},
+		cfg: cfg{
+			fn:     r.config,
+			docker: dockerCfg,
+		},
+		operator: r.gitOperator,
 	}
 
-	revision, err := r.syncRevision(instance, gitOptions)
-	if err != nil {
-		result, errMsg := NextRequeue(err)
-		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
-		return result, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            errMsg,
-		})
+	stateReconciler.result = ctrl.Result{
+		RequeueAfter: time.Second * 1,
 	}
 
-	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
-	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)
-	var result ctrl.Result
-
-	switch {
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
-		r.isOnSourceChange(instance, revision):
-		return result, r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
-			Reference: instance.Spec.Reference,
-			BaseDir:   instance.Spec.Repository.BaseDir,
-		}, revision)
-
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
-		r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items, dockerConfig):
-		return result, r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
-
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
-		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions, dockerConfig):
-		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
-
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
-		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}, dockerConfig):
-		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items, dockerConfig)
-
-	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items, dockerConfig):
-		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
-
-	case r.isOnServiceChange(instance, services.Items):
-		return result, r.onServiceChange(ctx, log, instance, services.Items)
-
-	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
-		return result, r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
-
-	default:
-		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
-	}
-}
-
-func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
-	return instance.Status.Commit == "" ||
-		commit != instance.Status.Commit ||
-		instance.Spec.Reference != instance.Status.Reference ||
-		serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime) != instance.Status.Runtime ||
-		instance.Spec.BaseDir != instance.Status.BaseDir ||
-		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
-}
-
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) error {
-	return r.updateStatus(ctx, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionConfigurationReady,
-		Status:             corev1.ConditionTrue,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonSourceUpdated,
-		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
-	}, repository, commit)
+	return stateReconciler.reconcile(ctx, instance)
 }
 
 func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
 	var secret corev1.Secret
 	// try reading user config
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
-		data := r.readSecretData(secret.Data)
+		data := readSecretData(secret.Data)
 		return DockerConfig{
 			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
 			PushAddress:                    data["registryAddress"],
@@ -263,29 +155,21 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 
 	// try reading default config
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
-		data := r.readSecretData(secret.Data)
+		data := readSecretData(secret.Data)
 		if data["isInternal"] == "true" {
 			return DockerConfig{
 				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
 				PushAddress:                    data["registryAddress"],
 				PullAddress:                    data["serverAddress"],
 			}, nil
-		} else {
-			return DockerConfig{
-				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-				PushAddress:                    data["registryAddress"],
-				PullAddress:                    data["registryAddress"],
-			}, nil
 		}
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+			PushAddress:                    data["registryAddress"],
+			PullAddress:                    data["registryAddress"],
+		}, nil
+
 	}
 
 	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
-}
-
-func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {
-	output := make(map[string]string)
-	for k, v := range data {
-		output[k] = string(v)
-	}
-	return output
 }

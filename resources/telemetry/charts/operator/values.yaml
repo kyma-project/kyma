@@ -43,10 +43,10 @@ readinessProbe:
 resources:
   limits:
     cpu: 100m
-    memory: 300Mi
+    memory: 100Mi
   requests:
-    cpu: 100m
-    memory: 200Mi
+    cpu: 5m
+    memory: 20Mi
 
 terminationGracePeriodSeconds: 10
 
@@ -81,6 +81,18 @@ serviceMonitor:
        sourceLabels: [ __name__ ]
 
 logProcessor: fluent-bit
+
+deniedPlugins:
+  filter:
+    - kubernetes
+    - rewrite_tag
+    - multiline
+  output: []
+
+syncPeriod: 1h
+maxLogPipelines: 3
+
+filesystemBufferLimit: 1G
 
 nodeSelector: {}
 

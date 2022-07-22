@@ -78,11 +78,8 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 3. Choose the **Advanced** view and provide the following parameters:
     - **Name**: `orders-service`
     - **Labels**: add labels `app` and `example` and set their values to `orders-service`
-    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`
-    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service)
-    - **Port**: `80`
-    - **Target Port**: `8080`  
-
+    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
+  
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
@@ -144,18 +141,24 @@ The operation was successful if the command returns the **uid** of your Service.
   Kyma Dashboard
   </summary>
 
-As you've already [created the Kubernetes Service with the microservice](03-deploy-expose-microservice.md#deploy-the-microservice), skip this part.
-
-<!--
-//TODO: Functionality not added yet. Check with Hasselhoffs in a while.
-If you created the Service at the previous step while creating the Deployment, skip this section. Otherwise, you must now create the Service.
-
-1. From the left navigation, go to **Services**.
+1. From the left navigation, go to **Discovery and Network > Services**.
 2. Click on **Create Service +**.
-3. ...
+3. In the **Create Service** view, paste the following values to your YAML file:  
 
-The operation was successful if ... .
---->
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: orders-service
+   spec:
+     selector:
+       app: orders-service
+     ports:
+       - protocol: TCP
+         port: 80
+         targetPort: 8080
+    ```
+4. Click **Create**. 
   </details>
 </div>
 
@@ -163,7 +166,7 @@ The operation was successful if ... .
 
 We have created the Service. Let's now expose it outside the cluster.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-jwt.md).
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md).
 
 To expose our microservice, we must create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 

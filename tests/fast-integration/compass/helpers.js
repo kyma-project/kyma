@@ -88,7 +88,7 @@ async function assignRuntimeToScenario(client, runtimeID, scenarioName) {
 
 async function isRuntimeAssignedToScenario(client, runtimeID, scenarioName) {
   const runtime = await client.getRuntime(runtimeID);
-  if (!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
+  if (!runtime || !runtime.labels[SCENARIOS_DEFINITION_NAME]) {
     return false;
   }
 
@@ -99,6 +99,9 @@ async function isRuntimeAssignedToScenario(client, runtimeID, scenarioName) {
 // getAlreadyAssignedScenarios returns the list of the scenarios by one runtime
 async function getAlreadyAssignedScenarios(client, runtimeID) {
   const runtime = await client.getRuntime(runtimeID);
+  if (!runtime) {
+    throw new Error(`Failed to find runtime: ${runtimeID}`);
+  }
   if (!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
     return [];
   }

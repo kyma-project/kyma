@@ -3,13 +3,13 @@ title: Subscription
 type: Custom Resource
 ---
 
-The Subscription custom resource definition (CRD) is used to subscribe to events. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `subscriptions.eventing.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data and the format used to subscribe to events. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 `kubectl get crd subscriptions.eventing.kyma-project.io -o yaml`
 
 ## Sample custom resource
 
-This sample Subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
+This sample Subscription custom resource (CR) subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
 
 > **WARNING:** Non-alphanumeric characters `[^a-zA-Z0-9]+` are not allowed in event names under the **spec.filter.filters.eventType.value** property. If any are detected, Eventing will remove them. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
 
@@ -57,6 +57,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.protocol** | Yes | Must be set to `""`. |
 | **spec.protocolsettings** | Yes | Defines the Cloud Event protocol setting specification implementation. Must be set to `{}`. |
 | **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`.  |
+| **spec.config.maxInFlightMessages** | No | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. By default, it is set to 10.  |
 
 ## Related resources and components
 

@@ -35,4 +35,6 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
    ![Alert Notifications](./assets/alert-notifications.png)
 
-5. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
+## Next steps
+
+You've successfully finished the monitoring tutorials. [Clean up the configuration](obsv-05-clean-up-configuration.md).

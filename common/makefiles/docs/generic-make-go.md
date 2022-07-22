@@ -65,7 +65,7 @@ Although these rules do not appear in the Makefile, they are generated.
 
 The generic Makefile contains such a line of code:
 ```makefile
-MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate gqlgen
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 ```
 For all the rules defined in **MOUNT_TARGETS**, the `buildpack-mount` Function is called. It dynamically defines a new rule:

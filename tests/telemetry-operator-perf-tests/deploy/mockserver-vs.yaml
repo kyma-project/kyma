@@ -1,0 +1,36 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: mockserver
+  namespace: mockserver
+spec:
+  gateways:
+  - kyma-gateway.kyma-system.svc.cluster.local
+  hosts:
+  - KYMA_HOST_PLACEHOLDER
+  http:
+  - name: good
+    match:
+    - uri:
+        prefix: /good
+    - uri:
+        prefix: /
+    rewrite:
+      uri: /good
+    route:
+    - destination:
+        host: mockserver.mockserver.svc.cluster.local
+        port:
+          number: 1080
+  - name: bad
+    match:
+    - uri:
+        prefix: /bad
+    rewrite:
+      uri: /bad
+    route:
+    - destination:
+        host: mockserver.mockserver.svc.cluster.local
+        port:
+          number: 1080

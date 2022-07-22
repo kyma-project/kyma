@@ -5,14 +5,7 @@ version: 1.0.0
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
 dependencies:
-  - name: application-broker
-  - name: application-operator
-  - name: application-registry
   - name: central-application-connectivity-validator
-    condition: global.centralApplicationConnectivityValidatorEnabled
+    condition: global.disableLegacyConnectivity
   - name: central-application-gateway
     condition: central_application_gateway.enabled
-  - name: connection-token-handler
-    condition: connection_token_handler.enabled
-  - name: connector-service
-    condition: connector_service.enabled

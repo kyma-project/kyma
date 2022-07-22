@@ -1,7 +1,6 @@
 package teststep
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
@@ -13,7 +12,6 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 )
 
 type HTTPCheck struct {
@@ -120,78 +118,5 @@ func (d DefaultedFunctionCheck) Cleanup() error {
 }
 
 func (d DefaultedFunctionCheck) OnError() error {
-	return nil
-}
-
-type E2EFunctionCheck struct {
-	log          *logrus.Entry
-	name         string
-	inClusterURL string
-	fnGatewayURL string
-	publishURL   string
-	poller       poller.Poller
-}
-
-func NewE2EFunctionCheck(log *logrus.Entry, name, publishURL string, inClusterURL, fnGatewayURL *url.URL, poller poller.Poller) E2EFunctionCheck {
-	return E2EFunctionCheck{
-		log:          log.WithField(step.LogStepKey, name),
-		name:         name,
-		inClusterURL: inClusterURL.String(),
-		fnGatewayURL: fnGatewayURL.String(),
-		publishURL:   publisherURL,
-		poller:       poller,
-	}
-}
-
-func (c E2EFunctionCheck) Name() string {
-	return c.name
-}
-
-func (c E2EFunctionCheck) Run() error {
-	c.log.Infof("Testing local connection through the service to updated Function")
-	err := c.poller.PollForAnswer(c.inClusterURL, testsuite.HappyMsg, fmt.Sprintf("Hello %s world 1", testsuite.HappyMsg))
-	if err != nil {
-		return errors.Wrap(err, "while testing local connection through the service")
-	}
-
-	c.log.Infof("Step: %s, Testing connection through the Gateway", c.Name())
-	c.log.Infof("Gateway URL: %s", c.fnGatewayURL)
-	err = c.poller.PollForAnswer(c.fnGatewayURL, testsuite.HappyMsg, fmt.Sprintf("Hello %s world 2", testsuite.HappyMsg))
-	if err != nil {
-		return errors.Wrap(err, "while testing connection throight gateway")
-	}
-
-	c.log.Infof("Step: %s, Sending an event to NATS publisher proxy", c.Name())
-
-	err = testsuite.CreateEvent(c.publishURL)
-	if err != nil {
-		return errors.Wrap(err, "while testing connection to event-mesh via NATS publisher proxy")
-	}
-
-	c.log.Infof("Step: %s, Check if event has come to the function through the service", c.Name())
-	err = c.poller.PollForAnswer(c.inClusterURL, "", testsuite.GotEventMsg)
-	if err != nil {
-		return errors.Wrap(err, "while local connection through the service")
-	}
-
-	c.log.Infof("Step: %s, Testing injection of env variables via incluster url", c.Name())
-	err = c.poller.PollForAnswer(c.inClusterURL, testsuite.RedisEnvPing, testsuite.AnswerForEnvPing)
-	if err != nil {
-		return errors.Wrap(err, "while injection of env variables via incluster url")
-	}
-
-	c.log.Infof("Step: %s, Testing injection of env variables via gateway", c.Name())
-	err = c.poller.PollForAnswer(c.fnGatewayURL, testsuite.RedisEnvPing, testsuite.AnswerForEnvPing)
-	if err != nil {
-		return errors.Wrap(err, "while injection of env variables via gateway")
-	}
-	return nil
-}
-
-func (c E2EFunctionCheck) Cleanup() error {
-	return nil
-}
-
-func (e E2EFunctionCheck) OnError() error {
 	return nil
 }

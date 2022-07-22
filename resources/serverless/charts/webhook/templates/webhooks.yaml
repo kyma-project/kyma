@@ -35,3 +35,13 @@ webhooks:
     timeoutSeconds: 30
     admissionReviewVersions: ["v1beta1", "v1"]
     name: defaulting.webhook.serverless.kyma-project.io
+  - clientConfig:
+      service:
+        name: {{ template "webhook.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+    failurePolicy: Fail
+    sideEffects: None
+    matchPolicy: Exact
+    timeoutSeconds: 30
+    admissionReviewVersions: ["v1beta1", "v1"]
+    name: mutating.secret.webhook.serverless.kyma-project.io

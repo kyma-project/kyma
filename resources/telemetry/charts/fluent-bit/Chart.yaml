@@ -5,20 +5,22 @@ keywords:
   - logging
   - fluent-bit
   - fluentd
-version: 0.16.2
-appVersion: 1.8.3
+version: 0.20.3
+appVersion: 1.9.5
 icon: https://fluentbit.io/assets/img/logo1-default.png
 home: https://fluentbit.io/
 sources:
   - https://github.com/fluent/fluent-bit/
 maintainers:
   - name: edsiper
-    email: eduardo@treasure-data.com
+    email: eduardo@calyptia.com
   - name: naseemkullah
     email: naseem@transit.app
   - name: Towmeykaw
     email: towmeykaw@gmail.com
+  - name: stevehipwell
+    email: steve.hipwell@gmail.com
 annotations:
   artifacthub.io/changes: |
     - kind: changed
-      description: Update image version to v1.8.3.
+      description: "Update fluent-bit image to 1.9.5."

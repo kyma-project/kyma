@@ -145,17 +145,17 @@ spec:
         resources:
           {{- toYaml .Values.nats.resources | nindent 10 }}
         ports:
-        - containerPort: 4222
+        - containerPort: {{ .Values.nats.ports.client }}
           name: client
-        - containerPort: 7422
+        - containerPort: {{ .Values.nats.ports.leafnodes }}
           name: leafnodes
-        - containerPort: 7522
+        - containerPort: {{ .Values.nats.ports.gateways }}
           name: gateways
-        - containerPort: 6222
+        - containerPort: {{ .Values.nats.ports.cluster }}
           name: cluster
-        - containerPort: 8222
+        - containerPort: {{ .Values.nats.ports.monitoring }}
           name: monitor
-        - containerPort: 7777
+        - containerPort: {{ .Values.nats.ports.metrics }}
           name: metrics
         {{- if .Values.nats.profiling.enabled }}
         - containerPort: {{ .Values.nats.profiling.port }}

@@ -43,6 +43,9 @@ spec:
             {{- if .Values.forwardedProto }}
             - --forwarded-proto={{ .Values.forwardedProto }}
             {{- end }}
+            {{- if .Values.singleNamespaceMode }}
+            - --namespace={{ .Release.Namespace }}
+            {{- end }}               
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:
@@ -93,4 +96,3 @@ spec:
         - name: hydra-dsn
           secret:
             secretName: {{ include "hydra-maester.hydraSecret" . }}
-

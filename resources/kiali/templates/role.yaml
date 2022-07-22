@@ -10,7 +10,9 @@ rules:
   resources:
   - configmaps
   - endpoints
+{{- if not (has "logs-tab" .Values.kiali_feature_flags.disabled_features) }}
   - pods/log
+{{- end }}
   verbs:
   - get
   - list
@@ -81,16 +83,6 @@ rules:
   - routes
   verbs:
   - get
-- apiGroups: ["iter8.tools"]
-  resources:
-  - experiments
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-  - patch
 - apiGroups: ["authentication.k8s.io"]
   resources:
   - tokenreviews

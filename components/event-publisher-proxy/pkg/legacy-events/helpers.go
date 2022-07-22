@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
@@ -21,6 +21,8 @@ const (
 	// eventTypeFormatWithoutPrefix must have at least 3 segments separated by dots in the form of:
 	// <businessObjectName>.<operation>.<version>
 	eventTypeFormatWithoutPrefix = "%s.%s.%s"
+
+	legacyEventsName = "legacy-events"
 )
 
 // ParseApplicationNameFromPath returns application name from the URL.
@@ -58,7 +60,11 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 		return
 	}
 
-	log.Errorf("received an empty response")
+	// init the contexted logger
+	logger, _ := kymalogger.New("json", "error")
+	namedLogger := logger.WithContext().Named(legacyEventsName)
+
+	namedLogger.Error("Received an empty response")
 }
 
 // formatEventType joins the given prefix, application, eventType and version with a "." as a separator.

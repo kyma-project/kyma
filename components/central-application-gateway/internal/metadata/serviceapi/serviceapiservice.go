@@ -17,11 +17,11 @@ const (
 	UsernameKey        = "username"
 	PasswordKey        = "password"
 	TypeOAuth          = "OAuth"
+	TypeOAuthWithCert  = "OAuthWithCert"
 	TypeBasic          = "Basic"
 	TypeCertificateGen = "CertificateGen"
 	PrivateKeyKey      = "key"
 	CertificateKey     = "crt"
-	CommonNameKey      = "commonName"
 
 	HeadersKey         = "headers"
 	QueryParametersKey = "queryParameters"
@@ -94,6 +94,14 @@ func (sas defaultService) readCredentials(secret map[string][]byte, applicationA
 		credentials = &authorization.Credentials{
 			OAuth: oAuthCredentials,
 		}
+	} else if credentialsType == TypeOAuthWithCert {
+		oAuthWithCredentials, err := getOAuthWithCertCredentials(secret, applicationAPI.Credentials.URL)
+		if err != nil {
+			return nil, err
+		}
+		credentials = &authorization.Credentials{
+			OAuthWithCert: oAuthWithCredentials,
+		}
 	} else if credentialsType == TypeBasic {
 		credentials = &authorization.Credentials{
 			BasicAuth: getBasicAuthCredentials(secret),
@@ -159,6 +167,21 @@ func getOAuthCredentials(secret map[string][]byte, url string) (*authorization.O
 	}, nil
 }
 
+func getOAuthWithCertCredentials(secret map[string][]byte, url string) (*authorization.OAuthWithCert, apperrors.AppError) {
+	requestParameters, err := getRequestParameters(secret)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authorization.OAuthWithCert{
+		ClientID:          string(secret[ClientIDKey]),
+		Certificate:       secret[CertificateKey],
+		PrivateKey:        secret[PrivateKeyKey],
+		URL:               url,
+		RequestParameters: requestParameters,
+	}, nil
+}
+
 func getBasicAuthCredentials(secret map[string][]byte) *authorization.BasicAuth {
 	return &authorization.BasicAuth{
 		Username: string(secret[UsernameKey]),
@@ -168,7 +191,6 @@ func getBasicAuthCredentials(secret map[string][]byte) *authorization.BasicAuth 
 
 func getCertificateGenCredentials(secret map[string][]byte) *authorization.CertificateGen {
 	return &authorization.CertificateGen{
-		CommonName:  string(secret[CommonNameKey]),
 		Certificate: secret[CertificateKey],
 		PrivateKey:  secret[PrivateKeyKey],
 	}

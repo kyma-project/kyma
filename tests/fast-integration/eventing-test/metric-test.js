@@ -10,9 +10,11 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   debug,
   retryPromise,
+  replaceAllInString,
 } = require('../utils');
 
 const {queryPrometheus} = require('../monitoring/client');
+const {subscriptionNames} = require('./utils');
 
 const dashboards = {
   // The delivery dashboard
@@ -24,15 +26,6 @@ const dashboards = {
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
     assert: function(result) {
       const foundMetric = result.find((res) => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
-      expect(foundMetric).to.be.not.undefined;
-    },
-  },
-  delivery_applicationConnectivityValidator: {
-    title: 'Requests to application connectivity validator',
-    query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
-    backends: ['nats', 'beb'],
-    assert: function(result) {
-      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
       expect(foundMetric).to.be.not.undefined;
     },
   },
@@ -52,26 +45,18 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  // The latency dashboard
-  latency_connectivityValidatorToPublisherProxy: {
-    title: 'Latency of Connectivity Validator -> Event Publisher',
+  delivery_per_subscription: {
+    title: 'Delivery per Subscription',
     query: `
-        histogram_quantile(
-          0.99999, 
-          sum(rate(
-            istio_request_duration_milliseconds_bucket{
-              source_workload_namespace="kyma-system",
-              source_workload="central-application-connectivity-validator",
-              destination_workload_namespace="kyma-system",
-              destination_workload="eventing-publisher-proxy"
-            }[5m])
-          ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
-        `,
-    backends: ['nats', 'beb'],
+         sum (delivery_per_subscription{response_code=~"[245].*"}) 
+          by (namespace, subscription_name,event_type,sink,response_code)`,
+    backends: ['nats'],
     assert: function(result) {
       const foundMetric = result.find((res) =>
-        res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
-        res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
+        res.metric.subscription_name &&
+          res.metric.subscription_name === subscriptionNames.orderReceived &&
+          res.metric.response_code === '200',
+      );
       expect(foundMetric).to.be.not.undefined;
     },
   },
@@ -153,6 +138,42 @@ const dashboards = {
   },
 };
 
+const skrDashboards = {
+  // The delivery dashboard
+  delivery_applicationConnectivityValidator: {
+    title: 'Requests to application connectivity validator',
+    query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
+    backends: ['nats', 'beb'],
+    assert: function(result) {
+      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+  // The latency dashboard
+  latency_connectivityValidatorToPublisherProxy: {
+    title: 'Latency of Connectivity Validator -> Event Publisher',
+    query: `
+        histogram_quantile(
+          0.99999, 
+          sum(rate(
+            istio_request_duration_milliseconds_bucket{
+              source_workload_namespace="kyma-system",
+              source_workload="central-application-connectivity-validator",
+              destination_workload_namespace="kyma-system",
+              destination_workload="eventing-publisher-proxy"
+            }[5m])
+          ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
+        `,
+    backends: ['nats', 'beb'],
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
+        res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
+          res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+};
+
 // A generic assertion for the pod dashboards
 function ensureEventingPodsArePresent(result) {
   let controllerFound = false; let publisherProxyFound = false; let natsFound = false;
@@ -178,17 +199,19 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-function eventingMonitoringTest(backend, isJetStreamEnabled = false) {
+async function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
   let allDashboards = dashboards;
   if (isJetStreamEnabled) {
     allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
   }
+  if (isSkr) {
+    allDashboards = Object.assign(allDashboards, skrDashboards);
+  }
 
   for (const [dashboardName, test] of Object.entries(allDashboards)) {
     if (test.backends.includes(backend)) {
-      it('Testing dashboard: ' + test.title, async () => {
-        await runDashboardTestCase(dashboardName, test);
-      });
+      console.log('Testing dashboard: ' + test.title);
+      await runDashboardTestCase(dashboardName, test);
     }
   }
 }
@@ -209,7 +232,7 @@ function getJetStreamDashboardTests() {
     let finalQuery = natsDashboardQueries[i]['query'];
     // replace variables in queries with values
     for (const [variableName, value] of Object.entries(dashboardVariables)) {
-      finalQuery = finalQuery.replaceAll(variableName, value);
+      finalQuery = replaceAllInString(finalQuery, variableName, value);
     }
 
     dashboardTests[`jetstream_dash_${i}`] = {

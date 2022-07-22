@@ -5,7 +5,7 @@ prometheus:
         cpu: 1000m
         memory: 4Gi
       requests:
-        cpu: 300m
+        cpu: 125m
         memory: 1Gi
     retention: 30d
     retentionSize: 15GB
@@ -19,7 +19,7 @@ prometheus:
 prometheusOperator:
   resources:
     requests:
-      cpu: "50m"
+      cpu: "10m"
       memory: "128Mi"
     limits:
       cpu: "500m"
@@ -31,7 +31,7 @@ alertmanager:
 kube-state-metrics:
   resources:
     requests:
-      cpu: "50m"
+      cpu: "10m"
       memory: "128Mi"
     limits:
       cpu: "500m"

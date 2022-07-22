@@ -1,13 +1,15 @@
 package main
 
 import (
+	golog "log"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -21,6 +23,12 @@ type Config struct {
 
 	// JetstreamModeEnabled indicates whether NATS backend will be used in default or jetstream mode.
 	JetstreamModeEnabled bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
+
+	// AppLogFormat defines the log format.
+	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
+
+	// AppLogLevel defines the log level.
+	AppLogLevel string `envconfig:"APP_LOG_LEVEL" default:"info"`
 }
 
 // Commander defines the interface of different implementations
@@ -36,14 +44,25 @@ type Commander interface {
 }
 
 func main() {
-	logger := logrus.New()
 	opts := options.ParseArgs()
 
 	// parse the config for main:
 	cfg := new(Config)
 	if err := envconfig.Process("", cfg); err != nil {
-		logger.Fatalf("Read configuration failed with error: %s", err)
+		golog.Fatalf("Failed to read configuration, error: %v", err)
 	}
+
+	// init the logger
+	logger, err := kymalogger.New(cfg.AppLogFormat, cfg.AppLogLevel)
+	if err != nil {
+		golog.Fatalf("Failed to initialize logger, error: %v", err)
+	}
+	defer func() {
+		if err := logger.WithContext().Sync(); err != nil {
+			golog.Printf("Failed to flush logger, error: %v", err)
+		}
+	}()
+	setupLogger := logger.WithContext().With("backend", cfg.Backend, "jetstream mode", cfg.JetstreamModeEnabled)
 
 	// metrics collector
 	metricsCollector := metrics.NewCollector()
@@ -57,31 +76,27 @@ func main() {
 	case backendNATS:
 		commander = nats.NewCommander(opts, metricsCollector, logger, cfg.JetstreamModeEnabled)
 	default:
-		logger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
+		setupLogger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
 	}
 
 	// Init the commander.
 	if err := commander.Init(); err != nil {
-		logger.Fatalf("Initialization failed: %s", err)
+		setupLogger.Fatalw("Commander initialization failed", "error", err)
 	}
 
 	// Start the metrics server.
 	metricsServer := metrics.NewServer(logger)
 	defer metricsServer.Stop()
 	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
-		logger.Infof("Metrics server failed to start with error: %v", err)
+		setupLogger.Infow("Failed to start metrics server", "error", err)
 	}
 
-	if cfg.JetstreamModeEnabled {
-		logger.Infof("Starting publisher to: %v in the Jetstream mode", cfg.Backend)
-	} else {
-		logger.Infof("Starting publisher to: %v", cfg.Backend)
-	}
+	setupLogger.Infof("Starting publisher to: %v", cfg.Backend)
 
 	// Start the commander.
 	if err := commander.Start(); err != nil {
-		logger.Fatalf("Unable to start publisher: %s", err)
+		setupLogger.Fatalw("Failed to to start publisher", "error", err)
 	}
 
-	logger.Info("Shutdown the Event Publisher Proxy")
+	setupLogger.Info("Shutdown the Event Publisher")
 }

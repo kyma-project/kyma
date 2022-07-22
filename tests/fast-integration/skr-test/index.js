@@ -1,4 +1,5 @@
 module.exports = {
-  ...require('./skr-test'),
   ...require('./helpers'),
+  ...require('./provision/provision-skr'),
+  ...require('./oidc/index'),
 };

@@ -68,7 +68,7 @@ jaeger:
         cpu: 100m
         memory: 500Mi
       requests:
-        cpu: 10m
+        cpu: 20m
         memory: 40Mi
     securityContext:
       runAsUser: 1000
@@ -116,7 +116,7 @@ global:
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.2.1-581a4014"
+      version: "7.3.0-6b2bc161"
       directory: "tpi"
 virtualservice:
   enabled: true
@@ -152,5 +152,5 @@ authProxy:
       cpu: 50m
       memory: 100Mi
     requests:
-      cpu: 10m
+      cpu: 20m
       memory: 15Mi

@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-publisher-proxy
 
@@ -14,6 +14,5 @@ USER nonroot:nonroot
 WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-publisher-proxy/event-publisher-proxy .
 
-COPY licenses/ /licenses/
 
 ENTRYPOINT ["/event-publisher-proxy"]

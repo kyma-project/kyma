@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +17,7 @@ import (
 type RoleService interface {
 	IsBase(role *rbacv1.Role) bool
 	ListBase(ctx context.Context) ([]rbacv1.Role, error)
-	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *rbacv1.Role) error
+	UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *rbacv1.Role) error
 }
 
 var _ RoleService = &roleService{}
@@ -47,7 +48,7 @@ func (r *roleService) IsBase(role *rbacv1.Role) bool {
 	return role.Namespace == r.config.BaseNamespace && ok && label == RoleLabelValue
 }
 
-func (r *roleService) UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *rbacv1.Role) error {
+func (r *roleService) UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *rbacv1.Role) error {
 	logger.Info(fmt.Sprintf("Updating Role '%s/%s'", namespace, baseInstance.GetName()))
 	instance := &rbacv1.Role{}
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstance.GetName()}, instance); err != nil {
@@ -61,7 +62,7 @@ func (r *roleService) UpdateNamespace(ctx context.Context, logger logr.Logger, n
 	return r.updateRole(ctx, logger, instance, baseInstance)
 }
 
-func (r *roleService) createRole(ctx context.Context, logger logr.Logger, namespace string, baseInstance *rbacv1.Role) error {
+func (r *roleService) createRole(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *rbacv1.Role) error {
 	role := rbacv1.Role{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        baseInstance.GetName(),
@@ -81,7 +82,7 @@ func (r *roleService) createRole(ctx context.Context, logger logr.Logger, namesp
 	return nil
 }
 
-func (r *roleService) updateRole(ctx context.Context, logger logr.Logger, instance, baseInstance *rbacv1.Role) error {
+func (r *roleService) updateRole(ctx context.Context, logger *zap.SugaredLogger, instance, baseInstance *rbacv1.Role) error {
 	copiedRole := instance.DeepCopy()
 	copiedRole.Annotations = baseInstance.GetAnnotations()
 	copiedRole.Labels = baseInstance.GetLabels()

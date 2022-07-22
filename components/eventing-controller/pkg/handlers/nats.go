@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"k8s.io/apimachinery/pkg/types"
@@ -59,14 +61,16 @@ type Nats struct {
 	subscriptions     map[string]*nats.Subscription
 	sinks             sync.Map
 	connClosedHandler ConnClosedHandler
+	metricsCollector  *pkgmetrics.Collector
 }
 
-func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *Nats {
 	return &Nats{
 		config:            config,
 		defaultSubsConfig: subsConfig,
 		logger:            logger,
 		subscriptions:     make(map[string]*nats.Subscription),
+		metricsCollector:  metricsCollector,
 	}
 }
 
@@ -119,7 +123,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return []string{}, errors.Wrap(err, "deduplicate subscription filters failed")
+			return nil, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -128,7 +132,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 	for _, filter := range filters {
 		subject, err := getCleanSubject(filter, cleaner)
 		if err != nil {
-			return []string{}, err
+			return nil, err
 		}
 		cleanSubjects = append(cleanSubjects, subject)
 	}
@@ -150,7 +154,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 				return err
 			}
 			log.Infow(
-				"deleted NATS subscription because it was deleted from subscription filters",
+				"Deleted NATS subscription because it was deleted from subscription filters",
 				"subscriptionKey", key,
 				"natsSubject", s.Subject,
 			)
@@ -163,11 +167,11 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	}
 
 	for _, subject := range sub.Status.CleanEventTypes {
-		callback := n.getCallback(subKeyPrefix)
+		callback := n.getCallback(subKeyPrefix, sub.Name)
 
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(n.connClosedHandler); err != nil {
-				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
+				log.Errorw("Failed to reset NATS connection", "status", n.connection.Stats(), "error", err)
 				return err
 			}
 		}
@@ -184,7 +188,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 						return err
 					}
 				} else if existingNatsSub.IsValid() {
-					log.Debugw("skipping creating subscription on NATS because it already exists", "subject", subject)
+					log.Debugw("Skipping creating subscription on NATS because it already exists", "subject", subject)
 					continue
 				}
 			}
@@ -192,7 +196,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 			// otherwise, create subscription on NATS
 			natsSub, err := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if err != nil {
-				log.Errorw("create NATS subscription failed", "error", err)
+				log.Errorw("Failed to create NATS subscription", "error", err)
 				return err
 			}
 
@@ -234,7 +238,7 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	var nsn []types.NamespacedName
 	for k, v := range n.subscriptions {
 		if !v.IsValid() {
-			n.namedLogger().Debugw("invalid NATS subscription", "key", k, "subject", v.Subject)
+			n.namedLogger().Debugw("Invalid NATS subscription", "key", k, "subject", v.Subject)
 			nsn = append(nsn, createKymaSubscriptionNamespacedName(k, v))
 		}
 	}
@@ -252,40 +256,40 @@ func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey str
 	// Unsubscribe call to NATS is async hence checking the status of the connection is important
 	if n.connection.Status() != nats.CONNECTED {
 		if err := n.Initialize(n.connClosedHandler); err != nil {
-			log.Errorw("connect to NATS failed", "status", n.connection.Status(), "error", err)
+			log.Errorw("Failed to connect to NATS", "status", n.connection.Status(), "error", err)
 			return errors.Wrapf(err, "connect to NATS failed")
 		}
 	}
 	if natsSub.IsValid() {
 		if err := natsSub.Unsubscribe(); err != nil {
-			log.Errorw("unsubscribe failed", "error", err)
+			log.Errorw("Failed to unsubscribe", "error", err)
 			return errors.Wrapf(err, "unsubscribe failed")
 		}
 	}
 	delete(n.subscriptions, subKey)
-	log.Debugw("unsubscribe from NATS succeeded", "subscriptionKey", subKey)
+	log.Debugw("Unsubscribed from NATS", "subscriptionKey", subKey)
 
 	return nil
 }
 
-func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
+func (n *Nats) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
 		sinkValue, ok := n.sinks.Load(subKeyPrefix)
 		if !ok {
-			n.namedLogger().Errorw("cannot find sink url in storage", "keyPrefix", subKeyPrefix)
+			n.namedLogger().Errorw("Failed to find sink URL in storage", "keyPrefix", subKeyPrefix)
 			return
 		}
 		// convert interface type to string
 		sink, ok := sinkValue.(string)
 		if !ok {
-			n.namedLogger().Errorw("failed to convert sink value to string", "sinkValue", sinkValue)
+			n.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
 
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
-			n.namedLogger().Errorw("convert NATS message to CE failed", "error", err)
+			n.namedLogger().Errorw("Failed to convert NATS message to CloudEvent", "error", err)
 			return
 		}
 
@@ -304,11 +308,15 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 			MaxTries: n.defaultSubsConfig.DispatcherMaxRetries,
 			Period:   n.defaultSubsConfig.DispatcherRetryPeriod,
 		}
+
+		ceLogger := n.namedLogger().With("id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
-			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
+			n.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
+			ceLogger.Errorw("Faied to dispatch CloudEvent failed after retries", "error", result)
 			return
 		}
-		n.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+		n.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
+		ceLogger.Infow("CloudEvent was dispatched")
 	}
 }
 
@@ -319,11 +327,11 @@ func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, 
 		if cev2protocol.IsACK(result) {
 			return result
 		}
-		n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
+		n.namedLogger().Errorw("Failed to dispatch CloudEvent", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
 		// Try again?
 		if err := params.Backoff(ctx, retry+1); err != nil {
 			// do not try again.
-			n.namedLogger().Errorw("backoff error, will not try again", "error", err)
+			n.namedLogger().Errorw("Backoff error, will not try again", "error", err)
 			return result
 		}
 		retry++

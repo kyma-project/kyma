@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"go.uber.org/zap"
+
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -29,6 +30,8 @@ import (
 const (
 	// noDuration signals that the dispatch step has not started yet.
 	noDuration = -1
+
+	bebCommanderName = "beb-commander"
 )
 
 var (
@@ -56,7 +59,7 @@ type Handler struct {
 	//SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
 	SubscribedProcessor *subscribed.Processor
 	// Logger default logger
-	Logger *logrus.Logger
+	Logger *logger.Logger
 	// Options configures HTTP server
 	Options *options.Options
 	// collector collects metrics
@@ -68,7 +71,7 @@ type Handler struct {
 // NewHandler returns a new HTTP Handler instance.
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
-	logger *logrus.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
+	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -85,7 +88,7 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessag
 // Start starts the Handler with the given context.
 func (h *Handler) Start(ctx context.Context) error {
 	healthChecker := health.NewChecker()
-	return h.Receiver.StartListen(ctx, healthChecker.Check(h))
+	return h.Receiver.StartListen(ctx, healthChecker.Check(h), h.Logger)
 }
 
 // ServeHTTP serves an HTTP request and returns an HTTP response.
@@ -94,7 +97,7 @@ func (h *Handler) Start(ctx context.Context) error {
 func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	// validate request method
 	if request.Method != http.MethodPost && request.Method != http.MethodGet {
-		h.Logger.Warnf("Unexpected request method: %s", request.Method)
+		h.namedLogger().Warnf("Unexpected request method: %s", request.Method)
 		h.writeResponse(writer, http.StatusMethodNotAllowed, nil)
 		return
 	}
@@ -129,7 +132,7 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
 	event, eventTypeOriginal := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
 	if event == nil {
-		h.Logger.Debug("failed to transform legacy event to CE, event is nil")
+		h.namedLogger().Debug("Failed to transform legacy event to CloudEvent, event is nil")
 		return
 	}
 
@@ -141,16 +144,15 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
 
-	h.Logger.WithFields(
-		logrus.Fields{
-			"id":           event.ID(),
-			"source":       event.Source(),
-			"before":       eventTypeOriginal,
-			"after":        event.Type(),
-			"statusCode":   statusCode,
-			"duration":     dispatchTime,
-			"responseBody": string(respBody),
-		}).Info("Event dispatched")
+	h.namedLogger().With(
+		"id", event.ID(),
+		"source", event.Source(),
+		"before", eventTypeOriginal,
+		"after", event.Type(),
+		"statusCode", statusCode,
+		"duration", dispatchTime,
+		"responseBody", string(respBody),
+	).Info("Event dispatched")
 }
 
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
@@ -162,7 +164,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 
 	event, err := binding.ToEvent(ctx, message)
 	if err != nil {
-		h.Logger.Errorf("Failed to extract event from request with error: %s", err)
+		h.namedLogger().Errorw("Failed to extract event from request", "error", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
 	}
@@ -170,14 +172,13 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	eventTypeOriginal := event.Type()
 	eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
 	if err != nil {
-		h.Logger.Errorf("Failed to clean event type with error: %s", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
 	}
 	event.SetType(eventTypeClean)
 
 	if err := event.Validate(); err != nil {
-		h.Logger.Errorf("Request is invalid as per CE spec with error: %s", err)
+		h.namedLogger().Errorw("Request doesn't correspond to CloudEvent spec", "error", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
 	}
@@ -192,16 +193,15 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 
-	h.Logger.WithFields(
-		logrus.Fields{
-			"id":           event.ID(),
-			"source":       event.Source(),
-			"before":       eventTypeOriginal,
-			"after":        eventTypeClean,
-			"statusCode":   statusCode,
-			"duration":     dispatchTime,
-			"responseBody": string(respBody),
-		}).Info("Event dispatched")
+	h.namedLogger().With(
+		"id", event.ID(),
+		"source", event.Source(),
+		"before", eventTypeOriginal,
+		"after", eventTypeClean,
+		"statusCode", statusCode,
+		"duration", dispatchTime,
+		"responseBody", string(respBody),
+	).Info("Event dispatched")
 }
 
 // writeResponse writes the HTTP response given the status code and response body.
@@ -212,7 +212,7 @@ func (h *Handler) writeResponse(writer http.ResponseWriter, statusCode int, resp
 		return
 	}
 	if _, err := writer.Write(respBody); err != nil {
-		h.Logger.Errorf("Failed to write response body with error: %s", err)
+		h.namedLogger().Errorw("Failed to write response body", "error", err)
 	}
 }
 
@@ -223,14 +223,14 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 		event = &newEvent
 	}
 
-	h.Logger.Infof("Event received id:[%s]", event.ID())
+	h.namedLogger().Infof("CloudEvent received id:[%s]", event.ID())
 }
 
 // send dispatches the given Cloud Event to the EMS gateway and returns the response details and dispatch time.
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	request, err := h.Sender.NewRequestWithTarget(ctx, h.Sender.Target)
 	if err != nil {
-		h.Logger.Errorf("failed to prepare a cloudevent request with error: %s", err)
+		h.namedLogger().Errorw("Failed to prepare a CloudEvent request", "error", err)
 		return http.StatusInternalServerError, noDuration, []byte{}
 	}
 
@@ -239,13 +239,13 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 
 	err = cloudevents.WriteRequestWithHeaders(ctx, message, request, additionalHeaders)
 	if err != nil {
-		h.Logger.Errorf("failed to add additional headers to the request with error: %s", err)
+		h.namedLogger().Errorw("Failed to add additional headers to the request", "error", err)
 		return http.StatusInternalServerError, noDuration, []byte{}
 	}
 
 	resp, dispatchTime, err := h.sendAndRecordDispatchTime(request)
 	if err != nil {
-		h.Logger.Errorf("failed to send event and record dispatch time with error: %s", err)
+		h.namedLogger().Errorw("Failed to send CloudEvent and record dispatch time", "error", err)
 		h.collector.RecordError()
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
@@ -254,7 +254,7 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		h.Logger.Errorf("failed to read response body with error: %s", err)
+		h.namedLogger().Errorw("Failed to read response body", "error", err)
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 
@@ -267,4 +267,8 @@ func (h *Handler) sendAndRecordDispatchTime(request *http.Request) (*http.Respon
 	resp, err := h.Sender.Send(request)
 	dispatchTime := time.Since(start)
 	return resp, dispatchTime, err
+}
+
+func (h *Handler) namedLogger() *zap.SugaredLogger {
+	return h.Logger.WithContext().Named(bebCommanderName)
 }

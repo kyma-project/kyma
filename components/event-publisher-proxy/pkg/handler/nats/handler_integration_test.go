@@ -129,6 +129,9 @@ func TestHandlerForCloudEvents(t *testing.T) {
 							assert.NoError(t, err)
 							assert.NoError(t, resp.Body.Close())
 							assert.Equal(t, testCase.WantStatusCode, resp.StatusCode)
+							if testingutils.IsNot4XX(resp.StatusCode) {
+								metricstest.EnsureMetricEventTypePublished(t, handlerMock.GetMetricsCollector())
+							}
 							if testingutils.Is2XX(resp.StatusCode) {
 								metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
 								assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))
@@ -252,7 +255,9 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 							} else {
 								handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
 							}
-
+							if testingutils.IsNot4XX(resp.StatusCode) {
+								metricstest.EnsureMetricEventTypePublished(t, handlerMock.GetMetricsCollector())
+							}
 							if testingutils.Is2XX(resp.StatusCode) {
 								metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
 								assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))

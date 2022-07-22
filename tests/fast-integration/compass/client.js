@@ -80,12 +80,12 @@ class DirectorClient {
     try {
       const resp = await retryOnConcurrentUpdate(() => axios.post(url, body, params), 10);
       if (resp.data.errors) {
-        debug(resp);
+        debug('Error', resp);
         throw resp.data;
       }
       return resp.data.data.result;
     } catch (err) {
-      debug(err);
+      debug('Error', err);
       const msg = 'Error calling Director API';
       if (err.response) {
         throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);

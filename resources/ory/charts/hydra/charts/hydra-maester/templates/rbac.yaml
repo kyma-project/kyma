@@ -38,9 +38,6 @@ metadata:
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
-    verbs: ["list", "watch"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
     verbs: ["list", "patch", "get", "watch"]
     resourceNames:
       - {{ include "hydra-maester.getHydraName" . }}

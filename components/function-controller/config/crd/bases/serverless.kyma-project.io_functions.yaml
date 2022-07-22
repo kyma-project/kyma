@@ -237,6 +237,7 @@ spec:
                 enum:
                 - nodejs12
                 - nodejs14
+                - nodejs16
                 - python39
                 type: string
               runtimeImageOverride:
@@ -284,6 +285,7 @@ spec:
                 enum:
                 - nodejs12
                 - nodejs14
+                - nodejs16
                 - nodejs10
                 - python38
                 - python39

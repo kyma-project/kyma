@@ -10,8 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	appsecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets"
@@ -20,7 +18,6 @@ import (
 type service struct {
 	applicationRepository    applications.Repository
 	converter                applications.Converter
-	rafter                   rafter.Service
 	credentialsService       appsecrets.CredentialsService
 	requestParametersService appsecrets.RequestParametersService
 }
@@ -45,11 +42,10 @@ type Result struct {
 	Error           apperrors.AppError
 }
 
-func NewService(applicationRepository applications.Repository, converter applications.Converter, resourcesService rafter.Service, credentialsService appsecrets.CredentialsService, requestParametersService appsecrets.RequestParametersService) Service {
+func NewService(applicationRepository applications.Repository, converter applications.Converter, credentialsService appsecrets.CredentialsService, requestParametersService appsecrets.RequestParametersService) Service {
 	return &service{
 		applicationRepository:    applicationRepository,
 		converter:                converter,
-		rafter:                   resourcesService,
 		credentialsService:       credentialsService,
 		requestParametersService: requestParametersService,
 	}
@@ -141,13 +137,6 @@ func (s *service) createApplication(directorApplication model.Application, runti
 		return newResult(runtimeApplication, directorApplication.ID, Create, err)
 	}
 
-	log.Infof("Creating API resources for application '%s'.", directorApplication.Name)
-	err = s.upsertAPIResources(directorApplication)
-	if err != nil {
-		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.Name, err)
-		return newResult(runtimeApplication, directorApplication.ID, Create, err)
-	}
-
 	log.Infof("Creating credentials secrets for application '%s'.", directorApplication.Name)
 	err = s.upsertCredentialsSecrets(directorApplication)
 	if err != nil {
@@ -163,19 +152,6 @@ func (s *service) createApplication(directorApplication model.Application, runti
 	}
 
 	return newResult(runtimeApplication, directorApplication.ID, Create, nil)
-}
-
-func (s *service) upsertAPIResources(directorApplication model.Application) apperrors.AppError {
-	var appendedErr apperrors.AppError
-
-	for _, apiBundle := range directorApplication.ApiBundles {
-		err := s.upsertAPIResourcesForBundle(apiBundle)
-		if err != nil {
-			appendedErr = apperrors.AppendError(appendedErr, err)
-		}
-	}
-
-	return appendedErr
 }
 
 func (s *service) upsertCredentialsSecrets(directorApplication model.Application) apperrors.AppError {
@@ -223,29 +199,6 @@ func (s *service) upsertRequestParametersSecrets(directorApplication model.Appli
 	return appendedErr
 }
 
-func (s *service) upsertAPIResourcesForBundle(apiBundle model.APIBundle) apperrors.AppError {
-	if !model.BundleContainsAnySpecs(apiBundle) {
-		return nil
-	}
-
-	assetsCount := len(apiBundle.APIDefinitions) + len(apiBundle.EventDefinitions)
-	assets := make([]clusterassetgroup.Asset, 0, assetsCount)
-
-	for _, apiDefinition := range apiBundle.APIDefinitions {
-		if apiDefinition.APISpec != nil {
-			assets = append(assets, createAssetFromAPIDefinition(apiDefinition))
-		}
-	}
-
-	for _, eventAPIDefinition := range apiBundle.EventDefinitions {
-		if eventAPIDefinition.EventAPISpec != nil {
-			assets = append(assets, createAssetFromEventAPIDefinition(eventAPIDefinition))
-		}
-	}
-
-	return s.rafter.Put(apiBundle.ID, assets)
-}
-
 func (s *service) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
 	log.Info("Deleting applications.")
 	results := make([]Result, 0)
@@ -278,33 +231,13 @@ func (s *service) deleteApplication(runtimeApplication v1alpha1.Application, app
 		log.Warningf("Failed to delete credentials secrets for application '%s': %s.", runtimeApplication.Name, err)
 	}
 
-	log.Infof("Deleting API resources for application '%s'.", runtimeApplication.Name)
-	appendedErr := s.deleteAllAPIResources(runtimeApplication)
-	if appendedErr != nil {
-		log.Warningf("Failed to delete API resources for application '%s'.", runtimeApplication.Name)
-	}
-
 	log.Infof("Deleting application '%s'.", runtimeApplication.Name)
 	err := s.applicationRepository.Delete(runtimeApplication.Name, &v1.DeleteOptions{})
 	if err != nil {
 		log.Warningf("Failed to delete application '%s'", runtimeApplication.Name)
-		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	return newResult(runtimeApplication, applicationID, Delete, err)
-}
-
-func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
-	var appendedErr apperrors.AppError
-	for _, service := range runtimeApplication.Spec.Services {
-		log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, runtimeApplication.Name)
-		err := s.rafter.Delete(service.ID)
-		if err != nil {
-			appendedErr = apperrors.AppendError(appendedErr, err)
-		}
-	}
-
-	return appendedErr
 }
 
 func (s *service) deleteCredentialsSecrets(runtimeApplication v1alpha1.Application) apperrors.AppError {
@@ -382,14 +315,8 @@ func (s *service) updateApplication(directorApplication model.Application, exist
 		return newResult(existentRuntimeApplication, directorApplication.ID, Update, err)
 	}
 
-	log.Infof("Updating API resources for application '%s'.", directorApplication.Name)
-	appendedErr := s.updateAPIResources(directorApplication, existentRuntimeApplication, *updatedRuntimeApplication)
-	if appendedErr != nil {
-		log.Warningf("Failed to update API resources for application '%s': %s.", directorApplication.Name, appendedErr)
-	}
-
 	log.Infof("Updating credentials secrets for application '%s'.", directorApplication.Name)
-	appendedErr = s.updateCredentialsSecrets(directorApplication, existentRuntimeApplication, *updatedRuntimeApplication)
+	appendedErr := s.updateCredentialsSecrets(directorApplication, existentRuntimeApplication, *updatedRuntimeApplication)
 	if appendedErr != nil {
 		log.Warningf("Failed to update credentials secrets for application '%s': %s.", directorApplication.Name, appendedErr)
 	}
@@ -401,23 +328,6 @@ func (s *service) updateApplication(directorApplication model.Application, exist
 	}
 
 	return newResult(existentRuntimeApplication, directorApplication.ID, Update, appendedErr)
-}
-
-func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
-	appendedErr := s.upsertAPIResources(directorApplication)
-
-	for _, service := range existentRuntimeApplication.Spec.Services {
-		apiBundle, apiBundleExists := model.APIBundleExists(service.ID, directorApplication)
-		deleteSpecs := (apiBundleExists && !model.BundleContainsAnySpecs(apiBundle)) || !apiBundleExists
-
-		if deleteSpecs {
-			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
-			err := s.rafter.Delete(service.ID)
-			appendedErr = apperrors.AppendError(appendedErr, err)
-		}
-	}
-
-	return appendedErr
 }
 
 func (s *service) updateCredentialsSecrets(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {

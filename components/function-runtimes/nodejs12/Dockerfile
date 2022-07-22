@@ -26,7 +26,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.15.3
+FROM alpine:3.15.4
 
 ENV NODE_VERSION 12.22.11
 
@@ -130,7 +130,6 @@ COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Serverless
-
 LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY kubeless/ /

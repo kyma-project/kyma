@@ -7,23 +7,18 @@ Istio in Kyma is installed with the help of the `istioctl` tool. The tool is dri
 ## Istio components
 
 This list shows the available Istio components and addons. Check which of those are enabled in Kyma:
-
-| Component | Enabled |
-| :--- | :---: |
-| Istiod | ✅ |
-| Ingress Gateway | ✅️ |
-| Egress Gateway | ⛔️ |
-| CNI | ⛔️ |
-| Grafana | ⛔️ |
-| Prometheus | ⛔️ |
-| Tracing | ⛔️ |
-| Kiali | ⛔️ |
+- Istiod (Pilot)
+- Ingress Gateway
+- Grafana - installed as separate component - [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md)
+- Prometheus - installed as separate component - [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md)
+- Tracing - installed as separate component - [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md)
+- Kiali - installed as separate component - [Kiali](../../../05-technical-reference/00-architecture/obsv-04-architecture-kiali.md)
 
 ## Kyma-specific configuration
 
 These configuration changes are applied to customize Istio for use with Kyma:
 
-- Both [Istio control plane and data plane](https://istio.io/latest/docs/ops/deployment/architecture/) use distroless images compliant with Federal Information Processing Standards (FIPS). [Solo.io](https://www.solo.io/) provides the FIPS-certified images. To learn more, read about [Distroless FIPS-compliant Istio](https://www.solo.io/blog/distroless-fips-compliant-istio/).
+- Both [Istio control plane and data plane](https://istio.io/latest/docs/ops/deployment/architecture/) use distroless images. To learn more, read about [Harden Docker Container Images](https://istio.io/latest/docs/ops/configuration/security/harden-docker-images/).
 - Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces. See how to [disable sidecar proxy injection](../../../04-operation-guides/operations/smsh-01-istio-disable-sidecar-injection.md).
 - Resource requests and limits for Istio sidecars are modified to best suit the needs of the evaluation and production profiles.
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide in a STRICT mode.

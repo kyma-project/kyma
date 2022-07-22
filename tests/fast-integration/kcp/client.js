@@ -103,8 +103,8 @@ class KCPWrapper {
 
   async reconciliations(query) {
     let args = ['reconciliations', `${query.parameter}`, '--output', 'json'];
-    if (query.shootName) {
-      args = args.concat('--shoot', `${query.shootName}`);
+    if (query.runtimeID) {
+      args = args.concat('--runtime-id', `${query.runtimeID}`);
     }
     if (query.schedulingID) {
       args = args.concat('--scheduling-id', `${query.schedulingID}`);
@@ -123,25 +123,30 @@ class KCPWrapper {
     return await this.exec(args);
   }
 
-  async upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID) {
+  async upgradeKyma(instanceID, kymaUpgradeVersion, upgradeTimeoutMin = 30) {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
       const res = await this.exec(args);
 
-      // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
+      // output if successful:
+      // "Note: Ignore sending slack notification when slackAPIURL is empty\n" +
+      // "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
       // so we need to extract the uuid
-      const orchestrationID = res.split(' ')[1];
+      if (!res.includes('OrchestrationID: ')) {
+        throw new Error(`Kyma Upgrade failed. KCP upgrade command returned no OrchestrationID. Response: \"${res}\"`);
+      }
+      const orchestrationID = res.split('OrchestrationID: ')[1];
       debug(`OrchestrationID: ${orchestrationID}`);
 
       try {
-        const orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID);
+        const orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID, upgradeTimeoutMin);
         return orchestrationStatus;
       } catch (error) {
         debug(error);
       }
 
       try {
-        const runtime = await this.runtimes({subaccount: subAccountID});
+        const runtime = await this.runtimes({instanceID: instanceID});
         debug(`Runtime Status: ${inspect(runtime, false, null, false)}`);
       } catch (error) {
         debug(error);
@@ -168,10 +173,10 @@ class KCPWrapper {
     }
   };
 
-  async getReconciliationsOperations(shootName) {
+  async getReconciliationsOperations(runtimeID) {
     await this.login();
     const reconciliationsOperations = await this.reconciliations({parameter: 'operations',
-      shootName: shootName});
+      runtimeID: runtimeID});
     return JSON.stringify(reconciliationsOperations, null, '\t');
   }
 
@@ -237,7 +242,7 @@ class KCPWrapper {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
         debug(`OrchestrationID: ${orchestrationID}
         OperationID: ${operations.data[0].operationID}
-        OperationStatus: ${upgradeOperation.state}`);
+        OperationStatus: ${upgradeOperation[0].state}`);
       } else {
         debug(`No operations in OrchestrationID ${o.orchestrationID}`);
       }
@@ -249,7 +254,7 @@ class KCPWrapper {
     }
   };
 
-  async ensureOrchestrationSucceeded(orchenstrationID) {
+  async ensureOrchestrationSucceeded(orchenstrationID, upgradeTimeoutMin = 30) {
     // Decides whether to go to the next step of while or not based on
     // the orchestration result (0 = succeeded, 1 = failed, 2 = cancelled, 3 = pending/other)
     debug(`Waiting for Kyma Upgrade with OrchestrationID ${orchenstrationID} to succeed...`);
@@ -257,7 +262,7 @@ class KCPWrapper {
       const res = await wait(
           () => this.getOrchestrationStatus(orchenstrationID),
           (res) => res && res.state && (res.state === 'succeeded' || res.state === 'failed'),
-          1000*60*15, // 15 min
+          1000 * 60 * upgradeTimeoutMin, // 30 min
           1000 * 30, // 30 seconds
       );
 
@@ -284,19 +289,19 @@ class KCPWrapper {
       const objRuntimeStatus = JSON.parse(runtimeStatus);
 
       try {
-        if (!objRuntimeStatus.data[0].shootName) {}
+        if (!objRuntimeStatus.data[0].runtimeID) {}
       } catch (e) {
-        console.log('skipping reconciliation logging: no shootName provided by runtimeStatus');
+        console.log('skipping reconciliation logging: no runtimeID provided by runtimeStatus');
         return;
       }
 
-      // kcp reconciliations operations -c <shootName> -o json
-      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+      // kcp reconciliations operations -r <runtimeID> -o json
+      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].runtimeID);
 
       const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
 
       if ( objReconciliationsOperations == null ) {
-        console.log(`skipping reconciliation logging: kcp rc operations -c ${objRuntimeStatus.data[0].shootName}
+        console.log(`skipping reconciliation logging: kcp rc operations -r ${objRuntimeStatus.data[0].runtimeID}
          -o json returned null`);
         return;
       }
@@ -339,7 +344,7 @@ class KCPWrapper {
       if (err.stderr === undefined) {
         throw new Error(`failed to process kcp binary output: ${err.toString()}`);
       }
-      throw new Error(`kcp command failed: args: ${args} ,${err.stderr.toString()}`);
+      throw new Error(`kcp command failed: ${err.stderr.toString()}`);
     }
   }
 }

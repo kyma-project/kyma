@@ -26,16 +26,13 @@ cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
 .PHONY: clean
-clean: $(cmds_clean) resolve_clean licenses_clean
+clean: $(cmds_clean) resolve_clean
 
 $(cmds_clean): %.clean:
 	rm -f $*
 
 resolve_clean:
 	rm -rf vendor
-
-licenses_clean:
-	rm -rf licenses
 
 build-local: $(cmds) test-local ;
 
@@ -57,7 +54,7 @@ $(cmds): %:
 
 # Example:
 #   make event-publisher-proxy.image
-$(cmds_images): %.image: build-local pull-licenses
+$(cmds_images): %.image: build-local
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .

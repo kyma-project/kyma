@@ -1,0 +1,14 @@
+{{- if .Values.pdb.enabled -}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "oathkeeper-maester.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+      app.kubernetes.io/name: {{ include "oathkeeper-maester.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  {{ toYaml .Values.pdb.spec }}
+{{- end -}}

@@ -80,3 +80,107 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
 </p>
+
+## Join us
+
+If you would like to join us and work together on the Kyma project, there are some prerequisite skills you should acquire beforehand. Git basic skills are the most important for a quick start with the code. Mastering Kubernetes skills is very important for your future work.
+
+### Required programming skills
+
+- Git basic skillset:
+  - Forking a project from the `main` repository to your own repository
+  - Checking out code from a public and private repository
+  - Managing and fetching remote repositories
+  - Creating a custom branch, adding and pushing commits to a remote branch of a forked project
+  - Rebasing and merging a local branch with changes to the `main` branch
+  - Creating and merging pull requests to the `main` branch
+  - Interpreting automatic test results, rerunning a test suite
+  - Resolving conflicts with the `main` branch
+
+- Go basic skillset:
+  - Installing and upgrading Go compiler
+  - Setting up your IDE
+  - Building a GoLang project
+  - Running tests on a Golang project
+  - Running code in the debug mode in your IDE
+  - Understanding Makefiles and Dockerfiles
+  - Downloading dependencies for the project
+  - Understanding dependency tools such as `go mod` and `dep`
+  - Downloading additional tools modules with the `go get` command
+
+- Kubernetes basic skillset:
+  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: Namespace, Pod, Deployment, Secret, Config Map, Replica Set, Service, Custom Resource Definition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
+  - Using a kubeconfig file to connect to a cluster
+  - Browsing cluster resources using `kubectl` commands and editing Kubernetes resources using Terminal
+  - Applying YAML files to a cluster with Kubernetes resources
+  - Port forwarding from a running Pod to a local machine
+  - Installing and using Minikube
+  - Displaying logs from a container
+  - Exporting Kubernetes objects to YAML files
+  - Understanding Helm package manager
+  - Certified Kubernetes Application Developer (CKAD) level preferred
+
+- Docker basic skillset:
+  - Listing all running Docker containers
+  - Starting, stopping, deleting Docker containers
+  - Exposing ports from running containers
+  - Managing local image repositories
+  - Pulling images from a remote repository and running them
+  - Building images and tagging them
+  - Pushing and managing images in your Docker Hub account
+  - Executing `bash` commands inside containers
+
+> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.tools.sap/kubernetes/docker-k8s-training) training to get the basic Docker and Kubernetes knowledge.
+
+- Cloud services skillset:
+  - Logging in to Google Cloud Platform (GCP)
+  - Understanding GCP basics concepts
+  - Creating and deleting Kubernetes clusters in team projects on GCP
+  - Creating Kubernetes shoot clusters on GCP and Azure
+
+- Linux/Terminal basic skill set
+  - Understanding basic `bash` scripting
+  - Understanding the basics of the Unix filesystem
+  - Performing basic operations on files (list, create, copy, delete, move, execute)
+  - Sending REST queries with curl or HTTPie
+  - CLI/Terminal confident use
+
+- Fluency with command-line JSON and YAML processors, such as jq, yq, grep
+- CI/CD experience (ideally Prow)
+
+- Other skills
+  - Understanding the Architecture Base Pattern
+  - Understanding the Service Mesh concept
+  - Basic Markdown editing
+
+
+### Basic Kyma knowledge
+
+These are the sources you can get the basic Kyma knowledge from:
+
+- [Official Kyma documentation](https://kyma-project.io/)
+- [Getting Started guide](https://kyma-project.io/docs/kyma/latest/02-get-started/)
+- Kyma project [Youtube channel](https://www.youtube.com/watch?v=wqQflgmyboY&list=PLmZLSvJAm8FabPF4hLjScx-dDl84NK3l5)
+
+### Open job positions
+
+Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
+- [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)
+- [Munich, Germany](https://jobs.sap.com/search/?createNewAlert=false&q=%23kyma&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=munich)
+
+### FAQ
+
+- **What is your IDE?**
+
+  Nothing is enforced. People often use GoLand, Visual Studio Code, VIM.
+
+- **How do you approach testing in Go? Do you use any frameworks?**
+
+  We use tools such as classical Go runner, Gomega, Testify.
+
+- **How to learn Go?**
+
+  Here are some useful sources to learn Go:
+  - [Official Go learning tutorials](https://go.dev/learn/)
+  - [50 Shades of Go: Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
+  - [Language converter](https://ide.onelang.io/?input=HelloWorldRaw) - this tool helps you to convert code from one language to any other one

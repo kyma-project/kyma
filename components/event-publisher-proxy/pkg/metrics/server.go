@@ -6,16 +6,20 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"go.uber.org/zap"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/sirupsen/logrus"
 )
+
+const metricsServerLoggerName = "metrics-server"
 
 type Server struct {
 	srv    http.Server
-	logger *logrus.Logger
+	logger *logger.Logger
 }
 
-func NewServer(logger *logrus.Logger) *Server {
+func NewServer(logger *logger.Logger) *Server {
 	return &Server{logger: logger}
 }
 
@@ -28,7 +32,7 @@ func (s *Server) Start(address string) error {
 			return err
 		}
 
-		s.logger.Infof("Metrics server started on %v", address)
+		s.namedLogger().Infof("Metrics server started on %v", address)
 		go s.srv.Serve(listener) //nolint:errcheck
 	}
 
@@ -37,6 +41,9 @@ func (s *Server) Start(address string) error {
 
 func (s *Server) Stop() {
 	if err := s.srv.Shutdown(context.Background()); err != nil {
-		s.logger.Infof("Metrics server failed to shutdown with error: %v", err)
+		s.namedLogger().Warnw("Failed to shutdown metrics server", "error", err)
 	}
+}
+func (s *Server) namedLogger() *zap.SugaredLogger {
+	return s.logger.WithContext().Named(metricsServerLoggerName)
 }

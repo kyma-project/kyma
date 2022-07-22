@@ -18,6 +18,11 @@ func EnsureMetricLatency(t *testing.T, collector *metrics.Collector) {
 	ensureMetricCount(t, collector, metrics.Latency, 1)
 }
 
+// EnsureMetricEventTypePublished ensures metric eventType exists
+func EnsureMetricEventTypePublished(t *testing.T, collector *metrics.Collector) {
+	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, 1)
+}
+
 func ensureMetricCount(t *testing.T, collector *metrics.Collector, metric string, expectedCount int) {
 	if count := testutil.CollectAndCount(collector, metric); count != expectedCount {
 		t.Fatalf("invalid count for metric:%s, want:%d, got:%d", metric, expectedCount, count)

@@ -199,12 +199,29 @@ func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
 	return HaveCondition(condition)
 }
 
+func HaveConditionInvalidPrefix() gomegatypes.GomegaMatcher {
+	condition := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
+		corev1.ConditionFalse, "prefix not found",
+	)
+	return HaveCondition(condition)
+}
+
 func HaveCleanEventTypes(cleanEventTypes []string) gomegatypes.GomegaMatcher {
 	return WithTransform(
 		func(s *eventingv1alpha1.Subscription) []string {
 			return s.Status.CleanEventTypes
 		},
 		Equal(cleanEventTypes))
+}
+
+func HaveCleanEventTypesEmpty() gomegatypes.GomegaMatcher {
+	return WithTransform(
+		func(s *eventingv1alpha1.Subscription) []string {
+			return s.Status.CleanEventTypes
+		},
+		BeEmpty())
 }
 
 func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {

@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,8 +21,8 @@ const cfgSecretFinalizerName = "serverless.kyma-project.io/finalizer-registry-co
 type SecretService interface {
 	IsBase(secret *corev1.Secret) bool
 	ListBase(ctx context.Context) ([]corev1.Secret, error)
-	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error
-	HandleFinalizer(ctx context.Context, logger logr.Logger, secret *corev1.Secret, namespaces []string) error
+	UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.Secret) error
+	HandleFinalizer(ctx context.Context, logger *zap.SugaredLogger, secret *corev1.Secret, namespaces []string) error
 }
 
 var _ SecretService = &secretService{}
@@ -51,7 +52,7 @@ func (r *secretService) IsBase(secret *corev1.Secret) bool {
 	return secret.Namespace == r.config.BaseNamespace && secret.Labels[ConfigLabel] == CredentialsLabelValue
 }
 
-func (r *secretService) UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error {
+func (r *secretService) UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.Secret) error {
 	logger.Info(fmt.Sprintf("Updating Secret '%s/%s'", namespace, baseInstance.GetName()))
 	instance := &corev1.Secret{}
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstance.GetName()}, instance); err != nil {
@@ -67,7 +68,7 @@ func (r *secretService) UpdateNamespace(ctx context.Context, logger logr.Logger,
 	return r.updateSecret(ctx, logger, instance, baseInstance)
 }
 
-func (r *secretService) HandleFinalizer(ctx context.Context, logger logr.Logger, instance *corev1.Secret, namespaces []string) error {
+func (r *secretService) HandleFinalizer(ctx context.Context, logger *zap.SugaredLogger, instance *corev1.Secret, namespaces []string) error {
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		if containsString(instance.ObjectMeta.Finalizers, cfgSecretFinalizerName) {
 			return nil
@@ -94,7 +95,7 @@ func (r *secretService) HandleFinalizer(ctx context.Context, logger logr.Logger,
 	return nil
 }
 
-func (r *secretService) createSecret(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error {
+func (r *secretService) createSecret(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.Secret) error {
 	secret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        baseInstance.GetName(),
@@ -116,7 +117,7 @@ func (r *secretService) createSecret(ctx context.Context, logger logr.Logger, na
 	return nil
 }
 
-func (r *secretService) updateSecret(ctx context.Context, logger logr.Logger, instance, baseInstance *corev1.Secret) error {
+func (r *secretService) updateSecret(ctx context.Context, logger *zap.SugaredLogger, instance, baseInstance *corev1.Secret) error {
 	copy := instance.DeepCopy()
 	copy.Annotations = baseInstance.GetAnnotations()
 	copy.Labels = baseInstance.GetLabels()
@@ -132,7 +133,7 @@ func (r *secretService) updateSecret(ctx context.Context, logger logr.Logger, in
 	return nil
 }
 
-func (r *secretService) deleteSecret(ctx context.Context, logger logr.Logger, namespace, baseInstanceName string) error {
+func (r *secretService) deleteSecret(ctx context.Context, logger *zap.SugaredLogger, namespace, baseInstanceName string) error {
 	instance := &corev1.Secret{}
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstanceName}, instance); err != nil {
 		return client.IgnoreNotFound(err)

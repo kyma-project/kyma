@@ -68,6 +68,8 @@ spec:
             value: {{ .Values.jetstream.streamName | quote }}
           - name: JS_STREAM_STORAGE_TYPE
             value: {{ .Values.global.jetstream.storage | quote }}
+          - name: JS_STREAM_REPLICAS
+            value: {{ .Values.jetstream.streamReplicas | quote }}
           - name: JS_STREAM_RETENTION_POLICY
             value: {{ .Values.jetstream.retentionPolicy | quote }}
           - name: JS_CONSUMER_DELIVER_POLICY
@@ -76,8 +78,6 @@ spec:
             value: {{ .Values.jetstream.maxMessages | quote }}
           - name: JS_STREAM_MAX_BYTES
             value: {{ .Values.jetstream.maxBytes | quote }}
-          - name: JS_STREAM_SUBJECT_PREFIX
-            value: {{ .Values.jetstream.subjectPrefix | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
@@ -110,7 +110,7 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.metrics.config.port }}
-              name: {{ .Values.metrics.config.portName }}
+              name: {{ .Values.global.ports.namePrefix }}{{ .Values.metrics.config.portName }}
               protocol: TCP
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}

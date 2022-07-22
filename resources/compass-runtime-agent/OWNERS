@@ -1,7 +1,0 @@
-reviewers:
-  - PK85
-  - application-connector-reviewers
-approvers:
-  - application-connector-approvers
-labels:
-  - area/application-connector

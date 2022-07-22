@@ -1,7 +1,7 @@
 {{- /*
   Customizations:
     - priorityClassName considers global priorityClass
-    - main container and sidecar have securityContext
+    - main container and sidecar have containerSecurityContext
     - images are referenced from global values
 */ -}}
 
@@ -72,11 +72,15 @@ spec:
           {{- range .Values.configmapReload.prometheus.extraVolumeDirs }}
             - --volume-dir={{ . }}
           {{- end }}
+          {{- if .Values.configmapReload.prometheus.containerPort }}
+          ports:
+            - containerPort: {{ .Values.configmapReload.prometheus.containerPort }}
+          {{- end }}
           resources:
 {{ toYaml .Values.configmapReload.prometheus.resources | indent 12 }}
-          {{- if .Values.configmapReload.prometheus.securityContext }}
+          {{- if .Values.configmapReload.prometheus.containerSecurityContext }}
           securityContext:
-{{ toYaml .Values.configmapReload.prometheus.securityContext | indent 12 }}
+{{ toYaml .Values.configmapReload.prometheus.containerSecurityContext | indent 12 }}
           {{- end }}
           volumeMounts:
             - name: config-volume
@@ -98,6 +102,9 @@ spec:
 {{ toYaml .Values.server.env | indent 12}}
           {{- end }}
           args:
+        {{- if .Values.server.defaultFlagsOverride }}
+        {{ toYaml .Values.server.defaultFlagsOverride | nindent 12}}
+        {{- else }}
           {{- if .Values.server.prefixURL }}
             - --web.route-prefix={{ .Values.server.prefixURL }}
           {{- end }}
@@ -121,8 +128,12 @@ spec:
           {{- if .Values.server.baseURL }}
             - --web.external-url={{ .Values.server.baseURL }}
           {{- end }}
+        {{- end }}
           ports:
             - containerPort: 9090
+          {{- if .Values.server.hostPort }}
+              hostPort: {{ .Values.server.hostPort }}
+          {{- end }}
           readinessProbe:
             {{- if not .Values.server.tcpSocketProbeEnabled }}
             httpGet:
@@ -155,9 +166,9 @@ spec:
             successThreshold: {{ .Values.server.livenessProbeSuccessThreshold }}
           resources:
 {{ toYaml .Values.server.resources | indent 12 }}
-          {{- if .Values.server.securityContext }}
+          {{- if .Values.server.containerSecurityContext }}
           securityContext:
-{{ toYaml .Values.server.securityContext | indent 12 }}
+{{ toYaml .Values.server.containerSecurityContext | indent 12 }}
           {{- end }}
           volumeMounts:
             - name: config-volume
@@ -216,9 +227,9 @@ spec:
       dnsConfig:
 {{ toYaml .Values.server.dnsConfig | indent 8 }}
     {{- end }}
-    {{- if .Values.server.podSecurityContext }}
+    {{- if .Values.server.securityContext }}
       securityContext:
-{{ toYaml .Values.server.podSecurityContext | indent 8 }}
+{{ toYaml .Values.server.securityContext | indent 8 }}
     {{- end }}
     {{- if .Values.server.tolerations }}
       tolerations:
@@ -231,8 +242,13 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.server.terminationGracePeriodSeconds }}
       volumes:
         - name: config-volume
+        {{- if empty .Values.server.configFromSecret }}
           configMap:
             name: {{ if .Values.server.configMapOverrideName }}{{ .Release.Name }}-{{ .Values.server.configMapOverrideName }}{{- else }}{{ template "prometheus.server.fullname" . }}{{- end }}
+        {{- else }}
+          secret:
+            secretName: {{ .Values.server.configFromSecret }}
+        {{- end }}
       {{- range .Values.server.extraHostPathMounts }}
         - name: {{ .name }}
           hostPath:

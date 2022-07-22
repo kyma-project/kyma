@@ -24,7 +24,7 @@ func WaitForCacheSyncOrDie(ctx context.Context, dc dynamicinformer.DynamicShared
 
 	err := hasSynced(ctx, dc.WaitForCacheSync)
 	if err != nil {
-		log.Fatalf("sync informer caches failed: %v", err)
+		log.Fatalf("Failed to sync informer caches: %v", err)
 	}
 }
 

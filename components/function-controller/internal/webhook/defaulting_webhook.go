@@ -23,12 +23,12 @@ func NewDefaultingWebhook(config *serverlessv1alpha1.DefaultingConfig, client ct
 		client: client,
 	}
 }
-func (w *DefaultingWebHook) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (w *DefaultingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
 	if req.RequestKind.Kind == "Function" {
-		return w.handleFunctionDefaulting(ctx, req)
+		return w.handleFunctionDefaulting(req)
 	}
 	if req.RequestKind.Kind == "GitRepository" {
-		return w.handleGitRepoDefaulting(ctx, req)
+		return w.handleGitRepoDefaulting()
 	}
 	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.RequestKind.Kind))
 }
@@ -38,7 +38,7 @@ func (w *DefaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 	return nil
 }
 
-func (w *DefaultingWebHook) handleFunctionDefaulting(ctx context.Context, req admission.Request) admission.Response {
+func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admission.Response {
 	f := &serverlessv1alpha1.Function{}
 	if err := w.decoder.Decode(req, f); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
@@ -53,6 +53,6 @@ func (w *DefaultingWebHook) handleFunctionDefaulting(ctx context.Context, req ad
 	return admission.PatchResponseFromRaw(req.Object.Raw, fBytes)
 }
 
-func (w *DefaultingWebHook) handleGitRepoDefaulting(ctx context.Context, req admission.Request) admission.Response {
+func (w *DefaultingWebHook) handleGitRepoDefaulting() admission.Response {
 	return admission.Allowed("")
 }

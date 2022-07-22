@@ -34,17 +34,26 @@ SHELL = /usr/bin/env bash -o pipefail
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
 
-
 help-generic:
 	@printf "\nUsage:\n  make \033[36m<target>\033[0m\n"
 	@printf "\nTargets from common makefile:\n"
 
-
 ##@ Development
-# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
+HELM_TEMPLATE_ASSETS_DIR=./config/helm/manifests
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development using helm templates.
+deploy: manifests-local copy-crds copy-external-crds set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
 	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
-	kustomize build config/default | envsubst | ko apply -f -
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
+	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
+	kustomize build config/helm | envsubst | ko apply -f -
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
+
+deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ## Dry run for deploying eventing-controller for local development using helm templates.
+	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
+	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
+	kustomize build config/helm | envsubst
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -54,7 +63,6 @@ generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepC
 
 set-up-local-env:
     export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
-    export EVENT_TYPE_PREFIX ?= sap.kyma.custom
     export DOMAIN ?= example-domain.com
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
 
@@ -90,7 +98,10 @@ release:
 ##@ Deployment
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	kustomize build config/default | kubectl delete -f -
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
+	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
+	kustomize build config/helm | envsubst | kubectl delete -f -
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen
 OS := $(shell uname)
@@ -99,11 +110,6 @@ controller-gen-local: ## Download controller-gen locally if necessary.
 
 path-to-referenced-charts:
 	@echo "resources/eventing"
-
-
-deploy-dry-run: set-up-local-env manifests-local ## Dry run for deploying eventing-controller for local development
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/default | envsubst
 
 ##@ CRD
 
@@ -125,8 +131,3 @@ $(eval $(call buildpack-mount,manifests))
 
 resolve_clean:
 	rm -rf vendor
-
-licenses_clean:
-	rm -rf licenses
-
-

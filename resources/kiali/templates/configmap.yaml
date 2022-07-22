@@ -1,5 +1,5 @@
 {{- /*
-    Customization:
+    Customizations:
     * exclude "global", "authProxy", and "virtualservices" sections from being rendered as a part of the config
     * enable or disable tracing based on .Values.global.tracing.enabled
     * call tpl before toYaml since some values contain templates
@@ -12,6 +12,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
+  {{- if .Values.deployment.configmap_annotations }}
+  annotations:
+    {{- toYaml .Values.deployment.configmap_annotations | nindent 4 }}
+  {{- end }}
 data:
   config.yaml: |
     {{- /* Most of .Values is simply the ConfigMap - strip out the keys that are not part of the ConfigMap */}}

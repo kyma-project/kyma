@@ -4,7 +4,7 @@ deployment:
       cpu: 100m
       memory: 128Mi
     requests:
-      cpu: 50m
+      cpu: 10m
       memory: 64Mi
 autoscaling:
   enable: false

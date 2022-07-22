@@ -140,10 +140,6 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	return cleanup(c.backend, dynamicClient, c.namedLogger())
 }
 
-func (c *SubscriptionManager) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(subscriptionManagerName)
-}
-
 func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -163,7 +159,7 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 		}
 		desiredSub := handlers.SetStatusAsNotReady(sub)
 		if err = handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
-			logger.Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+			logger.Errorw("Failed to update BEB subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}
 	}
 	return err
@@ -178,7 +174,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 	var ok bool
 	if bebBackend, ok = backend.(*handlers.BEB); !ok {
 		err := errors.New("convert backend handler to BEB handler failed")
-		logger.Errorw("no BEB backend exists", "error", err)
+		logger.Errorw("No BEB backend exists", "error", err)
 		return err
 	}
 
@@ -200,7 +196,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 			if err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
 				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {
 				isCleanupSuccessful = false
-				logger.Errorw("delete APIRule failed", "namespace", sub.Namespace, "name", apiRule, "error", err)
+				logger.Errorw("Failed to delete APIRule", "namespace", sub.Namespace, "name", apiRule, "error", err)
 			}
 		}
 
@@ -208,19 +204,19 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
-			logger.Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+			logger.Errorw("Failed to update BEB subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}
 
 		// Clean subscriptions from BEB.
 		if bebBackend != nil {
 			if err := bebBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
-				logger.Errorw("delete BEB subscription failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+				logger.Errorw("Failed to delete BEB subscription", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 			}
 		}
 	}
 
-	logger.Debugw("cleanup process finished", "success", isCleanupSuccessful)
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
 	return nil
 }
 
@@ -239,4 +235,8 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlers.OA
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 	}, nil
+}
+
+func (c *SubscriptionManager) namedLogger() *zap.SugaredLogger {
+	return c.logger.WithContext().Named(subscriptionManagerName)
 }

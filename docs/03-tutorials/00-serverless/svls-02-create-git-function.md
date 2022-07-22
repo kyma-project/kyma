@@ -83,7 +83,8 @@ Follow these steps:
         type: # "basic" or "key"
         secretName: # "git-creds-basic" or "git-creds-key"
     ```
-
+   
+    >**NOTE:** To avoid performance degradation caused by large Git repositories and large monorepos, Function Controller implements a configurable backoff period for the source checkout based on `APP_FUNCTION_REQUEUE_DURATION`. This behavior can be disabled, allowing the controller to perform the source checkout with every reconciliation loop by marking the Function CR with the annotation `serverless.kyma-project.io/continuousGitCheckout: true`
 4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
     ```yaml

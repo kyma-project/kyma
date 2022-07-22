@@ -208,6 +208,10 @@ func Is2XX(statusCode int) bool {
 	return statusCode/100 == 2
 }
 
+func IsNot4XX(statusCode int) bool {
+	return statusCode/100 != 4
+}
+
 // isPortAvailable returns true if the port is available for use, otherwise returns false
 func isPortAvailable(port int) bool {
 	address := fmt.Sprintf(":%d", port)

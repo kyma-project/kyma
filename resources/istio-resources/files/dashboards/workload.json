@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Istio Workload Dashboard version 1.12.3",
+  "description": "Istio Workload Dashboard version 1.14.1",
   "editable": false,
   "gnetId": 7630,
   "graphTooltip": 0,
@@ -2478,7 +2478,7 @@
       "type": "row"
     }
   ],
-  "refresh": "10s",
+  "refresh": "1m",
   "schemaVersion": 26,
   "style": "dark",
   "templating": {
@@ -2641,7 +2641,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {

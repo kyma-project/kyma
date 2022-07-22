@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +17,7 @@ import (
 type ConfigMapService interface {
 	IsBase(configMap *corev1.ConfigMap) bool
 	ListBase(ctx context.Context) ([]corev1.ConfigMap, error)
-	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ConfigMap) error
+	UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.ConfigMap) error
 }
 
 var _ ConfigMapService = &configMapService{}
@@ -46,7 +47,7 @@ func (r *configMapService) IsBase(configMap *corev1.ConfigMap) bool {
 	return configMap.Namespace == r.config.BaseNamespace && configMap.Labels[ConfigLabel] == RuntimeLabelValue
 }
 
-func (r *configMapService) UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ConfigMap) error {
+func (r *configMapService) UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.ConfigMap) error {
 	logger.Info(fmt.Sprintf("Updating ConfigMap '%s/%s'", namespace, baseInstance.GetName()))
 	instance := &corev1.ConfigMap{}
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstance.GetName()}, instance); err != nil {
@@ -60,7 +61,7 @@ func (r *configMapService) UpdateNamespace(ctx context.Context, logger logr.Logg
 	return r.updateConfigMap(ctx, logger, instance, baseInstance)
 }
 
-func (r *configMapService) createConfigMap(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ConfigMap) error {
+func (r *configMapService) createConfigMap(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.ConfigMap) error {
 	configMap := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        baseInstance.GetName(),
@@ -81,7 +82,7 @@ func (r *configMapService) createConfigMap(ctx context.Context, logger logr.Logg
 	return nil
 }
 
-func (r *configMapService) updateConfigMap(ctx context.Context, logger logr.Logger, instance, baseInstance *corev1.ConfigMap) error {
+func (r *configMapService) updateConfigMap(ctx context.Context, logger *zap.SugaredLogger, instance, baseInstance *corev1.ConfigMap) error {
 	copy := instance.DeepCopy()
 	copy.Annotations = baseInstance.GetAnnotations()
 	copy.Labels = baseInstance.GetLabels()

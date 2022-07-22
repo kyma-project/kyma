@@ -1,0 +1,44 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: loki
+spec:
+  filters:
+    - content: |
+        Name   rewrite_tag
+        Match  kube.*
+        Rule   $log "^.*$" loki_rewritten true
+        Emitter_Name  loki_emitter
+        Emitter_Storage.type filesystem
+  files:
+  - content: |
+      {
+        "kubernetes": {
+          "container_name": "container",
+          "host": "node",
+          "labels": {
+            "app": "app",
+            "app.kubernetes.io/component": "component",
+            "app.kubernetes.io/name": "app",
+            "serverless.kyma-project.io/function-name": "function"
+          },
+          "namespace_name": "namespace",
+          "pod_name": "pod"
+        },
+        "stream": "stream"
+      }
+    name: labelmap.json
+  outputs:
+  - content: |
+      Name               loki
+      Alias              loki-output
+      Match              loki_rewritten
+      host               logging-loki.kyma-system.svc.cluster.local
+      port               3100
+      Workers            1
+      labels             job=telemetry_fluent-bit,stream=$stream,namespace=$kubernetes['namespace_name'],node=$kubernetes['host'],pod=$kubernetes['pod_name'],container=$kubernetes['container_name'],function=$kubernetes['labels']['serverless.kyma-project.io/function-name'],app=$kubernetes['labels']['app'],app=$kubernetes['labels']['app.kubernetes.io/name'],component=$kubernetes['labels']['app.kubernetes.io/component']
+      drop_single_key    off
+      auto_kubernetes_labels off
+      remove_keys        kubernetes, stream
+      line_format        json
+      storage.total_limit_size 20M

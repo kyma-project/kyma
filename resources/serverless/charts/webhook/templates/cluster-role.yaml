@@ -23,10 +23,12 @@ rules:
       - validatingwebhookconfigurations
     verbs:
       - create
+      - delete
       - get
       - update
       - list
       - watch
+      - delete
   - apiGroups:
       - coordination.k8s.io
     resources:

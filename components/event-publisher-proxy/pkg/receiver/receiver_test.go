@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -32,7 +34,7 @@ func TestNewHttpMessageReceiver(t *testing.T) {
 func TestStartListener(t *testing.T) {
 	timeout := time.Second * 10
 	r := fixtureReceiver()
-
+	mockedLogger, _ := logger.New("json", "info")
 	ctx := context.Background()
 
 	// used to simulate sending a stop signal
@@ -47,7 +49,7 @@ func TestStartListener(t *testing.T) {
 		defer wg.Done()
 		start <- true
 		t.Log("starting receiver in goroutine")
-		if err := r.StartListen(ctx, &testHandler{}); err != nil {
+		if err := r.StartListen(ctx, &testHandler{}, mockedLogger); err != nil {
 			t.Errorf("error while starting HTTPMessageReceiver: %v", err)
 		}
 		t.Log("receiver goroutine ends here")

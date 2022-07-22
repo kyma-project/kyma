@@ -71,4 +71,7 @@ You have performed the steps to observe application metrics using the `monitorin
 
    ![Alert on the dashboard](./assets/fired-alert.png)
 
-6. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
+## Next steps
+
+- Follow the tutorial to [Send notifications to Slack](obsv-04-send-notifications.md).
+- If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).

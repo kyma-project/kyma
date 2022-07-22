@@ -28,7 +28,7 @@ const (
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
 	DashboardLabelValue      = "eventing"
-	BackendLabelKey          = "kyma-project.io/eventingBackend"
+	BackendLabelKey          = "eventing.kyma-project.io/backend"
 	publisherPortName        = "http"
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"
@@ -59,6 +59,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 		WithLabels(v1alpha1.BEBBackendType),
 		WithContainers(publisherConfig),
 		WithBEBEnvVars(publisherConfig),
+		WithLogEnvVars(publisherConfig),
 	)
 }
 func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
@@ -67,6 +68,7 @@ func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.P
 		WithLabels(v1alpha1.NatsBackendType),
 		WithContainers(publisherConfig),
 		WithNATSEnvVars(natsConfig, publisherConfig),
+		WithLogEnvVars(publisherConfig),
 		WithAffinity(),
 	)
 }
@@ -105,7 +107,8 @@ func WithLabels(backendType v1alpha1.BackendType) DeployOpt {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
-		DashboardLabelKey: DashboardLabelValue}
+		DashboardLabelKey: DashboardLabelValue,
+	}
 	return func(d *appsv1.Deployment) {
 		d.Spec.Selector = metav1.SetAsLabelSelector(labels)
 		d.Spec.Template.ObjectMeta.Labels = labels
@@ -155,6 +158,16 @@ func WithContainers(publisherConfig env.PublisherConfig) DeployOpt {
 	}
 }
 
+func WithLogEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
+	return func(d *appsv1.Deployment) {
+		for i, container := range d.Spec.Template.Spec.Containers {
+			if strings.EqualFold(container.Name, PublisherName) {
+				d.Spec.Template.Spec.Containers[i].Env = append(d.Spec.Template.Spec.Containers[i].Env, getLogEnvVars(publisherConfig)...)
+			}
+		}
+	}
+}
+
 func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
@@ -164,6 +177,7 @@ func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherCon
 		}
 	}
 }
+
 func WithBEBEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
 		for i, container := range d.Spec.Template.Spec.Containers {
@@ -234,6 +248,13 @@ func getContainerPorts() []v1.ContainerPort {
 			Name:          publisherMetricsPortName,
 			ContainerPort: publisherMetricsPortNum,
 		},
+	}
+}
+
+func getLogEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
+	return []v1.EnvVar{
+		{Name: "APP_LOG_FORMAT", Value: publisherConfig.AppLogFormat},
+		{Name: "APP_LOG_LEVEL", Value: publisherConfig.AppLogLevel},
 	}
 }
 
@@ -308,17 +329,6 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
 		{
-			Name: "LEGACY_EVENT_TYPE_PREFIX",
-			ValueFrom: &v1.EnvVarSource{
-				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: configMapName,
-					},
-					Key: configMapKeyEventTypePrefix,
-				},
-			},
-		},
-		{
 			Name: "EVENT_TYPE_PREFIX",
 			ValueFrom: &v1.EnvVarSource{
 				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
@@ -329,10 +339,9 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 				},
 			},
 		},
-		// jetstream-specific config
+		// Jetstream-specific config
 		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(natsConfig.EnableJetStreamBackend)},
 		{Name: "JS_STREAM_NAME", Value: natsConfig.JSStreamName},
-		{Name: "JS_STREAM_SUBJECT_PREFIX", Value: natsConfig.JSStreamSubjectPrefix},
 	}
 }
 

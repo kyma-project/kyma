@@ -8,19 +8,66 @@ import (
 	"time"
 
 	"github.com/avast/retry-go/v3"
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
+	ce "github.com/cloudevents/sdk-go/v2"
+	cebinding "github.com/cloudevents/sdk-go/v2/binding"
+	ceevent "github.com/cloudevents/sdk-go/v2/event"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/nats-io/nats.go"
-	. "github.com/onsi/gomega"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/nats-io/nats.go"
+	. "github.com/onsi/gomega"
 )
+
+const (
+	Structured SendEncoding = 0
+	Binary     SendEncoding = 1
+)
+
+type SendEncoding uint8
+
+// SendCloudEventToNATS sends a CloudEvent to a NATS client using a defined encoding method.
+func SendCloudEventToNATS(natsClient *Nats, cloudEvent *ceevent.Event, encoding SendEncoding) error {
+	// create a NATS-sender
+	natsOpts := cenats.NatsOptions()
+	url := natsClient.config.URL
+	subject := cloudEvent.Subject()
+	sender, err := cenats.NewSender(url, subject, natsOpts)
+	if err != nil {
+		return fmt.Errorf("failed to create NATS protocol sender, %s", err.Error())
+	}
+
+	// create a CloudEvent client
+	ceClient, err := ce.NewClient(sender)
+	if err != nil {
+		return fmt.Errorf("failed to create an CloudEvent client, %s", err.Error())
+	}
+
+	// define the encoding for sending the event
+	ctx := contextWithSendEncoding(encoding)
+
+	if result := ceClient.Send(ctx, *cloudEvent); ce.IsUndelivered(result) {
+		return fmt.Errorf("failed to send CloudEvent, %s", result.Error())
+	}
+	return nil
+}
+
+func contextWithSendEncoding(encoding SendEncoding) context.Context {
+	ctx := context.Background()
+	switch encoding {
+	case Structured:
+		ctx = cebinding.WithForceStructured(ctx)
+	case Binary:
+		ctx = cebinding.WithForceBinary(ctx)
+	}
+	return ctx
+}
 
 var (
 	nextSinkPort = &portGenerator{port: 8088}
@@ -31,7 +78,7 @@ func TestConvertMsgToCE(t *testing.T) {
 	testCases := []struct {
 		name               string
 		natsMsg            nats.Msg
-		expectedCloudEvent cev2event.Event
+		expectedCloudEvent ceevent.Event
 		expectedErr        error
 	}{
 		{
@@ -54,7 +101,7 @@ func TestConvertMsgToCE(t *testing.T) {
 				Data:    []byte(NewNatsMessagePayload("foo-data", "", "foosource", eventTime, "fooeventtype")),
 				Sub:     nil,
 			},
-			expectedCloudEvent: cev2event.New(cev2event.CloudEventsVersionV1),
+			expectedCloudEvent: ceevent.New(ceevent.CloudEventsVersionV1),
 			expectedErr:        errors.New("id: MUST be a non-empty string\n"), //nolint:revive
 		},
 	}
@@ -100,7 +147,7 @@ func TestSubscription(t *testing.T) {
 	}
 	defaultMaxInflight := 9
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
@@ -145,7 +192,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
@@ -226,7 +273,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber1 := eventingtesting.NewSubscriber()
@@ -311,7 +358,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
@@ -403,7 +450,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	// Create a new subscriber
@@ -500,7 +547,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	// Create a new subscriber
@@ -601,7 +648,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	// Create a new subscriber
@@ -740,7 +787,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	}
 	defaultMaxInflight := 1
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
@@ -796,7 +843,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, defaultLogger)
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
@@ -832,7 +879,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
@@ -896,7 +943,7 @@ func TestIsValidSubscription(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
@@ -955,20 +1002,28 @@ func TestIsValidSubscription(t *testing.T) {
 
 func TestSubscriptionUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
+	defaultLogger := getLogger(g, kymalogger.INFO)
+
 	natsServer, _ := startNATSServer()
 	defer natsServer.Shutdown()
-	defaultLogger := getLogger(g, kymalogger.INFO)
+
 	natsConfig := env.NatsConfig{
-		URL:           natsServer.ClientURL(),
-		MaxReconnects: 2,
-		ReconnectWait: time.Second,
+		URL:                 natsServer.ClientURL(),
+		MaxReconnects:       2,
+		ReconnectWait:       time.Second,
+		MaxIdleConns:        50,
+		MaxConnsPerHost:     50,
+		MaxIdleConnsPerHost: 2,
+		IdleConnTimeout:     6 * time.Second,
 	}
 	defaultMaxInflight := 1
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
-	subscriber := eventingtesting.NewSubscriber()
+	subscriber := eventingtesting.NewSubscriber(
+		eventingtesting.WithCloudEventServeMux(),
+	)
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -982,19 +1037,24 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
-	subject := eventingtesting.CloudEventType
-	g.Expect(SendBinaryCloudEventToNATS(natsBackend, subject, eventingtesting.CloudEventData)).Should(Succeed())
-	g.Expect(subscriber.CheckEvent(eventingtesting.CloudEventData)).Should(Succeed())
-	g.Expect(SendStructuredCloudEventToNATS(natsBackend, subject, eventingtesting.StructuredCloudEvent)).Should(Succeed())
-	g.Expect(subscriber.CheckEvent("\"" + eventingtesting.EventData + "\"")).Should(Succeed())
+	event, err := eventingtesting.CloudEvent()
+	g.Expect(err).To(BeNil())
+
+	g.Expect(SendCloudEventToNATS(natsBackend, event, Structured)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent(event.String())).Should(Succeed())
+
+	g.Expect(SendCloudEventToNATS(natsBackend, event, Binary)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent(event.String())).Should(Succeed())
+
 	g.Expect(natsBackend.DeleteSubscription(sub)).Should(Succeed())
 }
 
 func TestRetryUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
+	defaultLogger := getLogger(g, kymalogger.INFO)
+
 	natsServer, _ := startNATSServer()
 	defer natsServer.Shutdown()
-	defaultLogger := getLogger(g, kymalogger.INFO)
 
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
@@ -1007,28 +1067,32 @@ func TestRetryUsingCESDK(t *testing.T) {
 		DispatcherRetryPeriod: time.Second,
 		DispatcherMaxRetries:  maxRetries,
 	}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
-	subscriber := eventingtesting.NewSubscriber()
+	subscriber := eventingtesting.NewSubscriber(
+		eventingtesting.WithCloudEventServeMux(),
+	)
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	sub := eventingtesting.NewSubscription("sub", "foo",
+	subscription := eventingtesting.NewSubscription("subscription", "foo",
 		eventingtesting.WithOrderCreatedFilter(),
 		eventingtesting.WithSinkURL(subscriber.InternalErrorURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
-	addCleanEventTypesToStatus(sub, cleaner)
-	err := natsBackend.SyncSubscription(sub)
+	addCleanEventTypesToStatus(subscription, cleaner)
+	err := natsBackend.SyncSubscription(subscription)
 	g.Expect(err).To(BeNil())
 
-	subject := eventingtesting.CloudEventType
-	g.Expect(SendStructuredCloudEventToNATS(natsBackend, subject, eventingtesting.StructuredCloudEvent)).Should(Succeed())
-	// Check that the retries are done and that the published data was correctly received
-	g.Expect(subscriber.CheckRetries(maxRetries, "\""+eventingtesting.EventData+"\"")).Should(Succeed())
-	g.Expect(natsBackend.DeleteSubscription(sub)).Should(Succeed())
+	event, err := eventingtesting.CloudEvent()
+	g.Expect(err).To(BeNil())
+
+	g.Expect(SendCloudEventToNATS(natsBackend, event, Structured)).Should(Succeed())
+	// check if the retries are done and if the published data was correctly received
+	g.Expect(subscriber.CheckRetries(maxRetries, event.String())).Should(Succeed())
+	g.Expect(natsBackend.DeleteSubscription(subscription)).Should(Succeed())
 }
 
 func TestSubscription_NATSServerRestart(t *testing.T) {
@@ -1043,7 +1107,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 		ReconnectWait: 3 * time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()

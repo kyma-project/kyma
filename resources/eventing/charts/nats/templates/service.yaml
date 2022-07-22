@@ -30,7 +30,7 @@ spec:
     appProtocol: tcp
     {{- end }}
   - name: cluster
-    port: 6222
+    port: {{ .Values.nats.ports.cluster }}
     {{- if .Values.appProtocol.enabled }}
     appProtocol: tcp
     {{- end }}
@@ -40,17 +40,17 @@ spec:
     appProtocol: http
     {{- end }}
   - name: metrics
-    port: 7777
+    port: {{ .Values.nats.ports.metrics }}
     {{- if .Values.appProtocol.enabled }}
     appProtocol: http
     {{- end }}
   - name: leafnodes
-    port: 7422
+    port: {{ .Values.nats.ports.leafnodes }}
     {{- if .Values.appProtocol.enabled }}
     appProtocol: tcp
     {{- end }}
   - name: gateways
-    port: 7522
+    port: {{ .Values.nats.ports.gateways }}
     {{- if .Values.appProtocol.enabled }}
     appProtocol: tcp
     {{- end }}

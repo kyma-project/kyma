@@ -1,12 +1,14 @@
 const fs = require('fs');
 const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
-const eventMeshNamespace = getEventMeshNamespace();
 const natsBackend = 'nats';
 const bebBackend = 'beb';
 
 // returns the EventMesh namespace from the secret.
 function getEventMeshNamespace() {
   try {
+    if (eventMeshSecretFilePath === '') {
+      return undefined;
+    }
     const eventMeshSecret = JSON.parse(fs.readFileSync(eventMeshSecretFilePath, {encoding: 'utf8'}));
     return '/' + eventMeshSecret['namespace'];
   } catch (e) {
@@ -17,7 +19,7 @@ function getEventMeshNamespace() {
 
 module.exports = {
   eventMeshSecretFilePath,
-  eventMeshNamespace,
+  getEventMeshNamespace,
   natsBackend,
   bebBackend,
 };

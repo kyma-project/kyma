@@ -11,8 +11,8 @@ const {
   withScenarioName,
   keb,
   gardener,
-  commerceMockTest,
   withInstanceID,
+  commerceMockTest,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -26,6 +26,10 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 describe('SKR Nightly periodic test', function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
+
+  let options;
+  let shoot;
+
   before('Fetch last nightly SKR', async function() {
     try {
       let runtime;
@@ -38,15 +42,15 @@ describe('SKR Nightly periodic test', function() {
       if (runtimes.data) {
         runtime = runtimes.data[0];
       }
-      this.shoot = await gardener.getShoot(runtime.shootName);
-      this.options = gatherOptions(
+      shoot = await gardener.getShoot(runtime.shootName);
+      options = gatherOptions(
           withInstanceID(runtime.instanceID),
           withRuntimeName('kyma-nightly'),
           withScenarioName('test-nightly'));
-      initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
+      initializeK8sClient({kubeconfig: shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  commerceMockTest();
+  commerceMockTest(options);
 });

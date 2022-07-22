@@ -40,6 +40,10 @@ spec:
                 secretKeyRef:
                   name: event-publisher-proxy
                   key: ems-publish-url
+            - name: APP_LOG_FORMAT
+              value: "json"
+            - name: APP_LOG_LEVEL
+              value: "info"
           image: ko://github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
           imagePullPolicy: IfNotPresent
           name: event-publisher-proxy

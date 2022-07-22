@@ -5,16 +5,20 @@ const path = require('path');
 const {
   k8sCoreV1Api,
   k8sApply,
+  k8sDelete,
   waitForK8sObject,
 } = require('../utils');
+const {logsPresentInLoki} = require('../logging');
 const {
-  lokiPortForward,
-  logsPresentInLoki,
-} = require('../logging');
-
+  exposeGrafana,
+  unexposeGrafana,
+} = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
+const defaultNamespace = 'default';
 const testStartTimestamp = new Date().toISOString();
-
+const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
+const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
+const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -25,7 +29,7 @@ function loadResourceFromFile(file) {
 
 function checkLastCondition(logPipeline, conditionType) {
   const conditions = logPipeline.status.conditions;
-  if (conditions.length == 0) {
+  if (conditions.length === 0) {
     return false;
   }
   const lastCondition = conditions[conditions.length - 1];
@@ -38,7 +42,7 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
       {},
       (_type, watchObj, _) => {
         return (
-          watchObj.metadata.name == name && checkLastCondition(watchObj, lastConditionType)
+          watchObj.metadata.name === name && checkLastCondition(watchObj, lastConditionType)
         );
       },
       timeout,
@@ -46,13 +50,29 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
+async function prepareEnvironment() {
+  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
+  const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
+  await logPipelinePromise;
+  await deploymentPromise;
+}
 
-describe('Telemetry Operator tests', function() {
-  let cancelPortForward;
+async function cleanEnvironment() {
+  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
+  const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
+  await logPipelinePromise;
+  await deploymentPromise;
+}
 
-  before(async function() {
-    cancelPortForward = lokiPortForward();
+describe('Telemetry Operator tests, prepare the environment', function() {
+  before('Expose Grafana', async () => {
+    await prepareEnvironment();
+    await exposeGrafana();
+  });
+
+  after('Unexpose Grafana, clean the environment', async () => {
+    await cleanEnvironment();
+    await unexposeGrafana();
   });
 
   it('Operator should be ready', async () => {
@@ -75,19 +95,31 @@ describe('Telemetry Operator tests', function() {
   it('Should reject the invalid LogPipeline', async () => {
     try {
       await k8sApply(invalidLogPipelineCR, telemetryNamespace);
+      await k8sDelete(invalidLogPipelineCR, telemetryNamespace);
+      assert.fail('Should not be able to apply invalid LogPipeline');
     } catch (e) {
       assert.equal(e.statusCode, 403);
-      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
-    };
+      expect(e.body.message).to.have.string('denied the request');
+      const errMsg = 'section \'abc\' tried to instance a plugin name that don\'t exists';
+      expect(e.body.message).to.have.string(errMsg);
+    }
   });
 
-  it('should push the logs to the loki output', async () => {
-    const labels = '{job="telemetry-fluent-bit"}';
+  it('Should push the logs to the loki output', async () => {
+    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
-  after(async function() {
-    cancelPortForward();
+  it('Should parse the logs using regex', async () => {
+    try {
+      const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
+      const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+      assert.isTrue(logsPresent, 'No parsed logs present in Loki');
+    } catch (e) {
+      assert.fail(e);
+    }
   });
 });
+
+

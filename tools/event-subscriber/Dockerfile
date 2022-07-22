@@ -8,7 +8,6 @@ ARG DOCK_PKG_DIR=/event-subscriber
 
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
-COPY ./licenses/ /app/licenses
 
 RUN go mod download
 
@@ -22,6 +21,5 @@ WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY --from=builder $DOCK_PKG_DIR/event-subscriber .
-COPY --from=builder /app/licenses /app/licenses
 
 CMD ["/app/event-subscriber"]

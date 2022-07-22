@@ -6,6 +6,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
+    {{- with .Values.service.public.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- with .Values.service.public.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -16,7 +19,7 @@ spec:
     - port: {{ .Values.service.public.port }}
       targetPort: http-public
       protocol: TCP
-      name: http
+      name: {{ .Values.service.public.name }}
   selector:
     app.kubernetes.io/name: {{ include "hydra.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

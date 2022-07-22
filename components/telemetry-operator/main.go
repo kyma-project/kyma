@@ -20,27 +20,37 @@ import (
 	"errors"
 	"flag"
 	"os"
+	"strings"
+	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
+
+	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-logr/zapr"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
+	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -54,8 +64,18 @@ var (
 	fluentBitNs                string
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
+	fluentBitPath              string
+	fluentBitPluginDirectory   string
+	fluentBitInputTag          string
+	fluentBitMemoryBufferLimit string
+	fluentBitStorageType       string
+	fluentBitFsBufferLimit     string
 	logFormat                  string
 	logLevel                   string
+	certDir                    string
+	deniedFilterPlugins        string
+	deniedOutputPlugins        string
+	maxPipelines               int
 )
 
 //nolint:gochecknoinits
@@ -77,8 +97,10 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var syncPeriod time.Duration
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.DurationVar(&syncPeriod, "sync-period", 1*time.Hour, "minimum frequency at which watched resources are reconciled")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
@@ -88,8 +110,19 @@ func main() {
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
+	flag.StringVar(&fluentBitPath, "fluent-bit-path", "fluent-bit/bin/fluent-bit", "Fluent Bit binary path")
+	flag.StringVar(&fluentBitPluginDirectory, "fluent-bit-plugin-directory", "fluent-bit/lib", "Fluent Bit plugin directory")
+	flag.StringVar(&fluentBitInputTag, "fluent-bit-input-tag", "tele", "Fluent Bit base tag of the input to use")
+	flag.StringVar(&fluentBitMemoryBufferLimit, "fluent-bit-memory-buffer-limit", "10M", "Fluent Bit memory buffer limit per log pipeline")
+	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
+	flag.StringVar(&fluentBitFsBufferLimit, "fluent-bit-filesystem-buffer-limit", "1G", "Fluent Bit filesystem buffer limit per log pipeline")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
+	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
+	flag.StringVar(&deniedFilterPlugins, "denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
+	flag.StringVar(&deniedOutputPlugins, "denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
+	flag.IntVar(&maxPipelines, "max-pipelines", 5, "Maximum number of LogPipelines to be created. If 0, no limit is applied.")
+
 	flag.Parse()
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
@@ -109,44 +142,115 @@ func main() {
 		os.Exit(1)
 	}
 
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+	metrics.Registry.MustRegister(restartsTotal)
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
-		CertDir:                "/var/run/telemetry-webhook",
+		CertDir:                certDir,
 	})
 	if err != nil {
 		setupLog.Error(err, "Failed to start manager")
 		os.Exit(1)
 	}
 
+	pipelineConfig := fluentbit.PipelineConfig{
+		InputTag:          fluentBitInputTag,
+		MemoryBufferLimit: fluentBitMemoryBufferLimit,
+		StorageType:       fluentBitStorageType,
+		FsBufferLimit:     fluentBitFsBufferLimit,
+	}
+
+	daemonSetConfig := sync.FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName: types.NamespacedName{
+			Namespace: fluentBitNs,
+			Name:      fluentBitDaemonSet,
+		},
+		FluentBitSectionsConfigMap: types.NamespacedName{
+			Name:      fluentBitSectionsConfigMap,
+			Namespace: fluentBitNs,
+		},
+
+		FluentBitFilesConfigMap: types.NamespacedName{
+			Name:      fluentBitFilesConfigMap,
+			Namespace: fluentBitNs,
+		},
+		FluentBitEnvSecret: types.NamespacedName{
+			Name:      fluentBitEnvSecret,
+			Namespace: fluentBitNs,
+		},
+	}
+	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName: types.NamespacedName{
+			Namespace: fluentBitNs,
+			Name:      fluentBitDaemonSet,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      fluentBitParsersConfigMap,
+			Namespace: fluentBitNs,
+		},
+	}
+
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		fluentbit.NewConfigValidator(),
+		validation.NewVariablesValidator(mgr.GetClient()),
+		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		validation.NewPluginValidator(
+			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
+			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
+		validation.NewMaxPipelinesValidator(maxPipelines),
+		validation.NewOutputValidator(),
+		pipelineConfig,
 		fs.NewWrapper(),
+		restartsTotal,
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
-	reconciler := controllers.NewLogPipelineReconciler(
+	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
-		fluentBitNs,
-		fluentBitSectionsConfigMap,
-		fluentBitParsersConfigMap,
-		fluentBitDaemonSet,
-		fluentBitEnvSecret,
-		fluentBitFilesConfigMap)
+		daemonSetConfig,
+		pipelineConfig,
+		restartsTotal)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
+	parserReconciler := telemetrycontrollers.NewLogParserReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		parserDaemonSetConfig,
+		restartsTotal)
+	if err = parserReconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		os.Exit(1)
+	}
+
+	logParserValidator := webhook.NewLogParserValidator(mgr.GetClient(),
+		fluentBitConfigMap,
+		fluentBitNs,
+		validation.NewParserValidator(),
+		pipelineConfig,
+		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		fs.NewWrapper(),
+		restartsTotal,
+	)
+	mgr.GetWebhookServer().Register(
+		"/validate-logparser",
+		&k8sWebhook.Admission{Handler: logParserValidator})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -191,6 +295,9 @@ func validateFlags() error {
 	}
 	if logLevel != "debug" && logLevel != "info" && logLevel != "warn" && logLevel != "error" && logLevel != "fatal" {
 		return errors.New("--log-level has to be one of debug, info, warn, error, fatal")
+	}
+	if fluentBitStorageType != "filesystem" && fluentBitStorageType != "memory" {
+		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
 	return nil
 }

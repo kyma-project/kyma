@@ -25,15 +25,15 @@ type HealthChecker struct {
 	checkCh  chan event.GenericEvent
 	healthCh chan bool
 	timeout  time.Duration
-	logger   *zap.Logger
+	log      *zap.SugaredLogger
 }
 
-func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeout time.Duration, logger *zap.Logger) HealthChecker {
-	return HealthChecker{checkCh: checkCh, healthCh: returnCh, timeout: timeout, logger: logger}
+func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeout time.Duration, logger *zap.SugaredLogger) HealthChecker {
+	return HealthChecker{checkCh: checkCh, healthCh: returnCh, timeout: timeout, log: logger}
 }
 
 func (h HealthChecker) Checker(req *http.Request) error {
-	h.logger.Debug("Liveness handler triggered")
+	h.log.Debug("Liveness handler triggered")
 
 	checkEvent := event.GenericEvent{
 		Object: &corev1.Event{
@@ -48,13 +48,13 @@ func (h HealthChecker) Checker(req *http.Request) error {
 		return errors.New("timeout when sending check event")
 	}
 
-	h.logger.Debug("check event send to reconcile loop")
+	h.log.Debug("check event send to reconcile loop")
 	select {
 	case <-h.healthCh:
-		h.logger.Debug("reconcile loop is healthy")
+		h.log.Debug("reconcile loop is healthy")
 		return nil
 	case <-time.After(h.timeout):
-		h.logger.Debug("reconcile timeout")
+		h.log.Debug("reconcile timeout")
 		return errors.New("reconcile didn't send confirmation")
 	}
 }

@@ -3,7 +3,8 @@ package kubernetes
 import (
 	"context"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,16 +13,16 @@ import (
 )
 
 type ConfigMapReconciler struct {
-	Log    logr.Logger
+	Log    *zap.SugaredLogger
 	client client.Client
 	config Config
 	svc    ConfigMapService
 }
 
-func NewConfigMap(client client.Client, log logr.Logger, config Config, service ConfigMapService) *ConfigMapReconciler {
+func NewConfigMap(client client.Client, log *zap.SugaredLogger, config Config, service ConfigMapService) *ConfigMapReconciler {
 	return &ConfigMapReconciler{
 		client: client,
-		Log:    log.WithName("controllers").WithName("configmap"),
+		Log:    log.Named("controllers").Named("configmap"),
 		config: config,
 		svc:    service,
 	}
@@ -75,7 +76,7 @@ func (r *ConfigMapReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 	}
 	r.client.Status()
 
-	logger := r.Log.WithValues("namespace", instance.GetNamespace(), "name", instance.GetName())
+	logger := r.Log.With("namespace", instance.GetNamespace(), "name", instance.GetName())
 
 	namespaces, err := getNamespaces(ctx, r.client, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 	if err != nil {

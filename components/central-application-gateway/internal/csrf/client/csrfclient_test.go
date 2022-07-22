@@ -147,7 +147,6 @@ func TestAddAuthorization(t *testing.T) {
 
 		// given
 		strategy := sf.Create(&authorization.Credentials{CertificateGen: &authorization.CertificateGen{
-			CommonName:  "",
 			PrivateKey:  privateKey,
 			Certificate: certificate,
 		}})

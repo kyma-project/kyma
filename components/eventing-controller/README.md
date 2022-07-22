@@ -56,7 +56,7 @@ This section explains how to use the Eventing Controller. It expects the followi
 | `PUBLISHER_LIMITS_MEMORY`         | The memory limits of the Event Publisher Proxy.                                                |
 | **For NATS**                      |                                                                                                |
 | `NATS_URL`                        | The URL for the NATS server.                                                                   |
-| `EVENT_TYPE_PREFIX`               | The Event Type Prefix for the NATS backend.                                                    |
+| `EVENT_TYPE_PREFIX`               | The event type prefix for the NATS and BEB backend.                                                    |
 | `MAX_IDLE_CONNS`                  | The maximum number of idle connections for the HTTP transport of the NATS backend.             |
 | `MAX_CONNS_PER_HOST`              | The maximum connections per host for the HTTP transport of the NATS backend.                   |
 | `MAX_IDLE_CONNS_PER_HOST`         | The maximum idle connections per host for the HTTP transport of the NATS backend.              |
@@ -70,7 +70,6 @@ This section explains how to use the Eventing Controller. It expects the followi
 |  `JS_STREAM_RETENTION_POLICY`     | The policy to delete events from the stream: `limits` or `interest`. See https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy. |
 |  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
 |  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
-|  `JS_STREAM_SUBJECT_PREFIX`       | The prefix for the JetStream subjects filter. Used only when `EVENT_TYPE_PREFIX` is empty.     |
 |  `JS_CONSUMER_DELIVER_POLICY`     | The policy to deliver events to consumers from the stream. Supported values are: `all`, `last`, `last_per_subject`, and `new`. See https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy-optstartseq-optstarttime. |
 | **For BEB**                       |                                                                                                |
 | `TOKEN_ENDPOINT`                  | The Authentication Server Endpoint to provide Access Tokens.                                   |
@@ -183,7 +182,7 @@ kubectl port-forward -n kyma-system svc/eventing-nats 4222
 |--------------------------|----------------------------------------------------|----------|-----------------------------|
 | `KUBECONFIG`             | Path to a local kubeconfig file.                   | yes      | ~/.kube/config              |
 | `NATS_URL`               | URL of the NATS server.                            | no       | nats.nats.svc.cluster.local |
-| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                   | yes      | sap.kyma.custom             |
+| `EVENT_TYPE_PREFIX`      | The event type prefix for the NATS and BEB backend.        | yes      | sap.kyma.custom             |
 | `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens. | yes      | WEBHOOK_TOKEN_ENDPOINT      |
 | `DOMAIN`                 | Domain.                                            | yes      | example.com                 |
 

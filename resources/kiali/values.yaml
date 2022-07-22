@@ -9,11 +9,11 @@ global:
   images:
     kiali:
       name: kiali
-      version: 1.44.0-581a4014
+      version: 1.51.1-cc0b2ce4
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.2.1-581a4014
+      version: 7.3.0-6b2bc161
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
@@ -66,7 +66,7 @@ authProxy:
 # If 'fullnameOverride' is not "kiali" and 'deployment.instance_name' is "kiali",
 # then 'deployment.instance_name' will take the value of 'fullnameOverride' value.
 # Otherwise, 'fullnameOverride' is ignored and 'deployment.instance_name' is used.
-fullnameOverride: "kiali-server"
+fullnameOverride: "kiali"
 
 # This is required for "openshift" auth strategy.
 # You have to know ahead of time what your Route URL will be because
@@ -78,7 +78,6 @@ kiali_route_url: ""
 
 #
 # Settings that mimic the Kiali CR which are placed in the ConfigMap.
-# See https://github.com/kiali/kiali-operator/blob/master/deploy/kiali/kiali_cr to see all possible values (and what they mean).
 # Note that only those values used by the Helm Chart will be here.
 #
 
@@ -99,13 +98,17 @@ deployment:
     node: {}
     pod: {}
     pod_anti: {}
+  configmap_annotations: {}
   custom_secrets: []
   host_aliases: []
   hpa:
-    api_version: "autoscaling/v2beta2"
+    api_version: "autoscaling/v2"
     spec: {}
+  image_digest: "" # use "sha256" if image_version is a sha256 hash (do NOT prefix this value with a "@")
+  image_name: quay.io/kiali/kiali
   image_pull_policy: "Always"
   image_pull_secrets: []
+  image_version: ""
   ingress:
     additional_labels: {}
     class_name: "nginx"
@@ -125,12 +128,12 @@ deployment:
   priority_class_name: "kyma-system-priority"
   replicas: 1
   resources:
-    limits:
-      cpu: 100m
-      memory: 140Mi
     requests:
       cpu: 10m
       memory: 20Mi
+    limits:
+      cpu: 100m
+      memory: 140Mi
   secret_name: "kiali"
   service_annotations: {}
   service_type: ""
@@ -150,6 +153,7 @@ external_services:
   istio:
     enabled: true
     root_namespace: "istio-system"
+    url_service_version: "http://istiod.istio-system:15014/version" # not needed anymore after https://github.com/kiali/kiali/issues/4985
     component_status:
       components:
       - app_label: istiod
@@ -184,12 +188,16 @@ identity: {}
 
 kiali_feature_flags:
   certificates_information_indicators:
-   enabled: false
-   secrets:
-   - cacerts
-   - istio-ca-secret
+    enabled: true
+    secrets:
+    - cacerts
+    - istio-ca-secret
   clustering:
-    enabled: false
+    enabled: true
+  disabled_features: []
+  validations:
+    ignore: ["KIA1201"]
+
 login_token:
   signing_key: ""
 

@@ -49,6 +49,7 @@ npm run test-eventing
 ```bash
 npm run test-eventing TEST_SUFFIX=abcd
 ```
+>**NOTE:** The `at least once` delivery test for JetStream is only run when the `STREAM_RETENTION_POLICY` is set to `limits` and the `CONSUMER_DELIVER_POLICY` is set to `all`.
 
 ## Troubleshooting ##
 

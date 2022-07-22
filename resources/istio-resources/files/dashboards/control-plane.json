@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Istio Control Plane Dashboard version 1.12.3",
+  "description": "Istio Control Plane Dashboard version 1.14.1",
   "editable": false,
   "gnetId": 7645,
   "graphTooltip": 1,
@@ -1687,7 +1687,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": "5s",
   "schemaVersion": 18,
   "style": "dark",
   "templating": {
@@ -1714,7 +1714,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {

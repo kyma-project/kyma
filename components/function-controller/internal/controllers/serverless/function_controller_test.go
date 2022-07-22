@@ -53,8 +53,7 @@ func TestFunctionReconciler_getConditionStatus(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.getConditionStatus(tt.args.conditions, tt.args.conditionType)
+			got := getConditionStatus(tt.args.conditions, tt.args.conditionType)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -142,8 +141,7 @@ func TestFunctionReconciler_equalConditions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.equalConditions(tt.args.existing, tt.args.expected)
+			got := equalConditions(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -201,8 +199,7 @@ func TestFunctionReconciler_mapsEqual(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.mapsEqual(tt.args.existing, tt.args.expected)
+			got := mapsEqual(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -308,8 +305,7 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.envsEqual(tt.args.existing, tt.args.expected)
+			got := envsEqual(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -360,8 +356,7 @@ func TestFunctionReconciler_getConditionReason(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.getConditionReason(tt.args.conditions, tt.args.conditionType)
+			got := getConditionReason(tt.args.conditions, tt.args.conditionType)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

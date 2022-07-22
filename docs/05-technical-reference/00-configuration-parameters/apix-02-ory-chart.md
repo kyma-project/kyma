@@ -40,6 +40,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | **postgresql.resources.limits.cpu** | Defines limits for CPU resources. | `750m` |
 | **postgresql.existingSecret** | Specifies the name of an existing secret to use for PostgreSQL passwords. | `"ory-hydra-credentials"` |
 | **gcloud-sqlproxy.existingSecret** | Specifies the name of the Secret in the same Namespace as the proxy, that stores the database password. | `ory-hydra-credentials` |
-| **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). | `gcp-sa.json` |
+| **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP service account JSON key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). | `gcp-sa.json` |
 
 > **TIP:** See the original [ORY](https://github.com/ory/k8s/tree/master/helm/charts), [ORY Oathkeeper](http://k8s.ory.sh/helm/oathkeeper.html), [PostgreSQL](https://github.com/helm/charts/tree/master/stable/postgresql), and [GCP SQL Proxy](https://github.com/rimusz/charts/tree/master/stable/gcloud-sqlproxy) helm charts for more configuration options.

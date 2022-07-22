@@ -11,12 +11,12 @@ webhook:
   deployment:
     resources:
       requests:
-        cpu: 50m
+        cpu: 10m
 
 docker-registry:
   resources:
     requests:
-      cpu: 50m
+      cpu: 10m
 
 containers:
   manager:
@@ -24,4 +24,13 @@ containers:
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
-        value: "warn"
+        value: "info"
+      logFormat:
+        value: "json"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 160Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi

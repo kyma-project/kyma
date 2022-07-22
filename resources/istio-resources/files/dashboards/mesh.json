@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Istio Mesh Dashboard version 1.12.3",
+  "description": "Istio Mesh Dashboard version 1.14.1",
   "editable": false,
   "gnetId": 7639,
   "graphTooltip": 0,
@@ -1682,7 +1682,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": "5s",
   "schemaVersion": 18,
   "style": "dark",
   "templating": {
@@ -1709,7 +1709,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {

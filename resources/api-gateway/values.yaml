@@ -9,7 +9,7 @@ deployment:
       cpu: 100m
       memory: 128Mi
     requests:
-      cpu: 50m
+      cpu: 10m
       memory: 64Mi
   securityContext:
     allowPrivilegeEscalation: false
@@ -110,5 +110,5 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "9fd030a8"
+      version: "2216798b"
       directory: "incubator"

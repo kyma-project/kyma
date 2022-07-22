@@ -3,14 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-
-	"github.com/go-logr/logr"
-	appsv1 "k8s.io/api/apps/v1"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -23,188 +16,192 @@ import (
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig) bool {
-	image := r.buildImageAddress(instance, dockerConfig.PullAddress)
-	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
-
-	var expectedJob batchv1.Job
-	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		expectedJob = r.buildJob(instance, rtmCfg, "", dockerConfig)
-	} else {
-		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
-	}
-
-	if len(deployments) == 1 &&
-		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
-		buildStatus != corev1.ConditionUnknown &&
-		len(jobs) > 0 &&
-		r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) {
-		return buildStatus == corev1.ConditionFalse
-	}
-
-	return len(jobs) != 1 ||
-		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||
-		// Compare image argument
-		!r.equalJobs(jobs[0], expectedJob) ||
-		!r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) ||
-		buildStatus == corev1.ConditionUnknown ||
-		buildStatus == corev1.ConditionFalse
+var backoffLimitExceeded = func(reason string) bool {
+	return reason == "BackoffLimitExceeded"
 }
 
-func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, newJob batchv1.Job, jobs []batchv1.Job) (ctrl.Result, error) {
-	jobsLen := len(jobs)
+// build state function that will check if a job responsible for building function image succeeded or failed;
+// if a job is not running start one
+func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+		labels := s.internalFunctionLabels()
 
-	switch {
-	case jobsLen == 0:
-		activeJobs, err := r.getActiveAndStatelessJobs(ctx)
-		if err != nil {
-			return ctrl.Result{}, err
+		r.err = r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.jobs)
+		if r.err != nil {
+			return nil
 		}
 
-		if activeJobs >= r.config.Build.MaxSimultaneousJobs {
-			return ctrl.Result{
+		jobLen := len(s.jobs.Items)
+
+		if jobLen == 0 {
+			return buildStateFnInlineCreateJob(expectedJob)
+		}
+
+		jobFailed := s.jobFailed(backoffLimitExceeded)
+
+		conditionStatus := getConditionStatus(
+			s.instance.Status.Conditions,
+			serverlessv1alpha1.ConditionBuildReady,
+		)
+
+		if jobFailed && conditionStatus == corev1.ConditionFalse {
+			return stateFnInlineDeleteJobs
+		}
+
+		if jobFailed {
+			r.result = ctrl.Result{
+				RequeueAfter: time.Minute * 5,
+				Requeue:      true,
+			}
+
+			condition := serverlessv1alpha1.Condition{
+				Type:               serverlessv1alpha1.ConditionBuildReady,
+				Status:             corev1.ConditionFalse,
+				LastTransitionTime: metav1.Now(),
+				Reason:             serverlessv1alpha1.ConditionReasonJobFailed,
+				Message:            fmt.Sprintf("Job %s failed, it will be re-run", s.jobs.Items[0].Name),
+			}
+			return buildStateFnUpdateStateFnFunctionCondition(condition)
+		}
+
+		s.image = s.buildImageAddress(r.cfg.docker.PullAddress)
+
+		jobChanged := s.fnJobChanged(expectedJob)
+		if !jobChanged {
+			return stateFnCheckDeployments
+		}
+
+		if jobLen > 1 || !equalJobs(s.jobs.Items[0], expectedJob) {
+			return stateFnInlineDeleteJobs
+		}
+
+		expectedLabels := expectedJob.GetLabels()
+
+		if !mapsEqual(s.jobs.Items[0].GetLabels(), expectedLabels) {
+			return buildStateFnInlineUpdateJobLabels(expectedLabels)
+		}
+
+		return stateFnUpdateJobStatus
+	}
+}
+
+func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+		// validate if the max number of running jobs
+		// didn't exceed max simultaneous jobs number
+
+		var allJobs batchv1.JobList
+
+		r.err = r.client.ListByLabel(ctx, "", fcManagedByLabel, &allJobs)
+		if r.err != nil {
+			return nil
+		}
+
+		activeJobsCount := countJobs(allJobs, didNotFail, didNotSucceed)
+		if activeJobsCount >= r.cfg.fn.Build.MaxSimultaneousJobs {
+			r.result = ctrl.Result{
 				RequeueAfter: time.Second * 5,
-			}, nil
+			}
+			return nil
 		}
 
-		return ctrl.Result{}, r.createJob(ctx, log, instance, newJob)
-	case jobsLen > 1 || !r.equalJobs(jobs[0], newJob):
-		return ctrl.Result{}, r.deleteJobs(ctx, log, instance)
-	case !r.mapsEqual(jobs[0].GetLabels(), newJob.GetLabels()):
-		return ctrl.Result{}, r.updateJobLabels(ctx, log, instance, jobs[0], newJob.GetLabels())
-	default:
-		return r.updateBuildStatus(ctx, log, instance, jobs[0])
-	}
-}
-
-func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options, dockerConfig DockerConfig) (ctrl.Result, error) {
-	newJob := r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
-	return r.changeJob(ctx, log, instance, newJob, jobs)
-}
-func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job, dockerConfig DockerConfig) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, rtmCfg, configMapName, dockerConfig)
-	return r.changeJob(ctx, log, instance, newJob, jobs)
-}
-
-func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
-	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
-	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
-
-	// Compare destination argument as it contains image tag
-	existingDst := r.getArg(existingArgs, destinationArg)
-	expectedDst := r.getArg(expectedArgs, destinationArg)
-
-	return existingDst == expectedDst
-}
-
-func (r *FunctionReconciler) getArg(args []string, arg string) string {
-	for _, item := range args {
-		if strings.HasPrefix(item, arg) {
-			return item
+		r.err = r.client.CreateWithReference(ctx, &s.instance, &expectedJob)
+		if r.err != nil {
+			return nil
 		}
+
+		condition := serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionBuildReady,
+			Status:             corev1.ConditionUnknown,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonJobCreated,
+			Message:            fmt.Sprintf("Job %s created", expectedJob.GetName()),
+		}
+
+		result := buildStateFnUpdateStateFnFunctionCondition(condition)
+		return result
 	}
-	return ""
 }
 
-func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) error {
-	log.Info("Creating Job")
-	if err := r.client.CreateWithReference(ctx, instance, &job); err != nil {
-		log.Error(err, "Cannot create Job")
-		return err
+func stateFnInlineDeleteJobs(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	r.log.Info("delete Jobs")
+
+	labels := s.internalFunctionLabels()
+	selector := apilabels.SelectorFromSet(labels)
+
+	r.err = r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, s.instance.GetNamespace(), selector)
+	if r.err != nil {
+		return nil
 	}
-	log.Info(fmt.Sprintf("Job %s created", job.GetName()))
 
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionBuildReady,
-		Status:             corev1.ConditionUnknown,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonJobCreated,
-		Message:            fmt.Sprintf("Job %s created", job.GetName()),
-	})
-}
-
-func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) error {
-	log.Info("Deleting all old jobs")
-	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
-	if err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete old Jobs")
-		return err
-	}
-	log.Info("Old Jobs deleted")
-
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+	condition := serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionBuildReady,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
 		Reason:             serverlessv1alpha1.ConditionReasonJobsDeleted,
 		Message:            "Old Jobs deleted",
-	})
+	}
+
+	result := buildStateFnUpdateStateFnFunctionCondition(condition)
+	return result
 }
 
-func (r *FunctionReconciler) updateBuildStatus(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job) (ctrl.Result, error) {
-	switch {
-	case job.Status.CompletionTime != nil:
-		log.Info(fmt.Sprintf("Job %s finished", job.GetName()))
-		return ctrl.Result{}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+func buildStateFnInlineUpdateJobLabels(m map[string]string) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+		s.jobs.Items[0].Labels = m
+
+		jobName := s.jobs.Items[0].GetName()
+
+		r.log.Info(fmt.Sprintf("updating Job %q labels", jobName))
+
+		r.err = r.client.Update(ctx, &s.jobs.Items[0])
+		if r.err != nil {
+			return nil
+		}
+
+		condition := serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionBuildReady,
+			Status:             corev1.ConditionUnknown,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonJobUpdated,
+			Message:            fmt.Sprintf("Job %s updated", jobName),
+		}
+
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
+	}
+}
+
+func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	if r.err = ctx.Err(); r.err != nil {
+		return nil
+	}
+
+	job := &s.jobs.Items[0]
+	jobName := job.GetName()
+
+	if job.Status.CompletionTime != nil {
+		r.log.Info(fmt.Sprintf("job finished %q", jobName))
+		condition := serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionBuildReady,
 			Status:             corev1.ConditionTrue,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonJobFinished,
-			Message:            fmt.Sprintf("Job %s finished", job.GetName()),
-		})
-	case job.Status.Failed < 1:
-		log.Info(fmt.Sprintf("Job %s is still in progress", job.GetName()))
-		return ctrl.Result{}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+			Message:            fmt.Sprintf("Job %s finished", jobName),
+		}
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
+	}
+
+	if job.Status.Failed < 1 {
+		r.log.Info(fmt.Sprintf("job in progress %q", jobName))
+		condition := serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionBuildReady,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonJobRunning,
-			Message:            fmt.Sprintf("Job %s is still in progress", job.GetName()),
-		})
-	default:
-		log.Info(fmt.Sprintf("Job %s failed", job.GetName()))
-		return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionBuildReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonJobFailed,
-			Message:            fmt.Sprintf("Job %s failed", job.GetName()),
-		})
-	}
-}
-
-func (r *FunctionReconciler) updateJobLabels(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, job batchv1.Job, newLabels map[string]string) error {
-	newJob := job.DeepCopy()
-	newJob.Labels = newLabels
-
-	log.Info(fmt.Sprintf("Updating labels of a Job with name %s", newJob.GetName()))
-	if err := r.client.Update(ctx, newJob); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot update Job with name %s", newJob.GetName()))
-		return err
-	}
-	log.Info(fmt.Sprintf("Job %s updated", newJob.GetName()))
-
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionBuildReady,
-		Status:             corev1.ConditionUnknown,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonJobUpdated,
-		Message:            fmt.Sprintf("Job %s updated", newJob.GetName()),
-	})
-}
-
-func (r *FunctionReconciler) getActiveAndStatelessJobs(ctx context.Context) (int, error) {
-	var allJobs batchv1.JobList
-	if err := r.client.ListByLabel(ctx, "", fcManagedByLabel, &allJobs); err != nil {
-		r.Log.Error(err, "Cannot list Jobs")
-		return 0, err
-	}
-
-	out := 0
-	for _, j := range allJobs.Items {
-		if j.Status.Succeeded == 0 && j.Status.Failed == 0 {
-			out++
+			Message:            fmt.Sprintf("Job %s is still in progress", jobName),
 		}
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
 	}
-	return out, nil
+
+	return nil
 }

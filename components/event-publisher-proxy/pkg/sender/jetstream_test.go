@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/cloudevents/sdk-go/v2/event"
@@ -18,7 +20,6 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,7 +58,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			testEnv := setupTestEnvironment(t)
-			natsServer, connection := testEnv.Server, testEnv.Connection
+			natsServer, connection, mockedLogger := testEnv.Server, testEnv.Connection, testEnv.Logger
 
 			defer func() {
 				natsServer.Shutdown()
@@ -72,7 +73,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 
 			// when
 			ctx := context.Background()
-			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, logrus.New())
+			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
 			if tc.givenNatsConnectionClosed {
 				connection.Close()
@@ -80,6 +81,8 @@ func TestJetstreamMessageSender(t *testing.T) {
 
 			// then
 			status, err := sender.Send(ctx, ce)
+
+			testEnv.Logger.WithContext().Errorf("err: %v", err)
 			assert.Equal(t, tc.wantError, err != nil)
 			assert.Equal(t, tc.wantStatusCode, status)
 		})
@@ -148,54 +151,12 @@ func TestStreamExists(t *testing.T) {
 	}
 }
 
-func TestJSSubjectPrefix(t *testing.T) {
-
-	testCases := []struct {
-		name              string
-		givenPrefix       string
-		givenEventSubject string
-		wantSubject       string
-	}{
-		{
-			name:              "With empty prefix",
-			givenEventSubject: "custom.test",
-			givenPrefix:       "",
-			wantSubject:       "custom.test",
-		},
-		{
-			name:              "With non-empty prefix",
-			givenEventSubject: "custom.test",
-			givenPrefix:       "prefix",
-			wantSubject:       "prefix.custom.test",
-		},
-	}
-
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			// given
-			config := &env.NatsConfig{
-				JSStreamSubjectPrefix: tc.givenPrefix,
-			}
-			s := JetstreamMessageSender{envCfg: config}
-			ce := createCloudEvent(t)
-			ce.SetType(tc.givenEventSubject)
-
-			// when
-			subject := s.getJsSubjectToPublish(ce.Type())
-
-			// then
-			assert.Equal(t, subject, tc.wantSubject)
-		})
-	}
-}
-
 // helper functions and structs
 
 type TestEnvironment struct {
 	Connection *nats.Conn
 	Config     *env.NatsConfig
-	Logger     *logrus.Logger
+	Logger     *logger.Logger
 	Sender     *JetstreamMessageSender
 	Server     *server.Server
 	JsContext  *nats.JetStreamContext
@@ -210,21 +171,24 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	require.NotNil(t, connection)
 	require.NoError(t, err)
 
-	natsConfig := CreateNatsJsConfig(natsServer.ClientURL(), testingutils.MessagingEventTypePrefix)
-	logger := logrus.New()
+	natsConfig := CreateNatsJsConfig(natsServer.ClientURL())
+
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
+
 	jsCtx, err := connection.JetStream()
 	require.NoError(t, err)
 
 	sender := &JetstreamMessageSender{
 		connection: connection,
 		envCfg:     natsConfig,
-		logger:     logger,
+		logger:     mockedLogger,
 	}
 
 	return &TestEnvironment{
 		Connection: connection,
 		Config:     natsConfig,
-		Logger:     logger,
+		Logger:     mockedLogger,
 		Sender:     sender,
 		Server:     natsServer,
 		JsContext:  &jsCtx,
@@ -248,8 +212,8 @@ func createCloudEvent(t *testing.T) *event.Event {
 // getStreamConfig inits a testing stream config.
 func getStreamConfig() *nats.StreamConfig {
 	return &nats.StreamConfig{
-		Name:      testingutils.MessagingEventTypePrefix,
-		Subjects:  []string{fmt.Sprintf("%s.>", testingutils.MessagingEventTypePrefix)},
+		Name:      testingutils.StreamName,
+		Subjects:  []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
 		Storage:   nats.MemoryStorage,
 		Retention: nats.InterestPolicy,
 	}
@@ -263,9 +227,9 @@ func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 	assert.NoError(t, err)
 }
 
-func CreateNatsJsConfig(url string, streamName string) *env.NatsConfig {
+func CreateNatsJsConfig(url string) *env.NatsConfig {
 	return &env.NatsConfig{
-		JSStreamName:  streamName,
+		JSStreamName:  testingutils.StreamName,
 		URL:           url,
 		ReconnectWait: time.Second,
 	}

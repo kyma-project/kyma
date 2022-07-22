@@ -1,15 +1,9 @@
 #TODO: remove https://dashboard.kyma-project, https://kiali.kyma.example.com/oauth2/callback  after it's available
-external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://github.com/kyma-project/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com" ]
+external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com" ]
 files-to-ignore: [ "/vendor/", "/testdata/" ]
 timeout: 60
 request-repeats: 5
 files:
-  - path: "./kyma/docs/kyma/04-10-upgrade.md"
-    config:
-      external-links-to-ignore: [ "https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml" ]
-  - path: "./kyma/resources/service-manager-proxy/README.md"
-    config:
-      external-links-to-ignore: [ "http://service-manager.dev.cfdev.sh" ]
   - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
     config:
       internal-links-to-ignore: [ "{CVSS" ]
@@ -17,48 +11,9 @@ files:
   - path: "./kyma/docs/README.md"
     config:
       external-links-to-ignore: [ "kyma-project.io" ]
-  - path: "./kyma/tools/stability-checker/README.md"
-    config:
-      external-links-to-ignore: [ "https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz" ]
-  - path: "./kyma/components/helm-broker/docs/proposals/addon-git-support.md"
-    config:
-      external-links-to-ignore: [ "https://github.com/kyma-project/addons/blob/master/addons/index.yaml", "https://gitlab.com/kyma-project/addons/blob/master/addons/index.yaml", "https://bitbucket.org/kyma-project/addons/src/master/addons/index.yaml" ]
-  - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
-    config:
-      external-links-to-ignore: [ "https://alert.victorops.com/integrations/generic/20131114/alert" ]
-  - path: "./kyma/docs/application-connector/012-details-serviceclass-documentation.md"
-    config:
-      external-links-to-ignore: [ "https://www.orders.com/v1/orders" ]
   - path: "./kyma/docs/05-technical-reference/00-configuration-parameters/smgt-03-hb-chart.md"
     config:
       external-links-to-ignore: [ "custom.bundles-repository" ]
-  - path: "./kyma/docs/kyma/04-07-aks-xip.io-domain.md"
-    config:
-      external-links-to-ignore: [ "https://console.{WILDCARD_DNS}.xip.io" ]
-  - path: "./kyma/docs/kyma/04-06-gke-xip.io-domain.md"
-    config:
-      external-links-to-ignore: [ "https://console.{WILDCARD_DNS}.xip.io" ]
-  - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
-    config:
-      external-links-to-ignore: [ "https://{host}/{path}/{bundle_repo_version" ]
-  - path: "./kyma/docs/03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md"
-    config:
-      external-links-to-ignore: [ "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations" ]
-  - path: "./kyma/docs/migration-guides/0.8-0.9.md"
-    config:
-      external-links-to-ignore: [ "https://github.com/kyma-project/kyma/releases/tag/0.9.0" ]
-  - path: "./kyma/docs/asset-store/05-02-asset-store-metadata-service.md"
-    config:
-      external-links-to-ignore: [ "https://{VIRTUALSERVICE_NAME}.{DOMAIN" ]
-  - path: "./kyma/docs/asset-store/05-04-asset-upload-service.md"
-    config:
-      external-links-to-ignore: [ "https://{VIRTUALSERVICE_NAME}.{DOMAIN" ]
-  - path: "./kyma/docs/asset-store/05-01-asset-store.md"
-    config:
-      external-links-to-ignore: [ "https://minio.{DOMAIN}/minio" ]
-  - path: "./kyma/components/console-backend-service/docs/configuration.md"
-    config:
-      external-links-to-ignore: [ "http://zipkin.kyma-system" ]
   - path: "./kyma/tests/perf/README.md"
     config:
       external-links-to-ignore: [ "https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1" ]
@@ -71,43 +26,29 @@ files:
   - path: "./kyma/docs/03-tutorials/00-observability/obsv-04-send-notifications.md"
     config:
       external-links-to-ignore: [ "https://hooks.slack.com/services/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" ]
-  - path: "./kyma/docs/kyma/05-04-component-source-url.md"
-    config:
-      external-links-to-ignore: [ "https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip" ]
   - path: "./kyma/docs/03-tutorials/00-application-connectivity/ra-01-establish-secure-connection-with-compass.md"
     config:
       external-links-to-ignore: [ "https://compass.{CLUSTER_DOMAIN" ]
-  - path: "./kyma/docs/migration-guides/1.10-1.11.md"
-    config:
-      external-links-to-ignore: [ "https://gateway.domain/APP_NAME/v1/events",
-                                  "https://gateway.domain/APP_NAME/events" ]
-  - path: "./kyma/docs/runtime-agent/08-01-basic-flow-tutorial.md"
-    config:
-      external-links-to-ignore: [ "https://compass.{CLUSTER_DOMAIN" ]
-  - path: "./kyma/docs/migration-guides/1.13-1.14.md"
-    config:
-      external-links-to-ignore: [ "https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3" ]
-  - path: "./kyma/docs/security/08-04-add-connector.md"
-    config:
-      external-links-to-ignore: [ "https://dex.{CLUSTER_DOMAIN}/callback" ]
-  - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
-    config:
-      external-links-to-ignore: [ "https://configurations-generator.{YOUR_CLUSTER_DOMAIN" ]
   - path: "./kyma/docs/02-get-started/04-trigger-workload-with-event.md"
     config:
       external-links-to-ignore: [ "http://eventing-event-publisher-proxy.kyma-system/publish" ]
-  - path: "./kyma/docs/02-get-started/01-quick-install.md"
-    config:
-      external-links-to-ignore: [ "https://dashboard.kyma-project/" ]
   - path: "./kyma/docs/02-get-started/README.md"
     config:
       external-links-to-ignore: [ "https://k3d.io/#installation" ]
   - path: "./kyma/docs/04-operation-guides/operations/02-install-kyma.md"
     config:
       external-links-to-ignore: [ "https://dashboard.kyma-project.io/" ]
-  - path: "./kyma/docs/03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-istio.md"
+  - path: "./kyma/docs/03-tutorials/00-api-exposure/apix-04-get-jwt.md"
     config:
       external-links-to-ignore: [ "https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration" ]
-  - path: "./kyma/docs/03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-jwt.md"
+  - path: "./kyma/docs/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md"
     config:
-      external-links-to-ignore: [ "https://{YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE}/.well-known/openid-configuration" ]
+      external-links-to-ignore: [ "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces",
+                                  "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish" ]
+  - path: "./kyma/docs/04-operation-guides/troubleshooting/evnt-02-jetstream-troubleshooting.md"
+    config:
+      external-links-to-ignore: [ "https://grafana.com/grafana/dashboards/14725" ]
+  - path: "./kyma/docs/05-technical-reference/ac-01-application-gateway-details.md"
+    config:
+      external-links-to-ignore: [ "http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH",
+      "http://central-application-gateway.kyma-system:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH"]

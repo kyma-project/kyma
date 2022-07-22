@@ -1,49 +1,3 @@
-application-broker:
-  ctrl:
-    resources:
-      limits:
-        memory: 96Mi
-        cpu: 100m
-      requests:
-        memory: 48Mi
-        cpu: 60m
-application-operator:
-  controller:
-    resources:
-      profile: "production"
-      limits:
-        cpu: 100m
-        memory: 256Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-connector-service:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
-application-registry:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
-connection-token-handler:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 96Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
 central-application-gateway:
   autoscaling:
     enable: true
@@ -56,7 +10,7 @@ central-application-gateway:
         cpu: 100m
         memory: 128Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 64Mi
 central-application-connectivity-validator:
   deployment:
@@ -65,5 +19,5 @@ central-application-connectivity-validator:
         cpu: 100m
         memory: 128Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 64Mi

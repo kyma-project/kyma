@@ -1,13 +1,6 @@
 {{/* vim: set filetype=mustache: */}}
 
 {{/*
-Short name used by kyma additions, compatible with old versions of the chart.
-*/}}
-{{- define "kiali-server.name" -}}
-{{- .Chart.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
 Create a default fully qualified instance name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 To simulate the way the operator works, use deployment.instance_name rather than the old fullnameOverride.
@@ -58,7 +51,7 @@ Selector labels
 */}}
 {{- define "kiali-server.selectorLabels" -}}
 app.kubernetes.io/name: kiali
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/instance: {{ include "kiali-server.fullname" . }}
 {{- end }}
 
 {{/*
@@ -187,4 +180,4 @@ Create a URL for container images
 {{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
 {{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
 {{- print $path "/" $.img.name $version -}}
-{{- end -}}
+{{- end }}

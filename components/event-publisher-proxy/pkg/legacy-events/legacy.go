@@ -165,7 +165,7 @@ func (t *Transformer) convertPublishRequestToCloudEvent(appName string, publishR
 	event.SetTime(evTime)
 
 	if err := event.SetData(internal.ContentTypeApplicationJSON, publishRequest.PublishrequestV1.Data); err != nil {
-		return nil, errors.Wrap(err, "failed to set data to CE data field")
+		return nil, errors.Wrap(err, "failed to set data to CloudEvent data field")
 	}
 
 	// set the event id from the request if it is available

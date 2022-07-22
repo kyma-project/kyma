@@ -40,7 +40,7 @@ type testRepo struct {
 }
 
 type config struct {
-	Azure  AzureRepo `envconfig:AZURE`
+	Azure  AzureRepo `envconfig:"AZURE"`
 	Github GithubRepo
 }
 

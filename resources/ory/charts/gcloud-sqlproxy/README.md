@@ -10,7 +10,7 @@ Accessing your Cloud SQL instance using the Cloud SQL Proxy offers these advanta
 
 ## Introduction
 
-This chart creates a Google Cloud SQL proxy deployment and service on a Kubernetes cluster using the Helm package manager.
+This chart creates a Google Cloud SQL proxy Deployment and Service on a Kubernetes cluster using the Helm package manager.
 You need to enable Cloud SQL Administration API and create a service account for the proxy as per these [instructions](https://cloud.google.com/sql/docs/postgres/connect-container-engine).
 
 ## Prerequisites
@@ -18,7 +18,7 @@ You need to enable Cloud SQL Administration API and create a service account for
 - Kubernetes cluster on Google Container Engine (GKE)
 - Kubernetes cluster on Google Compute Engine (GCE)
 - Cloud SQL Administration API enabled
-- GCP Service account for the proxy with `Cloud SQL Admin` role, and `Cloud SQL Admin API` enabled.
+- GCP service account for the proxy with `Cloud SQL Admin` role, and `Cloud SQL Admin API` enabled.
 
 ## Installing the Chart
 
@@ -68,7 +68,7 @@ The following table lists the configurable parameters of the `gcloud-sqlproxy` c
 | `serviceAccountKey`               | Service account key JSON file. Provide it encoded with base64 if no existing Secret is used to create a new Secret. | |
 | `existingSecret`                  | Name of an existing secret to be used for the cloud-sql credentials | `""`                                                            |
 | `existingSecretKey`               | The key to use in the provided existing secret   | `""`                                                                               |
-| `usingGCPController`              | enable the use of the GCP Service Account Controller     | `""`                                                                       |
+| `usingGCPController`              | Enable the use of the GCP Service Account Controller     | `""`                                                                       |
 | `serviceAccountName`              | specify a service account name to use with GCP Controller | `""`                                                                                        |
 | `cloudsql.instances`              | List of PostgreSQL/MySQL instances      | [{instance: `instance`, project: `project`, region: `region`, port: 5432}] must be provided |
 | `resources`                       | CPU/Memory resource requests/limits     | Memory: `100/150Mi`, CPU: `100/150m`                                                        |

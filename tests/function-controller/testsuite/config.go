@@ -7,25 +7,14 @@ import (
 )
 
 const (
-	TestDataKey  = "testData"
-	EventPing    = "event-ping"
-	RedisEnvPing = "env-ping"
-
-	GotEventMsg              = "The event has come!"
-	AnswerForEnvPing         = "Redis port: 6379"
-	HappyMsg                 = "happy"
-	AddonsConfigUrl          = "https://github.com/kyma-project/addons/releases/download/0.13.0/index-testing.yaml"
-	ServiceClassExternalName = "redis"
-	ServicePlanExternalName  = "micro"
-	RedisEnvPrefix           = "REDIS_TEST_"
+	TestDataKey = "testData"
 )
 
 type Config struct {
-	UsageKindName                   string           `envconfig:"default=serverless-function"`
 	Namespace                       string           `envconfig:"default=test-function"`
 	DomainName                      string           `envconfig:"default=kyma.local"`
 	Verbose                         bool             `envconfig:"default=false"`
-	WaitTimeout                     time.Duration    `envconfig:"default=15m"` // damn istio
+	WaitTimeout                     time.Duration    `envconfig:"default=15m"`
 	DomainPort                      uint32           `envconfig:"default=80"`
 	MaxPollingTime                  time.Duration    `envconfig:"default=5m"`
 	InsecureSkipVerify              bool             `envconfig:"default=true"`

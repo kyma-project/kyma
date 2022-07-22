@@ -1,7 +1,0 @@
-reviewers:
-  - service-management-reviewers
-approvers:
-  - service-management-approvers
-
-labels:
-  - area/service-management

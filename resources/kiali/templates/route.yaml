@@ -1,0 +1,34 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+{{- if eq "true" (include "kiali-server.deployment.ingress.enabled" .) }}
+# As of OpenShift 4.5, need to use --disable-openapi-validation when installing via Helm
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "kiali-server.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- if .Values.deployment.ingress.additional_labels }}
+    {{- toYaml .Values.deployment.ingress.additional_labels | nindent 4 }}
+    {{- end }}
+    {{- include "kiali-server.labels" . | nindent 4 }}
+  {{- if .Values.deployment.ingress.override_yaml.metadata.annotations }}
+  annotations:
+  {{- toYaml .Values.deployment.ingress.override_yaml.metadata.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if hasKey .Values.deployment.ingress.override_yaml "spec" }}
+  {{- toYaml .Values.deployment.ingress.override_yaml.spec | nindent 2 }}
+  {{- else }}
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Redirect
+  to:
+    kind: Service
+    name: {{ include "kiali-server.fullname" . }}
+  port:
+    targetPort: {{ .Values.server.port }}
+  {{- end }}
+...
+{{- end }}
+{{- end }}

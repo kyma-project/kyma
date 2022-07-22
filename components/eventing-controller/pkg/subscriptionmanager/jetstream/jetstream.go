@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,22 +48,24 @@ func AddToScheme(scheme *runtime.Scheme) error {
 }
 
 type SubscriptionManager struct {
-	cancel      context.CancelFunc
-	envCfg      env.NatsConfig
-	restCfg     *rest.Config
-	metricsAddr string
-	mgr         manager.Manager
-	backend     handlers.JetStreamBackend
-	logger      *logger.Logger
+	cancel           context.CancelFunc
+	envCfg           env.NatsConfig
+	restCfg          *rest.Config
+	metricsAddr      string
+	metricsCollector *pkgmetrics.Collector
+	mgr              manager.Manager
+	backend          handlers.JetStreamBackend
+	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
-		envCfg:      natsConfig,
-		restCfg:     restCfg,
-		metricsAddr: metricsAddr,
-		logger:      logger,
+		envCfg:           natsConfig,
+		restCfg:          restCfg,
+		metricsAddr:      metricsAddr,
+		metricsCollector: metricsCollector,
+		logger:           logger,
 	}
 }
 
@@ -81,7 +85,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	client := sm.mgr.GetClient()
 	recorder := sm.mgr.GetEventRecorderFor("eventing-controller-jetstream")
-	jetStreamHandler := handlers.NewJetStream(sm.envCfg, sm.logger)
+	jetStreamHandler := handlers.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
@@ -102,7 +106,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 	if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
 		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
 	}
-	sm.namedLogger().Info("started JetStream subscription manager")
+	sm.namedLogger().Info("Started JetStream subscription manager")
 	return nil
 }
 
@@ -148,19 +152,19 @@ func cleanup(backend handlers.JetStreamBackend, dynamicClient dynamic.Interface,
 		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
-			log.Errorw("update NATS subscription status failed", "error", err)
+			log.Errorw("Failed to update JetStream subscription status", "error", err)
 		}
 
 		// clean subscriptions from JetStream.
 		if jsBackend != nil {
 			if err := jsBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
-				log.Errorw("delete JetStream subscription failed", "error", err)
+				log.Errorw("Failed to delete JetStream subscription", "error", err)
 			}
 		}
 	}
 
-	logger.Debugw("cleanup process finished", "success", isCleanupSuccessful)
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
 	return nil
 }
 

@@ -176,7 +176,7 @@ resources:
     cpu: 200m
     memory: 300Mi
   requests:
-    cpu: 100m
+    cpu: 10m
     memory: 128Mi
 
 podSecurityContext:
@@ -282,7 +282,6 @@ kyma:
     useKymaGroups: false
     groups: ""
   logPipeline:
-    match: "kube.*"
     logLevel: warn
     lineFormat: json
     removeKeys: "kubernetes, stream"

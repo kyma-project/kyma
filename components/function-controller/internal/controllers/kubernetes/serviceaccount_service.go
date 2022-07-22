@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +18,7 @@ import (
 type ServiceAccountService interface {
 	IsBase(serviceAccount *corev1.ServiceAccount) bool
 	ListBase(ctx context.Context) ([]corev1.ServiceAccount, error)
-	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ServiceAccount) error
+	UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.ServiceAccount) error
 }
 
 type serviceAccountService struct {
@@ -45,7 +46,7 @@ func (r *serviceAccountService) IsBase(serviceAccount *corev1.ServiceAccount) bo
 	return serviceAccount.Namespace == r.config.BaseNamespace && serviceAccount.Labels[ConfigLabel] == ServiceAccountLabelValue
 }
 
-func (r *serviceAccountService) UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ServiceAccount) error {
+func (r *serviceAccountService) UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.ServiceAccount) error {
 	logger.Info(fmt.Sprintf("Updating ServiceAccount '%s/%s'", namespace, baseInstance.GetName()))
 	serviceAccount := &corev1.ServiceAccount{}
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstance.GetName()}, serviceAccount); err != nil {
@@ -59,7 +60,7 @@ func (r *serviceAccountService) UpdateNamespace(ctx context.Context, logger logr
 	return r.updateServiceAccount(ctx, logger, serviceAccount, baseInstance)
 }
 
-func (r *serviceAccountService) createServiceAccount(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.ServiceAccount) error {
+func (r *serviceAccountService) createServiceAccount(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *corev1.ServiceAccount) error {
 	secrets := r.shiftSecretTokens(baseInstance)
 	serviceAccount := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
@@ -82,7 +83,7 @@ func (r *serviceAccountService) createServiceAccount(ctx context.Context, logger
 	return nil
 }
 
-func (r *serviceAccountService) updateServiceAccount(ctx context.Context, logger logr.Logger, instance, baseInstance *corev1.ServiceAccount) error {
+func (r *serviceAccountService) updateServiceAccount(ctx context.Context, logger *zap.SugaredLogger, instance, baseInstance *corev1.ServiceAccount) error {
 	tokens := r.extractSecretTokens(instance)
 	secrets := r.shiftSecretTokens(baseInstance)
 	secrets = append(secrets, tokens...)

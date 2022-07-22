@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -13,7 +15,6 @@ import (
 
 	"github.com/nats-io/nats-server/v2/server"
 	natsio "github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -40,7 +41,7 @@ type NatsHandlerMock struct {
 	livenessEndpoint    string
 	readinessEndpoint   string
 	eventTypePrefix     string
-	logger              *logrus.Logger
+	logger              *logger.Logger
 	natsServer          *server.Server
 	jetstreamMode       bool
 	natsConfig          *env.NatsConfig
@@ -58,11 +59,15 @@ type NatsHandlerMockOpt func(*NatsHandlerMock)
 // Preconditions: 1) NATS connection and 2) nats.Handler started without errors.
 func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *NatsHandlerMock {
 	port := testingutils.GeneratePortOrDie()
+
+	mockedLogger, err := logger.New("json", "info")
+	require.NoError(t, err)
+
 	mock := &NatsHandlerMock{
 		ctx:                 ctx,
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", port, health.ReadinessURI),
-		logger:              logrus.New(),
+		logger:              mockedLogger,
 		natsConfig:          newNatsConfig(port),
 		collector:           metrics.NewCollector(),
 		legacyTransformer:   &legacy.Transformer{},
@@ -155,11 +160,12 @@ func WithEventTypePrefix(eventTypePrefix string) NatsHandlerMockOpt {
 // WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
 func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NatsHandlerMockOpt {
 	return func(m *NatsHandlerMock) {
-		m.natsConfig.LegacyEventTypePrefix = m.eventTypePrefix
+		m.natsConfig.EventTypePrefix = m.eventTypePrefix
 		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
 		genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
-		informers.WaitForCacheSyncOrDie(m.ctx, dFilteredSharedInfFactory)
+		mockedLogger, _ := logger.New("json", "info")
+		informers.WaitForCacheSyncOrDie(m.ctx, dFilteredSharedInfFactory, mockedLogger)
 		subLister := genericInf.Lister()
 		m.subscribedProcessor = &subscribed.Processor{
 			SubscriptionLister: &subLister,
@@ -191,9 +197,9 @@ func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
 
 func newNatsConfig(port int) *env.NatsConfig {
 	return &env.NatsConfig{
-		Port:                  port,
-		LegacyNamespace:       testingutils.MessagingNamespace,
-		LegacyEventTypePrefix: testingutils.MessagingEventTypePrefix,
-		JSStreamName:          testingutils.StreamName,
+		Port:            port,
+		LegacyNamespace: testingutils.MessagingNamespace,
+		EventTypePrefix: testingutils.MessagingEventTypePrefix,
+		JSStreamName:    testingutils.StreamName,
 	}
 }

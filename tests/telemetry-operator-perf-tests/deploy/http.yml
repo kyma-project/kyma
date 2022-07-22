@@ -1,0 +1,30 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: {{ .Name }}
+spec:
+  parsers: []
+  multilineParsers: []
+  filters:
+    - content: |
+        Name   rewrite_tag
+        Match  kube.*
+        Rule   $log "^.*$" {{ .Tag }} true
+        Emitter_Name  {{ .Name }}-emitter
+        Emitter_Storage.type filesystem
+  outputs:
+    - content: |
+        Name               http
+        Alias              {{ .Name }}
+        Match              {{ .Tag }}
+        Retry_Limit        False
+        Host               {{ .Host }}
+        Port               {{ .Port }}
+        URI                {{ .URI }}
+        Header             Content-Type application/json
+        Format             json_stream
+        tls                on
+        tls.verify         on
+        storage.total_limit_size 10M
+  files: []
+  secretRefs: []

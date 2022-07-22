@@ -13,24 +13,26 @@ const (
 
 // Runtime enumerates runtimes that are currently supported by Function Controller
 // It is a subset of RuntimeExtended
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;python39
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;python39
 type Runtime string
 
 const (
 	Nodejs12 Runtime = "nodejs12"
 	Nodejs14 Runtime = "nodejs14"
+	Nodejs16 Runtime = "nodejs16"
 	Python39 Runtime = "python39"
 )
 
 // RuntimeExtended enumerates runtimes that are either currently supported or
 // no longer supported but there still might be "read-only" Functions using them
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs10;python38;python39
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;nodejs10;python38;python39
 type RuntimeExtended string
 
 const (
 	RuntimeExtendedNodejs10 RuntimeExtended = "nodejs10"
 	RuntimeExtendedNodejs12 RuntimeExtended = "nodejs12"
 	RuntimeExtendedNodejs14 RuntimeExtended = "nodejs14"
+	RuntimeExtendedNodejs16 RuntimeExtended = "nodejs16"
 	RuntimeExtendedPython38 RuntimeExtended = "python38"
 	RuntimeExtendedPython39 RuntimeExtended = "python39"
 )
@@ -173,6 +175,20 @@ type FunctionList struct {
 	Items           []Function `json:"items"`
 }
 
+//nolint
 func init() {
 	SchemeBuilder.Register(&Function{}, &FunctionList{})
+}
+
+func (s *FunctionStatus) Condition(c ConditionType) *Condition {
+	for _, cond := range s.Conditions {
+		if cond.Type == c {
+			return &cond
+		}
+	}
+	return nil
+}
+
+func (c *Condition) IsTrue() bool {
+	return c.Status == corev1.ConditionTrue
 }

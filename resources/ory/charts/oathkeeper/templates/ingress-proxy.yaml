@@ -1,6 +1,10 @@
 {{- if .Values.ingress.proxy.enabled -}}
 {{- $fullName := include "oathkeeper.fullname" . -}}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
+{{- else -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}-proxy
@@ -8,35 +12,42 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
-{{ include "oathkeeper.labels" . | indent 4 }}
-  {{- with .Values.ingress.proxy.annotations }}
+    {{- include "oathkeeper.labels" . | nindent 4 }}
   annotations:
+  {{- with .Values.ingress.proxy.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-{{- if .Values.ingress.proxy.tls }}
+  {{- if .Values.ingress.proxy.tls }}
   tls:
-  {{- range .Values.ingress.proxy.tls }}
+    {{- range .Values.ingress.proxy.tls }}
     - hosts:
-      {{- range .hosts }}
+        {{- range .hosts }}
         - {{ . | quote }}
-      {{- end }}
+        {{- end }}
       secretName: {{ .secretName }}
+    {{- end }}
   {{- end }}
-{{- end }}
   rules:
-  {{- range .Values.ingress.proxy.hosts }}
+    {{- range .Values.ingress.proxy.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
           {{- range .paths }}
-          - path: {{ . }}
+          - path: {{ .path }}
+            {{- if .pathType }}
             pathType: ImplementationSpecific
+            {{- end }}
             backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
                 name: {{ $fullName }}-proxy
                 port:
                   name: http
+              {{- else }}
+              serviceName: {{ $fullName }}-proxy
+              servicePort: http
+              {{- end }}
           {{- end }}
-  {{- end }}
+    {{- end }}
 {{- end }}

@@ -11,8 +11,8 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
-      name: {{ .Values.publisherProxy.config.portName }}
+      targetPort: {{ .Values.publisherProxy.config.port }}
+      name: {{ .Values.global.ports.namePrefix }}{{ .Values.publisherProxy.config.portName }}
 ---
 apiVersion: v1
 kind: Service
@@ -25,8 +25,8 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
-      name: {{ .Values.publisherProxy.config.portName }}
+      targetPort: {{ .Values.publisherProxy.config.port }}
+      name: {{ .Values.global.ports.namePrefix }}{{ .Values.publisherProxy.config.portName }}
 ---
 apiVersion: v1
 kind: Service
@@ -40,7 +40,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: {{ .Values.metrics.config.port }}
-      name: {{ .Values.metrics.config.portName }}
+      name: {{ .Values.global.ports.namePrefix }}{{ .Values.metrics.config.portName }}
 ---
 apiVersion: v1
 kind: Service
@@ -51,7 +51,7 @@ spec:
   type: ClusterIP
   selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
   ports:
-    - name: {{ .Values.global.istio.proxy.portName }}
+    - name: {{ .Values.global.ports.namePrefix }}{{ .Values.global.istio.proxy.portName }}
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}

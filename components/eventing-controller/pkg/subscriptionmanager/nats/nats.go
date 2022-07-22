@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
@@ -46,23 +48,25 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // SubscriptionManager implements the subscriptionmanager.Manager interface.
 type SubscriptionManager struct {
-	cancel      context.CancelFunc
-	envCfg      env.NatsConfig
-	restCfg     *rest.Config
-	metricsAddr string
-	mgr         manager.Manager
-	backend     handlers.NatsBackend
-	logger      *logger.Logger
+	cancel           context.CancelFunc
+	envCfg           env.NatsConfig
+	restCfg          *rest.Config
+	metricsAddr      string
+	metricsCollector *pkgmetrics.Collector
+	mgr              manager.Manager
+	backend          handlers.NatsBackend
+	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
-		envCfg:      natsConfig,
-		restCfg:     restCfg,
-		metricsAddr: metricsAddr,
-		logger:      logger,
+		envCfg:           natsConfig,
+		restCfg:          restCfg,
+		metricsAddr:      metricsAddr,
+		metricsCollector: metricsCollector,
+		logger:           logger,
 	}
 }
 
@@ -84,7 +88,7 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-nats")
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
+	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
@@ -124,7 +128,7 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 	var natsBackend *handlers.Nats
 	if natsBackend, ok = backend.(*handlers.Nats); !ok {
 		err := errors.New("convert backend handler to NATS handler failed")
-		logger.Errorw("no NATS backend exists", "error", err)
+		logger.Errorw("No NATS backend exists", "error", err)
 		return err
 	}
 
@@ -149,19 +153,19 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
-			log.Errorw("update NATS subscription status failed", "error", err)
+			log.Errorw("Failed to update NATS subscription status", "error", err)
 		}
 
 		// Clean subscriptions from NATS.
 		if natsBackend != nil {
 			if err := natsBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
-				log.Errorw("delete NATS subscription failed", "error", err)
+				log.Errorw("Failed to delete NATS subscription", "error", err)
 			}
 		}
 	}
 
-	logger.Debugw("cleanup process finished", "success", isCleanupSuccessful)
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
 	return nil
 }
 

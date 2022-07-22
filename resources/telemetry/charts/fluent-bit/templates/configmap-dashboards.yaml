@@ -1,0 +1,23 @@
+
+{{- if .Values.dashboards.enabled -}}
+{{- range $path, $_ :=  .Files.Glob "dashboards/*.json" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fluent-bit.fullname" $ }}-dashboard-{{ trimSuffix ".json" (base $path) }}
+  {{- with $.Values.dashboards.namespace }}
+  namespace: {{ . }}
+  {{- end }}
+  {{- with $.Values.dashboards.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 -}}
+  {{- end }}
+  labels:
+    {{- include "fluent-bit.labels" $ | nindent 4 }}
+    {{ $.Values.dashboards.labelKey }}: "1"
+data:
+  {{ base $path }}: |
+    {{- tpl ($.Files.Get $path) $ | nindent 4 }}
+---
+{{- end }}
+{{- end -}}

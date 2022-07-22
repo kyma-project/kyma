@@ -20,8 +20,6 @@ type args struct {
 	eventingPublisherHost       string
 	eventingPathPrefixEvents    string
 	eventingDestinationPath     string
-	appRegistryPathPrefix       string
-	appRegistryHost             string
 	appNamePlaceholder          string
 	cacheExpirationSeconds      int
 	cacheCleanupIntervalSeconds int
@@ -46,8 +44,6 @@ func parseOptions() (*options, error) {
 	eventingPublisherHost := flag.String("eventingPublisherHost", "eventing-event-publisher-proxy.kyma-system", "Host (and port) of the Eventing Publisher")
 	eventingDestinationPath := flag.String("eventingDestinationPath", "/publish", "Path of the destination of the requests to the Eventing")
 	eventingPathPrefixEvents := flag.String("eventingPathPrefixEvents", "/events", "Prefix of paths that is directed to the Cloud Events based Eventing")
-	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/%%APP_NAME%%/v1/metadata", "Prefix of paths that is directed to the Application Registry")
-	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	appNamePlaceholder := flag.String("appNamePlaceholder", "%%APP_NAME%%", "Path URL placeholder used for an application name")
 	cacheExpirationSeconds := flag.Int("cacheExpirationSeconds", 90, "Expiration time for client IDs stored in cache expressed in seconds")
 	cacheCleanupIntervalSeconds := flag.Int("cacheCleanupIntervalSeconds", 20, "Clean up interval controls how often the client IDs stored in cache are removed")
@@ -69,8 +65,6 @@ func parseOptions() (*options, error) {
 			eventingPublisherHost:       *eventingPublisherHost,
 			eventingPathPrefixEvents:    *eventingPathPrefixEvents,
 			eventingDestinationPath:     *eventingDestinationPath,
-			appRegistryPathPrefix:       *appRegistryPathPrefix,
-			appRegistryHost:             *appRegistryHost,
 			appNamePlaceholder:          *appNamePlaceholder,
 			cacheExpirationSeconds:      *cacheExpirationSeconds,
 			cacheCleanupIntervalSeconds: *cacheCleanupIntervalSeconds,
@@ -85,13 +79,13 @@ func (o *options) String() string {
 		"--eventingPathPrefixV1=%s --eventingPathPrefixV2=%s "+
 		"--eventingPathPrefixEvents=%s --eventingPublisherHost=%s "+
 		"--eventingDestinationPath=%s "+
-		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appNamePlaceholder=%s "+
+		"--appNamePlaceholder=%s "+
 		"--cacheExpirationSeconds=%d --cacheCleanupIntervalSeconds=%d "+
 		"--syncPeriod=%d APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s KUBECONFIG=%s",
 		o.proxyPort, o.externalAPIPort,
 		o.eventingPathPrefixV1, o.eventingPathPrefixV2, o.eventingPathPrefixEvents,
 		o.eventingPublisherHost, o.eventingDestinationPath,
-		o.appRegistryPathPrefix, o.appRegistryHost, o.appNamePlaceholder,
+		o.appNamePlaceholder,
 		o.cacheExpirationSeconds, o.cacheCleanupIntervalSeconds,
 		o.syncPeriod, o.LogFormat, o.LogLevel, os.Getenv(clientcmd.RecommendedConfigPathEnvVar))
 }
@@ -108,9 +102,6 @@ func (o *options) validate() error {
 	}
 	if !strings.Contains(o.eventingPathPrefixEvents, o.appNamePlaceholder) {
 		return fmt.Errorf("eventingPathPrefixEvents '%s' should contain appNamePlaceholder '%s'", o.eventingPathPrefixEvents, o.appNamePlaceholder)
-	}
-	if !strings.Contains(o.appRegistryPathPrefix, o.appNamePlaceholder) {
-		return fmt.Errorf("appRegistryPathPrefix '%s' should contain appNamePlaceholder '%s'", o.appRegistryPathPrefix, o.appNamePlaceholder)
 	}
 	if o.syncPeriod > time.Duration(o.cacheExpirationSeconds)*time.Second {
 		return fmt.Errorf("syncPeriod '%v' greater than cacheExpirationSeconds '%v' will cause unwanted cache eviction", o.syncPeriod, o.cacheExpirationSeconds)

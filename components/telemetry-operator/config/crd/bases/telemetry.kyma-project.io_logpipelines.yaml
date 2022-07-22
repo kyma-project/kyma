@@ -16,7 +16,17 @@ spec:
     singular: logpipeline
   scope: Cluster
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[-1].type
+      name: Status
+      type: string
+    - jsonPath: .status.unsupportedMode
+      name: Unsupported-Mode
+      type: boolean
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: LogPipeline is the Schema for the logpipelines API
@@ -50,48 +60,36 @@ spec:
               filters:
                 items:
                   description: Filter describes a Fluent Bit filter configuration
-                    section
                   properties:
-                    content:
+                    custom:
                       type: string
                   type: object
                 type: array
-              multilineParsers:
+              output:
+                description: Output describes a Fluent Bit output configuration section
+                properties:
+                  custom:
+                    type: string
+                type: object
+              variables:
                 items:
-                  description: MultiLineParser describes a Fluent Bit multiline parser
-                    configuration section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
-              outputs:
-                items:
-                  description: Output describes a Fluent Bit output configuration
-                    section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
-              parsers:
-                items:
-                  description: Parser describes a Fluent Bit parser configuration
-                    section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
-              secretRefs:
-                items:
-                  description: SecretReference is a pointer to a Kubernetes secret
-                    that should be provided as environment variable to Fluent Bit
+                  description: Variables is a pointer to a Kubernetes secret that
+                    should be provided as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string
-                    namespace:
-                      type: string
+                    valueFrom:
+                      properties:
+                        secretKeyRef:
+                          properties:
+                            key:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                      type: object
                   type: object
                 type: array
             type: object
@@ -112,6 +110,8 @@ spec:
                       type: string
                   type: object
                 type: array
+              unsupportedMode:
+                type: boolean
             type: object
         type: object
     served: true

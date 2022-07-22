@@ -12,6 +12,7 @@ See the sample `config.yaml` for an inline Function for which code and dependenc
 name: function-practical-filip5
 namespace: testme
 runtime: nodejs14
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs14:9e934c09
 labels:
     app: serverless-test
 source:
@@ -124,7 +125,8 @@ See all parameter descriptions.
 | ---------------------------------------- | :------------: | ---------| ---------| ------- |
 | **name**              | Yes | Function | | Specifies the name of your Function.         |
 | **namespace**             | No | Function | `default` | Defines the Namespace in which the Function is created.        |
-| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs14` and `python39`.      |
+| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs14`, `nodejs16`, and `python39`.      |
+| **runtimeImageOverride** | No | Function | | Specifies the runtimes image which must be used instead of default one. |
 | **labels**             | No | Function | | Specifies the Function's Pod labels. |
 | **source**            | Yes | Function | | Provides details on the type and location of your Function's source code and dependencies.         |
 | **source.sourceType**            | Yes | Function | | Defines whether you use either inline code or a Git repository as the source of the Function's code and dependencies. It must be set either to `inline` or `git`.         |

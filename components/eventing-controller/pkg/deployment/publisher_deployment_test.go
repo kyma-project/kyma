@@ -2,15 +2,12 @@ package deployment
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -24,6 +21,8 @@ func TestNewDeployment(t *testing.T) {
 		LimitsMemory:    "128Mi",
 		Image:           "testImage",
 		ImagePullPolicy: "Always",
+		AppLogLevel:     "info",
+		AppLogFormat:    "json",
 	}
 	testCases := []struct {
 		name                  string
@@ -53,7 +52,6 @@ func TestNewDeployment(t *testing.T) {
 				natsConfig = env.NatsConfig{
 					EnableJetStreamBackend: true,
 					JSStreamName:           "kyma",
-					JSStreamSubjectPrefix:  "subjectPrefix",
 				}
 				deployment = NewNATSPublisherDeployment(natsConfig, publisherConfig)
 			case "BEB":
@@ -100,7 +98,6 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				"REQUEST_TIMEOUT":          "10s",
 				"ENABLE_JETSTREAM_BACKEND": "true",
 				"JS_STREAM_NAME":           "",
-				"JS_STREAM_SUBJECT_PREFIX": "",
 			},
 		},
 		{
@@ -112,10 +109,8 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			},
 			givenNatsConfig: env.NatsConfig{},
 			wantEnvs: map[string]string{
-				"REQUEST_TIMEOUT":          "10s",
-				"JS_STREAM_NAME":           "",
-				"JS_STREAM_SUBJECT_PREFIX": "",
-				"ENABLE_JETSTREAM_BACKEND": "false",
+				"REQUEST_TIMEOUT": "10s",
+				"JS_STREAM_NAME":  "",
 			},
 		},
 		{
@@ -126,31 +121,84 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			givenNatsConfig: env.NatsConfig{
 				EnableJetStreamBackend: true,
 				JSStreamName:           "kyma",
-				JSStreamSubjectPrefix:  "subjectPrefix",
 			},
 			wantEnvs: map[string]string{
 				"REQUEST_TIMEOUT":          "10s",
 				"JS_STREAM_NAME":           "kyma",
-				"JS_STREAM_SUBJECT_PREFIX": "subjectPrefix",
 				"ENABLE_JETSTREAM_BACKEND": "true",
 			},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			defer func() {
-				for k := range tc.givenEnvs {
-					err := os.Unsetenv(k)
-					require.NoError(t, err)
-				}
-			}()
-
 			for k, v := range tc.givenEnvs {
-				err := os.Setenv(k, v)
-				require.NoError(t, err)
+				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
 			envVars := getNATSEnvVars(tc.givenNatsConfig, backendConfig.PublisherConfig)
+
+			// ensure the right envs were set
+			for index, val := range tc.wantEnvs {
+				gotEnv := findEnvVar(envVars, index)
+				assert.NotNil(t, gotEnv)
+				assert.Equal(t, val, gotEnv.Value)
+			}
+		})
+	}
+}
+func Test_GetLogEnvVars(t *testing.T) {
+	testCases := []struct {
+		name      string
+		givenEnvs map[string]string
+		wantEnvs  map[string]string
+	}{
+		{
+			name: "APP_LOG_FORMAT should be text and APP_LOG_LEVEL should become the default info value",
+			givenEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+			},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+				"APP_LOG_LEVEL":  "info",
+			},
+		},
+		{
+			name: "APP_LOG_FORMAT should become default json and APP_LOG_LEVEL should be warning",
+			givenEnvs: map[string]string{
+				"APP_LOG_LEVEL": "warning",
+			},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "json",
+				"APP_LOG_LEVEL":  "warning",
+			},
+		},
+		{
+			name:      "APP_LOG_FORMAT and APP_LOG_LEVEL should take the default values",
+			givenEnvs: map[string]string{},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "json",
+				"APP_LOG_LEVEL":  "info",
+			},
+		},
+		{
+			name: "APP_LOG_FORMAT should be testFormat and APP_LOG_LEVEL should be error",
+			givenEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+				"APP_LOG_LEVEL":  "error",
+			},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "text",
+				"APP_LOG_LEVEL":  "error",
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			for k, v := range tc.givenEnvs {
+				t.Setenv(k, v)
+			}
+			backendConfig := env.GetBackendConfig()
+			envVars := getLogEnvVars(backendConfig.PublisherConfig)
 
 			// ensure the right envs were set
 			for index, val := range tc.wantEnvs {
@@ -189,16 +237,8 @@ func Test_GetBEBEnvVars(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			defer func() {
-				for k := range tc.givenEnvs {
-					err := os.Unsetenv(k)
-					require.NoError(t, err)
-				}
-			}()
-
 			for k, v := range tc.givenEnvs {
-				err := os.Setenv(k, v)
-				require.NoError(t, err)
+				t.Setenv(k, v)
 			}
 			backendConfig := env.GetBackendConfig()
 			envVars := getBEBEnvVars(backendConfig.PublisherConfig)

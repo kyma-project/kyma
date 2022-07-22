@@ -30,6 +30,14 @@ podSecurityPolicy:
   create: false
   annotations: {}
 
+openShift:
+  # Sets Openshift support
+  enabled: false
+  # Creates SCC for Fluent-bit when Openshift support is enabled
+  securityContextConstraints:
+    create: true
+    annotations: {}
+
 podSecurityContext: {}
 #   fsGroup: 2000
 
@@ -65,6 +73,8 @@ service:
   type: ClusterIP
   port: 2020
   labels: {}
+  # nodePort: 30020
+  # clusterIP: 172.16.10.1
   annotations: {}
 #   prometheus.io/path: "/api/v1/metrics/prometheus"
 #   prometheus.io/port: "2020"
@@ -75,13 +85,31 @@ serviceMonitor:
 #   namespace: monitoring
 #   interval: 10s
 #   scrapeTimeout: 10s
+#   jobLabel: fluentbit
 #   selector:
 #    prometheus: my-prometheus
+#  ## metric relabel configs to apply to samples before ingestion.
+#  ##
+#  metricRelabelings:
+#    - sourceLabels: [__meta_kubernetes_service_label_cluster]
+#      targetLabel: cluster
+#      regex: (.*)
+#      replacement: ${1}
+#      action: replace
+#  ## relabel configs to apply to samples after ingestion.
+#  ##
+#  relabelings:
+#    - sourceLabels: [__meta_kubernetes_pod_node_name]
+#      separator: ;
+#      regex: ^(.*)$
+#      targetLabel: nodename
+#      replacement: $1
+#      action: replace
 
 prometheusRule:
   enabled: false
 #   namespace: ""
-#   additionnalLabels: {}
+#   additionalLabels: {}
 #   rules:
 #   - alert: NoOutputBytesProcessed
 #     expr: rate(fluentbit_output_proc_bytes_total[5m]) == 0
@@ -93,6 +121,17 @@ prometheusRule:
 #     for: 15m
 #     labels:
 #       severity: critical
+
+dashboards:
+  enabled: true
+  labelKey: grafana_dashboard
+  annotations: {}
+  namespace: ""
+
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command: ["/bin/sh", "-c", "sleep 20"]
 
 livenessProbe:
   httpGet:
@@ -109,14 +148,69 @@ resources:
     cpu: 400m
     memory: 256Mi
   requests:
-    cpu: 20m
+    cpu: 10m
     memory: 50Mi
+
+## only available if kind is Deployment
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts: []
+  # - host: fluent-bit.example.tld
+  extraHosts: []
+  # - host: fluent-bit-extra.example.tld
+      ## specify extraPort number
+  #   port: 5170
+  tls: []
+  #  - secretName: fluent-bit-example-tld
+  #    hosts:
+  #      - fluent-bit.example.tld
+
+## only available if kind is Deployment
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+#  targetMemoryUtilizationPercentage: 75
+   ## see https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
+  customRules: []
+#     - type: Pods
+#       pods:
+#         metric:
+#           name: packets-per-second
+#         target:
+#           type: AverageValue
+#           averageValue: 1k
+    ## see https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#support-for-configurable-scaling-behavior
+  behavior: {}
+#      scaleDown:
+#        policies:
+#          - type: Pods
+#            value: 4
+#            periodSeconds: 60
+#          - type: Percent
+#            value: 10
+#            periodSeconds: 60
+
+## only available if kind is Deployment
+podDisruptionBudget:
+  enabled: false
+  annotations: {}
+  maxUnavailable: "30%"
 
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+labels: {}
+
+annotations: {}
 
 podAnnotations: {}
 
@@ -125,6 +219,17 @@ podLabels: {}
 priorityClassName: ""
 
 env: []
+#  - name: FOO
+#    value: "bar"
+
+# The envWithTpl array below has the same usage as "env", but is using the tpl function to support templatable string.
+# This can be useful when you want to pass dynamic values to the Chart using the helm argument "--set <variable>=<value>"
+# https://helm.sh/docs/howto/charts_tips_and_tricks/#using-the-tpl-function
+envWithTpl: []
+#  - name: FOO_2
+#    value: "{{ .Values.foo2 }}"
+#
+# foo2: bar2
 
 envFrom:
   - secretRef:
@@ -136,16 +241,28 @@ extraContainers: []
 #     image: busybox
 #     command: ['do', 'something']
 
+flush: 1
+
+metricsPort: 2020
+
 extraPorts: []
 #   - port: 5170
 #     containerPort: 5170
 #     protocol: TCP
 #     name: tcp
-
-volumes:
-  mountMachineIdFile: false
+#     nodePort: 30517
 
 extraVolumes:
+  - name: shared-fluent-bit-config
+    emptyDir: {}
+  - name: dynamic-config
+    configMap:
+      name: telemetry-fluent-bit-sections
+      optional: true
+  - name: dynamic-parsers-config
+    configMap:
+      name: telemetry-fluent-bit-parsers
+      optional: true
   - name: dynamic-files
     configMap:
       name: telemetry-fluent-bit-files
@@ -180,32 +297,41 @@ config:
   service: |
     [SERVICE]
         Daemon Off
+        Flush {{ .Values.flush }}
         Log_Level {{ .Values.logLevel }}
         Parsers_File parsers.conf
         Parsers_File custom_parsers.conf
         Parsers_File dynamic-parsers/parsers.conf
         HTTP_Server On
         HTTP_Listen 0.0.0.0
-        HTTP_Port {{ .Values.service.port }}
+        HTTP_Port {{ .Values.metricsPort }}
         Health_Check On
+        storage.path /data/flb-storage/
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |
     [INPUT]
         Name tail
         Path /var/log/containers/*.log
-        multiline.parser docker, cri
-        Tag kube.*
+        multiline.parser docker, cri, go, python, java
+        Tag tele.*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
         Refresh_Interval 10
-        DB /data/flb_kube_loki.db
+        DB /data/flb_kube.db
+        storage.type  filesystem
+
+    [INPUT]
+        Name tail
+        Path /null.log
+        Tag null.*
+        Alias dummy
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
     [FILTER]
         Name kubernetes
-        Match kube.*
+        Match tele.*
         Merge_Log On
         K8S-Logging.Parser On
         K8S-Logging.Exclude On
@@ -215,7 +341,8 @@ config:
   outputs: |
     [OUTPUT]
         Name null
-        Match *
+        Match null.*
+        Alias dummy
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]
@@ -225,8 +352,19 @@ config:
         Time_Key time
         Time_Format %Y-%m-%dT%H:%M:%S.%L
 
+  # This allows adding more files with arbitary filenames to /fluent-bit/etc by providing key/value pairs.
+  # The key becomes the filename, the value becomes the file content.
+  extraFiles: {}
+#     example.conf: |
+#       [OUTPUT]
+#           Name example
+#           Match foo.*
+#           Host bar
+
 # The config volume is mounted by default, either to the existingConfigMap value, or the default of "fluent-bit.fullname"
 volumeMounts:
+  - name: shared-fluent-bit-config
+    mountPath: /fluent-bit/etc
   - name: config
     mountPath: /fluent-bit/etc/fluent-bit.conf
     subPath: fluent-bit.conf
@@ -255,23 +393,31 @@ args: []
 
 command: []
 
-initContainers:
+# This supports either a structured array or a templatable string
+# Array mode
+# initContainers:
+#   - name: do-something
+#     image: bitnami/kubectl:1.22
+#     command: ['kubectl', 'version']
+
+# String mode
+# initContainers: |-
+#   - name: do-something
+#     image: bitnami/kubectl:{{ .Capabilities.KubeVersion.Major }}.{{ .Capabilities.KubeVersion.Minor }}
+#     command: ['kubectl', 'version']
+initContainers: |-
   - name: prep-fluent-bit-config
-    volumeMounts:
-    - name: shared-fluent-bit-config
-      mountPath: /fluent-bit/etc/
-    - name: config
-      mountPath: /main/fluent-bit.conf
-      subPath: fluent-bit.conf
-    - name: dynamic-config
-      mountPath: /dynamic
-    - name: dynamic-parsers-config
-      mountPath: /dynamic-parsers
+    image: "{{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}"
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
+    volumeMounts:
+    - mountPath: /fluent-bit/etc/
+      name: shared-fluent-bit-config
+    - mountPath: /main/fluent-bit.conf
+      name: config
+      subPath: fluent-bit.conf
+    - mountPath: /dynamic
+      name: dynamic-config
+    - mountPath: /dynamic-parsers
+      name: dynamic-parsers-config
 
 logLevel: warn
-
-istio:
-# Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
-# If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
-  permissiveMtls: false

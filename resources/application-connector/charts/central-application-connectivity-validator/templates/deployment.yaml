@@ -42,8 +42,6 @@ spec:
           - "--eventingPublisherHost={{ .Values.eventPublisherProxy.service.name }}.{{ .Values.eventPublisherProxy.service.namespace }}"
           - "--eventingDestinationPath=/{{ .Values.eventPublisherProxy.publishCEEndpoint }}"
           - "--eventingPathPrefixEvents=/%%APP_NAME%%/events"
-          - "--appRegistryPathPrefix=/%%APP_NAME%%/v1/metadata"
-          - "--appRegistryHost={{ .Values.deployment.args.appRegistryHost }}"
           - "--appNamePlaceholder=%%APP_NAME%%"
           - "--cacheExpirationSeconds={{ .Values.deployment.args.cacheExpirationSeconds }}"
           - "--cacheCleanupIntervalSeconds={{ .Values.deployment.args.cacheCleanupIntervalSeconds }}"

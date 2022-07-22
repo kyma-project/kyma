@@ -24,7 +24,7 @@ tests:
     resources:
       requests:
         memory: 128Mi
-        cpu: 100m
+        cpu: 10m
       limits:
         memory: 256Mi
         cpu: 200m
@@ -40,7 +40,7 @@ tests:
   resources:
     requests:
       memory: 32Mi
-      cpu: 100m
+      cpu: 10m
     limits:
       memory: 64Mi
       cpu: 200m
@@ -62,7 +62,6 @@ global:
     version: "{{ .Values.global.images.function_controller.version }}"
     app.kubernetes.io/name: '{{ template "name" . }}'
     app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
@@ -73,33 +72,36 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220406-be8951f6"
+      version: "20220720-94f56c6a"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-13631"
+      version: "db4a6ee8"
     function_webhook:
       name: "function-webhook"
-      version: "PR-13631"
+      version: "db4a6ee8"
     function_build_init:
       name: "function-build-init"
-      version: "PR-13631"
+      version: "db4a6ee8"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-13881"
+      version: "edd4cc71"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-13881"
+      version: "edd4cc71"
+    function_runtime_nodejs16:
+      name: "function-runtime-nodejs16"
+      version: "edd4cc71"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-13881"
+      version: "edd4cc71"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.8.0-ec157b48"
+      version: "1.8.0-a0c08196"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-ec157b48"
+      version: "2.7.1-c33cdde0"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -108,7 +110,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "708f6a87"
+      version: "631efc81"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -125,13 +127,17 @@ deployment:
   annotations: {}
   extraProperties: {}
   livenessProbe:
+    successThreshold: 1
+    failureThreshold: 3
     initialDelaySeconds: 50
-    timeoutSeconds: 2
-    periodSeconds: 10
+    timeoutSeconds: 60
+    periodSeconds: 120
   readinessProbe:
+    successThreshold: 1
+    failureThreshold: 3
     initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 2
+    timeoutSeconds: 10
+    periodSeconds: 30
 
 pod:
   labels: {}
@@ -153,8 +159,8 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 100m
-        memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
+        cpu: 300m
+        memory: 160Mi
       requests:
         cpu: 10m
         memory: 32Mi
@@ -202,8 +208,10 @@ containers:
         value: "5"
       logLevel:
         value: "info"
+      logFormat:
+        value: "json"
       healthzLivenessTimeout:
-        value: "1s"
+        value: "10s"
 
 services:
   manager:
@@ -243,9 +251,6 @@ grafanaDashboard:
   enabled: true
   functionMetrics:
     enabled: false
-
-usageKind:
-  name: serverless-function
 
 dockerRegistry:
   enableInternal: true

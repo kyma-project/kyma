@@ -1,6 +1,6 @@
 {{- /*
   Customizations:
-    * take image from image url from global values
+    * image from image url from global values
     * priorityClassName includes global values
 */ -}}
 {{- if .Values.prometheus.enabled }}
@@ -277,6 +277,11 @@ spec:
   additionalAlertRelabelConfigs:
     name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus-am-relabel-confg
     key: additional-alert-relabel-configs.yaml
+{{- end }}
+{{- if .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigsSecret }}
+  additionalAlertRelabelConfigs:
+    name: {{ .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigsSecret.name }}
+    key: {{ .Values.prometheus.prometheusSpec.additionalAlertRelabelConfigsSecret.key }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.containers }}
   containers:

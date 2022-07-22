@@ -2,7 +2,6 @@ package env
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -14,26 +13,21 @@ func Test_GetNatsConfig(t *testing.T) {
 	maxConnsPerHost := 20
 	maxIdleConnsPerHost := 30
 	idleConnTimeout := time.Second * 40
+	jsStreamReplicas := 3
 
 	envs := map[string]string{
-		"NATS_URL":                 "NATS_URL",
-		"JS_STREAM_NAME":           "kyma",
-		"JS_STREAM_SUBJECT_PREFIX": "kyma",
-		"EVENT_TYPE_PREFIX":        "EVENT_TYPE_PREFIX",
-		"MAX_IDLE_CONNS":           fmt.Sprintf("%d", maxIdleConns),
-		"MAX_CONNS_PER_HOST":       fmt.Sprintf("%d", maxConnsPerHost),
-		"MAX_IDLE_CONNS_PER_HOST":  fmt.Sprintf("%d", maxIdleConnsPerHost),
-		"IDLE_CONN_TIMEOUT":        fmt.Sprintf("%v", idleConnTimeout),
+		"NATS_URL":                "NATS_URL",
+		"JS_STREAM_NAME":          "kyma",
+		"JS_STREAM_REPLICAS":      fmt.Sprintf("%d", jsStreamReplicas),
+		"EVENT_TYPE_PREFIX":       "EVENT_TYPE_PREFIX",
+		"MAX_IDLE_CONNS":          fmt.Sprintf("%d", maxIdleConns),
+		"MAX_CONNS_PER_HOST":      fmt.Sprintf("%d", maxConnsPerHost),
+		"MAX_IDLE_CONNS_PER_HOST": fmt.Sprintf("%d", maxIdleConnsPerHost),
+		"IDLE_CONN_TIMEOUT":       fmt.Sprintf("%v", idleConnTimeout),
 	}
 
-	defer func() {
-		for k := range envs {
-			require.NoError(t, os.Unsetenv(k))
-		}
-	}()
-
 	for k, v := range envs {
-		require.NoError(t, os.Setenv(k, v))
+		t.Setenv(k, v)
 	}
 
 	maxReconnects, reconnectWait := 1, time.Second
@@ -51,97 +45,5 @@ func Test_GetNatsConfig(t *testing.T) {
 	require.Equal(t, config.IdleConnTimeout, idleConnTimeout)
 
 	require.Equal(t, config.JSStreamName, envs["JS_STREAM_NAME"])
-	// JSStreamSubjectPrefix would be `EVENTTYPEPREFIX`
-	// because JSStreamSubjectPrefix is cleaned up for non-alphanumeric characters.
-	require.Equal(t, config.JSStreamSubjectPrefix, "EVENTTYPEPREFIX")
-}
-
-func Test_JSStreamSubjectPrefix(t *testing.T) {
-	maxIdleConns := 10
-	maxConnsPerHost := 20
-	maxIdleConnsPerHost := 30
-	idleConnTimeout := time.Second * 40
-	maxReconnects, reconnectWait := 1, time.Second
-
-	envs := map[string]string{
-		"NATS_URL":                 "NATS_URL",
-		"JS_STREAM_NAME":           "kyma",
-		"JS_STREAM_SUBJECT_PREFIX": "kyma",
-		"MAX_IDLE_CONNS":           fmt.Sprintf("%d", maxIdleConns),
-		"MAX_CONNS_PER_HOST":       fmt.Sprintf("%d", maxConnsPerHost),
-		"MAX_IDLE_CONNS_PER_HOST":  fmt.Sprintf("%d", maxIdleConnsPerHost),
-		"IDLE_CONN_TIMEOUT":        fmt.Sprintf("%v", idleConnTimeout),
-	}
-
-	// set initial env variables
-	for k, v := range envs {
-		require.NoError(t, os.Setenv(k, v))
-	}
-
-	// define defer to unset env variables
-	defer func() {
-		for k := range envs {
-			require.NoError(t, os.Unsetenv(k))
-		}
-	}()
-
-	// define test cases
-	testCases := []struct {
-		name                      string
-		givenEventTypePrefix      string
-		wantJSStreamSubjectPrefix string
-	}{
-		{
-			name:                      "When eventTypePrefix is empty",
-			givenEventTypePrefix:      "",
-			wantJSStreamSubjectPrefix: "kyma",
-		},
-		{
-			name:                      "When eventTypePrefix is non-empty",
-			givenEventTypePrefix:      "one.two.three",
-			wantJSStreamSubjectPrefix: "one.two.three",
-		},
-	}
-	// run test cases
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			// given
-			require.NoError(t, os.Setenv("EVENT_TYPE_PREFIX", tc.givenEventTypePrefix))
-
-			// when
-			config := GetNatsConfig(maxReconnects, reconnectWait)
-
-			// then
-			require.Equal(t, config.JSStreamSubjectPrefix, tc.wantJSStreamSubjectPrefix)
-		})
-	}
-}
-
-func Test_getCleanJSStreamSubjectPrefix(t *testing.T) {
-	// define test cases
-	testCases := []struct {
-		name        string
-		givenPrefix string
-		wantPrefix  string
-	}{
-		{
-			name:        "when the prefix does not contain any alpha-numeric characters except dot",
-			givenPrefix: "testapp.Segment1Part1Part2.Segment2Part1Part2",
-			wantPrefix:  "testapp.Segment1Part1Part2.Segment2Part1Part2",
-		},
-		{
-			name:        "when the prefix contains alpha-numeric characters except dot",
-			givenPrefix: "testapp@@.Segment1$%-Part1>>-Part2-Ä.Segment2**##-Part1##-Part2-Ä",
-			wantPrefix:  "testapp.Segment1Part1Part2.Segment2Part1Part2",
-		},
-	}
-
-	// run test cases
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, getCleanJSStreamSubjectPrefix(tc.givenPrefix), tc.wantPrefix)
-		})
-	}
+	require.Equal(t, config.JSStreamReplicas, jsStreamReplicas)
 }

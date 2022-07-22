@@ -11,11 +11,8 @@ import (
 	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/metrics"
-	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -52,7 +49,7 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 	}, nil
 }
 
-func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string, integrationNamespace string, centralGatewayServiceUrl string, appTLSSkipVerify bool) (kyma.Service, error) {
+func createKymaService(k8sResourceClients *k8sResourceClientSets, integrationNamespace string, centralGatewayServiceUrl string, appTLSSkipVerify bool) (kyma.Service, error) {
 	nameResolver := k8sconsts.NewNameResolver()
 	secretsManagerConstructor := func(namespace string) secrets.Manager {
 		return k8sResourceClients.core.CoreV1().Secrets(namespace)
@@ -60,21 +57,12 @@ func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceU
 	repository := appsecrets.NewRepository(secretsManagerConstructor(integrationNamespace))
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
+
 	converter := applications.NewConverter(nameResolver, centralGatewayServiceUrl, appTLSSkipVerify)
-	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
 	credentialsService := appsecrets.NewCredentialsService(repository, strategy.NewSecretsStrategyFactory(), nameResolver)
 	requestParametersService := appsecrets.NewRequestParametersService(repository, nameResolver)
 
-	return kyma.NewService(applicationManager, converter, rafterService, credentialsService, requestParametersService), nil
-}
-
-func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.Service {
-	groupVersionResource := v1beta1.GroupVersion.WithResource("clusterassetgroups")
-	resourceInterface := dynamicClient.Resource(groupVersionResource)
-
-	clusterAssetGroupRepository := rafter.NewAssetGroupRepository(resourceInterface)
-	uploadClient := upload.NewClient(uploadServiceURL)
-	return rafter.NewService(clusterAssetGroupRepository, uploadClient)
+	return kyma.NewService(applicationManager, converter, credentialsService, requestParametersService), nil
 }
 
 func newApplicationManager(appClientset *appclient.Clientset) applications.Repository {

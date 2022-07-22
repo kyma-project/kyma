@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
-	"os"
+	"log"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
@@ -22,52 +25,51 @@ import (
 )
 
 func main() {
-	setupLogger := ctrl.Log.WithName("setup")
-
 	opts := options.New()
 	if err := opts.Parse(); err != nil {
-		setupLogger.Error(err, "parse options failed")
-		os.Exit(1)
+		log.Fatalf("Failed to parse options, error: %v", err)
 	}
 
 	ctrLogger, err := logger.New(opts.LogFormat, opts.LogLevel)
 	if err != nil {
-		setupLogger.Error(err, "initialize logger failed")
-		os.Exit(1)
+		log.Fatalf("Failed to initialize logger, error: %v", err)
 	}
 	defer func() {
 		if err := ctrLogger.WithContext().Sync(); err != nil {
-			setupLogger.Error(err, "flush logger failed")
+			log.Printf("Failed to flush logger, error: %v", err)
 		}
 	}()
 
 	// Set controller core logger.
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 
+	// prepare the setup logger
+	setupLogger := ctrLogger.WithContext().Named("setup")
+
 	// Instantiate and initialize all the subscription managers.
 	restCfg := ctrl.GetConfigOrDie()
 	scheme := runtime.NewScheme()
 
+	metricsCollector := pkgmetrics.NewCollector()
+	metricsCollector.RegisterMetrics()
+
 	var natsSubMgr subscriptionmanager.Manager
 	natsConfig := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
 	if opts.EnableJetStreamBackend {
-		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, ctrLogger)
+		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 		if err := jetstream.AddToScheme(scheme); err != nil {
-			setupLogger.Error(err, "start manager failed")
-			os.Exit(1)
+			setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "jetstream mode", opts.EnableJetStreamBackend, "error", err)
 		}
 	} else {
-		natsSubMgr = nats.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, ctrLogger)
+		natsSubMgr = nats.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 		if err := nats.AddToScheme(scheme); err != nil {
-			setupLogger.Error(err, "start manager failed")
-			os.Exit(1)
+			setupLogger.Fatalw("Failed to start subscription manager", "backend", "jetstream mode", opts.EnableJetStreamBackend, v1alpha1.NatsBackendType, "error", err)
 		}
 	}
 
 	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err := beb.AddToScheme(scheme); err != nil {
-		setupLogger.Error(err, "start manager failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 
 	// Init the manager.
@@ -79,27 +81,22 @@ func main() {
 		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
 	})
 	if err != nil {
-		setupLogger.Error(err, "start manager failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to start manager", "error", err)
 	}
 
 	if err := natsSubMgr.Init(mgr); err != nil {
-		setupLogger.Error(err, "initialize NATS subscription manager failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NatsBackendType, "jetstream mode", opts.EnableJetStreamBackend, "error", err)
 	}
 
 	if err := bebSubMgr.Init(mgr); err != nil {
-		setupLogger.Error(err, "initialize BEB subscription manager failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 
 	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
-		setupLogger.Error(err, "setup health check failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to setup health check", "error", err)
 	}
 	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
-		setupLogger.Error(err, "setup ready check failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to setup ready check", "error", err)
 	}
 
 	// Start the backend manager.
@@ -107,14 +104,12 @@ func main() {
 	recorder := mgr.GetEventRecorderFor("backend-controller")
 	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, bebSubMgr, mgr.GetClient(), ctrLogger, recorder)
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
-		setupLogger.Error(err, "start backend controller failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to start backend controller", "error", err)
 	}
 
 	// Start the controller manager.
 	ctrLogger.WithContext().With("options", opts).Info("start controller manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLogger.Error(err, "start controller manager failed")
-		os.Exit(1)
+		setupLogger.Fatalw("Failed to start controller manager", "error", err)
 	}
 }

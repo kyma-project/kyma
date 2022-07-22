@@ -3,32 +3,17 @@ kind: LogPipeline
 metadata:
   name: loki
 spec:
-  parsers: [ ]
-  multilineParsers:
-    - content: |
-        # Example to parse multiline exceptions in Kyma node.js functions
-        Name          multiline-kyma-js-function
-        Type          regex
-        Flush_timeout 1000
-        Rule      "start_state"   "/^Function failed to execute.*/"  "cont"
-        Rule      "cont"          "/^\s+at.*/"                       "cont"
-  filters:
-    - content: |
-        name                  multiline
-        match                 *
-        multiline.key_content log
-        multiline.parser      multiline-kyma-js-function
-  outputs:
-    - content: |
-        Name               grafana-loki
-        Alias              loki-output
-        Match              kube.*
-        Url                http://logging-loki:3100/loki/api/v1/push
-        Labels             {job="telemetry-fluent-bit"}
-        RemoveKeys         kubernetes, stream
-        LineFormat         json
-        LogLevel           warn
-        LabelMapPath       /files/labelmap.json
+  filters: []
+  output:
+    custom: |
+      Name               grafana-loki
+      Alias              loki-output
+      Url                http://logging-loki:3100/loki/api/v1/push
+      Labels             {job="telemetry-fluent-bit"}
+      RemoveKeys         kubernetes, stream
+      LineFormat         json
+      LogLevel           warn
+      LabelMapPath       /files/labelmap.json
   files:
     - name: labelmap.json
       content: |
@@ -47,4 +32,4 @@ spec:
           },
           "stream": "stream"
         }
-  secretRefs: [ ]
+  variables: [ ]

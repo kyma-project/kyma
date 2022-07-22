@@ -2,7 +2,6 @@ package jetstream
 
 import (
 	"context"
-	"os"
 	"reflect"
 
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -63,7 +62,7 @@ func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers
 		customEventsChannel: make(chan event.GenericEvent),
 	}
 	if err := jsHandler.Initialize(reconciler.handleNatsConnClose); err != nil {
-		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
+		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
 		panic(err)
 	}
 	return reconciler
@@ -73,24 +72,23 @@ func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
-		r.namedLogger().Errorw("create unmanaged controller failed", "name", reconcilerName, "error", err)
+		r.namedLogger().Errorw("Failed to create unmanaged controller", "error", err)
 		return err
 	}
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("setup watch for subscriptions failed", "error", err)
+		r.namedLogger().Errorw("Failed to setup watch for subscriptions", "error", err)
 		return err
 	}
 
 	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("setup watch for custom channel failed", "error", err)
+		r.namedLogger().Errorw("Failed to setup watch for custom channel", "error", err)
 		return err
 	}
 
 	go func(r *Reconciler, c controller.Controller) {
 		if err := c.Start(r.ctx); err != nil {
-			r.namedLogger().Errorw("start controller failed", "name", reconcilerName, "error", err)
-			os.Exit(1)
+			r.namedLogger().Fatalw("Failed to start controller", "error", err)
 		}
 	}(r, ctru)
 
@@ -105,7 +103,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 // +kubebuilder:rbac:groups="applicationconnector.kyma-project.io",resources=applications,verbs=get;list;watch
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.namedLogger().Debugw("received subscription reconciliation request", "namespace", req.Namespace, "name", req.Name)
+	r.namedLogger().Debugw("Received subscription reconciliation request", "namespace", req.Namespace, "name", req.Name)
 
 	actualSubscription := &eventingv1alpha1.Subscription{}
 	// Ensure the object was not deleted in the meantime
@@ -135,8 +133,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// update the cleanEventTypes and config values in the subscription status, if changed
 	statusChanged, err := r.syncInitialStatus(desiredSubscription, log)
 	if err != nil {
-		log.Errorw("sync initial status failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+		log.Errorw("Failed to sync initial status", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		return ctrl.Result{}, err
@@ -144,8 +142,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
-		log.Errorw("sink URL validation failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+		log.Errorw("Failed to validate sink URL", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -153,12 +151,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Synchronize Kyma subscription to JetStream backend
-	if syncErr := r.Backend.SyncSubscription(desiredSubscription); syncErr != nil {
-		log.Errorw("sync subscription failed", "error", syncErr)
-		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, syncErr); err != nil {
-			return ctrl.Result{}, err
+	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
+		log.Errorw("Failed to sync subscription", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
+			return ctrl.Result{}, syncErr
 		}
-		return ctrl.Result{}, syncErr
+		return ctrl.Result{}, err
 	}
 
 	// Update Subscription status
@@ -212,7 +210,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
 	if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
-			log.Errorw("delete JetStream subscription failed", "error", err)
+			log.Errorw("Failed to delete JetStream subscription", "error", err)
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
 			return err
@@ -222,10 +220,10 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
-			log.Errorw("remove finalizer from subscription failed", "error", err)
+			log.Errorw("Failed to remove finalizer from subscription", "error", err)
 			return err
 		}
-		log.Debug("remove finalizer from subscription succeeded")
+		log.Debug("Removed finalizer from subscription")
 	}
 	return nil
 }
@@ -235,10 +233,10 @@ func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.S
 	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
 	if err := r.Update(context.Background(), subscription); err != nil {
-		log.Errorw("add finalizer to subscription failed", "error", err)
+		log.Errorw("Failed to add finalizer to subscription", "error", err)
 		return err
 	}
-	log.Debug("add finalizer to subscription succeeded")
+	log.Debug("Added finalizer to subscription")
 	return nil
 }
 
@@ -247,7 +245,11 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	statusChanged := false
 	cleanedSubjects, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
-		log.Errorw("getting clean subjects failed", "error", err)
+		log.Errorw("Failed to get clean subjects", "error", err)
+		if len(subscription.Status.CleanEventTypes) != 0 {
+			subscription.Status.CleanEventTypes = nil
+			return true, err
+		}
 		return false, err
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanedSubjects) {
@@ -265,7 +267,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 // enqueueReconciliationForSubscriptions adds the subscriptions to the customEventsChannel
 // which is being watched by the controller.
 func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alpha1.Subscription) {
-	r.namedLogger().Debug("enqueuing reconciliation request for all subscriptions")
+	r.namedLogger().Debug("Enqueuing reconciliation request for all subscriptions")
 	for i := range subs {
 		r.customEventsChannel <- event.GenericEvent{Object: &subs[i]}
 	}

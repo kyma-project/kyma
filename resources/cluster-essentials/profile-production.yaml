@@ -7,7 +7,7 @@ pod-preset:
       minAvailable: 1
     resources:
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 30Mi
       limits:
         cpu: 100m

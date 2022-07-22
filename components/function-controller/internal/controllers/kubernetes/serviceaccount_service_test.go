@@ -6,14 +6,14 @@ import (
 	"reflect"
 	"testing"
 
+	"go.uber.org/zap"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 	"github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
 func Test_serviceAccountService_extractSecretTokens(t *testing.T) {
@@ -157,7 +157,7 @@ func TestServiceAccountService_updateServiceAccount(t *testing.T) {
 			AutomountServiceAccountToken: &falsy,
 		}
 
-		err := r.updateServiceAccount(ctx, log.Log, instance, base)
+		err := r.updateServiceAccount(ctx, zap.NewNop().Sugar(), instance, base)
 		g.Expect(err).To(gomega.Succeed())
 
 		g.Expect(obj).NotTo(gomega.BeNil())
@@ -201,7 +201,7 @@ func TestServiceAccountService_updateServiceAccount(t *testing.T) {
 			Secrets:    []corev1.ObjectReference{{Name: "instance-token-1"}, {Name: "instance-token-2"}},
 		}
 
-		err := r.updateServiceAccount(ctx, log.Log, instance, base)
+		err := r.updateServiceAccount(ctx, zap.NewNop().Sugar(), instance, base)
 		g.Expect(err).To(gomega.Succeed())
 
 		g.Expect(obj).NotTo(gomega.BeNil())
@@ -234,7 +234,7 @@ func TestServiceAccountService_updateServiceAccount(t *testing.T) {
 			Secrets:    []corev1.ObjectReference{{Name: "instance-token-1"}, {Name: "instance-token-2"}},
 		}
 
-		err := r.updateServiceAccount(ctx, log.Log, instance, base)
+		err := r.updateServiceAccount(ctx, zap.NewNop().Sugar(), instance, base)
 		g.Expect(err).To(gomega.HaveOccurred())
 	})
 }
@@ -342,7 +342,7 @@ func TestServiceAccountService_createServiceAccount(t *testing.T) {
 
 		namespace := "some-ns"
 
-		err := r.createServiceAccount(ctx, log.Log, namespace, base)
+		err := r.createServiceAccount(ctx, zap.NewNop().Sugar(), namespace, base)
 		g.Expect(err).To(gomega.Succeed())
 
 		g.Expect(obj).NotTo(gomega.BeNil())
@@ -373,7 +373,7 @@ func TestServiceAccountService_createServiceAccount(t *testing.T) {
 			Secrets:    []corev1.ObjectReference{{Name: "base-secret-1"}, {Name: "base-secret-2"}},
 		}
 
-		err := r.createServiceAccount(ctx, log.Log, "random-ns", base)
+		err := r.createServiceAccount(ctx, zap.NewNop().Sugar(), "random-ns", base)
 		g.Expect(err).To(gomega.HaveOccurred())
 	})
 }

@@ -3,7 +3,8 @@ package kubernetes
 import (
 	"context"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,16 +13,16 @@ import (
 )
 
 type ServiceAccountReconciler struct {
-	Log    logr.Logger
+	Log    *zap.SugaredLogger
 	client client.Client
 	svc    ServiceAccountService
 	config Config
 }
 
-func NewServiceAccount(client client.Client, log logr.Logger, config Config, serviceAccountSvc ServiceAccountService) *ServiceAccountReconciler {
+func NewServiceAccount(client client.Client, log *zap.SugaredLogger, config Config, serviceAccountSvc ServiceAccountService) *ServiceAccountReconciler {
 	return &ServiceAccountReconciler{
 		client: client,
-		Log:    log.WithName("controllers").WithName("serviceaccount").WithValues("kind", "ServiceAccount"),
+		Log:    log.Named("controllers").Named("serviceaccount").With("kind", "ServiceAccount"),
 		config: config,
 		svc:    serviceAccountSvc,
 	}
@@ -74,7 +75,7 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, request ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	logger := r.Log.WithValues("namespace", instance.GetNamespace(), "name", instance.GetName())
+	logger := r.Log.With("namespace", instance.GetNamespace(), "name", instance.GetName())
 
 	namespaces, err := getNamespaces(ctx, r.client, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 	if err != nil {

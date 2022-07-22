@@ -12,61 +12,6 @@ See the flags that configure all Config Maps, Secret and Daemon Set names in [ma
 
 The operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.1.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
 
-## Development
-
-### Prerequisites
-- Install [kubebuilder 3.2.0](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
-- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
-- Install [Golang 1.17](https://golang.org/dl/) or newer (for local execution)
-- Install [Docker](https://www.docker.com/get-started)
-
-### Available Commands
-
-For development, you can use the following commands:
-
-- Run all tests and validation
-
-```bash
-make
-```
-
-- Regenerate YAML manifests
-
-```bash
-make manifests
-```
-
-- Install CRDs to cluster in current kubeconfig context
-
-```bash
-make install-local
-```
-
-- Uninstall CRDs to cluster in current kubeconfig context
-
-```bash
-make uninstall-local
-```
-
-- Run the operator locally (uses current kubeconfig context)
-
-```bash
-make run-local
-```
-
-- Build container image and deploy to cluster in current kubeconfig context
-
-```bash
-make build-image IMG_NAME=<my container repo>
-make push-image IMG_NAME=<my container repo> TAG=latest
-make deploy-local IMG_NAME=<my container repo> TAG=latest
-```
-
-- Remove controller from cluster in current kubeconfig context
-
-```bash
-make undeploy-local
-```
 ## Trying it out on a Kyma cluster
 You can try out the Telemetry Operator on your Kyma cluster. Learn here how to install and configure it. When you're finished testing the Telemetry Operator, you should disable it again.
 ### Prerequisites
@@ -126,3 +71,61 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to i
    kubectl delete serviceaccount -n kyma-system telemetry-operator
    kubectl delete serviceaccount -n kyma-system telemetry-fluent-bit
    ```
+
+## Development
+
+### Prerequisites
+- Install [kubebuilder 3.2.0](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
+- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
+- Install [Golang 1.18](https://golang.org/dl/) or newer (for local execution)
+- Install [Docker](https://www.docker.com/get-started)
+- Install [OpenSSL](https://www.openssl.org/) to generate webhook certificate for local execution
+
+### Available Commands
+
+For development, you can use the following commands:
+
+- Run all tests and validation
+
+```bash
+make
+```
+
+- Regenerate YAML manifests (CRD and Cluster Role)
+
+```bash
+make manifests
+```
+
+- Copy CRDs to installation directory
+
+```bash
+make copy-crds-local
+```
+
+- Install CRDs to cluster in current kubeconfig context
+
+```bash
+make install-crds-local
+```
+
+- Uninstall CRDs to cluster in current kubeconfig context
+
+```bash
+make uninstall-crds-local
+```
+
+- Run the operator locally (uses current kubeconfig context)
+
+```bash
+kubectl -n kyma-system scale deployment telemetry-operator --replicas=0 # Scale down in-cluster telemetry-operator
+make run-local
+```
+
+- Build container image and deploy to cluster in current kubeconfig context. Deploy telemetry chart first, as described before. Then run the following commands to deploy your own operator image.
+
+```bash
+make build-image DOCKER_PUSH_DIRECTORY=<my container repo>
+make push-image DOCKER_PUSH_DIRECTORY=<my container repo> DOCKER_TAG=latest
+kubectl -n kyma-system set image deployment telemetry-operator manager=<my container repo>/telemetry-operator:latest
+```

@@ -164,7 +164,7 @@ See the detailed descriptions of these fields:
 |-------|-------------|
 | **function-name** | Name of the invoked Function |
 | **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs14` or `python39`. |
+| **runtime** | Environment used to run the Function. You can use `nodejs14`, `nodejs16`, or `python39`. |
 | **memory-limit** | Maximum amount of memory assigned to run a Function |
 
 ## HTTP requests
@@ -173,9 +173,9 @@ You can use the **event.extensions.request** object to access properties and met
 
 ## Custom HTTP responses in Node.js
 
-By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
+By default, a failing Function simply throws an error to tell the Event Service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
-Apart from these two default codes, you can define custom responses in both Node.js 12 and Node.js 14 environments using the **event.extensions.response** object.
+Apart from these two default codes, you can define custom responses in all Node.js runtimes using the **event.extensions.response** object.
 
 This object is created by the Express framework and can be customized. For more information, read [Node.js API documentation](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_serverresponse).
 
@@ -198,3 +198,16 @@ module.exports = {
 
 You can use the `/metrics` endpoint to return the Function metrics. All the information is gathered using Prometheus and can be displayed using the Grafana dashboard (see [Kyma observability](https://kyma-project.io/docs/kyma/latest/02-get-started/05-observability/) for more information on how to use Grafana dashboard in Kyma). As this endpoint is provided by Kubeless, it cannot be customized.  
 For more information, see [Kubeless monitoring](https://github.com/vmware-archive/kubeless/blob/master/docs/monitoring.md) and [Kubeless runtime variants](https://github.com/vmware-archive/kubeless/blob/master/docs/runtimes.md) pages.
+
+## Override runtime image
+
+You can use a custom runtime image to override the existing one. Your image must meet all the following requirements:
+
+- Expose the workload endpoint on the right port
+- Provide liveness and readiness check endpoints at `/healthz`
+- Fetch sources from the path under the `KUBELESS_INSTALL_VOLUME` environment
+- Security support. Kyma runtimes are secure by default. You only need to protect your images.
+
+> Note: For better understanding you can look at [main dockerfiles](https://github.com/kyma-project/kyma/blob/main/resources/serverless/templates/runtimes.yaml) which are responsible for building the final image based on the `base_image` argument which you as an user can override and what we are doing in [this tutorial](../03-tutorials/00-serverless/svls-13-override-runtime-image).
+
+Every Function's Pods container have the same system environments which helps you configure the Functions server. For more information, read the [Environment variables](../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md) page.

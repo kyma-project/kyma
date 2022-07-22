@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/nats-io/nats-server/v2/server"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -87,7 +89,6 @@ func getNATSConf(natsURL string) env.NatsConfig {
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         controllertesting.EventTypePrefix,
 		JSStreamName:            controllertesting.EventTypePrefix,
-		JSStreamSubjectPrefix:   controllertesting.EventTypePrefix,
 		JSStreamStorageType:     handlers.JetStreamStorageTypeMemory,
 		JSStreamRetentionPolicy: handlers.JetStreamRetentionPolicyInterest,
 	}
@@ -170,8 +171,11 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 	envConf := getNATSConf(natsServer.ClientURL())
 	jsClient := getJetStreamClient(t, natsServer.ClientURL())
 
+	// init the metrics collector
+	metricsCollector := metrics.NewCollector()
+
 	// Create an instance of the JetStream Backend
-	jsBackend := handlers.NewJetStream(envConf, defaultLogger)
+	jsBackend := handlers.NewJetStream(envConf, metricsCollector, defaultLogger)
 
 	// Initialize JetStream Backend
 	err = jsBackend.Initialize(nil)

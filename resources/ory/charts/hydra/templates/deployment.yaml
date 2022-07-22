@@ -23,7 +23,7 @@ spec:
       app.kubernetes.io/name: {{ include "hydra.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   strategy:
-    {{- toYaml .Values.deployment.strategy | nindent 4 }}
+     {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -32,6 +32,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
+        {{- include "hydra.annotations.checksum" . | indent 8 -}}
         {{- with .Values.deployment.annotations }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -104,10 +105,8 @@ spec:
         {{- if .Values.deployment.extraVolumes }}
 {{ toYaml .Values.deployment.extraVolumes | indent 8 }}
         {{- end }}
-
-      {{- if .Values.deployment.serviceAccountName  }}
-      serviceAccountName: {{ .Values.deployment.serviceAccountName }}
-      {{- end }}
+      serviceAccountName: {{ include "hydra.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"
@@ -144,18 +143,12 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
-            initialDelaySeconds: 45
-            periodSeconds: 10
-            failureThreshold: 10
-            timeoutSeconds: 5
+            {{- toYaml .Values.deployment.livenessProbe | nindent 12 }}
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 45
-            periodSeconds: 10
-            failureThreshold: 10
-            timeoutSeconds: 5
+            {{- toYaml .Values.deployment.readinessProbe | nindent 12 }}
           env:
             {{- if .Values.deployment.tracing.datadog.enabled }}
             - name: TRACING_PROVIDER
@@ -196,17 +189,21 @@ spec:
             {{- with .Values.deployment.extraEnv }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 1000
-            runAsNonRoot: true
-            runAsUser: 1000
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          {{- if .Values.deployment.securityContext }}
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+          {{- end }}
+          lifecycle:
+            {{- toYaml .Values.deployment.lifecycle | nindent 12 }}
+        {{- if .Values.deployment.extraContainers }}
+{{ tpl .Values.deployment.extraContainers . | indent 8 }}
+        {{- end }}
+      {{- if .Values.deployment.extraInitContainers }}
+      initContainers:
+{{ tpl .Values.deployment.extraInitContainers . | indent 8 }}
+      {{- end }}
       {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}

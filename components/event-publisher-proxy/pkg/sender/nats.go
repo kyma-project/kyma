@@ -5,11 +5,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
-	"github.com/sirupsen/logrus"
 )
 
 // compile time check
@@ -23,12 +24,12 @@ type GenericSender interface {
 // NatsMessageSender is responsible for sending messages over HTTP.
 type NatsMessageSender struct {
 	ctx        context.Context
-	logger     *logrus.Logger
+	logger     *logger.Logger
 	connection *nats.Conn
 }
 
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given nats connection.
-func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logrus.Logger) *NatsMessageSender {
+func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logger.Logger) *NatsMessageSender {
 	return &NatsMessageSender{ctx: ctx, connection: connection, logger: logger}
 }
 

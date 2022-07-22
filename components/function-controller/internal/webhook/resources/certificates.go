@@ -2,9 +2,13 @@ package resources
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -51,7 +55,7 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	}
 
 	logger.Info("updating pre-exiting webhook secret")
-	if err := updateSecret(ctx, client, secret, serviceName); err != nil {
+	if err := updateSecret(ctx, client, logger, secret, serviceName); err != nil {
 		return errors.Wrap(err, "failed to update secret")
 	}
 	return nil
@@ -68,9 +72,13 @@ func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace
 	return nil
 }
 
-func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.Secret, serviceName string) error {
-	if hasRequiredKeys(secret.Data) {
+func updateSecret(ctx context.Context, client ctrlclient.Client, log logr.Logger, secret *corev1.Secret, serviceName string) error {
+	valid, err := isValidSecret(secret)
+	if valid {
 		return nil
+	}
+	if err != nil {
+		log.Error(err, "invalid certificate")
 	}
 
 	newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
@@ -81,6 +89,50 @@ func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.
 	secret.Data = newSecret.Data
 	if err := client.Update(ctx, secret); err != nil {
 		return errors.Wrap(err, "failed to update secret")
+	}
+	return nil
+}
+
+func isValidSecret(s *corev1.Secret) (bool, error) {
+	if !hasRequiredKeys(s.Data) {
+		return false, nil
+	}
+	if err := verifyCertificate(s.Data[CertFile]); err != nil {
+		return false, err
+	}
+	if err := verifyKey(s.Data[KeyFile]); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func verifyCertificate(c []byte) error {
+	certificate, err := cert.ParseCertsPEM(c)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse certificate data")
+	}
+	// certificate is self signed. So we use it as a root cert
+	root, err := cert.NewPoolFromBytes(c)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse root certificate data")
+	}
+	// make sure the certificate is valid for the next 10 days. Otherwise it will be recreated.
+	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(10 * 24 * time.Hour), Roots: root})
+	if err != nil {
+		return errors.Wrap(err, "certificate verification failed")
+	}
+	return nil
+}
+
+func verifyKey(k []byte) error {
+	b, _ := pem.Decode(k)
+	key, err := x509.ParsePKCS1PrivateKey(b.Bytes)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse key data")
+	}
+	if err = key.Validate(); err != nil {
+		return errors.Wrap(err, "key verification failed")
 	}
 	return nil
 }

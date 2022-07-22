@@ -4,10 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"k8s.io/client-go/kubernetes/scheme"
 
 	rbacv1 "k8s.io/api/rbac/v1"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,10 +19,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
 func TestRoleReconciler_Reconcile(t *testing.T) {
@@ -39,7 +39,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 	g.Expect(k8sClient.Create(context.TODO(), baseRole)).To(gomega.Succeed())
 
 	roleSvc := NewRoleService(resourceClient, testCfg)
-	reconciler := NewRole(k8sClient, log.Log, testCfg, roleSvc)
+	reconciler := NewRole(k8sClient, zap.NewNop().Sugar(), testCfg, roleSvc)
 	namespace := userNamespace.GetName()
 
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: baseRole.GetName()}}

@@ -1,9 +1,0 @@
-reviewers:
-  - application-connector-reviewers
-  - PK85
-  - dbadura
-approvers:
-  - application-connector-approvers
-
-labels:
-  - area/application-connector

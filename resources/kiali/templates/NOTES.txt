@@ -1,0 +1,5 @@
+Welcome to Kiali! For more details on Kiali, see: https://kiali.io
+
+The Kiali Server [{{ .Chart.AppVersion }}] has been installed in namespace [{{ .Release.Namespace }}]. It will be ready soon.
+
+(Helm: Chart=[{{ .Chart.Name }}], Release=[{{ .Release.Name }}], Version=[{{ .Chart.Version }}])

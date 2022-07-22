@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +17,7 @@ import (
 type RoleBindingService interface {
 	IsBase(role *rbacv1.RoleBinding) bool
 	ListBase(ctx context.Context) ([]rbacv1.RoleBinding, error)
-	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *rbacv1.RoleBinding) error
+	UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *rbacv1.RoleBinding) error
 }
 
 var _ RoleBindingService = &roleBindingService{}
@@ -47,7 +48,7 @@ func (r *roleBindingService) IsBase(roleBinding *rbacv1.RoleBinding) bool {
 	return roleBinding.Namespace == r.config.BaseNamespace && ok && label == RoleBindingLabelValue
 }
 
-func (r *roleBindingService) UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *rbacv1.RoleBinding) error {
+func (r *roleBindingService) UpdateNamespace(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *rbacv1.RoleBinding) error {
 	logger.Info(fmt.Sprintf("Updating RoleBinding '%s/%s'", namespace, baseInstance.GetName()))
 	instance := &rbacv1.RoleBinding{}
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstance.GetName()}, instance); err != nil {
@@ -61,7 +62,7 @@ func (r *roleBindingService) UpdateNamespace(ctx context.Context, logger logr.Lo
 	return r.updateRoleBinding(ctx, logger, instance, baseInstance)
 }
 
-func (r *roleBindingService) createRoleBinding(ctx context.Context, logger logr.Logger, namespace string, baseInstance *rbacv1.RoleBinding) error {
+func (r *roleBindingService) createRoleBinding(ctx context.Context, logger *zap.SugaredLogger, namespace string, baseInstance *rbacv1.RoleBinding) error {
 	if len(baseInstance.Subjects) != 1 {
 		return fmt.Errorf("base RoleBinding %s in namespace %s has %d subjects, expected 1, cannot create", baseInstance.GetName(), baseInstance.GetNamespace(), len(baseInstance.Subjects))
 	}
@@ -91,7 +92,7 @@ func (r *roleBindingService) createRoleBinding(ctx context.Context, logger logr.
 	return nil
 }
 
-func (r *roleBindingService) updateRoleBinding(ctx context.Context, logger logr.Logger, instance, baseInstance *rbacv1.RoleBinding) error {
+func (r *roleBindingService) updateRoleBinding(ctx context.Context, logger *zap.SugaredLogger, instance, baseInstance *rbacv1.RoleBinding) error {
 	if len(baseInstance.Subjects) != 1 {
 		return fmt.Errorf("base RoleBinding %s in namespace %s has %d subjects, expected 1, cannot update", baseInstance.GetName(), baseInstance.GetNamespace(), len(baseInstance.Subjects))
 	}

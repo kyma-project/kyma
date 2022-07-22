@@ -10,10 +10,9 @@ spec:
   selector:
     matchLabels: {{- include "controller.labels" . | nindent 6 }}
   namespaceSelector:
-    matchNames:
-      - {{ .Release.Namespace }}
+    any: true
   endpoints:
-    - port: {{ .Values.metrics.config.portName }}
+    - port: {{ .Values.global.ports.namePrefix }}{{ .Values.metrics.config.portName }}
       interval: {{ .Values.metrics.config.interval }}
       scheme: https
       tlsConfig: 

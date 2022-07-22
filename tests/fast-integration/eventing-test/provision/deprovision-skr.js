@@ -1,16 +1,15 @@
 const {expect} = require('chai');
 const {
   deprovisionSKR,
+  KEBClient,
+  KEBConfig,
 } = require('../../kyma-environment-broker');
-
-const {
-  keb,
-} = require('../../skr-test');
 
 const {
   getEnvOrThrow,
   debug,
 } = require('../../utils');
+const keb = new KEBClient(KEBConfig.fromEnv());
 const {KCPWrapper, KCPConfig} = require('../../kcp/client');
 const {slowTime} = require('../utils');
 

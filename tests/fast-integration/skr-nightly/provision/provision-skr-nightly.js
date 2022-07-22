@@ -15,14 +15,14 @@ const {
   KCPWrapper,
 } = require('../../kcp/client');
 const {
-  oidcE2ETest,
   gatherOptions,
   withRuntimeName,
   withScenarioName,
-  commerceMockTest,
   gardener,
   keb,
   director,
+  oidcE2ETest,
+  commerceMockTest,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -40,13 +40,17 @@ describe('SKR nightly', function() {
 
   const provisioningTimeout = 1000 * 60 * 60; // 1h
   const deprovisioningTimeout = 1000 * 60 * 30; // 30m
+  let shoot;
+  const getShootInfoFunc = function() {
+    return shoot;
+  };
+  const options = gatherOptions(
+      withRuntimeName('kyma-nightly'),
+      withScenarioName('test-nightly'));
 
   before('Fetch last SKR and deprovision if needed', async function() {
     try {
       let runtime;
-      this.options = gatherOptions(
-          withRuntimeName('kyma-nightly'),
-          withScenarioName('test-nightly'));
 
       console.log('Login to KCP.');
       await kcp.login();
@@ -61,37 +65,37 @@ describe('SKR nightly', function() {
       if (runtime) {
         console.log('Deprovision last SKR.');
         await deprovisionSKR(keb, kcp, runtime.instanceID, deprovisioningTimeout);
-        await unregisterKymaFromCompass(director, this.options.scenarioName);
+        await unregisterKymaFromCompass(director, options.scenarioName);
       } else {
         console.log('Deprovisioning not needed - no previous SKR found.');
       }
 
-      console.log(`Provision SKR with runtime ID ${this.options.instanceID}`);
+      console.log(`Provision SKR with runtime ID ${options.instanceID}`);
       const customParams = {
-        oidc: this.options.oidc0,
+        oidc: options.oidc0,
       };
 
       const skr = await provisionSKR(keb,
           kcp,
           gardener,
-          this.options.instanceID,
-          this.options.runtimeName,
+          options.instanceID,
+          options.runtimeName,
           null,
           null,
           customParams,
           provisioningTimeout);
 
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
       console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
 
-      this.shoot = skr.shoot;
-      await addScenarioInCompass(director, this.options.scenarioName);
-      await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
-      initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
+      shoot = skr.shoot;
+      await addScenarioInCompass(director, options.scenarioName);
+      await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
+      initializeK8sClient({kubeconfig: shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  oidcE2ETest();
-  commerceMockTest();
+  oidcE2ETest(options, getShootInfoFunc);
+  commerceMockTest(options);
 });

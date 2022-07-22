@@ -12,7 +12,6 @@
     "labels": {
       "area/application-connector": "Application Connector",
       "area/serverless": "Serverless",
-      "area/service-catalog": "Service Catalog",
       "area/cluster": "Cluster",
       "area/eventing": "Eventing",
       "area/security": "Security",

@@ -40,6 +40,16 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs14"},
 			},
 		}
+	case serverlessv1alpha1.Nodejs16:
+		return Config{
+			Runtime:                 serverlessv1alpha1.Nodejs16,
+			DependencyFile:          "package.json",
+			FunctionFile:            "handler.js",
+			DockerfileConfigMapName: "dockerfile-nodejs-16",
+			RuntimeEnvs: []corev1.EnvVar{
+				{Name: "FUNC_RUNTIME", Value: "nodejs16"},
+			},
+		}
 	case serverlessv1alpha1.Python39:
 		return Config{
 			Runtime:                 serverlessv1alpha1.Python39,

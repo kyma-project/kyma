@@ -35,8 +35,12 @@ spec:
               value: 5s
             - name: LEGACY_NAMESPACE
               value: kyma
-            - name: LEGACY_EVENT_TYPE_PREFIX
+            - name: EVENT_TYPE_PREFIX
               value: sap.kyma.custom
+            - name: APP_LOG_FORMAT
+              value: "json"
+            - name: APP_LOG_LEVEL
+              value: "info"
           image: ko://github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
           imagePullPolicy: IfNotPresent
           name: event-publisher-proxy

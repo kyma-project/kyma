@@ -1,9 +1,16 @@
 package resources
 
 import (
+	"bytes"
 	"context"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -52,6 +59,8 @@ func Test_serviceAltNames(t *testing.T) {
 
 func TestEnsureWebhookSecret(t *testing.T) {
 	ctx := context.Background()
+	cert, key, err := generateWebhookCertificates(testServiceName, testNamespaceName)
+	require.NoError(t, err)
 
 	t.Run("can ensure the secret if it doesn't exist", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
@@ -110,7 +119,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 				},
 			},
 			Data: map[string][]byte{
-				KeyFile: []byte("key content"),
+				KeyFile: key,
 			},
 		}
 		err := client.Create(ctx, secret)
@@ -144,8 +153,8 @@ func TestEnsureWebhookSecret(t *testing.T) {
 				},
 			},
 			Data: map[string][]byte{
-				KeyFile:  []byte("key content"),
-				CertFile: []byte("cert content"),
+				KeyFile:  key,
+				CertFile: cert,
 			},
 		}
 		err := client.Create(ctx, secret)
@@ -165,8 +174,117 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		require.Equal(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
 		require.Contains(t, updatedSecret.Data, KeyFile)
 		require.Contains(t, updatedSecret.Data, CertFile)
-		require.Equal(t, []byte("key content"), updatedSecret.Data[KeyFile])
-		require.Equal(t, []byte("cert content"), updatedSecret.Data[CertFile])
+		require.Equal(t, key, updatedSecret.Data[KeyFile])
+		require.Equal(t, cert, updatedSecret.Data[CertFile])
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
 	})
+
+	t.Run("should update if the cert will expire in 10 days", func(t *testing.T) {
+		client := fake.NewClientBuilder().Build()
+
+		tenDaysCert, err := generateShortLivedCertWithKey(key, testServiceName, 10*24*time.Hour)
+		require.NoError(t, err)
+
+		secret := &corev1.Secret{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      testSecretName,
+				Namespace: testNamespaceName,
+				Labels: map[string]string{
+					"dont-remove-me": "true",
+				},
+			},
+			Data: map[string][]byte{
+				KeyFile:  key,
+				CertFile: tenDaysCert,
+			},
+		}
+		err = client.Create(ctx, secret)
+		require.NoError(t, err)
+
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		require.NoError(t, err)
+
+		updatedSecret := &corev1.Secret{}
+		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
+
+		require.NoError(t, err)
+		require.NotNil(t, secret)
+		require.Equal(t, testSecretName, updatedSecret.Name)
+		require.Equal(t, testNamespaceName, updatedSecret.Namespace)
+		require.Contains(t, updatedSecret.Data, KeyFile)
+		require.Contains(t, updatedSecret.Data, CertFile)
+		// make sure it's updated, not overridden.
+		require.NotEqual(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
+		require.NotEqual(t, key, updatedSecret.Data[KeyFile])
+		require.NotEqual(t, cert, updatedSecret.Data[CertFile])
+		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
+	})
+
+	t.Run("should not update if the cert will expire in more than 10 days", func(t *testing.T) {
+		client := fake.NewClientBuilder().Build()
+
+		elevenDaysCert, err := generateShortLivedCertWithKey(key, testServiceName, 11*24*time.Hour)
+		require.NoError(t, err)
+
+		secret := &corev1.Secret{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      testSecretName,
+				Namespace: testNamespaceName,
+				Labels: map[string]string{
+					"dont-remove-me": "true",
+				},
+			},
+			Data: map[string][]byte{
+				KeyFile:  key,
+				CertFile: elevenDaysCert,
+			},
+		}
+		err = client.Create(ctx, secret)
+		require.NoError(t, err)
+
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		require.NoError(t, err)
+
+		updatedSecret := &corev1.Secret{}
+		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
+
+		require.NoError(t, err)
+		require.NotNil(t, secret)
+		require.Equal(t, testSecretName, updatedSecret.Name)
+		require.Equal(t, testNamespaceName, updatedSecret.Namespace)
+		require.Contains(t, updatedSecret.Data, KeyFile)
+		require.Contains(t, updatedSecret.Data, CertFile)
+		// make sure it's NOT updated, not overridden.
+		require.Equal(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
+		require.Equal(t, key, updatedSecret.Data[KeyFile])
+		require.Equal(t, elevenDaysCert, updatedSecret.Data[CertFile])
+		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
+	})
+}
+
+func generateShortLivedCertWithKey(keyBytes []byte, host string, age time.Duration) ([]byte, error) {
+	pemKey, _ := pem.Decode(keyBytes)
+	key, err := x509.ParsePKCS1PrivateKey(pemKey.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	t := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			CommonName: host,
+		},
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().Add(age),
+	}
+
+	certBytes, err := x509.CreateCertificate(rand.Reader, &t, &t, &key.PublicKey, key)
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.Buffer{}
+	if err := pem.Encode(&buf, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes}); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }

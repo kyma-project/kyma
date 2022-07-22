@@ -11,18 +11,22 @@ import (
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 const (
 	tarGitRepoPath = "./testdata"
 	tarGitName     = "test-repo.tar"
-	repoName       = "test-repo"
 	branchName     = "branch2"
 	branchCommit   = "728c47705dabc65c12583ff5feb2e5300983afc3"
 	tagName        = "tag1"
 	trickyTagName  = "tricky1"
 	tagCommit      = "6eff122e8afb57a6f270285dc3bfcc9a4ef4b8ad"
 	secondCommitID = "8b27a9d6f148533773ae0666dc27c5b359b46553"
+
+	azureRepo   = "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function"
+	azureTag    = "python-tag"
+	azureCommit = "6dac23dd3b697970cf351101ff5c3e9733c2bdfc"
 )
 
 func TestNewGit2Go_LastCommit(t *testing.T) {
@@ -65,10 +69,10 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			repoPath := prepareRepo(t)
 			defer deleteTmpRepo(t, repoPath)
-			cloner := &git2goClonerMock{repoPath: repoPath}
+			fetcher := &git2goFetcherMock{repoPath: repoPath}
 
-			opts := Options{Reference: testcase.refName}
-			client := Git2GoClient{cloner}
+			opts := Options{Reference: testcase.refName, URL: repoPath}
+			client := Git2GoClient{fetcher: fetcher}
 			//WHEN
 			commitID, err := client.LastCommit(opts)
 
@@ -84,6 +88,20 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 	}
 }
 
+func TestNewGit2Go_LastCommitWithAzureTag(t *testing.T) {
+	//GIVEN
+	client := NewGit2Go(zap.L().Sugar())
+
+	//WHEN
+	commitID, err := client.LastCommit(Options{
+		URL:       azureRepo,
+		Reference: azureTag,
+	})
+	//THEN
+	require.NoError(t, err)
+	assert.Equal(t, azureCommit, commitID)
+}
+
 func TestGo2GitClient_Clone(t *testing.T) {
 	//GIVEN
 	repoPath := prepareRepo(t)
@@ -91,7 +109,7 @@ func TestGo2GitClient_Clone(t *testing.T) {
 	cloner := &git2goClonerMock{repoPath: repoPath}
 	assertHeadCommitNotEqual(t, repoPath, secondCommitID)
 
-	client := Git2GoClient{cloner}
+	client := Git2GoClient{cloner: cloner}
 	opts := Options{Reference: secondCommitID}
 	//WHEN
 	commitID, err := client.Clone("", opts)
@@ -107,7 +125,14 @@ type git2goClonerMock struct {
 
 func (g *git2goClonerMock) git2goClone(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error) {
 	return git2go.OpenRepository(g.repoPath)
+}
 
+type git2goFetcherMock struct {
+	repoPath string
+}
+
+func (g *git2goFetcherMock) git2goFetch(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error) {
+	return git2go.OpenRepository(g.repoPath)
 }
 
 func prepareRepo(t *testing.T) string {
@@ -122,6 +147,7 @@ func prepareRepo(t *testing.T) string {
 		} else {
 			require.NoError(t, err)
 		}
+		//nolint:gosec
 		path := filepath.Join(tarGitRepoPath, h.Name)
 		info := h.FileInfo()
 		if info.IsDir() {
@@ -132,6 +158,7 @@ func prepareRepo(t *testing.T) string {
 		f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, info.Mode())
 		require.NoError(t, err)
 		defer closeAssert(t, f.Close)
+		//nolint:gosec
 		_, err = io.Copy(f, r)
 		require.NoError(t, err)
 	}

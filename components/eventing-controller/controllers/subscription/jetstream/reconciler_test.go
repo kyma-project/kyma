@@ -8,10 +8,11 @@ import (
 	"testing"
 	"time"
 
-	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
 
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	"github.com/nats-io/nats.go"
+
+	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -23,6 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
@@ -96,11 +98,13 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+				reconcilertesting.WithFinalizers([]string{}),
 			},
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
 				},
 				NatsSubscription: []gomegatypes.GomegaMatcher{
 					natstesting.BeExistingSubscription(),
@@ -211,7 +215,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
@@ -445,7 +449,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantBefore: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCleanEventTypes(nil),
+					reconcilertesting.HaveCleanEventTypesEmpty(),
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveSubscriptionReady(),
@@ -465,6 +469,34 @@ func TestChangeSubscription(t *testing.T) {
 					reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
 					gomega.Not(reconcilertesting.HaveCondition(reconcilertesting.MultipleDefaultConditions()[0])),
 					gomega.Not(reconcilertesting.HaveCondition(reconcilertesting.MultipleDefaultConditions()[1])),
+				},
+			},
+		},
+		{
+			name: "CleanEventTypes; update valid filter to a filter with an invalid prefix",
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+			},
+			wantBefore: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("0"),
+					}),
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				// change the filter  to the event type
+				for _, f := range subscription.Spec.Filter.Filters {
+					f.EventType.Value = fmt.Sprintf("invalid%s", f.EventType.Value)
+				}
+			},
+			wantAfter: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveConditionInvalidPrefix(),
+					reconcilertesting.HaveCleanEventTypesEmpty(),
 				},
 			},
 		},
@@ -521,7 +553,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
 		natstesting.BeExistingSubscription(),
 		natstesting.BeValidSubscription(),
-		natstesting.BeJetStreamSubscriptionWithSubject(fmt.Sprintf("%s.%s", reconcilertesting.JSStreamSubjectPrefix, reconcilertesting.OrderCreatedEventTypePrefixEmpty)),
+		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
 	}
 
 	testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
@@ -532,7 +564,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
-	getSubscriptionFromJetStream(ens, subscription, subject).Should(gomega.And(expectations...))
+	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...))
 }
 
 func testDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
@@ -608,7 +640,6 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         eventTypePrefix,
 		JSStreamName:            reconcilertesting.JSStreamName,
-		JSStreamSubjectPrefix:   reconcilertesting.JSStreamSubjectPrefix,
 		JSStreamStorageType:     "memory",
 		JSStreamMaxBytes:        -1,
 		JSStreamMaxMessages:     -1,
@@ -619,10 +650,13 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationNameNotClean, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
+	// init the metrics collector
+	metricsCollector := metrics.NewCollector()
+
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	jetStreamHandler := handlers.NewJetStream(envConf, defaultLogger)
+	jetStreamHandler := handlers.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()

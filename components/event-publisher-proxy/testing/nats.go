@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+
 	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
-	"github.com/sirupsen/logrus"
 
 	cev2 "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats-server/v2/server"
@@ -37,10 +38,12 @@ func StartNatsServer(enableJetstream bool) *server.Server {
 	opts := test.DefaultTestOptions
 	opts.Port = server.RANDOM_PORT
 	opts.JetStream = enableJetstream
+
+	log, _ := logger.New("json", "info")
 	if enableJetstream {
-		logrus.New().Info("Starting test NATS Server in Jetstream mode")
+		log.WithContext().Info("Starting test NATS Server in Jetstream mode")
 	} else {
-		logrus.New().Info("Starting test NATS Server in default mode")
+		log.WithContext().Info("Starting test NATS Server in default mode")
 	}
 	return test.RunServer(&opts)
 }

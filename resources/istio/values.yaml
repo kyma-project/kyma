@@ -1,6 +1,4 @@
 ---
-
-
 helmValues:
   global:
     priorityClassName: "kyma-system-priority"
@@ -11,7 +9,7 @@ helmValues:
       readinessPeriodSeconds: 5
       resources:
         requests:
-          cpu: 75m
+          cpu: 100m
           memory: 64Mi
         limits:
           cpu: 250m
@@ -103,7 +101,7 @@ components:
           cpu: 500m
           memory: 1024Mi
         requests:
-          cpu: 250m
+          cpu: 100m
           memory: 512Mi
       securityContext:
         runAsUser: 65534
@@ -125,15 +123,16 @@ global:
   images:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
-      # eu.gcr.io/kyma-project/external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2/proxyv2
       name: "proxyv2"
-      version: "1.12.3-solo-fips-distroless"
-      directory: "external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2"
+      version: "1.14.1-distroless"
+      directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.12.3-solo-fips-distroless"
-      directory: "external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2"
+      version: "1.14.1-distroless"
+      directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
+  # This configuration is only temporary and will be removed in kyma version 2.7.x.
+  sidecarMigration: true
