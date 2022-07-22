@@ -134,7 +134,7 @@ hydra:
   hydra-maester:
     globalAccess: true
     config:
-      # Must be in-sync with hydra.hydra.config.existingSecret
+      # Must be in-sync with hydra.config.existingSecret
       hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
