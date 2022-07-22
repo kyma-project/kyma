@@ -15,10 +15,13 @@ const {
 } = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
 const defaultNamespace = 'default';
+const mockserverNamespace = 'mockserver';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
 const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
+const mockserverDeployment = loadResourceFromFile('./resources/deployments/mockserver.yaml');
+const httpLogPipelineCR = loadResourceFromFile('./resources/pipelines/http-log-pipeline.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -51,16 +54,24 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 }
 
 async function prepareEnvironment() {
-  const logPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
+  const lokiLogPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
+  const httpLogPipelinePromise = k8sApply(httpLogPipelineCR, telemetryNamespace);
+  const mockserverPromise = k8sApply(mockserverDeployment, mockserverNamespace);
   const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
-  await logPipelinePromise;
+  await lokiLogPipelinePromise;
+  await httpLogPipelinePromise;
+  await mockserverPromise;
   await deploymentPromise;
 }
 
 async function cleanEnvironment() {
   const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
+  const mockserverPromise = k8sDelete(mockserverDeployment, mockserverNamespace);
   const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
+  const httpLogPipelinePromise = k8sDelete(httpLogPipelineCR, telemetryNamespace);
   await logPipelinePromise;
+  await mockserverPromise;
+  await httpLogPipelinePromise;
   await deploymentPromise;
 }
 
@@ -119,6 +130,17 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     } catch (e) {
       assert.fail(e);
     }
+  });
+
+  it('HTTP LogPipeline should have Running condition', async () => {
+    await waitForLogPipelineStatusCondition('http-mockserver', 'Running', 180000);
+  });
+
+  it('Should push the logs to the http mockserver', async () => {
+    // The mockserver prints received logs to stdout, which should finally be pushed to Loki by the other pipeline
+    const labels = '{job="telemetry-fluent-bit", namespace="mockserver"}';
+    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+    assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
   });
 });
 

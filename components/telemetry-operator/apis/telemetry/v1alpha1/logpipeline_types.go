@@ -37,9 +37,27 @@ type Filter struct {
 	Custom string `json:"custom,omitempty"`
 }
 
+// HttpOutput describes a Fluent Bit HTTP output configuration
+type HTTPOutput struct {
+	Host      ValueType `json:"host,omitempty"`
+	User      ValueType `json:"user,omitempty"`
+	Password  ValueType `json:"password,omitempty"`
+	URI       string    `json:"uri,omitempty"`
+	Port      string    `json:"port,omitempty"`
+	Compress  string    `json:"compress,omitempty"`
+	Format    string    `json:"format,omitempty"`
+	TLSConfig TLSConfig `json:"tls,omitempty"`
+}
+
+type TLSConfig struct {
+	Disabled                  bool `json:"disabled,omitempty"`
+	SkipCertificateValidation bool `json:"skipCertificateValidation,omitempty"`
+}
+
 // Output describes a Fluent Bit output configuration section
 type Output struct {
-	Custom string `json:"custom,omitempty"`
+	Custom string     `json:"custom,omitempty"`
+	HTTP   HTTPOutput `json:"http,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration
@@ -52,6 +70,19 @@ type FileMount struct {
 type VariableReference struct {
 	Name      string        `json:"name,omitempty"`
 	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+}
+
+type ValueType struct {
+	Value     string        `json:"value,omitempty"`
+	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+}
+
+func (v *ValueType) IsDefined() bool {
+	return v.Value != "" || (v.ValueFrom.SecretKey.Name != "" && v.ValueFrom.SecretKey.Key != "")
+}
+
+func (v *ValueFromType) IsSecretRef() bool {
+	return v.SecretKey.Name != "" && v.SecretKey.Key != ""
 }
 
 type ValueFromType struct {
