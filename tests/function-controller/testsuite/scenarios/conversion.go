@@ -76,7 +76,7 @@ func ConversionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.
 				teststep.NewGitServerV1Alpha1(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.IstioEnabled),
 				teststep.NewCreateGitRepository(gitFuncLogger, gitrepository.New("git-repo", genericContainer), "Create Git Repository", gitopsv1alpha1.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
 				teststep.CreateFunctionV1Alpha1(gitFuncLogger, gitCfg.Fn, "Create Git Function", gitopsv1alpha1.GitopsFunction("git-repo", "/", "master", serverlessv1alpha1.Nodejs14)),
-				teststep.NewHTTPCheck(gitFuncLogger, "gitops function check ", gitCfg.InClusterURL, poll, "GITOPS 1")),
+				teststep.NewHTTPCheck(gitFuncLogger, "gitops function check ", gitCfg.InClusterURL, poll.WithLogger(gitFuncLogger), "GITOPS 1")),
 			step.NewSerialTestRunner(logf, "Convert Inline Python39 function",
 				teststep.CreateFunctionV1Alpha1(python39Logger, python39Cfg.Fn, "Create Python39 Function in version v1alpha1", runtimesv1alpha1.BasicPythonFunction("Hello From python", serverlessv1alpha1.Python39)),
 				teststep.NewHTTPCheck(python39Logger, "Python39 v1alpha1 simple check through service", python39Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From python"),
