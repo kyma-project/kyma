@@ -158,11 +158,11 @@ func generateHTTPOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConf
 	if logPipeline.Spec.Output.HTTP.Format != "" {
 		result["format"] = logPipeline.Spec.Output.HTTP.Format
 	}
-	if logPipeline.Spec.Output.HTTP.TLS != "" {
-		result["tls"] = logPipeline.Spec.Output.HTTP.TLS
+	if logPipeline.Spec.Output.HTTP.TLSConfig.Disabled {
+		result["tls"] = "off"
 	}
-	if logPipeline.Spec.Output.HTTP.TLSVerify != "" {
-		result["tls.verify"] = logPipeline.Spec.Output.HTTP.TLSVerify
+	if logPipeline.Spec.Output.HTTP.TLSConfig.SkipCertificateValidation {
+		result["tls.verify"] = "off"
 	}
 	if logPipeline.Spec.Output.HTTP.Compress != "" {
 		result["compress"] = logPipeline.Spec.Output.HTTP.Compress

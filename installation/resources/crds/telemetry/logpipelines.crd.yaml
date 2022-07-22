@@ -114,9 +114,12 @@ spec:
                       port:
                         type: string
                       tls:
-                        type: string
-                      tlsVerify:
-                        type: string
+                        properties:
+                          disabled:
+                            type: boolean
+                          skipCertificateValidation:
+                            type: boolean
+                        type: object
                       uri:
                         type: string
                       user:

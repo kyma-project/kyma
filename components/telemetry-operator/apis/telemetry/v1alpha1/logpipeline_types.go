@@ -46,8 +46,12 @@ type HTTPOutput struct {
 	Port      string    `json:"port,omitempty"`
 	Compress  string    `json:"compress,omitempty"`
 	Format    string    `json:"format,omitempty"`
-	TLS       string    `json:"tls,omitempty"`
-	TLSVerify string    `json:"tlsVerify,omitempty"`
+	TLSConfig TLSConfig `json:"tls,omitempty"`
+}
+
+type TLSConfig struct {
+	Disabled                  bool `json:"disabled,omitempty"`
+	SkipCertificateValidation bool `json:"skipCertificateValidation,omitempty"`
 }
 
 // Output describes a Fluent Bit output configuration section

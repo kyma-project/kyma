@@ -12,4 +12,6 @@ spec:
             namespace: mockserver
             key: host
       port: "9880"
-      tls: "off"
+      tls:
+        disabled: true
+        skipCertificateValidation: true
