@@ -506,3 +506,94 @@ func validateRecreatedRepo(t *testing.T, client ctrlclient.Client, f *serverless
 	require.Equal(t, authConfig.SecretName, repo.Spec.Auth.SecretName)
 	require.Equal(t, authConfig.Type, serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type))
 }
+
+func TestConvertingWebhook_convertFunctionWithGitConfigUpdates(t *testing.T) {
+	scheme := runtime.NewScheme()
+	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = serverlessv1alpha2.AddToScheme(scheme)
+
+	client := fake.NewClientBuilder().WithScheme(scheme).Build()
+	w := NewConvertingWebhook(client, scheme)
+	//GIVEN
+	startingFunction := &serverlessv1alpha2.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "test", Namespace: "test",
+		},
+		Spec: serverlessv1alpha2.FunctionSpec{
+			ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
+				Build: serverlessv1alpha2.ResourceRequirements{
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("200m"),
+							corev1.ResourceMemory: resource.MustParse("200Mi"),
+						},
+					},
+				},
+				Function: serverlessv1alpha2.ResourceRequirements{
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+				},
+			},
+			Runtime: serverlessv1alpha2.NodeJs12,
+			Source: serverlessv1alpha2.Source{
+				GitRepository: &serverlessv1alpha2.GitRepositorySource{
+					URL: "https://github.com/kyma-project/kyma.git",
+					Repository: serverlessv1alpha2.Repository{
+						BaseDir:   "/code/",
+						Reference: "main",
+					},
+					Auth: &serverlessv1alpha2.RepositoryAuth{
+						Type:       serverlessv1alpha2.RepositoryAuthBasic,
+						SecretName: "secret-name",
+					},
+				},
+			},
+		},
+	}
+
+	dst, err := w.allocateDstObject(serverlessv1alpha1.GroupVersion.String(), "Function")
+	require.NoError(t, err)
+
+	err = w.convertFunction(startingFunction, dst)
+	require.NoError(t, err)
+
+	repoName := recreatedRepoName(startingFunction.Name)
+	repo := &serverlessv1alpha1.GitRepository{}
+	err = client.Get(context.Background(), types.NamespacedName{
+		Name:      repoName,
+		Namespace: startingFunction.Namespace,
+	}, repo)
+
+	require.NoError(t, err)
+	require.NotNil(t, repo)
+	require.Equal(t, startingFunction.Spec.Source.GitRepository.URL, repo.Spec.URL)
+
+	//WHEN
+	startingFunction.Spec.Source.GitRepository.URL = "https://github.com/kyma-fork/kyma.git"
+
+	err = w.convertFunction(startingFunction, dst)
+	require.NoError(t, err)
+
+	//THEN
+	UpdatedRepo := &serverlessv1alpha1.GitRepository{}
+	err = client.Get(context.Background(), types.NamespacedName{
+		Name:      repoName,
+		Namespace: startingFunction.Namespace,
+	}, UpdatedRepo)
+
+	require.NoError(t, err)
+	require.NotNil(t, UpdatedRepo)
+	require.Equal(t, startingFunction.Spec.Source.GitRepository.URL, UpdatedRepo.Spec.URL)
+}
