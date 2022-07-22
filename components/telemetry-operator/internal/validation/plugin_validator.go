@@ -131,6 +131,9 @@ func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
 	if httpOutput.URI != "" && !strings.HasPrefix(httpOutput.URI, "/") {
 		return fmt.Errorf("uri has to start with /")
 	}
+	if !httpOutput.Host.IsDefined() && (httpOutput.User.IsDefined() || httpOutput.Password.IsDefined() || httpOutput.URI != "" || httpOutput.Port != "" || httpOutput.Compress != "" || httpOutput.TLSConfig.Disabled || httpOutput.TLSConfig.SkipCertificateValidation) {
+		return fmt.Errorf("http output needs to have a host configured")
+	}
 	return nil
 }
 

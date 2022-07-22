@@ -312,7 +312,9 @@ func TestValidateHTTPOutput(t *testing.T) {
 		},
 		URI: "/my-path",
 	}
-	require.Error(t, validateHTTPOutput(output))
+	err := validateHTTPOutput(output)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "invalid hostname")
 
 	output = telemetryv1alpha1.HTTPOutput{
 		Host: telemetryv1alpha1.ValueType{
@@ -320,6 +322,14 @@ func TestValidateHTTPOutput(t *testing.T) {
 		},
 		URI: "broken-uri",
 	}
-	require.Error(t, validateHTTPOutput(output))
+	err = validateHTTPOutput(output)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "uri has to start with /")
 
+	output = telemetryv1alpha1.HTTPOutput{
+		URI: "/my-path",
+	}
+	err = validateHTTPOutput(output)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "http output needs to have a host configured")
 }
