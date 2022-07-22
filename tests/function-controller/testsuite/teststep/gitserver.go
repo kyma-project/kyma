@@ -2,14 +2,13 @@ package teststep
 
 import (
 	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite/gitops"
 	gitopsv1alpha1 "github.com/kyma-project/kyma/tests/function-controller/testsuite/gitops/v1alpha1"
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/git"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/gitserver"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite/gitops"
-
 	"github.com/pkg/errors"
 	appsCli "k8s.io/client-go/kubernetes/typed/apps/v1"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"

@@ -65,7 +65,7 @@ var availableScenarios = map[string][]scenario{
 		{displayName: "gitops", testSuite: scenarios.GitopsSteps},
 		{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest},
 	},
-	//"conversion": {{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest}},
+	"conversion": {{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest}},
 	//	TODO: add it to serverless integration
 	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
 }
