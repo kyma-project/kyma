@@ -101,7 +101,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 		return []fs.File{}, err
 	}
 	if pipeline != nil {
-		logPipelines.Items = append(logPipelines.Items, *pipeline)
+		logPipelines.Items = appendUniquePipelines(logPipelines.Items, *pipeline)
 	}
 	// Build the config from all the exiting pipelines
 	for _, logPipeline := range logPipelines.Items {
@@ -117,7 +117,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 		return []fs.File{}, err
 	}
 	if parser != nil {
-		logParsers.Items = append(logParsers.Items, *parser)
+		logParsers.Items = appendUniqueParsers(logParsers.Items, *parser)
 	}
 
 	parsersConfig = MergeParsersConfig(&logParsers)
@@ -129,6 +129,25 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 
 	return configFiles, nil
 }
+
+func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser telemetryv1alpha1.LogParser) []telemetryv1alpha1.LogParser {
+	for _, l := range logParsers {
+		if l.Name == parser.Name {
+			return logParsers
+		}
+	}
+	return append(logParsers, parser)
+}
+
+func appendUniquePipelines(logPipelines []telemetryv1alpha1.LogPipeline, pipeline telemetryv1alpha1.LogPipeline) []telemetryv1alpha1.LogPipeline {
+	for _, l := range logPipelines {
+		if l.Name == pipeline.Name {
+			return logPipelines
+		}
+	}
+	return append(logPipelines, pipeline)
+}
+
 func appendFluentBitConfigFile(
 	configFiles []fs.File,
 	logPipeline telemetryv1alpha1.LogPipeline,

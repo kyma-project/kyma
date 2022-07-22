@@ -37,8 +37,8 @@ func NewLogParserSyncer(client client.Client,
 	return &lps
 }
 
-// Synchronize LogPipeline with ConfigMap of DaemonSetUtils parsers (Parser and MultiLineParser).
-func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogParser) (bool, error) {
+// Synchronize LogParser with ConfigMap of DaemonSetUtils parsers.
+func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
@@ -48,8 +48,8 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 	changed := false
 	var logParsers telemetryv1alpha1.LogParserList
 
-	if logPipeline.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
+	if logParser.DeletionTimestamp != nil {
+		if cm.Data != nil && controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
 
 			err = s.List(ctx, &logParsers)
@@ -65,7 +65,7 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 				data[parsersConfigMapKey] = fluentBitParsersConfig
 				cm.Data = data
 			}
-			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
+			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
 			changed = true
 		}
 	} else {
@@ -86,9 +86,9 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logPipeline 
 				changed = true
 			}
 		}
-		if !controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
+		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Adding finalizer")
-			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
+			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
 			changed = true
 		}
 
