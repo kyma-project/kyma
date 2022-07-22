@@ -4,6 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
+	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
@@ -131,4 +135,54 @@ Alias  bar`
 	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{l1, l2}}
 	res := updateUnsupportedPluginsTotal(logPipelines)
 	require.Equal(t, 2, res)
+}
+
+func TestSyncVariablesFromHttpOutput(t *testing.T) {
+	s := scheme.Scheme
+	err := telemetryv1alpha1.AddToScheme(s)
+	require.NoError(t, err)
+
+	secretData := map[string][]byte{
+		"host": []byte("my-host"),
+	}
+	referencedSecret := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "referenced-secret",
+			Namespace: "default",
+		},
+		Data: secretData,
+	}
+	require.NoError(t, err)
+
+	secretKeyRef := telemetryv1alpha1.SecretKeyRef{
+		Name:      "referenced-secret",
+		Key:       "host",
+		Namespace: "default",
+	}
+	lp := telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{Name: "my-pipeline"},
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				HTTP: telemetryv1alpha1.HTTPOutput{
+					Host: telemetryv1alpha1.ValueType{
+						ValueFrom: telemetryv1alpha1.ValueFromType{
+							SecretKey: secretKeyRef,
+						},
+					},
+				},
+			},
+		},
+	}
+	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret, &lp).Build()
+
+	lps := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	restartRequired, err := lps.syncVariables(context.Background())
+	require.NoError(t, err)
+	require.True(t, restartRequired)
+
+	var envSecret corev1.Secret
+	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)
+	require.NoError(t, err)
+	targetSecretKey := secret.GenerateVariableName(secretKeyRef, "my-pipeline")
+	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
 }

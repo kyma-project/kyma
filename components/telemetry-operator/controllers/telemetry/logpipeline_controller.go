@@ -101,7 +101,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	secretsOK := r.Syncer.SecretValidator.ValidateSecretsExist(ctx, &logPipeline)
+	secretsOK := r.Syncer.SecretHelper.ValidateSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.SecretsNotPresent,
@@ -182,7 +182,8 @@ func shouldRetryOn(err error) bool {
 		!errors.IsMethodNotSupported(err) &&
 		!errors.IsBadRequest(err) &&
 		!errors.IsUnauthorized(err) &&
-		!errors.IsForbidden(err)
+		!errors.IsForbidden(err) &&
+		!errors.IsNotFound(err)
 }
 
 func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition, unSupported bool) error {

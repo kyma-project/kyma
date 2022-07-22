@@ -82,6 +82,14 @@ Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" foo.$TAG true
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+
+[FILTER]
     name                  record_modifier
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
@@ -89,14 +97,37 @@ func TestFilter(t *testing.T) {
 [FILTER]
     match foo.*
     name grep
+    regex log aa
+
+[OUTPUT]
+    allow_duplicated_headers true
+    format json
+    host localhost
+    match foo.*
+    name http
+    port 443
+    storage.total_limit_size 1G
+    tls on
+    tls.verify on
+    uri /customindex/kyma
 
 `
-
+	filters := []telemetryv1alpha1.Filter{
+		{
+			Custom: `
+	name grep
+    regex log aa
+`,
+		},
+	}
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Filters: []telemetryv1alpha1.Filter{
-				{Custom: `
-	name               grep	`,
+			Filters: filters,
+			Output: telemetryv1alpha1.Output{
+				HTTP: telemetryv1alpha1.HTTPOutput{
+					Host: telemetryv1alpha1.ValueType{
+						Value: "localhost",
+					},
 				},
 			},
 		},
@@ -112,10 +143,9 @@ func TestFilter(t *testing.T) {
 	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
-
 }
 
-func TestOutput(t *testing.T) {
+func TestCustomOutput(t *testing.T) {
 	expected := `[FILTER]
     name                  rewrite_tag
     match                 kube.*
@@ -157,16 +187,52 @@ func TestOutput(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestPermanentFilter(t *testing.T) {
+func TestHTTPOutput(t *testing.T) {
 	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" foo.$TAG true
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+
+[FILTER]
     name                  record_modifier
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
+[OUTPUT]
+    allow_duplicated_headers true
+    format json
+    host localhost
+    http_passwd password
+    http_user user
+    match foo.*
+    name http
+    port 443
+    storage.total_limit_size 1G
+    tls on
+    tls.verify on
+    uri /customindex/kyma
+
 `
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
-		Spec: telemetryv1alpha1.LogPipelineSpec{},
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				HTTP: telemetryv1alpha1.HTTPOutput{
+					Host: telemetryv1alpha1.ValueType{
+						Value: "localhost",
+					},
+					User: telemetryv1alpha1.ValueType{
+						Value: "user",
+					},
+					Password: telemetryv1alpha1.ValueType{
+						Value: "password",
+					},
+				},
+			},
+		},
 	}
 	logPipeline.Name = "foo"
 	pipelineConfig := PipelineConfig{
@@ -179,16 +245,95 @@ func TestPermanentFilter(t *testing.T) {
 	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
+}
 
-	expected = `[FILTER]
+func TestHTTPOutputWithSecretReference(t *testing.T) {
+	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" foo.$TAG true
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+
+[FILTER]
     name                  record_modifier
-    match                 bar.*
+    match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[OUTPUT]
+    allow_duplicated_headers true
+    format json
+    host localhost
+    http_passwd ${FOO_MY_NAMESPACE_SECRET_KEY}
+    http_user user
+    match foo.*
+    name http
+    port 443
+    storage.total_limit_size 1G
+    tls on
+    tls.verify on
+    uri /my-uri
 
 `
 
-	logPipeline.Name = "bar"
-	actual, err = MergeSectionsConfig(logPipeline, pipelineConfig)
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				HTTP: telemetryv1alpha1.HTTPOutput{
+					Host: telemetryv1alpha1.ValueType{
+						Value: "localhost",
+					},
+					User: telemetryv1alpha1.ValueType{
+						Value: "user",
+					},
+					Password: telemetryv1alpha1.ValueType{
+						ValueFrom: telemetryv1alpha1.ValueFromType{
+							SecretKey: telemetryv1alpha1.SecretKeyRef{
+								Name:      "secret",
+								Key:       "key",
+								Namespace: "my-namespace",
+							},
+						},
+					},
+					URI: "/my-uri",
+				},
+			},
+		},
+	}
+	logPipeline.Name = "foo"
+	pipelineConfig := PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
+}
+
+func TestResolveDirectValue(t *testing.T) {
+	value := telemetryv1alpha1.ValueType{
+		Value: "test",
+	}
+	resolved, err := resolveValue(value, "pipeline")
+	require.NoError(t, err)
+	require.Equal(t, resolved, value.Value)
+}
+
+func TestResolveSecretValue(t *testing.T) {
+	value := telemetryv1alpha1.ValueType{
+		ValueFrom: telemetryv1alpha1.ValueFromType{
+			SecretKey: telemetryv1alpha1.SecretKeyRef{
+				Name:      "test-name",
+				Key:       "test-key",
+				Namespace: "test-namespace",
+			},
+		},
+	}
+	resolved, err := resolveValue(value, "pipeline")
+	require.NoError(t, err)
+	require.Equal(t, resolved, "${PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY}")
 }
