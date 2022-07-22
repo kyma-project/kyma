@@ -17,6 +17,7 @@ spec:
         LineFormat         {{ .Values.kyma.logPipeline.lineFormat }}
         LogLevel           {{ .Values.kyma.logPipeline.logLevel }}
         LabelMapPath       /files/labelmap.json
+        storage.total_limit_size  {{ .Values.kyma.logPipeline.fsBufferSize }}
   files:
     - name: labelmap.json
       content: |

@@ -1031,18 +1031,46 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "telemetry_fsbuffer_size{pod=\"$pod\"}",
+          "expr": "telemetry_fsbuffer_size{pod=~\"$pod\"}",
           "interval": "",
           "legendFormat": "{{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "telemetry_fsbuffer_limit{pod=\"$pod\"}",
+          "expr": "telemetry_fsbuffer_limit{pod=~\"$pod\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "{{"{{"}} pod {{"}}"}} - limit",
           "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "telemetry_fsbuffer_size_emitter4{pod=~\"$pod\"}",
+          "interval": "",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - emitter.2",
+          "refId": "C"
+        },
+        {
+          "exemplar": true,
+          "expr": "telemetry_fsbuffer_size_emitter3{pod=~\"$pod\"}",
+          "interval": "",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - emitter.3",
+          "refId": "D"
+        },
+        {
+          "exemplar": true,
+          "expr": "telemetry_fsbuffer_size_emitter2{pod=~\"$pod\"}",
+          "interval": "",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - emitter.4",
+          "refId": "E"
+        },
+        {
+          "exemplar": true,
+          "expr": "telemetry_fsbuffer_size_tail0{pod=~\"$pod\"}",
+          "interval": "",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - tail.0",
+          "refId": "F"
         }
       ],
       "thresholds": [],

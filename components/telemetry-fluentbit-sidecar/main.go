@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -32,6 +33,13 @@ func recordMetrics() {
 					panic(err)
 				}
 				fsbufferSize.Set(float64(size))
+				directories, errDirList := listDirs(logPath)
+				if errDirList != nil {
+					panic(errDirList)
+				}
+				for i, dir := range directories {
+					fsbufferLabels[i].Set(float64(dir.size))
+				}
 			case <-quit:
 				ticker.Stop()
 				return
@@ -41,6 +49,37 @@ func recordMetrics() {
 }
 
 var (
+	fsbufferLabels = []prometheus.Gauge{
+		promauto.NewGauge(prometheus.GaugeOpts{
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "telemetry_fsbuffer_size_emitter4",
+			Help:        "The emitter.4 size of the fluentbit chunk buffer",
+			ConstLabels: nil,
+		}),
+		promauto.NewGauge(prometheus.GaugeOpts{
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "telemetry_fsbuffer_size_emitter3",
+			Help:        "The emitter.3 size of the fluentbit chunk buffer",
+			ConstLabels: nil,
+		}),
+		promauto.NewGauge(prometheus.GaugeOpts{
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "telemetry_fsbuffer_size_emitter2",
+			Help:        "The emitter.2 size of the fluentbit chunk buffer",
+			ConstLabels: nil,
+		}),
+		promauto.NewGauge(prometheus.GaugeOpts{
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "telemetry_fsbuffer_size_tail0",
+			Help:        "The tail.0 size of the fluentbit chunk buffer",
+			ConstLabels: nil,
+		}),
+	}
+
 	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace:   "",
 		Subsystem:   "",
@@ -88,4 +127,20 @@ func dirSize(path string) (int64, error) {
 	return size, err
 }
 
-// func listDirs(path string) (returns an array of dirs)  // iterate through dir, for every subfolder calls dirSize
+func listDirs(path string) ([]directory, error) {
+	directories := make([]directory, 0)
+	files, err := ioutil.ReadDir(path)
+	for _, file := range files {
+		if err != nil {
+			return directories, err
+		}
+		if file.IsDir() {
+			size, innerErr := dirSize(path + "/" + file.Name())
+			if innerErr != nil {
+				return directories, innerErr
+			}
+			directories = append(directories, directory{file.Name(), size})
+		}
+	}
+	return directories, err
+} // iterate through dir, for every subfolder calls dirSize
