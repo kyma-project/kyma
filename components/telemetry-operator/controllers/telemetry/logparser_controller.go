@@ -73,7 +73,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to loparser change")
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to log parser change")
 
 		if err = r.Update(ctx, &logParser); err != nil {
 			log.Error(err, "Failed updating log parser")
