@@ -41,5 +41,5 @@ spec:
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/name: hydra-maester
   portLevelMtls:
-    {{ index .Values "hydra-maester" "port" "metrics" }}:
+    {{ index .Values "hydra" "hydra-maester" "port" "metrics" }}:
       mode: PERMISSIVE
