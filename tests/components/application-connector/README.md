@@ -2,65 +2,86 @@
 
 These are the component tests for Application Connector.
 
-## Tests structure
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
 
-The test are structured as a monorepo with tests for the following modules:
-- Application Gateway
+- [Component tests for Application Connector](#component-tests-for-application-connector)
+- [Design and architecture](#design-and-architecture)
+- [Building](#building)
+- [Running](#running)
+- [Debugging](#debugging)
 
-## Application Gateway tests
+<!-- markdown-toc end -->
 
-The tests are executed on a Kyma cluster where the tested Application Gateway is installed.
+## Design and architecture
 
-The environment consists of a Kubernetes Pod running the tests and a mock application simulating the remote endpoints for the tested Application Gateway.
+The tests consist of:
+- [Application CRs](./resources/charts/gateway-test/templates/applications/) describing test cases
+- [Test runners](./test/application-gateway/) with various check for subsets of cases, grouped by App CRs
+- [Mock app](./tools/external-api-mock-app/) which simulates remote endpoints
+
+Additionally, following resources are created on the cluster:
+- [Service Account](./resources/charts/gateway-test/templates/service-account.yml:2), used by tests to read App CRs
+
+The tests are executed as a Kubernetes Job on a Kyma cluster, 
+where the tested Application Gateway is installed. 
+The test job and mock app deployment are in the `test` namespace. 
 
 ![Application Gateway tests architecture](./assets/app-gateway-tests-architecture.svg)
 
-The test cases are defined as services in the Application CR.
+## Building
 
-The whole test setup is deployed into the Kyma cluster with the Helm template executed in the Makefile by the command `test-gateway`.
+To build Docker images of tests and mock application:
 
-Image versions and the external service name used during testing can be set up in the Helm chart values file `k8s/gateway-test/values.yaml`.
+``` sh
+./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
+```
+This will build the following images:
+- `{DOCKER_TAG}/gateway-test:{DOCKER_TAG}`
+- `{DOCKER_TAG}/mock-app:{DOCKER_TAG}`
 
-### Local build of test images
+## Running
 
-1. In the main folder build the test images.
-   ```bash
-   ./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
-   ```
-
-### Local execution
+### Deploy Kyma cluster locally
 
 1. Provision a local Kubernetes cluster with k3d:
-
-   ```shell
+   ```sh
    kyma provision k3d
    ```
 
 2. Install the minimal set of components required to run Application Gateway for either Kyma OS or SKR:
 
-   <div tabs name="Kyma flavor" group="minimal-kyma-installation">
-      <details open>
-      <summary label="OS">
-      Kyma OS
-      </summary>
+    <div tabs name="Kyma flavor" group="minimal-kyma-installation">
+    <details open>
+    <summary label="OS">
+    Kyma OS
+    </summary>
 
-   ```bash
-   kyma deploy --components-file ./resources/installation-config/mini-kyma-os.yaml
-   ```
-      </details>
-      <details>
-      <summary label="SKR">
-      SKR
-      </summary>
+    ```sh
+    kyma deploy --components-file ./resources/installation-config/mini-kyma-os.yaml
+    ```
 
-   ```bash
-   kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml 
-   ```
-      </details>
-   </div>
+    </details>
+    <details>
+    <summary label="SKR">
+    SKR
+    </summary>
 
+    ```bash
+    kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml 
+    ```
+
+    </details>
+    </div>
+
+    >**TIP:** More about this step can be found in [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma)
+    
 3. Run the tests:
 
-   ```bash
-   make test-gateway
-   ```
+    ``` sh
+    make test-gateway
+    ```
+    
+    >**CAUTION:** This might override existing resources, if names of already existing resources collide with names used by tests
+
+### Debugging
