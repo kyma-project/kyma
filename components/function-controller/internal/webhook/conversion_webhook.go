@@ -18,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
 
@@ -304,50 +303,16 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
 	}
+
 	if repoName == "" {
-		var err error
-		// create a custom-named git repo with the information. This is not supposed to happen, it's just a precaution.
-		repoName, err = w.recreateGitRepoObjectFromFunction(in)
-		if err != nil {
-			return errors.Wrap(err, "while recreating GitRepository")
-		}
+		// TODO: Improve logging interface
+		w.log.Error(fmt.Errorf("Unable to find GitRepository annotation for function: "), fmt.Sprintf("%s/%s", in.Namespace, in.Name))
 	}
+
 	out.Spec.Source = repoName
 	out.Spec.Reference = in.Spec.Source.GitRepository.Reference
 	out.Spec.BaseDir = in.Spec.Source.GitRepository.BaseDir
 	return nil
-}
-
-func (w *ConvertingWebhook) recreateGitRepoObjectFromFunction(in *serverlessv1alpha2.Function) (string, error) {
-	repoName := recreatedRepoName(in.Name)
-
-	repo := &serverlessv1alpha1.GitRepository{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      repoName,
-			Namespace: in.Namespace,
-		},
-	}
-	spec := serverlessv1alpha1.GitRepositorySpec{
-		URL: in.Spec.Source.GitRepository.URL,
-	}
-
-	if in.Spec.Source.GitRepository.Auth != nil {
-		spec.Auth = &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthType(in.Spec.Source.GitRepository.Auth.Type),
-			SecretName: in.Spec.Source.GitRepository.Auth.SecretName,
-		}
-	}
-	_, err := controllerutil.CreateOrUpdate(context.Background(), w.client, repo,
-		func() error {
-			repo.Spec = spec
-			return nil
-		})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to createOrUpdate GitRepository")
-	}
-
-	return repoName, nil
-
 }
 
 func recreatedRepoName(functionName string) string {

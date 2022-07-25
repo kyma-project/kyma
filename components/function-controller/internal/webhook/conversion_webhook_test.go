@@ -41,12 +41,11 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepo).Build()
 	w := NewConvertingWebhook(client, scheme)
 	tests := []struct {
-		name          string
-		src           runtime.Object
-		wantDst       runtime.Object
-		wantVersion   string
-		wantErr       bool
-		checkRecreate bool
+		name        string
+		src         runtime.Object
+		wantDst     runtime.Object
+		wantVersion string
+		wantErr     bool
 	}{
 		{
 			name: "v1alpha1 to v1alpha2 inline function",
@@ -318,46 +317,6 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
-		{
-			name:          "v1alpha2 to v1alpha1 Git function - missing git repository",
-			checkRecreate: true,
-
-			src: &serverlessv1alpha2.Function{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "test", Namespace: "test",
-				},
-				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
-					Source: serverlessv1alpha2.Source{
-						GitRepository: &serverlessv1alpha2.GitRepositorySource{
-							URL: testGitRepo.Spec.URL,
-							Repository: serverlessv1alpha2.Repository{
-								BaseDir:   "/code/",
-								Reference: "main",
-							},
-							Auth: &serverlessv1alpha2.RepositoryAuth{
-								Type:       serverlessv1alpha2.RepositoryAuthType(testGitRepo.Spec.Auth.Type),
-								SecretName: testGitRepo.Spec.Auth.SecretName,
-							},
-						},
-					},
-				},
-			},
-			wantDst: &serverlessv1alpha1.Function{
-				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
-				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
-					Type:    serverlessv1alpha1.SourceTypeGit,
-					Source:  "test-recreated-repo",
-					Repository: serverlessv1alpha1.Repository{
-						BaseDir:   "/code/",
-						Reference: "main",
-					},
-				},
-			},
-
-			wantVersion: serverlessv1alpha1.GroupVersion.String(),
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -369,18 +328,6 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			if _, ok := tt.wantDst.(*serverlessv1alpha1.Function); ok {
 				require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec, dst.(*serverlessv1alpha1.Function).Spec)
 
-				if tt.checkRecreate {
-					validateRecreatedRepo(t,
-						client,
-						tt.src.(*serverlessv1alpha2.Function),
-						*tt.src.(*serverlessv1alpha2.Function).Spec.Source.GitRepository.Auth)
-
-					require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec.BaseDir,
-						dst.(*serverlessv1alpha1.Function).Spec.BaseDir)
-
-					require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec.Reference,
-						dst.(*serverlessv1alpha1.Function).Spec.Reference)
-				}
 			} else if _, ok := tt.wantDst.(*serverlessv1alpha2.Function); ok {
 				require.Equal(t, tt.wantDst.(*serverlessv1alpha2.Function).Spec, dst.(*serverlessv1alpha2.Function).Spec)
 
@@ -415,69 +362,4 @@ func validateRecreatedRepo(t *testing.T, client ctrlclient.Client, f *serverless
 
 	require.Equal(t, authConfig.SecretName, repo.Spec.Auth.SecretName)
 	require.Equal(t, authConfig.Type, serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type))
-}
-
-func TestConvertingWebhook_convertFunctionWithGitConfigUpdates(t *testing.T) {
-	scheme := runtime.NewScheme()
-	_ = serverlessv1alpha1.AddToScheme(scheme)
-	_ = serverlessv1alpha2.AddToScheme(scheme)
-
-	client := fake.NewClientBuilder().WithScheme(scheme).Build()
-	w := NewConvertingWebhook(client, scheme)
-	//GIVEN
-	startingFunction := &serverlessv1alpha2.Function{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test", Namespace: "test",
-		},
-		Spec: serverlessv1alpha2.FunctionSpec{
-			Runtime: serverlessv1alpha2.NodeJs12,
-			Source: serverlessv1alpha2.Source{
-				GitRepository: &serverlessv1alpha2.GitRepositorySource{
-					URL: "https://github.com/kyma-project/kyma.git",
-					Repository: serverlessv1alpha2.Repository{
-						BaseDir:   "/code/",
-						Reference: "main",
-					},
-					Auth: &serverlessv1alpha2.RepositoryAuth{
-						Type:       serverlessv1alpha2.RepositoryAuthBasic,
-						SecretName: "secret-name",
-					},
-				},
-			},
-		},
-	}
-
-	dst, err := w.allocateDstObject(serverlessv1alpha1.GroupVersion.String(), "Function")
-	require.NoError(t, err)
-
-	err = w.convertFunction(startingFunction, dst)
-	require.NoError(t, err)
-
-	repoName := recreatedRepoName(startingFunction.Name)
-	repo := &serverlessv1alpha1.GitRepository{}
-	err = client.Get(context.Background(), types.NamespacedName{
-		Name:      repoName,
-		Namespace: startingFunction.Namespace,
-	}, repo)
-
-	require.NoError(t, err)
-	require.NotNil(t, repo)
-	require.Equal(t, startingFunction.Spec.Source.GitRepository.URL, repo.Spec.URL)
-
-	//WHEN
-	startingFunction.Spec.Source.GitRepository.URL = "https://github.com/kyma-fork/kyma.git"
-
-	err = w.convertFunction(startingFunction, dst)
-	require.NoError(t, err)
-
-	//THEN
-	UpdatedRepo := &serverlessv1alpha1.GitRepository{}
-	err = client.Get(context.Background(), types.NamespacedName{
-		Name:      repoName,
-		Namespace: startingFunction.Namespace,
-	}, UpdatedRepo)
-
-	require.NoError(t, err)
-	require.NotNil(t, UpdatedRepo)
-	require.Equal(t, startingFunction.Spec.Source.GitRepository.URL, UpdatedRepo.Spec.URL)
 }
