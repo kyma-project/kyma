@@ -1,7 +1,6 @@
 package webhook
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -12,8 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -34,6 +31,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 		},
 	}
 
+	testTransitionTime := metav1.Now()
 	scheme := runtime.NewScheme()
 	_ = serverlessv1alpha1.AddToScheme(scheme)
 	_ = serverlessv1alpha2.AddToScheme(scheme)
@@ -96,7 +94,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha1 to v1alpha2 inline function - with Resources",
+			name: "v1alpha1 to v1alpha2 inline function - with Resources and Status",
 			src: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
@@ -124,6 +122,18 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 
 					Source: "test-source",
 					Deps:   "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
 				},
 			},
 			wantDst: &serverlessv1alpha2.Function{
@@ -163,11 +173,21 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
 			},
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 inline function - with ResourceConfiguration",
+			name: "v1alpha2 to v1alpha1 inline function - with ResourceConfiguration and Status",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
@@ -205,6 +225,16 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
 			},
 			wantDst: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
@@ -233,6 +263,18 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 
 					Source: "test-source",
 					Deps:   "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -347,19 +389,4 @@ func checkGitRepoAnnotation(f *serverlessv1alpha2.Function, repoName string) err
 		return fmt.Errorf("can't find the GitRepo annotation or the value is incorrect")
 	}
 	return nil
-}
-
-func validateRecreatedRepo(t *testing.T, client ctrlclient.Client, f *serverlessv1alpha2.Function, authConfig serverlessv1alpha2.RepositoryAuth) {
-	repoName := recreatedRepoName(f.Name)
-	repo := &serverlessv1alpha1.GitRepository{}
-	err := client.Get(context.Background(), types.NamespacedName{
-		Name:      repoName,
-		Namespace: f.Namespace,
-	}, repo)
-
-	require.NoError(t, err)
-	require.NotNil(t, repo)
-
-	require.Equal(t, authConfig.SecretName, repo.Spec.Auth.SecretName)
-	require.Equal(t, authConfig.Type, serverlessv1alpha2.RepositoryAuthType(repo.Spec.Auth.Type))
 }

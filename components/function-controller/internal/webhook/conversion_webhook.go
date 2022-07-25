@@ -271,7 +271,7 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 		return errors.Wrap(err, "while converting function spec from v1alpha2 to v1alpha1")
 	}
 
-	w.convertStatusV1Alpha2ToV1Alpha1(&in.Status, &out.Status)
+	w.convertStatusV1Alpha2ToV1Alpha1(&in.Status, out.Spec.Source, &out.Status)
 	return nil
 }
 
@@ -291,7 +291,7 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 }
 
 func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
-	if in.Spec.Source.GitRepository == nil {
+	if in.Spec.Source.Inline != nil {
 		out.Spec.Source = in.Spec.Source.Inline.Source
 		out.Spec.Deps = in.Spec.Source.Inline.Dependencies
 		return nil
@@ -319,11 +319,12 @@ func recreatedRepoName(functionName string) string {
 	return fmt.Sprintf("%s-recreated-repo", functionName)
 }
 
-func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, out *serverlessv1alpha1.FunctionStatus) {
+func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, outSource string, out *serverlessv1alpha1.FunctionStatus) {
 	out.Repository = serverlessv1alpha1.Repository(in.Repository)
 	out.Commit = in.Commit
 	out.Runtime = serverlessv1alpha1.RuntimeExtended(in.Runtime)
 	out.RuntimeImageOverride = in.RuntimeImageOverride
+	out.Source = outSource
 
 	out.Conditions = []serverlessv1alpha1.Condition{}
 
