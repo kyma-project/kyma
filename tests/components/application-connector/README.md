@@ -5,11 +5,12 @@ These are the component tests for Application Connector.
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [Component tests for Application Connector](#component-tests-for-application-connector)
 - [Design and architecture](#design-and-architecture)
 - [Building](#building)
 - [Running](#running)
-- [Debugging](#debugging)
+  - [Deploy Kyma cluster locally](#deploy-kyma-cluster-locally)
+  - [Run the tests](#run-the-tests)
+  - [Debugging](#debugging)
 
 <!-- markdown-toc end -->
 
@@ -49,7 +50,7 @@ This will build the following images:
    kyma provision k3d
    ```
 
-2. Install the minimal set of components required to run Application Gateway for either Kyma OS or SKR:
+1. Install the minimal set of components required to run Application Gateway for either Kyma OS or SKR:
 
     <div tabs name="Kyma flavor" group="minimal-kyma-installation">
     <details open>
@@ -75,13 +76,13 @@ This will build the following images:
     </div>
 
     >**TIP:** More about this step can be found in [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma)
-    
-3. Run the tests:
 
-    ``` sh
-    make test-gateway
-    ```
-    
-    >**CAUTION:** This might override existing resources, if names of already existing resources collide with names used by tests
+### Run the tests
+
+``` sh
+make test-gateway
+```
+
+>**CAUTION:** This might override existing resources, if names of already existing resources collide with names used by tests
 
 ### Debugging
