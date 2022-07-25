@@ -10,9 +10,17 @@ test: test-gateway
 image: image-gateway-test
 clean: clean-gateway-test
 
-release: publish-gateway-test publish-mock-app
+release: publish-gateway-test publish-mock-app publish-app-conn-validator-test
+
+test-validator: test-app-conn-validator-debug clean-app-conn-validator-test
 
 test-gateway: test-gateway-debug clean-gateway-test
+
+
+test-app-conn-validator-debug:
+
+clean-app-conn-validator-test:
+
 
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help

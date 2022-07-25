@@ -1,0 +1,13 @@
+# Default values for application-connectivity-validator-test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+containerRegistry:
+  path: "eu.gcr.io/kyma-project"
+
+images:
+  validatorTest:
+    name: "app-conn-validator-test"
+    version: "00001"
+
+namespace: "test"
