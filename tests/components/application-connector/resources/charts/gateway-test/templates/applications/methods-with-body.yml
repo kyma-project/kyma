@@ -9,7 +9,7 @@ spec:
     are correctly forwarded, including their body
   skipVerify: true
   labels:
-    app: body-forwarding
+    app: methods-with-body
   services:
     - displayName: post
       name: post
@@ -19,7 +19,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/body-forwarding/post"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/methods-with-body/post"
     - displayName: delete
       name: delete
       providerDisplayName: delete
@@ -28,7 +28,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/body-forwarding/delete"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/methods-with-body/delete"
     - displayName: put
       name: put
       providerDisplayName: put
@@ -37,4 +37,4 @@ spec:
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/body-forwarding/put"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/methods-with-body/put"

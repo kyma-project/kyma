@@ -75,7 +75,7 @@ func (gs *GatewaySuite) TestResponseBody() {
 }
 
 func (gs *GatewaySuite) TestBodyPerMethod() {
-	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "body-forwarding", v1.GetOptions{})
+	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "methods-with-body", v1.GetOptions{})
 	gs.Nil(err)
 	for _, service := range app.Spec.Services {
 		gs.Run(service.Description, func() {
