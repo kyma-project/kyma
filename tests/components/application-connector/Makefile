@@ -9,7 +9,7 @@ SUBJECT =  "/C=PL/ST=A/O=SAP/CN=$(APP_URL)"
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
-test: disable-sidecar-for-mtls-test generate-certs test-gateway
+test: disable-sidecar-for-mtls-test generate-certs test-gateway enable-sidecar-after-mtls-test
 image: image-gateway-test
 clean: clean-gateway-test
 
@@ -45,10 +45,14 @@ image-mock-app:
 	docker build -t $(MOCK_APP_IMAGE) -f Dockerfile.mockapp .
 
 disable-sidecar-for-mtls-test:
-	kubectl annotate pod traffic.sidecar.istio.io/excludeOutboundPorts=8090 -l app=central-application-gateway -n kyma-system
+	@echo "Disabling Application Gateway's Istio sidecar for port 8090"
+	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "add", "path": "/spec/template/metadata/annotations", "value": { "traffic.sidecar.istio.io/excludeOutboundPorts": "8090" } }]'
+	@echo "Waiting for Application Gateway deployment to rollout"
+	kubectl rollout status deploy central-application-gateway -n kyma-system --timeout=1m
 
 enable-sidecar-after-mtls-test:
-	kubectl annotate pod traffic.sidecar.istio.io/excludeOutboundPorts- -l app=central-application-gateway -n kyma-system
+	@echo "Enabling Application Gateway's Istio sidecar for port 8090"
+	-kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
 generate-certs:
 	echo "Generating certificate for $(APP_URL)"
