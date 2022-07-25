@@ -1,3 +1,4 @@
+{{- if .Values.global.ory.hydra.persistence.gcloud.enabled -}}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -8,3 +9,4 @@ spec:
   trafficPolicy:
     tls:
       mode: DISABLE
+{{- end -}}
