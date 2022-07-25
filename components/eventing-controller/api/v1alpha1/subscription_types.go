@@ -238,8 +238,9 @@ type Subscription struct {
 // If the SubscriptionStatus.CleanEventTypes is nil, it will be initialized to an empty slice of stings.
 // It is needed because the Kubernetes APIServer will reject requests containing null in the JSON payload.
 func (s Subscription) MarshalJSON() ([]byte, error) {
+	// Use type alias to copy the subscription without causing an infinite recursion when calling json.Marshal.
 	type Alias Subscription
-	a := (Alias)(s)
+	a := Alias(s)
 	if a.Status.CleanEventTypes == nil {
 		a.Status.InitializeCleanEventTypes()
 	}
