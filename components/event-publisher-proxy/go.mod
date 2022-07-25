@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/event-publisher-proxy
 
-go 1.17
+go 1.18
 
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.1
@@ -87,12 +87,12 @@ require (
 
 replace (
 	// keep all following packages at the same version
-	k8s.io/api => k8s.io/api v0.24.2
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.2
-	k8s.io/apimachinery => k8s.io/apimachinery v0.24.2
-	k8s.io/cli-runtime => k8s.io/cli-runtime v0.24.2
-	k8s.io/component-base => k8s.io/component-base v0.24.2
-	k8s.io/kubectl => k8s.io/kubectl v0.24.2
+	k8s.io/api => k8s.io/api v0.24.3
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.3
+	k8s.io/apimachinery => k8s.io/apimachinery v0.24.3
+	k8s.io/cli-runtime => k8s.io/cli-runtime v0.24.3
+	k8s.io/component-base => k8s.io/component-base v0.24.3
+	k8s.io/kubectl => k8s.io/kubectl v0.24.3
 )
 
 replace (

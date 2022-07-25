@@ -85,6 +85,9 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	fluentBitFilesDirectory := currentBaseDirectory + "/files"
 
 	var generalCm v1.ConfigMap
+	var logParsers telemetryv1alpha1.LogParserList
+	var err error
+
 	if err := f.client.Get(ctx, fluentBitConfigMap, &generalCm); err != nil {
 		return []fs.File{}, err
 	}
@@ -95,40 +98,49 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 			Data: data,
 		})
 	}
-	var logPipelines telemetryv1alpha1.LogPipelineList
-	err := f.client.List(ctx, &logPipelines)
-	if err != nil {
-		return []fs.File{}, err
-	}
+	// If validating pipeline then check pipelines + parsers
 	if pipeline != nil {
-		logPipelines.Items = append(logPipelines.Items, *pipeline)
-	}
-	// Build the config from all the exiting pipelines
-	for _, logPipeline := range logPipelines.Items {
-		configFiles, err = appendFluentBitConfigFile(configFiles, logPipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
+		configFiles, err = appendFluentBitConfigFile(configFiles, *pipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
 		if err != nil {
 			return []fs.File{}, err
 		}
+		if err = f.client.List(ctx, &logParsers); err != nil {
+			return []fs.File{}, err
+		}
+		parsersConfig := MergeParsersConfig(&logParsers)
+		configFiles = append(configFiles, fs.File{
+			Path: fluentBitParsersConfigDirectory,
+			Name: fluentBitParsersConfigMapKey,
+			Data: parsersConfig,
+		})
+
+		return configFiles, nil
 	}
 
-	var parsersConfig string
-	var logParsers telemetryv1alpha1.LogParserList
-	if err := f.client.List(ctx, &logParsers); err != nil {
-		return []fs.File{}, err
-	}
 	if parser != nil {
-		logParsers.Items = append(logParsers.Items, *parser)
+		logParsers.Items = appendUniqueParsers(logParsers.Items, parser)
+		parsersConfig := MergeParsersConfig(&logParsers)
+		configFiles = append(configFiles, fs.File{
+			Path: fluentBitParsersConfigDirectory,
+			Name: fluentBitParsersConfigMapKey,
+			Data: parsersConfig,
+		})
+
+		return configFiles, nil
 	}
-
-	parsersConfig = MergeParsersConfig(&logParsers)
-	configFiles = append(configFiles, fs.File{
-		Path: fluentBitParsersConfigDirectory,
-		Name: fluentBitParsersConfigMapKey,
-		Data: parsersConfig,
-	})
-
-	return configFiles, nil
+	return []fs.File{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
 }
+
+func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telemetryv1alpha1.LogParser) []telemetryv1alpha1.LogParser {
+	for _, l := range logParsers {
+		if l.Name == parser.Name {
+			l = *parser
+			return logParsers
+		}
+	}
+	return append(logParsers, *parser)
+}
+
 func appendFluentBitConfigFile(
 	configFiles []fs.File,
 	logPipeline telemetryv1alpha1.LogPipeline,

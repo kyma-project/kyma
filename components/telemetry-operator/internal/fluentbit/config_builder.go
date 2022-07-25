@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
@@ -18,13 +20,12 @@ type PipelineConfig struct {
 }
 
 const (
-	ParserConfigHeader          ConfigHeader = "[PARSER]"
-	MultiLineParserConfigHeader ConfigHeader = "[MULTILINE_PARSER]"
-	FilterConfigHeader          ConfigHeader = "[FILTER]"
-	OutputConfigHeader          ConfigHeader = "[OUTPUT]"
-	MatchKey                    string       = "match"
-	OutputStorageMaxSizeKey     string       = "storage.total_limit_size"
-	EmitterTemplate             string       = `
+	ParserConfigHeader      ConfigHeader = "[PARSER]"
+	FilterConfigHeader      ConfigHeader = "[FILTER]"
+	OutputConfigHeader      ConfigHeader = "[OUTPUT]"
+	MatchKey                string       = "match"
+	OutputStorageMaxSizeKey string       = "storage.total_limit_size"
+	EmitterTemplate         string       = `
 name                  rewrite_tag
 match                 %s.*
 Rule                  $log "^.*$" %s.$TAG true
@@ -74,9 +75,7 @@ func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) s
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 
-	if len(logPipeline.Spec.Output.Custom) > 0 {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
-	}
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
 
@@ -91,19 +90,106 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
 
-	if len(logPipeline.Spec.Output.Custom) > 0 {
-		section, err := ParseSection(logPipeline.Spec.Output.Custom)
-		if err != nil {
-			return "", err
-		}
-
-		section[MatchKey] = generateMatchCondition(logPipeline.Name)
-		section[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
-
-		sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, section))
+	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
+	if err != nil {
+		return "", err
 	}
+	sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, outputSection))
 
 	return sb.String(), nil
+}
+
+func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
+	if len(logPipeline.Spec.Output.Custom) > 0 {
+		return generateCustomOutput(logPipeline, pipelineConfig)
+	}
+
+	// An HTTP output needs at least a host attribute
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() {
+		return generateHTTPOutput(logPipeline, pipelineConfig)
+	}
+
+	return nil, fmt.Errorf("output plugin not defined")
+}
+
+func getHTTPOutputDefaults() map[string]string {
+	result := map[string]string{
+		"name":                     "http",
+		"port":                     "443",
+		"tls":                      "on",
+		"tls.verify":               "on",
+		"allow_duplicated_headers": "true",
+		"uri":                      "/customindex/kyma",
+		"format":                   "json",
+	}
+	return result
+}
+
+func generateHTTPOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
+	result := getHTTPOutputDefaults()
+	result[MatchKey] = generateMatchCondition(logPipeline.Name)
+	result[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
+	var err error
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() {
+		result["host"], err = resolveValue(logPipeline.Spec.Output.HTTP.Host, logPipeline.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if logPipeline.Spec.Output.HTTP.Password.IsDefined() {
+		result["http_passwd"], err = resolveValue(logPipeline.Spec.Output.HTTP.Password, logPipeline.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if logPipeline.Spec.Output.HTTP.User.IsDefined() {
+		result["http_user"], err = resolveValue(logPipeline.Spec.Output.HTTP.User, logPipeline.Name)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if logPipeline.Spec.Output.HTTP.Port != "" {
+		result["port"] = logPipeline.Spec.Output.HTTP.Port
+	}
+	if logPipeline.Spec.Output.HTTP.URI != "" {
+		result["uri"] = logPipeline.Spec.Output.HTTP.URI
+	}
+	if logPipeline.Spec.Output.HTTP.Format != "" {
+		result["format"] = logPipeline.Spec.Output.HTTP.Format
+	}
+	if logPipeline.Spec.Output.HTTP.TLSConfig.Disabled {
+		result["tls"] = "off"
+	}
+	if logPipeline.Spec.Output.HTTP.TLSConfig.SkipCertificateValidation {
+		result["tls.verify"] = "off"
+	}
+	if logPipeline.Spec.Output.HTTP.Compress != "" {
+		result["compress"] = logPipeline.Spec.Output.HTTP.Compress
+	}
+
+	return result, nil
+}
+
+func resolveValue(value telemetryv1alpha1.ValueType, logPipeline string) (string, error) {
+	if value.Value != "" {
+		return value.Value, nil
+	}
+	if value.ValueFrom.SecretKey.Name != "" && value.ValueFrom.SecretKey.Key != "" {
+		return fmt.Sprintf("${%s}", secret.GenerateVariableName(value.ValueFrom.SecretKey, logPipeline)), nil
+	}
+	return "", fmt.Errorf("value not defined")
+}
+
+func generateCustomOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
+	section, err := ParseSection(logPipeline.Spec.Output.Custom)
+	if err != nil {
+		return nil, err
+	}
+
+	section[MatchKey] = generateMatchCondition(logPipeline.Name)
+	section[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
+
+	return section, nil
 }
 
 func generateMatchCondition(logPipelineName string) string {
