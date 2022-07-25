@@ -9,7 +9,7 @@ export APP_URL=$1
 export GATEWAY_TEST_CERTS_DIR=./resources/charts/gateway-test/certs
 export SUBJECT="/C=PL/ST=A/O=SAP/CN=$APP_URL"
 
-echo "For app at $APP_URL"
+echo "Generating certificate for domain: $APP_URL"
 openssl version
 openssl req -newkey rsa:2048 -nodes -x509 -days 365 -out $GATEWAY_TEST_CERTS_DIR/ca.crt -keyout $GATEWAY_TEST_CERTS_DIR/ca.key -subj $SUBJECT
 openssl genrsa -out $GATEWAY_TEST_CERTS_DIR/server.key 2048
