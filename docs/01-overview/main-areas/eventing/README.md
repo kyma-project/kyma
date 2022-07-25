@@ -2,28 +2,24 @@
 title: What is Eventing in Kyma?
 ---
 
-With Kyma Eventing, you can focus on your business workflows and trigger them with events to implement asynchronous flows within Kyma.
+## Overview
+
+With Kyma Eventing, you can focus on your business workflows and trigger them with events to implement asynchronous flows within Kyma. Generally, eventing consists of event producers (or publishers) and consumers (or subscribers) that send events to or receive events from an event processing backend.
+
+The objective of Eventing in Kyma is to simplify the process of publishing and subscribing to events. Kyma uses proven eventing backend technology to provide a seamless experience to the user with their end-to-end business flows. The user does not have to implement or integrate any intermediate backend or protocol.
 
 Kyma Eventing uses the following technology:
 - [NATS JetStream](https://docs.nats.io/) as backend within the cluster
 - [HTTP POST](https://www.w3schools.com/tags/ref_httpmethods.asp) requests to simplify sending and receiving events
 - Declarative [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) to subscribe to events
 
-## Overview
+## Kyma Eventing flow
 
-Generally, eventing consists of event producers (or publishers) and consumers (or subscribers) that send events to or receive events from an event processing backend.
-
-Kyma uses the PubSub messaging pattern: Kyma publishes messages to a messaging backend, which filters these messages and sends them to interested subscribers. Kyma does not send messages directly to the subscribers.
+Kyma Eventing follows the PubSub messaging pattern: Kyma publishes messages to a messaging backend, which filters these messages and sends them to interested subscribers. Kyma does not send messages directly to the subscribers as shown below:
 
 ![PubSub](./assets/pubsub.svg)
 
-The key benefits of PubSub are:
-- Asynchronous communication between loosely coupled components
-- Easy scaling of publishers and subscribers
-
-## Eventing in Kyma in a nutshell
-
-The objective of Eventing in Kyma is to simplify the process of publishing and subscribing to events. Kyma uses proven eventing backend technology such as [NATS JetStream](https://docs.nats.io/), so that the user gets a seamless experience with their end-to-end business flow. The user does not have to implement or integrate any intermediate backend or protocol. Eventing in Kyma from a user's perspective works as follows:
+Eventing in Kyma from a user’s perspective works as follows:
 
 - Offer an HTTP end point, for example a Function to receive the events.
 - Specify the events the user is interested in using the Kyma [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md).
