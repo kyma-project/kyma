@@ -84,6 +84,7 @@ maintenance:
 
 # Overrides for the Hydra chart
 hydra:
+  enabled: true
   ingress:
     public:
       enabled: false
@@ -139,6 +140,7 @@ hydra:
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
+  enabled: true
   oathkeeper:
     config:
       authenticators:
@@ -159,7 +161,7 @@ oathkeeper:
             # If unset, all requests are forwarded.
             # If set, only requests that have at least one of the set cookies will be forwarded, others will be passed to the next authenticator
             only:
-            - sessionid
+              - sessionid
         oauth2_client_credentials:
           enabled: true
           config:
@@ -179,7 +181,7 @@ oathkeeper:
           enabled: true
           config:
             jwks_urls:
-            - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
+              - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
             scope_strategy: wildcard
       authorizers:
         allow:
