@@ -35,6 +35,31 @@ spec:
             secretName: wrong-oauth-test
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
+    - displayName: mtls-oauth-different-ca
+      name: mtls-oauth-different-ca
+      providerDisplayName: mTLS-OAuth
+      description: Should return 401 for mTLS Oauth with client certificate generated from different CA
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-different-ca"
+          credentials:
+            secretName: mtls-oauth-negative-different-ca
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls-negative-different-ca
+      name: mtls-negative-different-ca
+      providerDisplayName: mTLS
+      description: Should return 401 when calling endpoint protected with mTLS
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "htts://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-different-ca"
+          credentials:
+            secretName: mtls-negative
+            type: CertGen
     - displayName: bad csrf token basic
       name: bad-csrf-token-basic
       providerDisplayName: Basic with CSRF

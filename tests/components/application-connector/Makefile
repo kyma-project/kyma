@@ -15,7 +15,7 @@ clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway: test-gateway-debug clean-gateway-test
+test-gateway: test-gateway-debug #clean-gateway-test
 
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
@@ -45,11 +45,14 @@ image-mock-app:
 	docker build -t $(MOCK_APP_IMAGE) -f Dockerfile.mockapp .
 
 disable-sidecar-for-mtls-test:
-`	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "add", "path": "/spec/template/metadata/annotations", "value": { "traffic.sidecar.istio.io/excludeOutboundPorts": "8090" } }]'
+	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "add", "path": "/spec/template/metadata/annotations", "value": { "traffic.sidecar.istio.io/excludeOutboundPorts": "8090" } }]'
 	kubectl rollout status deploy central-application-gateway -n kyma-system --timeout=1m
 
 enable-sidecar-after-mtls-test:
 	-kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
 generate-certs:
-	./scripts/generate-self-signed-certs.sh $(APP_URL)
+	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
+	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
+
+

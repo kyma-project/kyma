@@ -53,9 +53,21 @@ spec:
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls-oauth"
           credentials:
-            secretName: mtls-oauth-test
+            secretName: mtls-oauth-positive
             authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
+    - displayName: mtls
+      name: mtls
+      providerDisplayName: mTLS
+      description: Should return 200 when calling endpoint protected with mTLS
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "htts://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls"
+          credentials:
+            secretName: mtls-positive
+            type: CertGen
     - displayName: csrf basic
       name: csrf-basic
       providerDisplayName: Basic with CSRF
