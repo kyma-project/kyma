@@ -44,7 +44,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="094790128069eccc9534214e7435c70bcafa221a0ef0f229c59418f8762704fa" \
+          CHECKSUM="6c96fdd6438cb919f4861419b632165697aabb1233d8da6cf3f7886b221416bf" \
           ;; \
         *) ;; \
       esac \
