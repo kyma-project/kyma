@@ -45,6 +45,8 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
+    deprecated: true
+    deprecationWarning: use v1alpha2 instead
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -600,6 +602,8 @@ spec:
     - jsonPath: .spec.auth.type
       name: Auth
       type: string
+    deprecated: true
+    deprecationWarning: Git Repository CR will be removed in kyma version 2.x
     name: v1alpha1
     schema:
       openAPIV3Schema:
