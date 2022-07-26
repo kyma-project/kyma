@@ -26,10 +26,24 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	Input     Input               `json:"input,omitempty"`
 	Filters   []Filter            `json:"filters,omitempty"`
 	Output    Output              `json:"output,omitempty"`
 	Files     []FileMount         `json:"files,omitempty"`
 	Variables []VariableReference `json:"variables,omitempty"`
+}
+
+// Input describes a Fluent Bit input configuration section
+type Input struct {
+	Application ApplicationInput `json:"application,omitempty"`
+}
+
+// ApplicationInput is the default type of Input that handles application logs
+type ApplicationInput struct {
+	Namespaces        []string `json:"namespaces,omitempty"`
+	ExcludeNamespaces []string `json:"excludeNamespaces,omitempty"`
+	Containers        []string `json:"containers,omitempty"`
+	ExcludeContainers []string `json:"excludeContainers,omitempty"`
 }
 
 // Filter describes a Fluent Bit filter configuration
@@ -37,7 +51,7 @@ type Filter struct {
 	Custom string `json:"custom,omitempty"`
 }
 
-// HttpOutput describes a Fluent Bit HTTP output configuration
+// HTTPOutput describes a Fluent Bit HTTP output configuration
 type HTTPOutput struct {
 	Host      ValueType `json:"host,omitempty"`
 	User      ValueType `json:"user,omitempty"`
@@ -66,7 +80,7 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Variables is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
+// VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
 type VariableReference struct {
 	Name      string        `json:"name,omitempty"`
 	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
