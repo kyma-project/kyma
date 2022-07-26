@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: application-gateway-test
+  name: application-connectivity-validator-test
   namespace: {{ .Values.namespace }}
 spec:
   template:
@@ -11,5 +11,4 @@ spec:
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.validatorTest) }}
           imagePullPolicy: Always
       restartPolicy: Never
-{{/*      serviceAccountName: {{ .Values.serviceAccountName }}*/}}
   backoffLimit: 0

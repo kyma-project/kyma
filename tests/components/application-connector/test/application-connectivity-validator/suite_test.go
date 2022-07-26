@@ -24,6 +24,6 @@ func (gs *ValidatorSuite) TearDownSuite() {
 	gs.Nil(err)
 }
 
-func TestGatewaySuite(t *testing.T) {
+func TestValidatorSuite(t *testing.T) {
 	suite.Run(t, new(ValidatorSuite))
 }

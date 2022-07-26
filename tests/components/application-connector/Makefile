@@ -12,6 +12,7 @@ image: image-gateway-test image-app-connectivity-validator-test
 clean: clean-gateway-test clean-app-conn-validator-test
 
 release: publish-gateway-test publish-mock-app publish-app-connectivity-validator-test
+#release: publish-app-connectivity-validator-test
 
 test-app-conn-validator: test-app-conn-validator-debug clean-app-conn-validator-test
 
@@ -22,6 +23,12 @@ test-app-conn-validator-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 
+	helm template resources/charts/application-connectivity-validator-test | kubectl apply -f -
+
+	kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-connectivity-validator-test
+	@echo ""
+	@echo "Application connectivity validator test results:"
+
 clean-app-conn-validator-test:
 	helm template resources/charts/application-connectivity-validator-test  | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
@@ -31,7 +38,7 @@ test-gateway-debug:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test --set gatewayTest=$(GATEWAY_TEST_IMAGE),mockApplication=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
 
-	-kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-gateway-test
+	kubectl wait --for=condition=complete --timeout=1m -n $(NAMESPACE) job/application-gateway-test
 	@echo ""
 	@echo "Gateway test results:"
 
