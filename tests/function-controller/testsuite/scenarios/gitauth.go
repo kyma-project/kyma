@@ -9,7 +9,7 @@ import (
 
 	"github.com/vrischmann/envconfig"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
@@ -34,8 +34,8 @@ type testRepo struct {
 	expectedResponse string
 	reference        string
 	secretData       map[string]string
-	runtime          serverlessv1alpha1.Runtime
-	auth             *serverlessv1alpha1.RepositoryAuth
+	runtime          serverlessv1alpha2.Runtime
+	auth             *serverlessv1alpha2.RepositoryAuth
 }
 
 type config struct {
@@ -185,9 +185,9 @@ func getAzureDevopsTestcase(cfg *config) testRepo {
 		baseDir:          cfg.Azure.BaseDir,
 		reference:        cfg.Azure.Reference,
 		expectedResponse: "Hello azure",
-		runtime:          serverlessv1alpha1.NodeJs14,
-		auth: &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthBasic,
+		runtime:          serverlessv1alpha2.NodeJs14,
+		auth: &serverlessv1alpha2.RepositoryAuth{
+			Type:       serverlessv1alpha2.RepositoryAuthBasic,
 			SecretName: "azure-devops-auth-secret",
 		},
 		secretData: createBasicAuthSecretData(cfg.Azure.BasicAuth)}
@@ -205,9 +205,9 @@ func getGithubTestcase(cfg *config) (testRepo, error) {
 		baseDir:          cfg.Github.BaseDir,
 		reference:        cfg.Github.Reference,
 		expectedResponse: "hello github",
-		runtime:          serverlessv1alpha1.Python39,
-		auth: &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
+		runtime:          serverlessv1alpha2.Python39,
+		auth: &serverlessv1alpha2.RepositoryAuth{
+			Type:       serverlessv1alpha2.RepositoryAuthSSHKey,
 			SecretName: "github-auth-secret",
 		},
 		secretData: secretData,
