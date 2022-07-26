@@ -265,7 +265,6 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 
 	return admissionregistrationv1.MutatingWebhook{
 		Name: ConvertingWebHookName,
-
 		AdmissionReviewVersions: []string{
 			"v1beta1",
 			"v1",
