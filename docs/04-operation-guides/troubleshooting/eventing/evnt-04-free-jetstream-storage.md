@@ -18,6 +18,8 @@ This retention policy keeps messages in the stream if they can't be delivered to
 If there are too many undelivered events, the NATS JetStream storage may get full.
 To prevent event loss, the backend stops receiving events, and no further events can be persisted to the stream.
 
+>**NOTE:** Remember, that if you delete a Subscriber(sink), but there is still a Kyma Subscription pointing to that sink in place, the events published to that Subscription will pile up in the stream and possibly delay the event delivery to other Subscribers.
+
 ## Remedy
 
 There are several ways to free the space on NATS JetStream backend:
