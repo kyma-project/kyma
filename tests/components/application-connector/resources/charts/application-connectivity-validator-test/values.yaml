@@ -7,7 +7,7 @@ containerRegistry:
 
 images:
   validatorTest:
-    name: "app-conn-validator-test"
+    name: "app-connectivity-validator-test"
     version: "00001"
 
 namespace: "test"
