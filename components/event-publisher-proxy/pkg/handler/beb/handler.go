@@ -32,7 +32,7 @@ const (
 	noDuration = -1
 
 	bebCommanderName      = "beb-commander"
-	destinationServiceBEB = "beb"
+	destinationServiceBEB = "sap event mesh"
 )
 
 var (
