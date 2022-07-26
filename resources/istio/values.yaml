@@ -48,6 +48,12 @@ meshConfig:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
+  extensionProviders:
+    - name: envoy
+      envoyFileAccessLog:
+        path: "/dev/stdout"
+        logFormat:
+          labels: {}
 
 components:
   egressGateways:
