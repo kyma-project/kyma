@@ -54,6 +54,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	subscription := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, utils.NewUncleanEventType("")),
@@ -86,6 +87,7 @@ func TestCreateSubscription(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	var testCases = []struct {
 		name                  string
@@ -298,6 +300,7 @@ func TestChangeSubscription(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	var testCases = []struct {
 		name                  string
@@ -535,6 +538,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	// when
 	subscription := utils.CreateSubscription(ens.TestEnsemble,
