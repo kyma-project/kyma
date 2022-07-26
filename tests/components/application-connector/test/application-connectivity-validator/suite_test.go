@@ -1,4 +1,4 @@
-package application_conn_validator
+package application_connectivity_validator
 
 import (
 	//	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -12,15 +12,9 @@ import (
 
 type ValidatorSuite struct {
 	suite.Suite
-	//	cli *cli.Clientset
 }
 
 func (gs *ValidatorSuite) SetupSuite() {
-	//	cfg, err := rest.InClusterConfig()
-	//	gs.Require().Nil(err)
-
-	//	gs.cli, err = cli.NewForConfig(cfg)
-	//	gs.Require().Nil(err)
 }
 
 func (gs *ValidatorSuite) TearDownSuite() {
