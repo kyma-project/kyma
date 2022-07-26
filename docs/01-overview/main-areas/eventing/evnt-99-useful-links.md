@@ -8,10 +8,10 @@ To learn more about how Eventing works, see:
 
 - [Eventing architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md) - describes how Eventing works and the main actors involved, such as the Eventing Controller and Event Publisher Proxy.
 - [Event names](../../../05-technical-reference/evnt-01-event-names.md) - contains information about event names and event name cleanup.
+- [EventingBackend CR](../../../05-technical-reference/00-custom-resources/evnt-02-eventingbackend.md) - describes the EventingBackend custom resource, which shows the current status of Kyma Eventing.
 - [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) - describes the Subscription custom resource, which you need to subscribe to events.
 - [Cloud Events](https://cloudevents.io/) - provides information about the Cloud Events specification used in Kyma.
-- [NATS](https://nats.io/) - provides more information about the backend technology behind Eventing in Kyma.
-- [JetStream](https://docs.nats.io/nats-concepts/jetstream) - provides details on the new functionalities and higher qualities of service on top of NATS. Read [Eventing Architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md#jet-stream) for more information.
+- [NATS JetStream](https://docs.nats.io/nats-concepts/jetstream) - provides more information about the backend technology behind Eventing in Kyma. [Eventing Architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md#jet-stream) provides details on the new functionalities and higher qualities of service on top of Core NATS.
 
 To perform tasks with Eventing, go through these tutorials:
 
@@ -20,6 +20,11 @@ To perform tasks with Eventing, go through these tutorials:
 - [Tutorial: Event name cleanup in Subscriptions](../../../03-tutorials/00-eventing/evnt-03-type-cleanup.md) - explains how Kyma Eventing filters out non-alphanumeric character from event names.
 - [Tutorial: Changing Events Max-In-Flight in Subscriptions](../../../03-tutorials/00-eventing/evnt-04-change-max-in-flight-in-sub.md) - shows how to set idle "in-flight messages" limit in Kyma Subscriptions.
 - [Tutorial: Publish legacy events using Kyma Eventing](../../../03-tutorials/00-eventing/evnt-05-send-legacy-events.md) - demonstrates how to send legacy events using Kyma Eventing.
+
+To troubleshoot Eventing-related issues:
+- [Basic Eventing Troubleshooting](../../../04-operation-guides/troubleshooting/eventing/evnt-01-eventing-troubleshooting.md)
+- [NATS JetStream Troubleshooting](../../../04-operation-guides/troubleshooting/eventing/evnt-02-jetstream-troubleshooting.md)
+- [Event Type Collision](../../../04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md)
 
 For other technical resources, check out these links on the Kyma GitHub repository:
 
