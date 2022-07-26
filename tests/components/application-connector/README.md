@@ -18,15 +18,15 @@ These are the component tests for Application Connector.
 
 The tests consist of:
 - [Application CRs](./resources/charts/gateway-test/templates/applications/) describing test cases
-- [Test runners](./test/application-gateway/) with various check for subsets of cases, grouped by App CRs
-- [Mock app](./tools/external-api-mock-app/) which simulates remote endpoints
+- [Test runners](./test/application-gateway/) with various check for subsets of cases, grouped by Application CRs
+- [Mock application](./tools/external-api-mock-app/) which simulates remote endpoints
 
 Additionally, following resources are created on the cluster:
-- [Service Account](./resources/charts/gateway-test/templates/service-account.yml:2), used by tests to read App CRs
+- [Service Account](./resources/charts/gateway-test/templates/service-account.yml:2), used by tests to read Application CRs
 
 The tests are executed as a Kubernetes Job on a Kyma cluster, 
 where the tested Application Gateway is installed. 
-The test job and mock app deployment are in the `test` namespace. 
+The test job and mock application deployment are in the `test` namespace. 
 
 ![Application Gateway tests architecture](./assets/app-gateway-tests-architecture.svg)
 
@@ -75,7 +75,7 @@ This will build the following images:
     </details>
     </div>
 
-    >**TIP:** More about this step can be found in [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma)
+    >**TIP:** More on Kyma installation can be found in [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma)
 
 ### Run the tests
 
