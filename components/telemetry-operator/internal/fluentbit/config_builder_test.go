@@ -76,8 +76,45 @@ name                  record_modifier
 match                 foo.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
-	actual := generatePermanentFilter("foo")
+	actual := generateFilter(PermanentFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit Permanent parser config is invalid")
+}
+
+func TestGenerateLuaFilter(t *testing.T) {
+	expected := `
+name                  lua
+match                 foo.*
+script 				  /files/filter-script.lua
+call   				  kubernetes_map_keys`
+
+	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
+	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
+}
+
+func TestGenerateFilter(t *testing.T) {
+
+	template := `
+name                  namename
+match                 %s.*`
+	expected := `
+name                  namename
+match                 foo.*`
+
+	actual := generateFilter(template, "foo")
+	require.Equal(t, expected, actual, "Fluent Bit filter generated config is invalid")
+
+	template = `
+name                  namename
+match                 %s.*
+Record                %s`
+	expected = `
+name                  namename
+match                 foo.*
+Record                abc`
+
+	actual = generateFilter(template, "foo", "abc")
+	require.Equal(t, expected, actual, "Fluent Bit filter generated config is invalid")
+
 }
 
 func TestFilter(t *testing.T) {
