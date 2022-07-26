@@ -11,10 +11,9 @@ test: test-gateway test-validator
 image: image-gateway-test image-app-connectivity-validator-test
 clean: clean-gateway-test clean-app-conn-validator-test
 
-#release: publish-gateway-test publish-mock-app publish-app-connectivity-validator-test
-release: publish-app-connectivity-validator-test
+release: publish-gateway-test publish-mock-app publish-app-connectivity-validator-test
 
-test-validator: test-app-conn-validator-debug clean-app-conn-validator-test
+test-app-conn-validator: test-app-conn-validator-debug clean-app-conn-validator-test
 
 test-gateway: test-gateway-debug clean-gateway-test
 
@@ -45,14 +44,16 @@ clean-gateway-test:
 publish-app-connectivity-validator-test: image-app-connectivity-validator-test
 	docker push $(VALIDATOR_TEST_IMAGE)
 
+image-app-connectivity-validator-test:
+	docker build -t $(VALIDATOR_TEST_IMAGE) -f Dockerfile.appconnvalidator .
+
 publish-gateway-test: image-gateway-test
 	docker push $(GATEWAY_TEST_IMAGE)
 
 image-gateway-test:
 	docker build -t $(GATEWAY_TEST_IMAGE) -f Dockerfile.gateway .
 
-image-app-connectivity-validator-test:
-	docker build -t $(VALIDATOR_TEST_IMAGE) -f Dockerfile.appconnvalidator .
+
 
 publish-mock-app: image-mock-app
 	docker push $(MOCK_APP_IMAGE)
