@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -76,7 +77,7 @@ func (c *Collector) RecordError() {
 
 // RecordLatency records a latency metric
 func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destinationService string) {
-	c.latency.WithLabelValues(string(statusCode), destinationService).Observe(float64(duration.Microseconds()))
+	c.latency.WithLabelValues(fmt.Sprint(statusCode), destinationService).Observe(duration.Seconds())
 }
 
 // RecordEventType records a eventType metric
