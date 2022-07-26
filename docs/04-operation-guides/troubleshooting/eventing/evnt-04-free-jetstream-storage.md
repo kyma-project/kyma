@@ -1,29 +1,33 @@
 ---
-title: Free NATS JetStream file storage when it gets full
+title: Eventing backend stopped receiving events due to full storage
 ---
 
 ## Symptom
 
-Free NATS JetStream file storage when it gets full.
+NATS JetStream backend stopped receiving events due to full storage.
+
+You see one of the following messages:
+- `507 Insufficient Storage` error from Event Publisher Proxy.
+- `no space left on device` from the eventing backend.
 
 ## Cause
 
-NATS JetStream uses [Interest retention policy](https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive) in Kyma per default.
-It means, that as long as there are consumers on the stream, which the published event's subject, the messages will be kept in the stream if they cannot be delivered to the sink.
+In Kyma, the default retention policy for NATS JetStream is [Interest](https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive).
+This retention policy keeps messages in the stream if they can't be delivered to the sink, as long as there are consumers in the stream that match the published event's subject.
 
-In some cases, it might happen, that the NATS JetStream storage gets full due to too many undelivered events.
-In order to not lose events, JetStream backend will just stop receiving and the user will get `507 Insufficient Storage` Error from Publisher Proxy or `no space left on device` from the Backend directly.
-This means, that the Backend's storage is full and no further events can be persisted to the stream.
+If there are too many undelivered events, the NATS JetStream storage may get full.
+To prevent event loss, the backend stops receiving events, and no further events can be persisted to the stream.
 
 ## Remedy
 
-There are several ways of how to free the space on NATS JetStream Backend:
+There are several ways to free the space on NATS JetStream backend:
 
-- The published events might be too large, so the consumer isn't fast enough to deliver them, before the storage gets full. In that case eiter wait until the events get delivered or extend the NATS Backend by additional replicas.
-
-
-- Check if the sink is reachable and can accept the events.
+- If the published events are too large, the consumer cannot deliver them fast enough before the storage is full.
+  In that case, either wait until the events are delivered, or scale the NATS backend with additional replicas.
 
 
-- Due to `Interest` Policy, the events published to the subject, which doesn't match any consumer filter, will not be kept in the stream.
-  You can delete a Kyma Subscription, which will automatically remove all the pending messages in the stream, which were published the Subscription's subject. 
+- Check the [NATS JetStream backend status](evnt-01-eventing-troubleshooting.md#step-6-check-nats-jetstream-status) and if [the sink is reachable and can accept the events](evnt-01-eventing-troubleshooting.md#step-5-check-if-the-subscription-sink-is-healthy).
+
+
+- The `Interest` retention policy specifies that events published to the subject are not kept in the stream if they don't match any consumer filter.
+  You can delete a Kyma Subscription, which automatically removes all the pending messages in the stream that were published to that Subscription's subject. 
