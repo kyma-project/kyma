@@ -38,8 +38,8 @@ To build Docker images of tests and mock application:
 ./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
 ```
 This will build the following images:
-- `{DOCKER_TAG}/gateway-test:{DOCKER_TAG}`
-- `{DOCKER_TAG}/mock-app:{DOCKER_TAG}`
+- `{DOCKER_PUSH_REPOSITORY}/gateway-test:{DOCKER_TAG}`
+- `{DOCKER_PUSH_REPOSITORY}/mock-app:{DOCKER_TAG}`
 
 ## Running
 
