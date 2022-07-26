@@ -9,7 +9,7 @@ helmValues:
       readinessPeriodSeconds: 5
       resources:
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 64Mi
         limits:
           cpu: 250m
@@ -56,7 +56,7 @@ components:
           cpu: 2000m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 120Mi
 
   ingressGateways:
@@ -83,7 +83,7 @@ components:
           cpu: 2000m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 128Mi
       strategy:
         rollingUpdate:
@@ -101,7 +101,7 @@ components:
           cpu: 500m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 512Mi
       securityContext:
         runAsUser: 65534
