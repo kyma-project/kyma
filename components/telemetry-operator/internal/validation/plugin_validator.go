@@ -36,10 +36,7 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 			return true
 		}
 	}
-	if logPipeline.Spec.Output.Custom != "" {
-		return true
-	}
-	return false
+	return logPipeline.Spec.Output.Custom != ""
 }
 
 // Validate returns an error if validation fails
@@ -141,10 +138,7 @@ func validHostname(host string) bool {
 	host = strings.Trim(host, " ")
 
 	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
-	if re.MatchString(host) {
-		return true
-	}
-	return false
+	return re.MatchString(host)
 }
 
 func getCustomName(custom map[string]string) (string, error) {
