@@ -25,7 +25,10 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
 )
 
-const natsHandlerName = "nats-handler"
+const (
+	natsHandlerName        = "nats-handler"
+	destinationServiceNATS = "nats"
+)
 
 // Handler is responsible for receiving HTTP requests and dispatching them to NATS.
 // It also assures that the messages received are compliant with the Cloud Events spec.
@@ -226,7 +229,7 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 		h.collector.RecordError()
 		return resp, dispatchTime, []byte(err.Error())
 	}
-	h.collector.RecordLatency(dispatchTime)
+	h.collector.RecordLatency(dispatchTime, resp, destinationServiceNATS)
 	return resp, dispatchTime, []byte{}
 }
 

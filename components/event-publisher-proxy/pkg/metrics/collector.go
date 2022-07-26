@@ -43,7 +43,7 @@ func NewCollector() *Collector {
 				Name: Latency,
 				Help: latencyHelp,
 			},
-			[]string{},
+			[]string{"status_code", "destination_service"},
 		),
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -75,8 +75,8 @@ func (c *Collector) RecordError() {
 }
 
 // RecordLatency records a latency metric
-func (c *Collector) RecordLatency(duration time.Duration) {
-	c.latency.WithLabelValues().Observe(duration.Seconds())
+func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destinationService string) {
+	c.latency.WithLabelValues(string(statusCode), destinationService).Observe(float64(duration.Microseconds()))
 }
 
 // RecordEventType records a eventType metric
