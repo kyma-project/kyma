@@ -26,8 +26,8 @@ type oauthResponse struct {
 
 //go:generate mockery --name=Client
 type Client interface {
-	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
-	GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
+	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
+	GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
 	InvalidateTokenCache(clientID string, authURL string)
 }
 
@@ -43,13 +43,13 @@ func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Clien
 	}
 }
 
-func (c *client) GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
+func (c *client) GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
 	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
 	if found {
 		return token, nil
 	}
 
-	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
+	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters, skipVerify)
 	if err != nil {
 		return "", err
 	}
@@ -59,13 +59,13 @@ func (c *client) GetToken(clientID, clientSecret, authURL string, headers, query
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
+func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
 	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
 	if found {
 		return token, nil
 	}
 
-	tokenResponse, err := c.requestTokenMTLS(clientID, authURL, cert, headers, queryParameters)
+	tokenResponse, err := c.requestTokenMTLS(clientID, authURL, cert, headers, queryParameters, skipVerify)
 	if err != nil {
 		return "", err
 	}
@@ -84,9 +84,9 @@ func (c *client) makeOAuthTokenCacheKey(clientID, authURL string) string {
 	return clientID + authURL
 }
 
-func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
+func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 	}
 	client := &http.Client{Transport: transport}
 
@@ -135,11 +135,11 @@ func (c *client) requestToken(clientID, clientSecret, authURL string, headers, q
 	return tokenResponse, nil
 }
 
-func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
+func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			Certificates:       []tls.Certificate{cert},
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: skipVerify,
 		},
 	}
 	client := &http.Client{Transport: transport}

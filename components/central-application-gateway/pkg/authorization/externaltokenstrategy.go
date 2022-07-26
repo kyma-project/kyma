@@ -16,7 +16,7 @@ func newExternalTokenStrategy(strategy Strategy) Strategy {
 	return externalTokenStrategy{strategy}
 }
 
-func (e externalTokenStrategy) AddAuthorization(r *http.Request, setter clientcert.SetClientCertificateFunc) apperrors.AppError {
+func (e externalTokenStrategy) AddAuthorization(r *http.Request, setter clientcert.SetClientCertificateFunc, skipTLSVerification bool) apperrors.AppError {
 	externalToken := r.Header.Get(httpconsts.HeaderAccessToken)
 	if externalToken != "" {
 		r.Header.Del(httpconsts.HeaderAccessToken)
@@ -25,7 +25,7 @@ func (e externalTokenStrategy) AddAuthorization(r *http.Request, setter clientce
 		return nil
 	}
 
-	return e.strategy.AddAuthorization(r, setter)
+	return e.strategy.AddAuthorization(r, setter, skipTLSVerification)
 }
 
 func (o externalTokenStrategy) Invalidate() {

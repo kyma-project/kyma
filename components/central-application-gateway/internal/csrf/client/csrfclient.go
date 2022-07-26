@@ -96,10 +96,10 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 
 }
 
-func addAuthorization(r *http.Request, clientCertificate clientcert.ClientCertificate, strategy authorization.Strategy) apperrors.AppError {
+func addAuthorization(r *http.Request, clientCertificate clientcert.ClientCertificate, strategy authorization.Strategy, skipTLSVerify bool) apperrors.AppError {
 	return strategy.AddAuthorization(r, func(cert *tls.Certificate) {
 		clientCertificate.SetCertificate(cert)
-	})
+	}, skipTLSVerify)
 }
 
 func setCSRFSpecificHeaders(r *http.Request) {

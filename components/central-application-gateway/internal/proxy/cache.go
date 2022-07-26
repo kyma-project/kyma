@@ -27,8 +27,8 @@ type authorizationStrategyWrapper struct {
 	clientCertificate clientcert.ClientCertificate
 }
 
-func (ce *authorizationStrategyWrapper) AddAuthorization(r *http.Request) apperrors.AppError {
-	return ce.actualStrategy.AddAuthorization(r, ce.clientCertificate.SetCertificate)
+func (ce *authorizationStrategyWrapper) AddAuthorization(r *http.Request, skipTLSVerify bool) apperrors.AppError {
+	return ce.actualStrategy.AddAuthorization(r, ce.clientCertificate.SetCertificate, skipTLSVerify)
 }
 
 func (ce *authorizationStrategyWrapper) Invalidate() {

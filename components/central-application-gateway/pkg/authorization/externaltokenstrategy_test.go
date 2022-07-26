@@ -18,7 +18,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
-		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(&oauthStrategy)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -45,7 +45,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
-		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(&oauthStrategy)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
-		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(&oauthStrategy)
 
 		// when
 		externalTokenStrategy.Invalidate()
