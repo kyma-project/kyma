@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -71,12 +70,5 @@ func newMTLSServer(caCertPath, address string, handler http.Handler) *http.Serve
 		Addr:      address,
 		Handler:   handler,
 		TLSConfig: tlsConfig,
-	}
-}
-
-func exitOnError(err error, context string) {
-	if err != nil {
-		wrappedError := errors.Wrap(err, context)
-		log.Fatal(wrappedError)
 	}
 }
