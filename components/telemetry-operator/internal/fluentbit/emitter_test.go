@@ -1,16 +1,15 @@
-package sections
+package fluentbit
 
 import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -34,13 +33,14 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
     Rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
+
 `
 	actual := CreateEmitter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
 func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -64,13 +64,14 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
     Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
+
 `
 	actual := CreateEmitter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
 func TestGenerateEmitterIncludeContainers(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -94,13 +95,14 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
     Rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
+
 `
 	actual := CreateEmitter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
 func TestGenerateEmitterExcludeContainers(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -124,6 +126,7 @@ func TestGenerateEmitterExcludeContainers(t *testing.T) {
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
     Rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
+
 `
 	actual := CreateEmitter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
