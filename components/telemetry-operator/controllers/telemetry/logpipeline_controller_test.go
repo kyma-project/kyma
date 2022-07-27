@@ -41,12 +41,12 @@ var _ = Describe("LogPipeline controller", func() {
 		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" log-pipeline.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          log-pipeline
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $log "^.*$" log-pipeline.$TAG true
 
 [FILTER]
     name                  record_modifier
