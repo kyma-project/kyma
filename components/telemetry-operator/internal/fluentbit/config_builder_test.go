@@ -62,12 +62,12 @@ Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" foo.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $log "^.*$" foo.$TAG true
 
 [FILTER]
     name                  record_modifier

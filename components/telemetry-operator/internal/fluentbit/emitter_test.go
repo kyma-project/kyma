@@ -1,16 +1,15 @@
-package sections
+package fluentbit
 
 import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -40,7 +39,7 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
 }
 
 func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -70,7 +69,7 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
 }
 
 func TestGenerateEmitterIncludeContainers(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -100,7 +99,7 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
 }
 
 func TestGenerateEmitterExcludeContainers(t *testing.T) {
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

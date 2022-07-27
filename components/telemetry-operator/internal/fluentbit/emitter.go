@@ -1,9 +1,8 @@
-package sections
+package fluentbit
 
 import (
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"strings"
 )
 
@@ -41,7 +40,7 @@ func (sb *SectionBuilder) ToString() string {
 }
 
 // CreateEmitter creates the Fluent Bit Rewrite Tag Filter section
-func CreateEmitter(config fluentbit.PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
+func CreateEmitter(config PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
 
 	var sectionBuilder = NewSectionBuilder().
 		CreateFilterSection().

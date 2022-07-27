@@ -34,6 +34,7 @@ Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
+	sb.WriteString(CreateEmitter(pipelineConfig, logPipeline))
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
