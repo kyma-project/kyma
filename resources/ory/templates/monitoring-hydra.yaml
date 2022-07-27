@@ -1,3 +1,4 @@
+{{- if .Values.hydra.enabled }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -43,3 +44,4 @@ spec:
   portLevelMtls:
     {{ index .Values "hydra" "hydra-maester" "port" "metrics" }}:
       mode: PERMISSIVE
+{{- end }}

@@ -11,12 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
-	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
-
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -30,13 +24,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	"github.com/avast/retry-go/v3"
+	"github.com/go-logr/zapr"
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/ginkgo"
@@ -45,6 +38,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
@@ -52,10 +46,16 @@ import (
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
+	testEnvStartDelay           = time.Minute
+	testEnvStartAttempts        = 10
+	beforeSuiteTimeoutInSeconds = testEnvStartAttempts * 60
 	subscriptionNamespacePrefix = "test-"
 	bigPollingInterval          = 3 * time.Second
 	bigTimeOut                  = 40 * time.Second
@@ -1367,7 +1367,6 @@ const (
 )
 
 var (
-	cfg        *rest.Config
 	k8sClient  client.Client
 	testEnv    *envtest.Environment
 	beb        *reconcilertesting.BEBMock
@@ -1384,8 +1383,6 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
-
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
@@ -1398,8 +1395,32 @@ var _ = BeforeSuite(func(done Done) {
 	}
 
 	var err error
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	Expect(err).To(BeNil())
+	logf.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
 
-	cfg, err = testEnv.Start()
+	var cfg *rest.Config
+	err = retry.Do(func() error {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("panic recovered:", r)
+			}
+		}()
+
+		cfg, err = testEnv.Start()
+		return err
+	},
+		retry.Delay(testEnvStartDelay),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(testEnvStartAttempts),
+		retry.OnRetry(func(n uint, err error) {
+			log.Printf("[%v] try failed to start testenv: %s", n, err)
+			if stopErr := testEnv.Stop(); stopErr != nil {
+				log.Printf("failed to stop testenv: %s", stopErr)
+			}
+		}),
+	)
+
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
@@ -1441,8 +1462,6 @@ var _ = BeforeSuite(func(done Done) {
 	// prepare application-lister
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	Expect(err).To(BeNil())
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
@@ -1463,9 +1482,15 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(k8sClient).ToNot(BeNil())
 
 	close(done)
-}, 60)
+}, beforeSuiteTimeoutInSeconds)
 
 var _ = AfterSuite(func() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("panic recovered:", r)
+		}
+	}()
+
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	mock.Stop()

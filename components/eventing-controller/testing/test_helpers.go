@@ -293,7 +293,11 @@ func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt
 
 func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
-		sub.Status.CleanEventTypes = cleanEventTypes
+		if cleanEventTypes == nil {
+			sub.Status.InitializeCleanEventTypes()
+		} else {
+			sub.Status.CleanEventTypes = cleanEventTypes
+		}
 	}
 }
 

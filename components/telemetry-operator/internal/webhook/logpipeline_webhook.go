@@ -47,21 +47,17 @@ const (
 //+kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type LogPipelineValidator struct {
 	client.Client
-
-	fluentBitConfigMap       types.NamespacedName
-	inputValidator           validation.InputValidator
-	variablesValidator       validation.VariablesValidator
-	configValidator          validation.ConfigValidator
-	pluginValidator          validation.PluginValidator
-	maxPipelinesValidator    validation.MaxPipelinesValidator
-	outputValidator          validation.OutputValidator
-	pipelineConfig           fluentbit.PipelineConfig
-	fluentBitMaxFSBufferSize string
-
-	fsWrapper fs.Wrapper
-
-	decoder        *admission.Decoder
-	daemonSetUtils *fluentbit.DaemonSetUtils
+	fluentBitConfigMap    types.NamespacedName
+	inputValidator        validation.InputValidator
+	variablesValidator    validation.VariablesValidator
+	configValidator       validation.ConfigValidator
+	pluginValidator       validation.PluginValidator
+	maxPipelinesValidator validation.MaxPipelinesValidator
+	outputValidator       validation.OutputValidator
+	pipelineConfig        fluentbit.PipelineConfig
+	fsWrapper             fs.Wrapper
+	decoder               *admission.Decoder
+	daemonSetUtils        *fluentbit.DaemonSetUtils
 }
 
 func NewLogPipeLineValidator(

@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ include "hydra.fullname" . }}-hydra
+  name: {{ include "hydra.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
@@ -9,17 +9,17 @@ spec:
   hosts:
     - oauth2.{{ .Values.global.domainName }}
   http:
-    {{- if .Values.hydra.service.admin.enabled }}
+    {{- if .Values.service.admin.enabled }}
     - match:
         - uri:
             exact: "/oauth2/introspect"
       route:
         - destination:
-            host: {{ include "hydra.fullname" . }}-hydra-admin
+            host: {{ include "hydra.fullname" . }}-admin
             port:
-              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+              number: {{ .Values.hydra.config.serve.admin.port }}
     {{- end -}}
-    {{- if .Values.hydra.service.public.enabled }}
+    {{- if .Values.service.public.enabled }}
     - match:
         - uri:
             prefix: "/.well-known"
@@ -29,7 +29,7 @@ spec:
             exact: "/userinfo"
       route:
         - destination:
-            host: {{ include "hydra.fullname" . }}-hydra-public
+            host: {{ include "hydra.fullname" . }}-public
             port:
-              number: {{ .Values.hydra.hydra.config.serve.public.port }}
+              number: {{ .Values.hydra.config.serve.public.port }}
     {{- end -}}

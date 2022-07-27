@@ -125,7 +125,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 	gotSub, err := controllertesting.ToSubscription(unstructuredSub)
 	g.Expect(err).To(gomega.BeNil())
-	expectedSubStatus := eventingv1alpha1.SubscriptionStatus{}
+	expectedSubStatus := eventingv1alpha1.SubscriptionStatus{CleanEventTypes: []string{}}
 	g.Expect(expectedSubStatus).To(gomega.Equal(gotSub.Status))
 
 	// Test NATS subscriptions are gone
