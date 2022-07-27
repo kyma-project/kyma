@@ -134,7 +134,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	statusChanged, err := r.syncInitialStatus(desiredSubscription, log)
 	if err != nil {
 		log.Errorw("Failed to sync initial status", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		return ctrl.Result{}, err
@@ -143,7 +143,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
 		log.Errorw("Failed to validate sink URL", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -151,12 +151,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Synchronize Kyma subscription to JetStream backend
-	if syncErr := r.Backend.SyncSubscription(desiredSubscription); syncErr != nil {
-		log.Errorw("Failed to sync subscription", "error", syncErr)
-		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, syncErr); err != nil {
-			return ctrl.Result{}, err
+	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
+		log.Errorw("Failed to sync subscription", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
+			return ctrl.Result{}, syncErr
 		}
-		return ctrl.Result{}, syncErr
+		return ctrl.Result{}, err
 	}
 
 	// Update Subscription status
@@ -246,11 +246,8 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	cleanedSubjects, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("Failed to get clean subjects", "error", err)
-		if len(subscription.Status.CleanEventTypes) != 0 {
-			subscription.Status.CleanEventTypes = nil
-			return true, err
-		}
-		return false, err
+		subscription.Status.InitializeCleanEventTypes()
+		return true, err
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanedSubjects) {
 		subscription.Status.CleanEventTypes = cleanedSubjects
@@ -259,6 +256,10 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)
 	if subscription.Status.Config == nil || !reflect.DeepEqual(subscriptionConfig, subscription.Status.Config) {
 		subscription.Status.Config = subscriptionConfig
+		statusChanged = true
+	}
+	if subscription.Status.CleanEventTypes == nil {
+		subscription.Status.InitializeCleanEventTypes()
 		statusChanged = true
 	}
 	return statusChanged, nil

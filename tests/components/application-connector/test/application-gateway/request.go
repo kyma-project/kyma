@@ -1,28 +1,54 @@
 package application_gateway
 
 import (
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"encoding/json"
+	"io"
 	"net/http"
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/pkg/errors"
+
+	test_api "github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 )
 
-func executeGetRequest(t *testing.T, entry v1alpha1.Entry) int {
-	t.Log("Calling", entry.CentralGatewayUrl)
-	res, err := http.Get(entry.CentralGatewayUrl)
+type LogHttp struct {
+	t       *testing.T
+	httpCli *http.Client
+}
 
-	if err == nil {
-		body, err := ioutil.ReadAll(res.Body)
-		if err == nil && len(body) > 0 {
-			t.Log("Response", string(body))
-		}
+func NewHttpCli(t *testing.T) LogHttp {
+	return LogHttp{t: t, httpCli: &http.Client{}}
+}
+
+func (c LogHttp) Get(url string) (resp *http.Response, body []byte, err error) {
+	c.t.Helper()
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return
 	}
-	assert.Nil(t, err)
-	return res.StatusCode
+
+	return c.Do(req)
+
+}
+
+func (c LogHttp) Do(req *http.Request) (res *http.Response, body []byte, err error) {
+	c.t.Helper()
+	c.t.Logf("%s %s", req.Method, req.URL)
+
+	res, err = c.httpCli.Do(req)
+	if err != nil {
+		return
+	}
+
+	body, err = io.ReadAll(res.Body)
+	if err == nil && len(body) > 0 {
+		c.t.Logf("Body: %s", body)
+	}
+
+	return
 }
 
 func getExpectedHTTPCode(service v1alpha1.Service) (int, error) {
@@ -31,4 +57,14 @@ func getExpectedHTTPCode(service v1alpha1.Service) (int, error) {
 		return strconv.Atoi(codeStr)
 	}
 	return 0, errors.New("Bad configuration")
+}
+
+func gatewayURL(app, service string) string {
+	return "http://central-application-gateway.kyma-system:8080/" + app + "/" + service
+}
+
+func unmarshalBody(body []byte) (test_api.EchoResponse, error) {
+	res := test_api.EchoResponse{}
+	err := json.Unmarshal(body, &res)
+	return res, err
 }

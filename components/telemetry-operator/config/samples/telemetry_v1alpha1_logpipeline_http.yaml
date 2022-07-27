@@ -1,0 +1,23 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: logpipeline-http-sample
+spec:
+  output:
+    http:
+      host:
+        valueFrom:
+          secretKeyRef:
+            name: mockserver-host
+            namespace: mockserver
+            key: host
+      user:
+        value: "user"
+      password:
+        value: "not-required"
+      port: "9880"
+      uri: "/"
+      format: "json"
+      tls:
+        disabled: true
+        skipCertificateValidation: true

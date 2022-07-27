@@ -17,3 +17,4 @@ spec:
           imagePullPolicy: Always
       restartPolicy: Never
       serviceAccountName: {{ .Values.serviceAccountName }}
+  backoffLimit: 0

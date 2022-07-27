@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package telemetry
 
 import (
 	"context"
@@ -26,8 +26,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,12 +46,12 @@ type LogPipelineReconciler struct {
 	Scheme             *runtime.Scheme
 	Syncer             *sync.LogPipelineSyncer
 	FluentBitDaemonSet types.NamespacedName
-	restartsTotal      prometheus.Counter
 	unsupportedTotal   prometheus.Gauge
+	DaemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig) *LogPipelineReconciler {
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
@@ -62,16 +61,12 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	)
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
-	// Metrics
-	lpr.restartsTotal = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_restarts_total",
-		Help: "Number of triggered Fluent Bit restarts",
-	})
 	lpr.unsupportedTotal = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	metrics.Registry.MustRegister(lpr.restartsTotal)
+	lpr.DaemonSetUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
+
 	metrics.Registry.MustRegister(lpr.unsupportedTotal)
 
 	return &lpr
@@ -106,7 +101,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	secretsOK := r.Syncer.SecretValidator.ValidateSecretsExist(ctx, &logPipeline)
+	secretsOK := r.Syncer.SecretHelper.ValidateSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.SecretsNotPresent,
@@ -128,14 +123,14 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
 
 		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
-		if err = r.restartFluentBit(ctx); err != nil {
+		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
@@ -154,7 +149,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
 		var ready bool
-		ready, err = r.isFluentBitDaemonSetReady(ctx)
+		ready, err = r.DaemonSetUtils.IsFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
 			return ctrl.Result{RequeueAfter: requeueTime}, err
@@ -187,50 +182,8 @@ func shouldRetryOn(err error) bool {
 		!errors.IsMethodNotSupported(err) &&
 		!errors.IsBadRequest(err) &&
 		!errors.IsUnauthorized(err) &&
-		!errors.IsForbidden(err)
-}
-
-// Delete all Fluent Bit pods to apply new configuration.
-func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
-	log := logf.FromContext(ctx)
-	var ds appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
-		log.Error(err, "Failed getting fluent bit DaemonSet")
-		return err
-	}
-
-	patchedDS := *ds.DeepCopy()
-	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
-		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
-	}
-	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
-
-	if err := r.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
-		log.Error(err, "Failed to patch Fluent Bit to trigger rolling update")
-		return err
-	}
-	r.restartsTotal.Inc()
-	return nil
-}
-
-func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (bool, error) {
-	log := logf.FromContext(ctx)
-	var ds appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
-		log.Error(err, "Failed getting fluent bit daemon set")
-		return false, err
-	}
-
-	generation := ds.Generation
-	observedGeneration := ds.Status.ObservedGeneration
-	updated := ds.Status.UpdatedNumberScheduled
-	desired := ds.Status.DesiredNumberScheduled
-	ready := ds.Status.NumberReady
-
-	log.V(1).Info(fmt.Sprintf("Checking fluent bit: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
-		updated, desired, ready, generation, observedGeneration))
-
-	return observedGeneration == generation && updated == desired && ready >= desired, nil
+		!errors.IsForbidden(err) &&
+		!errors.IsNotFound(err)
 }
 
 func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition, unSupported bool) error {

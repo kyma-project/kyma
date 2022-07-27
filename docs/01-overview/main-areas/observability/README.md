@@ -2,13 +2,13 @@
 title: What is Observability in Kyma?
 ---
 
-The term "Observability" can be defined as a measure of how well the internal states of single components can be reflected by the application's external outputs. The insights that are exposed are called "telemetry" or "signals" and they are usually displayed in the form of metrics, traces, and logs. They can be exposed by employing modern instrumentation.
+Fundamentally, "Observability" is a measure of how well the internal states of single components can be reflected by the application's external outputs. The insights that an application exposes are displayed in the form of metrics, traces, and logs - collectively, that's called "telemetry" or "signals". These can be exposed by employing modern instrumentation.
 
-Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyze the data you're collecting. This is where **observability** tools come in.
+Out of the box, Kyma provides tools to collect and expose telemetry data. Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
 
-## Collecting data
+## Data collection
 
-Kyma collects telemetry data with several in-cluster components:
+Kyma collects telemetry data with the following in-cluster components:
 
 - [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately.
 
@@ -18,14 +18,16 @@ Kyma collects telemetry data with several in-cluster components:
 
 The collected telemetry data are exposed so that you can view and analyze them with observability tools.
 
-## Analyzing data
+> **NOTE:** As an alpha feature, Kyma ships the [telemetry component](./obsv-04-telemetry-in-kyma.md). It supports providing your own output configuration for application logs, and connecting your own observability systems outside the Kyma cluster with the Kyma backend.
+
+## Data analysis
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
 - [Prometheus](https://prometheus.io/docs/introduction), a lightweight backend for metrics.
 - [Loki](https://github.com/grafana/loki), a lightweight Prometheus-like backend for logs.
-- [Jaeger](https://www.jaegertracing.io/docs/) as a backend, which serves as the query mechanism for displaying information about traces.
+- [Jaeger](https://www.jaegertracing.io/docs/), a tracing backend serving as the query mechanism to display information about traces.
 
-- [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to receive and manage alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
+- [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to receive and manage alerts coming from Prometheus. Alertmanager can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
 - [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics and logs collected from Prometheus and Loki.
-- [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
+- [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and on connections between them.

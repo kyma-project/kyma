@@ -249,6 +249,7 @@ spec:
                 description: Ready defines the overall readiness status of a subscription
                 type: boolean
             required:
+            - cleanEventTypes
             - ready
             type: object
         type: object
