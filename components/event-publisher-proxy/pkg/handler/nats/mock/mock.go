@@ -100,7 +100,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 		mock.logger,
 		mock.collector,
 		mock.eventTypeCleaner,
-		"destSvc", //todo
+		mock.natsServer.ClientURL(),
 	)
 
 	go func() { require.NoError(t, mock.handler.Start(ctx)) }()

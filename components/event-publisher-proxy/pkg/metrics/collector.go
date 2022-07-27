@@ -14,19 +14,19 @@ const (
 	Latency = "event_publish_to_messaging_server_latency"
 	// EventTypePublishedMetricKey name of the eventType metric
 	EventTypePublishedMetricKey = "event_type_published"
-	//EventRequests //todo
-	EventRequests = "event_requests" //todo
+	//EventRequests name if the eventRequests metric
+	EventRequests = "event_requests"
 	// errorsHelp help for the errors metric
 	errorsHelp = "The total number of errors while sending Events to the messaging server"
 	// latencyHelp help for the latency metric
 	latencyHelp = "The duration of sending Events to the messaging server"
 	// EventTypePublishedMetricHelp help for the eventType metric
 	EventTypePublishedMetricHelp = "The total number of events published for a given eventType"
-	//todo
-	EventRequestsHelp = "lol" //todo
-	//todo
-	statusCode = "status_code"
-	//todo
+	// EventRequestsHelp help for event requests metric
+	EventRequestsHelp = "The total number of event requests"
+	//statusCode is the name of the status code labels used by multiple metrics
+	statusCode = "code"
+	//destSvc is the name of the destination service label used by multiple metrics
 	destSvc = "destination_service"
 )
 
@@ -65,7 +65,7 @@ func NewCollector() *Collector {
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventRequests,
-				Help: EventTypePublishedMetricHelp,
+				Help: EventRequestsHelp,
 			},
 			[]string{statusCode, destSvc},
 		),
@@ -103,7 +103,7 @@ func (c *Collector) RecordEventType(eventType, eventSource string) {
 	c.eventType.WithLabelValues(eventType, eventSource).Inc()
 }
 
-// todo
+// RecordRequests records the eventRequests metric
 func (c *Collector) RecordRequests(statusCode int, destSvc string) {
 	c.requests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }
