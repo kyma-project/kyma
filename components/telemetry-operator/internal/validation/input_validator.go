@@ -2,6 +2,7 @@ package validation
 
 import (
 	"errors"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 

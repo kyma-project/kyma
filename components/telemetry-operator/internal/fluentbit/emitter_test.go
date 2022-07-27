@@ -1,9 +1,10 @@
 package fluentbit
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 )
