@@ -2,11 +2,12 @@ package client
 
 import (
 	"encoding/base64"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
