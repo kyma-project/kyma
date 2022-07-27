@@ -95,7 +95,7 @@ func (c *Collector) RecordError() {
 
 // RecordLatency records a latency metric
 func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destSvc string) {
-	c.latency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
+	c.latency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(duration.Seconds() * 1000)
 }
 
 // RecordEventType records a eventType metric
