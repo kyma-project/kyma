@@ -24,7 +24,7 @@ openssl req -new \
       <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
   -out $GATEWAY_TEST_CERTS_DIR/server.csr
 
-	openssl x509 -req -days 365 -CA $GATEWAY_TEST_CERTS_DIR/ca.crt -CAkey $GATEWAY_TEST_CERTS_DIR/ca.key -CAcreateserial \
+	openssl x509 -req -sha256 -days 365 -CA $GATEWAY_TEST_CERTS_DIR/ca.crt -CAkey $GATEWAY_TEST_CERTS_DIR/ca.key -CAcreateserial \
   	-extensions SAN \
   	-extfile <(cat /etc/ssl/openssl.cnf \
     <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
@@ -38,7 +38,7 @@ openssl req -new \
       <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
   -out $GATEWAY_TEST_CERTS_DIR/client.csr
 
-	openssl x509 -req -days 365 -CA $GATEWAY_TEST_CERTS_DIR/ca.crt -CAkey $GATEWAY_TEST_CERTS_DIR/ca.key -CAcreateserial \
+	openssl x509 -req -sha256 -days 365 -CA $GATEWAY_TEST_CERTS_DIR/ca.crt -CAkey $GATEWAY_TEST_CERTS_DIR/ca.key -CAcreateserial \
   	-extensions SAN \
   	-extfile <(cat /etc/ssl/openssl.cnf \
     <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
