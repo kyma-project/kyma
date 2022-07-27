@@ -7,58 +7,78 @@ import (
 	"strings"
 )
 
-const emitterTemplate string = `
-Name                  rewrite_tag
-Match                 %s.*
-Emitter_Name          %s
-Emitter_Storage.type  %s
-Emitter_Mem_Buf_Limit %s`
+type SectionBuilder struct {
+	indentation string
+	valueTab    string
+	builder     strings.Builder
+}
 
-// TODO delete and keep default case for all empty
-var emitterRules = map[string]string{
-	"default":          `$log "^.*$" %s.$TAG true`,
-	"namespaceInclude": `$kubernetes['namespace_name'] "^%s$" %s.$TAG true`,
-	"namespaceExclude": `$kubernetes['namespace_name'] "^(?!.*%s).*" %s.$TAG true`,
+func NewSectionBuilder() *SectionBuilder {
+	return &SectionBuilder{
+		indentation: strings.Repeat(" ", 4),
+		valueTab:    strings.Repeat(" ", 22),
+	}
+}
+
+func (sb *SectionBuilder) CreateFilterSection() *SectionBuilder {
+	sb.builder.WriteString("[FILTER]")
+	sb.builder.WriteByte('\n')
+	return sb
+}
+
+func (sb *SectionBuilder) AddConfigurationParameter(key string, value string) *SectionBuilder {
+	sb.builder.WriteString(fmt.Sprintf("%s%s%s%s",
+		sb.indentation,
+		key,
+		sb.valueTab[:len(sb.valueTab)-len(key)],
+		value))
+	sb.builder.WriteByte('\n')
+	return sb
+}
+
+func (sb *SectionBuilder) ToString() string {
+	return sb.builder.String()
 }
 
 // CreateEmitter creates the Fluent Bit Rewrite Tag Filter section
 func CreateEmitter(config fluentbit.PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
-	var emitter = fmt.Sprintf(emitterTemplate, config.InputTag, logPipeline.Name, config.StorageType, config.MemoryBufferLimit)
-	var sb strings.Builder
-	sb.WriteString(fluentbit.BuildConfigSection(fluentbit.FilterConfigHeader, emitter))
-	sb.WriteString(appendEmitterRules(logPipeline))
-	return sb.String()
-}
 
-func appendEmitterRules(logPipeline *telemetryv1alpha1.LogPipeline) string {
-	var sb strings.Builder
+	var sectionBuilder = NewSectionBuilder().
+		CreateFilterSection().
+		AddConfigurationParameter("Name", "rewrite_tag").
+		AddConfigurationParameter("Match", fmt.Sprintf("%s.*", config.InputTag)).
+		AddConfigurationParameter("Emitter_Name", logPipeline.Name).
+		AddConfigurationParameter("Emitter_Storage.type", config.StorageType).
+		AddConfigurationParameter("Emitter_Mem_Buf_Limit", config.MemoryBufferLimit)
+
+	if !logPipeline.Spec.Input.Application.HasSelectors() {
+		sectionBuilder.AddConfigurationParameter("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
+		return sectionBuilder.ToString()
+	}
+
 	if len(logPipeline.Spec.Input.Application.Namespaces) > 0 {
-		sb.WriteString("Rule                  $kubernetes['namespace_name']\"^")
-		sb.WriteString(strings.Join(logPipeline.Spec.Input.Application.Namespaces, "|"))
-		sb.WriteString(fmt.Sprintf("$\" %s.$TAG true", logPipeline.Name))
-		sb.WriteByte('\n')
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['namespace_name'] \"^(%s)$\" %s.$TAG true",
+				strings.Join(logPipeline.Spec.Input.Application.Namespaces, "|"), logPipeline.Name))
 	}
 
 	if len(logPipeline.Spec.Input.Application.ExcludeNamespaces) > 0 {
-		sb.WriteString("Rule                  $kubernetes['namespace_name']\"^(?!")
-		sb.WriteString(strings.Join(logPipeline.Spec.Input.Application.ExcludeNamespaces, "$|"))
-		sb.WriteString(fmt.Sprintf("$).*\" %s.$TAG true", logPipeline.Name))
-		sb.WriteByte('\n')
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!%s$).*\" %s.$TAG true",
+				strings.Join(logPipeline.Spec.Input.Application.ExcludeNamespaces, "$|"), logPipeline.Name))
 	}
 
 	if len(logPipeline.Spec.Input.Application.Containers) > 0 {
-		sb.WriteString("Rule                  $kubernetes['container_name']\"^")
-		sb.WriteString(strings.Join(logPipeline.Spec.Input.Application.Containers, "|"))
-		sb.WriteString(fmt.Sprintf("$\" %s.$TAG true", logPipeline.Name))
-		sb.WriteByte('\n')
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['container_name'] \"^(%s)$\" %s.$TAG true",
+				strings.Join(logPipeline.Spec.Input.Application.Containers, "|"), logPipeline.Name))
 	}
 
 	if len(logPipeline.Spec.Input.Application.ExcludeContainers) > 0 {
-		sb.WriteString("Rule                  $kubernetes['container_name']\"^(?!")
-		sb.WriteString(strings.Join(logPipeline.Spec.Input.Application.ExcludeContainers, "$|"))
-		sb.WriteString(fmt.Sprintf("$).*\" %s.$TAG true", logPipeline.Name))
-		sb.WriteByte('\n')
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['container_name'] \"^(?!%s$).*\" %s.$TAG true",
+				strings.Join(logPipeline.Spec.Input.Application.ExcludeContainers, "$|"), logPipeline.Name))
 	}
 
-	return sb.String()
+	return sectionBuilder.ToString()
 }

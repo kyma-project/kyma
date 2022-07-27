@@ -46,6 +46,13 @@ type ApplicationInput struct {
 	ExcludeContainers []string `json:"excludeContainers,omitempty"`
 }
 
+func (a *ApplicationInput) HasSelectors() bool {
+	return len(a.Namespaces) > 0 ||
+		len(a.ExcludeNamespaces) > 0 ||
+		len(a.Containers) > 0 ||
+		len(a.ExcludeContainers) > 0
+}
+
 // Filter describes a Fluent Bit filter configuration
 type Filter struct {
 	Custom string `json:"custom,omitempty"`
