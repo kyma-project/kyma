@@ -209,7 +209,7 @@ func TestProxyRequest(t *testing.T) {
 			}
 			authStrategyMock := &authMock.Strategy{}
 			authStrategyMock.
-				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
 				Return(nil).
 				Once()
 
@@ -289,7 +289,7 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
 			Return(apperrors.UpstreamServerCallFailed("failed"))
 
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", "www.example.com/token")
@@ -346,12 +346,12 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.Anything, mock.AnythingOfType("SetClientCertificateFunc")).
+			On("AddAuthorization", mock.Anything, mock.AnythingOfType("SetClientCertificateFunc"), false).
 			Return(nil).Twice()
 		authStrategyMock.On("Invalidate").Return().Once()
 
 		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).Return(nil).Twice()
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), false).Return(nil).Twice()
 		csrfTokenStrategyMock.On("Invalidate").Return().Once()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
@@ -496,7 +496,7 @@ func createBasicCredentialsMatcher(username, password string) CredentialsMatcher
 func mockCSRFStrategy(authorizationStrategy authorization.Strategy, ef ensureCalledFunc) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
 
 	csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-	strategyCall := csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+	strategyCall := csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), false).
 		Return(nil)
 	ef(strategyCall)
 

@@ -74,10 +74,10 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 				},
 			}
 
-			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy).Return(cachedItem, nil)
+			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy, false).Return(cachedItem, nil)
 
 			// when
-			err := s.AddCSRFToken(req)
+			err := s.AddCSRFToken(req, false)
 
 			//then
 			require.Nil(t, err)
@@ -105,10 +105,10 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 				},
 			}
 
-			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy).Return(cachedItem, nil)
+			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy, false).Return(cachedItem, nil)
 
 			// when
-			err := s.AddCSRFToken(req)
+			err := s.AddCSRFToken(req, false)
 
 			//then
 			require.Nil(t, err)
@@ -134,10 +134,10 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 
 			s := sf.Create(authStrategy, testCSRFTokenEndpointURL)
 
-			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy).Return(nil, apperrors.NotFound("error"))
+			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy, false).Return(nil, apperrors.NotFound("error"))
 
 			//when
-			err := s.AddCSRFToken(req)
+			err := s.AddCSRFToken(req, false)
 
 			//then
 			require.NotNil(t, err)
@@ -157,7 +157,7 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			s := sf.Create(nil, "")
 
 			// when
-			err := s.AddCSRFToken(req)
+			err := s.AddCSRFToken(req, false)
 
 			//then
 			require.Nil(t, err)

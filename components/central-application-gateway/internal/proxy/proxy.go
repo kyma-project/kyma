@@ -139,7 +139,7 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry, skipTL
 		return err
 	}
 
-	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
+	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r, skipTLSVerify)
 }
 
 func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {

@@ -23,7 +23,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 	retryAuthStrategyMock := func() *authMock.Strategy {
 		result := &authMock.Strategy{}
 		result.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
 			Return(nil).
 			Once()
 		result.On("Invalidate").Return().Once()
@@ -35,7 +35,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 	}
 	retryCsrfTokenStrategyMock := func() *csrfMock.TokenStrategy {
 		result := &csrfMock.TokenStrategy{}
-		result.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).Return(nil)
+		result.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), false).Return(nil)
 		result.On("Invalidate").Return().Once()
 		return result
 	}
@@ -162,7 +162,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 			csrfTokenStrategyMock := tc.csrfTokenStrategyFunc()
 			clientCertificate := clientcert.NewClientCertificate(nil)
 
-			transport := NewRetryableRoundTripper(http.DefaultTransport, authStrategyMock, csrfTokenStrategyMock, clientCertificate, 10)
+			transport := NewRetryableRoundTripper(http.DefaultTransport, authStrategyMock, csrfTokenStrategyMock, clientCertificate, 10, false)
 			httpClient := &http.Client{
 				Transport: transport,
 			}

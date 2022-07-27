@@ -19,7 +19,7 @@ func TestBasicAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = basicAuthStrategy.AddAuthorization(request, nil, true)
+		err = basicAuthStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.NoError(t, err)

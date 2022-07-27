@@ -118,7 +118,7 @@ func TestProxyFactory(t *testing.T) {
 
 			authStrategyMock := &authMock.Strategy{}
 			authStrategyMock.
-				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
 				Return(nil).
 				Once()
 

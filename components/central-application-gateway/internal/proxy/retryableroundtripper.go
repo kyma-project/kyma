@@ -17,9 +17,10 @@ type RetryableRoundTripper struct {
 	csrfTokenStrategy     csrf.TokenStrategy
 	clientCertificate     clientcert.ClientCertificate
 	timeout               int
+	skipTLSVerify         bool
 }
 
-func NewRetryableRoundTripper(roundTripper http.RoundTripper, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) *RetryableRoundTripper {
+func NewRetryableRoundTripper(roundTripper http.RoundTripper, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int, skipTLSVerify bool) *RetryableRoundTripper {
 	return &RetryableRoundTripper{
 		roundTripper:          roundTripper,
 		authorizationStrategy: authorizationStrategy,
@@ -72,11 +73,11 @@ func (p *RetryableRoundTripper) prepareRequest(req *http.Request) (*http.Request
 func (p *RetryableRoundTripper) addAuthorization(r *http.Request) error {
 	authorizationStrategy := p.authorizationStrategy
 	authorizationStrategy.Invalidate()
-	err := authorizationStrategy.AddAuthorization(r, p.clientCertificate.SetCertificate)
+	err := authorizationStrategy.AddAuthorization(r, p.clientCertificate.SetCertificate, p.skipTLSVerify)
 	if err != nil {
 		return err
 	}
 	csrfTokenStrategy := p.csrfTokenStrategy
 	csrfTokenStrategy.Invalidate()
-	return csrfTokenStrategy.AddCSRFToken(r)
+	return csrfTokenStrategy.AddCSRFToken(r, p.skipTLSVerify)
 }
