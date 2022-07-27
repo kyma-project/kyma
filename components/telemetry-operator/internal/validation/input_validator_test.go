@@ -7,7 +7,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestValidateWithValidInput(t *testing.T) {
+func TestValidateWithValidInputNamespace(t *testing.T) {
+	inputValidator := NewInputValidator()
+
+	input := telemetryv1alpha1.Input{
+		Application: telemetryv1alpha1.ApplicationInput{
+			Namespaces: []string{"namespace-1", "namespace-2"},
+			Containers: []string{"container-1"},
+		},
+	}
+
+	err := inputValidator.Validate(&input)
+	require.NoError(t, err)
+}
+
+func TestValidateWithValidInputExcludeNamespace(t *testing.T) {
 	inputValidator := NewInputValidator()
 
 	input := telemetryv1alpha1.Input{
