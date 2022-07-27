@@ -30,7 +30,7 @@ func NewDaemonSetUtils(client client.Client, fluenbitDaemonSet types.NamespacedN
 	}
 }
 
-// Delete all Fluent Bit pods to apply new configuration.
+// RestartFluentBit deletes all Fluent Bit pods to apply new configuration
 func (f *DaemonSetUtils) RestartFluentBit(ctx context.Context) error {
 	log := logf.FromContext(ctx)
 	var ds appsv1.DaemonSet

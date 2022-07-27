@@ -44,30 +44,10 @@ func TestBuildConfigSectionFromMap(t *testing.T) {
 		"Key_A": "Value_A",
 		"Key_B": "Value_B",
 	}
-	actual := BuildConfigSectionFromMap(FilterConfigHeader, content)
+	actual := buildConfigSectionFromMap(FilterConfigHeader, content)
 
 	require.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
 
-}
-
-func TestGenerateEmitter(t *testing.T) {
-	pipelineConfig := PipelineConfig{
-		InputTag:          "kube",
-		MemoryBufferLimit: "10M",
-		StorageType:       "filesystem",
-		FsBufferLimit:     "1G",
-	}
-
-	expected := `
-name                  rewrite_tag
-match                 kube.*
-Rule                  $log "^.*$" test.$TAG true
-Emitter_Name          test
-Emitter_Storage.type  filesystem
-Emitter_Mem_Buf_Limit 10M`
-
-	actual := generateEmitter(pipelineConfig, "test")
-	require.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
 
 func TestGeneratePermanentFilter(t *testing.T) {

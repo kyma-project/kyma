@@ -25,18 +25,36 @@ const (
 	OutputConfigHeader      ConfigHeader = "[OUTPUT]"
 	MatchKey                string       = "match"
 	OutputStorageMaxSizeKey string       = "storage.total_limit_size"
-	EmitterTemplate         string       = `
-name                  rewrite_tag
-match                 %s.*
-Rule                  $log "^.*$" %s.$TAG true
-Emitter_Name          %s
-Emitter_Storage.type  %s
-Emitter_Mem_Buf_Limit %s`
-	PermanentFilterTemplate string = `
+	PermanentFilterTemplate string       = `
 name                  record_modifier
 match                 %s.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 )
+
+// MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
+	var sb strings.Builder
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
+
+	for _, filter := range logPipeline.Spec.Filters {
+		section, err := ParseSection(filter.Custom)
+		if err != nil {
+			return "", err
+		}
+
+		section[MatchKey] = generateMatchCondition(logPipeline.Name)
+
+		sb.WriteString(buildConfigSectionFromMap(FilterConfigHeader, section))
+	}
+
+	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
+	if err != nil {
+		return "", err
+	}
+	sb.WriteString(buildConfigSectionFromMap(OutputConfigHeader, outputSection))
+
+	return sb.String(), nil
+}
 
 func BuildConfigSection(header ConfigHeader, content string) string {
 	var sb strings.Builder
@@ -52,7 +70,7 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	return sb.String()
 }
 
-func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
+func buildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
 	// Sort maps for idempotent results
 	keys := make([]string, 0, len(section))
 	for k := range section {
@@ -69,34 +87,6 @@ func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) s
 	sb.WriteByte('\n')
 
 	return sb.String()
-}
-
-// MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
-	var sb strings.Builder
-
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
-
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
-
-	for _, filter := range logPipeline.Spec.Filters {
-		section, err := ParseSection(filter.Custom)
-		if err != nil {
-			return "", err
-		}
-
-		section[MatchKey] = generateMatchCondition(logPipeline.Name)
-
-		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
-	}
-
-	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
-	if err != nil {
-		return "", err
-	}
-	sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, outputSection))
-
-	return sb.String(), nil
 }
 
 func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
@@ -208,10 +198,6 @@ func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 		}
 	}
 	return sb.String()
-}
-
-func generateEmitter(config PipelineConfig, logPipelineName string) string {
-	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }
 
 func generatePermanentFilter(logPipelineName string) string {
