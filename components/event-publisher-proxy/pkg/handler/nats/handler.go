@@ -26,8 +26,7 @@ import (
 )
 
 const (
-	natsHandlerName        = "nats-handler"
-	destinationServiceNATS = "nats"
+	natsHandlerName = "nats-handler"
 )
 
 // Handler is responsible for receiving HTTP requests and dispatching them to NATS.
@@ -53,12 +52,14 @@ type Handler struct {
 	collector *metrics.Collector
 	// eventTypeCleaner cleans the cloud event type
 	eventTypeCleaner eventtype.Cleaner
+	//destSvc hold the destination service for metrics
+	destSvc string
 }
 
 // NewHandler returns a new NATS Handler instance.
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.GenericSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
-	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
+	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner, destSvc string) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -69,6 +70,7 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.GenericSe
 		Options:             opts,
 		collector:           collector,
 		eventTypeCleaner:    eventTypeCleaner,
+		destSvc:             destSvc,
 	}
 }
 
@@ -229,7 +231,8 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 		h.collector.RecordError()
 		return resp, dispatchTime, []byte(err.Error())
 	}
-	h.collector.RecordLatency(dispatchTime, resp, destinationServiceNATS)
+	h.collector.RecordLatency(dispatchTime, resp, h.destSvc)
+	h.collector.RecordRequests(resp, h.destSvc)
 	return resp, dispatchTime, []byte{}
 }
 

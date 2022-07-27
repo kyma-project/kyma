@@ -126,7 +126,7 @@ nats:
 
       # Use below block to create new persistent volume
       # only used if existingClaim is not specified
-      size: 1Gi
+      size: 1Ki
       # storageClassName: ""
       accessModes:
         - ReadWriteOnce

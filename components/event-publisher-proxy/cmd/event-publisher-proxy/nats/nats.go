@@ -126,7 +126,7 @@ func (c *Commander) Start() error {
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := nats.NewHandler(messageReceiver, &messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner, c.envCfg.URL).Start(ctx); err != nil {
 		c.namedLogger().Errorw("Failed to start handler", "error", err)
 		return err
 	}
