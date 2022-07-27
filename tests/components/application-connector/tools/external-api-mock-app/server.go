@@ -62,8 +62,9 @@ func newMTLSServer(caCertPath, address string, handler http.Handler) *http.Serve
 
 	// Create the TLS Config with the CA pool and enable Client certificate validation
 	tlsConfig := &tls.Config{
-		ClientCAs:  caCertPool,
-		ClientAuth: tls.RequireAndVerifyClientCert,
+		ClientCAs:          caCertPool,
+		ClientAuth:         tls.RequireAndVerifyClientCert,
+		InsecureSkipVerify: true,
 	}
 
 	return &http.Server{
