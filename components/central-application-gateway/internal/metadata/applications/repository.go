@@ -16,7 +16,6 @@ import (
 
 const (
 	specAPIType    = "API"
-	specEventsType = "Events"
 )
 
 // Manager contains operations for managing Application CRD

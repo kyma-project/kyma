@@ -33,7 +33,7 @@ func TestErrorHandler_ServeHTTP(t *testing.T) {
 
 		var errResponse httperrors.ErrorResponse
 
-		json.Unmarshal(responseBody, &errResponse)
+		_ = json.Unmarshal(responseBody, &errResponse)
 
 		// then
 		require.NoError(t, err)

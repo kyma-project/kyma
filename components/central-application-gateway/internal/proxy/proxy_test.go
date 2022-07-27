@@ -393,10 +393,10 @@ func TestProxy(t *testing.T) {
 		requestBody := bytes.NewBufferString("some body")
 		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
 			return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				r.ParseForm()
+				_ = r.ParseForm()
 				check(r)
 				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte("test"))
+				_, _ = w.Write([]byte("test"))
 			}))
 
 		}, requestBody, http.StatusForbidden, t)
@@ -412,10 +412,10 @@ func assertCookie(t *testing.T, r *http.Request, name, value string) {
 
 func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
+		_ = r.ParseForm()
 		check(r)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test"))
+		_, _ =w.Write([]byte("test"))
 	}))
 }
 
@@ -440,7 +440,7 @@ func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httpt
 	willFail := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
+		_ = r.ParseForm()
 		check(r)
 		if willFail {
 			w.WriteHeader(status)
@@ -448,7 +448,7 @@ func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httpt
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
-		w.Write([]byte("test"))
+		_, _ = w.Write([]byte("test"))
 	}))
 }
 

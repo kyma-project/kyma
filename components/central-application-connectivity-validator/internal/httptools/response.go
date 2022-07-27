@@ -18,7 +18,7 @@ func RespondWithError(log *zap.SugaredLogger, w http.ResponseWriter, apperr appe
 	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
 
 	Respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
+	_ = json.NewEncoder(w).Encode(responseBody)
 }
 
 func Respond(w http.ResponseWriter, statusCode int) {
@@ -28,5 +28,5 @@ func Respond(w http.ResponseWriter, statusCode int) {
 
 func RespondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) {
 	Respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
+	_ = json.NewEncoder(w).Encode(responseBody)
 }

@@ -22,5 +22,5 @@ func (eh *ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
 	w.WriteHeader(eh.Code)
-	json.NewEncoder(w).Encode(responseBody)
+	_ = json.NewEncoder(w).Encode(responseBody)
 }

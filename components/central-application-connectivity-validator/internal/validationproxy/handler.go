@@ -175,9 +175,8 @@ func newSubjectValidator(applicationClientIDs []string, appName string) func(sub
 	}
 	if len(applicationClientIDs) == 0 {
 		return validateCommonNameWithAppName
-	} else {
-		return validateCommonNameWithClientIDs
 	}
+	return validateCommonNameWithClientIDs
 }
 
 func extractSubjects(certInfoData string) []string {
