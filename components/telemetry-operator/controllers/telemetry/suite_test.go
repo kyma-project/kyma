@@ -14,12 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package telemetry
 
 import (
 	"context"
 	"path/filepath"
 	"testing"
+
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
@@ -35,7 +39,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -43,7 +47,6 @@ var (
 	daemonSetConfig = sync.FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "default"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "logging-fluent-bit-sections", Namespace: "default"},
-		FluentBitParsersConfigMap:  types.NamespacedName{Name: "logging-fluent-bit-parsers", Namespace: "default"},
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "logging-fluent-bit-files", Namespace: "default"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "logging-fluent-bit-env", Namespace: "default"},
 	}
@@ -74,7 +77,7 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
 	}
 
@@ -107,12 +110,18 @@ var _ = BeforeSuite(func() {
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+	metrics.Registry.MustRegister(restartsTotal)
 
 	reconciler := NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
 		pipelineConfig,
+		restartsTotal,
 	)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())

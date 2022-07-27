@@ -2,11 +2,12 @@ package validation
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
@@ -35,52 +36,69 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 			return true
 		}
 	}
-	if logPipeline.Spec.Output.Custom != "" {
-		return true
-	}
-	for _, f := range logPipeline.Spec.Filters {
-		if f.Custom != "" {
-			return true
-		}
-	}
-	return false
+	return logPipeline.Spec.Output.Custom != ""
 }
 
 // Validate returns an error if validation fails
 // because of using denied plugins or errors in match conditions
 // for filters or outputs.
 func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	err := pv.validateFilters(logPipeline, logPipelines)
+	err := pv.validateFilters(logPipeline)
 	if err != nil {
 		return errors.Wrap(err, "error validating filter plugins")
 	}
-	err = pv.validateOutput(logPipeline, logPipelines)
+	err = pv.validateOutput(logPipeline)
 	if err != nil {
 		return errors.Wrap(err, "error validating output plugin")
 	}
 	return nil
 }
 
-func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline) error {
 	for _, filterPlugin := range pipeline.Spec.Filters {
-		if err := checkIfPluginIsValid(filterPlugin.Custom, pipeline, pv.deniedFilterPlugins, pipelines); err != nil {
+		if err := validateCustomOutput(filterPlugin.Custom, pv.deniedFilterPlugins); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipeline, pipelines *telemetryv1alpha1.LogPipelineList) error {
-	if len(pipeline.Spec.Output.Custom) == 0 {
-		return fmt.Errorf("no output is defined, you must define one output")
+func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipeline) error {
+	if err := checkSingleOutputPlugin(pipeline.Spec.Output); err != nil {
+		return err
 	}
-	if err := checkIfPluginIsValid(pipeline.Spec.Output.Custom, pipeline, pv.deniedOutputPlugins, pipelines); err != nil {
+	if err := validateCustomOutput(pipeline.Spec.Output.Custom, pv.deniedOutputPlugins); err != nil {
+		return err
+	}
+	if err := validateHTTPOutput(pipeline.Spec.Output.HTTP); err != nil {
 		return err
 	}
 	return nil
 }
 
-func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipeline, denied []string, pipelines *telemetryv1alpha1.LogPipelineList) error {
+func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
+	outputPluginCount := 0
+	if len(output.Custom) != 0 {
+		outputPluginCount++
+	}
+	if output.HTTP.Host.IsDefined() {
+		outputPluginCount++
+	}
+
+	if outputPluginCount == 0 {
+		return fmt.Errorf("no output is defined, you must define one output")
+	}
+	if outputPluginCount > 1 {
+		return fmt.Errorf("multiple output plugins are defined, you must define only one output")
+	}
+	return nil
+}
+
+func validateCustomOutput(content string, denied []string) error {
+	if content == "" {
+		return nil
+	}
+
 	customSection, err := parseSection(content)
 	if err != nil {
 		return err
@@ -101,6 +119,26 @@ func checkIfPluginIsValid(content string, pipeline *telemetryv1alpha1.LogPipelin
 	}
 
 	return nil
+}
+
+func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
+	if httpOutput.Host.Value != "" && !validHostname(httpOutput.Host.Value) {
+		return fmt.Errorf("invalid hostname '%s'", httpOutput.Host.Value)
+	}
+	if httpOutput.URI != "" && !strings.HasPrefix(httpOutput.URI, "/") {
+		return fmt.Errorf("uri has to start with /")
+	}
+	if !httpOutput.Host.IsDefined() && (httpOutput.User.IsDefined() || httpOutput.Password.IsDefined() || httpOutput.URI != "" || httpOutput.Port != "" || httpOutput.Compress != "" || httpOutput.TLSConfig.Disabled || httpOutput.TLSConfig.SkipCertificateValidation) {
+		return fmt.Errorf("http output needs to have a host configured")
+	}
+	return nil
+}
+
+func validHostname(host string) bool {
+	host = strings.Trim(host, " ")
+
+	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
+	return re.MatchString(host)
 }
 
 func getCustomName(custom map[string]string) (string, error) {

@@ -2,7 +2,9 @@ package application_gateway
 
 import (
 	"context"
+	"net/http"
 	"strconv"
+	"strings"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -67,6 +69,38 @@ func (gs *GatewaySuite) TestResponseBody() {
 				codeStr := strconv.Itoa(expectedCode)
 
 				gs.Equal(codeStr, string(body), "Incorrect body")
+			}
+		})
+	}
+}
+
+func (gs *GatewaySuite) TestBodyPerMethod() {
+	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "methods-with-body", v1.GetOptions{})
+	gs.Nil(err)
+	for _, service := range app.Spec.Services {
+		gs.Run(service.Description, func() {
+			httpCli := NewHttpCli(gs.T())
+
+			for _, entry := range service.Entries {
+				if entry.Type != "API" {
+					gs.T().Log("Skipping event entry")
+					continue
+				}
+
+				method := service.Description
+				bodyBuf := strings.NewReader(service.Description)
+
+				req, err := http.NewRequest(method, entry.CentralGatewayUrl, bodyBuf)
+				gs.Nil(err, "Preparing request failed")
+
+				_, body, err := httpCli.Do(req)
+				gs.Nil(err, "Request failed")
+
+				res, err := unmarshalBody(body)
+				gs.Nil(err, "Response body wasn't correctly forwarded")
+
+				gs.Equal(service.Description, string(res.Body), "Request body doesn't match")
+				gs.Equal(service.Description, res.Method, "Request method doesn't match")
 			}
 		})
 	}

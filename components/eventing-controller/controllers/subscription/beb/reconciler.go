@@ -629,6 +629,10 @@ func getSvcNsAndName(url string) (string, string, error) {
 
 // syncInitialStatus determines the desired initial status and updates it accordingly (if conditions changed)
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) {
+	if subscription.Status.CleanEventTypes == nil {
+		subscription.Status.InitializeCleanEventTypes()
+	}
+
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
 	expectedStatus.InitializeConditions()
 

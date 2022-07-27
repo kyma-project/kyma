@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
 )
 
@@ -204,6 +204,41 @@ func TestDeniedOutputPlugins(t *testing.T) {
 	assert.Contains(t, err.Error(), "error validating output plugin: plugin 'lua' is not supported. ")
 }
 
+func TestContainsNoOutputPlugins(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{},
+		}}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.Validate(logPipeline, logPipelines)
+
+	require.Error(t, result)
+	require.Contains(t, result.Error(), "no output is defined, you must define one output")
+}
+
+func TestContainsMultipleOutputPlugins(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Custom: `Name	http`,
+				HTTP: telemetryv1alpha1.HTTPOutput{
+					Host: telemetryv1alpha1.ValueType{
+						Value: "localhost",
+					},
+				},
+			},
+		}}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
+
+	sut := NewPluginValidator([]string{}, []string{})
+	result := sut.Validate(logPipeline, logPipelines)
+
+	require.Error(t, result)
+	require.Contains(t, result.Error(), "multiple output plugins are defined, you must define only one output")
+}
+
 func TestContainsCustomPluginWithCustomFilter(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -244,4 +279,57 @@ func TestContainsCustomPluginWithoutAny(t *testing.T) {
 	result := sut.ContainsCustomPlugin(logPipeline)
 
 	require.False(t, result)
+}
+
+func TestValidHostname(t *testing.T) {
+	require.True(t, validHostname("localhost"))
+	require.True(t, validHostname("logging-loki"))
+	require.True(t, validHostname("logging-loki.kyma-system.svc.cluster.local"))
+	require.False(t, validHostname("https://logging-loki.kyma-system.svc.cluster.local"))
+	require.False(t, validHostname("logging-loki.kyma-system.svc.cluster.local:443"))
+	require.False(t, validHostname("!@#$$%"))
+}
+
+func TestValidateHTTPOutput(t *testing.T) {
+	output := telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "localhost",
+		},
+	}
+	require.NoError(t, validateHTTPOutput(output))
+
+	output = telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "localhost",
+		},
+		URI: "/my-path",
+	}
+	require.NoError(t, validateHTTPOutput(output))
+
+	output = telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "http://localhost",
+		},
+		URI: "/my-path",
+	}
+	err := validateHTTPOutput(output)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "invalid hostname")
+
+	output = telemetryv1alpha1.HTTPOutput{
+		Host: telemetryv1alpha1.ValueType{
+			Value: "localhost",
+		},
+		URI: "broken-uri",
+	}
+	err = validateHTTPOutput(output)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "uri has to start with /")
+
+	output = telemetryv1alpha1.HTTPOutput{
+		URI: "/my-path",
+	}
+	err = validateHTTPOutput(output)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "http output needs to have a host configured")
 }
