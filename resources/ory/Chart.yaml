@@ -13,5 +13,7 @@ dependencies:
     condition: global.ory.hydra.persistence.gcloud.enabled
   - name: oathkeeper
     version: 0.23.2
+    condition: oathkeeper.enabled
   - name: hydra
     version: 0.23.2
+    condition: hydra.enabled

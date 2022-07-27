@@ -26,7 +26,7 @@ metadata:
 spec:
   accessLogging:
     - providers:
-      - name: envoy
+      - name: stdout-json
 ```
 
 ### Configure Istio access logs for a selective workload
