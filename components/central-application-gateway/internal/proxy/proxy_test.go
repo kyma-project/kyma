@@ -415,7 +415,7 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 		_ = r.ParseForm()
 		check(r)
 		w.WriteHeader(http.StatusOK)
-		_, _ =w.Write([]byte("test"))
+		_, _ = w.Write([]byte("test"))
 	}))
 }
 

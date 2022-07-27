@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	specAPIType    = "API"
+	specAPIType = "API"
 )
 
 // Manager contains operations for managing Application CRD
