@@ -76,7 +76,8 @@ name                  record_modifier
 match                 foo.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
-	actual := generateFilter(PermanentFilterTemplate, "foo")
+	actual, err := generateFilter(PermanentFilterTemplate, "foo")
+	require.NoError(t, err)
 	require.Equal(t, expected, actual, "Fluent Bit Permanent parser config is invalid")
 }
 
@@ -87,7 +88,8 @@ match                 foo.*
 script 				  /files/filter-script.lua
 call   				  kubernetes_map_keys`
 
-	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
+	actual, err := generateFilter(LuaDeDotFilterTemplate, "foo")
+	require.NoError(t, err)
 	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
 }
 
@@ -100,8 +102,9 @@ match                 %s.*`
 name                  namename
 match                 foo.*`
 
-	actual := generateFilter(template, "foo")
+	actual, err := generateFilter(template, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit filter generated config is invalid")
+	require.NoError(t, err)
 
 	template = `
 name                  namename
@@ -112,7 +115,8 @@ name                  namename
 match                 foo.*
 Record                abc`
 
-	actual = generateFilter(template, "foo", "abc")
+	actual, err = generateFilter(template, "foo", "abc")
+	require.NoError(t, err)
 	require.Equal(t, expected, actual, "Fluent Bit filter generated config is invalid")
 
 }
@@ -135,6 +139,12 @@ func TestFilter(t *testing.T) {
     match foo.*
     name grep
     regex log aa
+
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script 				  /files/filter-script.lua
+    call   				  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
@@ -196,6 +206,12 @@ func TestCustomOutput(t *testing.T) {
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script 				  /files/filter-script.lua
+    call   				  kubernetes_map_keys
+
 [OUTPUT]
     match foo.*
     name http
@@ -237,6 +253,12 @@ func TestHTTPOutput(t *testing.T) {
     name                  record_modifier
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script 				  /files/filter-script.lua
+    call   				  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
@@ -297,6 +319,12 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
     name                  record_modifier
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script 				  /files/filter-script.lua
+    call   				  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true

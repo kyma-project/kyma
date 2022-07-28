@@ -1,6 +1,8 @@
 package fluentbit
 
 import (
+	"bufio"
+	"container/list"
 	"fmt"
 	"sort"
 	"strings"
@@ -82,7 +84,11 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
+	filter, err := generateFilter(PermanentFilterTemplate, logPipeline.Name)
+	if err != nil {
+		return "", err
+	}
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, filter))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Custom)
@@ -95,7 +101,11 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
 
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
+	filter, err = generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)
+	if err != nil {
+		return "", err
+	}
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, filter))
 
 	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
 	if err != nil {
@@ -221,9 +231,36 @@ func generateEmitter(config PipelineConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }
 
-func generateFilter(template string, logPipelineName string, params ...string) string {
-	if len(params) > 0 {
-		return fmt.Sprintf(template, logPipelineName, params)
+func generateFilter(template string, logPipelineName string, params ...string) (string, error) {
+	if len(params) == 0 {
+		return fmt.Sprintf(template, logPipelineName), nil
 	}
-	return fmt.Sprintf(template, logPipelineName)
+
+	parameters := list.New()
+	parameters.PushBack(logPipelineName)
+	for _, param := range params {
+		parameters.PushBack(param)
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(template))
+	filter := ""
+	parameter := parameters.Front()
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continue
+		}
+		filter += "\n"
+		if strings.Contains(line, "%s") {
+			if parameter == nil {
+				return "", fmt.Errorf("You have less parameters than template requires")
+			}
+			line = fmt.Sprintf(line, parameter.Value)
+			parameter = parameter.Next()
+		}
+		filter += line
+	}
+
+	return filter, nil
+
 }
