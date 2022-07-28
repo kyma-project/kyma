@@ -14,5 +14,5 @@ spec:
           path: /convert/functions
           port: 443
       conversionReviewVersions:
-        - "v1beta1"
-        - "v1"
+      - "v1beta1"
+      - "v1"
