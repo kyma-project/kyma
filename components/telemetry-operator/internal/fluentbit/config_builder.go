@@ -1,8 +1,6 @@
 package fluentbit
 
 import (
-	"bufio"
-	"container/list"
 	"fmt"
 	"sort"
 	"strings"
@@ -236,31 +234,8 @@ func generateFilter(template string, logPipelineName string, params ...string) (
 		return fmt.Sprintf(template, logPipelineName), nil
 	}
 
-	parameters := list.New()
-	parameters.PushBack(logPipelineName)
-	for _, param := range params {
-		parameters.PushBack(param)
-	}
+	parameters := formListBySliceOfStrings(params)
+	parameters.PushFront(logPipelineName)
 
-	scanner := bufio.NewScanner(strings.NewReader(template))
-	filter := ""
-	parameter := parameters.Front()
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line == "" {
-			continue
-		}
-		filter += "\n"
-		if strings.Contains(line, "%s") {
-			if parameter == nil {
-				return "", fmt.Errorf("You have less parameters than template requires")
-			}
-			line = fmt.Sprintf(line, parameter.Value)
-			parameter = parameter.Next()
-		}
-		filter += line
-	}
-
-	return filter, nil
-
+	return formTemplateOutputByParameterList(template, parameters)
 }

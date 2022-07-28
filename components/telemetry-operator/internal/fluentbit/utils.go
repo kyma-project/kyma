@@ -1,8 +1,11 @@
 package fluentbit
 
 import (
+	"bufio"
+	"container/list"
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -165,4 +168,40 @@ func appendFluentBitConfigFile(
 		Data: sectionsConfig,
 	})
 	return configFiles, nil
+}
+
+func formListBySliceOfStrings(slice []string) *list.List {
+	formedList := list.New()
+	for _, elem := range slice {
+		formedList.PushBack(elem)
+	}
+	return formedList
+}
+
+func formTemplateOutputByParameterList(template string, parameters *list.List) (string, error) {
+	scanner := bufio.NewScanner(strings.NewReader(template))
+	filter := ""
+	parameter := parameters.Front()
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if line == "" {
+			continue
+		}
+		filter += "\n"
+
+		if !strings.Contains(line, "%s") {
+			filter += line
+			continue
+		}
+
+		if parameter == nil {
+			return "", fmt.Errorf("You have less parameters than template requires")
+		}
+		line = fmt.Sprintf(line, parameter.Value)
+		parameter = parameter.Next()
+		filter += line
+	}
+
+	return filter, nil
 }
