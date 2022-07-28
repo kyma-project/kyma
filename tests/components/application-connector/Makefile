@@ -15,7 +15,7 @@ clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway: test-gateway-debug #clean-gateway-test
+test-gateway: test-gateway-debug clean-gateway-test
 
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
@@ -27,6 +27,8 @@ test-gateway-debug:
 	@echo "Gateway test results:"
 
 	./scripts/check-pod-logs.sh
+	kubectl logs -l app=mock-app -n test
+	kubectl logs -l app=central-application-gateway -n kyma-system
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test  | kubectl delete -f -
