@@ -9,7 +9,7 @@ deployment:
       cpu: 100m
       memory: 128Mi
     requests:
-      cpu: 12m
+      cpu: 13m
       memory: 64Mi
   securityContext:
     allowPrivilegeEscalation: false
