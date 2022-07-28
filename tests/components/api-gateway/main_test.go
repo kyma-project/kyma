@@ -97,7 +97,7 @@ func TestMain(m *testing.M) {
 
 	helper = helpers.NewHelper(httpClient, commonRetryOpts)
 
-	client, err  := client.GetDynamicClient()
+	client, err := client.GetDynamicClient()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +175,8 @@ func TestApiGateway(t *testing.T) {
 		return nil
 	})
 
-	apiGatewayOpts.Concurrency = conf.TestConcurency
+	//apiGatewayOpts.Concurrency = conf.TestConcurency
+	apiGatewayOpts.Concurrency = 1
 
 	apigatewaySuite := godog.TestSuite{
 		Name:                 "API-Gateway",
