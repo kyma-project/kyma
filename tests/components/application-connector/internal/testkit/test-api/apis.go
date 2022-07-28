@@ -10,14 +10,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, tokens map[string]OAuthToken) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
-	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
 	csrf := NewCSRF()
 
 	{
@@ -64,14 +64,14 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	return router
 }
 
-func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials) http.Handler {
+func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, tokens map[string]OAuthToken) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
-	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
 
 	{
 		api.HandleFunc("/mtls-oauth/token", oauth.MTLSToken).Methods(http.MethodPost)

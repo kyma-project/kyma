@@ -29,11 +29,12 @@ func main() {
 
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
 	oAuthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
+	tokens := make(map[string]test_api.OAuthToken)
 
 	go func() {
 		expectedRequestParameters := test_api.ExpectedRequestParameters{Headers: cfg.RequestHeaders, QueryParameters: cfg.RequestQueryParameters}
 
-		router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials, expectedRequestParameters)
+		router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials, expectedRequestParameters, tokens)
 
 		address := fmt.Sprintf(":%d", cfg.Port)
 		log.Fatal(http.ListenAndServe(address, router))
@@ -41,7 +42,7 @@ func main() {
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.MtlsPort)
-		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials)
+		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, tokens)
 		mtlsServer := newMTLSServer(cfg.CaCertPath, address, router)
 		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.ServerCertPath, cfg.ServerKeyPath))
 		wg.Done()

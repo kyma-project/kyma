@@ -47,12 +47,12 @@ type OAuthHandler struct {
 	tokens       map[string]OAuthToken
 }
 
-func NewOAuth(clientID, clientSecret string) OAuthHandler {
+func NewOAuth(clientID, clientSecret string, tokens map[string]OAuthToken) OAuthHandler {
 	return OAuthHandler{
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		mutex:        sync.RWMutex{},
-		tokens:       make(map[string]OAuthToken),
+		tokens:       tokens,
 	}
 }
 
