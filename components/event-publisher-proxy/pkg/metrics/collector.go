@@ -24,8 +24,8 @@ const (
 	EventTypePublishedMetricHelp = "The total number of events published for a given eventType"
 	// EventRequestsHelp help for event requests metric
 	EventRequestsHelp = "The total number of event requests"
-	//statusCode is the name of the status code labels used by multiple metrics
-	statusCode = "code"
+	//responseCode is the name of the status code labels used by multiple metrics
+	responseCode = "response_code"
 	//destSvc is the name of the destination service label used by multiple metrics
 	destSvc = "destination_service"
 )
@@ -53,7 +53,7 @@ func NewCollector() *Collector {
 				Name: Latency,
 				Help: latencyHelp,
 			},
-			[]string{statusCode, destSvc},
+			[]string{responseCode, destSvc},
 		),
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -67,7 +67,7 @@ func NewCollector() *Collector {
 				Name: EventRequests,
 				Help: EventRequestsHelp,
 			},
-			[]string{statusCode, destSvc},
+			[]string{responseCode, destSvc},
 		),
 	}
 }
