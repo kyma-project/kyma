@@ -27,6 +27,7 @@ func NewRetryableRoundTripper(roundTripper http.RoundTripper, authorizationStrat
 		csrfTokenStrategy:     csrfTokenStrategy,
 		clientCertificate:     clientCertificate,
 		timeout:               timeout,
+		skipTLSVerify:         skipTLSVerify,
 	}
 }
 
