@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -54,6 +55,13 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handleErrors(w, err)
 		return
+	}
+
+	log.Infof("SkipVerify=%v", serviceAPI.SkipVerify)
+	if serviceAPI.SkipVerify {
+		log.Info("Verifying certificates disabled")
+	} else {
+		log.Info("Verifying certificates disabled")
 	}
 
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
