@@ -3,7 +3,10 @@ package testing
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/avast/retry-go/v3"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
@@ -126,10 +129,45 @@ func EventInvalidSink(msg string) v1.Event {
 func StartTestEnv(ens *TestEnsemble) {
 	g := ens.G
 
-	k8sCfg, err := ens.TestEnv.Start()
+	var err error
+	var k8sCfg *rest.Config
+
+	err = retry.Do(func() error {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("panic recovered:", r)
+			}
+		}()
+
+		k8sCfg, err = ens.TestEnv.Start()
+		return err
+	},
+		retry.Delay(time.Minute),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(5),
+		retry.OnRetry(func(n uint, err error) {
+			log.Printf("[%v] try failed to start testenv: %s", n, err)
+			if stopErr := ens.TestEnv.Stop(); stopErr != nil {
+				log.Printf("failed to stop testenv: %s", stopErr)
+			}
+		}),
+	)
+
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	g.Expect(k8sCfg).ToNot(gomega.BeNil())
 	ens.Cfg = k8sCfg
+}
+
+func StopTestEnv(ens *TestEnsemble) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("panic recovered:", r)
+		}
+	}()
+
+	if stopErr := ens.TestEnv.Stop(); stopErr != nil {
+		log.Printf("failed to stop testenv: %s", stopErr)
+	}
 }
 
 func StartSubscriberSvc(ens *TestEnsemble) {

@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
-	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -25,6 +24,9 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
+	ce "github.com/cloudevents/sdk-go/v2"
+	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 )
 
 const (
@@ -63,6 +65,19 @@ const (
 
 	JSStreamName = "kyma"
 )
+
+// CloudEvent returns the pointer to a simple CloudEvent for testing purpose.
+func CloudEvent() (*ce.Event, error) {
+	return cehelper.NewEvent(
+		cehelper.WithSubject(CloudEventType),
+		cehelper.WithSpecVersion(CloudEventSpecVersion),
+		cehelper.WithID(CloudEventSpecVersion),
+		cehelper.WithSource(CloudEventSource),
+		cehelper.WithType(CloudEventType),
+		cehelper.WithData(ce.ApplicationJSON, CloudEventData),
+		cehelper.WithTime(time.Now()),
+	)
+}
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
 
@@ -278,7 +293,19 @@ func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt
 
 func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
-		sub.Status.CleanEventTypes = cleanEventTypes
+		if cleanEventTypes == nil {
+			sub.Status.InitializeCleanEventTypes()
+		} else {
+			sub.Status.CleanEventTypes = cleanEventTypes
+		}
+	}
+}
+
+func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+			SubscriptionStatus: status,
+		}
 	}
 }
 
@@ -541,44 +568,6 @@ func NewEventingControllerDeployment() *appsv1.Deployment {
 			},
 		},
 		Status: appsv1.DeploymentStatus{},
-	}
-}
-
-func NewEventingPublisherProxyPod(backend string) *corev1.Pod {
-	labels := map[string]string{
-		deployment.AppLabelKey:       deployment.PublisherName,
-		deployment.InstanceLabelKey:  deployment.InstanceLabelValue,
-		deployment.DashboardLabelKey: deployment.DashboardLabelValue,
-		deployment.BackendLabelKey:   backend,
-	}
-	return &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "eventing-publisher-proxy-fffff",
-			Namespace: deployment.ControllerNamespace,
-			Labels:    labels,
-		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:  deployment.PublisherName,
-					Image: "container-image1",
-					Env: []corev1.EnvVar{{
-						Name:  "BACKEND",
-						Value: backend,
-					}},
-					Resources: corev1.ResourceRequirements{
-						Limits: map[corev1.ResourceName]k8sresource.Quantity{
-							corev1.ResourceCPU:    k8sresource.MustParse("50m"),
-							corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
-						},
-						Requests: map[corev1.ResourceName]k8sresource.Quantity{
-							corev1.ResourceCPU:    k8sresource.MustParse("20m"),
-							corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
-						},
-					},
-				},
-			},
-		},
 	}
 }
 

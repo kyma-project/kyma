@@ -65,30 +65,82 @@ spec:
                       type: string
                   type: object
                 type: array
-              multilineParsers:
-                items:
-                  description: MultiLineParser describes a Fluent Bit multiline parser
-                    configuration section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
               output:
                 description: Output describes a Fluent Bit output configuration section
                 properties:
                   custom:
                     type: string
+                  http:
+                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    properties:
+                      compress:
+                        type: string
+                      format:
+                        type: string
+                      host:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      password:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      port:
+                        type: string
+                      tls:
+                        properties:
+                          disabled:
+                            type: boolean
+                          skipCertificateValidation:
+                            type: boolean
+                        type: object
+                      uri:
+                        type: string
+                      user:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                    type: object
                 type: object
-              parsers:
-                items:
-                  description: Parser describes a Fluent Bit parser configuration
-                    section
-                  properties:
-                    content:
-                      type: string
-                  type: object
-                type: array
               variables:
                 items:
                   description: Variables is a pointer to a Kubernetes secret that

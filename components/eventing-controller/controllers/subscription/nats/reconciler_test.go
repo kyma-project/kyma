@@ -56,6 +56,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	subscription := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, utils.NewUncleanEventType("")),
@@ -87,6 +88,7 @@ func TestCreateSubscription(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	var testCases = []struct {
 		name                  string
@@ -214,7 +216,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
@@ -298,6 +300,7 @@ func TestChangeSubscription(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	var testCases = []struct {
 		name                  string
@@ -534,6 +537,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	subscription := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),

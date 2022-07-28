@@ -11,10 +11,12 @@ If you're interested in learning more about the Observability area, check out th
 
 - See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) the services Grafana, Jaeger, and Kiali.
 
+- Learn how to [use the telemetry component](../../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md) (alpha feature).
+
 - Troubleshoot Observability-related issues:
-  - [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
-  - [Jaeger shows fewer traces than expected](../../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md)
-  - [Loki shows fewer logs than expected](../../../04-operation-guides/troubleshooting/obsv-03-troubleshoot-loki-logging.md)
+  - [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
+  - [Jaeger shows fewer traces than expected](../../../04-operation-guides/troubleshooting/observability/obsv-02-troubleshoot-jaeger-shows-few-traces.md)
+  - [Loki shows fewer logs than expected](../../../04-operation-guides/troubleshooting/observability/obsv-03-troubleshoot-loki-logging.md)
 
 - Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) components.
 

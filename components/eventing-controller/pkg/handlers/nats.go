@@ -123,7 +123,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return nil, errors.Wrap(err, "deduplicate subscription filters failed")
+			return []string{}, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -132,7 +132,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 	for _, filter := range filters {
 		subject, err := getCleanSubject(filter, cleaner)
 		if err != nil {
-			return nil, err
+			return []string{}, err
 		}
 		cleanSubjects = append(cleanSubjects, subject)
 	}
@@ -327,7 +327,7 @@ func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, 
 		if cev2protocol.IsACK(result) {
 			return result
 		}
-		n.namedLogger().Errorw("Failed to CloudEvent dispatch", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
+		n.namedLogger().Errorw("Failed to dispatch CloudEvent", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
 		// Try again?
 		if err := params.Backoff(ctx, retry+1); err != nil {
 			// do not try again.
