@@ -60,7 +60,7 @@ var _ = Describe("LogPipeline controller", func() {
 
 [FILTER]
     name                  lua
-    match                 foo.*
+    match                 log-pipeline.*
     script 				  /files/filter-script.lua
     call   				  kubernetes_map_keys
 
