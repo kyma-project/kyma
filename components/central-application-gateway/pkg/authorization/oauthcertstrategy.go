@@ -34,6 +34,7 @@ func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, certific
 }
 
 func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc, skipTLSVerification bool) apperrors.AppError {
+	log.Infof("Passing skipTLSVerification=%v to GetTokenMTLS", skipTLSVerification)
 	cert, err := o.prepareCertificate()
 	if err != nil {
 		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())

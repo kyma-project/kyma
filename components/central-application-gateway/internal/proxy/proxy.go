@@ -74,6 +74,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
 
+	log.Infof("SkipVerify=%v passed to addAuthorization", serviceAPI.SkipVerify)
 	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
 		handleErrors(w, err)
