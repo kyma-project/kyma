@@ -41,6 +41,8 @@ manifests: controller-gen-local generate-local
 		output:crd:artifacts:config=config/crd/bases \
 		output:rbac:artifacts:config=config/rbac \
 		output:webhook:artifacts:config=config/webhook
+	kustomize build config/crd > config/crd/crd-serverless.yaml
+	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
 
 # Generate code
 .PHONY: generate-local
