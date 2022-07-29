@@ -3,6 +3,7 @@ package v1alpha2
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -107,8 +108,10 @@ func (fn *Function) validateObjectMeta(_ *ValidationConfig) error {
 }
 
 func (spec *FunctionSpec) validateGitRepoURL(_ *ValidationConfig) error {
-	if _, err := url.ParseRequestURI(spec.Source.GitRepository.URL); err != nil {
-		return fmt.Errorf("invalid source.gitRepository.URL value: %w", err)
+	if isRepoURLIsSSH(spec.Source.GitRepository.URL) {
+		return nil
+	} else if _, err := url.ParseRequestURI(spec.Source.GitRepository.URL); err != nil {
+		return fmt.Errorf("invalid source.gitRepository.URL value: %v", err)
 	}
 	return nil
 }
@@ -307,4 +310,13 @@ func (spec *FunctionSpec) validateRepository(_ *ValidationConfig) error {
 		{name: "spec.source.gitRepository.baseDir", value: spec.Source.GitRepository.BaseDir},
 		{name: "spec.source.gitRepository.reference", value: spec.Source.GitRepository.Reference},
 	}...)
+}
+
+func isRepoURLIsSSH(repoURL string) bool {
+	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?`)
+	if err != nil {
+		panic(err)
+	}
+
+	return exp.MatchString(repoURL)
 }
