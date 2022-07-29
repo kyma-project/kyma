@@ -99,11 +99,13 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
 	}
 
-	filter, err = generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)
-	if err != nil {
-		return "", err
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
+		filter, err = generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)
+		if err != nil {
+			return "", err
+		}
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, filter))
 	}
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, filter))
 
 	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
 	if err != nil {
