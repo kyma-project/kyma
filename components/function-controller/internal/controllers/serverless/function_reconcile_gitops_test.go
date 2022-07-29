@@ -140,6 +140,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			gitClient := newMockedGitClient(gitAuthOpts)
 			factory := automock.NewGitClientFactory(t)
 			factory.On("GetGitClient", mock.Anything).Return(gitClient)
+			defer factory.AssertExpectations(t)
 
 			statsCollector := &automock.StatsCollector{}
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
@@ -463,6 +464,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			gitClient := newMockedGitClient(gitAuthOpts)
 			factory := automock.NewGitClientFactory(t)
 			factory.On("GetGitClient", mock.Anything).Return(gitClient)
+			defer factory.AssertExpectations(t)
 
 			statsCollector := &automock.StatsCollector{}
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
@@ -730,6 +732,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 
 		factory := automock.NewGitClientFactory(t)
 		factory.On("GetGitClient", mock.Anything).Return(gitClient)
+		defer factory.AssertExpectations(t)
 
 		prometheusCollector := &automock.StatsCollector{}
 		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
@@ -817,6 +820,7 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 
 		factory := automock.NewGitClientFactory(t)
 		factory.On("GetGitClient", mock.Anything).Return(gitClient)
+		defer factory.AssertExpectations(t)
 
 		reconciler := &FunctionReconciler{
 			Log:               zap.NewNop().Sugar(),
