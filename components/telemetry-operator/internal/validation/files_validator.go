@@ -2,8 +2,9 @@ package validation
 
 import (
 	"fmt"
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"strings"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 //go:generate mockery --name FilesValidator --filename files_validator.go
