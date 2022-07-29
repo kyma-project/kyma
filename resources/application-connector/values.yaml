@@ -32,7 +32,7 @@ global:
   images:
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "1791fe4d"
+      version: "f36115cc"
     central_application_gateway:
       name: "central-application-gateway"
       version: "c573ed5c"
