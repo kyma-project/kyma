@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,7 +18,7 @@ import (
 
 func TestDefaultingWebHook_Handle(t *testing.T) {
 	type fields struct {
-		config  *serverlessv1alpha1.DefaultingConfig
+		config  *serverlessv1alpha2.DefaultingConfig
 		client  ctrlclient.Client
 		decoder *admission.Decoder
 	}
@@ -31,7 +31,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 		statusCode      int32
 	}
 	scheme := runtime.NewScheme()
-	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = serverlessv1alpha2.AddToScheme(scheme)
 	decoder, err := admission.NewDecoder(scheme)
 	require.NoError(t, err)
 
@@ -44,20 +44,20 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 		{
 			name: "Set function defaults successfully",
 			fields: fields{
-				config: &serverlessv1alpha1.DefaultingConfig{
-					Function: serverlessv1alpha1.FunctionDefaulting{
-						Replicas: serverlessv1alpha1.FunctionReplicasDefaulting{
+				config: &serverlessv1alpha2.DefaultingConfig{
+					Function: serverlessv1alpha2.FunctionDefaulting{
+						Replicas: serverlessv1alpha2.FunctionReplicasDefaulting{
 							DefaultPreset: "S",
-							Presets: map[string]serverlessv1alpha1.ReplicasPreset{
+							Presets: map[string]serverlessv1alpha2.ReplicasPreset{
 								"S": {
 									Min: int32(1),
 									Max: int32(1),
 								},
 							},
 						},
-						Resources: serverlessv1alpha1.FunctionResourcesDefaulting{
+						Resources: serverlessv1alpha2.FunctionResourcesDefaulting{
 							DefaultPreset: "S",
-							Presets: map[string]serverlessv1alpha1.ResourcesPreset{
+							Presets: map[string]serverlessv1alpha2.ResourcesPreset{
 								"S": {
 									RequestCPU:    "100m",
 									RequestMemory: "128Mi",
@@ -67,10 +67,10 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 							},
 						},
 					},
-					BuildJob: serverlessv1alpha1.BuildJobDefaulting{
-						Resources: serverlessv1alpha1.BuildJobResourcesDefaulting{
+					BuildJob: serverlessv1alpha2.BuildJobDefaulting{
+						Resources: serverlessv1alpha2.BuildJobResourcesDefaulting{
 							DefaultPreset: "normal",
-							Presets: map[string]serverlessv1alpha1.ResourcesPreset{
+							Presets: map[string]serverlessv1alpha2.ResourcesPreset{
 								"normal": {
 									RequestCPU:    "700m",
 									RequestMemory: "700Mi",
@@ -91,7 +91,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
-								"apiVersion": "serverless.kyma-project.io/v1alpha1",
+								"apiVersion": "serverless.kyma-project.io/v1alpha2",
 								"kind": "Function",
 								"metadata": {
 									"labels": {
@@ -102,7 +102,11 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 								},
 								"spec": {
 									"runtime": "python39",
-									"source": "def main(event, context):\n  return \"hello world\"\n"
+									"source": {
+										"inline": {
+											"source": "def main(event, context):\n  return \"hello world\"\n"
+										}
+									}
 								}
 							}`),
 						},
@@ -113,17 +117,18 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 				// 6 patch operations added
 				// add /spec/resources
 				// add /spec/buildResources
+				// add /spec/sources/inline/dependencies
 				// add /spec/minReplicas
 				// add /spec/maxReplicas
 				// add /status
 				// add /metadata/creationTimestamp
-				operationsCount: 6,
+				operationsCount: 7,
 			},
 		},
 		{
 			name: "Bad request",
 			fields: fields{
-				config:  &serverlessv1alpha1.DefaultingConfig{},
+				config:  &serverlessv1alpha2.DefaultingConfig{},
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
@@ -156,7 +161,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
-								"apiVersion": "serverless.kyma-project.io/v1alpha1",
+								"apiVersion": "serverless.kyma-project.io/v1alpha2",
 								"kind": "NotFunction",
 								"metadata": {
 									"labels": {

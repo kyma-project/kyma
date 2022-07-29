@@ -4,24 +4,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/subscription"
 )
-
-type FunctionTestConfig struct {
-	FnName       string
-	APIRuleURL   *url.URL
-	Fn           *function.Function
-	ApiRule      *apirule.APIRule
-	UsageName    string
-	Subscription *subscription.Subscription
-	Job          *job.Job
-	InClusterURL *url.URL
-	SinkURL      *url.URL
-}
 
 type FunctionSimpleTestConfig struct {
 	FnName       string

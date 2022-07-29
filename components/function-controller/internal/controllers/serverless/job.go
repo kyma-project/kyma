@@ -11,10 +11,10 @@ import (
 	apilabels "k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
+var fcManagedByLabel = map[string]string{serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue}
 
 var backoffLimitExceeded = func(reason string) bool {
 	return reason == "BackoffLimitExceeded"
@@ -41,7 +41,7 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 
 		conditionStatus := getConditionStatus(
 			s.instance.Status.Conditions,
-			serverlessv1alpha1.ConditionBuildReady,
+			serverlessv1alpha2.ConditionBuildReady,
 		)
 
 		if jobFailed && conditionStatus == corev1.ConditionFalse {
@@ -54,11 +54,11 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 				Requeue:      true,
 			}
 
-			condition := serverlessv1alpha1.Condition{
-				Type:               serverlessv1alpha1.ConditionBuildReady,
+			condition := serverlessv1alpha2.Condition{
+				Type:               serverlessv1alpha2.ConditionBuildReady,
 				Status:             corev1.ConditionFalse,
 				LastTransitionTime: metav1.Now(),
-				Reason:             serverlessv1alpha1.ConditionReasonJobFailed,
+				Reason:             serverlessv1alpha2.ConditionReasonJobFailed,
 				Message:            fmt.Sprintf("Job %s failed, it will be re-run", s.jobs.Items[0].Name),
 			}
 			return buildStateFnUpdateStateFnFunctionCondition(condition)
@@ -110,11 +110,11 @@ func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionBuildReady,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionBuildReady,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonJobCreated,
+			Reason:             serverlessv1alpha2.ConditionReasonJobCreated,
 			Message:            fmt.Sprintf("Job %s created", expectedJob.GetName()),
 		}
 
@@ -134,11 +134,11 @@ func stateFnInlineDeleteJobs(ctx context.Context, r *reconciler, s *systemState)
 		return nil
 	}
 
-	condition := serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionBuildReady,
+	condition := serverlessv1alpha2.Condition{
+		Type:               serverlessv1alpha2.ConditionBuildReady,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonJobsDeleted,
+		Reason:             serverlessv1alpha2.ConditionReasonJobsDeleted,
 		Message:            "Old Jobs deleted",
 	}
 
@@ -159,11 +159,11 @@ func buildStateFnInlineUpdateJobLabels(m map[string]string) stateFn {
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionBuildReady,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionBuildReady,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonJobUpdated,
+			Reason:             serverlessv1alpha2.ConditionReasonJobUpdated,
 			Message:            fmt.Sprintf("Job %s updated", jobName),
 		}
 
@@ -181,11 +181,11 @@ func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) 
 
 	if job.Status.CompletionTime != nil {
 		r.log.Info(fmt.Sprintf("job finished %q", jobName))
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionBuildReady,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionBuildReady,
 			Status:             corev1.ConditionTrue,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonJobFinished,
+			Reason:             serverlessv1alpha2.ConditionReasonJobFinished,
 			Message:            fmt.Sprintf("Job %s finished", jobName),
 		}
 		return buildStateFnUpdateStateFnFunctionCondition(condition)
@@ -193,11 +193,11 @@ func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) 
 
 	if job.Status.Failed < 1 {
 		r.log.Info(fmt.Sprintf("job in progress %q", jobName))
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionBuildReady,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionBuildReady,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonJobRunning,
+			Reason:             serverlessv1alpha2.ConditionReasonJobRunning,
 			Message:            fmt.Sprintf("Job %s is still in progress", jobName),
 		}
 		return buildStateFnUpdateStateFnFunctionCondition(condition)

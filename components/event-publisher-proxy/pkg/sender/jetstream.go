@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
@@ -17,8 +18,9 @@ import (
 )
 
 const (
-	natsBackend         = "nats"
-	jestreamHandlerName = "jetstream-handler"
+	natsBackend           = "nats"
+	jestreamHandlerName   = "jetstream-handler"
+	noSpaceLeftErrMessage = "no space left on device"
 )
 
 // compile time check
@@ -71,6 +73,9 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
+		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
+			return http.StatusInsufficientStorage, err
+		}
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusNoContent, nil

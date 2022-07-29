@@ -7,10 +7,3 @@ func NoAuthRepositorySpec(url string) serverlessv1alpha1.GitRepositorySpec {
 		URL: url,
 	}
 }
-
-func AuthRepositorySpecWithURL(url string, repoAuth *serverlessv1alpha1.RepositoryAuth) serverlessv1alpha1.GitRepositorySpec {
-	return serverlessv1alpha1.GitRepositorySpec{
-		URL:  url,
-		Auth: repoAuth,
-	}
-}
