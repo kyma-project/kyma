@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// +kubebuilder:webhook:path=/mutate-v1-secret,mutating=true,failurePolicy=fail,groups="",resources=secrets,verbs=create;update,versions=v1,name=mutating.secret.serverless.k8s.io
+// +kubebuilder:webhook:path=/mutate-v1-secret,mutating=true,failurePolicy=fail,groups="",resources=secrets,verbs=create;update,versions=v1,name=mutating.secret.serverless.k8s.io,sideEffects=none,admissionReviewVersions=v1,versions=v1
 
 const (
 	keyDockerConfigJSON = ".dockerconfigjson"

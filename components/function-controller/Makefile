@@ -5,7 +5,7 @@ APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go
+override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
@@ -34,6 +34,8 @@ test-local:
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
 # Generate manifests e.g. CRD, RBAC etc.
+CONTROLLER_GEN_VERSION=v0.6.2
+
 .PHONY: manifests
 manifests: controller-gen-local generate-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
@@ -54,18 +56,14 @@ generate-local: controller-gen-local
 .PHONY: controller-gen-local
 controller-gen-local:
 ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.9 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
+	make install-controller-gen
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+install-controller-gen:
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
 .PHONY: build-image 
 build-image: build-image-function-webhook \
