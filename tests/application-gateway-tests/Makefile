@@ -1,6 +1,6 @@
 APP_NAME = application-gateway-tests
 APP_PATH = tests/application-gateway-tests
- BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
