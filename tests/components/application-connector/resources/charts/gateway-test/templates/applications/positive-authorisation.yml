@@ -63,11 +63,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "htts://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls"
           credentials:
             secretName: mtls-positive
-            type: CertGen
+            type: CertificateGen
     - displayName: csrf basic
       name: csrf-basic
       providerDisplayName: Basic with CSRF

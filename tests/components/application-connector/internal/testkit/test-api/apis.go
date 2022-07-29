@@ -74,12 +74,13 @@ func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, tokens
 	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
 
 	{
+		r := api.PathPrefix("/mtls").Subrouter()
+		r.Use(oauth.Middleware())
 		api.HandleFunc("/mtls-oauth/token", oauth.MTLSToken).Methods(http.MethodPost)
 	}
 
 	{
 		r := api.PathPrefix("/mtls").Subrouter()
-		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
