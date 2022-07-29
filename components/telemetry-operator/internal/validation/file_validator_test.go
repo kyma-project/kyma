@@ -14,7 +14,7 @@ func TestConflictingFileName(t *testing.T) {
 			Name: "foo",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Files: []telemetryv1alpha1.FileMount{telemetryv1alpha1.FileMount{
+			Files: []telemetryv1alpha1.FileMount{{
 				Name:    "labelMap.json",
 				Content: "",
 			},
@@ -34,7 +34,7 @@ func TestDuplicateFileName(t *testing.T) {
 			Name: "foo",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Files: []telemetryv1alpha1.FileMount{telemetryv1alpha1.FileMount{
+			Files: []telemetryv1alpha1.FileMount{{
 				Name:    "f1.json",
 				Content: "",
 			},
@@ -50,7 +50,7 @@ func TestDuplicateFileName(t *testing.T) {
 			Name: "bar",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Files: []telemetryv1alpha1.FileMount{telemetryv1alpha1.FileMount{
+			Files: []telemetryv1alpha1.FileMount{{
 				Name:    "f1.json",
 				Content: "",
 			},
@@ -69,7 +69,7 @@ func TestValidateUpdatePipeline(t *testing.T) {
 			Name: "foo",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Files: []telemetryv1alpha1.FileMount{telemetryv1alpha1.FileMount{
+			Files: []telemetryv1alpha1.FileMount{{
 				Name:    "f1.json",
 				Content: "",
 			},
@@ -85,7 +85,7 @@ func TestValidateUpdatePipeline(t *testing.T) {
 			Name: "foo",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Files: []telemetryv1alpha1.FileMount{telemetryv1alpha1.FileMount{
+			Files: []telemetryv1alpha1.FileMount{{
 				Name:    "f1.json",
 				Content: "",
 			},
