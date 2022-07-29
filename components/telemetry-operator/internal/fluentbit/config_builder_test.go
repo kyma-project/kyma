@@ -1,6 +1,9 @@
 package fluentbit
 
 import (
+	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
+	"github.com/stretchr/testify/mock"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -336,4 +339,45 @@ func TestResolveSecretValue(t *testing.T) {
 	resolved, err := resolveValue(value, "pipeline")
 	require.NoError(t, err)
 	require.Equal(t, resolved, "${PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY}")
+}
+
+func TestLokiOutputPlugin(t *testing.T) {
+	lokiLabels := make(map[string]string)
+	lokiLabels["job"] = "telemetry-fluent-bit"
+
+	loki := &telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "lokiFoo",
+			Namespace: "lokiNs",
+		},
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Loki: telemetryv1alpha1.LokiOutput{
+					URL: telemetryv1alpha1.ValueType{
+						Value: "http:loki:3100",
+					},
+					Labels:     lokiLabels,
+					RemoveKeys: []string{"key1", "key2"},
+				},
+			},
+		},
+	}
+	pipelineConfig := PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+	fsWrapperMock := &fsmocks.Wrapper{}
+	fsWrapperMock.On("CreateAndWrite", mock.Anything).Return(nil)
+	res, err := generateLokiOutPut(loki, pipelineConfig)
+	require.NoError(t, err)
+	require.Equal(t, "grafana-loki", res["name"])
+	require.Equal(t, loki.Name, res["alias"])
+	require.Equal(t, "http:loki:3100", res["url"])
+	require.Equal(t, "{job=\"telemetry-fluent-bit\"}", res["labels"])
+	require.Equal(t, "key1, key2", res["removeKeys"])
+	require.Equal(t, "/files/labelmap.json", res["labelMapPath"])
+	require.Equal(t, "warn", res["loglevel"])
+	require.Equal(t, "json", res["lineformat"])
 }

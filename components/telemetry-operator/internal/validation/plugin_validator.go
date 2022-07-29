@@ -87,6 +87,9 @@ func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
 	if output.HTTP.Host.IsDefined() {
 		outputPluginCount++
 	}
+	if output.Loki.URL.IsDefined() {
+		outputPluginCount++
+	}
 
 	if outputPluginCount == 0 {
 		return fmt.Errorf("no output is defined, you must define one output")

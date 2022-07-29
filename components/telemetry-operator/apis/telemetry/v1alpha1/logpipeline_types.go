@@ -16,12 +16,15 @@ limitations under the License.
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // LogPipelineSpec defines the desired state of LogPipeline
+
 type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -35,6 +38,14 @@ type LogPipelineSpec struct {
 // Filter describes a Fluent Bit filter configuration
 type Filter struct {
 	Custom string `json:"custom,omitempty"`
+}
+
+// LokiOutput describes a Fluent Bit Loki output configuration
+
+type LokiOutput struct {
+	URL        ValueType         `json:"Url,omitempty"`
+	Labels     map[string]string `json:"Labels,omitempty"`
+	RemoveKeys []string          `json:"RemoveKeys,omitempty"`
 }
 
 // HttpOutput describes a Fluent Bit HTTP output configuration
@@ -58,6 +69,7 @@ type TLSConfig struct {
 type Output struct {
 	Custom string     `json:"custom,omitempty"`
 	HTTP   HTTPOutput `json:"http,omitempty"`
+	Loki   LokiOutput `json:"grafana-loki,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration

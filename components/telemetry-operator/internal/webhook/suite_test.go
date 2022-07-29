@@ -62,6 +62,7 @@ var (
 	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
 	outputValidatorMock   *validationmocks.OutputValidator
 	parserValidatorMock   *validationmocks.ParserValidator
+	fileValidatorMock     *validationmocks.FilesValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -126,6 +127,7 @@ var _ = BeforeSuite(func() {
 	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
 	parserValidatorMock = &validationmocks.ParserValidator{}
+	fileValidatorMock = &validationmocks.FilesValidator{}
 
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_restarts_total",
@@ -146,6 +148,7 @@ var _ = BeforeSuite(func() {
 		pipelineConfig,
 		fsWrapperMock,
 		restartsTotal,
+		fileValidatorMock,
 	)
 
 	By("registering LogPipeline webhook")
