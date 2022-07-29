@@ -100,9 +100,7 @@ func (oh *OAuthHandler) MTLSToken(w http.ResponseWriter, r *http.Request) {
 	grantType := r.FormValue(grantTypeKey)
 
 	if r.TLS == nil || id != oh.clientID || grantType != "client_credentials" {
-		log.Println("tls", r.TLS, "id", id, "grant", grantType)
 		w.WriteHeader(http.StatusForbidden)
-		// TODO: respond with error
 		return
 	}
 
@@ -115,9 +113,11 @@ func (oh *OAuthHandler) MTLSToken(w http.ResponseWriter, r *http.Request) {
 
 	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response) // TODO: Handle error
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		handleError(w, http.StatusInternalServerError, "Failed to encode token response")
+		return
+	}
 }
 
 func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {

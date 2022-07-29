@@ -95,35 +95,3 @@ spec:
           credentials:
             secretName: basic-test
             type: Basic
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: basic-test
-  namespace: kyma-integration
-type: Opaque
-data:
-  password: {{ "passwd" | b64enc }}
-  username: {{ "user" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: oauth-test
-  namespace: kyma-integration
-type: Opaque
-data:
-  clientId: {{ "clientID" | b64enc }}
-  clientSecret: {{ "clientSecret" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: request-parameters-test
-  namespace: kyma-integration
-type: Opaque
-stringData:
-  headers: |-
-    {"Hkey1":["Hval1"],"Hkey2":["Hval21","Hval22"]}
-  queryParameters: |-
-    {"Qkey1":["Qval1"],"Qkey2":["Qval21","Qval22"]}
