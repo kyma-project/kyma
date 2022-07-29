@@ -8,10 +8,12 @@ import (
 	"github.com/go-logr/zapr"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/gitrepo"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/vrischmann/envconfig"
 	"go.uber.org/zap/zapcore"
@@ -38,6 +40,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	_ = serverlessv1alpha2.AddToScheme(scheme)
+	_ = serverlessv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -112,6 +115,12 @@ func main() {
 
 	if err := mgr.AddReadyzCheck("readiness check", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to register readyz")
+		os.Exit(1)
+	}
+
+	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), zapLogger).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "unable to create gitRepo controller")
 		os.Exit(1)
 	}
 
