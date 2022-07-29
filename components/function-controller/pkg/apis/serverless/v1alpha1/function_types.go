@@ -158,6 +158,7 @@ type Repository struct {
 // +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".status.runtime"
 // +kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".metadata.generation"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:deprecatedversion:warning="use v1alpha2 instead"
 
 type Function struct {
 	metav1.TypeMeta   `json:",inline"`

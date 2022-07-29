@@ -41,6 +41,7 @@ const (
 
 // +kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.spec.url`
 // +kubebuilder:printcolumn:name="Auth",type=string,JSONPath=`.spec.auth.type`
+// +kubebuilder:deprecatedversion:warning="Git Repository CR will be removed in kyma version 2.x"
 //
 // GitRepository is the Schema for the gitrepositories API
 type GitRepository struct {
