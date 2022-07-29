@@ -380,6 +380,82 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 	}
 }
 
+func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
+	testGitRepoNoAuth := &serverlessv1alpha1.GitRepository{
+		ObjectMeta: metav1.ObjectMeta{Name: testRepoName, Namespace: "test"},
+
+		Spec: serverlessv1alpha1.GitRepositorySpec{
+			URL: "https://github.com/kyma-project/kyma.git",
+		},
+	}
+
+	scheme := runtime.NewScheme()
+	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = serverlessv1alpha2.AddToScheme(scheme)
+
+	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepoNoAuth).Build()
+	w := NewConvertingWebhook(client, scheme)
+	tests := []struct {
+		name        string
+		src         runtime.Object
+		repo        serverlessv1alpha1.GitRepository
+		wantDst     runtime.Object
+		wantVersion string
+		wantErr     bool
+	}{
+		{
+			name: "v1alpha1 to v1alpha2 Git function without auth",
+			src: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Type:    serverlessv1alpha1.SourceTypeGit,
+					Source:  testRepoName,
+					Repository: serverlessv1alpha1.Repository{
+						BaseDir:   "/code/",
+						Reference: "main",
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test", Namespace: "test",
+					Annotations: map[string]string{
+						v1alpha1GitRepoNameAnnotation: testRepoName,
+					},
+				},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						GitRepository: &serverlessv1alpha2.GitRepositorySource{
+							URL: testGitRepoNoAuth.Spec.URL,
+							Repository: serverlessv1alpha2.Repository{
+								BaseDir:   "/code/",
+								Reference: "main",
+							},
+						},
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dst, err := w.allocateDstObject(tt.wantVersion, "Function")
+			require.NoError(t, err)
+			if err := w.convertFunction(tt.src, dst); (err != nil) != tt.wantErr {
+				t.Errorf("ConvertingWebhook.convertFunction() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			desSpec := dst.(*serverlessv1alpha2.Function).Spec
+			wantSpec := tt.wantDst.(*serverlessv1alpha2.Function).Spec
+			require.Equal(t, wantSpec, wantSpec)
+			require.Nil(t, desSpec.Source.GitRepository.Auth)
+
+		})
+	}
+}
+
 func checkGitRepoAnnotation(f *serverlessv1alpha2.Function, repoName string) error {
 	if !f.TypeOf(serverlessv1alpha2.FunctionTypeGit) {
 		return nil

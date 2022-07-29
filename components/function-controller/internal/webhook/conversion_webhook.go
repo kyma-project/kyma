@@ -315,10 +315,6 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	return nil
 }
 
-func recreatedRepoName(functionName string) string {
-	return fmt.Sprintf("%s-recreated-repo", functionName)
-}
-
 func (w *ConvertingWebhook) convertStatusV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.FunctionStatus, outSource string, out *serverlessv1alpha1.FunctionStatus) {
 	out.Repository = serverlessv1alpha1.Repository(in.Repository)
 	out.Commit = in.Commit
