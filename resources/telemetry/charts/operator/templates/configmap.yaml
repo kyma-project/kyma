@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "fluent-bit.file" . }}
+  name: {{ include "fluent-bit.fullname" . }}
   labels:
     {{- include "fluent-bit.labels" . | nindent 4 }}
 data:
