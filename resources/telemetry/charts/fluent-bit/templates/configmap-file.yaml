@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "fluent-bit.labels" . | nindent 4 }}
 data:
-  label-map.json: |
+  labelmap.json: |
     {
       "kubernetes": {
         "container_name": "container",
