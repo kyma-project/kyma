@@ -389,35 +389,11 @@ func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
 		},
 	}
 
-	v1alpha2FunctionWithAuth := &serverlessv1alpha2.Function{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test", Namespace: "test",
-			Annotations: map[string]string{
-				v1alpha1GitRepoNameAnnotation: testRepoName,
-			},
-		},
-		Spec: serverlessv1alpha2.FunctionSpec{
-			Runtime: serverlessv1alpha2.NodeJs12,
-			Source: serverlessv1alpha2.Source{
-				GitRepository: &serverlessv1alpha2.GitRepositorySource{
-					URL: "https://github.com/kyma-project/kyma.git",
-					Repository: serverlessv1alpha2.Repository{
-						BaseDir:   "/code/",
-						Reference: "main",
-					},
-					Auth: &serverlessv1alpha2.RepositoryAuth{
-						Type:       serverlessv1alpha2.RepositoryAuthBasic,
-						SecretName: "secret_name",
-					},
-				},
-			},
-		},
-	}
 	scheme := runtime.NewScheme()
 	_ = serverlessv1alpha1.AddToScheme(scheme)
 	_ = serverlessv1alpha2.AddToScheme(scheme)
 
-	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepoNoAuth, v1alpha2FunctionWithAuth).Build()
+	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepoNoAuth).Build()
 	w := NewConvertingWebhook(client, scheme)
 	tests := []struct {
 		name        string
@@ -441,7 +417,6 @@ func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
 					},
 				},
 			},
-			repo: *testGitRepoNoAuth,
 			wantDst: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test", Namespace: "test",
