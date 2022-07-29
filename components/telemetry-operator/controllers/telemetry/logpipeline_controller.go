@@ -120,6 +120,15 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
+	if logPipeline.Spec.Input.Application == nil {
+		log.V(1).Info("input.application has not been set. Setting default values for excluding")
+		logPipeline.Spec.Input.Application = &telemetryv1alpha1.ApplicationInput{
+			ExcludeNamespaces: []string{"kyma-system", "kube-system"},
+			ExcludeContainers: []string{"fluent-bit"},
+		}
+		changed = true
+	}
+
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
 	if changed {

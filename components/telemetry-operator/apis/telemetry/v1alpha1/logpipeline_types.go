@@ -35,7 +35,8 @@ type LogPipelineSpec struct {
 
 // Input describes a Fluent Bit input configuration section
 type Input struct {
-	Application ApplicationInput `json:"application,omitempty"`
+	// +nullable
+	Application *ApplicationInput `json:"application,omitempty"`
 }
 
 // ApplicationInput is the default type of Input that handles application logs
@@ -47,6 +48,9 @@ type ApplicationInput struct {
 }
 
 func (a *ApplicationInput) HasSelectors() bool {
+	if a == nil {
+		return false
+	}
 	return len(a.Namespaces) > 0 ||
 		len(a.ExcludeNamespaces) > 0 ||
 		len(a.Containers) > 0 ||

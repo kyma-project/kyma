@@ -3,12 +3,6 @@ kind: LogPipeline
 metadata:
   name: logpipeline-sample
 spec:
-  input:
-    application:
-      namespaces: []
-      excludeNamespaces: []
-      containers:  []
-      excludeContainers: []
   filters:
     - custom: |
         Name    grep

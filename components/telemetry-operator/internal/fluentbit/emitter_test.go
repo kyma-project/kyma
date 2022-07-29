@@ -21,7 +21,7 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
 			Name: "logpipeline1",
 		},
 		Spec: v1alpha1.LogPipelineSpec{
-			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
+			Input: v1alpha1.Input{Application: &v1alpha1.ApplicationInput{
 				Namespaces: []string{"namespace1", "namespace2"},
 			}},
 		},
@@ -52,7 +52,7 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
 			Name: "logpipeline1",
 		},
 		Spec: v1alpha1.LogPipelineSpec{
-			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
+			Input: v1alpha1.Input{Application: &v1alpha1.ApplicationInput{
 				ExcludeNamespaces: []string{"namespace1", "namespace2"},
 			}},
 		},
@@ -83,7 +83,7 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
 			Name: "logpipeline1",
 		},
 		Spec: v1alpha1.LogPipelineSpec{
-			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
+			Input: v1alpha1.Input{Application: &v1alpha1.ApplicationInput{
 				Containers: []string{"container1", "container2"},
 			}},
 		},
@@ -114,7 +114,7 @@ func TestGenerateEmitterExcludeContainers(t *testing.T) {
 			Name: "logpipeline1",
 		},
 		Spec: v1alpha1.LogPipelineSpec{
-			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
+			Input: v1alpha1.Input{Application: &v1alpha1.ApplicationInput{
 				ExcludeContainers: []string{"container1", "container2"},
 			}},
 		},
@@ -145,7 +145,7 @@ func TestGenerateEmitterExcludeNamespacesAndExcludeContainers(t *testing.T) {
 			Name: "logpipeline1",
 		},
 		Spec: v1alpha1.LogPipelineSpec{
-			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
+			Input: v1alpha1.Input{Application: &v1alpha1.ApplicationInput{
 				ExcludeNamespaces: []string{"namespace1", "namespace2"},
 				ExcludeContainers: []string{"container1"},
 			}},

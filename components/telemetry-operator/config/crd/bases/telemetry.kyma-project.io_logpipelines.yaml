@@ -71,6 +71,7 @@ spec:
                   application:
                     description: ApplicationInput is the default type of Input that
                       handles application logs
+                    nullable: true
                     properties:
                       containers:
                         items:
