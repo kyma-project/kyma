@@ -45,7 +45,7 @@ image-mock-app:
 	docker build -t $(MOCK_APP_IMAGE) -f Dockerfile.mockapp .
 
 disable-sidecar-for-mtls-test:
-	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "add", "path": "/spec/template/metadata/annotations", "value": { "traffic.sidecar.istio.io/excludeOutboundPorts": "8090" } }]'
+	kubectl -n kyma-system patch deployment central-application-gateway -p '{"spec":{"template":{"metadata":{"annotations":{"traffic.sidecar.istio.io/excludeOutboundPorts": "8090"}}}}}'
 	kubectl rollout status deploy central-application-gateway -n kyma-system --timeout=1m
 
 enable-sidecar-after-mtls-test:
