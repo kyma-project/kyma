@@ -3,7 +3,7 @@ package serverless
 import (
 	"testing"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -23,19 +23,19 @@ func TestIsFunctionStatusUpdate(t *testing.T) {
 		"Function status is not updated": {
 			result: true,
 			event: event.UpdateEvent{
-				ObjectOld: &serverlessv1alpha1.Function{},
-				ObjectNew: &serverlessv1alpha1.Function{},
+				ObjectOld: &serverlessv1alpha2.Function{},
+				ObjectNew: &serverlessv1alpha2.Function{},
 			},
 		},
 		"Function status is updated": {
 			result: false,
 			event: event.UpdateEvent{
-				ObjectOld: &serverlessv1alpha1.Function{},
-				ObjectNew: &serverlessv1alpha1.Function{
-					Status: serverlessv1alpha1.FunctionStatus{
-						Conditions: []serverlessv1alpha1.Condition{
+				ObjectOld: &serverlessv1alpha2.Function{},
+				ObjectNew: &serverlessv1alpha2.Function{
+					Status: serverlessv1alpha2.FunctionStatus{
+						Conditions: []serverlessv1alpha2.Condition{
 							{
-								Type:               serverlessv1alpha1.ConditionBuildReady,
+								Type:               serverlessv1alpha2.ConditionBuildReady,
 								Status:             corev1.ConditionUnknown,
 								LastTransitionTime: metav1.Time{},
 								Reason:             "test reason",

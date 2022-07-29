@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/vrischmann/envconfig"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -37,7 +37,7 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = serverlessv1alpha2.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -115,7 +115,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, zapLogger, config.Function, git.NewGit2Go(zapLogger), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunction(resourceClient, zapLogger, config.Function, git.NewGit2Go(zapLogger), mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")

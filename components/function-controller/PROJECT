@@ -3,8 +3,5 @@ repo: github.com/kyma-project/kyma/components/function-controller
 resources:
 - group: serverless
   kind: Function
-  version: v1alpha1
-- group: serverless
-  kind: GitRepository
-  version: v1alpha1
-version: "2"
+  version: v1alpha2
+version: "3"
