@@ -35,3 +35,4 @@ data:
         table[key] = val
       end
     end
+{{- end -}}
