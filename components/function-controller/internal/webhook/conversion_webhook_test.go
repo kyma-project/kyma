@@ -404,7 +404,7 @@ func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name: "v1alpha1 to v1alpha2 Git function - auth removed",
+			name: "v1alpha1 to v1alpha2 Git function without auth",
 			src: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
