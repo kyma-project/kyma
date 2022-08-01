@@ -1,4 +1,4 @@
-package sync
+package helper
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/helper/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"

@@ -35,22 +35,19 @@ type LogPipelineSpec struct {
 
 // Input describes a Fluent Bit input configuration section
 type Input struct {
-	// +nullable
-	Application *ApplicationInput `json:"application,omitempty"`
+	Application ApplicationInput `json:"application,omitempty"`
 }
 
 // ApplicationInput is the default type of Input that handles application logs
 type ApplicationInput struct {
-	Namespaces        []string `json:"namespaces,omitempty"`
-	ExcludeNamespaces []string `json:"excludeNamespaces,omitempty"`
-	Containers        []string `json:"containers,omitempty"`
-	ExcludeContainers []string `json:"excludeContainers,omitempty"`
+	IncludeSystemNamespaces bool     `json:"includeSystemNamespaces,omitempty"`
+	Namespaces              []string `json:"namespaces,omitempty"`
+	ExcludeNamespaces       []string `json:"excludeNamespaces,omitempty"`
+	Containers              []string `json:"containers,omitempty"`
+	ExcludeContainers       []string `json:"excludeContainers,omitempty"`
 }
 
-func (a *ApplicationInput) HasSelectors() bool {
-	if a == nil {
-		return false
-	}
+func (a ApplicationInput) HasSelectors() bool {
 	return len(a.Namespaces) > 0 ||
 		len(a.ExcludeNamespaces) > 0 ||
 		len(a.Containers) > 0 ||

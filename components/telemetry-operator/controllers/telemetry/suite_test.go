@@ -26,7 +26,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/helper"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -44,7 +44,7 @@ import (
 )
 
 var (
-	daemonSetConfig = sync.FluentBitDaemonSetConfig{
+	daemonSetConfig = helper.FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "default"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "logging-fluent-bit-sections", Namespace: "default"},
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "logging-fluent-bit-files", Namespace: "default"},

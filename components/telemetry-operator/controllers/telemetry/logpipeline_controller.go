@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/helper"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -44,18 +44,18 @@ var (
 type LogPipelineReconciler struct {
 	client.Client
 	Scheme             *runtime.Scheme
-	Syncer             *sync.LogPipelineSyncer
+	Syncer             *helper.LogPipelineSyncer
 	FluentBitDaemonSet types.NamespacedName
 	unsupportedTotal   prometheus.Gauge
 	DaemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig helper.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
-	lpr.Syncer = sync.NewLogPipelineSyncer(client,
+	lpr.Syncer = helper.NewLogPipelineSyncer(client,
 		daemonSetConfig,
 		pipelineConfig,
 	)
@@ -107,7 +107,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
+		pipeLineUnsupported := helper.LogPipelineIsUnsupported(logPipeline)
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 		}
@@ -120,14 +120,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
-	if logPipeline.Spec.Input.Application == nil {
-		log.V(1).Info("input.application has not been set. Setting default values for excluding")
-		logPipeline.Spec.Input.Application = &telemetryv1alpha1.ApplicationInput{
-			ExcludeNamespaces: []string{"kyma-system", "kube-system"},
-			ExcludeContainers: []string{"fluent-bit"},
-		}
-		changed = true
-	}
+	changed = helper.SetDefaults(&logPipeline)
 
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 
@@ -148,7 +141,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
+		pipeLineUnsupported := helper.LogPipelineIsUnsupported(logPipeline)
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
@@ -173,7 +166,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipeLineUnsupported := sync.LogPipelineIsUnsupported(logPipeline)
+		pipeLineUnsupported := helper.LogPipelineIsUnsupported(logPipeline)
 
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
