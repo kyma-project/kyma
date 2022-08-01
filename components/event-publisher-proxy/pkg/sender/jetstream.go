@@ -39,7 +39,7 @@ func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCf
 	return &JetstreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 
-//TODO
+// URL returns the URL of the Sender's connection.
 func (s *JetstreamMessageSender) URL() string {
 	return s.connection.ConnectedUrl()
 }

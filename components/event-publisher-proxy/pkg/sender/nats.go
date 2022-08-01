@@ -34,7 +34,7 @@ func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *lo
 	return &NatsMessageSender{ctx: ctx, connection: connection, logger: logger}
 }
 
-//todo
+// URL returns the URL of the Sender's connection.
 func (s *NatsMessageSender) URL() string {
 	return s.connection.ConnectedUrl()
 }
