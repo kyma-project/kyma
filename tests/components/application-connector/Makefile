@@ -7,13 +7,13 @@ APP_URL = "mock-application.test.svc.cluster.local"
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
-test: disable-sidecar-for-mtls-test generate-certs test-gateway enable-sidecar-after-mtls-test
+test: test-gateway
 image: image-gateway-test
 clean: clean-gateway-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway: test-gateway-debug clean-gateway-test
+test-gateway: disable-sidecar-for-mtls-test generate-certs test-gateway-debug clean-gateway-test enable-sidecar-after-mtls-test
 
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
