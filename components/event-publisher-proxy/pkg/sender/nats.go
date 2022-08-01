@@ -19,6 +19,7 @@ var _ GenericSender = &NatsMessageSender{}
 type GenericSender interface {
 	Send(context.Context, *event.Event) (int, error)
 	ConnectionStatus() nats.Status
+	URL() string
 }
 
 // NatsMessageSender is responsible for sending messages over HTTP.
@@ -31,6 +32,11 @@ type NatsMessageSender struct {
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given nats connection.
 func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logger.Logger) *NatsMessageSender {
 	return &NatsMessageSender{ctx: ctx, connection: connection, logger: logger}
+}
+
+//todo
+func (s *NatsMessageSender) URL() string {
+	return s.connection.ConnectedUrl()
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the NatsMessageSender.

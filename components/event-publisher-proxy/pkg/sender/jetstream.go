@@ -39,6 +39,11 @@ func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCf
 	return &JetstreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 
+//TODO
+func (s *JetstreamMessageSender) URL() string {
+	return s.connection.ConnectedUrl()
+}
+
 // ConnectionStatus returns nats.Status for the NATS connection used by the JetstreamMessageSender.
 func (s *JetstreamMessageSender) ConnectionStatus() nats.Status {
 	return s.connection.Status()
