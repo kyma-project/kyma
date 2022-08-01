@@ -35,13 +35,15 @@ func RequestParameters(expectedRequestParams ExpectedRequestParameters) mux.Midd
 	}
 }
 
-func containsAllValues[T comparable](a, b []T) bool {
-	for _, bVal := range b {
-		for _, aVal := range a {
-			if bVal == aVal {
-				return true
-			}
+func containsAllValues(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
 		}
 	}
-	return false
+	return true
 }
