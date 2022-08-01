@@ -84,7 +84,7 @@ func TestGenerateLuaFilter(t *testing.T) {
 	expected := `
 name                  lua
 match                 foo.*
-script 				  /files/filter-script.lua
+script 				  /fluent-bit/scripts/filter-script.lua
 call   				  kubernetes_map_keys`
 
 	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
@@ -113,7 +113,7 @@ func TestFilter(t *testing.T) {
 [FILTER]
     name                  lua
     match                 foo.*
-    script 				  /files/filter-script.lua
+    script 				  /fluent-bit/scripts/filter-script.lua
     call   				  kubernetes_map_keys
 
 [OUTPUT]
@@ -222,7 +222,7 @@ func TestHTTPOutput(t *testing.T) {
 [FILTER]
     name                  lua
     match                 foo.*
-    script 				  /files/filter-script.lua
+    script 				  /fluent-bit/scripts/filter-script.lua
     call   				  kubernetes_map_keys
 
 [OUTPUT]
@@ -289,7 +289,7 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
 [FILTER]
     name                  lua
     match                 foo.*
-    script 				  /files/filter-script.lua
+    script 				  /fluent-bit/scripts/filter-script.lua
     call   				  kubernetes_map_keys
 
 [OUTPUT]

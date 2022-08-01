@@ -39,7 +39,7 @@ Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 	LuaDeDotFilterTemplate string = `
 name                  lua
 match                 %s.*
-script 				  /files/filter-script.lua
+script 				  /fluent-bit/scripts/filter-script.lua
 call   				  kubernetes_map_keys`
 )
 
