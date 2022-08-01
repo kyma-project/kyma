@@ -13,51 +13,57 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 The following Function object creates a Function which responds to HTTP requests with the "Hello John" message. The Function's code (**source**) and dependencies (**deps**) are specified in the Function CR.
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1
 kind: Function
 metadata:
   name: my-test-function
   namespace: default
+  labels:
+    app: my-test-function
 spec:
+  runtime: nodejs16
+  source:
+    inline:
+      dependencies: |
+        {
+          "name": "hellowithdeps",
+          "version": "0.0.1",
+          "dependencies": {
+            "end-of-stream": "^1.4.1",
+            "from2": "^2.3.0",
+            "lodash": "^4.17.5"
+          }
+        }
+      source: |
+        module.exports = {
+          main: function(event, context) {
+            const name = process.env.PERSON_NAME;
+            return 'Hello ' + name;
+          }
+        }
+  scaleConfig:
+    minReplicas: 3
+    maxReplicas: 3
+  resourceConfiguration:
+    function:
+      resources:
+        limits:
+          cpu: 1
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 500Mi
+    build:
+      resources:
+        limits:
+          cpu: 2
+          memory: 2Gi
+        requests:
+          cpu: 1
+          memory: 1Gi
   env:
     - name: PERSON_NAME
       value: "John"
-  deps: |
-    {
-      "name": "hellowithdeps",
-      "version": "0.0.1",
-      "dependencies": {
-        "end-of-stream": "^1.4.1",
-        "from2": "^2.3.0",
-        "lodash": "^4.17.5"
-      }
-    }
-  labels:
-    app: my-test-function
-  minReplicas: 3
-  maxReplicas: 3
-  resources:
-    limits:
-      cpu: 1
-      memory: 1Gi
-    requests:
-      cpu: 500m
-      memory: 500Mi
-  buildResources:
-    limits:
-      cpu: 2
-      memory: 2Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
-  source: |
-    module.exports = {
-      main: function(event, context) {
-        const name = process.env.PERSON_NAME;
-        return 'Hello ' + name;
-      }
-    }
-  runtime: nodejs14
   status:
     conditions:
       - lastTransitionTime: "2020-04-14T08:17:11Z"
@@ -85,10 +91,14 @@ kind: Function
 metadata:
   name: my-test-function
 spec:
-  type: git
-  source: auth-basic
-  baseDir: "/"
-  reference: "branchA"
+  source:
+    gitRepository:
+      url: github.com/username/repo
+      baseDir: "/"
+      reference: "branchA"
+      auth:
+        type: basic
+        secretName: secret-name
   runtime: "nodejs14"
 ```
 
@@ -96,34 +106,61 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter         |    Required    | Description                                   |
-| ---------------------------------------- | :------------: | ---------|
-| **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
-| **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
-| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map). |
-| **spec.deps**                            |       No       | Specifies the Function's dependencies.  |
-| **spec.labels**                          |       No       | Specifies the Function's Pod labels.    |
-| **spec.minReplicas**                     |       No       | Defines the minimum number of Function's Pods to run at a time.  |
-| **spec.maxReplicas**                     |       No       | Defines the maximum number of Function's Pods to run at a time.    |
-| **spec.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use.      |
-| **spec.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use.      |
-| **spec.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate.       |
-| **spec.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate.               |
-| **spec.buildResources.limits.cpu**            |       No       | Defines the maximum number of CPUs available to use for the Kubernetes Job's Pod responsible for building the Function's image.      |
-| **spec.buildResources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
-| **spec.buildResources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
-| **spec.buildResources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
-| **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
+| Parameter                                     |    Required    | Description                                   |
+| --------------------------------------------- | :------------: | ---------|
+| **metadata.name**                             |      Yes       | Specifies the name of the CR.                 |
+| **metadata.namespace**                        |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
+| **spec.runtime**                              |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
-| **spec.type**                          |      No       | Defines that you use a Git repository as the source of Function's code and dependencies. It must be set to `git`. |
-| **spec.source**                          |      Yes       | Provides the Function's full source code or the name of the Git directory in which the code and dependencies are stored.     |
-| **spec.baseDir**                          |      No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built​. |
-| **spec.reference**                        |      No       | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in Function's code and dependencies. |
+| **spec.customRuntimeConfiguration** | | |
+| **spec.customRuntimeConfiguration.name** | | |
+| **spec.customRuntimeConfiguration.namespace** | | |
+| **spec.source**                               |      Yes       | |
+| **spec.source.inline**                        |       No       | |
+| **spec.source.inline.dependencies**           |      Yes       | Specifies the Function's dependencies. |
+| **spec.source.inline.source**                 |      Yes       | |
+| **spec.source.gitRepository**                 |       No       | |
+| **spec.source.gitRepository.url**             |                | |
+| **spec.source.gitRepository.baseDir**         |                | Specifies the relative path to the Git directory that contains the source code from which the Function will be built​. |
+| **spec.source.gitRepository.reference**       |                | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in Function's code and dependencies. |
+| **spec.source.gitRepository.auth**            |                | |
+| **spec.source.gitRepository.auth.type**       |                | |
+| **spec.source.gitRepository.auth.secretName** |                | |
+| **spec.replicas**                             |       No       | Defines exact number of Function's Pods to run at a time. Can't be used at the same time with `spec.scaleConfig`. |
+| **spec.scaleConfig**                          |       No       | Defines minimum and maximum number of Functions Pods to run at a time. |
+| **spec.scaleConfig.minReplicas**              |       No       | Defines the minimum number of Function's Pods to run at a time. |
+| **spec.scaleConfig.maxReplicas**              |       No       | Defines the maximum number of Function's Pods to run at a time. |
+| **spec.templates**                            |                | | <!-- REMOVE ME PLS - remove this field from the API or document it  -->
+| **spec.resourceConfiguration** | | |
+| **spec.resourceConfiguration.function** | | |
+| **spec.resourceConfiguration.function.profile** | | |
+| **spec.resourceConfiguration.function.resources** | | |
+| **spec.resourceConfiguration.function.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use. |
+| **spec.resourceConfiguration.function.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use. |
+| **spec.resourceConfiguration.function.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate. |
+| **spec.resourceConfiguration.function.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate. |
+| **spec.resourceConfiguration** | | |
+| **spec.resourceConfiguration.build** | | |
+| **spec.resourceConfiguration.build.profile** | | |
+| **spec.resourceConfiguration.build.resources** | | |
+| **spec.resourceConfiguration.build.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available to use for the Kubernetes Job's Pod responsible for building the Function's image.      |
+| **spec.resourceConfiguration.build.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
+| **spec.resourceConfiguration.build.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
+| **spec.resourceConfiguration.build.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
-| **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
-| **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
-| **status.conditions.status**             | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready.     |
-| **status.conditions.type**               | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a Function has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the Function status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on the type of Function modification, but all three need to be in the `True` status for the Function to be considered successfully processed. |
+| **spec.env**                                  |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map). | <!--  maybe add link to kubernetes documentation? -->
+| **status.runtime** | | |
+| **status.runtimeImageOverride** | | |
+| **status.repository** | | |
+| **status.commit** | | |
+| **status.selector** | Not applicable | Describes a selector can be used to select all Function's Pods. |
+| **status.replicas** | Not applicable | Describes a number of currently running replicas. |
+| **status.conditions** | | |
+| **status.conditions[].message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
+| **status.conditions[].reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
+| **status.conditions[].status**             | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready.     |
+| **status.conditions[].type**               | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a Function has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the Function status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on the type of Function modification, but all three need to be in the `True` status for the Function to be considered successfully processed. |
+| **status.conditions[].lastTransitionTime** | | |
 
 ### Status reasons
 
