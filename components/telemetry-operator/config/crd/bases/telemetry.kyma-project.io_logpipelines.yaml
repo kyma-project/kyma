@@ -71,7 +71,7 @@ spec:
                   custom:
                     type: string
                   http:
-                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    description: HTTPOutput describes a Fluent Bit HTTP output configuration
                     properties:
                       compress:
                         type: string

@@ -37,7 +37,7 @@ type Filter struct {
 	Custom string `json:"custom,omitempty"`
 }
 
-// HttpOutput describes a Fluent Bit HTTP output configuration
+// HTTPOutput describes a Fluent Bit HTTP output configuration
 type HTTPOutput struct {
 	Host      ValueType `json:"host,omitempty"`
 	User      ValueType `json:"user,omitempty"`

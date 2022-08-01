@@ -58,12 +58,6 @@ var _ = Describe("LogPipeline controller", func() {
     name grep
     regex $kubernetes['labels']['app'] my-deployment
 
-[FILTER]
-    name                  lua
-    match                 log-pipeline.*
-    script 				  /files/filter-script.lua
-    call   				  kubernetes_map_keys
-
 [OUTPUT]
     match log-pipeline.*
     name stdout

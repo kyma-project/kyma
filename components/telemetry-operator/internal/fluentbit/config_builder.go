@@ -82,11 +82,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 
-	filter, err := generateFilter(PermanentFilterTemplate, logPipeline.Name)
-	if err != nil {
-		return "", err
-	}
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, filter))
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Custom)
@@ -100,11 +96,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 	}
 
 	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
-		filter, err = generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)
-		if err != nil {
-			return "", err
-		}
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, filter))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
 	}
 
 	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
@@ -231,13 +223,6 @@ func generateEmitter(config PipelineConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }
 
-func generateFilter(template string, logPipelineName string, params ...string) (string, error) {
-	if len(params) == 0 {
-		return fmt.Sprintf(template, logPipelineName), nil
-	}
-
-	parameters := formListBySliceOfStrings(params)
-	parameters.PushFront(logPipelineName)
-
-	return formTemplateOutputByParameterList(template, parameters)
+func generateFilter(template string, params ...any) string {
+	return fmt.Sprintf(template, params...)
 }
