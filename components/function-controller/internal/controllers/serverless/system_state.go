@@ -370,8 +370,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	envs = append(envs, deploymentEnvs...)
 
 	minReplicas := DefaultDeploymentReplicas
-	if s.instance.Spec.MinReplicas != nil {
-		minReplicas = *s.instance.Spec.MinReplicas
+	if s.instance.Spec.ScaleConfig != nil && s.instance.Spec.ScaleConfig.MinReplicas != nil {
+		minReplicas = *s.instance.Spec.ScaleConfig.MinReplicas
 	}
 
 	return appsv1.Deployment{
@@ -381,7 +381,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: s.instance.Spec.ScaleConfig.MinReplicas,
+			Replicas: &minReplicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
