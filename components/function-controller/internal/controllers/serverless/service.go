@@ -34,7 +34,7 @@ func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) sta
 		return buildStateFnUpdateService(expectedSvc)
 	}
 
-	return stateFnCheckHPA
+	return initStateFnCheckScaling
 }
 
 func buildStateFnUpdateService(newService corev1.Service) stateFn {

@@ -456,6 +456,9 @@ spec:
                   - name
                   type: object
                 type: array
+              replicas:
+                format: int32
+                type: integer
               resourceConfiguration:
                 properties:
                   build:
@@ -626,16 +629,25 @@ spec:
                 type: array
               reference:
                 type: string
+              replicas:
+                format: int32
+                type: integer
               runtime:
                 description: Runtime specifies the name of the Function's runtime.
                 type: string
               runtimeImageOverride:
+                type: string
+              selector:
                 type: string
             type: object
         type: object
     served: true
     storage: true
     subresources:
+      scale:
+        labelSelectorPath: .status.selector
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
       status: {}
 status:
   acceptedNames:

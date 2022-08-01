@@ -369,11 +369,6 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
-	minReplicas := DefaultDeploymentReplicas
-	if s.instance.Spec.ScaleConfig != nil && s.instance.Spec.ScaleConfig.MinReplicas != nil {
-		minReplicas = *s.instance.Spec.ScaleConfig.MinReplicas
-	}
-
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -381,7 +376,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &minReplicas,
+			Replicas: s.getReplicas(DefaultDeploymentReplicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
@@ -479,6 +474,21 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 		},
 	}
+}
+
+func (s *systemState) getReplicas(defaultVal int32) *int32 {
+	if s.instance.Spec.ScaleConfig != nil {
+		// TODO: question - should it looks like this?
+		// Maybe better way is to return s.deployments.Items[0].Spec.Replicas?
+		// this resource is managed by HPA and returning always minReplicas is confusing
+
+		return s.instance.Spec.ScaleConfig.MinReplicas
+	}
+	if s.instance.Spec.Replicas != nil {
+		return s.instance.Spec.Replicas
+	}
+
+	return &defaultVal
 }
 
 //TODO do not negate

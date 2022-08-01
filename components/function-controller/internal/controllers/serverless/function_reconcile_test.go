@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -34,6 +35,244 @@ const (
 	addedLabelKey         = "that-label"
 	addedLabelValue       = "wasnt-here"
 )
+
+func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	rtm := serverlessv1alpha2.NodeJs12
+	resourceClient, testEnv := setUpTestEnv(g)
+	defer tearDownTestEnv(g, testEnv)
+	testCfg := setUpControllerConfig(g)
+	initializeServerlessResources(g, resourceClient)
+	createDockerfileForRuntime(g, resourceClient, rtm)
+	statsCollector := &automock.StatsCollector{}
+	statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
+
+	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	t.Run("should use HPA only when needed", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "hpa", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		t.Log("creating the ConfigMap")
+		result, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function := &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(1))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonConfigMapCreated))
+
+		configMapList := &corev1.ConfigMapList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(configMapList.Items).To(gomega.HaveLen(1))
+		g.Expect(configMapList.Items[0].Data[FunctionSourceKey]).To(gomega.Equal(function.Spec.Source.Inline.Source))
+		g.Expect(configMapList.Items[0].Data[FunctionDepsKey]).To(gomega.Equal("{}"))
+
+		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
+
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+
+		two := int32(2)
+		four := int32(4)
+
+		t.Log("updating function to use fixed replicas number")
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		function.Spec.ScaleConfig.MinReplicas = &two
+		function.Spec.ScaleConfig.MaxReplicas = &two
+		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
+
+		t.Log("updating deployment with new number of replicas")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentUpdated))
+		deployments := &appsv1.DeploymentList{}
+		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
+		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
+		deployment := &deployments.Items[0]
+		g.Expect(deployment).ToNot(gomega.BeNil())
+		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&two))
+
+		t.Log("removing hpa")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(hpaList.Items).To(gomega.HaveLen(0))
+
+		t.Log("deployment ready")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
+
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
+
+		t.Log("updating function to use scalable replicas number")
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		function.Spec.ScaleConfig.MaxReplicas = &four
+		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
+
+		t.Log("creating hpa")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonHorizontalPodAutoscalerCreated))
+
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(hpaList.Items).To(gomega.HaveLen(1))
+
+		hpaSpec := hpaList.Items[0].Spec
+
+		g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
+		g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
+		g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+
+		t.Log("deployment ready")
+		deployment.Status.Conditions = []appsv1.DeploymentCondition{
+			{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
+			{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
+		}
+		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
+
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
+
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
+	})
+
+	t.Run("should propagate spec.replicas value to deployment", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "replicas", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		t.Log("creating cm")
+		_, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+
+		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
+
+		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
+
+		t.Log("update function")
+		function := &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.ScaleConfig).NotTo(gomega.BeNil())
+		g.Expect(function.Spec.Replicas).To(gomega.BeNil())
+
+		functionWithReplicas := function.DeepCopy()
+		functionWithReplicas.Spec.ScaleConfig = nil
+		functionWithReplicas.Spec.Replicas = pointer.Int32(3)
+
+		g.Expect(resourceClient.Update(context.TODO(), functionWithReplicas)).To(gomega.Succeed())
+
+		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.ScaleConfig).To(gomega.BeNil())
+		g.Expect(function.Spec.Replicas).NotTo(gomega.BeNil())
+
+		_, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+
+		t.Log("remove hpa")
+		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(hpaList.Items).To(gomega.HaveLen(1))
+
+		_, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+
+		hpaList = &autoscalingv1.HorizontalPodAutoscalerList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(hpaList.Items).To(gomega.HaveLen(0))
+
+		t.Log("deployment ready")
+		_, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
+		deployments := &appsv1.DeploymentList{}
+		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
+		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
+		deployment := &deployments.Items[0]
+		g.Expect(deployment).ToNot(gomega.BeNil())
+		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(pointer.Int32(3)))
+	})
+}
 
 func TestFunctionReconciler_Reconcile(t *testing.T) {
 	t.Parallel()
@@ -992,149 +1231,6 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 	})
 
-	t.Run("should use HPA only when needed", func(t *testing.T) {
-		//GIVEN
-		g := gomega.NewGomegaWithT(t)
-		inFunction := newFixFunction(testNamespace, "hpa", 1, 2)
-		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
-		defer deleteFunction(g, resourceClient, inFunction)
-
-		s := systemState{
-			//TODO https://github.com/kyma-project/kyma/issues/14079
-			instance: *inFunction,
-		}
-
-		fnLabels := s.functionLabels()
-
-		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
-
-		//WHEN
-		t.Log("creating the ConfigMap")
-		result, err := reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
-
-		function := &serverlessv1alpha2.Function{}
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Status.Conditions).To(gomega.HaveLen(1))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
-
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonConfigMapCreated))
-
-		configMapList := &corev1.ConfigMapList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(configMapList.Items).To(gomega.HaveLen(1))
-		g.Expect(configMapList.Items[0].Data[FunctionSourceKey]).To(gomega.Equal(function.Spec.Source.Inline.Source))
-		g.Expect(configMapList.Items[0].Data[FunctionDepsKey]).To(gomega.Equal("{}"))
-
-		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
-
-		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
-
-		two := int32(2)
-		four := int32(4)
-
-		t.Log("updating function to use fixed replicas number")
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.ScaleConfig.MinReplicas = &two
-		function.Spec.ScaleConfig.MaxReplicas = &two
-		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
-
-		t.Log("updating deployment with new number of replicas")
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
-
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentUpdated))
-		deployments := &appsv1.DeploymentList{}
-		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
-		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
-		deployment := &deployments.Items[0]
-		g.Expect(deployment).ToNot(gomega.BeNil())
-		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&two))
-
-		t.Log("removing hpa")
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
-
-		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(hpaList.Items).To(gomega.HaveLen(0))
-
-		t.Log("deployment ready")
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
-
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
-
-		t.Log("updating function to use scalable replicas number")
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.ScaleConfig.MaxReplicas = &four
-		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
-
-		t.Log("creating hpa")
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
-
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
-
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonHorizontalPodAutoscalerCreated))
-
-		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(hpaList.Items).To(gomega.HaveLen(1))
-
-		hpaSpec := hpaList.Items[0].Spec
-
-		g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-		g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-		g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
-
-		t.Log("deployment ready")
-		deployment.Status.Conditions = []appsv1.DeploymentCondition{
-			{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
-			{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
-		}
-		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
-
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
-
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
-	})
 	t.Run("should properly handle `kubectl rollout restart` changing annotations in deployment", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
