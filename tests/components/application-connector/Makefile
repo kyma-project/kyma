@@ -3,9 +3,7 @@ GOPATH ?= $(shell go env GOPATH)
 
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
-GATEWAY_TEST_CERTS_DIR ?= ./resources/charts/gateway-test/certs
 APP_URL = "mock-application.test.svc.cluster.local"
-SUBJECT =  "/C=PL/ST=A/O=SAP/CN=$(APP_URL)"
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
@@ -20,7 +18,7 @@ test-gateway: test-gateway-debug clean-gateway-test
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	helm template resources/charts/gateway-test --set gatewayTest=$(GATEWAY_TEST_IMAGE),mockApplication=$(MOCK_APP_IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
+	helm template resources/charts/gateway-test | kubectl apply -f -
 
 	-kubectl wait --for=condition=complete --timeout=2m -n $(NAMESPACE) job/application-gateway-test
 	@echo ""
@@ -49,7 +47,7 @@ disable-sidecar-for-mtls-test:
 	kubectl rollout status deploy central-application-gateway -n kyma-system --timeout=1m
 
 enable-sidecar-after-mtls-test:
-	-kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
+	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
 generate-certs:
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive

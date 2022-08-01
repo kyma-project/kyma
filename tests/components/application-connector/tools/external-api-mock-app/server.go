@@ -21,7 +21,7 @@ func main() {
 	}
 	log.SetLevel(logLevel)
 
-	log.Infof("Starting frog auth server application")
+	log.Infof("Starting mock application")
 	log.Infof("Config: %s", cfg.String())
 
 	wg := sync.WaitGroup{}
