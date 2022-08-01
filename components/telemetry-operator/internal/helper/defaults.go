@@ -5,9 +5,11 @@ import (
 )
 
 const (
-	kymaSystem, kubeSystem string = "kyma-system", "kube-system"
+	kymaSystem, kubeSystem = "kyma-system", "kube-system"
 )
 
+// SetDefaults sets the defaults for excluding system namespaces.
+// Returns true if changes to the logpipeline have been made
 func SetDefaults(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	var applicationInput = &logPipeline.Spec.Input.Application
 	systemNamespaces := make(map[string]string)

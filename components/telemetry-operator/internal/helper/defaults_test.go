@@ -8,17 +8,17 @@ import (
 )
 
 func TestDefaultInputWithEmptySelectorsAndIncludeOptionFalse(t *testing.T) {
-	logPipeline := v1alpha1.LogPipeline{
+	logPipeline := &v1alpha1.LogPipeline{
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{}},
 		},
 	}
 
-	result := SetDefaults(&logPipeline)
+	result := SetDefaults(logPipeline)
 
 	require.True(t, result)
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "kyma-system")
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "kube-system")
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "kyma-system")
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "kube-system")
 }
 
 func TestDefaultInputWithEmptySelectorsAndIncludeOptionTrue(t *testing.T) {
@@ -31,8 +31,8 @@ func TestDefaultInputWithEmptySelectorsAndIncludeOptionTrue(t *testing.T) {
 	result := SetDefaults(logPipeline)
 
 	require.False(t, result)
-	require.Empty(t, &logPipeline.Spec.Input.Application.Namespaces)
-	require.Empty(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces)
+	require.Empty(t, logPipeline.Spec.Input.Application.Namespaces)
+	require.Empty(t, logPipeline.Spec.Input.Application.ExcludeNamespaces)
 }
 
 func TestDefaultInputWithSetNamespacesAndIncludeOptionFalse(t *testing.T) {
@@ -47,11 +47,11 @@ func TestDefaultInputWithSetNamespacesAndIncludeOptionFalse(t *testing.T) {
 	result := SetDefaults(logPipeline)
 
 	require.False(t, result)
-	require.Contains(t, &logPipeline.Spec.Input.Application.Namespaces, "namespace1")
-	require.Contains(t, &logPipeline.Spec.Input.Application.Namespaces, "namespace2")
-	require.NotContains(t, &logPipeline.Spec.Input.Application.Namespaces, "kyma-system")
-	require.NotContains(t, &logPipeline.Spec.Input.Application.Namespaces, "kube-system")
-	require.Empty(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces)
+	require.Contains(t, logPipeline.Spec.Input.Application.Namespaces, "namespace1")
+	require.Contains(t, logPipeline.Spec.Input.Application.Namespaces, "namespace2")
+	require.NotContains(t, logPipeline.Spec.Input.Application.Namespaces, "kyma-system")
+	require.NotContains(t, logPipeline.Spec.Input.Application.Namespaces, "kube-system")
+	require.Empty(t, logPipeline.Spec.Input.Application.ExcludeNamespaces)
 }
 
 func TestDefaultInputWithSetNamespacesAndIncludeOptionTrue(t *testing.T) {
@@ -67,11 +67,11 @@ func TestDefaultInputWithSetNamespacesAndIncludeOptionTrue(t *testing.T) {
 	result := SetDefaults(logPipeline)
 
 	require.True(t, result)
-	require.Contains(t, &logPipeline.Spec.Input.Application.Namespaces, "namespace1")
-	require.Contains(t, &logPipeline.Spec.Input.Application.Namespaces, "namespace2")
-	require.Contains(t, &logPipeline.Spec.Input.Application.Namespaces, "kyma-system")
-	require.Contains(t, &logPipeline.Spec.Input.Application.Namespaces, "kube-system")
-	require.Empty(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces)
+	require.Contains(t, logPipeline.Spec.Input.Application.Namespaces, "namespace1")
+	require.Contains(t, logPipeline.Spec.Input.Application.Namespaces, "namespace2")
+	require.Contains(t, logPipeline.Spec.Input.Application.Namespaces, "kyma-system")
+	require.Contains(t, logPipeline.Spec.Input.Application.Namespaces, "kube-system")
+	require.Empty(t, logPipeline.Spec.Input.Application.ExcludeNamespaces)
 }
 
 func TestDefaultInputWithSetExcludedNamespacesAndIncludeOptionFalse(t *testing.T) {
@@ -86,28 +86,29 @@ func TestDefaultInputWithSetExcludedNamespacesAndIncludeOptionFalse(t *testing.T
 	result := SetDefaults(logPipeline)
 
 	require.True(t, result)
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace1")
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace2")
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "kyma-system")
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "kube-system")
-	require.Empty(t, &logPipeline.Spec.Input.Application.Namespaces)
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace1")
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace2")
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "kyma-system")
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "kube-system")
+	require.Empty(t, logPipeline.Spec.Input.Application.Namespaces)
 }
 
 func TestDefaultInputWithSetExcludedNamespacesAndIncludeOptionTrue(t *testing.T) {
 	logPipeline := &v1alpha1.LogPipeline{
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
-				ExcludeNamespaces: []string{"namespace1", "namespace2"},
+				ExcludeNamespaces:       []string{"namespace1", "namespace2"},
+				IncludeSystemNamespaces: true,
 			}},
 		},
 	}
 
 	result := SetDefaults(logPipeline)
 
-	require.True(t, result)
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace1")
-	require.Contains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace2")
-	require.NotContains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "kyma-system")
-	require.NotContains(t, &logPipeline.Spec.Input.Application.ExcludeNamespaces, "kube-system")
-	require.Empty(t, &logPipeline.Spec.Input.Application.Namespaces)
+	require.False(t, result)
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace1")
+	require.Contains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "namespace2")
+	require.NotContains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "kyma-system")
+	require.NotContains(t, logPipeline.Spec.Input.Application.ExcludeNamespaces, "kube-system")
+	require.Empty(t, logPipeline.Spec.Input.Application.Namespaces)
 }

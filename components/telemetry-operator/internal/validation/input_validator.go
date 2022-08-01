@@ -22,9 +22,6 @@ func (v *inputValidator) Validate(logPipelineInput *telemetryv1alpha1.Input) err
 	if logPipelineInput == nil {
 		return nil
 	}
-	if logPipelineInput.Application == nil {
-		return nil
-	}
 
 	var containers = logPipelineInput.Application.Containers
 	var excludeContainers = logPipelineInput.Application.ExcludeContainers
