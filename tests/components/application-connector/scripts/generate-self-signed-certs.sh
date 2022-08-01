@@ -9,6 +9,8 @@ export APP_URL=$1
 export GATEWAY_TEST_CERTS_DIR=$2
 export SUBJECT="/C=PL/ST=A/O=SAP/CN=$APP_URL"
 
+mkdir -p "$GATEWAY_TEST_CERTS_DIR"
+
 echo "Generating certificate for domain: $APP_URL"
 openssl version
 openssl req -newkey rsa:2048 -nodes -x509 -days 365 -out $GATEWAY_TEST_CERTS_DIR/ca.crt -keyout $GATEWAY_TEST_CERTS_DIR/ca.key -subj $SUBJECT
