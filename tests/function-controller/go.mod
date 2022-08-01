@@ -24,7 +24,7 @@ require (
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
 	// replace it in another PR
-	github.com/kyma-project/kyma/components/function-controller => ../../components/function-controller
+	github.com/kyma-project/kyma/components/function-controller => github.com/pPrecel/kyma/components/function-controller v0.0.0-20220801083447-41d01d8dc0c7
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/text => golang.org/x/text v0.3.3

@@ -697,6 +697,8 @@ github.com/openzipkin/zipkin-go v0.1.6/go.mod h1:QgAqvLzwWbR/WpD4A3cGpPtJrZXNIiJ
 github.com/openzipkin/zipkin-go v0.2.1/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
 github.com/openzipkin/zipkin-go v0.2.2/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
 github.com/ory/oathkeeper-maester v0.1.0/go.mod h1:O692MD+MJP3dx0QUV1iOcSPxczdRZEj5WauFaD1vy7U=
+github.com/pPrecel/kyma/components/function-controller v0.0.0-20220801083447-41d01d8dc0c7 h1:fqIpH+E9OD6pR9meM6jdDqI5GW7P+w7JE34tDGWxOAc=
+github.com/pPrecel/kyma/components/function-controller v0.0.0-20220801083447-41d01d8dc0c7/go.mod h1:pUzJCeMD6jhiUbjks+uS11zd6U0MFKD4v79nrKWCj3k=
 github.com/pact-foundation/pact-go v1.0.4/go.mod h1:uExwJY4kCzNPcHRj+hCR/HBbOOIwwtUjcrb0b5/5kLM=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
