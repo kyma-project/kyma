@@ -86,7 +86,7 @@ spec:
 If you store the Function's source code and dependencies in a Git repository and want the Function Controller to fetch them from it, use these parameters in the Function CR:
 
 ```yaml
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1
 kind: Function
 metadata:
   name: my-test-function
