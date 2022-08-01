@@ -42,6 +42,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
+	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -64,6 +65,10 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating nodejs14 config")
+	}
+	nodejs16Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs16", genericContainer.WithLogger(nodejs16Logger))
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating nodejs16 config")
 	}
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
@@ -115,6 +120,14 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
 				teststep.UpdateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha2.NodeJs14)),
 				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 post update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), "Hello From updated nodejs14"),
+			),
+			step.NewSerialTestRunner(nodejs16Logger, "NodeJS16 test",
+				teststep.CreateConfigMap(nodejs16Logger, cm, "Create Test ConfigMap", cmData),
+				teststep.CreateSecret(nodejs16Logger, sec, "Create Test Secret", secretData),
+				teststep.CreateFunction(nodejs16Logger, nodejs16Cfg.Fn, "Create NodeJS16 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha2.NodeJs16)),
+				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Cfg.InClusterURL, poll.WithLogger(nodejs16Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
+				teststep.UpdateFunction(nodejs16Logger, nodejs16Cfg.Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated NodeJS16", serverlessv1alpha2.NodeJs16)),
+				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Cfg.InClusterURL, poll.WithLogger(nodejs16Logger), "Hello From updated nodejs16"),
 			),
 		),
 	), nil
