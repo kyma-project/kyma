@@ -39,8 +39,8 @@ Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 	LuaDeDotFilterTemplate string = `
 name                  lua
 match                 %s.*
-script 				  /fluent-bit/scripts/filter-script.lua
-call   				  kubernetes_map_keys`
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
 )
 
 func BuildConfigSection(header ConfigHeader, content string) string {
