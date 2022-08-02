@@ -13,7 +13,7 @@ The Function Controller requires the following components to be installed:
 
 To develop the Function Controller, you need:
 - [libgit2-dev](https://libgit2.org/) (v1.1)
-- [controller-gen](https://github.com/kubernetes-sigs/controller-tools/tree/master/cmd/controller-gen) (v0.2.9)
+- [controller-gen](https://github.com/kubernetes-sigs/controller-tools/releases/tag/v0.6.2) (v0.6.2)
 
 To develop the component, use the formulae declared in the [generic](/common/makefiles/generic-make-go.mk) and [component-specific](./Makefile) Makefiles. To run tests without the Makefile logic, use the `go test ./...` command.
 
