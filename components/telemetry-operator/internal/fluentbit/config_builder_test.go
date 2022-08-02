@@ -84,8 +84,8 @@ func TestGenerateLuaFilter(t *testing.T) {
 	expected := `
 name                  lua
 match                 foo.*
-script 				  /fluent-bit/scripts/filter-script.lua
-call   				  kubernetes_map_keys`
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
 
 	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
@@ -113,8 +113,8 @@ func TestFilter(t *testing.T) {
 [FILTER]
     name                  lua
     match                 foo.*
-    script 				  /fluent-bit/scripts/filter-script.lua
-    call   				  kubernetes_map_keys
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
@@ -221,8 +221,8 @@ func TestHTTPOutput(t *testing.T) {
 [FILTER]
     name                  lua
     match                 foo.*
-    script 				  /fluent-bit/scripts/filter-script.lua
-    call   				  kubernetes_map_keys
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
@@ -289,8 +289,8 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
 [FILTER]
     name                  lua
     match                 foo.*
-    script 				  /fluent-bit/scripts/filter-script.lua
-    call   				  kubernetes_map_keys
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
