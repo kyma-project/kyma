@@ -130,7 +130,7 @@ func validateCustomOutput(content string, denied []string) error {
 }
 
 func validateLokiOutPut(lokiOutPut telemetryv1alpha1.LokiOutput) error {
-	if lokiOutPut.URL.Value != "" && !validHostname(lokiOutPut.URL.Value, true) {
+	if lokiOutPut.URL.Value != "" && !validURL(lokiOutPut.URL.Value) {
 		return fmt.Errorf("invalid hostname '%s'", lokiOutPut.URL.Value)
 	}
 	if !lokiOutPut.URL.IsDefined() && (len(lokiOutPut.Labels) != 0 || len(lokiOutPut.RemoveKeys) != 0) {
@@ -141,7 +141,7 @@ func validateLokiOutPut(lokiOutPut telemetryv1alpha1.LokiOutput) error {
 }
 
 func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
-	if httpOutput.Host.Value != "" && !validHostname(httpOutput.Host.Value, false) {
+	if httpOutput.Host.Value != "" && !validHostname(httpOutput.Host.Value) {
 		return fmt.Errorf("invalid hostname '%s'", httpOutput.Host.Value)
 	}
 	if httpOutput.URI != "" && !strings.HasPrefix(httpOutput.URI, "/") {
@@ -153,22 +153,25 @@ func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
 	return nil
 }
 
-func validHostname(host string, isLoki bool) bool {
+func validURL(host string) bool {
 	host = strings.Trim(host, " ")
 
-	if isLoki {
-		_, err := url.ParseRequestURI(host)
-		if err != nil {
-			return false
-		}
-
-		u, err := url.Parse(host)
-		if err != nil || u.Scheme == "" || u.Host == "" {
-			return false
-		}
-
-		return true
+	_, err := url.ParseRequestURI(host)
+	if err != nil {
+		return false
 	}
+
+	u, err := url.Parse(host)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
+
+}
+
+func validHostname(host string) bool {
+
 	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
 	return re.MatchString(host)
 }
