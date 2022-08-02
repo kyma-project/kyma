@@ -168,11 +168,9 @@ func validHostname(host string, isLoki bool) bool {
 		}
 
 		return true
-	} else {
-		re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
-		return re.MatchString(host)
 	}
-
+	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
+	return re.MatchString(host)
 }
 
 func getCustomName(custom map[string]string) (string, error) {
