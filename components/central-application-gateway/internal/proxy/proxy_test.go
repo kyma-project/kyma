@@ -47,6 +47,7 @@ func TestProxyRequest(t *testing.T) {
 		request              request
 		apiExtractor         apiExtractor
 		expectedProxyRequest expectedProxyRequest
+		skipTLSVerify        bool
 	}
 	tests := []testcase{
 		{
@@ -164,6 +165,26 @@ func TestProxyRequest(t *testing.T) {
 			},
 		},
 		{
+			name: "should proxy OAuth calls with TLS verification disabled",
+			request: request{
+				url: "/orders/123",
+			},
+			apiExtractor: apiExtractor{
+				credentials: authorization.Credentials{
+					OAuth: &authorization.OAuth{
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
+						URL:          "www.example.com/token",
+					},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123",
+				// authorization header is not set by the mock
+			},
+			skipTLSVerify: true,
+		},
+		{
 			name: "should fail with Bad Gateway error when failed to get OAuth token",
 			request: request{
 				url: "/orders/123",
@@ -209,7 +230,7 @@ func TestProxyRequest(t *testing.T) {
 			}
 			authStrategyMock := &authMock.Strategy{}
 			authStrategyMock.
-				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), tc.skipTLSVerify).
 				Return(nil).
 				Once()
 
@@ -217,7 +238,7 @@ func TestProxyRequest(t *testing.T) {
 			authStrategyFactoryMock := &authMock.StrategyFactory{}
 			authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock).Once()
 
-			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce, tc.skipTLSVerify)
 
 			apiExtractorMock := &proxyMocks.APIExtractor{}
 			apiExtractorMock.On("Get", metadatamodel.APIIdentifier{
@@ -228,7 +249,7 @@ func TestProxyRequest(t *testing.T) {
 				TargetUrl:         ts.URL + tc.apiExtractor.targetPath,
 				Credentials:       &tc.apiExtractor.credentials,
 				RequestParameters: tc.apiExtractor.requestParameters,
-				SkipVerify:        false,
+				SkipVerify:        tc.skipTLSVerify,
 			}, nil).Once()
 
 			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
@@ -493,10 +514,10 @@ func createBasicCredentialsMatcher(username, password string) CredentialsMatcher
 	}
 }
 
-func mockCSRFStrategy(authorizationStrategy authorization.Strategy, ef ensureCalledFunc) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
+func mockCSRFStrategy(authorizationStrategy authorization.Strategy, ef ensureCalledFunc, skipTLSVerify bool) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
 
 	csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-	strategyCall := csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), false).
+	strategyCall := csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), skipTLSVerify).
 		Return(nil)
 	ef(strategyCall)
 

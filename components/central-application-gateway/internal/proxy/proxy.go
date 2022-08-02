@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/httperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
@@ -58,13 +56,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Infof("SkipVerify=%v", serviceAPI.SkipVerify)
-	if serviceAPI.SkipVerify {
-		log.Info("Verifying certificates disabled")
-	} else {
-		log.Info("Verifying certificates disabled")
-	}
-
 	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
 	if err != nil {
 		handleErrors(w, err)
@@ -74,7 +65,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
 
-	log.Infof("SkipVerify=%v passed to addAuthorization", serviceAPI.SkipVerify)
 	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
 		handleErrors(w, err)

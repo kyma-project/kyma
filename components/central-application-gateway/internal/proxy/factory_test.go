@@ -126,7 +126,7 @@ func TestProxyFactory(t *testing.T) {
 			authStrategyFactoryMock := &authMock.StrategyFactory{}
 			authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
-			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce, false)
 
 			serviceDefServiceMock := testCase.createMockServiceDefServiceFunc(testCase.apiIdentifier, ts.URL, credentials)
 
