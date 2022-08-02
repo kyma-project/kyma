@@ -213,6 +213,7 @@ func main() {
 		pipelineConfig,
 		fs.NewWrapper(),
 		restartsTotal,
+		validation.NewFilesValidator(),
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
