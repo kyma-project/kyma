@@ -39,7 +39,7 @@ call                  kubernetes_map_keys`
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
-	sb.WriteString(CreateEmitter(pipelineConfig, logPipeline))
+	sb.WriteString(CreateRewriteTagFilter(pipelineConfig, logPipeline))
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {

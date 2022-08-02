@@ -36,7 +36,7 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
     Rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
 
 `
-	actual := CreateEmitter(pipelineConfig, logPipeline)
+	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
@@ -67,7 +67,7 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
     Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateEmitter(pipelineConfig, logPipeline)
+	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
@@ -98,7 +98,7 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
     Rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
 
 `
-	actual := CreateEmitter(pipelineConfig, logPipeline)
+	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
@@ -129,7 +129,7 @@ func TestGenerateEmitterExcludeContainers(t *testing.T) {
     Rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateEmitter(pipelineConfig, logPipeline)
+	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }
 
@@ -162,6 +162,6 @@ func TestGenerateEmitterExcludeNamespacesAndExcludeContainers(t *testing.T) {
     Rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateEmitter(pipelineConfig, logPipeline)
+	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
 	require.Equal(t, expected, actual)
 }

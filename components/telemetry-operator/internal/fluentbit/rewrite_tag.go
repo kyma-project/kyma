@@ -41,9 +41,8 @@ func (sb *SectionBuilder) ToString() string {
 	return sb.builder.String()
 }
 
-// CreateEmitter creates the Fluent Bit Rewrite Tag Filter section
-func CreateEmitter(config PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
-
+// CreateRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
+func CreateRewriteTagFilter(config PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
 	var sectionBuilder = NewSectionBuilder().
 		CreateFilterSection().
 		AddConfigurationParameter("Name", "rewrite_tag").
