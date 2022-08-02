@@ -34,6 +34,8 @@ The test Job and the mock application deployment are in the `test` Namespace.
 
 ## Building
 
+Pipelines build the mock application and the gateway test using the `release` target from the `Makefile`.
+
 To build **and push** the Docker images of the tests and the mock application:
 
 ``` sh
@@ -46,6 +48,8 @@ This will build the following images:
 ## Running
 
 Tests can be run on any Kyma cluster with Application Gateway.
+
+Pipelines run the tests using the `test-gateway` target from the `Makefile`
 
 ### Deploy a Kyma cluster locally
 
@@ -95,13 +99,14 @@ By default, the tests clean up after themselves, removing all the previously cre
 
 ### Running locally
 
-Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
-Application Gateway and the mock application can both be run locally.
+> **CAUTION:** Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
+> Application Gateway and the mock application can both be run locally.
 
 To run the mock application locally, follow these steps:
 1. Change all the **targetUrl** values in the [Application CRs](./resources/charts/gateway-test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
 2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
-3. Deploy all the resources on the cluster (you can omit the test Job and the Central Gateway, but it's easier to just let them fail).
+3. Deploy all the resources on the cluster.
+   > **NOTE:** you can omit the test Job and the Central Gateway, but it's easier to just let them fail
 4. Build the mock application:
    
    <div tabs name="Mock App Build Flavor" group="mock-app-flavor">
