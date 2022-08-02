@@ -37,7 +37,7 @@ type Filter struct {
 	Custom string `json:"custom,omitempty"`
 }
 
-// HttpOutput describes a Fluent Bit HTTP output configuration
+// HTTPOutput describes a Fluent Bit HTTP output configuration
 type HTTPOutput struct {
 	Host      ValueType `json:"host,omitempty"`
 	User      ValueType `json:"user,omitempty"`
@@ -47,6 +47,7 @@ type HTTPOutput struct {
 	Compress  string    `json:"compress,omitempty"`
 	Format    string    `json:"format,omitempty"`
 	TLSConfig TLSConfig `json:"tls,omitempty"`
+	Dedot     bool      `json:"dedot,omitempty"`
 }
 
 type TLSConfig struct {
