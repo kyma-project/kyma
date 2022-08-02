@@ -60,7 +60,6 @@ type LogPipelineValidator struct {
 
 	decoder        *admission.Decoder
 	daemonSetUtils *fluentbit.DaemonSetUtils
-	fileValidator  validation.FilesValidator
 }
 
 func NewLogPipeLineValidator(
@@ -74,8 +73,7 @@ func NewLogPipeLineValidator(
 	outputValidator validation.OutputValidator,
 	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper,
-	restartsTotal prometheus.Counter,
-	fileValidator validation.FilesValidator) *LogPipelineValidator {
+	restartsTotal prometheus.Counter) *LogPipelineValidator {
 	fluentBitConfigMapNamespacedName := types.NamespacedName{
 		Name:      fluentBitConfigMap,
 		Namespace: namespace,
@@ -93,7 +91,6 @@ func NewLogPipeLineValidator(
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
 		daemonSetUtils:        daemonSetUtils,
-		fileValidator:         fileValidator,
 	}
 }
 
