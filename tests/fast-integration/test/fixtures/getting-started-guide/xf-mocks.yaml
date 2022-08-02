@@ -22,7 +22,7 @@ kind: TokenRequest
 metadata:
   name: commerce-mock
 ---
-apiVersion: serverless.kyma-project.io/v1alpha2
+apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: orders-function
@@ -31,166 +31,162 @@ metadata:
     app: orders-function
     example: orders-function
 spec:
+  deps: |-
+    { 
+      "name": "orders-function",
+      "version": "1.0.0",
+      "dependencies": {
+        "redis": "3.0.2"
+      }
+    }
   maxReplicas: 1
   minReplicas: 1
-  resourceConfiguration:
-    function:
-      resources:
-        limits:
-          cpu: 20m
-          memory: 32Mi
-        requests:
-          cpu: 10m
-          memory: 16Mi
+  resources:
+    limits:
+      cpu: 20m
+      memory: 32Mi
+    requests:
+      cpu: 10m
+      memory: 16Mi
   env:
     - name: APP_REDIS_PREFIX
       value: "REDIS_"
-  source:
-    inline:
-      dependencies: |-
-        { 
-          "name": "orders-function",
-          "version": "1.0.0",
-          "dependencies": {
-            "redis": "3.0.2"
-          }
+  source: |-
+    const redis = require("redis");
+    const { promisify } = require("util");
+
+    let storage = undefined;
+    const errors = {
+      codeRequired: new Error("orderCode is required"),
+      alreadyExists: new Error("object already exists"),
+    }
+
+    module.exports = { 
+      main: async function (event, _) {
+        const storage = getStorage();
+
+        if (!event.data || !Object.keys(event.data).length) {
+          return await onList(storage, event);
         }
-      source: |-
-        const redis = require("redis");
-        const { promisify } = require("util");
-    
-        let storage = undefined;
-        const errors = {
-          codeRequired: new Error("orderCode is required"),
-          alreadyExists: new Error("object already exists"),
+
+        const { orderCode, consignmentCode, consignmentStatus } = event.data;
+        if (orderCode && consignmentCode && consignmentStatus) {
+          return await onCreate(storage, event);
         }
-    
-        module.exports = { 
-          main: async function (event, _) {
-            const storage = getStorage();
-    
-            if (!event.data || !Object.keys(event.data).length) {
-              return await onList(storage, event);
-            }
-    
-            const { orderCode, consignmentCode, consignmentStatus } = event.data;
-            if (orderCode && consignmentCode && consignmentStatus) {
-              return await onCreate(storage, event);
-            }
-    
-            event.extensions.response.status(500);
-          }
+
+        event.extensions.response.status(500);
+      }
+    }
+
+    async function onList(storage, event) {
+      try {
+        return await storage.getAll();
+      } catch(err) {
+        event.extensions.response.status(500);
+        return;
+      }
+    }
+
+    async function onCreate(storage, event) {
+      try {
+        await storage.set(event.data);
+      } catch(err) {
+        let status = 500;
+        switch (err) {
+          case errors.codeRequired: {
+            status = 400;
+            break;
+          };
+          case errors.alreadyExists: {
+            status = 409;
+            break;
+          };
         }
-    
-        async function onList(storage, event) {
-          try {
-            return await storage.getAll();
-          } catch(err) {
-            event.extensions.response.status(500);
-            return;
-          }
+        event.extensions.response.status(status);
+      }
+    }
+
+    class RedisStorage {
+      storage = undefined;
+      asyncGet = undefined;
+      asyncKeys = undefined;
+      asyncSet = undefined;
+
+      constructor(options) {
+        this.storage = redis.createClient(options);
+        this.asyncGet = promisify(this.storage.get).bind(this.storage);
+        this.asyncKeys = promisify(this.storage.keys).bind(this.storage);
+        this.asyncSet = promisify(this.storage.set).bind(this.storage);
+      }
+
+      async getAll() {
+        let values = [];
+
+        const keys = await this.asyncKeys("*");
+        for (const key of keys) {
+          const value = await this.asyncGet(key);
+          values.push(JSON.parse(value));
         }
-    
-        async function onCreate(storage, event) {
-          try {
-            await storage.set(event.data);
-          } catch(err) {
-            let status = 500;
-            switch (err) {
-              case errors.codeRequired: {
-                status = 400;
-                break;
-              };
-              case errors.alreadyExists: {
-                status = 409;
-                break;
-              };
-            }
-            event.extensions.response.status(status);
-          }
+
+        return values;
+      }
+
+      async set(order = {}) {
+        if (!order.orderCode) {
+          throw errors.codeRequired;
         }
-    
-        class RedisStorage {
-          storage = undefined;
-          asyncGet = undefined;
-          asyncKeys = undefined;
-          asyncSet = undefined;
-    
-          constructor(options) {
-            this.storage = redis.createClient(options);
-            this.asyncGet = promisify(this.storage.get).bind(this.storage);
-            this.asyncKeys = promisify(this.storage.keys).bind(this.storage);
-            this.asyncSet = promisify(this.storage.set).bind(this.storage);
-          }
-    
-          async getAll() {
-            let values = [];
-    
-            const keys = await this.asyncKeys("*");
-            for (const key of keys) {
-              const value = await this.asyncGet(key);
-              values.push(JSON.parse(value));
-            }
-    
-            return values;
-          }
-    
-          async set(order = {}) {
-            if (!order.orderCode) {
-              throw errors.codeRequired;
-            }
-            const value = await this.asyncGet(order.orderCode);
-            if (value) {
-              throw errors.alreadyExists;
-            }
-            await this.asyncSet(order.orderCode, JSON.stringify(order));
-          }
+        const value = await this.asyncGet(order.orderCode);
+        if (value) {
+          throw errors.alreadyExists;
         }
-    
-        class InMemoryStorage {
-          storage = new Map();
-    
-          getAll() {
-            return Array.from(this.storage)
-              .map(([_, order]) => order)
-          }
-    
-          set(order = {}) {
-            if (!order.orderCode) {
-              throw errors.codeRequired;
-            }
-            if (this.storage.get(order.orderCode)) {
-              throw errors.alreadyExists;
-            }
-            return this.storage.set(order.orderCode, order);
-          }
+        await this.asyncSet(order.orderCode, JSON.stringify(order));
+      }
+    }
+
+    class InMemoryStorage {
+      storage = new Map();
+
+      getAll() {
+        return Array.from(this.storage)
+          .map(([_, order]) => order)
+      }
+
+      set(order = {}) {
+        if (!order.orderCode) {
+          throw errors.codeRequired;
         }
-    
-        function readEnv(env = "") {
-          return process.env[env] || undefined;
+        if (this.storage.get(order.orderCode)) {
+          throw errors.alreadyExists;
         }
-    
-        function createStorage() {
-          let redisPrefix = readEnv("APP_REDIS_PREFIX");
-          if (!redisPrefix) {
-            redisPrefix = "REDIS_";
-          }
-          const port = readEnv(redisPrefix + "PORT");
-          const host = readEnv(redisPrefix + "HOST");
-          const password = readEnv(redisPrefix + "REDIS_PASSWORD");
-    
-          if (host && port && password) {
-            return new RedisStorage({ host, port, password });
-          }
-          return new InMemoryStorage();
-        }
-    
-        function getStorage() {
-          if (!storage) {
-            storage = createStorage();
-          }
-          return storage;
-        }
+        return this.storage.set(order.orderCode, order);
+      }
+    }
+
+    function readEnv(env = "") {
+      return process.env[env] || undefined;
+    }
+
+    function createStorage() {
+      let redisPrefix = readEnv("APP_REDIS_PREFIX");
+      if (!redisPrefix) {
+        redisPrefix = "REDIS_";
+      }
+      const port = readEnv(redisPrefix + "PORT");
+      const host = readEnv(redisPrefix + "HOST");
+      const password = readEnv(redisPrefix + "REDIS_PASSWORD");
+
+      if (host && port && password) {
+        return new RedisStorage({ host, port, password });
+      }
+      return new InMemoryStorage();
+    }
+
+    function getStorage() {
+      if (!storage) {
+        storage = createStorage();
+      }
+      return storage;
+    }
 ---
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
