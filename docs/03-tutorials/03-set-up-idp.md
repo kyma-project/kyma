@@ -53,7 +53,7 @@ Now, whenever the JWT token is included in the call to the API server, the API s
 
 You must now define which individuals or groups should have access to which Kyma resources because the default setup does not provide access to any. You need to model permissions using the [RBAC concept](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
-By default, Kyma comes with the following Cluster Roles:
+By default, Kyma comes with the following ClusterRoles:
 
 - **kyma-admin**: gives full admin access to the entire cluster
 - **kyma-namespace-admin**: gives full admin access to the specific Namespace
@@ -62,7 +62,7 @@ By default, Kyma comes with the following Cluster Roles:
 - **kyma-view**: allows viewing and listing all of the resources in the cluster
 - **kyma-essentials**: gives a set of minimal view access right to use in Kyma Dashboard
 
-To bind a user to the **kyma-admin** Cluster Role, run this command:
+To bind a user to the **kyma-admin** ClusterRole, run this command:
 
 ```
 kubectl create clusterrolebinding {BINDING_NAME} --clusterrole=kyma-admin --user={USERNAME AS IDENTIFIED AT YOUR IDP}
@@ -74,7 +74,7 @@ To check if the binding is created, run:
 kubectl get clusterrolebinding {BINDING_NAME}
 ```
 
-To bind a group of users to the **kyma-admin** Cluster Role, run this command:
+To bind a group of users to the **kyma-admin** ClusterRole, run this command:
 
 ```
 kubectl create clusterrolebinding {BINDING_NAME} --clusterrole=kyma-admin --group={GROUPNAME}

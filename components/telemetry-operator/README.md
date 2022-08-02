@@ -4,11 +4,11 @@
 
 The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more `LogPipeline` custom resources. The controller ensures that all Fluent Bit Pods run the current configuration by deleting Pods after the configuration has changed. See all [CRD attributes](apis/telemetry/v1alpha1/logpipeline_types.go) and an [example](config/samples/telemetry_v1alpha1_logpipeline.yaml).
 
-For now, creating Fluent Bit Pods is out of scope of the operator. An existing Fluent Bit Daemon Set is expected.
+For now, creating Fluent Bit Pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
 
-The generated Config Map (by default, `telemetry-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit Pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file). Fluent Bit parsers, file references, and environment variables are available in an additional Config Map or Secret.
+The generated ConfigMap (by default, `telemetry-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit Pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file). Fluent Bit parsers, file references, and environment variables are available in an additional ConfigMap or Secret.
 
-See the flags that configure all Config Maps, Secret and Daemon Set names in [main.go](main.go).
+See the flags that configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
 
 The operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.1.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
 
@@ -19,7 +19,8 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to i
 - A Kyma Cluster with the latest Kyma version installed
 
 ### Enable Telemetry Operator integration
-1. Install the Telemetry Operator together with the Telemetry Fluent Bit Daemon Set with null output config: 
+
+1. Install the Telemetry Operator together with the Telemetry Fluent Bit DaemonSet with null output config: 
 
    ```bash
    kyma deploy --component=telemetry 
@@ -31,7 +32,7 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to i
    kyma deploy --component logging --value global.telemetry.enabled=true
    ```
 
-   The previous command also installs a Log Pipeline CR, which configures the Telemetry Fluent Bit to push logs to the Loki backend.
+   The previous command also installs a LogPipeline CR, which configures the Telemetry Fluent Bit to push logs to the Loki backend.
 
 3. After disabling Fluent Bit from the logging chart, delete the unneeded resources:
 
@@ -43,7 +44,7 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to i
 
 ### Disable Telemetry Operator integration
 
-1. To disable the Telemetry Fluent Bit integration, simply deploy the default version of the logging component, which doesn't contain the Loki Log Pipeline:
+1. To disable the Telemetry Fluent Bit integration, simply deploy the default version of the logging component, which doesn't contain the Loki LogPipeline:
 
    ```bash
    kyma deploy --component logging 
@@ -91,7 +92,7 @@ For development, you can use the following commands:
 make
 ```
 
-- Regenerate YAML manifests (CRD and Cluster Role)
+- Regenerate YAML manifests (CRD and ClusterRole)
 
 ```bash
 make manifests

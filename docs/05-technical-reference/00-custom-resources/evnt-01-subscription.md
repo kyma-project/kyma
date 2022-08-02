@@ -3,7 +3,7 @@ title: Subscription
 type: Custom Resource
 ---
 
-The `subscriptions.eventing.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data and the format used to subscribe to events. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `subscriptions.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to subscribe to events. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 `kubectl get crd subscriptions.eventing.kyma-project.io -o yaml`
 

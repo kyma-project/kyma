@@ -10,9 +10,9 @@ You have performed the steps to observe application metrics using the `monitorin
 
 ## Steps
 
-1. Create the Prometheus Rule resource holding the configuration of your alerting rule.
+1. Create the PrometheusRule resource holding the configuration of your alerting rule.
 
-   >**NOTE:** Prometheus requires specific labels to identify Prometheus Rule definitions. Make sure you set **app** and **release** to `monitoring`.
+   >**NOTE:** Prometheus requires specific labels to identify PrometheusRule definitions. Make sure you set **app** and **release** to `monitoring`.
 
    ```yaml
    apiVersion: monitoring.coreos.com/v1

@@ -44,7 +44,7 @@ You can configure environment variables either separately for a given runtime or
 
 ### Define environment variables in a Config Map
 
-Config Maps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a Config Map, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` Config Map as the `MY_VAR` environment variable.
+ConfigMaps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a ConfigMap, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` ConfigMap as the `MY_VAR` environment variable.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1

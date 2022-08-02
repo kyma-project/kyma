@@ -4,7 +4,7 @@ title: Kyma Gateway - not reachable
 
 ## Symptom
 
-You cannot access services or Functions using the API Rules created. The Kyma Gateway refuses the connection.
+You cannot access services or Functions using the APIRules created. The Kyma Gateway refuses the connection.
 
 ## Cause
 
