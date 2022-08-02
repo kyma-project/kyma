@@ -15,7 +15,7 @@ func TestConflictingFileName(t *testing.T) {
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Files: []telemetryv1alpha1.FileMount{{
-				Name:    "labelMap.json",
+				Name:    "loki-labelMap.json",
 				Content: "",
 			},
 			},
@@ -25,7 +25,7 @@ func TestConflictingFileName(t *testing.T) {
 	f := NewFilesValidator()
 	err := f.Validate(&l, &pipeLineList)
 	require.Error(t, err)
-	require.Equal(t, "cannot use reserver filename 'labelmap.json'", err.Error())
+	require.Equal(t, "cannot use reserved filename 'loki-labelmap.json'", err.Error())
 }
 
 func TestDuplicateFileName(t *testing.T) {
