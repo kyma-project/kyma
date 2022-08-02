@@ -128,7 +128,6 @@ func getHTTPOutputDefaults() map[string]string {
 		"tls":                      "on",
 		"tls.verify":               "on",
 		"allow_duplicated_headers": "true",
-		"uri":                      "/customindex/kyma",
 		"format":                   "json",
 	}
 	return result

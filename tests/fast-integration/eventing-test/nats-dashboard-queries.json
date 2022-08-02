@@ -105,11 +105,7 @@
   },
   {
     "title":"JetStream Event Types Summary: Published Event Types with a Subscription",
-    "query":"count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published) by (event_type)"
-  },
-  {
-    "title":"JetStream Event Types Summary: Subscribed Event Types without Incoming Events",
-    "query":"sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published) by (event_type)"
+    "query":"count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{}) by (event_type)"
   },
   {
     "title":"JetStream Event Types Summary: Throughput of Events Published per Event Type",

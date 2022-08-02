@@ -126,7 +126,6 @@ func TestFilter(t *testing.T) {
     storage.total_limit_size 1G
     tls on
     tls.verify on
-    uri /customindex/kyma
 
 `
 
@@ -255,6 +254,7 @@ func TestHTTPOutput(t *testing.T) {
 					Password: telemetryv1alpha1.ValueType{
 						Value: "password",
 					},
+					URI: "/customindex/kyma",
 				},
 			},
 		},

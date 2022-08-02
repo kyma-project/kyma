@@ -3,7 +3,7 @@ package serverless
 import (
 	"testing"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/onsi/gomega"
@@ -315,8 +315,8 @@ func Test_isScalingEnabled(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			instance := &serverlessv1alpha1.Function{
-				Spec: serverlessv1alpha1.FunctionSpec{
+			instance := &serverlessv1alpha2.Function{
+				Spec: serverlessv1alpha2.FunctionSpec{
 					MinReplicas: &tt.args.minReplicas,
 					MaxReplicas: &tt.args.maxReplicas,
 				},
@@ -352,7 +352,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 	equalHPA := s.buildHorizontalPodAutoscaler(0)
 
 	type args struct {
-		instance    *serverlessv1alpha1.Function
+		instance    *serverlessv1alpha2.Function
 		hpas        []autoscalingv1.HorizontalPodAutoscaler
 		deployments []appsv1.Deployment
 	}
@@ -452,7 +452,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			var instance serverlessv1alpha1.Function
+			var instance serverlessv1alpha2.Function
 			if tt.args.instance != nil {
 				instance = *tt.args.instance
 			}

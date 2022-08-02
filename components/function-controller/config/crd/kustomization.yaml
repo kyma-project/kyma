@@ -7,6 +7,7 @@ resources:
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
+  - patches/conversion_webhook_function.yaml
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
 # patches here are for enabling the conversion webhook for each CRD
 #- patches/webhook_in_functions.yaml
