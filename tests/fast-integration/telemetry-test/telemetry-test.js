@@ -4,8 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const {
   k8sCoreV1Api,
+  k8sDynamicApi,
   k8sApply,
   k8sDelete,
+  sleep,
   waitForK8sObject,
 } = require('../utils');
 const {logsPresentInLoki} = require('../logging');
@@ -13,13 +15,15 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
+const {debug} = require('console');
+
 const telemetryNamespace = 'kyma-system';
 const defaultNamespace = 'default';
 const mockserverNamespace = 'mockserver';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./resources/pipelines/invalid-log-pipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/pipelines/valid-parser-log-pipeline.yaml');
-const fooBarDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
+const regexFilterDeployment = loadResourceFromFile('./resources/deployments/regex_filter_deployment.yaml');
 const mockserverDeployment = loadResourceFromFile('./resources/deployments/mockserver.yaml');
 const httpLogPipelineCR = loadResourceFromFile('./resources/pipelines/http-log-pipeline.yaml');
 
@@ -57,7 +61,7 @@ async function prepareEnvironment() {
   const lokiLogPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
   const httpLogPipelinePromise = k8sApply(httpLogPipelineCR, telemetryNamespace);
   const mockserverPromise = k8sApply(mockserverDeployment, mockserverNamespace);
-  const deploymentPromise = k8sApply(fooBarDeployment, defaultNamespace);
+  const deploymentPromise = k8sApply(regexFilterDeployment, defaultNamespace);
   await lokiLogPipelinePromise;
   await httpLogPipelinePromise;
   await mockserverPromise;
@@ -67,7 +71,7 @@ async function prepareEnvironment() {
 async function cleanEnvironment() {
   const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
   const mockserverPromise = k8sDelete(mockserverDeployment, mockserverNamespace);
-  const deploymentPromise = k8sDelete(fooBarDeployment, defaultNamespace);
+  const deploymentPromise = k8sDelete(regexFilterDeployment, defaultNamespace);
   const httpLogPipelinePromise = k8sDelete(httpLogPipelineCR, telemetryNamespace);
   await logPipelinePromise;
   await mockserverPromise;
@@ -116,10 +120,11 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     }
   });
 
-  it('Should push the logs to the loki output', async () => {
-    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
+  it('Should exclude system namespaces by default', async () => {
+    await sleep(5 * 1000);
+    const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-    assert.isTrue(logsPresent, 'No logs present in Loki');
+    assert.isFalse(logsPresent, 'No logs present in Loki');
   });
 
   it('Should parse the logs using regex', async () => {
@@ -144,4 +149,45 @@ describe('Telemetry Operator tests, prepare the environment', function() {
   });
 });
 
+async function getLogPipeline(name) {
+  const path = `/apis/telemetry.kyma-project.io/v1alpha1/logpipelines/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  return JSON.parse(response.body);
+}
 
+async function updateLogPipeline(logPipeline) {
+  const options = {
+    headers: {'Content-type': 'application/merge-patch+json'},
+  };
+
+  await k8sDynamicApi.patch(
+      logPipeline,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      options,
+  );
+}
+
+describe('Telemetry Operator tests, input section', function() {
+  it('Default with excluded namespaces is set for loki pipeline', async () => {
+    const lokiPipeline = await getLogPipeline('loki');
+    assert.include(lokiPipeline.spec.input.application.excludeNamespaces, 'kyma-system');
+    assert.include(lokiPipeline.spec.input.application.excludeNamespaces, 'kube-system');
+  });
+
+  it('Include kyma-system namespace on loki pipeline ', async () => {
+    const lokiPipeline = await getLogPipeline('loki');
+    lokiPipeline.spec.input.application.excludeNamespaces = [];
+    lokiPipeline.spec.input.application.includeSystemNamespaces = true;
+    await updateLogPipeline(lokiPipeline);
+
+    await sleep(15 * 1000);
+    const labels = '{namespace="kyma-system"}';
+    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+    assert.isTrue(logsPresent, 'No logs present in Loki');
+  });
+});
