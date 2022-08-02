@@ -165,13 +165,11 @@ func validURL(host string) bool {
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		return false
 	}
-
 	return true
-
 }
 
 func validHostname(host string) bool {
-
+	host = strings.Trim(host, " ")
 	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
 	return re.MatchString(host)
 }
