@@ -12,7 +12,7 @@ ENTRYPOINT := ./cmd/main.go
 VERIFY_IGNORE := /vendor\|/mocks
 
 test-local:
-	GO111MODULE=on go test -v ./pkg/...
+	GO111MODULE=on go test -count=1 -v ./pkg/...
 
 resolve-local:
 	GO111MODULE=on go mod download

@@ -35,6 +35,11 @@ Emitter_Mem_Buf_Limit %s`
 name                  record_modifier
 match                 %s.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
+	LuaDeDotFilterTemplate string = `
+name                  lua
+match                 %s.*
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
 )
 
 func BuildConfigSection(header ConfigHeader, content string) string {
@@ -76,7 +81,7 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
 
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Custom)
@@ -87,6 +92,10 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 		section[MatchKey] = generateMatchCondition(logPipeline.Name)
 
 		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
+	}
+
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
 	}
 
 	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
@@ -162,7 +171,6 @@ func getHTTPOutputDefaults() map[string]string {
 		"tls":                      "on",
 		"tls.verify":               "on",
 		"allow_duplicated_headers": "true",
-		"uri":                      "/customindex/kyma",
 		"format":                   "json",
 	}
 	return result
@@ -257,6 +265,6 @@ func generateEmitter(config PipelineConfig, logPipelineName string) string {
 	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
 }
 
-func generatePermanentFilter(logPipelineName string) string {
-	return fmt.Sprintf(PermanentFilterTemplate, logPipelineName)
+func generateFilter(template string, params ...any) string {
+	return fmt.Sprintf(template, params...)
 }

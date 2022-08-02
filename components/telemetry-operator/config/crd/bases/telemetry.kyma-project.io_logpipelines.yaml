@@ -98,10 +98,12 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    description: HTTPOutput describes a Fluent Bit HTTP output configuration
                     properties:
                       compress:
                         type: string
+                      dedot:
+                        type: boolean
                       format:
                         type: string
                       host:

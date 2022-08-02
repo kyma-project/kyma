@@ -92,7 +92,7 @@ func CheckIfSecretHasChanged(newSecret, oldSecret map[string][]byte) bool {
 		return true
 	}
 	for k, newSecretVal := range newSecret {
-		if oldSecretVal, ok := oldSecret[k]; !ok || bytes.Compare(newSecretVal, oldSecretVal) != 0 {
+		if oldSecretVal, ok := oldSecret[k]; !ok || !bytes.Equal(newSecretVal, oldSecretVal) {
 			return true
 		}
 	}

@@ -48,14 +48,13 @@ const (
 type LogPipelineValidator struct {
 	client.Client
 
-	fluentBitConfigMap       types.NamespacedName
-	variablesValidator       validation.VariablesValidator
-	configValidator          validation.ConfigValidator
-	pluginValidator          validation.PluginValidator
-	maxPipelinesValidator    validation.MaxPipelinesValidator
-	outputValidator          validation.OutputValidator
-	pipelineConfig           fluentbit.PipelineConfig
-	fluentBitMaxFSBufferSize string
+	fluentBitConfigMap    types.NamespacedName
+	variablesValidator    validation.VariablesValidator
+	configValidator       validation.ConfigValidator
+	pluginValidator       validation.PluginValidator
+	maxPipelinesValidator validation.MaxPipelinesValidator
+	outputValidator       validation.OutputValidator
+	pipelineConfig        fluentbit.PipelineConfig
 
 	fsWrapper fs.Wrapper
 

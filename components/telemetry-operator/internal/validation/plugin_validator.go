@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
@@ -36,10 +37,7 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 			return true
 		}
 	}
-	if logPipeline.Spec.Output.Custom != "" {
-		return true
-	}
-	return false
+	return logPipeline.Spec.Output.Custom != ""
 }
 
 // Validate returns an error if validation fails
@@ -108,7 +106,7 @@ func validateCustomOutput(content string, denied []string) error {
 		return nil
 	}
 
-	customSection, err := parseSection(content)
+	customSection, err := fluentbit.ParseSection(content)
 	if err != nil {
 		return err
 	}
@@ -158,10 +156,7 @@ func validHostname(host string) bool {
 	host = strings.Trim(host, " ")
 
 	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
-	if re.MatchString(host) {
-		return true
-	}
-	return false
+	return re.MatchString(host)
 }
 
 func getCustomName(custom map[string]string) (string, error) {
@@ -176,22 +171,4 @@ func hasMatchCondition(section map[string]string) bool {
 		return true
 	}
 	return false
-}
-
-func parseSection(section string) (map[string]string, error) {
-	result := make(map[string]string)
-
-	for _, line := range strings.Split(section, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		key, value, found := strings.Cut(line, " ")
-		if !found {
-			return nil, fmt.Errorf("invalid line: %s", line)
-		}
-		result[strings.ToLower(strings.TrimSpace(key))] = strings.TrimSpace(value)
-	}
-	return result, nil
 }

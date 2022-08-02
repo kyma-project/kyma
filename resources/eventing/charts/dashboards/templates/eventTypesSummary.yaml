@@ -116,9 +116,9 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{event_type=~\"$eventType\"}) by (event_type)",
+                "expr": "count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{event_type=~\"$eventType\"}) by (event_type)",
                 "format": "table",
-                "instant": true,
+                "instant": false,
                 "interval": "",
                 "legendFormat": "",
                 "refId": "A"
@@ -133,12 +133,16 @@ data:
                 "options": {
                   "include": {
                     "names": [
-                      "event_type",
-                      "subscription_name",
-                      "subscription_namespace"
+                        "event_type",
+                        "subscription_name",
+                        "subscription_namespace"
                     ]
                   }
                 }
+              },
+              {
+                "id": "merge",
+                "options": {}
               },
               {
                 "id": "renameByRegex",
@@ -216,9 +220,9 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum(event_type_published{event_type=~\"$eventType\"}) by (event_type) unless (count(event_type_published * on(event_type) group_left() sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type) event_type_subscribed) by (event_type)) by (event_type))",
+                "expr": "sum(event_type_published{event_type=~\"$eventType\"}) by (event_type) unless (count(event_type_published * on(event_type) group_left() sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type)) by (event_type))",
                 "format": "table",
-                "instant": true,
+                "instant": false,
                 "interval": "",
                 "legendFormat": "",
                 "refId": "A"
@@ -233,10 +237,14 @@ data:
                 "options": {
                   "include": {
                     "names": [
-                      "event_type"
+                        "event_type"
                     ]
                   }
                 }
+              },
+              {
+                "id": "merge",
+                "options": {}
               },
               {
                 "id": "renameByRegex",
@@ -326,7 +334,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published) by (event_type)",
+                "expr": "sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(rate(event_type_published{}[$__range])) by (event_type)",
                 "format": "table",
                 "instant": true,
                 "interval": "",
@@ -343,9 +351,9 @@ data:
                 "options": {
                   "include": {
                     "names": [
-                      "event_type",
-                      "subscription_namespace",
-                      "subscription_name"
+                        "event_type",
+                        "subscription_namespace",
+                        "subscription_name"
                     ]
                   }
                 }
@@ -390,8 +398,8 @@ data:
             "id": 8,
             "legend": {
               "alignAsTable": true,
-              "avg": false,
-              "current": true,
+              "avg": true,
+              "current": false,
               "hideEmpty": false,
               "max": false,
               "min": false,
@@ -473,8 +481,8 @@ data:
         "schemaVersion": 27,
         "style": "dark",
         "tags": [
-          "kyma",
-          "eventing"
+            "kyma",
+            "eventing"
         ],
         "templating": {
           "list": [
@@ -484,10 +492,10 @@ data:
                 "selected": true,
                 "tags": [],
                 "text": [
-                  "All"
+                    "All"
                 ],
                 "value": [
-                  "$__all"
+                    "$__all"
                 ]
               },
               "datasource": null,
@@ -525,4 +533,4 @@ data:
         "title": "Kyma / Eventing / JetStream Event Types Summary",
         "uid": "mRzqZ4q7z",
         "version": 1
-    }`}}
+      }`}}

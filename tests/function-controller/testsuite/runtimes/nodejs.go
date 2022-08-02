@@ -3,42 +3,49 @@ package runtimes
 import (
 	"fmt"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
-
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 )
 
-func BasicNodeJSFunction(msg string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
-	return &function.FunctionData{
-		Body:        fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
-		Deps:        `{ "name": "hellobasic", "version": "0.0.1", "dependencies": {} }`,
-		MaxReplicas: 2,
-		MinReplicas: 1,
-		Runtime:     rtm,
+func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
+				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": {} }`,
+			},
+		},
 	}
 }
 
-func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
-	return &function.FunctionData{
-		Body:        fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
-		Deps:        `{ "name": "hellobasic", "version": "0.0.1", "dependencies": { "@kyma/kyma-npm-test": "^1.0.0" } }`,
-		MaxReplicas: 2,
-		MinReplicas: 1,
-		Runtime:     rtm,
+func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
+				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": { "@kyma/kyma-npm-test": "^1.0.0" } }`,
+			},
+		},
 	}
 }
 
-func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secretName, secretEnvKey string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
+func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secretName, secretEnvKey string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	mappedCmEnvKey := "CM_KEY"
 	mappedSecretEnvKey := "SECRET_KEY"
 
-	return &function.FunctionData{
-		Body:        fmt.Sprintf(`module.exports = { main: function(event, context) { return process.env["%s"] + "-" + process.env["%s"]; } }`, mappedCmEnvKey, mappedSecretEnvKey),
-		Deps:        `{ "name": "hellowithconfigmapsecretenvs", "version": "0.0.1", "dependencies": { } }`,
-		MaxReplicas: 1,
-		MinReplicas: 1,
-		Runtime:     rtm,
+	src := fmt.Sprintf(`module.exports = { main: function(event, context) { return process.env["%s"] + "-" + process.env["%s"]; } }`, mappedCmEnvKey, mappedSecretEnvKey)
+	dpd := `{ "name": "hellowithconfigmapsecretenvs", "version": "0.0.1", "dependencies": { } }`
+
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source:       src,
+				Dependencies: dpd,
+			},
+		},
 		Env: []corev1.EnvVar{
 			{
 				Name: mappedCmEnvKey,
@@ -49,7 +56,8 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 						},
 						Key: cmEnvKey,
 					},
-				}},
+				},
+			},
 			{
 				Name: mappedSecretEnvKey,
 				ValueFrom: &corev1.EnvVarSource{
@@ -59,7 +67,8 @@ func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secret
 						},
 						Key: secretEnvKey,
 					},
-				}},
+				},
+			},
 		},
 	}
 }

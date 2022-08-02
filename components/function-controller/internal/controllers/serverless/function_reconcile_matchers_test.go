@@ -5,7 +5,7 @@ import (
 
 	v1 "k8s.io/api/apps/v1"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
 	gtypes "github.com/onsi/gomega/types"
@@ -24,65 +24,65 @@ func recResultMatcher(requeue bool, requeueAfter time.Duration) gtypes.GomegaMat
 
 var (
 	haveConditionReasonSourceUpdated = haveConditionReason(
-		serverlessv1alpha1.ConditionConfigurationReady,
-		serverlessv1alpha1.ConditionReasonSourceUpdated,
+		serverlessv1alpha2.ConditionConfigurationReady,
+		serverlessv1alpha2.ConditionReasonSourceUpdated,
 	)
 
 	haveConditionReasonJobRunning = haveConditionReason(
-		serverlessv1alpha1.ConditionBuildReady,
-		serverlessv1alpha1.ConditionReasonJobRunning)
+		serverlessv1alpha2.ConditionBuildReady,
+		serverlessv1alpha2.ConditionReasonJobRunning)
 
 	haveConditionReasonJobFinished = haveConditionReason(
-		serverlessv1alpha1.ConditionBuildReady,
-		serverlessv1alpha1.ConditionReasonJobFinished)
+		serverlessv1alpha2.ConditionBuildReady,
+		serverlessv1alpha2.ConditionReasonJobFinished)
 
 	haveConditionReasonServiceCreated = haveConditionReason(
-		serverlessv1alpha1.ConditionRunning,
-		serverlessv1alpha1.ConditionReasonServiceCreated)
+		serverlessv1alpha2.ConditionRunning,
+		serverlessv1alpha2.ConditionReasonServiceCreated)
 
 	haveConditionReasonDeploymentReady = haveConditionReason(
-		serverlessv1alpha1.ConditionRunning,
-		serverlessv1alpha1.ConditionReasonDeploymentReady)
+		serverlessv1alpha2.ConditionRunning,
+		serverlessv1alpha2.ConditionReasonDeploymentReady)
 
 	haveConditionReasonHorizontalPodAutoscalerCreated = haveConditionReason(
-		serverlessv1alpha1.ConditionRunning,
-		serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerCreated)
+		serverlessv1alpha2.ConditionRunning,
+		serverlessv1alpha2.ConditionReasonHorizontalPodAutoscalerCreated)
 )
 
-func haveConditionReason(t serverlessv1alpha1.ConditionType, expected serverlessv1alpha1.ConditionReason) gtypes.GomegaMatcher {
-	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) serverlessv1alpha1.ConditionReason {
+func haveConditionReason(t serverlessv1alpha2.ConditionType, expected serverlessv1alpha2.ConditionReason) gtypes.GomegaMatcher {
+	return gomega.WithTransform(func(fn *serverlessv1alpha2.Function) serverlessv1alpha2.ConditionReason {
 		return getConditionReason(fn.Status.Conditions, t)
 	}, gomega.Equal(expected))
 }
 
 var (
-	haveConditionCfgRdy          = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionTrue)
-	haveConditionBuildRdy        = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionTrue)
-	haveUnknownConditionBuildRdy = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionUnknown)
-	haveConditionRunning         = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionTrue)
-	haveUnknownConditionRunning  = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionUnknown)
+	haveConditionCfgRdy          = haveCondition(serverlessv1alpha2.ConditionConfigurationReady, corev1.ConditionTrue)
+	haveConditionBuildRdy        = haveCondition(serverlessv1alpha2.ConditionBuildReady, corev1.ConditionTrue)
+	haveUnknownConditionBuildRdy = haveCondition(serverlessv1alpha2.ConditionBuildReady, corev1.ConditionUnknown)
+	haveConditionRunning         = haveCondition(serverlessv1alpha2.ConditionRunning, corev1.ConditionTrue)
+	haveUnknownConditionRunning  = haveCondition(serverlessv1alpha2.ConditionRunning, corev1.ConditionUnknown)
 )
 
-func haveCondition(t serverlessv1alpha1.ConditionType, expected corev1.ConditionStatus) gtypes.GomegaMatcher {
-	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) corev1.ConditionStatus {
+func haveCondition(t serverlessv1alpha2.ConditionType, expected corev1.ConditionStatus) gtypes.GomegaMatcher {
+	return gomega.WithTransform(func(fn *serverlessv1alpha2.Function) corev1.ConditionStatus {
 		return getConditionStatus(fn.Status.Conditions, t)
 	}, gomega.Equal(expected))
 }
 
 func haveConditionLen(expected int) gtypes.GomegaMatcher {
-	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) int {
+	return gomega.WithTransform(func(fn *serverlessv1alpha2.Function) int {
 		return len(fn.Status.Conditions)
 	}, gomega.Equal(expected))
 }
 
 func haveStatusReference(expected string) gtypes.GomegaMatcher {
-	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) string {
+	return gomega.WithTransform(func(fn *serverlessv1alpha2.Function) string {
 		return fn.Status.Reference
 	}, gomega.Equal(expected))
 }
 
 func haveStatusCommit(expected string) gtypes.GomegaMatcher {
-	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) string {
+	return gomega.WithTransform(func(fn *serverlessv1alpha2.Function) string {
 		return fn.Status.Commit
 	}, gomega.Equal(expected))
 }

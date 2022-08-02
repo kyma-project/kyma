@@ -56,6 +56,7 @@ type HTTPOutput struct {
 	Compress  string    `json:"compress,omitempty"`
 	Format    string    `json:"format,omitempty"`
 	TLSConfig TLSConfig `json:"tls,omitempty"`
+	Dedot     bool      `json:"dedot,omitempty"`
 }
 
 type TLSConfig struct {
