@@ -102,6 +102,8 @@ spec:
                     properties:
                       compress:
                         type: string
+                      dedot:
+                        type: boolean
                       format:
                         type: string
                       host:

@@ -29,13 +29,18 @@ const (
 name                  record_modifier
 match                 %s.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
+	LuaDeDotFilterTemplate string = `
+name                  lua
+match                 %s.*
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
 )
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 	sb.WriteString(CreateEmitter(pipelineConfig, logPipeline))
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Custom)
@@ -46,6 +51,10 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 		section[MatchKey] = generateMatchCondition(logPipeline.Name)
 
 		sb.WriteString(buildConfigSectionFromMap(FilterConfigHeader, section))
+	}
+
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
 	}
 
 	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
@@ -110,7 +119,6 @@ func getHTTPOutputDefaults() map[string]string {
 		"tls":                      "on",
 		"tls.verify":               "on",
 		"allow_duplicated_headers": "true",
-		"uri":                      "/customindex/kyma",
 		"format":                   "json",
 	}
 	return result
@@ -201,6 +209,6 @@ func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 	return sb.String()
 }
 
-func generatePermanentFilter(logPipelineName string) string {
-	return fmt.Sprintf(PermanentFilterTemplate, logPipelineName)
+func generateFilter(template string, params ...any) string {
+	return fmt.Sprintf(template, params...)
 }

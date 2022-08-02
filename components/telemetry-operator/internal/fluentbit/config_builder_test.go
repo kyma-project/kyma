@@ -56,8 +56,19 @@ name                  record_modifier
 match                 foo.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
-	actual := generatePermanentFilter("foo")
+	actual := generateFilter(PermanentFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit Permanent parser config is invalid")
+}
+
+func TestGenerateLuaFilter(t *testing.T) {
+	expected := `
+name                  lua
+match                 foo.*
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
+
+	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
+	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
 }
 
 func TestFilter(t *testing.T) {
@@ -79,6 +90,12 @@ func TestFilter(t *testing.T) {
     name grep
     regex log aa
 
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
+
 [OUTPUT]
     allow_duplicated_headers true
     format json
@@ -89,22 +106,22 @@ func TestFilter(t *testing.T) {
     storage.total_limit_size 1G
     tls on
     tls.verify on
-    uri /customindex/kyma
 
 `
-	filters := []telemetryv1alpha1.Filter{
-		{
-			Custom: `
-	name grep
-    regex log aa
-`,
-		},
-	}
+
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Filters: filters,
+			Filters: []telemetryv1alpha1.Filter{
+				{
+					Custom: `
+						name grep
+						regex log aa
+					`,
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
+					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},
@@ -181,6 +198,12 @@ func TestHTTPOutput(t *testing.T) {
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
+
 [OUTPUT]
     allow_duplicated_headers true
     format json
@@ -201,6 +224,7 @@ func TestHTTPOutput(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
+					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},
@@ -210,6 +234,7 @@ func TestHTTPOutput(t *testing.T) {
 					Password: telemetryv1alpha1.ValueType{
 						Value: "password",
 					},
+					URI: "/customindex/kyma",
 				},
 			},
 		},
@@ -241,6 +266,12 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
+
 [OUTPUT]
     allow_duplicated_headers true
     format json
@@ -261,6 +292,7 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
+					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},

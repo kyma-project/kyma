@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
@@ -99,7 +100,7 @@ func validateCustomOutput(content string, denied []string) error {
 		return nil
 	}
 
-	customSection, err := parseSection(content)
+	customSection, err := fluentbit.ParseSection(content)
 	if err != nil {
 		return err
 	}
@@ -153,22 +154,4 @@ func hasMatchCondition(section map[string]string) bool {
 		return true
 	}
 	return false
-}
-
-func parseSection(section string) (map[string]string, error) {
-	result := make(map[string]string)
-
-	for _, line := range strings.Split(section, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		key, value, found := strings.Cut(line, " ")
-		if !found {
-			return nil, fmt.Errorf("invalid line: %s", line)
-		}
-		result[strings.ToLower(strings.TrimSpace(key))] = strings.TrimSpace(value)
-	}
-	return result, nil
 }

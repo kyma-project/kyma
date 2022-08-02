@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
@@ -17,8 +18,9 @@ import (
 )
 
 const (
-	natsBackend         = "nats"
-	jestreamHandlerName = "jetstream-handler"
+	natsBackend           = "nats"
+	jestreamHandlerName   = "jetstream-handler"
+	noSpaceLeftErrMessage = "no space left on device"
 )
 
 // compile time check
@@ -35,6 +37,11 @@ type JetstreamMessageSender struct {
 // NewJetstreamMessageSender returns a new NewJetstreamMessageSender instance with the given nats connection.
 func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NatsConfig, logger *logger.Logger) *JetstreamMessageSender {
 	return &JetstreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
+}
+
+// URL returns the URL of the Sender's connection.
+func (s *JetstreamMessageSender) URL() string {
+	return s.connection.ConnectedUrl()
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the JetstreamMessageSender.
@@ -71,6 +78,9 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
+		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
+			return http.StatusInsufficientStorage, err
+		}
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusNoContent, nil
