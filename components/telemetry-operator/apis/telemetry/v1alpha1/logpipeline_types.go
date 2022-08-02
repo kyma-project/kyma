@@ -24,7 +24,6 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // LogPipelineSpec defines the desired state of LogPipeline
-
 type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -41,7 +40,6 @@ type Filter struct {
 }
 
 // LokiOutput describes a Fluent Bit Loki output configuration
-
 type LokiOutput struct {
 	URL        ValueType         `json:"Url,omitempty"`
 	Labels     map[string]string `json:"Labels,omitempty"`

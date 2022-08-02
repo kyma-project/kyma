@@ -3,8 +3,6 @@ package fluentbit
 import (
 	"testing"
 
-	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
-	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -345,10 +343,36 @@ func TestResolveSecretValue(t *testing.T) {
 func TestLokiOutputPlugin(t *testing.T) {
 	lokiLabels := make(map[string]string)
 	lokiLabels["job"] = "telemetry-fluent-bit"
+	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" foo.$TAG true
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
 
-	loki := &telemetryv1alpha1.LogPipeline{
+[FILTER]
+    name                  record_modifier
+    match                 foo.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[OUTPUT]
+    alias foo
+    labelMapPath /files/loki-labelmap.json
+    labels {job="telemetry-fluent-bit"}
+    lineformat json
+    loglevel warn
+    match foo.*
+    name grafana-loki
+    removeKeys key1, key2
+    storage.total_limit_size 1G
+    url http:loki:3100
+
+`
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "lokiFoo",
+			Name:      "foo",
 			Namespace: "lokiNs",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -369,16 +393,8 @@ func TestLokiOutputPlugin(t *testing.T) {
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
-	fsWrapperMock := &fsmocks.Wrapper{}
-	fsWrapperMock.On("CreateAndWrite", mock.Anything).Return(nil)
-	res, err := generateLokiOutPut(loki, pipelineConfig)
+
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
-	require.Equal(t, "grafana-loki", res["name"])
-	require.Equal(t, loki.Name, res["alias"])
-	require.Equal(t, "http:loki:3100", res["url"])
-	require.Equal(t, "{job=\"telemetry-fluent-bit\"}", res["labels"])
-	require.Equal(t, "key1, key2", res["removeKeys"])
-	require.Equal(t, "/files/labelmap.json", res["labelMapPath"])
-	require.Equal(t, "warn", res["loglevel"])
-	require.Equal(t, "json", res["lineformat"])
+	require.Equal(t, expected, actual)
 }

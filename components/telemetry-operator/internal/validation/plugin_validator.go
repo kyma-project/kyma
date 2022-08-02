@@ -76,6 +76,9 @@ func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipelin
 	if err := validateHTTPOutput(pipeline.Spec.Output.HTTP); err != nil {
 		return err
 	}
+	if err := validateLokiOutPut(pipeline.Spec.Output.Loki); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -125,6 +128,17 @@ func validateCustomOutput(content string, denied []string) error {
 	}
 
 	return nil
+}
+
+func validateLokiOutPut(lokiOutPut telemetryv1alpha1.LokiOutput) error {
+	if lokiOutPut.URL.Value != "" && !validHostname(lokiOutPut.URL.Value) {
+		return fmt.Errorf("invalid hostname '%s'", lokiOutPut.URL.Value)
+	}
+	if !lokiOutPut.URL.IsDefined() && (len(lokiOutPut.Labels) != 0 || len(lokiOutPut.RemoveKeys) != 0) {
+		return fmt.Errorf("loki output needs to have a URL configured")
+	}
+	return nil
+
 }
 
 func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {

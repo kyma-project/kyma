@@ -8,5 +8,5 @@ spec:
       Url:
         value: "http://logging-loki:3100/loki/api/v1/push"
       Labels:
-        "job": "sample-fluent-bit"
+        job: "sample-fluent-bit"
       RemoveKeys: ["kubernetes", "stream"]

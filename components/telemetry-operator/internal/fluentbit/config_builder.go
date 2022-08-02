@@ -108,7 +108,7 @@ func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineC
 		return generateHTTPOutput(logPipeline, pipelineConfig)
 	}
 
-	// A LokiOutput needs to have atleast url
+	// A LokiOutput needs to have at least url
 	if logPipeline.Spec.Output.Loki.URL.IsDefined() {
 		return generateLokiOutPut(logPipeline, pipelineConfig)
 	}
@@ -118,19 +118,23 @@ func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineC
 
 func getLokiDefaults() map[string]string {
 	result := make(map[string]string)
-	result["labelMapPath"] = "/files/labelmap.json"
+	result["labelMapPath"] = "/files/loki-labelmap.json"
 	result["loglevel"] = "warn"
 	result["lineformat"] = "json"
 	return result
 }
 func generateLokiOutPut(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
 	lokiConfig := logPipeline.Spec.Output.Loki
+	var err error
 	result := getLokiDefaults()
 	result[MatchKey] = generateMatchCondition(logPipeline.Name)
 	result[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
 	result["name"] = "grafana-loki"
 	result["alias"] = logPipeline.Name
-	result["url"] = lokiConfig.URL.Value
+	result["url"], err = resolveValue(logPipeline.Spec.Output.Loki.URL, logPipeline.Name)
+	if err != nil {
+		return nil, err
+	}
 	if len(lokiConfig.Labels) != 0 {
 		result["labels"] = covertLabelMaptoString(lokiConfig.Labels)
 	}

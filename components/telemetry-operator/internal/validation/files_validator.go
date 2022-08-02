@@ -34,8 +34,8 @@ func (f *filesValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, lo
 
 func validateFileName(files []telemetryv1alpha1.FileMount) error {
 	for _, f := range files {
-		if strings.ToLower(f.Name) == "labelmap.json" {
-			return fmt.Errorf("cannot use reserver filename 'labelmap.json'")
+		if strings.ToLower(f.Name) == "loki-labelmap.json" {
+			return fmt.Errorf("cannot use reserved filename 'loki-labelmap.json'")
 		}
 	}
 	return nil
