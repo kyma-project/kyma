@@ -390,7 +390,7 @@ func TestLokiOutputPlugin(t *testing.T) {
 
 [OUTPUT]
     alias foo
-    labelMapPath /files/loki-labelmap.json
+    labelMapPath /fluent-bit/etc/loki-labelmap.json
     labels {job="telemetry-fluent-bit"}
     lineformat json
     loglevel warn

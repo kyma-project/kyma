@@ -127,7 +127,7 @@ func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineC
 
 func getLokiDefaults() map[string]string {
 	result := make(map[string]string)
-	result["labelMapPath"] = "/files/loki-labelmap.json"
+	result["labelMapPath"] = "/fluent-bit/etc/loki-labelmap.json"
 	result["loglevel"] = "warn"
 	result["lineformat"] = "json"
 	return result
