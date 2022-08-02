@@ -108,7 +108,7 @@ func (fn *Function) validateObjectMeta(_ *ValidationConfig) error {
 }
 
 func (spec *FunctionSpec) validateGitRepoURL(_ *ValidationConfig) error {
-	if isRepoURLIsSSH(spec.Source.GitRepository.URL) {
+	if urlIsSSH(spec.Source.GitRepository.URL) {
 		return nil
 	} else if _, err := url.ParseRequestURI(spec.Source.GitRepository.URL); err != nil {
 		return fmt.Errorf("invalid source.gitRepository.URL value: %v", err)
@@ -312,7 +312,7 @@ func (spec *FunctionSpec) validateRepository(_ *ValidationConfig) error {
 	}...)
 }
 
-func isRepoURLIsSSH(repoURL string) bool {
+func urlIsSSH(repoURL string) bool {
 	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?`)
 	if err != nil {
 		panic(err)
