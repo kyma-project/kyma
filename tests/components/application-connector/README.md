@@ -20,22 +20,21 @@ These are the component tests for Application Connector.
 ## Design and architecture
 
 The tests consist of:
-- [Application CRs](./resources/charts/gateway-test/templates/applications/) describing test cases
-- [Test runners](./test/application-gateway/) with various check for subsets of cases, grouped by Application CRs
-- [Mock application](./tools/external-api-mock-app/) which simulates remote endpoints
+- [Application CRs](./resources/charts/gateway-test/templates/applications/) describing the test cases
+- [Test runners](./test/application-gateway/) with various check for subsets of cases, grouped by the Application CRs
+- [Mock application](./tools/external-api-mock-app/) which simulates the remote endpoints
 
-Additionally, following resources are created on the cluster:
-- [Service Account](./resources/charts/gateway-test/templates/service-account.yml:2), used by tests to read Application CRs
+Additionally, the following resources are created on the cluster:
+- [Service Account](./resources/charts/gateway-test/templates/service-account.yml#L2), used by the tests to read the Application CRs
 
-The tests are executed as a Kubernetes Job on a Kyma cluster, 
-where the tested Application Gateway is installed. 
-The test job and mock application deployment are in the `test` Namespace. 
+The tests are executed as a Kubernetes Job on a Kyma cluster, where the tested Application Gateway is installed. 
+The test Job and the mock application deployment are in the `test` Namespace. 
 
 ![Application Gateway tests architecture](./assets/app-gateway-tests-architecture.svg)
 
 ## Building
 
-To build **and push** Docker images of tests and mock application:
+To build **and push** the Docker images of the tests and the mock application:
 
 ``` sh
 ./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
@@ -48,7 +47,7 @@ This will build the following images:
 
 Tests can be run on any Kyma cluster with Application Gateway.
 
-### Deploy Kyma cluster locally
+### Deploy a Kyma cluster locally
 
 1. Provision a local Kubernetes cluster with k3d:
    ```sh
@@ -80,7 +79,7 @@ Tests can be run on any Kyma cluster with Application Gateway.
     </details>
     </div>
 
-    >**TIP:** More on Kyma installation can be found in [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma)
+    >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).
 
 ### Run the tests
 
@@ -88,27 +87,22 @@ Tests can be run on any Kyma cluster with Application Gateway.
 make test-gateway
 ```
 
-By default tests clean up after themselves, removing all created resources
-and `test` Namespace.
+By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.
 
-> **CAUTION:** This might override or remove existing resources, 
-> if names of already existing resources collide with names used by tests
+> **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
 ## Debugging
 
 ### Running locally
 
-The Test Job must run on a cluster, because of the way it accesses Application CRs.
-Application Gateway and Mock Application can both be run locally.
+Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
+Application Gateway and the mock application can both be run locally.
 
-To run Mock Application locally:
-1. Change all `targetUrl` in [Application CRs](./resources/charts/gateway-test/templates/applications/)
-   to reflect new app URL. For example `http://localhost:8081/v1/api/unsecure/ok`
-1. Change all `centralGatewayUrl` to reflect new Application Gateway URL. 
-   For example `http://localhost:8080/positive-authorisation/unsecure-always-ok`
-1. Deploy all resources (you can omit test Job and Central Gateway, but it's easier to just let them fail)
-   on the cluster
-1. Build the Mock Application:
+To run the mock application locally, follow these steps:
+1. Change all the **targetUrl** values in the [Application CRs](./resources/charts/gateway-test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
+2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
+3. Deploy all the resources on the cluster (you can omit the test Job and the Central Gateway, but it's easier to just let them fail).
+4. Build the mock application:
    
    <div tabs name="Mock App Build Flavor" group="mock-app-flavor">
    <details open>
@@ -118,7 +112,7 @@ To run Mock Application locally:
 
    ```shell
    export DOCKER_TAG="local"
-   export DOCKER_PUSH_REPOSITORY="{Docker username}"
+   export DOCKER_PUSH_REPOSITORY="{DOCKER_USERNAME}"
    make image-mock-app
    ```
 
@@ -128,13 +122,13 @@ To run Mock Application locally:
    Local
    </summary>
 
-   Change hardcoded application port in [config.go](./tools/external-api-mock-app/config.go), then
+   Change the hardcoded application port in [`config.go`](./tools/external-api-mock-app/config.go), and run:
    ```shell
    go build ./tools/external-api-mock-app/
    ```
    </details>
    </div>
-1. Run the Mock Application:
+5. Run the mock application:
    
    <div tabs name="Mock App Run Flavor" group="mock-app-flavor">
    <details open>
@@ -155,18 +149,17 @@ To run Mock Application locally:
    ```shell
    ./external-api-mock-app
    ```
-   > **CAUTION:** Certificates won't work, unless you copy them from `./k8s/gateway-test/certs` to `/etc/secret-volume`
+   > **CAUTION:** For the certificates to work, you must copy them from `./k8s/gateway-test/certs` to `/etc/secret-volume`.
 
    </details>
    </div>
-1. Run [Central Application Gateway](https://github.com/kyma-project/kyma/tree/main/components/central-application-gateway),
-   with `-kubeConfig {path_to_kubeconfig.yaml}` parameter.
+6. Run [Application Gateway](https://github.com/kyma-project/kyma/tree/main/components/central-application-gateway) with the `-kubeConfig {PATH_TO_YOUR_KUBECONFIG_FILE}` parameter.
 
-You can now send requests to the Application Gateway and debug its behaviour locally.
+You can now send requests to Application Gateway, and debug its behavior locally.
 
 ### Running without cleanup
 
-To run the tests without removing all the resources:
+To run the tests without removing all the created resources afterwards, run:
 
 ``` shell
 make test-gateway-debug
