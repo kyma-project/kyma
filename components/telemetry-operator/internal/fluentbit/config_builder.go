@@ -110,7 +110,7 @@ func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineC
 
 	// A LokiOutput needs to have at least url
 	if logPipeline.Spec.Output.Loki.URL.IsDefined() {
-		return generateLokiOutPut(logPipeline, pipelineConfig)
+		return generateLokiOutput(logPipeline, pipelineConfig)
 	}
 
 	return nil, fmt.Errorf("output plugin not defined")
@@ -123,7 +123,7 @@ func getLokiDefaults() map[string]string {
 	result["lineformat"] = "json"
 	return result
 }
-func generateLokiOutPut(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
+func generateLokiOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
 	lokiConfig := logPipeline.Spec.Output.Loki
 	var err error
 	result := getLokiDefaults()
@@ -136,7 +136,7 @@ func generateLokiOutPut(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConf
 		return nil, err
 	}
 	if len(lokiConfig.Labels) != 0 {
-		result["labels"] = covertLabelMaptoString(lokiConfig.Labels)
+		result["labels"] = convertLabelMaptoString(lokiConfig.Labels)
 	}
 	if len(lokiConfig.RemoveKeys) != 0 {
 		str := strings.Join(lokiConfig.RemoveKeys, ", ")
@@ -145,7 +145,7 @@ func generateLokiOutPut(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConf
 	return result, nil
 }
 
-func covertLabelMaptoString(labels map[string]string) string {
+func convertLabelMaptoString(labels map[string]string) string {
 	var labelString []string
 
 	for k, v := range labels {
