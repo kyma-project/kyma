@@ -282,12 +282,12 @@ func TestContainsCustomPluginWithoutAny(t *testing.T) {
 }
 
 func TestValidHostname(t *testing.T) {
-	require.True(t, validHostname("localhost"))
-	require.True(t, validHostname("logging-loki"))
-	require.True(t, validHostname("logging-loki.kyma-system.svc.cluster.local"))
-	require.False(t, validHostname("https://logging-loki.kyma-system.svc.cluster.local"))
-	require.False(t, validHostname("logging-loki.kyma-system.svc.cluster.local:443"))
-	require.False(t, validHostname("!@#$$%"))
+	require.True(t, validHostname("localhost", false))
+	require.True(t, validHostname("http://logging-loki:3100/loki/api/v1/push", true))
+	require.True(t, validHostname("http://logging-loki.kyma-system.svc.cluster.local", true))
+	require.True(t, validHostname("https://logging-loki.kyma-system.svc.cluster.local", true))
+	require.False(t, validHostname("logging-loki.kyma-system.svc.cluster.local:443", false))
+	require.False(t, validHostname("!@#$$%", false))
 }
 
 func TestValidateHTTPOutput(t *testing.T) {
