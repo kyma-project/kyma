@@ -19,7 +19,7 @@ var testLogPipeline = types.NamespacedName{
 }
 
 func createResources() error {
-	cm := corev1.ConfigMap{
+	cmFluentBit := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      FluentBitConfigMapName,
 			Namespace: ControllerNamespace,
@@ -43,7 +43,31 @@ func createResources() error {
 `,
 		},
 	}
-	err := k8sClient.Create(ctx, &cm)
+	err := k8sClient.Create(ctx, &cmFluentBit)
+	if err != nil {
+		return err
+	}
+	cmFile := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      FluentBitFileConfigMapName,
+			Namespace: ControllerNamespace,
+		},
+		Data: map[string]string{
+			"labelmap.json": `
+kubernetes:
+  namespace_name: namespace
+  labels:
+    app: app
+    "app.kubernetes.io/component": component
+    "app.kubernetes.io/name": app
+    "serverless.kyma-project.io/function-name": function
+     host: node
+  container_name: container
+  pod_name: pod
+stream: stream`,
+		},
+	}
+	err = k8sClient.Create(ctx, &cmFile)
 
 	return err
 }

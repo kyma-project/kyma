@@ -290,6 +290,11 @@ func TestValidHostname(t *testing.T) {
 	require.False(t, validHostname("!@#$$%"))
 }
 
+func TestValidLokiURL(t *testing.T) {
+	require.True(t, validURL("http://logging-loki:3100/loki/api/v1/push"))
+	require.False(t, validURL("http//abc.abc"))
+}
+
 func TestValidateHTTPOutput(t *testing.T) {
 	output := telemetryv1alpha1.HTTPOutput{
 		Host: telemetryv1alpha1.ValueType{
