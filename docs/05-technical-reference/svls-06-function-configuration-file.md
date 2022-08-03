@@ -171,7 +171,7 @@ See all parameter descriptions.
 | **apiRules.rules.accessStrategies**            | Yes | APIRule | | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/oathkeeper/docs/pipeline/authn/). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, and `allow`.         |
 | **apiRules.rules.path**            | No | APIRule | `/.*` | Specifies the path to the exposed Service.         |
 | **apiRules.rules.path.accessStrategies.handler**            | Yes | APIRule | `allow` | Specifies one of the authenticators used: `oauth2_introspection`, `jwt`, `noop`, or `allow`.       |
-| **apiRules.rules.path.accessStrategies.config.** | No | AP I ule |  | Defines the handler used. It can be specified globally or per access rule.         |
+| **apiRules.rules.path.accessStrategies.config.** | No | APIRule |  | Defines the handler used. It can be specified globally or per access rule.         |
 | **apiRules.rules.path.accessStrategies.config.required_scope** | No | APIRule | | Defines the [limits](https://oauth.net/2/scope/) that the client specifies for an access request. In turn, the authorization server issues the access token in the defined scope. |
 | **apiRules.rules.path.accessStrategies.config.jwks_urls** | No | APIRule | |  The URLs where ORY Oathkeeper can retrieve [JSON Web Keys](https://www.ory.sh/oathkeeper/docs/pipeline/authn/#jwt) from to validate the JSON Web Token.  |
 | **apiRules.rules.path.accessStrategies.config.trustedIssuers** | No | APIRule | |  Sets a list of trusted token issuers. |

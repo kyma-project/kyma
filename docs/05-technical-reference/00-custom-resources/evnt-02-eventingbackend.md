@@ -29,7 +29,7 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 |:---|:---|
 | **status.backendType** | Specifies the backend type used. |
 | **status.conditions.code** | Conditions defines the ready status of the Eventing Controller and the Eventing Publisher Proxy. |
-| **status.eventingReady** | Current ready status of the Eventing Backend. |
+| **status.eventingReady** | Current ready status of the EventingBackend. |
 
 The `status` field of this CR looks like this:
 

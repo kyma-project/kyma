@@ -18,9 +18,9 @@ Trouble with Kyma Eventing may be caused by various issues, so this document gui
 
 Follow these steps to detect the source of the problem:
 
-### Step 1: Check the status of the Eventing backend CR
+### Step 1: Check the status of the EventingBackend CR
 
-1. Check the Eventing backend CR. Is the field **EVENTINGREADY** `true`?
+1. Check the EventingBackend CR. Is the field **EVENTINGREADY** `true`?
    
     ```bash
     kubectl -n kyma-system get eventingbackends.eventing.kyma-project.io
@@ -32,7 +32,7 @@ Follow these steps to detect the source of the problem:
     kubectl -n kyma-system get eventingbackends.eventing.kyma-project.io eventing-backend -o yaml
     ```
 
-3. If **EVENTINGREADY** is `true`, the Eventing backend CR is not an issue. Follow the next steps to find the source of the problem.
+3. If **EVENTINGREADY** is `true`, the EventingBackend CR is not an issue. Follow the next steps to find the source of the problem.
 
 ### Step 2: Check the status of the Subscription
 
