@@ -38,7 +38,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/helper"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -170,7 +170,7 @@ func main() {
 		FsBufferLimit:     fluentBitFsBufferLimit,
 	}
 
-	daemonSetConfig := helper.FluentBitDaemonSetConfig{
+	daemonSetConfig := sync.FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName: types.NamespacedName{
 			Namespace: fluentBitNs,
 			Name:      fluentBitDaemonSet,

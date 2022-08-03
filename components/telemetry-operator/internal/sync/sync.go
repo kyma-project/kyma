@@ -1,4 +1,4 @@
-package helper
+package sync
 
 import (
 	"context"
@@ -69,15 +69,13 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		return false, err
 	}
 
-	defaultNamespacesChanged := SetDefaults(logPipeline)
-
 	err = s.syncUnsupportedPluginsTotal(ctx)
 	if err != nil {
 		log.Error(err, "Failed to sync unsupported mode metrics")
 		return false, err
 	}
 
-	return sectionsChanged || filesChanged || variablesChanged || defaultNamespacesChanged, nil
+	return sectionsChanged || filesChanged || variablesChanged, nil
 }
 
 // Synchronize LogPipeline with ConfigMap of DaemonSetUtils sections (Input, Filter and Output).

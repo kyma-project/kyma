@@ -78,7 +78,7 @@ func TestFilter(t *testing.T) {
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
-    Rule                  $log "^.*$" foo.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kube-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
@@ -149,7 +149,7 @@ func TestCustomOutput(t *testing.T) {
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
-    Rule                  $log "^.*$" foo.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kube-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
@@ -191,7 +191,7 @@ func TestHTTPOutput(t *testing.T) {
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
-    Rule                  $log "^.*$" foo.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kube-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
@@ -259,7 +259,7 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
-    Rule                  $log "^.*$" foo.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kube-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier

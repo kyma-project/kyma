@@ -52,7 +52,12 @@ func CreateRewriteTagFilter(config PipelineConfig, logPipeline *telemetryv1alpha
 		AddConfigurationParameter("Emitter_Mem_Buf_Limit", config.MemoryBufferLimit)
 
 	if !logPipeline.Spec.Input.Application.HasSelectors() {
-		sectionBuilder.AddConfigurationParameter("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
+		if logPipeline.Spec.Input.Application.IncludeSystemNamespaces {
+			sectionBuilder.AddConfigurationParameter("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
+		} else {
+			sectionBuilder.AddConfigurationParameter("Rule",
+				fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!kyma-system$|kube-system$).*\" %s.$TAG true", logPipeline.Name))
+		}
 		return sectionBuilder.ToString()
 	}
 
