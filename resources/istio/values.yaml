@@ -28,9 +28,9 @@ helmValues:
       autoscaleEnabled: true
 
   sidecarInjectorWebhook:
-    enableNamespacesByDefault: true
+    enableNamespacesByDefault: false
     objectSelector:
-      autoInject: true
+      autoInject: false
       enabled: false
     rewriteAppHTTPProbe: true
 
