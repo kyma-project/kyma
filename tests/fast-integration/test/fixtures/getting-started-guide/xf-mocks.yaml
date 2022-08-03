@@ -33,6 +33,7 @@ metadata:
 spec:
   maxReplicas: 1
   minReplicas: 1
+  runtime: nodejs14
   resourceConfiguration:
     function:
       resources:
