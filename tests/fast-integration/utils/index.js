@@ -386,8 +386,6 @@ function waitForFunction(name, namespace = 'default', timeout = 90000) {
       `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
       {},
       (_type, _apiObj, watchObj) => {
-        console.log('dupa');
-        console.log(watchObj.object.status.conditions);
         return (
           watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
