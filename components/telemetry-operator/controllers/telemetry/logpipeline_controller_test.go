@@ -41,12 +41,12 @@ var _ = Describe("LogPipeline controller", func() {
 		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" log-pipeline.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          log-pipeline
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $log "^.*$" log-pipeline.$TAG true
 
 [FILTER]
     name                  record_modifier
@@ -155,7 +155,7 @@ var _ = Describe("LogPipeline controller", func() {
 				Custom: FluentBitFilterConfig,
 			}
 
-			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
+			logPipeline := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "telemetry.kyma-project.io/v1alpha1",
 					Kind:       "LogPipeline",
@@ -164,13 +164,14 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
+					Input:     telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{IncludeSystemNamespaces: true}},
 					Filters:   []telemetryv1alpha1.Filter{filter},
 					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:     []telemetryv1alpha1.FileMount{file},
 					Variables: []telemetryv1alpha1.VariableReference{variableRefs},
 				},
 			}
-			Expect(k8sClient.Create(ctx, loggingConfiguration)).Should(Succeed())
+			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())
 
 			// Fluent Bit config section should be copied to ConfigMap
 			Eventually(func() string {
@@ -230,7 +231,7 @@ var _ = Describe("LogPipeline controller", func() {
 				return updatedLogPipeline.Finalizers
 			}, timeout, interval).Should(ContainElement("FLUENT_BIT_SECTIONS_CONFIG_MAP"))
 
-			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
+			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
 
 			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 3)
 			Eventually(func() int {

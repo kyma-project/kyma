@@ -28,10 +28,32 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	Input     Input               `json:"input,omitempty"`
 	Filters   []Filter            `json:"filters,omitempty"`
 	Output    Output              `json:"output,omitempty"`
 	Files     []FileMount         `json:"files,omitempty"`
 	Variables []VariableReference `json:"variables,omitempty"`
+}
+
+// Input describes a Fluent Bit input configuration section
+type Input struct {
+	Application ApplicationInput `json:"application,omitempty"`
+}
+
+// ApplicationInput is the default type of Input that handles application logs
+type ApplicationInput struct {
+	IncludeSystemNamespaces bool     `json:"includeSystemNamespaces,omitempty"`
+	Namespaces              []string `json:"namespaces,omitempty"`
+	ExcludeNamespaces       []string `json:"excludeNamespaces,omitempty"`
+	Containers              []string `json:"containers,omitempty"`
+	ExcludeContainers       []string `json:"excludeContainers,omitempty"`
+}
+
+func (a ApplicationInput) HasSelectors() bool {
+	return len(a.Namespaces) > 0 ||
+		len(a.ExcludeNamespaces) > 0 ||
+		len(a.Containers) > 0 ||
+		len(a.ExcludeContainers) > 0
 }
 
 // Filter describes a Fluent Bit filter configuration
@@ -77,7 +99,7 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Variables is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
+// VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
 type VariableReference struct {
 	Name      string        `json:"name,omitempty"`
 	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
@@ -179,7 +201,6 @@ func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineC
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
 //+kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
-
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -190,7 +211,6 @@ type LogPipeline struct {
 }
 
 //+kubebuilder:object:root=true
-
 // LogPipelineList contains a list of LogPipeline
 type LogPipelineList struct {
 	metav1.TypeMeta `json:",inline"`

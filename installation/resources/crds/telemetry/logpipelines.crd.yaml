@@ -64,6 +64,33 @@ spec:
                       type: string
                   type: object
                 type: array
+              input:
+                description: Input describes a Fluent Bit input configuration section
+                properties:
+                  application:
+                    description: ApplicationInput is the default type of Input that
+                      handles application logs
+                    properties:
+                      containers:
+                        items:
+                          type: string
+                        type: array
+                      excludeContainers:
+                        items:
+                          type: string
+                        type: array
+                      excludeNamespaces:
+                        items:
+                          type: string
+                        type: array
+                      includeSystemNamespaces:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
               output:
                 description: Output describes a Fluent Bit output configuration section
                 properties:
@@ -98,7 +125,7 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    description: HTTPOutput describes a Fluent Bit HTTP output configuration
                     properties:
                       compress:
                         type: string
@@ -172,7 +199,7 @@ spec:
                 type: object
               variables:
                 items:
-                  description: Variables is a pointer to a Kubernetes secret that
+                  description: VariableReference references a Kubernetes secret that
                     should be provided as environment variable to Fluent Bit
                   properties:
                     name:

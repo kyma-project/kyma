@@ -203,6 +203,7 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
+		validation.NewInputValidator(),
 		validation.NewVariablesValidator(mgr.GetClient()),
 		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		validation.NewPluginValidator(

@@ -115,7 +115,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
-	var changed, err = r.Syncer.SyncAll(ctx, &logPipeline)
+	changed, err := r.Syncer.SyncAll(ctx, &logPipeline)
 	if err != nil {
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
