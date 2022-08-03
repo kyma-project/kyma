@@ -90,7 +90,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
    - `http`, which pushes the data to the specified http destination.
    - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.     
 
-   An example of the `custom` output is the following:
+   See the following example of the `custom` output:
    
    ```yaml
    kind: LogPipeline
