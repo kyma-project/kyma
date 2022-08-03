@@ -5,11 +5,10 @@ These are the component tests for Application Connector.
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [Component tests for Application Connector](#component-tests-for-application-connector)
 - [Design and architecture](#design-and-architecture)
 - [Building](#building)
 - [Running](#running)
-    - [Deploy Kyma cluster locally](#deploy-kyma-cluster-locally)
+    - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
     - [Run the tests](#run-the-tests)
 - [Debugging](#debugging)
     - [Running locally](#running-locally)
