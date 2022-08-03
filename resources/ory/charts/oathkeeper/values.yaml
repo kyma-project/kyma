@@ -276,7 +276,8 @@ deployment:
   #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
   #      e.g.  type: app
 
-  annotations: {}
+  annotations:
+    sidecar.istio.io/rewriteAppHTTPProbers: "false"
   #      If you do want to specify annotations, uncomment the following
   #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
   #      e.g.  sidecar.istio.io/rewriteAppHTTPProbers: "true"
