@@ -84,6 +84,8 @@ spec:
                         items:
                           type: string
                         type: array
+                      includeSystemNamespaces:
+                        type: boolean
                       namespaces:
                         items:
                           type: string
