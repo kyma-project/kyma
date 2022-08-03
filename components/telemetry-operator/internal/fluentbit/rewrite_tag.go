@@ -56,7 +56,7 @@ func CreateRewriteTagFilter(config PipelineConfig, logPipeline *telemetryv1alpha
 			sectionBuilder.AddConfigurationParameter("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
 		} else {
 			sectionBuilder.AddConfigurationParameter("Rule",
-				fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!kyma-system$|kube-system$).*\" %s.$TAG true", logPipeline.Name))
+				fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*\" %s.$TAG true", logPipeline.Name))
 		}
 		return sectionBuilder.ToString()
 	}

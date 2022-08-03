@@ -144,7 +144,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
 
   it('Should exclude system namespace by default', async () => {
     await sleep(5 * 1000);
-    const labels = '{namespace="kyma-system"}';
+    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isFalse(logsPresent, 'No logs present in Loki');
   });
@@ -176,7 +176,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     await updateLogPipeline(lokiPipeline);
 
     await sleep(10 * 1000);
-    const labels = '{namespace="kyma-system"}';
+    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No kyma-system logs present in Loki');
   });
