@@ -54,6 +54,13 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 		r.HandleFunc("/echo", echo)
 	}
 	{
+		r := api.PathPrefix("/csrf-oauth").Subrouter()
+		r.Use(csrf.Middleware())
+		r.Use(oauth.Middleware())
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+	{
 		r := api.PathPrefix("/request-parameters-basic").Subrouter()
 		r.Use(RequestParameters(expectedRequestParameters.Headers, expectedRequestParameters.QueryParameters))
 		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))

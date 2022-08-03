@@ -57,6 +57,21 @@ spec:
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: csrf-oauth
+      name: csrf-oauth
+      providerDisplayName: OAuth with CSRF
+      description: Should return 200 when calling endpoint protected with OAuth with CSRF
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
     - displayName: basic-auth-with-request-parameters
       name: basic-auth-with-request-parameters
       providerDisplayName: Basic

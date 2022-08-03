@@ -63,6 +63,36 @@ spec:
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+    - displayName: bad csrf token oauth
+      name: bad-csrf-token-oauth
+      providerDisplayName: OAuth with CSRF
+      description: Should return 403 for OAuth with a bad CSRF token
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-oauth"
+          credentials:
+            secretName: oauth-test-negative-case
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+    - displayName: bad csrf endpoint oauth
+      name: bad-csrf-endpoint-oauth
+      providerDisplayName: OAuth with CSRF
+      description: Should return 403 for OAuth with a bad CSRF token endpoint
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-oauth"
+          credentials:
+            secretName: oauth-test-negative-case
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
     - displayName: basic-auth-with-wrong-request-parameters
       name: basic-auth-with-wrong-request-parameters
       providerDisplayName: Basic
