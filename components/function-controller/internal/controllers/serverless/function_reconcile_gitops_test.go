@@ -817,6 +817,7 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 
 		gitClient := new(automock.GitClient)
 		gitClient.On("LastCommit", mock.Anything).Return("", fmt.Errorf("test error")).Once()
+		defer gitClient.AssertExpectations(t)
 
 		factory := automock.NewGitClientFactory(t)
 		factory.On("GetGitClient", mock.Anything).Return(gitClient)
