@@ -4,13 +4,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
-
-	"github.com/onsi/gomega"
 )
 
 func TestFunctionSpec_validateResources(t *testing.T) {
@@ -537,6 +536,66 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			g.Expect(errs).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {
 				g.Expect(errs.Error()).To(testData.specifiedExpectedError)
+			}
+		})
+	}
+}
+
+func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		spec    FunctionSpec
+		wantErr bool
+	}{
+		{
+			name: "Invalid http",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "github.com/kyma-project/kyma.git",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Valid http",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "https://github.com/kyma-project/kyma.git",
+					},
+				},
+			},
+		},
+		{
+			name: "Invalid ssh",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "g0t@github.com:kyma-project/kyma.git",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Valid ssh",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "git@github.com:kyma-project/kyma.git",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if err := tt.spec.validateGitRepoURL(&ValidationConfig{}); (err != nil) != tt.wantErr {
+				t.Errorf("FunctionSpec.validateGitRepoURL() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
