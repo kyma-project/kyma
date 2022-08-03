@@ -278,7 +278,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | output.http.host.value | string | Host value, can contain references to Secret values. |
 | output.http.host.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
 | output.http.password | object | Basic Auth password. |
-| output.http.password.value | string | Actual password value, can contain references to Secret values. |
+| output.http.password.value | string | Password value, can contain references to Secret values. |
 | output.http.password.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`.|
 | output.http.port | string | TCP port of the target HTTP server. Default is `443`.  |
 | output.http.tls | object | TLS Configuration of the HTTP target server.  |
