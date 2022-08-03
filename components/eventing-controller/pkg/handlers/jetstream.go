@@ -398,11 +398,25 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			continue
 		}
 
-		jsSubscription, err := js.jsCtx.Subscribe(
-			jsSubject,
-			asyncCallback,
-			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
-		)
+		var jsSubscription *nats.Subscription
+		var err error
+
+		if jsSubject == "custom-subject" {
+			log.Infow("Creating subscriber with DeliverPolicy: All on JetStream", "subject", subject)
+			jsSubscription, err = js.jsCtx.Subscribe(
+				jsSubject,
+				asyncCallback,
+				js.getCustomSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
+			)
+		} else {
+			log.Infow("Creating subscriber with DeliverPolicy: New on JetStream", "subject", subject)
+			jsSubscription, err = js.jsCtx.Subscribe(
+				jsSubject,
+				asyncCallback,
+				js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
+			)
+		}
+
 		if err != nil {
 			log.Errorw("failed to subscribe on JetStream", "subject", subject, "error", err)
 			return err
@@ -426,6 +440,22 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.IdleHeartbeat(idleHeartBeatDuration),
 		nats.EnableFlowControl(),
 		toJetStreamConsumerDeliverPolicyOptOrDefault(js.config.JSConsumerDeliverPolicy),
+		nats.MaxAckPending(subConfig.MaxInFlightMessages),
+		nats.MaxDeliver(jsConsumerMaxRedeliver),
+		nats.AckWait(jsConsumerAcKWait),
+	}
+	return defaultOpts
+}
+
+func (js *JetStream) getCustomSubscriptionOptions(consumer SubscriptionSubjectIdentifier, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {
+	defaultOpts := DefaultSubOpts{
+		nats.Durable(consumer.consumerName),
+		nats.Description(consumer.namespacedSubjectName),
+		nats.ManualAck(),
+		nats.AckExplicit(),
+		nats.IdleHeartbeat(idleHeartBeatDuration),
+		nats.EnableFlowControl(),
+		nats.DeliverAll(),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
