@@ -146,4 +146,4 @@ global:
   tracing:
     enabled: true
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
-  sidecarMigration: true
+  sidecarMigration: false
