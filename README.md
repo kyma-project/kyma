@@ -109,7 +109,7 @@ If you would like to join us and work together on the Kyma project, there are so
   - Downloading additional tools modules with the `go get` command
 
 - Kubernetes basic skillset:
-  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: Namespace, Pod, Deployment, Secret, ConfigMap, ReplicaSet, Service, CustomResourc Definition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
+  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: Namespace, Pod, Deployment, Secret, ConfigMap, ReplicaSet, Service, CustomResourceDefinition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
   - Using a kubeconfig file to connect to a cluster
   - Browsing cluster resources using `kubectl` commands and editing Kubernetes resources using Terminal
   - Applying YAML files to a cluster with Kubernetes resources
