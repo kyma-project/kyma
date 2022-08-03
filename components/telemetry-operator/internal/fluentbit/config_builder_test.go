@@ -356,12 +356,12 @@ func TestLokiOutputPlugin(t *testing.T) {
 	lokiLabels := make(map[string]string)
 	lokiLabels["job"] = "telemetry-fluent-bit"
 	expected := `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" foo.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
