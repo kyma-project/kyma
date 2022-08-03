@@ -268,17 +268,17 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | output.http | object | [Fluent Bit http output](https://docs.fluentbit.io/manual/pipeline/outputs/http). |
 | output.http.compress | string | Payload compression mechanism. |
 | output.http.dedot | boolean | Indicates if *dedotting* (replacing dots with underscores) should be applied on the log field names `kubernetes.annotations` and `kubernetes.labels`. Default is `false`. |
-| output.http.format | string | Data format to be used in the HTTP request body. Fluent Bit Default is `msgpack`. |
+| output.http.format | string | Data format to be used in the HTTP request body. Default is `json`. |
 | output.http.host | object | IP address or hostname of the target HTTP server. |
 | output.http.host.value | string | Actual host value, can contain references to secret values. Fluent Bit Default is `127.0.0.1`.   |
 | output.http.host.valueFrom.secretKeyRef | object | Reference to a key in a Secret. `name` and `namespace` of the Secret, as well as the name of the `key`, must be provided. |
 | output.http.password | object | Basic Auth password. |
 | output.http.password.value | string | Actual password value, can contain references to secret values. |
 | output.http.password.valueFrom.secretKeyRef | object | Reference to a key in a Secret. `name` and `namespace` of the Secret, as well as the name of the `key`, must be provided. |
-| output.http.port | string | TCP port of the target HTTP server. Fluent Bit Default is `80`.  |
+| output.http.port | string | TCP port of the target HTTP server. Default is `443`.  |
 | output.http.tls | object | TLS Configuration of the HTTP target server.  |
-| output.http.tls.disabled | boolean | Indicates if TLS is disabled or enabled. |
-| output.http.tls.skipCertificateValidation | boolean | Indicates if the validation of certificates should be skipped. |
+| output.http.tls.disabled | boolean | Indicates if TLS is disabled or enabled. Default is `false`. |
+| output.http.tls.skipCertificateValidation | boolean | Indicates if the validation of certificates should be skipped. Default is `false`. |
 | output.http.uri | string | URI for the target HTTP server. Fluent Bit Default is `/`. |
 | output.http.user | object | Basic Auth username.|
 | output.http.user.value | string | Actual username value, can contain references to secret values. |
