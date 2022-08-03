@@ -15,7 +15,6 @@ const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../monitoring');
-const {debug} = require('console');
 
 const telemetryNamespace = 'kyma-system';
 const defaultNamespace = 'default';
@@ -54,6 +53,29 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
       },
       timeout,
       `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
+  );
+}
+
+async function getLogPipeline(name) {
+  const path = `/apis/telemetry.kyma-project.io/v1alpha1/logpipelines/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  return JSON.parse(response.body);
+}
+
+async function updateLogPipeline(logPipeline) {
+  const options = {
+    headers: {'Content-type': 'application/merge-patch+json'},
+  };
+
+  await k8sDynamicApi.patch(
+      logPipeline,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      options,
   );
 }
 
@@ -120,7 +142,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     }
   });
 
-  it('Should exclude system namespaces by default', async () => {
+  it('Should exclude system namespace by default', async () => {
     await sleep(5 * 1000);
     const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
@@ -147,47 +169,15 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
   });
-});
-
-async function getLogPipeline(name) {
-  const path = `/apis/telemetry.kyma-project.io/v1alpha1/logpipelines/${name}`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  return JSON.parse(response.body);
-}
-
-async function updateLogPipeline(logPipeline) {
-  const options = {
-    headers: {'Content-type': 'application/merge-patch+json'},
-  };
-
-  await k8sDynamicApi.patch(
-      logPipeline,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options,
-  );
-}
-
-describe('Telemetry Operator tests, input section', function() {
-  it('Default with excluded namespaces is set for loki pipeline', async () => {
-    const lokiPipeline = await getLogPipeline('loki');
-    assert.include(lokiPipeline.spec.input.application.excludeNamespaces, 'kyma-system');
-    assert.include(lokiPipeline.spec.input.application.excludeNamespaces, 'kube-system');
-  });
 
   it('Include kyma-system namespace on loki pipeline ', async () => {
     const lokiPipeline = await getLogPipeline('loki');
-    lokiPipeline.spec.input.application.excludeNamespaces = [];
     lokiPipeline.spec.input.application.includeSystemNamespaces = true;
     await updateLogPipeline(lokiPipeline);
 
-    await sleep(15 * 1000);
+    await sleep(10 * 1000);
     const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-    assert.isTrue(logsPresent, 'No logs present in Loki');
+    assert.isTrue(logsPresent, 'No kyma-system logs present in Loki');
   });
 });
