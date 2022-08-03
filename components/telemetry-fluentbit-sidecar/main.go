@@ -37,8 +37,8 @@ func recordMetrics() {
 				if errDirList != nil {
 					panic(errDirList)
 				}
-				for i, dir := range directories {
-					fsbufferLabels[i].Set(float64(dir.size))
+				for _, dir := range directories {
+					fsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
 				}
 			case <-quit:
 				ticker.Stop()
@@ -49,36 +49,12 @@ func recordMetrics() {
 }
 
 var (
-	fsbufferLabels = []prometheus.Gauge{
-		promauto.NewGauge(prometheus.GaugeOpts{
-			Namespace:   "",
-			Subsystem:   "",
-			Name:        "telemetry_fsbuffer_size_emitter4",
-			Help:        "The emitter.4 size of the fluentbit chunk buffer",
-			ConstLabels: nil,
-		}),
-		promauto.NewGauge(prometheus.GaugeOpts{
-			Namespace:   "",
-			Subsystem:   "",
-			Name:        "telemetry_fsbuffer_size_emitter3",
-			Help:        "The emitter.3 size of the fluentbit chunk buffer",
-			ConstLabels: nil,
-		}),
-		promauto.NewGauge(prometheus.GaugeOpts{
-			Namespace:   "",
-			Subsystem:   "",
-			Name:        "telemetry_fsbuffer_size_emitter2",
-			Help:        "The emitter.2 size of the fluentbit chunk buffer",
-			ConstLabels: nil,
-		}),
-		promauto.NewGauge(prometheus.GaugeOpts{
-			Namespace:   "",
-			Subsystem:   "",
-			Name:        "telemetry_fsbuffer_size_tail0",
-			Help:        "The tail.0 size of the fluentbit chunk buffer",
-			ConstLabels: nil,
-		}),
-	}
+	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "",
+		Subsystem: "",
+		Name:      "telemetry_fsbuffer_vector",
+		Help:      "Disk size for different emitters",
+	}, []string{"name"})
 
 	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace:   "",
