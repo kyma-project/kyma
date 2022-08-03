@@ -3,6 +3,8 @@ package fluentbit
 import (
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
 )
@@ -348,4 +350,63 @@ func TestResolveSecretValue(t *testing.T) {
 	resolved, err := resolveValue(value, "pipeline")
 	require.NoError(t, err)
 	require.Equal(t, resolved, "${PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY}")
+}
+
+func TestLokiOutputPlugin(t *testing.T) {
+	lokiLabels := make(map[string]string)
+	lokiLabels["job"] = "telemetry-fluent-bit"
+	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" foo.$TAG true
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+
+[FILTER]
+    name                  record_modifier
+    match                 foo.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[OUTPUT]
+    alias foo
+    labelMapPath /fluent-bit/etc/loki-labelmap.json
+    labels {job="telemetry-fluent-bit"}
+    lineformat json
+    loglevel warn
+    match foo.*
+    name grafana-loki
+    removeKeys key1, key2
+    storage.total_limit_size 1G
+    url http:loki:3100
+
+`
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo",
+			Namespace: "lokiNs",
+		},
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Loki: telemetryv1alpha1.LokiOutput{
+					URL: telemetryv1alpha1.ValueType{
+						Value: "http:loki:3100",
+					},
+					Labels:     lokiLabels,
+					RemoveKeys: []string{"key1", "key2"},
+				},
+			},
+		},
+	}
+	pipelineConfig := PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
 }

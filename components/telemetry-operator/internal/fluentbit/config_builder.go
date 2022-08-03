@@ -5,9 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 )
 
 type ConfigHeader string
@@ -109,7 +108,51 @@ func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineC
 		return generateHTTPOutput(logPipeline, pipelineConfig)
 	}
 
+	// A LokiOutput needs to have at least url
+	if logPipeline.Spec.Output.Loki.URL.IsDefined() {
+		return generateLokiOutput(logPipeline, pipelineConfig)
+	}
+
 	return nil, fmt.Errorf("output plugin not defined")
+}
+
+func getLokiDefaults() map[string]string {
+	result := make(map[string]string)
+	result["labelMapPath"] = "/fluent-bit/etc/loki-labelmap.json"
+	result["loglevel"] = "warn"
+	result["lineformat"] = "json"
+	return result
+}
+func generateLokiOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
+	lokiConfig := logPipeline.Spec.Output.Loki
+	var err error
+	result := getLokiDefaults()
+	result[MatchKey] = generateMatchCondition(logPipeline.Name)
+	result[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
+	result["name"] = "grafana-loki"
+	result["alias"] = logPipeline.Name
+	result["url"], err = resolveValue(logPipeline.Spec.Output.Loki.URL, logPipeline.Name)
+	if err != nil {
+		return nil, err
+	}
+	if len(lokiConfig.Labels) != 0 {
+		result["labels"] = convertLabelMaptoString(lokiConfig.Labels)
+	}
+	if len(lokiConfig.RemoveKeys) != 0 {
+		str := strings.Join(lokiConfig.RemoveKeys, ", ")
+		result["removeKeys"] = str
+	}
+	return result, nil
+}
+
+func convertLabelMaptoString(labels map[string]string) string {
+	var labelString []string
+
+	for k, v := range labels {
+		l := fmt.Sprintf("%s=\"%s\"", k, v)
+		labelString = append(labelString, l)
+	}
+	return fmt.Sprintf("{%s}", strings.Join(labelString, ", "))
 }
 
 func getHTTPOutputDefaults() map[string]string {

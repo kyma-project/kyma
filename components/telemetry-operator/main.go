@@ -213,8 +213,7 @@ func main() {
 		validation.NewOutputValidator(),
 		pipelineConfig,
 		fs.NewWrapper(),
-		restartsTotal,
-	)
+		restartsTotal)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})

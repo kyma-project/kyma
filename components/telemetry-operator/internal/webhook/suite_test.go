@@ -46,8 +46,9 @@ import (
 )
 
 const (
-	FluentBitConfigMapName = "telemetry-fluent-bit"
-	ControllerNamespace    = "default"
+	FluentBitConfigMapName     = "telemetry-fluent-bit"
+	FluentBitFileConfigMapName = "telemetry-fluent-bit-files"
+	ControllerNamespace        = "default"
 )
 
 var (

@@ -159,6 +159,7 @@ func appendFluentBitConfigFile(
 	if err != nil {
 		return []fs.File{}, err
 	}
+
 	configFiles = append(configFiles, fs.File{
 		Path: fluentBitSectionsConfigDirectory,
 		Name: logPipeline.Name + ".conf",
