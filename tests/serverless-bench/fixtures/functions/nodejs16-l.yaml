@@ -5,19 +5,21 @@ metadata:
     serverless.kyma-project.io/function-resources-preset: L
   name: nodejs16-l
 spec:
-  deps: |-
-    {
-      "name": "nodejs16-l",
-      "version": "0.0.1",
-      "dependencies": {}
-    }
   maxReplicas: 1
   minReplicas: 1
   runtime: nodejs16
-  source: |-
-    module.exports = {
-        main: function (event, context) {
-            return 'Hello Serverless'
+  source:
+    inline:
+      deps: |-
+        {
+          "name": "nodejs16-l",
+          "version": "0.0.1",
+          "dependencies": {}
         }
-    }
+      source: |-
+        module.exports = {
+            main: function (event, context) {
+                return 'Hello Serverless'
+            }
+        }
 

@@ -68,6 +68,7 @@ const (
 	apiRuleNamePrefix           = "webhook-"
 	reconcilerName              = "beb-subscription-reconciler"
 	timeoutRetryActiveEmsStatus = time.Second * 30
+	requeueAfterDuration        = time.Second * 2
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
@@ -154,7 +155,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// if beb subscription is not ready, then requeue
 	if !ready {
 		log.Debugw("Requeuing reconciliation because BEB subscription is not ready")
-		result.RequeueAfter = time.Second * 2
+		result.RequeueAfter = requeueAfterDuration
 	}
 
 	// update the subscription if modified
@@ -628,6 +629,10 @@ func getSvcNsAndName(url string) (string, string, error) {
 
 // syncInitialStatus determines the desired initial status and updates it accordingly (if conditions changed)
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) {
+	if subscription.Status.CleanEventTypes == nil {
+		subscription.Status.InitializeCleanEventTypes()
+	}
+
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
 	expectedStatus.InitializeConditions()
 

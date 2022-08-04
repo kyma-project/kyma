@@ -21,16 +21,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/google/uuid"
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	admissionv1 "k8s.io/api/admission/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -46,39 +47,42 @@ const (
 //+kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type LogPipelineValidator struct {
 	client.Client
-
-	fluentBitConfigMap       types.NamespacedName
-	variablesValidator       validation.VariablesValidator
-	configValidator          validation.ConfigValidator
-	pluginValidator          validation.PluginValidator
-	maxPipelinesValidator    validation.MaxPipelinesValidator
-	outputValidator          validation.OutputValidator
-	pipelineConfig           fluentbit.PipelineConfig
-	fluentBitMaxFSBufferSize string
-
-	fsWrapper fs.Wrapper
-
-	decoder *admission.Decoder
+	fluentBitConfigMap    types.NamespacedName
+	inputValidator        validation.InputValidator
+	variablesValidator    validation.VariablesValidator
+	configValidator       validation.ConfigValidator
+	pluginValidator       validation.PluginValidator
+	maxPipelinesValidator validation.MaxPipelinesValidator
+	outputValidator       validation.OutputValidator
+	pipelineConfig        fluentbit.PipelineConfig
+	fsWrapper             fs.Wrapper
+	decoder               *admission.Decoder
+	daemonSetUtils        *fluentbit.DaemonSetUtils
 }
 
 func NewLogPipeLineValidator(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
+	inputValidator validation.InputValidator,
 	variablesValidator validation.VariablesValidator,
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
 	maxPipelinesValidator validation.MaxPipelinesValidator,
 	outputValidator validation.OutputValidator,
 	pipelineConfig fluentbit.PipelineConfig,
-	fsWrapper fs.Wrapper) *LogPipelineValidator {
+	fsWrapper fs.Wrapper,
+	restartsTotal prometheus.Counter) *LogPipelineValidator {
+	fluentBitConfigMapNamespacedName := types.NamespacedName{
+		Name:      fluentBitConfigMap,
+		Namespace: namespace,
+	}
+	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
 
 	return &LogPipelineValidator{
-		Client: client,
-		fluentBitConfigMap: types.NamespacedName{
-			Name:      fluentBitConfigMap,
-			Namespace: namespace,
-		},
+		Client:                client,
+		fluentBitConfigMap:    fluentBitConfigMapNamespacedName,
+		inputValidator:        inputValidator,
 		variablesValidator:    variablesValidator,
 		configValidator:       configValidator,
 		pluginValidator:       pluginValidator,
@@ -86,6 +90,7 @@ func NewLogPipeLineValidator(
 		outputValidator:       outputValidator,
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
+		daemonSetUtils:        daemonSetUtils,
 	}
 }
 
@@ -142,7 +147,9 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}()
 
-	configFiles, err := v.getFluentBitConfig(ctx, currentBaseDirectory, logPipeline)
+	var parser *telemetryv1alpha1.LogParser
+
+	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
 	if err != nil {
 		return err
 	}
@@ -162,6 +169,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	if err = v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Maximum number of log pipelines reached")
+		return err
+	}
+
+	if err = v.inputValidator.Validate(&logPipeline.Spec.Input); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit input")
 		return err
 	}
 
@@ -186,56 +198,6 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 	}
 
 	return nil
-}
-
-func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) ([]fs.File, error) {
-	var configFiles []fs.File
-	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
-	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
-	fluentBitFilesDirectory := currentBaseDirectory + "/files"
-
-	var generalCm corev1.ConfigMap
-	if err := v.Get(ctx, v.fluentBitConfigMap, &generalCm); err != nil {
-		return nil, err
-	}
-	for key, data := range generalCm.Data {
-		configFiles = append(configFiles, fs.File{
-			Path: currentBaseDirectory,
-			Name: key,
-			Data: data,
-		})
-	}
-
-	for _, file := range logPipeline.Spec.Files {
-		configFiles = append(configFiles, fs.File{
-			Path: fluentBitFilesDirectory,
-			Name: file.Name,
-			Data: file.Content,
-		})
-	}
-
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.pipelineConfig)
-	if err != nil {
-		return []fs.File{}, err
-	}
-	configFiles = append(configFiles, fs.File{
-		Path: fluentBitSectionsConfigDirectory,
-		Name: logPipeline.Name + ".conf",
-		Data: sectionsConfig,
-	})
-
-	var logPipelines telemetryv1alpha1.LogPipelineList
-	if err := v.List(ctx, &logPipelines); err != nil {
-		return nil, err
-	}
-	parsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
-	configFiles = append(configFiles, fs.File{
-		Path: fluentBitParsersConfigDirectory,
-		Name: fluentBitParsersConfigMapKey,
-		Data: parsersConfig,
-	})
-
-	return configFiles, nil
 }
 
 func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {

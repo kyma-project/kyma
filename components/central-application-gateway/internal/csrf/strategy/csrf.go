@@ -32,9 +32,9 @@ type strategy struct {
 	csrfClient            csrf.Client
 }
 
-func (s *strategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
+func (s *strategy) AddCSRFToken(apiRequest *http.Request, skipTLSVerify bool) apperrors.AppError {
 
-	tokenResponse, err := s.csrfClient.GetTokenEndpointResponse(s.csrfTokenURL, s.authorizationStrategy)
+	tokenResponse, err := s.csrfClient.GetTokenEndpointResponse(s.csrfTokenURL, s.authorizationStrategy, skipTLSVerify)
 	if err != nil {
 		log.Errorf("failed to get CSRF token : '%s'", err)
 		return err
@@ -53,7 +53,7 @@ func (s *strategy) Invalidate() {
 
 type noTokenStrategy struct{}
 
-func (nts *noTokenStrategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
+func (nts *noTokenStrategy) AddCSRFToken(apiRequest *http.Request, skipTLSVerify bool) apperrors.AppError {
 	return nil
 }
 

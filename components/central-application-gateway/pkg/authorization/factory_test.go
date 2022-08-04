@@ -31,7 +31,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorization(request, nil)
+		err = strategy.AddAuthorization(request, nil, false)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -45,7 +45,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorization(requestWithExternalToken, nil)
+		err = strategy.AddAuthorization(requestWithExternalToken, nil, false)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -76,7 +76,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorization(request, nil)
+		err = strategy.AddAuthorization(request, nil, false)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -90,7 +90,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorization(requestWithExternalToken, nil)
+		err = strategy.AddAuthorization(requestWithExternalToken, nil, false)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -101,7 +101,7 @@ func TestStrategyFactory(t *testing.T) {
 	t.Run("should create oauth strategy", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := &Credentials{
@@ -123,7 +123,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorization(request, nil)
+		err = strategy.AddAuthorization(request, nil, false)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -137,7 +137,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorization(requestWithExternalToken, nil)
+		err = strategy.AddAuthorization(requestWithExternalToken, nil, false)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -151,7 +151,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", pair, (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", pair, (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := &Credentials{
@@ -174,7 +174,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorization(request, nil)
+		err = strategy.AddAuthorization(request, nil, false)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -188,7 +188,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorization(requestWithExternalToken, nil)
+		err = strategy.AddAuthorization(requestWithExternalToken, nil, false)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -222,7 +222,7 @@ func TestStrategyFactory(t *testing.T) {
 		// when
 		err = strategy.AddAuthorization(request, func(cert *tls.Certificate) {
 			clientCert.SetCertificate(cert)
-		})
+		}, false)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -237,7 +237,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorization(requestWithExternalToken, nil)
+		err = strategy.AddAuthorization(requestWithExternalToken, nil, false)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)

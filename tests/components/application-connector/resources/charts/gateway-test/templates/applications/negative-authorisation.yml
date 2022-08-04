@@ -12,7 +12,7 @@ spec:
     - displayName: bad oauth token
       name: bad-oauth-token
       providerDisplayName: OAuth
-      description: Should return 403 for OAuth with a wrong token
+      description: Should return 401 for OAuth with a wrong token
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -63,6 +63,19 @@ spec:
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+    - displayName: basic-auth-with-wrong-request-parameters
+      name: basic-auth-with-wrong-request-parameters
+      providerDisplayName: Basic
+      description: Should return 400 when calling endpoint protected with Basic Auth with wrong additional request parameters
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/basic-auth-with-wrong-request-parameters"
+          requestParametersSecretName: wrong-request-parameters-test
+          credentials:
+            secretName: basic-test
+            type: Basic
 ---
 apiVersion: v1
 kind: Secret
@@ -93,3 +106,15 @@ type: Opaque
 data:
   clientId: {{ "bad id" | b64enc }}
   clientSecret: {{ "bad secret" | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wrong-request-parameters-test
+  namespace: kyma-integration
+type: Opaque
+stringData:
+  headers: |-
+    {"Hkey1":["Wrong-value"],"Wrong-key":["Hval22"]}
+  queryParameters: |-
+    {"Wrong-key":["Qval1"],"Qkey2":["Qval21","Qval22","Additional-value"]}

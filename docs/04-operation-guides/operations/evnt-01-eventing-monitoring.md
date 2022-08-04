@@ -4,6 +4,8 @@ title: Monitoring Kyma Eventing
 
 Kyma Eventing provides several Grafana Dashboards so you can monitor statistics and other information for the Eventing backbone in real time.
 
+> **NOTE:** See how to [expose Grafana securely](../security/sec-06-access-expose-kiali-grafana.md) for easier access in the future.
+
 1. To access the Grafana Dashboard, port-forward the Grafana Service to localhost:
 
    ```bash

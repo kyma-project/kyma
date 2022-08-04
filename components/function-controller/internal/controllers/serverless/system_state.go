@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -17,11 +17,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const DefaultDeploymentReplicas int32 = 1
+
 type SystemState interface{}
 
 // TODO extract interface
 type systemState struct {
-	instance    serverlessv1alpha1.Function
+	instance    serverlessv1alpha2.Function
 	image       string               // TODO make sure this is needed
 	configMaps  corev1.ConfigMapList // TODO create issue to refactor this (only 1 config map should be here)
 	deployments appsv1.DeploymentList
@@ -35,9 +37,9 @@ var _ SystemState = systemState{}
 func (s *systemState) internalFunctionLabels() map[string]string {
 	labels := make(map[string]string, 3)
 
-	labels[serverlessv1alpha1.FunctionNameLabel] = s.instance.Name
-	labels[serverlessv1alpha1.FunctionManagedByLabel] = serverlessv1alpha1.FunctionControllerValue
-	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(s.instance.GetUID())
+	labels[serverlessv1alpha2.FunctionNameLabel] = s.instance.Name
+	labels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
+	labels[serverlessv1alpha2.FunctionUUIDLabel] = string(s.instance.GetUID())
 
 	return labels
 }
@@ -51,10 +53,11 @@ func (s *systemState) functionLabels() map[string]string {
 
 func (s *systemState) buildImageAddress(registryAddress string) string {
 	var imageTag string
-	if s.instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
+	isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
+	if isGitType {
 		imageTag = calculateGitImageTag(&s.instance)
 	} else {
-		imageTag = calculateImageTag(&s.instance)
+		imageTag = calculateInlineImageTag(&s.instance)
 	}
 	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, s.instance.Namespace, s.instance.Name, imageTag)
 }
@@ -62,23 +65,23 @@ func (s *systemState) buildImageAddress(registryAddress string) string {
 // TODO to self - create issue to refactor this
 func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 	image := s.buildImageAddress(dockerPullAddress)
-	configurationStatus := getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
+	configurationStatus := getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)
 	rtm := fnRuntime.GetRuntime(s.instance.Spec.Runtime)
 	labels := s.functionLabels()
 
 	if len(s.deployments.Items) == 1 &&
 		len(s.configMaps.Items) == 1 &&
 		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == image &&
-		s.instance.Spec.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
-		rtm.SanitizeDependencies(s.instance.Spec.Deps) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
+		s.instance.Spec.Source.Inline.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
+		rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus != corev1.ConditionUnknown &&
 		mapsEqual(s.configMaps.Items[0].Labels, labels) {
 		return false
 	}
 
 	return !(len(s.configMaps.Items) == 1 &&
-		s.instance.Spec.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
-		rtm.SanitizeDependencies(s.instance.Spec.Deps) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
+		s.instance.Spec.Source.Inline.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
+		rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus == corev1.ConditionTrue &&
 		mapsEqual(s.configMaps.Items[0].Labels, labels))
 }
@@ -86,8 +89,8 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 func (s *systemState) buildConfigMap() corev1.ConfigMap {
 	rtm := fnRuntime.GetRuntime(s.instance.Spec.Runtime)
 	data := map[string]string{
-		FunctionSourceKey: s.instance.Spec.Source,
-		FunctionDepsKey:   rtm.SanitizeDependencies(s.instance.Spec.Deps),
+		FunctionSourceKey: s.instance.Spec.Source.Inline.Source,
+		FunctionDepsKey:   rtm.SanitizeDependencies(s.instance.Spec.Source.Inline.Dependencies),
 	}
 	labels := s.functionLabels()
 
@@ -104,7 +107,7 @@ func (s *systemState) buildConfigMap() corev1.ConfigMap {
 func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 	conditionStatus := getConditionStatus(
 		s.instance.Status.Conditions,
-		serverlessv1alpha1.ConditionBuildReady,
+		serverlessv1alpha2.ConditionBuildReady,
 	)
 
 	if len(s.deployments.Items) == 1 &&
@@ -215,7 +218,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.BuildResources,
+							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
 							VolumeMounts:    s.getGitBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -306,7 +309,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.BuildResources,
+							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
 							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -328,7 +331,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 func (s *systemState) deploymentSelectorLabels() map[string]string {
 	return mergeLabels(
 		map[string]string{
-			serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
+			serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 		},
 		s.internalFunctionLabels(),
 	)
@@ -336,7 +339,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 
 func (s *systemState) podLabels() map[string]string {
 	selectorLabels := s.deploymentSelectorLabels()
-	return mergeLabels(s.instance.Spec.Labels, selectorLabels)
+	return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
 }
 
 type buildDeploymentArgs struct {
@@ -366,6 +369,11 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
+	minReplicas := DefaultDeploymentReplicas
+	if s.instance.Spec.MinReplicas != nil {
+		minReplicas = *s.instance.Spec.MinReplicas
+	}
+
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -373,7 +381,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: s.instance.Spec.MinReplicas,
+			Replicas: &minReplicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
@@ -400,7 +408,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 							Name:      functionContainerName,
 							Image:     imageName,
 							Env:       envs,
-							Resources: s.instance.Spec.Resources,
+							Resources: s.instance.Spec.ResourceConfiguration.Function.Resources,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name: volumeName,
 								/* needed in order to have python functions working:
@@ -601,10 +609,10 @@ func (s *systemState) equalHorizontalPodAutoscalers(expected autoscalingv1.Horiz
 func (s *systemState) gitFnSrcChanged(commit string) bool {
 	return s.instance.Status.Commit == "" ||
 		commit != s.instance.Status.Commit ||
-		s.instance.Spec.Reference != s.instance.Status.Reference ||
-		serverlessv1alpha1.RuntimeExtended(s.instance.Spec.Runtime) != s.instance.Status.Runtime ||
-		s.instance.Spec.BaseDir != s.instance.Status.BaseDir ||
-		getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
+		s.instance.Spec.Source.GitRepository.Reference != s.instance.Status.Reference ||
+		serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime) != s.instance.Status.Runtime ||
+		s.instance.Spec.Source.GitRepository.BaseDir != s.instance.Status.BaseDir ||
+		getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady) == corev1.ConditionFalse
 
 }
 
@@ -613,7 +621,7 @@ func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []cor
 		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 		// If COPY is not used, then the cache will not work
-		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(s.instance.Spec.BaseDir, "/")},
+		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(s.instance.Spec.Source.GitRepository.BaseDir, "/")},
 		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 	}
 	// add package registry config volume mount depending on the used runtime

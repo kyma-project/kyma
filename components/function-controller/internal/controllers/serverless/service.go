@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -56,11 +56,11 @@ func buildStateFnUpdateService(newService corev1.Service) stateFn {
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonServiceUpdated,
+			Reason:             serverlessv1alpha2.ConditionReasonServiceUpdated,
 			Message:            fmt.Sprintf("Service %s updated", svc.GetName()),
 		}
 
@@ -77,11 +77,11 @@ func buildStateFnCreateNewService(svc corev1.Service) stateFn {
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonServiceCreated,
+			Reason:             serverlessv1alpha2.ConditionReasonServiceCreated,
 			Message:            fmt.Sprintf("Service %s created", svc.GetName()),
 		}
 

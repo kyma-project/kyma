@@ -1,6 +1,4 @@
 ---
-
-
 helmValues:
   global:
     priorityClassName: "kyma-system-priority"
@@ -11,7 +9,7 @@ helmValues:
       readinessPeriodSeconds: 5
       resources:
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 64Mi
         limits:
           cpu: 250m
@@ -48,6 +46,17 @@ meshConfig:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
+  extensionProviders:
+    - name: envoy
+      envoyFileAccessLog:
+        path: "/dev/stdout"
+        logFormat:
+          labels: {}
+    - name: stdout-json
+      envoyFileAccessLog:
+        path: "/dev/stdout"
+        logFormat:
+          labels: {}
 
 components:
   egressGateways:
@@ -58,7 +67,7 @@ components:
           cpu: 2000m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 120Mi
 
   ingressGateways:
@@ -85,7 +94,7 @@ components:
           cpu: 2000m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 128Mi
       strategy:
         rollingUpdate:
@@ -103,7 +112,7 @@ components:
           cpu: 500m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 512Mi
       securityContext:
         runAsUser: 65534
@@ -136,3 +145,5 @@ global:
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
+  # This configuration is only temporary and will be removed in kyma version 2.7.x.
+  sidecarMigration: true

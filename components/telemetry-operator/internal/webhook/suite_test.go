@@ -25,6 +25,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
 	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/validation/mocks"
@@ -37,27 +40,31 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 const (
-	FluentBitConfigMapName = "telemetry-fluent-bit"
-	ControllerNamespace    = "default"
+	FluentBitConfigMapName     = "telemetry-fluent-bit"
+	FluentBitFileConfigMapName = "telemetry-fluent-bit-files"
+	ControllerNamespace        = "default"
 )
 
 var (
-	k8sClient             client.Client
-	testEnv               *envtest.Environment
-	ctx                   context.Context
-	cancel                context.CancelFunc
-	fsWrapperMock         *fsmocks.Wrapper
+	k8sClient     client.Client
+	testEnv       *envtest.Environment
+	ctx           context.Context
+	cancel        context.CancelFunc
+	fsWrapperMock *fsmocks.Wrapper
+
+	inputValidatorMock    *validationmocks.InputValidator
 	variableValidatorMock *validationmocks.VariablesValidator
 	configValidatorMock   *validationmocks.ConfigValidator
 	pluginValidatorMock   *validationmocks.PluginValidator
 	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
 	outputValidatorMock   *validationmocks.OutputValidator
+	parserValidatorMock   *validationmocks.ParserValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -85,6 +92,7 @@ var _ = BeforeSuite(func() {
 	cfg, err := testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
+	time.Sleep(60 * time.Second)
 
 	err = v1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
@@ -95,7 +103,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
-	// start webhook server using Manager
+	// start logPipeline webhook server using Manager
 	webhookInstallOptions := &testEnv.WebhookInstallOptions
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
@@ -115,17 +123,26 @@ var _ = BeforeSuite(func() {
 		FsBufferLimit:     "1G",
 	}
 
+	inputValidatorMock = &validationmocks.InputValidator{}
 	variableValidatorMock = &validationmocks.VariablesValidator{}
 	configValidatorMock = &validationmocks.ConfigValidator{}
 	pluginValidatorMock = &validationmocks.PluginValidator{}
 	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
+	parserValidatorMock = &validationmocks.ParserValidator{}
+
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+	metrics.Registry.MustRegister(restartsTotal)
 
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
+		inputValidatorMock,
 		variableValidatorMock,
 		configValidatorMock,
 		pluginValidatorMock,
@@ -133,6 +150,7 @@ var _ = BeforeSuite(func() {
 		outputValidatorMock,
 		pipelineConfig,
 		fsWrapperMock,
+		restartsTotal,
 	)
 
 	By("registering LogPipeline webhook")
@@ -166,7 +184,7 @@ var _ = BeforeSuite(func() {
 	err = createResources()
 	Expect(err).NotTo(HaveOccurred())
 
-}, 60)
+}, 180)
 
 var _ = AfterSuite(func() {
 	cancel()

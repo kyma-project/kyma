@@ -44,7 +44,7 @@ The **credentials** object must contain the following fields:
 | **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertGen`.  |
 | **authenticationUrl** | Optional OAuth token URL, valid only for the `OAuth` and `OAuthWithCert` types. |
 
-## Register a  Basic Authentication-secured API
+## Register a Basic Authentication-secured API
 
 This is an example of the **service** object for an API secured with Basic Authentication:
 
@@ -291,7 +291,7 @@ data:
 To create such a Secret, run this command:
 
 ```bash
-kubectl create secret generic {SECRET_NAME} --from-literal headers={HEADERS_JSON} --from-literal headers={QUERY_PARAMS_JSON} -n kyma-integration
+kubectl create secret generic {SECRET_NAME} --from-literal headers={HEADERS_JSON} --from-literal queryParameters={QUERY_PARAMS_JSON} -n kyma-integration
 ```
 
 Additional headers stored in the Secret must be provided in the form of a valid JSON document. This is an example of a headers JSON containing one entry:

@@ -28,7 +28,7 @@
 
 FROM alpine:3.15.4
 
-ENV NODE_VERSION 12.22.11
+ENV NODE_VERSION 12.22.12
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -44,7 +44,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="c30c9ba214a8eb2db6199db9147f14ff2cbb0fc07e4517e3a8758f213cc71128" \
+          CHECKSUM="e5eb941bd3d5b7ab197e27c353049e6e8fd03d39c4949ea393f5af4ba8ef020a" \
           ;; \
         *) ;; \
       esac \
