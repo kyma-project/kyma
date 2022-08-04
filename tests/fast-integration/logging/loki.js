@@ -4,6 +4,7 @@ const {
   lokiSecretData,
   tryGetLokiPersistentVolumeClaim,
   logsPresentInLoki,
+  queryLoki,
 } = require('./client');
 const {info} = require('../utils');
 
@@ -40,9 +41,27 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
+function isJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+async function verifyIstioAccessLogFormat() {
+  const query = '{container="istio-proxy",job="fluent-bit",namespace="kyma-system",pod="logging-loki-0"}';
+
+  const responseBody = await queryLoki(query);
+  assert.isTrue(responseBody.data.result.length > 0, 'No Istio access logs found for loki');
+  assert.isTrue(isJsonString(responseBody.data.result[0].log), 'Istio access log is not in JSON format');
+}
+
 module.exports = {
   checkCommerceMockLogs,
   checkKymaLogs,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
+  verifyIstioAccessLogFormat,
 };
