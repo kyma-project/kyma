@@ -3,7 +3,10 @@ GOPATH ?= $(shell go env GOPATH)
 
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
-APP_URL = "mock-application.test.svc.cluster.local"
+MOCK_SERVICE_NAME="mock-application"
+APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
+TEST_TIMEOUT = "2m"
+
 
 .PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
@@ -18,9 +21,13 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs test-gateway-debug cl
 test-gateway-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	helm template resources/charts/gateway-test | kubectl apply -f -
 
-	-kubectl wait --for=condition=complete --timeout=2m -n $(NAMESPACE) job/application-gateway-test
+	helm template resources/charts/gateway-test \
+    	--set namespace=$(NAMESPACE) \
+    	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+    | kubectl apply -f -
+
+	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test
 	@echo ""
 	@echo "Gateway test results:"
 

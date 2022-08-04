@@ -92,6 +92,51 @@ func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
 	oh.respondWithToken(w, response)
 }
 
+func (oh *OAuthHandler) MTLSToken(w http.ResponseWriter, r *http.Request) {
+	if ok, status, message := oh.isMTLSRequestValid(r); !ok {
+		handleError(w, status, message)
+		return
+	}
+
+	token := uuid.New().String()
+	exp := defaultTokenExpiresIn
+
+	oh.storeTokenInCache(token, exp)
+	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600}
+	oh.respondWithToken(w, response)
+}
+
+func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" {
+				handleError(w, http.StatusUnauthorized, "Authorization header missing")
+				return
+			}
+
+			splitToken := strings.Split(authHeader, "Bearer")
+			if len(splitToken) != 2 {
+				handleError(w, http.StatusUnauthorized, "Bearer token missing")
+				return
+			}
+
+			token := strings.TrimSpace(splitToken[1])
+
+			oh.mutex.RLock()
+			data, found := oh.tokens[token]
+			oh.mutex.RUnlock()
+
+			if !found || !data.Valid() {
+				handleError(w, http.StatusUnauthorized, "Invalid token")
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func (oh *OAuthHandler) isRequestValid(r *http.Request) (bool, int, string) {
 	err := r.ParseForm()
 	if err != nil {
@@ -128,21 +173,7 @@ func (oh *OAuthHandler) storeTokenInCache(token string, expIn time.Duration) {
 	oh.mutex.Unlock()
 }
 
-func (oh *OAuthHandler) MTLSToken(w http.ResponseWriter, r *http.Request) {
-	if ok, status, message := oh.ismTLSRequestValid(r); !ok {
-		handleError(w, status, message)
-		return
-	}
-
-	token := uuid.New().String()
-	exp := defaultTokenExpiresIn
-
-	oh.storeTokenInCache(token, exp)
-	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600}
-	oh.respondWithToken(w, response)
-}
-
-func (oh *OAuthHandler) ismTLSRequestValid(r *http.Request) (bool, int, string) {
+func (oh *OAuthHandler) isMTLSRequestValid(r *http.Request) (bool, int, string) {
 	err := r.ParseForm()
 	if err != nil {
 		return false, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err)
@@ -156,35 +187,4 @@ func (oh *OAuthHandler) ismTLSRequestValid(r *http.Request) (bool, int, string) 
 	}
 
 	return true, 0, ""
-}
-
-func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				handleError(w, http.StatusUnauthorized, "Authorization header missing")
-				return
-			}
-
-			splitToken := strings.Split(authHeader, "Bearer")
-			if len(splitToken) != 2 {
-				handleError(w, http.StatusUnauthorized, "Bearer token missing")
-				return
-			}
-
-			token := strings.TrimSpace(splitToken[1])
-
-			oh.mutex.RLock()
-			data, found := oh.tokens[token]
-			oh.mutex.RUnlock()
-
-			if !found || !data.Valid() {
-				handleError(w, http.StatusUnauthorized, "Invalid token")
-				return
-			}
-
-			next.ServeHTTP(w, r)
-		})
-	}
 }

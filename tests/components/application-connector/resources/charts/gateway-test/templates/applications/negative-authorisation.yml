@@ -61,6 +61,19 @@ spec:
             secretName: mtls-oauth-negative-incorrect-clientid
             authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
+    - displayName: mtls-oauth-negative-expired-client-cert
+      name: mtls-oauth-negative-expired-client-cert
+      providerDisplayName: mTLS-OAuth
+      description: Should return 500 for mTLS Oauth with expired certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-negative-expired-client-cert"
+          credentials:
+            secretName: mtls-oauth-negative-expired-client-cert
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
     - displayName: mtls-negative-other-ca
       name: mtls-negative-other-ca
       providerDisplayName: mTLS
@@ -72,6 +85,18 @@ spec:
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-other-ca"
           credentials:
             secretName: mtls-negative-other-ca
+            type: CertificateGen
+    - displayName: mtls-negative-expired-client-cert
+      name: mtls-negative-expired-client-cert
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with expired client certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-client-cert"
+          credentials:
+            secretName: mtls-negative-expired-client-cert
             type: CertificateGen
     - displayName: bad csrf token basic
       name: bad-csrf-token-basic

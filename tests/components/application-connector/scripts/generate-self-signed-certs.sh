@@ -13,35 +13,35 @@ mkdir -p "$GATEWAY_TEST_CERTS_DIR"
 
 echo "Generating certificate for domain: $APP_URL"
 openssl version
-openssl req -newkey rsa:2048 -nodes -x509 -days 365 -out $GATEWAY_TEST_CERTS_DIR/ca.crt -keyout $GATEWAY_TEST_CERTS_DIR/ca.key -subj $SUBJECT
+openssl req -newkey rsa:2048 -nodes -x509 -days 365 -out "$GATEWAY_TEST_CERTS_DIR/ca.crt" -keyout "$GATEWAY_TEST_CERTS_DIR/ca.key" -subj $SUBJECT
 
-openssl genrsa -out $GATEWAY_TEST_CERTS_DIR/server.key 2048
-openssl genrsa -out $GATEWAY_TEST_CERTS_DIR/client.key 2048
-
-openssl req -new \
-  -key $GATEWAY_TEST_CERTS_DIR/server.key \
-  -subj $SUBJECT \
-  -reqexts SAN \
-  -config <(cat /etc/ssl/openssl.cnf \
-      <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
-  -out $GATEWAY_TEST_CERTS_DIR/server.csr
-
-	openssl x509 -req -sha256 -days 365 -CA $GATEWAY_TEST_CERTS_DIR/ca.crt -CAkey $GATEWAY_TEST_CERTS_DIR/ca.key -CAcreateserial \
-  	-extensions SAN \
-  	-extfile <(cat /etc/ssl/openssl.cnf \
-    <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
-  	-in $GATEWAY_TEST_CERTS_DIR/server.csr -out $GATEWAY_TEST_CERTS_DIR/server.crt
+openssl genrsa -out "$GATEWAY_TEST_CERTS_DIR/server.key" 2048
+openssl genrsa -out "$GATEWAY_TEST_CERTS_DIR"/client.key 2048
 
 openssl req -new \
-  -key $GATEWAY_TEST_CERTS_DIR/client.key \
-  -subj $SUBJECT \
+  -key "$GATEWAY_TEST_CERTS_DIR/server.key" \
+  -subj "$SUBJECT" \
   -reqexts SAN \
   -config <(cat /etc/ssl/openssl.cnf \
-      <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
-  -out $GATEWAY_TEST_CERTS_DIR/client.csr
+  <(printf "\n[SAN]\nsubjectAltName=DNS:%s" "$APP_URL")) \
+  -out "$GATEWAY_TEST_CERTS_DIR/server.csr"
 
-	openssl x509 -req -sha256 -days 365 -CA $GATEWAY_TEST_CERTS_DIR/ca.crt -CAkey $GATEWAY_TEST_CERTS_DIR/ca.key -CAcreateserial \
-  	-extensions SAN \
-  	-extfile <(cat /etc/ssl/openssl.cnf \
-    <(printf "\n[SAN]\nsubjectAltName=DNS:$APP_URL")) \
-  	-in $GATEWAY_TEST_CERTS_DIR/client.csr -out $GATEWAY_TEST_CERTS_DIR/client.crt
+openssl x509 -req -sha256 -days 365 -CA "$GATEWAY_TEST_CERTS_DIR/ca.crt" -CAkey "$GATEWAY_TEST_CERTS_DIR/ca.key" -CAcreateserial \
+  -extensions SAN \
+  -extfile <(cat /etc/ssl/openssl.cnf \
+  <(printf "\n[SAN]\nsubjectAltName=DNS:%s" "$APP_URL" )) \
+  -in "$GATEWAY_TEST_CERTS_DIR/server.csr" -out "$GATEWAY_TEST_CERTS_DIR/server.crt"
+
+openssl req -new \
+  -key "$GATEWAY_TEST_CERTS_DIR/client.key" \
+  -subj "$SUBJECT" \
+  -reqexts SAN \
+  -config <(cat /etc/ssl/openssl.cnf \
+  <(printf "\n[SAN]\nsubjectAltName=DNS:%s" "$APP_URL")) \
+  -out "$GATEWAY_TEST_CERTS_DIR/client.csr"
+
+openssl x509 -req -sha256 -days 365 -CA "$GATEWAY_TEST_CERTS_DIR/ca.crt" -CAkey "$GATEWAY_TEST_CERTS_DIR/ca.key" -CAcreateserial \
+  -extensions SAN \
+  -extfile <(cat /etc/ssl/openssl.cnf \
+  <(printf "\n[SAN]\nsubjectAltName=DNS:%s" "$APP_URL")) \
+  -in "$GATEWAY_TEST_CERTS_DIR/client.csr" -out "$GATEWAY_TEST_CERTS_DIR/client.crt"

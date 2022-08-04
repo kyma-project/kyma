@@ -21,13 +21,6 @@ spec:
       containers:
         - image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.mockApplication) }}
           name: {{ .Values.mockServiceName}}
-          env:
-            - name: APP_CACERTPATH
-              value: "/etc/secret-volume/ca.crt"
-            - name: APP_SERVERCERTPATH
-              value: "/etc/secret-volume/server.crt"
-            - name: APP_SERVERKEYPATH
-              value: "/etc/secret-volume/server.key"
           ports:
             - containerPort: 8080
             - containerPort: 8090
