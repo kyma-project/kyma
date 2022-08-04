@@ -211,6 +211,7 @@ func main() {
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
 		validation.NewMaxPipelinesValidator(maxPipelines),
 		validation.NewOutputValidator(),
+		validation.NewFilesValidator(),
 		pipelineConfig,
 		fs.NewWrapper(),
 		restartsTotal)

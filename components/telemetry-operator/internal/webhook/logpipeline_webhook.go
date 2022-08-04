@@ -54,6 +54,7 @@ type LogPipelineValidator struct {
 	pluginValidator       validation.PluginValidator
 	maxPipelinesValidator validation.MaxPipelinesValidator
 	outputValidator       validation.OutputValidator
+	fileValidator         validation.FilesValidator
 	pipelineConfig        fluentbit.PipelineConfig
 	fsWrapper             fs.Wrapper
 	decoder               *admission.Decoder
@@ -70,6 +71,7 @@ func NewLogPipeLineValidator(
 	pluginValidator validation.PluginValidator,
 	maxPipelinesValidator validation.MaxPipelinesValidator,
 	outputValidator validation.OutputValidator,
+	fileValidator validation.FilesValidator,
 	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper fs.Wrapper,
 	restartsTotal prometheus.Counter) *LogPipelineValidator {
@@ -88,6 +90,7 @@ func NewLogPipeLineValidator(
 		pluginValidator:       pluginValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
 		outputValidator:       outputValidator,
+		fileValidator:         fileValidator,
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
 		daemonSetUtils:        daemonSetUtils,
@@ -193,6 +196,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 	}
 
 	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit config")
+		return err
+	}
+
+	if err = v.fileValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
