@@ -21,33 +21,6 @@ type directory struct {
 // TODO pass as arg or get from env
 const logPath = "../data/log/flb-storage/"
 
-func recordMetrics() {
-	ticker := time.NewTicker(10 * time.Second)
-	quit := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				size, err := dirSize(logPath)
-				if err != nil {
-					panic(err)
-				}
-				fsbufferSize.Set(float64(size))
-				directories, errDirList := listDirs(logPath)
-				if errDirList != nil {
-					panic(errDirList)
-				}
-				for _, dir := range directories {
-					fsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
-				}
-			case <-quit:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-}
-
 var (
 	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "",
@@ -85,8 +58,39 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 	err = http.ListenAndServe(":2021", nil)
 	if err != nil {
+		panic(err)
+	}
+}
+
+func recordingIteration(ticker *time.Ticker, quit chan struct{}) {
+	select {
+	case <-ticker.C:
+		size, err := dirSize(logPath)
+		if err != nil {
+			panic(err)
+		}
+		fsbufferSize.Set(float64(size))
+		directories, errDirList := listDirs(logPath)
+		if errDirList != nil {
+			panic(errDirList)
+		}
+		for _, dir := range directories {
+			fsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
+		}
+	case <-quit:
+		ticker.Stop()
 		return
 	}
+}
+
+func recordMetrics() {
+	ticker := time.NewTicker(10 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			recordingIteration(ticker, quit)
+		}
+	}()
 }
 
 func dirSize(path string) (int64, error) {
@@ -106,17 +110,18 @@ func dirSize(path string) (int64, error) {
 func listDirs(path string) ([]directory, error) {
 	directories := make([]directory, 0)
 	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return directories, err
+	}
 	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+		size, err := dirSize(path + "/" + file.Name())
 		if err != nil {
 			return directories, err
 		}
-		if file.IsDir() {
-			size, innerErr := dirSize(path + "/" + file.Name())
-			if innerErr != nil {
-				return directories, innerErr
-			}
-			directories = append(directories, directory{file.Name(), size})
-		}
+		directories = append(directories, directory{file.Name(), size})
 	}
 	return directories, err
-} // iterate through dir, for every subfolder calls dirSize
+}
