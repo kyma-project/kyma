@@ -14,7 +14,7 @@
 //limitations under the License.
 //*/
 //
-package webhook
+package logpipeline
 
 import (
 	"context"
@@ -24,6 +24,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -60,11 +62,10 @@ var (
 
 	inputValidatorMock    *validationmocks.InputValidator
 	variableValidatorMock *validationmocks.VariablesValidator
-	configValidatorMock   *validationmocks.ConfigValidator
+	dryRunnerMock         *mocks.DryRunner
 	pluginValidatorMock   *validationmocks.PluginValidator
 	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
 	outputValidatorMock   *validationmocks.OutputValidator
-	parserValidatorMock   *validationmocks.ParserValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -82,10 +83,10 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
+		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
-			Paths: []string{filepath.Join("..", "..", "config", "webhook")},
+			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
 		},
 	}
 
@@ -125,11 +126,10 @@ var _ = BeforeSuite(func() {
 
 	inputValidatorMock = &validationmocks.InputValidator{}
 	variableValidatorMock = &validationmocks.VariablesValidator{}
-	configValidatorMock = &validationmocks.ConfigValidator{}
+	dryRunnerMock = &mocks.DryRunner{}
 	pluginValidatorMock = &validationmocks.PluginValidator{}
 	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
-	parserValidatorMock = &validationmocks.ParserValidator{}
 
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_restarts_total",
@@ -138,13 +138,13 @@ var _ = BeforeSuite(func() {
 	metrics.Registry.MustRegister(restartsTotal)
 
 	fsWrapperMock = &fsmocks.Wrapper{}
-	logPipelineValidator := NewLogPipeLineValidator(
+	logPipelineValidator := NewValidatingWebhookHandler(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
 		inputValidatorMock,
 		variableValidatorMock,
-		configValidatorMock,
+		dryRunnerMock,
 		pluginValidatorMock,
 		maxPipelinesValidator,
 		outputValidatorMock,

@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package webhook
+package logparser
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -35,47 +37,55 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
-type LogparserValidator struct {
-	client.Client
+//go:generate mockery --name DryRunner --filename mocks.go
+type DryRunner interface {
+	RunParser(ctx context.Context, configFilePath string) error
+}
 
+const (
+	fluentBitConfigDirectory     = "/tmp/dry-run"
+	fluentBitParsersConfigMapKey = "parsers.conf"
+)
+
+//+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
+type ValidatingWebhookHandler struct {
+	client.Client
 	fluentBitConfigMap types.NamespacedName
 	parserValidator    validation.ParserValidator
 	pipelineConfig     fluentbit.PipelineConfig
-	configValidator    validation.ConfigValidator
+	dryRunner          DryRunner
 	fsWrapper          fs.Wrapper
-
-	decoder        *admission.Decoder
-	daemonSetUtils *fluentbit.DaemonSetUtils
+	decoder            *admission.Decoder
+	daemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
-func NewLogParserValidator(
+func NewValidatingWebhookHandler(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
 	parserValidator validation.ParserValidator,
 	pipelineConfig fluentbit.PipelineConfig,
-	configValidator validation.ConfigValidator,
+	dryRunner DryRunner,
 	fsWrapper fs.Wrapper,
 	restartsTotal prometheus.Counter,
-) *LogparserValidator {
+) *ValidatingWebhookHandler {
 	fluentBitConfigMapNamespacedName := types.NamespacedName{
 		Name:      fluentBitConfigMap,
 		Namespace: namespace,
 	}
 	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
-	return &LogparserValidator{
+	return &ValidatingWebhookHandler{
 		Client:             client,
 		fluentBitConfigMap: fluentBitConfigMapNamespacedName,
 		parserValidator:    parserValidator,
 		pipelineConfig:     pipelineConfig,
-		configValidator:    configValidator,
+		dryRunner:          dryRunner,
 		fsWrapper:          fsWrapper,
 		daemonSetUtils:     daemonSetUtils,
 	}
 }
 
-func (v *LogparserValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	log := logf.FromContext(ctx)
 
 	logParser := &telemetryv1alpha1.LogParser{}
@@ -91,7 +101,7 @@ func (v *LogparserValidator) Handle(ctx context.Context, req admission.Request) 
 				Allowed: false,
 				Result: &metav1.Status{
 					Code:    int32(http.StatusForbidden),
-					Reason:  StatusReasonConfigurationError,
+					Reason:  logpipeline.StatusReasonConfigurationError,
 					Message: err.Error(),
 				},
 			},
@@ -100,7 +110,7 @@ func (v *LogparserValidator) Handle(ctx context.Context, req admission.Request) 
 	return admission.Allowed("LogParser validation successful")
 }
 
-func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *telemetryv1alpha1.LogParser) error {
+func (v *ValidatingWebhookHandler) validateLogParser(ctx context.Context, logParser *telemetryv1alpha1.LogParser) error {
 	log := logf.FromContext(ctx)
 	err := v.parserValidator.Validate(logParser)
 	if err != nil {
@@ -121,8 +131,8 @@ func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *t
 			return err
 		}
 	}
-	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers" + "/parsers.conf"
-	if err = v.configValidator.Validate(ctx, fluentBitParsersConfigDirectory); err != nil {
+
+	if err = v.dryRunner.RunParser(ctx, currentBaseDirectory); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
@@ -130,7 +140,7 @@ func (v *LogparserValidator) validateLogParser(ctx context.Context, logParser *t
 	return nil
 }
 
-func (v *LogparserValidator) InjectDecoder(d *admission.Decoder) error {
+func (v *ValidatingWebhookHandler) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
 }

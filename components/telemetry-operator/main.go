@@ -23,12 +23,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -200,12 +203,12 @@ func main() {
 		},
 	}
 
-	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
+	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
 		validation.NewInputValidator(),
 		validation.NewVariablesValidator(mgr.GetClient()),
-		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
 		validation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
@@ -216,7 +219,7 @@ func main() {
 		restartsTotal)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
-		&k8sWebhook.Admission{Handler: logPipelineValidator})
+		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
 
 	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
 		mgr.GetClient(),
@@ -239,18 +242,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	logParserValidator := webhook.NewLogParserValidator(mgr.GetClient(),
+	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
 		validation.NewParserValidator(),
 		pipelineConfig,
-		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
 		fs.NewWrapper(),
 		restartsTotal,
 	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",
-		&k8sWebhook.Admission{Handler: logParserValidator})
+		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
