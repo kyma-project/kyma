@@ -1,5 +1,5 @@
 const loki = require('./loki');
-const {k8sApply} = require('../utils');
+const {k8sApply, k8sDelete} = require('../utils');
 const fs = require('fs');
 const path = require('path');
 const k8s = require('@kubernetes/client-node');
@@ -16,11 +16,15 @@ function loadResourceFromFile(file) {
 
 function istioAccessLogsTests(startTimestamp) {
   describe('Istio Access Logs tests', function() {
-    it('Should create Istio Access Logs resource for Loki', async () => {
+    after('Should delete the Istio Access Logs resource', async () => {
+      await k8sDelete(istioAccessLogsResource, namespace);
+    });
+
+    it('Should create the Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
     });
 
-    it('Should query Loki and verify format of Istio access logs', async () => {
+    it('Should query Loki and verify format of Istio Access Logs', async () => {
       await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
@@ -28,6 +32,7 @@ function istioAccessLogsTests(startTimestamp) {
 
 function loggingTests() {
   const testStartTimestamp = new Date().toISOString();
+  console.log('testStartTimestamp', testStartTimestamp);
   describe('Logging Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5000);

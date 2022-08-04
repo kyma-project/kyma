@@ -55,6 +55,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
 
   const responseBody = await queryLoki(query, startTimestamp);
   info('responseBody', responseBody);
+  info('responseBody.data.result', responseBody.data.result);
   assert.isTrue(responseBody.data.result.length > 0, 'No Istio access logs found for loki');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
   const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
