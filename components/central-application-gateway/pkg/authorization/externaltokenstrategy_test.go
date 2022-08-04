@@ -18,7 +18,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
-		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(&oauthStrategy)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -26,7 +26,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		request.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = externalTokenStrategy.AddAuthorization(request, nil)
+		err = externalTokenStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.NoError(t, err)
@@ -41,17 +41,17 @@ func TestExternalAuthStrategy(t *testing.T) {
 	t.Run("should use provided strategy when external token header is missing", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil).Once()
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("token", nil).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
-		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(&oauthStrategy)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
 
 		// when
-		err = externalTokenStrategy.AddAuthorization(request, nil)
+		err = externalTokenStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
-		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(&oauthStrategy)
 
 		// when
 		externalTokenStrategy.Invalidate()

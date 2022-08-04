@@ -16,7 +16,7 @@ func TestAuthStrategy(t *testing.T) {
 	t.Run("should add Authorization header", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil), true).Return("token", nil)
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
@@ -24,7 +24,7 @@ func TestAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.AddAuthorization(request, nil)
+		err = oauthStrategy.AddAuthorization(request, nil, true)
 
 		// then
 		require.NoError(t, err)
@@ -49,7 +49,7 @@ func TestAuthStrategy(t *testing.T) {
 	t.Run("should not add Authorization header when getting token failed", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("", apperrors.Internal("failed")).Once()
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("", apperrors.Internal("failed")).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 
@@ -57,7 +57,7 @@ func TestAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.AddAuthorization(request, nil)
+		err = oauthStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.Error(t, err)

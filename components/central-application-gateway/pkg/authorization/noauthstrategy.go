@@ -15,7 +15,7 @@ func newNoAuthStrategy() noAuthStrategy {
 type noAuthStrategy struct {
 }
 
-func (ns noAuthStrategy) AddAuthorization(_ *http.Request, _ clientcert.SetClientCertificateFunc) apperrors.AppError {
+func (ns noAuthStrategy) AddAuthorization(_ *http.Request, _ clientcert.SetClientCertificateFunc, _ bool) apperrors.AppError {
 	return nil
 }
 

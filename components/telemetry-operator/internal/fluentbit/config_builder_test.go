@@ -3,6 +3,8 @@ package fluentbit
 import (
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
 )
@@ -44,30 +46,10 @@ func TestBuildConfigSectionFromMap(t *testing.T) {
 		"Key_A": "Value_A",
 		"Key_B": "Value_B",
 	}
-	actual := BuildConfigSectionFromMap(FilterConfigHeader, content)
+	actual := buildConfigSectionFromMap(FilterConfigHeader, content)
 
 	require.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
 
-}
-
-func TestGenerateEmitter(t *testing.T) {
-	pipelineConfig := PipelineConfig{
-		InputTag:          "kube",
-		MemoryBufferLimit: "10M",
-		StorageType:       "filesystem",
-		FsBufferLimit:     "1G",
-	}
-
-	expected := `
-name                  rewrite_tag
-match                 kube.*
-Rule                  $log "^.*$" test.$TAG true
-Emitter_Name          test
-Emitter_Storage.type  filesystem
-Emitter_Mem_Buf_Limit 10M`
-
-	actual := generateEmitter(pipelineConfig, "test")
-	require.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
 
 func TestGeneratePermanentFilter(t *testing.T) {
@@ -76,18 +58,29 @@ name                  record_modifier
 match                 foo.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
-	actual := generatePermanentFilter("foo")
+	actual := generateFilter(PermanentFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit Permanent parser config is invalid")
+}
+
+func TestGenerateLuaFilter(t *testing.T) {
+	expected := `
+name                  lua
+match                 foo.*
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
+
+	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
+	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
 }
 
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" foo.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
@@ -99,6 +92,12 @@ func TestFilter(t *testing.T) {
     name grep
     regex log aa
 
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
+
 [OUTPUT]
     allow_duplicated_headers true
     format json
@@ -109,22 +108,22 @@ func TestFilter(t *testing.T) {
     storage.total_limit_size 1G
     tls on
     tls.verify on
-    uri /customindex/kyma
 
 `
-	filters := []telemetryv1alpha1.Filter{
-		{
-			Custom: `
-	name grep
-    regex log aa
-`,
-		},
-	}
+
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Filters: filters,
+			Filters: []telemetryv1alpha1.Filter{
+				{
+					Custom: `
+						name grep
+						regex log aa
+					`,
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
+					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},
@@ -147,12 +146,12 @@ func TestFilter(t *testing.T) {
 
 func TestCustomOutput(t *testing.T) {
 	expected := `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" foo.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
@@ -189,17 +188,23 @@ func TestCustomOutput(t *testing.T) {
 
 func TestHTTPOutput(t *testing.T) {
 	expected := `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" foo.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
@@ -221,6 +226,7 @@ func TestHTTPOutput(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
+					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},
@@ -230,6 +236,7 @@ func TestHTTPOutput(t *testing.T) {
 					Password: telemetryv1alpha1.ValueType{
 						Value: "password",
 					},
+					URI: "/customindex/kyma",
 				},
 			},
 		},
@@ -249,17 +256,23 @@ func TestHTTPOutput(t *testing.T) {
 
 func TestHTTPOutputWithSecretReference(t *testing.T) {
 	expected := `[FILTER]
-    name                  rewrite_tag
-    match                 kube.*
-    Rule                  $log "^.*$" foo.$TAG true
+    Name                  rewrite_tag
+    Match                 kube.*
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
     Emitter_Mem_Buf_Limit 10M
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
     name                  record_modifier
     match                 foo.*
     Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[FILTER]
+    name                  lua
+    match                 foo.*
+    script                /fluent-bit/scripts/filter-script.lua
+    call                  kubernetes_map_keys
 
 [OUTPUT]
     allow_duplicated_headers true
@@ -281,6 +294,7 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
+					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},
@@ -336,4 +350,63 @@ func TestResolveSecretValue(t *testing.T) {
 	resolved, err := resolveValue(value, "pipeline")
 	require.NoError(t, err)
 	require.Equal(t, resolved, "${PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY}")
+}
+
+func TestLokiOutputPlugin(t *testing.T) {
+	lokiLabels := make(map[string]string)
+	lokiLabels["job"] = "telemetry-fluent-bit"
+	expected := `[FILTER]
+    Name                  rewrite_tag
+    Match                 kube.*
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
+
+[FILTER]
+    name                  record_modifier
+    match                 foo.*
+    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[OUTPUT]
+    alias foo
+    labelMapPath /fluent-bit/etc/loki-labelmap.json
+    labels {job="telemetry-fluent-bit"}
+    lineformat json
+    loglevel warn
+    match foo.*
+    name grafana-loki
+    removeKeys key1, key2
+    storage.total_limit_size 1G
+    url http:loki:3100
+
+`
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "foo",
+			Namespace: "lokiNs",
+		},
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Output: telemetryv1alpha1.Output{
+				Loki: telemetryv1alpha1.LokiOutput{
+					URL: telemetryv1alpha1.ValueType{
+						Value: "http:loki:3100",
+					},
+					Labels:     lokiLabels,
+					RemoveKeys: []string{"key1", "key2"},
+				},
+			},
+		},
+	}
+	pipelineConfig := PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
 }

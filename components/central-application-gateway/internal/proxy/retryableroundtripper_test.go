@@ -17,25 +17,25 @@ import (
 
 func TestRetryableRoundTripper(t *testing.T) {
 
-	defaultAuthStrategyMock := func() *authMock.Strategy {
+	defaultAuthStrategyMock := func(_ bool) *authMock.Strategy {
 		return &authMock.Strategy{}
 	}
-	retryAuthStrategyMock := func() *authMock.Strategy {
+	retryAuthStrategyMock := func(skipTLSVerify bool) *authMock.Strategy {
 		result := &authMock.Strategy{}
 		result.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), skipTLSVerify).
 			Return(nil).
 			Once()
 		result.On("Invalidate").Return().Once()
 		return result
 	}
 
-	defaultCsrfTokenStrategyMock := func() *csrfMock.TokenStrategy {
+	defaultCsrfTokenStrategyMock := func(_ bool) *csrfMock.TokenStrategy {
 		return &csrfMock.TokenStrategy{}
 	}
-	retryCsrfTokenStrategyMock := func() *csrfMock.TokenStrategy {
+	retryCsrfTokenStrategyMock := func(skipTLSVerify bool) *csrfMock.TokenStrategy {
 		result := &csrfMock.TokenStrategy{}
-		result.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).Return(nil)
+		result.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), skipTLSVerify).Return(nil)
 		result.On("Invalidate").Return().Once()
 		return result
 	}
@@ -47,13 +47,14 @@ func TestRetryableRoundTripper(t *testing.T) {
 
 	tests := []struct {
 		name                  string
-		authStrategyFunc      func() *authMock.Strategy
-		csrfTokenStrategyFunc func() *csrfMock.TokenStrategy
+		authStrategyFunc      func(bool) *authMock.Strategy
+		csrfTokenStrategyFunc func(bool) *csrfMock.TokenStrategy
 		requestBody           string
 		serverResponses       []serverResponse
 		expectedStatusCode    int
 		expectedBody          string
 		expectedClientCert    *tls.Certificate
+		skipTLSVerify         bool
 	}{
 		{
 			name:                  "Success",
@@ -90,6 +91,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 					body:       "success",
 				},
 			},
+			skipTLSVerify: true,
 		},
 		{
 			name:                  "Retry on 403 and failure",
@@ -107,6 +109,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 					body:       "error 2",
 				},
 			},
+			skipTLSVerify: false,
 		},
 		{
 			name:                  "Retry on 401 and success",
@@ -124,6 +127,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 					body:       "success",
 				},
 			},
+			skipTLSVerify: true,
 		},
 		{
 			name:                  "Retry on 401 and failure",
@@ -141,6 +145,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 					body:       "error 2",
 				},
 			},
+			skipTLSVerify: false,
 		},
 	}
 	for _, tc := range tests {
@@ -158,11 +163,11 @@ func TestRetryableRoundTripper(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			authStrategyMock := tc.authStrategyFunc()
-			csrfTokenStrategyMock := tc.csrfTokenStrategyFunc()
+			authStrategyMock := tc.authStrategyFunc(tc.skipTLSVerify)
+			csrfTokenStrategyMock := tc.csrfTokenStrategyFunc(tc.skipTLSVerify)
 			clientCertificate := clientcert.NewClientCertificate(nil)
 
-			transport := NewRetryableRoundTripper(http.DefaultTransport, authStrategyMock, csrfTokenStrategyMock, clientCertificate, 10)
+			transport := NewRetryableRoundTripper(http.DefaultTransport, authStrategyMock, csrfTokenStrategyMock, clientCertificate, 10, tc.skipTLSVerify)
 			httpClient := &http.Client{
 				Transport: transport,
 			}

@@ -2,7 +2,7 @@
 title: Get Started
 ---
 
-This set of Get Started guides will show you how to set sail with Kyma and demonstrate its main use cases.
+This set of Get Started guides shows you how to set sail with Kyma and demonstrates its main use cases.
 
 All guides, whenever possible, demonstrate the steps in both kubectl and Kyma Dashboard.
 All the steps are performed in the `default` Namespace.
@@ -13,6 +13,7 @@ All the steps are performed in the `default` Namespace.
 - [curl](https://github.com/curl/curl)
 - [k3d](https://k3d.io) (v5.0.0 or higher with [a Kubernetes version supported by Kyma](../04-operation-guides/operations/02-install-kyma.md))
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
+- Minimum Docker resources: 4 CPUs and 8 GB RAM (learn how to adjust the values on [Mac](https://docs.docker.com/desktop/settings/mac/#resources), [Windows](https://docs.docker.com/desktop/settings/windows/#resources), or [Linux](https://docs.docker.com/desktop/settings/linux/#resources)).
 
 ## Steps
 

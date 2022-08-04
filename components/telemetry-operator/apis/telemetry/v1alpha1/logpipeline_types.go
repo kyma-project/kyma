@@ -16,7 +16,9 @@ limitations under the License.
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -26,15 +28,44 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	Input     Input               `json:"input,omitempty"`
 	Filters   []Filter            `json:"filters,omitempty"`
 	Output    Output              `json:"output,omitempty"`
 	Files     []FileMount         `json:"files,omitempty"`
 	Variables []VariableReference `json:"variables,omitempty"`
 }
 
+// Input describes a Fluent Bit input configuration section
+type Input struct {
+	Application ApplicationInput `json:"application,omitempty"`
+}
+
+// ApplicationInput is the default type of Input that handles application logs
+type ApplicationInput struct {
+	IncludeSystemNamespaces bool     `json:"includeSystemNamespaces,omitempty"`
+	Namespaces              []string `json:"namespaces,omitempty"`
+	ExcludeNamespaces       []string `json:"excludeNamespaces,omitempty"`
+	Containers              []string `json:"containers,omitempty"`
+	ExcludeContainers       []string `json:"excludeContainers,omitempty"`
+}
+
+func (a ApplicationInput) HasSelectors() bool {
+	return len(a.Namespaces) > 0 ||
+		len(a.ExcludeNamespaces) > 0 ||
+		len(a.Containers) > 0 ||
+		len(a.ExcludeContainers) > 0
+}
+
 // Filter describes a Fluent Bit filter configuration
 type Filter struct {
 	Custom string `json:"custom,omitempty"`
+}
+
+// LokiOutput describes a Fluent Bit Loki output configuration
+type LokiOutput struct {
+	URL        ValueType         `json:"Url,omitempty"`
+	Labels     map[string]string `json:"Labels,omitempty"`
+	RemoveKeys []string          `json:"RemoveKeys,omitempty"`
 }
 
 // HttpOutput describes a Fluent Bit HTTP output configuration
@@ -47,6 +78,7 @@ type HTTPOutput struct {
 	Compress  string    `json:"compress,omitempty"`
 	Format    string    `json:"format,omitempty"`
 	TLSConfig TLSConfig `json:"tls,omitempty"`
+	Dedot     bool      `json:"dedot,omitempty"`
 }
 
 type TLSConfig struct {
@@ -58,6 +90,7 @@ type TLSConfig struct {
 type Output struct {
 	Custom string     `json:"custom,omitempty"`
 	HTTP   HTTPOutput `json:"http,omitempty"`
+	Loki   LokiOutput `json:"grafana-loki,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration
@@ -66,7 +99,7 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Variables is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
+// VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
 type VariableReference struct {
 	Name      string        `json:"name,omitempty"`
 	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
@@ -168,7 +201,6 @@ func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineC
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
 //+kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
-
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -179,7 +211,6 @@ type LogPipeline struct {
 }
 
 //+kubebuilder:object:root=true
-
 // LogPipelineList contains a list of LogPipeline
 type LogPipelineList struct {
 	metav1.TypeMeta `json:",inline"`

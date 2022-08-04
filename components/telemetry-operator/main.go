@@ -203,6 +203,7 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
+		validation.NewInputValidator(),
 		validation.NewVariablesValidator(mgr.GetClient()),
 		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		validation.NewPluginValidator(
@@ -212,8 +213,7 @@ func main() {
 		validation.NewOutputValidator(),
 		pipelineConfig,
 		fs.NewWrapper(),
-		restartsTotal,
-	)
+		restartsTotal)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})

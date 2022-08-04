@@ -5,9 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 )
 
 type ConfigHeader string
@@ -25,18 +24,46 @@ const (
 	OutputConfigHeader      ConfigHeader = "[OUTPUT]"
 	MatchKey                string       = "match"
 	OutputStorageMaxSizeKey string       = "storage.total_limit_size"
-	EmitterTemplate         string       = `
-name                  rewrite_tag
-match                 %s.*
-Rule                  $log "^.*$" %s.$TAG true
-Emitter_Name          %s
-Emitter_Storage.type  %s
-Emitter_Mem_Buf_Limit %s`
-	PermanentFilterTemplate string = `
+	PermanentFilterTemplate string       = `
 name                  record_modifier
 match                 %s.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
+	LuaDeDotFilterTemplate string = `
+name                  lua
+match                 %s.*
+script                /fluent-bit/scripts/filter-script.lua
+call                  kubernetes_map_keys`
 )
+
+// MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
+	var sb strings.Builder
+	sb.WriteString(CreateRewriteTagFilter(pipelineConfig, logPipeline))
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
+
+	for _, filter := range logPipeline.Spec.Filters {
+		section, err := ParseSection(filter.Custom)
+		if err != nil {
+			return "", err
+		}
+
+		section[MatchKey] = generateMatchCondition(logPipeline.Name)
+
+		sb.WriteString(buildConfigSectionFromMap(FilterConfigHeader, section))
+	}
+
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
+	}
+
+	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
+	if err != nil {
+		return "", err
+	}
+	sb.WriteString(buildConfigSectionFromMap(OutputConfigHeader, outputSection))
+
+	return sb.String(), nil
+}
 
 func BuildConfigSection(header ConfigHeader, content string) string {
 	var sb strings.Builder
@@ -52,7 +79,7 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	return sb.String()
 }
 
-func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
+func buildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
 	// Sort maps for idempotent results
 	keys := make([]string, 0, len(section))
 	for k := range section {
@@ -71,34 +98,6 @@ func BuildConfigSectionFromMap(header ConfigHeader, section map[string]string) s
 	return sb.String()
 }
 
-// MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
-	var sb strings.Builder
-
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(pipelineConfig, logPipeline.Name)))
-
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generatePermanentFilter(logPipeline.Name)))
-
-	for _, filter := range logPipeline.Spec.Filters {
-		section, err := ParseSection(filter.Custom)
-		if err != nil {
-			return "", err
-		}
-
-		section[MatchKey] = generateMatchCondition(logPipeline.Name)
-
-		sb.WriteString(BuildConfigSectionFromMap(FilterConfigHeader, section))
-	}
-
-	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
-	if err != nil {
-		return "", err
-	}
-	sb.WriteString(BuildConfigSectionFromMap(OutputConfigHeader, outputSection))
-
-	return sb.String(), nil
-}
-
 func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
 	if len(logPipeline.Spec.Output.Custom) > 0 {
 		return generateCustomOutput(logPipeline, pipelineConfig)
@@ -109,7 +108,51 @@ func generateOutputSection(logPipeline *telemetryv1alpha1.LogPipeline, pipelineC
 		return generateHTTPOutput(logPipeline, pipelineConfig)
 	}
 
+	// A LokiOutput needs to have at least url
+	if logPipeline.Spec.Output.Loki.URL.IsDefined() {
+		return generateLokiOutput(logPipeline, pipelineConfig)
+	}
+
 	return nil, fmt.Errorf("output plugin not defined")
+}
+
+func getLokiDefaults() map[string]string {
+	result := make(map[string]string)
+	result["labelMapPath"] = "/fluent-bit/etc/loki-labelmap.json"
+	result["loglevel"] = "warn"
+	result["lineformat"] = "json"
+	return result
+}
+func generateLokiOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
+	lokiConfig := logPipeline.Spec.Output.Loki
+	var err error
+	result := getLokiDefaults()
+	result[MatchKey] = generateMatchCondition(logPipeline.Name)
+	result[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
+	result["name"] = "grafana-loki"
+	result["alias"] = logPipeline.Name
+	result["url"], err = resolveValue(logPipeline.Spec.Output.Loki.URL, logPipeline.Name)
+	if err != nil {
+		return nil, err
+	}
+	if len(lokiConfig.Labels) != 0 {
+		result["labels"] = convertLabelMaptoString(lokiConfig.Labels)
+	}
+	if len(lokiConfig.RemoveKeys) != 0 {
+		str := strings.Join(lokiConfig.RemoveKeys, ", ")
+		result["removeKeys"] = str
+	}
+	return result, nil
+}
+
+func convertLabelMaptoString(labels map[string]string) string {
+	var labelString []string
+
+	for k, v := range labels {
+		l := fmt.Sprintf("%s=\"%s\"", k, v)
+		labelString = append(labelString, l)
+	}
+	return fmt.Sprintf("{%s}", strings.Join(labelString, ", "))
 }
 
 func getHTTPOutputDefaults() map[string]string {
@@ -119,7 +162,6 @@ func getHTTPOutputDefaults() map[string]string {
 		"tls":                      "on",
 		"tls.verify":               "on",
 		"allow_duplicated_headers": "true",
-		"uri":                      "/customindex/kyma",
 		"format":                   "json",
 	}
 	return result
@@ -210,10 +252,6 @@ func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 	return sb.String()
 }
 
-func generateEmitter(config PipelineConfig, logPipelineName string) string {
-	return fmt.Sprintf(EmitterTemplate, config.InputTag, logPipelineName, logPipelineName, config.StorageType, config.MemoryBufferLimit)
-}
-
-func generatePermanentFilter(logPipelineName string) string {
-	return fmt.Sprintf(PermanentFilterTemplate, logPipelineName)
+func generateFilter(template string, params ...any) string {
+	return fmt.Sprintf(template, params...)
 }
