@@ -114,6 +114,8 @@ containers:
     env:
       - name: MAX_FSBUFFER_SIZE
         value: "500000000"
+      - name: STORAGE_PATH
+        value: /data/log/flb-storage/
     volumeMounts:
       - name: varfluentbit
         mountPath: /data

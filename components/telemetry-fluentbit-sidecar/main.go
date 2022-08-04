@@ -18,9 +18,6 @@ type directory struct {
 	size int64
 }
 
-// TODO pass as arg or get from env
-const logPath = "../data/log/flb-storage/"
-
 var (
 	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "",
@@ -47,13 +44,15 @@ var (
 )
 
 func main() {
+	logPath := os.Getenv("STORAGE_PATH")
+
 	max, err := strconv.ParseFloat(os.Getenv("MAX_FSBUFFER_SIZE"), 64)
 	if err != nil {
 		panic(err)
 	}
 
 	fsbufferMax.Set(max)
-	recordMetrics()
+	recordMetrics(logPath)
 
 	http.Handle("/metrics", promhttp.Handler())
 	err = http.ListenAndServe(":2021", nil)
@@ -62,35 +61,35 @@ func main() {
 	}
 }
 
-func recordingIteration(ticker *time.Ticker, quit chan struct{}) {
-	select {
-	case <-ticker.C:
-		size, err := dirSize(logPath)
-		if err != nil {
-			panic(err)
-		}
-		fsbufferSize.Set(float64(size))
-		directories, errDirList := listDirs(logPath)
-		if errDirList != nil {
-			panic(errDirList)
-		}
-		for _, dir := range directories {
-			fsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
-		}
-	case <-quit:
-		ticker.Stop()
-		return
-	}
-}
-
-func recordMetrics() {
+func recordMetrics(logPath string) {
 	ticker := time.NewTicker(10 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
-			recordingIteration(ticker, quit)
+			select {
+			case <-ticker.C:
+				recordingIteration(logPath, ticker)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
 		}
 	}()
+}
+
+func recordingIteration(logPath string, ticker *time.Ticker) {
+	size, err := dirSize(logPath)
+	if err != nil {
+		panic(err)
+	}
+	fsbufferSize.Set(float64(size))
+	directories, errDirList := listDirs(logPath)
+	if errDirList != nil {
+		panic(errDirList)
+	}
+	for _, dir := range directories {
+		fsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
+	}
 }
 
 func dirSize(path string) (int64, error) {
