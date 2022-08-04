@@ -14,7 +14,7 @@ spec:
     metadata:
       annotations:
         traffic.sidecar.istio.io/includeInboundPorts: "*"
-        traffic.sidecar.istio.io/excludeInboundPorts: "8090"
+        traffic.sidecar.istio.io/excludeInboundPorts: "8090,8091"
       labels:
         app: {{ .Values.mockServiceName}}
     spec:
@@ -24,10 +24,13 @@ spec:
           ports:
             - containerPort: 8080
             - containerPort: 8090
+            - containerPort: 8091
           imagePullPolicy: Always
           volumeMounts:
-            - name: secret-volume
+            - name: certs-secret-volume
               mountPath: /etc/secret-volume
+            - name: expired-certs-secret-volume
+              mountPath: /etc/expired-server-cert-volume
           livenessProbe:
             httpGet:
               path: /v1/health
@@ -35,9 +38,12 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 3
       volumes:
-        - name: secret-volume
+        - name: certs-secret-volume
           secret:
             secretName: mtls-cert-secret
+        - name: expired-certs-secret-volume
+          secret:
+            secretName: expired-mtls-cert-secret
 ---
 apiVersion: v1
 kind: Service
@@ -54,3 +60,6 @@ spec:
     - name: "https"
       protocol: TCP
       port: 8090
+    - name: "httpsexp"
+      protocol: TCP
+      port: 8091

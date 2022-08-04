@@ -64,7 +64,7 @@ spec:
     - displayName: mtls-oauth-negative-expired-client-cert
       name: mtls-oauth-negative-expired-client-cert
       providerDisplayName: mTLS-OAuth
-      description: Should return 500 for mTLS Oauth with expired certificate
+      description: Should return 500 for mTLS Oauth with expired client certificate
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -73,6 +73,19 @@ spec:
           credentials:
             secretName: mtls-oauth-negative-expired-client-cert
             authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls-oauth-negative-expired-server-cert
+      name: mtls-oauth-negative-expired-server-cert
+      providerDisplayName: mTLS-OAuth
+      description: Should return 500 for mTLS Oauth with expired server certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-negative-expired-server-cert"
+          credentials:
+            secretName: mtls-oauth-negative-expired-server-cert
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8091/v1/api/mtls-oauth/token"
             type: OAuthWithCert
     - displayName: mtls-negative-other-ca
       name: mtls-negative-other-ca
@@ -95,6 +108,18 @@ spec:
         - type: API
           targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-client-cert"
+          credentials:
+            secretName: mtls-negative-expired-client-cert
+            type: CertificateGen
+    - displayName: mtls-negative-expired-server-cert
+      name: mtls-negative-expired-server-cert
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with expired server certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8091/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-server-cert"
           credentials:
             secretName: mtls-negative-expired-client-cert
             type: CertificateGen
