@@ -19,7 +19,7 @@ var testLogPipeline = types.NamespacedName{
 }
 
 func createResources() error {
-	cm := corev1.ConfigMap{
+	cmFluentBit := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      FluentBitConfigMapName,
 			Namespace: ControllerNamespace,
@@ -43,7 +43,31 @@ func createResources() error {
 `,
 		},
 	}
-	err := k8sClient.Create(ctx, &cm)
+	err := k8sClient.Create(ctx, &cmFluentBit)
+	if err != nil {
+		return err
+	}
+	cmFile := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      FluentBitFileConfigMapName,
+			Namespace: ControllerNamespace,
+		},
+		Data: map[string]string{
+			"labelmap.json": `
+kubernetes:
+  namespace_name: namespace
+  labels:
+    app: app
+    "app.kubernetes.io/component": component
+    "app.kubernetes.io/name": app
+    "serverless.kyma-project.io/function-name": function
+     host: node
+  container_name: container
+  pod_name: pod
+stream: stream`,
+		},
+	}
+	err = k8sClient.Create(ctx, &cmFile)
 
 	return err
 }
@@ -89,6 +113,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -107,6 +132,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(0)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -131,6 +157,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginErr := errors.New("output plugin stdout is not allowed")
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(pluginErr).Times(1)
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(0)
@@ -150,6 +177,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should reject LogPipeline with invalid output", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
@@ -221,6 +249,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should create valid LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
@@ -239,6 +268,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should update previously created valid LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(7)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
@@ -264,6 +294,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should reject new update of previously created LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(9)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
@@ -293,6 +324,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(9)
 			pluginErr := errors.New("output plugin stdout is not allowed")
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(pluginErr).Times(1)

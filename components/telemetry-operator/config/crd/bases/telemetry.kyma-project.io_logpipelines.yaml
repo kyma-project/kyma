@@ -65,13 +65,69 @@ spec:
                       type: string
                   type: object
                 type: array
+              input:
+                description: Input describes a Fluent Bit input configuration section
+                properties:
+                  application:
+                    description: ApplicationInput is the default type of Input that
+                      handles application logs
+                    properties:
+                      containers:
+                        items:
+                          type: string
+                        type: array
+                      excludeContainers:
+                        items:
+                          type: string
+                        type: array
+                      excludeNamespaces:
+                        items:
+                          type: string
+                        type: array
+                      includeSystemNamespaces:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                type: object
               output:
                 description: Output describes a Fluent Bit output configuration section
                 properties:
                   custom:
                     type: string
+                  grafana-loki:
+                    description: LokiOutput describes a Fluent Bit Loki output configuration
+                    properties:
+                      Labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      RemoveKeys:
+                        items:
+                          type: string
+                        type: array
+                      Url:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                    type: object
                   http:
-                    description: HTTPOutput describes a Fluent Bit HTTP output configuration
+                    description: HttpOutput describes a Fluent Bit HTTP output configuration
                     properties:
                       compress:
                         type: string
@@ -145,7 +201,7 @@ spec:
                 type: object
               variables:
                 items:
-                  description: Variables is a pointer to a Kubernetes secret that
+                  description: VariableReference references a Kubernetes secret that
                     should be provided as environment variable to Fluent Bit
                   properties:
                     name:

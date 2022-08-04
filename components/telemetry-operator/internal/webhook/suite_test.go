@@ -52,11 +52,13 @@ const (
 )
 
 var (
-	k8sClient             client.Client
-	testEnv               *envtest.Environment
-	ctx                   context.Context
-	cancel                context.CancelFunc
-	fsWrapperMock         *fsmocks.Wrapper
+	k8sClient     client.Client
+	testEnv       *envtest.Environment
+	ctx           context.Context
+	cancel        context.CancelFunc
+	fsWrapperMock *fsmocks.Wrapper
+
+	inputValidatorMock    *validationmocks.InputValidator
 	variableValidatorMock *validationmocks.VariablesValidator
 	configValidatorMock   *validationmocks.ConfigValidator
 	pluginValidatorMock   *validationmocks.PluginValidator
@@ -122,6 +124,7 @@ var _ = BeforeSuite(func() {
 		FsBufferLimit:     "1G",
 	}
 
+	inputValidatorMock = &validationmocks.InputValidator{}
 	variableValidatorMock = &validationmocks.VariablesValidator{}
 	configValidatorMock = &validationmocks.ConfigValidator{}
 	pluginValidatorMock = &validationmocks.PluginValidator{}
@@ -141,6 +144,7 @@ var _ = BeforeSuite(func() {
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
+		inputValidatorMock,
 		variableValidatorMock,
 		configValidatorMock,
 		pluginValidatorMock,

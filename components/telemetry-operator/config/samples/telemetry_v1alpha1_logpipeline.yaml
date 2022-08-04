@@ -3,15 +3,6 @@ kind: LogPipeline
 metadata:
   name: logpipeline-sample
 spec:
-  parsers: [ ]
-  multilineParsers:
-    - content: |
-        # Example from https://docs.fluentbit.io/manual/pipeline/filters/multiline-stacktrace
-        Name          multiline-custom-regex
-        Type          regex
-        Flush_timeout 1000
-        Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
-        Rule      "cont"          "/^\s+at.*/"                     "cont"
   filters:
     - custom: |
         Name    grep

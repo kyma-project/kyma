@@ -47,8 +47,8 @@ const (
 //+kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type LogPipelineValidator struct {
 	client.Client
-
 	fluentBitConfigMap    types.NamespacedName
+	inputValidator        validation.InputValidator
 	variablesValidator    validation.VariablesValidator
 	configValidator       validation.ConfigValidator
 	pluginValidator       validation.PluginValidator
@@ -56,17 +56,16 @@ type LogPipelineValidator struct {
 	outputValidator       validation.OutputValidator
 	fileValidator         validation.FilesValidator
 	pipelineConfig        fluentbit.PipelineConfig
-
-	fsWrapper fs.Wrapper
-
-	decoder        *admission.Decoder
-	daemonSetUtils *fluentbit.DaemonSetUtils
+	fsWrapper             fs.Wrapper
+	decoder               *admission.Decoder
+	daemonSetUtils        *fluentbit.DaemonSetUtils
 }
 
 func NewLogPipeLineValidator(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
+	inputValidator validation.InputValidator,
 	variablesValidator validation.VariablesValidator,
 	configValidator validation.ConfigValidator,
 	pluginValidator validation.PluginValidator,
@@ -85,6 +84,7 @@ func NewLogPipeLineValidator(
 	return &LogPipelineValidator{
 		Client:                client,
 		fluentBitConfigMap:    fluentBitConfigMapNamespacedName,
+		inputValidator:        inputValidator,
 		variablesValidator:    variablesValidator,
 		configValidator:       configValidator,
 		pluginValidator:       pluginValidator,
@@ -172,6 +172,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	if err = v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Maximum number of log pipelines reached")
+		return err
+	}
+
+	if err = v.inputValidator.Validate(&logPipeline.Spec.Input); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit input")
 		return err
 	}
 

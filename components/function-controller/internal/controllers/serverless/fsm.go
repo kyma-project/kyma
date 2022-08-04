@@ -42,10 +42,10 @@ type out struct {
 }
 
 type reconciler struct {
-	cfg      cfg
-	fn       stateFn
-	log      *zap.SugaredLogger
-	operator GitOperator
+	cfg       cfg
+	fn        stateFn
+	log       *zap.SugaredLogger
+	gitClient GitClient
 	k8s
 	out
 }
@@ -185,9 +185,9 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 	}
 
 	var revision string
-	revision, r.err = r.operator.LastCommit(options)
+	revision, r.err = r.gitClient.LastCommit(options)
 	if r.err != nil {
-		r.log.Error(r.err, "while fetching last commit")
+		r.log.Error(r.err, " while fetching last commit")
 		var errMsg string
 		r.result, errMsg = NextRequeue(r.err)
 		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.

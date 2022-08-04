@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -74,6 +75,9 @@ func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipelin
 	if err := validateHTTPOutput(pipeline.Spec.Output.HTTP); err != nil {
 		return err
 	}
+	if err := validateLokiOutPut(pipeline.Spec.Output.Loki); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -83,6 +87,9 @@ func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
 		outputPluginCount++
 	}
 	if output.HTTP.Host.IsDefined() {
+		outputPluginCount++
+	}
+	if output.Loki.URL.IsDefined() {
 		outputPluginCount++
 	}
 
@@ -122,6 +129,17 @@ func validateCustomOutput(content string, denied []string) error {
 	return nil
 }
 
+func validateLokiOutPut(lokiOutPut telemetryv1alpha1.LokiOutput) error {
+	if lokiOutPut.URL.Value != "" && !validURL(lokiOutPut.URL.Value) {
+		return fmt.Errorf("invalid hostname '%s'", lokiOutPut.URL.Value)
+	}
+	if !lokiOutPut.URL.IsDefined() && (len(lokiOutPut.Labels) != 0 || len(lokiOutPut.RemoveKeys) != 0) {
+		return fmt.Errorf("loki output needs to have a URL configured")
+	}
+	return nil
+
+}
+
 func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
 	if httpOutput.Host.Value != "" && !validHostname(httpOutput.Host.Value) {
 		return fmt.Errorf("invalid hostname '%s'", httpOutput.Host.Value)
@@ -135,9 +153,23 @@ func validateHTTPOutput(httpOutput telemetryv1alpha1.HTTPOutput) error {
 	return nil
 }
 
-func validHostname(host string) bool {
+func validURL(host string) bool {
 	host = strings.Trim(host, " ")
 
+	_, err := url.ParseRequestURI(host)
+	if err != nil {
+		return false
+	}
+
+	u, err := url.Parse(host)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return false
+	}
+	return true
+}
+
+func validHostname(host string) bool {
+	host = strings.Trim(host, " ")
 	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
 	return re.MatchString(host)
 }

@@ -23,13 +23,13 @@ func TestAuthWithCerStrategy(t *testing.T) {
 		prepareCertificate, err := oauthStrategy.prepareCertificate()
 		require.NoError(t, err)
 
-		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil), true).Return("token", nil)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.AddAuthorization(request, nil)
+		err = oauthStrategy.AddAuthorization(request, nil, true)
 
 		// then
 		require.NoError(t, err)
@@ -60,13 +60,13 @@ func TestAuthWithCerStrategy(t *testing.T) {
 		prepareCertificate, err := authWithCertStrategy.prepareCertificate()
 		require.NoError(t, err)
 
-		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("", apperrors.Internal("failed")).Once()
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("", apperrors.Internal("failed")).Once()
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
 
 		// when
-		err = authWithCertStrategy.AddAuthorization(request, nil)
+		err = authWithCertStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.Error(t, err)
