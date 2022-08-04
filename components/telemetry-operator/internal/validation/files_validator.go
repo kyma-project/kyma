@@ -2,8 +2,6 @@ package validation
 
 import (
 	"fmt"
-	"strings"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
@@ -20,23 +18,25 @@ func NewFilesValidator() FilesValidator {
 }
 
 func (f *filesValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	files := logPipeline.Spec.Files
-	err := validateFileName(files)
+	err := validateUniqueFileName(logPipeline, logPipelines)
 	if err != nil {
 		return err
 	}
-	err = validateUniqueFileName(logPipeline, logPipelines)
+	err = validateDuplicateFileNameInNewPipeline(logPipeline)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func validateFileName(files []telemetryv1alpha1.FileMount) error {
+func validateDuplicateFileNameInNewPipeline(logpipeline *telemetryv1alpha1.LogPipeline) error {
+	files := logpipeline.Spec.Files
+	uniqFileMap := make(map[string]bool)
 	for _, f := range files {
-		if strings.ToLower(f.Name) == "loki-labelmap.json" {
-			return fmt.Errorf("cannot use reserved filename 'loki-labelmap.json'")
-		}
+		uniqFileMap[f.Name] = true
+	}
+	if len(uniqFileMap) != len(files) {
+		return fmt.Errorf("duplicate file names detected please review your pipeline")
 	}
 	return nil
 }

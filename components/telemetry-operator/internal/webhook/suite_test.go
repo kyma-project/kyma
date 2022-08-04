@@ -146,10 +146,10 @@ var _ = BeforeSuite(func() {
 		pluginValidatorMock,
 		maxPipelinesValidator,
 		outputValidatorMock,
+		fileValidatorMock,
 		pipelineConfig,
 		fsWrapperMock,
 		restartsTotal,
-		fileValidatorMock,
 	)
 
 	By("registering LogPipeline webhook")

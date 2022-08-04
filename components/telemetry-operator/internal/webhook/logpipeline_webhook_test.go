@@ -95,6 +95,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -172,6 +173,8 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			maxPipelinesErr := errors.New("too many pipelines")
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(maxPipelinesErr).Times(1)
+			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
+			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
@@ -185,6 +188,33 @@ var _ = Describe("LogPipeline webhook", func() {
 			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
 			Expect(status.Status().Message).To(ContainSubstring(maxPipelinesErr.Error()))
 		})
+
+		It("Should reject LogPipeline when duplicate filename is used", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
+			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
+				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
+			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
+			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
+			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
+
+			fileError := errors.New("duplicate file name: 1st-file")
+			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(fileError).Times(1)
+
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+
+			logPipeline := getLogPipeline()
+			err := k8sClient.Create(ctx, logPipeline)
+
+			Expect(err).To(HaveOccurred())
+			var status apierrors.APIStatus
+			errors.As(err, &status)
+
+			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
+			Expect(status.Status().Message).To(ContainSubstring(fileError.Error()))
+		})
+
 	})
 
 	Context("When updating LogPipeline", func() {
@@ -198,6 +228,8 @@ var _ = Describe("LogPipeline webhook", func() {
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
+
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
 
@@ -214,6 +246,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
 			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)
