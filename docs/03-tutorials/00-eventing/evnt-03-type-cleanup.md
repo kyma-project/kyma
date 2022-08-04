@@ -128,7 +128,7 @@ To check the Subscription cleaned Event type, run:
 kubectl get subscriptions lastorder-payment-sub -o=jsonpath="{.status.cleanEventTypes}"
 ```
 
-Note that the returned event type `["sap.kyma.custom.myapp.order.paymentsuccess.v1"]` does not contain the hyphen `-` in the `payment-success` part. That's because Kyma Eventing cleans out the non-alphanumeric characters from the Event name and uses the cleaned Event name in the underlying Eventing backend.
+Note that the returned event type `["sap.kyma.custom.myapp.order.paymentsuccess.v1"]` does not contain the hyphen `-` in the `payment-success` part. That's because Kyma Eventing cleans out the non-alphanumeric characters from the event name and uses the cleaned event name in the underlying Eventing backend.
 
 ## Trigger the workload with an event
 

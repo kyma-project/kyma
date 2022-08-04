@@ -18,9 +18,9 @@ Trouble with Kyma Eventing may be caused by various issues, so this document gui
 
 Follow these steps to detect the source of the problem:
 
-### Step 1: Check the status of the Eventing backend CR
+### Step 1: Check the status of the EventingBackend CR
 
-1. Check the Eventing backend CR. Is the field **EVENTINGREADY** `true`?
+1. Check the EventingBackend CR. Is the field **EVENTINGREADY** `true`?
    
     ```bash
     kubectl -n kyma-system get eventingbackends.eventing.kyma-project.io
@@ -32,7 +32,7 @@ Follow these steps to detect the source of the problem:
     kubectl -n kyma-system get eventingbackends.eventing.kyma-project.io eventing-backend -o yaml
     ```
 
-3. If **EVENTINGREADY** is `true`, the Eventing backend CR is not an issue. Follow the next steps to find the source of the problem.
+3. If **EVENTINGREADY** is `true`, the EventingBackend CR is not an issue. Follow the next steps to find the source of the problem.
 
 ### Step 2: Check the status of the Subscription
 
@@ -61,7 +61,7 @@ Follow these steps to detect the source of the problem:
 
 1. Check the HTTP status code returned after sending an event.
 
-    - If the HTTP status code is 4xx, check if you are sending the events in correct formats. Eventing supports two event formats (legacy and cloud events); see the [Eventing tutorials](../../../03-tutorials/00-eventing) for more information.
+    - If the HTTP status code is 4xx, check if you are sending the events in correct formats. Eventing supports two event formats (legacy and CloudEvents); see the [Eventing tutorials](../../../03-tutorials/00-eventing) for more information.
 
     -  If the HTTP status code is 5xx, check the logs from the Eventing publisher proxy Pod for any errors. To fetch these logs, run this command:
    
