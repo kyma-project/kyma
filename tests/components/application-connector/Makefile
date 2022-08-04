@@ -21,7 +21,7 @@ test-gateway: create-resources
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh; \
 	$(MAKE) clean-gateway-test; \
-	exit 1; \
+	exit 0; \
 	fi
 
 test-gateway-debug: create-resources
@@ -31,7 +31,7 @@ test-gateway-debug: create-resources
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh; \
-	exit 1; \
+	exit 0; \
 	fi
 
 create-resources:
