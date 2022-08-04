@@ -3,8 +3,9 @@ package fluentbit
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	v1 "k8s.io/api/core/v1"

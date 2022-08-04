@@ -20,13 +20,14 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
-	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation/mocks"
-	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils/mocks"
 	"net"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
+	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation/mocks"
+	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils/mocks"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -77,7 +78,6 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-
 	ctx, cancel = context.WithCancel(context.TODO())
 
 	By("bootstrapping test environment")

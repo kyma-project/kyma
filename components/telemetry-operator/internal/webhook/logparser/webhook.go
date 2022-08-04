@@ -18,9 +18,10 @@ package logparser
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
-	"net/http"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 

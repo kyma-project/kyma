@@ -19,9 +19,10 @@ package logpipeline
 import (
 	"context"
 	"fmt"
-	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -52,13 +53,13 @@ const (
 type ValidatingWebhookHandler struct {
 	client.Client
 	fluentBitConfigMap    types.NamespacedName
-	inputValidator        validation2.InputValidator
-	variablesValidator    validation2.VariablesValidator
+	inputValidator        validation.InputValidator
+	variablesValidator    validation.VariablesValidator
 	dryRunner             DryRunner
-	pluginValidator       validation2.PluginValidator
-	maxPipelinesValidator validation2.MaxPipelinesValidator
-	outputValidator       validation2.OutputValidator
-	fileValidator         validation2.FilesValidator
+	pluginValidator       validation.PluginValidator
+	maxPipelinesValidator validation.MaxPipelinesValidator
+	outputValidator       validation.OutputValidator
+	fileValidator         validation.FilesValidator
 	pipelineConfig        fluentbit.PipelineConfig
 	fsWrapper             utils.FileSystem
 	decoder               *admission.Decoder
@@ -69,13 +70,13 @@ func NewValidatingWebhookHandler(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
-	inputValidator validation2.InputValidator,
-	variablesValidator validation2.VariablesValidator,
+	inputValidator validation.InputValidator,
+	variablesValidator validation.VariablesValidator,
 	dryRunner DryRunner,
-	pluginValidator validation2.PluginValidator,
-	maxPipelinesValidator validation2.MaxPipelinesValidator,
-	outputValidator validation2.OutputValidator,
-	fileValidator validation2.FilesValidator,
+	pluginValidator validation.PluginValidator,
+	maxPipelinesValidator validation.MaxPipelinesValidator,
+	outputValidator validation.OutputValidator,
+	fileValidator validation.FilesValidator,
 	pipelineConfig fluentbit.PipelineConfig,
 	fsWrapper utils.FileSystem,
 	restartsTotal prometheus.Counter) *ValidatingWebhookHandler {
