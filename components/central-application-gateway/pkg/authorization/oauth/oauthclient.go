@@ -10,8 +10,6 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/tokencache"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/util"
@@ -87,12 +85,6 @@ func (c *client) makeOAuthTokenCacheKey(clientID, authURL string) string {
 }
 
 func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (*oauthResponse, apperrors.AppError) {
-	if skipVerify {
-		log.Info("Client certificate verification skipped for OAuth token calls")
-	} else {
-		log.Info("Client certificate verification enabled for OAuth token calls")
-	}
-
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 	}
@@ -144,12 +136,6 @@ func (c *client) requestToken(clientID, clientSecret, authURL string, headers, q
 }
 
 func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (*oauthResponse, apperrors.AppError) {
-	if skipVerify {
-		log.Info("Client certificate verification skipped for OAuth token calls")
-	} else {
-		log.Info("Client certificate verification enabled for OAuth token calls")
-	}
-
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			Certificates:       []tls.Certificate{cert},
