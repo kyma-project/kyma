@@ -6,7 +6,7 @@ const {
   logsPresentInLoki,
   queryLoki,
 } = require('./client');
-const {info, debug} = require('../utils');
+const {info} = require('../utils');
 
 async function checkCommerceMockLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
