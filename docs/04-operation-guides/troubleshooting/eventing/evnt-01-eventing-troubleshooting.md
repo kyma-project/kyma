@@ -61,7 +61,7 @@ Follow these steps to detect the source of the problem:
 
 1. Check the HTTP status code returned after sending an event.
 
-    - If the HTTP status code is 4xx, check if you are sending the events in correct formats. Eventing supports two event formats (legacy and cloud events); see the [Eventing tutorials](../../../03-tutorials/00-eventing) for more information.
+    - If the HTTP status code is 4xx, check if you are sending the events in correct formats. Eventing supports two event formats (legacy and CloudEvents); see the [Eventing tutorials](../../../03-tutorials/00-eventing) for more information.
 
     -  If the HTTP status code is 5xx, check the logs from the Eventing publisher proxy Pod for any errors. To fetch these logs, run this command:
    

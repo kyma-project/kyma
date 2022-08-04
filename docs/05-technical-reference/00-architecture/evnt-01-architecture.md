@@ -26,7 +26,7 @@ This diagram explains the event flow in Kyma, from the moment an event source se
 
 ## Event Publisher Proxy
 
-Event Publisher Proxy receives legacy and Cloud Events, and publishes them to the configured eventing backend. All the legacy events are automatically converted to Cloud Events.
+Event Publisher Proxy receives legacy and CloudEvents, and publishes them to the configured Eventing backend. All the legacy events are automatically converted to CloudEvents.
 
 ## Eventing Controller
 

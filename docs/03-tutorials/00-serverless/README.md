@@ -5,7 +5,7 @@ title: Serverless - tutorials
 # Overview - Its all about custom resources
 
 Kyma Serverless introduces a [Function](../../05-technical-reference/00-custom-resources/svls-01-function.md) CustomResourceDefinition (CRD) as an extension to the Kubernetes API server.
-Defining a Function in Kyma essentially means creating a new instance of the Function custom resource (CR). However, the content of the Function CR specification may become quite long. It consists of the code (or git reference to the code), dependencies, runtime specification, build-time specification, etc. Additionally, there are other CRs that are relevant for a Function developer - i.e. [APIRule](../../05-technical-reference/00-custom-resources/apix-01-apirule.md) (defining how Function is exposed to the outside world), [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) (defining which Cloud Events should trigger Function) and others.
+Defining a Function in Kyma essentially means creating a new instance of the Function custom resource (CR). However, the content of the Function CR specification may become quite long. It consists of the code (or git reference to the code), dependencies, runtime specification, build-time specification, etc. Additionally, there are other CRs that are relevant for a Function developer - i.e. [APIRule](../../05-technical-reference/00-custom-resources/apix-01-apirule.md) (defining how Function is exposed to the outside world), [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) (defining which CloudEvents should trigger Function) and others.
 
 
 All of that can be easily managed using the following best practices for the Function development. You will find hints that will be helpful for you at any stage of your development journey.
@@ -14,7 +14,7 @@ All of that can be easily managed using the following best practices for the Fun
 
 At the beginning of your Kyma journey you will probably want to evaluate Serverless and draft a few Functions.
 Kyma Dashboard is perfect to gain basic experience and start the journey with Kyma Functions. The Dashboard consists of UI components dedicated to Serverless. They will help you draft your first Functions by putting the code directly in the browser using a Web IDE.
-Kyma Dashboard will also help you expose your Function using HTTP, define environment variables, subscribe to Cloud Events, bind ServiceInstances, and even show you the Function logs - all in one place.
+Kyma Dashboard will also help you expose your Function using HTTP, define environment variables, subscribe to CloudEvents, bind ServiceInstances, and even show you the Function logs - all in one place.
 
 Get started with [Function UI](./svls-01-create-inline-function.md)
 
