@@ -4,54 +4,64 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func prepareMockDirectories(testDir string) string {
+func prepareMockDirectories(testDir string) (string, error) {
 	dirPath := testDir + "/test-data"
 	err := os.Mkdir(dirPath, 0700)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	files := []string{"file1", "file2", "file3"}
-	for i, file := range files {
-		err = os.Mkdir(dirPath+"/"+file, 0700)
+	emitters := []string{"emitter1", "emitter2", "emitter3"}
+	for i, emitterName := range emitters {
+		err = prepareMockDirectory(dirPath, emitterName, int64(i*100))
 		if err != nil {
-			panic(err)
+			return "", err
 		}
-		var newFile *os.File = nil
-		newFile, err = os.Create(dirPath + "/" + file + "/test.txt")
-		if err != nil {
-			panic(err)
-		}
-		err = os.Truncate(dirPath+"/"+file+"/test.txt", int64(i*100))
-		if err != nil {
-			panic(err)
-			newFile.Close()
-		}
+	}
+
+	return dirPath, err
+}
+
+func prepareMockDirectory(dirPath string, dirName string, size int64) error {
+	const fileName string = "test.txt"
+
+	err := os.Mkdir(dirPath+"/"+dirName, 0700)
+	if err != nil {
+		return err
+	}
+
+	var newFile *os.File = nil
+	newFile, err = os.Create(dirPath + "/" + dirName + "/" + fileName)
+	if err != nil {
+		return err
+	}
+
+	err = os.Truncate(dirPath+"/"+dirName+"/"+fileName, size)
+	if err != nil {
 		newFile.Close()
-		if err != nil {
-			panic(err)
-		}
+		return err
 	}
+	newFile.Close()
 
-	return dirPath
+	return err
 }
 
 func TestListDir(t *testing.T) {
-	dirPath := prepareMockDirectories(t.TempDir())
+	dirPath, errDirs := prepareMockDirectories(t.TempDir())
+	assert.NoError(t, errDirs)
 
 	expectedDirectories := []directory{
-		{name: "file1", size: int64(0)},
-		{name: "file2", size: int64(100)},
-		{name: "file3", size: int64(200)},
+		{name: "emitter1", size: int64(0)},
+		{name: "emitter2", size: int64(100)},
+		{name: "emitter3", size: int64(200)},
 	}
 
-	directories, errListDirs := listDirs(dirPath)
-	if errListDirs != nil {
-		panic(errListDirs)
-	}
+	directories, err := listDirs(dirPath)
+	assert.NoError(t, err)
 
 	isTrue := (len(directories) == len(expectedDirectories))
 	for i, dir := range directories {
@@ -65,10 +75,11 @@ func TestListDir(t *testing.T) {
 }
 
 func TestDirSize(t *testing.T) {
-	dirPath := prepareMockDirectories(t.TempDir())
+	dirPath, errDirs := prepareMockDirectories(t.TempDir())
+	assert.NoError(t, errDirs)
+
 	size, err := dirSize(dirPath)
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
+
 	require.Equal(t, int64(300), size)
 }
