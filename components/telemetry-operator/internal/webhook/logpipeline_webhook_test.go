@@ -226,6 +226,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			maxPipelinesValidator.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
+			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 
 			fileError := errors.New("duplicate file name: 1st-file")
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(fileError).Times(1)

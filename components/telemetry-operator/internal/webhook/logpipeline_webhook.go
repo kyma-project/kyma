@@ -200,12 +200,10 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
-	log.Info("sssssssssss")
 	if err = v.fileValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
-	log.Info("aaaaaaaa")
 
 	return nil
 }
