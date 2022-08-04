@@ -50,12 +50,13 @@ function isJsonString(str) {
   return true;
 }
 
-async function verifyIstioAccessLogFormat() {
+async function verifyIstioAccessLogFormat(startTimestamp) {
   const query = '{container="istio-proxy",job="fluent-bit",namespace="kyma-system",pod="logging-loki-0"}';
 
-  const responseBody = await queryLoki(query);
-  assert.isTrue(responseBody.data.result.length > 0, 'No Istio access logs found for loki');
-  assert.isTrue(isJsonString(responseBody.data.result[0].log), 'Istio access log is not in JSON format');
+  const responseBody = await queryLoki(query, startTimestamp);
+  assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
+  const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
+  assert.isTrue(isJsonString(entry.log), `Istio access log is not in JSON format: ${entry.log}` );
 }
 
 module.exports = {

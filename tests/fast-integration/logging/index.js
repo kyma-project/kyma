@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const k8s = require('@kubernetes/client-node');
 
-const istioAccessLogsResource = loadResourceFromFile('./istio-access-log.yaml');
+const istioAccessLogsResource = loadResourceFromFile('./istio_access_logs.yaml');
 const namespace = 'kyma-system';
 
 function loadResourceFromFile(file) {
@@ -14,14 +14,14 @@ function loadResourceFromFile(file) {
   return k8s.loadAllYaml(yaml);
 }
 
-function istioAccessLogsTests() {
+function istioAccessLogsTests(startTimestamp) {
   describe('Istio Access Logs tests', function() {
     it('Should create Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
     });
 
     it('Should query Loki and verify format of Istio access logs', async () => {
-      await loki.verifyIstioAccessLogFormat();
+      await loki.verifyIstioAccessLogFormat(startTimestamp);
     });
   });
 }
@@ -44,7 +44,7 @@ function loggingTests() {
       await loki.checkPersistentVolumeClaimSize();
     });
 
-    istioAccessLogsTests();
+    istioAccessLogsTests(testStartTimestamp);
   });
 }
 
