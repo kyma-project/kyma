@@ -19,6 +19,9 @@ package main
 import (
 	"errors"
 	"flag"
+	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 	"os"
 	"strings"
 	"time"
@@ -30,8 +33,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -206,16 +207,17 @@ func main() {
 	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		validation.NewInputValidator(),
-		validation.NewVariablesValidator(mgr.GetClient()),
+		validation3.NewInputValidator(),
+		validation3.NewVariablesValidator(mgr.GetClient()),
 		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
-		validation.NewPluginValidator(
+		validation3.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-		validation.NewMaxPipelinesValidator(maxPipelines),
-		validation.NewOutputValidator(),
+		validation3.NewMaxPipelinesValidator(maxPipelines),
+		validation3.NewOutputValidator(),
+		validation3.NewFilesValidator(),
 		pipelineConfig,
-		fs.NewWrapper(),
+		utils.NewFileSystem(),
 		restartsTotal)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
@@ -245,10 +247,10 @@ func main() {
 	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		validation.NewParserValidator(),
+		validation2.NewParserValidator(),
 		pipelineConfig,
 		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
-		fs.NewWrapper(),
+		utils.NewFileSystem(),
 		restartsTotal,
 	)
 	mgr.GetWebhookServer().Register(

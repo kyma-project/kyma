@@ -1,4 +1,4 @@
-package fs
+package utils
 
 import (
 	"fmt"
@@ -12,23 +12,23 @@ type File struct {
 	Data string
 }
 
-//go:generate mockery --name Wrapper --filename wrapper.go
-type Wrapper interface {
+//go:generate mockery --name FileSystem --filename fs.go
+type FileSystem interface {
 	CreateAndWrite(s File) error
 	RemoveDirectory(path string) error
 }
 
-type wrapper struct {
+type fileSystem struct {
 	fs afero.Fs
 }
 
-func NewWrapper() Wrapper {
-	return &wrapper{
+func NewFileSystem() FileSystem {
+	return &fileSystem{
 		fs: afero.NewOsFs(),
 	}
 }
 
-func (w *wrapper) CreateAndWrite(s File) error {
+func (w *fileSystem) CreateAndWrite(s File) error {
 	var err error
 
 	if err = w.fs.MkdirAll(s.Path, 0755); err != nil {
@@ -47,6 +47,6 @@ func (w *wrapper) CreateAndWrite(s File) error {
 	return nil
 }
 
-func (w *wrapper) RemoveDirectory(path string) error {
+func (w *fileSystem) RemoveDirectory(path string) error {
 	return w.fs.RemoveAll(path)
 }

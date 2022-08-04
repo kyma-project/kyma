@@ -19,18 +19,17 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,7 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//go:generate mockery --name DryRunner --filename mocks.go
+//go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
 	RunConfig(ctx context.Context, configFilePath string) error
 }
@@ -53,14 +52,15 @@ const (
 type ValidatingWebhookHandler struct {
 	client.Client
 	fluentBitConfigMap    types.NamespacedName
-	inputValidator        validation.InputValidator
-	variablesValidator    validation.VariablesValidator
+	inputValidator        validation2.InputValidator
+	variablesValidator    validation2.VariablesValidator
 	dryRunner             DryRunner
-	pluginValidator       validation.PluginValidator
-	maxPipelinesValidator validation.MaxPipelinesValidator
-	outputValidator       validation.OutputValidator
+	pluginValidator       validation2.PluginValidator
+	maxPipelinesValidator validation2.MaxPipelinesValidator
+	outputValidator       validation2.OutputValidator
+	fileValidator         validation2.FilesValidator
 	pipelineConfig        fluentbit.PipelineConfig
-	fsWrapper             fs.Wrapper
+	fsWrapper             utils.FileSystem
 	decoder               *admission.Decoder
 	daemonSetUtils        *fluentbit.DaemonSetUtils
 }
@@ -69,14 +69,15 @@ func NewValidatingWebhookHandler(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
-	inputValidator validation.InputValidator,
-	variablesValidator validation.VariablesValidator,
+	inputValidator validation2.InputValidator,
+	variablesValidator validation2.VariablesValidator,
 	dryRunner DryRunner,
-	pluginValidator validation.PluginValidator,
-	maxPipelinesValidator validation.MaxPipelinesValidator,
-	outputValidator validation.OutputValidator,
+	pluginValidator validation2.PluginValidator,
+	maxPipelinesValidator validation2.MaxPipelinesValidator,
+	outputValidator validation2.OutputValidator,
+	fileValidator validation2.FilesValidator,
 	pipelineConfig fluentbit.PipelineConfig,
-	fsWrapper fs.Wrapper,
+	fsWrapper utils.FileSystem,
 	restartsTotal prometheus.Counter) *ValidatingWebhookHandler {
 	fluentBitConfigMapNamespacedName := types.NamespacedName{
 		Name:      fluentBitConfigMap,
@@ -93,6 +94,7 @@ func NewValidatingWebhookHandler(
 		pluginValidator:       pluginValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
 		outputValidator:       outputValidator,
+		fileValidator:         fileValidator,
 		fsWrapper:             fsWrapper,
 		pipelineConfig:        pipelineConfig,
 		daemonSetUtils:        daemonSetUtils,
@@ -198,6 +200,11 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, curr
 	}
 
 	if err = v.dryRunner.RunConfig(ctx, currentBaseDirectory); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit config")
+		return err
+	}
+
+	if err = v.fileValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}

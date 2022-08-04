@@ -18,6 +18,8 @@ package logparser
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
@@ -27,8 +29,6 @@ import (
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,7 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//go:generate mockery --name DryRunner --filename mocks.go
+//go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
 	RunParser(ctx context.Context, configFilePath string) error
 }
@@ -54,7 +54,7 @@ type ValidatingWebhookHandler struct {
 	parserValidator    validation.ParserValidator
 	pipelineConfig     fluentbit.PipelineConfig
 	dryRunner          DryRunner
-	fsWrapper          fs.Wrapper
+	fsWrapper          utils.FileSystem
 	decoder            *admission.Decoder
 	daemonSetUtils     *fluentbit.DaemonSetUtils
 }
@@ -66,7 +66,7 @@ func NewValidatingWebhookHandler(
 	parserValidator validation.ParserValidator,
 	pipelineConfig fluentbit.PipelineConfig,
 	dryRunner DryRunner,
-	fsWrapper fs.Wrapper,
+	fsWrapper utils.FileSystem,
 	restartsTotal prometheus.Counter,
 ) *ValidatingWebhookHandler {
 	fluentBitConfigMapNamespacedName := types.NamespacedName{

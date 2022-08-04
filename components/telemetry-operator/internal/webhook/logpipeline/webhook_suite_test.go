@@ -20,19 +20,18 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
+	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation/mocks"
+	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils/mocks"
 	"net"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
-	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/validation/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -54,18 +53,18 @@ const (
 )
 
 var (
-	k8sClient     client.Client
-	testEnv       *envtest.Environment
-	ctx           context.Context
-	cancel        context.CancelFunc
-	fsWrapperMock *fsmocks.Wrapper
-
-	inputValidatorMock    *validationmocks.InputValidator
-	variableValidatorMock *validationmocks.VariablesValidator
-	dryRunnerMock         *mocks.DryRunner
-	pluginValidatorMock   *validationmocks.PluginValidator
-	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
-	outputValidatorMock   *validationmocks.OutputValidator
+	k8sClient                 client.Client
+	testEnv                   *envtest.Environment
+	ctx                       context.Context
+	cancel                    context.CancelFunc
+	inputValidatorMock        *validationmocks.InputValidator
+	variableValidatorMock     *validationmocks.VariablesValidator
+	pluginValidatorMock       *validationmocks.PluginValidator
+	maxPipelinesValidatorMock *validationmocks.MaxPipelinesValidator
+	outputValidatorMock       *validationmocks.OutputValidator
+	fileValidatorMock         *validationmocks.FilesValidator
+	fileSystemMock            *utilsmocks.FileSystem
+	dryRunnerMock             *mocks.DryRunner
 )
 
 func TestAPIs(t *testing.T) {
@@ -128,16 +127,16 @@ var _ = BeforeSuite(func() {
 	variableValidatorMock = &validationmocks.VariablesValidator{}
 	dryRunnerMock = &mocks.DryRunner{}
 	pluginValidatorMock = &validationmocks.PluginValidator{}
-	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
+	maxPipelinesValidatorMock = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
-
+	fileValidatorMock = &validationmocks.FilesValidator{}
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
 	metrics.Registry.MustRegister(restartsTotal)
 
-	fsWrapperMock = &fsmocks.Wrapper{}
+	fileSystemMock = &utilsmocks.FileSystem{}
 	logPipelineValidator := NewValidatingWebhookHandler(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
@@ -146,10 +145,11 @@ var _ = BeforeSuite(func() {
 		variableValidatorMock,
 		dryRunnerMock,
 		pluginValidatorMock,
-		maxPipelinesValidator,
+		maxPipelinesValidatorMock,
 		outputValidatorMock,
+		fileValidatorMock,
 		pipelineConfig,
-		fsWrapperMock,
+		fileSystemMock,
 		restartsTotal,
 	)
 
