@@ -11,11 +11,12 @@ import (
 )
 
 type oauthStrategy struct {
-	oauthClient       OAuthClient
-	clientId          string
-	clientSecret      string
-	url               string
-	requestParameters *RequestParameters
+	oauthClient            OAuthClient
+	clientId               string
+	clientSecret           string
+	url                    string
+	requestParameters      *RequestParameters
+	tokenRequestSkipVerify bool
 }
 
 func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url string, requestParameters *RequestParameters) oauthStrategy {
@@ -28,9 +29,9 @@ func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url strin
 	}
 }
 
-func (o oauthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc) apperrors.AppError {
+func (o oauthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc, skipTLSVerification bool) apperrors.AppError {
 	headers, queryParameters := o.requestParameters.unpack()
-	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters)
+	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters, skipTLSVerification)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
 		return err
