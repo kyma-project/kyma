@@ -20,12 +20,12 @@ test-gateway: create-resources disable-sidecar-for-mtls-test generate-certs
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh; \
 	$(MAKE) clean-gateway-test; \
-  $(MAKE) enable-sidecar-after-mtls-test; \
+  	$(MAKE) enable-sidecar-after-mtls-test; \
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh; \
 	$(MAKE) clean-gateway-test; \
-  $(MAKE) enable-sidecar-after-mtls-test; \
+  	$(MAKE) enable-sidecar-after-mtls-test; \
 	exit 0; \
 	fi
 
@@ -33,11 +33,11 @@ test-gateway-debug: create-resources disable-sidecar-for-mtls-test generate-cert
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh; \
-  $(MAKE) enable-sidecar-after-mtls-test; \
+  	$(MAKE) enable-sidecar-after-mtls-test; \
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh; \
-  $(MAKE) enable-sidecar-after-mtls-test; \
+  	$(MAKE) enable-sidecar-after-mtls-test; \
 	exit 0; \
 	fi
 
