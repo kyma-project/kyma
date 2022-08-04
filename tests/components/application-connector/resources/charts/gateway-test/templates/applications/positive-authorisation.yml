@@ -43,6 +43,31 @@ spec:
             secretName: oauth-test
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
+    - displayName: mtls-oauth
+      name: mtls-oauth
+      providerDisplayName: mTLS-OAuth
+      description: Should return 200 when calling endpoint protected with mTLS OAuth
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls-oauth"
+          credentials:
+            secretName: mtls-oauth-positive
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls
+      name: mtls
+      providerDisplayName: mTLS
+      description: Should return 200 when calling endpoint protected with mTLS
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls"
+          credentials:
+            secretName: mtls-positive
+            type: CertificateGen
     - displayName: csrf basic
       name: csrf-basic
       providerDisplayName: Basic with CSRF
@@ -70,35 +95,3 @@ spec:
           credentials:
             secretName: basic-test
             type: Basic
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: basic-test
-  namespace: kyma-integration
-type: Opaque
-data:
-  password: {{ "passwd" | b64enc }}
-  username: {{ "user" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: oauth-test
-  namespace: kyma-integration
-type: Opaque
-data:
-  clientId: {{ "clientID" | b64enc }}
-  clientSecret: {{ "clientSecret" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: request-parameters-test
-  namespace: kyma-integration
-type: Opaque
-stringData:
-  headers: |-
-    {"Hkey1":["Hval1"],"Hkey2":["Hval21","Hval22"]}
-  queryParameters: |-
-    {"Qkey1":["Qval1"],"Qkey2":["Qval21","Qval22"]}
