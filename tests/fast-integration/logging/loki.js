@@ -54,7 +54,7 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   const query = '{container="istio-proxy",job="fluent-bit",namespace="kyma-system",pod="logging-loki-0"}';
 
   const responseBody = await queryLoki(query, startTimestamp);
-  debug('responseBody', responseBody);
+  info('responseBody', responseBody);
   assert.isTrue(responseBody.data.result.length > 0, 'No Istio access logs found for loki');
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
   const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
