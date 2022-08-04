@@ -40,7 +40,7 @@ There are a few environments that occur only for a specific runtimes. The follow
 
 ## Configure runtime
 
-You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a Config Map.
+You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a ConfigMap.
 
 ### Define environment variables in a Config Map
 
