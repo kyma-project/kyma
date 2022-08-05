@@ -8,6 +8,9 @@ import (
 )
 
 func TestMainMetric(t *testing.T) {
+	os.Setenv("STORAGE_PATH", "/data/log")
+	os.Setenv("DIRECTORIES_SIZE_METRIC", "telemetry_fsbuffer_vector")
+	//main()
 	require.True(t, true)
 }
 

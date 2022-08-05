@@ -23,11 +23,10 @@ type directory struct {
 
 var (
 	fsBuffeLabelsVector *prometheus.GaugeVec
-	fsbufferSize        prometheus.Gauge
 	logPath             string
 )
 
-func NewExporter(dataPath string, dirsSizeMetricName string, totalSizeMetricName string) Exporter {
+func NewExporter(dataPath string, dirsSizeMetricName string) Exporter {
 	logPath = dataPath
 
 	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -36,14 +35,6 @@ func NewExporter(dataPath string, dirsSizeMetricName string, totalSizeMetricName
 		Name:      dirsSizeMetricName,
 		Help:      "Disk size for different emitters",
 	}, []string{"name"})
-
-	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace:   "",
-		Subsystem:   "",
-		Name:        totalSizeMetricName,
-		Help:        "The total disk size of the fluentbit chunk buffer",
-		ConstLabels: nil,
-	})
 
 	return &exporter{}
 }
@@ -65,11 +56,6 @@ func (v *exporter) RecordMetrics() {
 }
 
 func recordingIteration(logPath string, ticker *time.Ticker) {
-	size, err := dirSize(logPath)
-	if err != nil {
-		panic(err)
-	}
-	fsbufferSize.Set(float64(size))
 	directories, errDirList := listDirs(logPath)
 	if errDirList != nil {
 		panic(errDirList)
