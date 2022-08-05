@@ -34,7 +34,7 @@ test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resource
 	./scripts/check-pod-logs.sh; \
 
 create-resources:
-	@echo $(GOPATH)/bin/go-junit-report/v2 --help
+	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test \
     	--set namespace=$(NAMESPACE) \
