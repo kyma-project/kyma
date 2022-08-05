@@ -14,7 +14,7 @@
 //limitations under the License.
 //*/
 //
-package webhook
+package logpipeline
 
 import (
 	"context"
@@ -25,12 +25,14 @@ import (
 	"testing"
 	"time"
 
+	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/mocks"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
+	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation/mocks"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
-	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/validation/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,20 +54,18 @@ const (
 )
 
 var (
-	k8sClient     client.Client
-	testEnv       *envtest.Environment
-	ctx           context.Context
-	cancel        context.CancelFunc
-	fsWrapperMock *fsmocks.Wrapper
-
-	inputValidatorMock    *validationmocks.InputValidator
-	variableValidatorMock *validationmocks.VariablesValidator
-	configValidatorMock   *validationmocks.ConfigValidator
-	pluginValidatorMock   *validationmocks.PluginValidator
-	maxPipelinesValidator *validationmocks.MaxPipelinesValidator
-	outputValidatorMock   *validationmocks.OutputValidator
-	parserValidatorMock   *validationmocks.ParserValidator
-	fileValidatorMock     *validationmocks.FilesValidator
+	k8sClient                 client.Client
+	testEnv                   *envtest.Environment
+	ctx                       context.Context
+	cancel                    context.CancelFunc
+	inputValidatorMock        *validationmocks.InputValidator
+	variableValidatorMock     *validationmocks.VariablesValidator
+	pluginValidatorMock       *validationmocks.PluginValidator
+	maxPipelinesValidatorMock *validationmocks.MaxPipelinesValidator
+	outputValidatorMock       *validationmocks.OutputValidator
+	fileValidatorMock         *validationmocks.FilesValidator
+	fileSystemMock            *utilsmocks.FileSystem
+	dryRunnerMock             *mocks.DryRunner
 )
 
 func TestAPIs(t *testing.T) {
@@ -78,15 +78,14 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-
 	ctx, cancel = context.WithCancel(context.TODO())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
+		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
 		WebhookInstallOptions: envtest.WebhookInstallOptions{
-			Paths: []string{filepath.Join("..", "..", "config", "webhook")},
+			Paths: []string{filepath.Join("..", "..", "..", "config", "webhook")},
 		},
 	}
 
@@ -126,33 +125,31 @@ var _ = BeforeSuite(func() {
 
 	inputValidatorMock = &validationmocks.InputValidator{}
 	variableValidatorMock = &validationmocks.VariablesValidator{}
-	configValidatorMock = &validationmocks.ConfigValidator{}
+	dryRunnerMock = &mocks.DryRunner{}
 	pluginValidatorMock = &validationmocks.PluginValidator{}
-	maxPipelinesValidator = &validationmocks.MaxPipelinesValidator{}
+	maxPipelinesValidatorMock = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
-	parserValidatorMock = &validationmocks.ParserValidator{}
 	fileValidatorMock = &validationmocks.FilesValidator{}
-
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
 	metrics.Registry.MustRegister(restartsTotal)
 
-	fsWrapperMock = &fsmocks.Wrapper{}
-	logPipelineValidator := NewLogPipeLineValidator(
+	fileSystemMock = &utilsmocks.FileSystem{}
+	logPipelineValidator := NewValidatingWebhookHandler(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
 		inputValidatorMock,
 		variableValidatorMock,
-		configValidatorMock,
+		dryRunnerMock,
 		pluginValidatorMock,
-		maxPipelinesValidator,
+		maxPipelinesValidatorMock,
 		outputValidatorMock,
 		fileValidatorMock,
 		pipelineConfig,
-		fsWrapperMock,
+		fileSystemMock,
 		restartsTotal,
 	)
 

@@ -1,4 +1,4 @@
-package validation
+package dryrun
 
 import (
 	"context"
@@ -17,55 +17,50 @@ const (
 	ansiColorsRegex = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 )
 
-//go:generate mockery --name ConfigValidator --filename config_validator.go
-type ConfigValidator interface {
-	RunCmd(ctx context.Context, name string, args ...string) (string, error)
-	Validate(ctx context.Context, configFilePath string) error
+func fluentBitArgs() []string {
+	return []string{"--dry-run", "--quiet"}
 }
 
-type configValidator struct {
-	FluentBitPath   string
-	PluginDirectory string
+type DryRunner struct {
+	fluentBitPath   string
+	pluginDirectory string
 }
 
-func NewConfigValidator(fluentBitPath string, pluginDirectory string) ConfigValidator {
-	return &configValidator{
-		FluentBitPath:   fluentBitPath,
-		PluginDirectory: pluginDirectory,
+func NewDryRunner(fluentBitPath string, pluginDirectory string) DryRunner {
+	return DryRunner{
+		fluentBitPath:   fluentBitPath,
+		pluginDirectory: pluginDirectory,
 	}
 }
 
-func (v *configValidator) RunCmd(ctx context.Context, name string, args ...string) (string, error) {
-	cmd := exec.CommandContext(ctx, name, args...)
-
-	outBytes, err := cmd.CombinedOutput()
-	out := string(outBytes)
-	return out, err
+func (v DryRunner) RunConfig(ctx context.Context, configsDirectory string) error {
+	path := filepath.Join(configsDirectory, "fluent-bit.conf")
+	args := append(fluentBitArgs(), "--config", path)
+	return v.run(ctx, args)
 }
 
-func (v *configValidator) Validate(ctx context.Context, configFilePath string) error {
+func (v DryRunner) RunParser(ctx context.Context, configsDirectory string) error {
+	path := filepath.Join(configsDirectory, "dynamic-parsers", "parsers.conf")
+	args := append(fluentBitArgs(), "--parser", path)
+	return v.run(ctx, args)
+}
 
-	fluentBitArgs := []string{"--dry-run", "--quiet", "--config", configFilePath}
-
-	if strings.Contains(configFilePath, "parsers.conf") {
-		fluentBitArgs = []string{"--dry-run", "--quiet", "-R", configFilePath}
-	}
-	plugins, err := listPlugins(v.PluginDirectory)
+func (v *DryRunner) run(ctx context.Context, args []string) error {
+	plugins, err := listPlugins(v.pluginDirectory)
 	if err != nil {
 		return err
 	}
 	for _, plugin := range plugins {
-		fluentBitArgs = append(fluentBitArgs, "-e", plugin)
+		args = append(args, "-e", plugin)
 	}
 
-	out, err := v.RunCmd(ctx, v.FluentBitPath, fluentBitArgs...)
+	out, err := runCmd(ctx, v.fluentBitPath, args...)
 	if err != nil {
 		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))
 		}
 		return fmt.Errorf("error while validating Fluent Bit config: %v", err.Error())
 	}
-
 	return nil
 }
 
@@ -82,6 +77,14 @@ func listPlugins(pluginPath string) ([]string, error) {
 		plugins = append(plugins, filepath.Join(pluginPath, f.Name()))
 	}
 	return plugins, err
+}
+
+func runCmd(ctx context.Context, name string, args ...string) (string, error) {
+	cmd := exec.CommandContext(ctx, name, args...)
+
+	outBytes, err := cmd.CombinedOutput()
+	out := string(outBytes)
+	return out, err
 }
 
 // extractError extracts the error message from the output of fluent-bit

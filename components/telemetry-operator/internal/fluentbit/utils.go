@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -78,8 +79,8 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	fluentBitConfigMap types.NamespacedName,
 	pipelineConfig PipelineConfig,
 	pipeline *telemetryv1alpha1.LogPipeline,
-	parser *telemetryv1alpha1.LogParser) ([]fs.File, error) {
-	var configFiles []fs.File
+	parser *telemetryv1alpha1.LogParser) ([]utils.File, error) {
+	var configFiles []utils.File
 	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
 	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
 	fluentBitFilesDirectory := currentBaseDirectory + "/files"
@@ -89,10 +90,10 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	var err error
 
 	if err := f.client.Get(ctx, fluentBitConfigMap, &generalCm); err != nil {
-		return []fs.File{}, err
+		return []utils.File{}, err
 	}
 	for key, data := range generalCm.Data {
-		configFiles = append(configFiles, fs.File{
+		configFiles = append(configFiles, utils.File{
 			Path: currentBaseDirectory,
 			Name: key,
 			Data: data,
@@ -102,13 +103,13 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	if pipeline != nil {
 		configFiles, err = appendFluentBitConfigFile(configFiles, *pipeline, pipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
 		if err != nil {
-			return []fs.File{}, err
+			return []utils.File{}, err
 		}
 		if err = f.client.List(ctx, &logParsers); err != nil {
-			return []fs.File{}, err
+			return []utils.File{}, err
 		}
 		parsersConfig := MergeParsersConfig(&logParsers)
-		configFiles = append(configFiles, fs.File{
+		configFiles = append(configFiles, utils.File{
 			Path: fluentBitParsersConfigDirectory,
 			Name: fluentBitParsersConfigMapKey,
 			Data: parsersConfig,
@@ -120,7 +121,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	if parser != nil {
 		logParsers.Items = appendUniqueParsers(logParsers.Items, parser)
 		parsersConfig := MergeParsersConfig(&logParsers)
-		configFiles = append(configFiles, fs.File{
+		configFiles = append(configFiles, utils.File{
 			Path: fluentBitParsersConfigDirectory,
 			Name: fluentBitParsersConfigMapKey,
 			Data: parsersConfig,
@@ -128,7 +129,8 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 
 		return configFiles, nil
 	}
-	return []fs.File{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
+
+	return []utils.File{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
 }
 
 func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telemetryv1alpha1.LogParser) []telemetryv1alpha1.LogParser {
@@ -142,13 +144,13 @@ func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telem
 }
 
 func appendFluentBitConfigFile(
-	configFiles []fs.File,
+	configFiles []utils.File,
 	logPipeline telemetryv1alpha1.LogPipeline,
 	pipelineConfig PipelineConfig,
 	fluentBitSectionsConfigDirectory string,
-	fluentBitFilesDirectory string) ([]fs.File, error) {
+	fluentBitFilesDirectory string) ([]utils.File, error) {
 	for _, file := range logPipeline.Spec.Files {
-		configFiles = append(configFiles, fs.File{
+		configFiles = append(configFiles, utils.File{
 			Path: fluentBitFilesDirectory,
 			Name: file.Name,
 			Data: file.Content,
@@ -157,10 +159,10 @@ func appendFluentBitConfigFile(
 
 	sectionsConfig, err := MergeSectionsConfig(&logPipeline, pipelineConfig)
 	if err != nil {
-		return []fs.File{}, err
+		return []utils.File{}, err
 	}
 
-	configFiles = append(configFiles, fs.File{
+	configFiles = append(configFiles, utils.File{
 		Path: fluentBitSectionsConfigDirectory,
 		Name: logPipeline.Name + ".conf",
 		Data: sectionsConfig,
