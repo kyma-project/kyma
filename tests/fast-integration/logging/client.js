@@ -49,4 +49,5 @@ module.exports = {
   logsPresentInLoki,
   tryGetLokiPersistentVolumeClaim,
   lokiSecretData,
+  queryLoki,
 };
