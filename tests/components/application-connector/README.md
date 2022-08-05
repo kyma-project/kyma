@@ -168,3 +168,12 @@ To run the tests without removing all the created resources afterwards, run:
 ``` shell
 make test-gateway-debug
 ```
+4. If you run the tests with debug option:
+   
+   ```bash
+   make test-gateway-debug
+   ```
+   You need to remember to turn on the sidecars as soon as the test is completed.
+   ```bash
+   make enable-sidecar-after-mtls-test
+   ```

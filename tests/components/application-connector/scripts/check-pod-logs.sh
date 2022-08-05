@@ -8,8 +8,10 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
+podName=$(kubectl get pods -n $NAMESPACE --selector=job-name=application-gateway-test --output=jsonpath='{.items[*].metadata.name}')
+
 if ([[ ${EXPORT_RESULT} == true ]]); then
-	kubectl -n $NAMESPACE logs -f job/"$JOB_NAME" | tee /dev/stderr | $GOPATH/bin/go-junit-report -set-exit-code > junit-report.xml
+	kubectl -n $NAMESPACE logs $podName -f | tee /dev/stderr | $GOPATH/bin/go-junit-report -subtest-mode exclude-parents -set-exit-code > junit-report.xml
 else
-	kubectl -n $NAMESPACE logs -f job/"$JOB_NAME"
+	kubectl -n $NAMESPACE logs $podName application-gateway-test
 fi

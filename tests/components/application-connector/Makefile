@@ -18,22 +18,31 @@ test: test-gateway test-compass-runtime-agent
 image: image-gateway-test image-compass-runtime-agent-test
 clean: clean-gateway-test clean-compass-runtime-agent-test
 
-test-gateway: disable-sidecar-for-mtls-test generate-certs test-gateway-debug clean-gateway-test enable-sidecar-after-mtls-test
+test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
+	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Success! Results:"; \
+	./scripts/check-pod-logs.sh; \
+	$(MAKE) clean; \
+	else \
+	echo "Tests failed! Results:"; \
+	./scripts/check-pod-logs.sh; \
+	$(MAKE) clean; \
+	exit 1; \
+	fi
 
-test-gateway-debug:
-	@echo $(GOPATH)/bin/go-junit-report --help
+
+test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Results:"; \
+	./scripts/check-pod-logs.sh; \
+
+create-resources:
+	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
 	helm template resources/charts/gateway-test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
-
-	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test
-	@echo ""
-	@echo "Gateway test results:"
-
-	./scripts/check-pod-logs.sh application-gateway-test
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test  | kubectl delete -f -
@@ -88,5 +97,3 @@ publish-compass-runtime-agent-test: image-compass-runtime-agent-test
 
 image-compass-runtime-agent-test:
 	docker build -t $(COMPASS_TEST_IMAGE) -f Dockerfile.compass-runtime-agent .
-
-
