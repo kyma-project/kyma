@@ -6,7 +6,7 @@ const {
   logsPresentInLoki,
   queryLoki,
 } = require('./client');
-const {info} = require('../utils');
+const {info, sleep} = require('../utils');
 
 async function checkCommerceMockLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
@@ -60,6 +60,9 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
   const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
   assert.isTrue(isJsonString(entry.log), `Istio access log is not in JSON format: ${entry.log}` );
+
+
+  await sleep(10000000);
 }
 
 module.exports = {
