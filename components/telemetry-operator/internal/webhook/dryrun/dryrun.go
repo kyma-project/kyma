@@ -21,15 +21,18 @@ func fluentBitArgs() []string {
 	return []string{"--dry-run", "--quiet"}
 }
 
-type DryRunner struct {
-	fluentBitPath   string
-	pluginDirectory string
+type Config struct {
+	FluentBitBinPath   string
+	FluentBitPluginDir string
 }
 
-func NewDryRunner(fluentBitPath string, pluginDirectory string) DryRunner {
+type DryRunner struct {
+	config *Config
+}
+
+func NewDryRunner(config *Config) DryRunner {
 	return DryRunner{
-		fluentBitPath:   fluentBitPath,
-		pluginDirectory: pluginDirectory,
+		config: config,
 	}
 }
 
@@ -46,7 +49,7 @@ func (v DryRunner) RunParser(ctx context.Context, configsDirectory string) error
 }
 
 func (v *DryRunner) run(ctx context.Context, args []string) error {
-	plugins, err := listPlugins(v.pluginDirectory)
+	plugins, err := listPlugins(v.config.FluentBitPluginDir)
 	if err != nil {
 		return err
 	}
@@ -54,7 +57,7 @@ func (v *DryRunner) run(ctx context.Context, args []string) error {
 		args = append(args, "-e", plugin)
 	}
 
-	out, err := runCmd(ctx, v.fluentBitPath, args...)
+	out, err := runCmd(ctx, v.config.FluentBitBinPath, args...)
 	if err != nil {
 		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))

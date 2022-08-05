@@ -205,12 +205,17 @@ func main() {
 		},
 	}
 
+	dryRunConfig := &dryrun.Config{
+		FluentBitBinPath:   fluentBitPath,
+		FluentBitPluginDir: fluentBitPluginDirectory,
+	}
+
 	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
 		validation3.NewInputValidator(),
 		validation3.NewVariablesValidator(mgr.GetClient()),
-		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
+		dryrun.NewDryRunner(dryRunConfig),
 		validation3.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
@@ -250,7 +255,7 @@ func main() {
 		fluentBitNs,
 		validation2.NewParserValidator(),
 		pipelineConfig,
-		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
+		dryrun.NewDryRunner(dryRunConfig),
 		utils.NewFileSystem(),
 		restartsTotal,
 	)
