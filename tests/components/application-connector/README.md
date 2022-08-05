@@ -165,24 +165,13 @@ You can now send requests to Application Gateway, and debug its behavior locally
 
 To run the tests without removing all the created resources afterwards, run:
 
-``` shell
+```bash
 make test-gateway-debug
 ```
-4. If you run the tests with debug option:
-   
-   ```bash
-   make test-gateway-debug
-   ```
-   You need to remember to turn on the sidecars as soon as the test is completed.
-   ```bash
-   make enable-sidecar-after-mtls-test
-   ```
-   - Optionally, run the tests in the debugging mode:
-   
-      ```bash
-      make test-gateway-debug
-      ```
-      In this mode, you must remember to enable the sidecars as soon as the test is completed:
-      ```bash
-      make enable-sidecar-after-mtls-test
-      ```
+
+> **CAUTION:** In this mode, you must remember to enable the sidecars as soon as all the tests have been completed:
+> ```bash
+> make enable-sidecar-after-mtls-test
+> ```
+> Keep in mind that `completed` does not mean `succeeded`. You must do it even if the tests fail. 
+
