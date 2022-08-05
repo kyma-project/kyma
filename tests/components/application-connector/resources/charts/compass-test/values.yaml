@@ -1,0 +1,16 @@
+serviceAccountName: "test-account"
+namespace: "test"
+
+mockServiceName: "mock-application"
+
+containerRegistry:
+  path: "eu.gcr.io/kyma-project"
+
+images:
+  compassTest:
+    name: "compass-test"
+    version: "PR-1234"
+
+  mockApplication:
+    name: "mock-app"
+    version: "PR-14804"

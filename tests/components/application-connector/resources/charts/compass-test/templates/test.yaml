@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: compass-runtime-agent-test
+  namespace: {{ .Values.namespace }}
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: wait-for-services
+          image: opsfleet/depends-on
+          args:
+            - "-service={{ .Values.mockServiceName}}"
+      containers:
+        - name: compass-runtime-agent-test
+          image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.gatewayTest) }}
+          imagePullPolicy: Always
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.serviceAccountName }}
+  backoffLimit: 0
