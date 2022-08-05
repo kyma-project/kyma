@@ -44,29 +44,28 @@ type DryRunner struct {
 	config *Config
 }
 
-func NewDryRunner(client client.Client, config *Config) *DryRunner {
+func NewDryRunner(c client.Client, config *Config) *DryRunner {
 	return &DryRunner{
-		client: client,
+		client: c,
 		config: config,
 	}
 }
 
-func (d *DryRunner) RunConfig(ctx context.Context, configsDirectory string) error {
-	path := filepath.Join(configsDirectory, "fluent-bit.conf")
+func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
+	path := filepath.Join(currentBaseDirectory, "fluent-bit.conf")
 	args := append(fluentBitArgs(), "--config", path)
 	return d.run(ctx, args)
 }
 
-func (d *DryRunner) RunParser(ctx context.Context, configsDirectory string) error {
-	path := filepath.Join(configsDirectory, "dynamic-parsers", "parsers.conf")
+func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
+	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
+	path := filepath.Join(currentBaseDirectory, "dynamic-parsers", "parsers.conf")
 	args := append(fluentBitArgs(), "--parser", path)
 	return d.run(ctx, args)
 }
 
-func (d *DryRunner) prepareFluentBitConfig(ctx context.Context,
-	pipeline *telemetryv1alpha1.LogPipeline,
-	parser *telemetryv1alpha1.LogParser) ([]utils.File, error) {
-
+func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline, parser *telemetryv1alpha1.LogParser) ([]utils.File, error) {
 	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
 
 	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"

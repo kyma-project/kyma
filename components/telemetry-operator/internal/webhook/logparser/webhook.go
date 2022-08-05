@@ -40,7 +40,7 @@ import (
 
 //go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
-	RunParser(ctx context.Context, configFilePath string) error
+	DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
 }
 
 const (
@@ -133,7 +133,7 @@ func (v *ValidatingWebhookHandler) validateLogParser(ctx context.Context, logPar
 		}
 	}
 
-	if err = v.dryRunner.RunParser(ctx, currentBaseDirectory); err != nil {
+	if err = v.dryRunner.DryRunParser(ctx, logParser); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
