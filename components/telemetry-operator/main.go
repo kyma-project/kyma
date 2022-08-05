@@ -215,7 +215,7 @@ func main() {
 		fluentBitNs,
 		validation3.NewInputValidator(),
 		validation3.NewVariablesValidator(mgr.GetClient()),
-		dryrun.NewDryRunner(dryRunConfig),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig),
 		validation3.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
@@ -255,7 +255,7 @@ func main() {
 		fluentBitNs,
 		validation2.NewParserValidator(),
 		pipelineConfig,
-		dryrun.NewDryRunner(dryRunConfig),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig),
 		utils.NewFileSystem(),
 		restartsTotal,
 	)

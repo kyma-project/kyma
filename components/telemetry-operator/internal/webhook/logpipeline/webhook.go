@@ -149,12 +149,6 @@ func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Req
 func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) error {
 	log := logf.FromContext(ctx)
 
-	defer func() {
-		if err := v.fsWrapper.RemoveDirectory(currentBaseDirectory); err != nil {
-			log.Error(err, "Failed to remove Fluent Bit config directory")
-		}
-	}()
-
 	var parser *telemetryv1alpha1.LogParser
 
 	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
@@ -169,6 +163,11 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, curr
 			return err
 		}
 	}
+	defer func() {
+		if err := v.fsWrapper.RemoveDirectory(currentBaseDirectory); err != nil {
+			log.Error(err, "Failed to remove Fluent Bit config directory")
+		}
+	}()
 
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	if err := v.List(ctx, &logPipelines); err != nil {
