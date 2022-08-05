@@ -6,14 +6,9 @@ metadata:
 spec:
   template:
     spec:
-      initContainers:
-        - name: wait-for-services
-          image: opsfleet/depends-on
-          args:
-            - "-service={{ .Values.mockServiceName}}"
       containers:
         - name: compass-runtime-agent-test
-          image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.gatewayTest) }}
+          image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.compassTest) }}
           imagePullPolicy: Always
       restartPolicy: Never
   backoffLimit: 0
