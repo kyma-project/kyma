@@ -22,7 +22,7 @@ function istioAccessLogsTests(startTimestamp) {
 
     it('Should create the Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
-      await sleep(10000);
+      await sleep(10000); // wait 10 seconds until resource is ready
     });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
