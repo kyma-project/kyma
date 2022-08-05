@@ -21,11 +21,11 @@ clean: clean-gateway-test clean-compass-runtime-agent-test
 test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Success! Results:"; \
-	./scripts/check-pod-logs.sh; \
+	./scripts/check-pod-logs.sh application-gateway-test; \
 	$(MAKE) clean; \
 	else \
 	echo "Tests failed! Results:"; \
-	./scripts/check-pod-logs.sh; \
+	./scripts/check-pod-logs.sh application-gateway-test; \
 	$(MAKE) clean; \
 	exit 1; \
 	fi
@@ -34,7 +34,7 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
 	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Results:"; \
-	./scripts/check-pod-logs.sh; \
+	./scripts/check-pod-logs.sh application-gateway-test; \
 
 create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
