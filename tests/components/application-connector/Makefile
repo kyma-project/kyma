@@ -11,35 +11,27 @@ TEST_TIMEOUT = "2m"
 
 test: test-gateway
 image: image-gateway-test
-clean: clean-gateway-test
+clean: clean-gateway-test enable-sidecar-after-mtls-test
 
 release: publish-gateway-test publish-mock-app
 
-test-gateway: create-resources disable-sidecar-for-mtls-test generate-certs
+test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh; \
-	$(MAKE) clean-gateway-test; \
-  	$(MAKE) enable-sidecar-after-mtls-test; \
+	$(MAKE) clean; \
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh; \
-	$(MAKE) clean-gateway-test; \
-  	$(MAKE) enable-sidecar-after-mtls-test; \
-	exit 0; \
+	$(MAKE) clean; \
+	exit 1; \
 	fi
 
-test-gateway-debug: create-resources disable-sidecar-for-mtls-test generate-certs
-	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
-	echo "Success! Results:"; \
+#dopisac w .md zeby wlaczyc side-cary po testach jezeli uzyto test-gateway-debug !!!
+test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Results:"; \
 	./scripts/check-pod-logs.sh; \
-  	$(MAKE) enable-sidecar-after-mtls-test; \
-	else \
-	echo "Tests failed! Results:"; \
-	./scripts/check-pod-logs.sh; \
-  	$(MAKE) enable-sidecar-after-mtls-test; \
-	exit 0; \
-	fi
 
 create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
