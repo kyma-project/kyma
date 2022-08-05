@@ -55,6 +55,18 @@ func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alp
 	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
 	path := filepath.Join(currentBaseDirectory, "fluent-bit.conf")
 	args := append(fluentBitArgs(), "--config", path)
+	// log.Info("Fluent Bit config files count", "count", len(configFiles))
+	// for _, configFile := range configFiles {
+	// 	if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
+	// 		log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
+	// 		return err
+	// 	}
+	// }
+	// defer func() {
+	// 	if err := v.fsWrapper.RemoveDirectory(currentBaseDirectory); err != nil {
+	// 		log.Error(err, "Failed to remove Fluent Bit config directory")
+	// 	}
+	// }()
 	return d.run(ctx, args)
 }
 
