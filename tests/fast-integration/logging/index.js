@@ -1,5 +1,5 @@
 const loki = require('./loki');
-const {k8sApply, k8sDelete} = require('../utils');
+const {k8sApply, k8sDelete, sleep} = require('../utils');
 const fs = require('fs');
 const path = require('path');
 const k8s = require('@kubernetes/client-node');
@@ -22,6 +22,7 @@ function istioAccessLogsTests(startTimestamp) {
 
     it('Should create the Istio Access Logs resource for Loki', async () => {
       await k8sApply(istioAccessLogsResource, namespace);
+      await sleep(10000);
     });
 
     it('Should query Loki and verify format of Istio Access Logs', async () => {
