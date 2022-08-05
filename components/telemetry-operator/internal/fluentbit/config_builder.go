@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 )
 
 type ConfigHeader string
@@ -217,7 +216,7 @@ func resolveValue(value telemetryv1alpha1.ValueType, logPipeline string) (string
 		return value.Value, nil
 	}
 	if value.ValueFrom.SecretKey.Name != "" && value.ValueFrom.SecretKey.Key != "" {
-		return fmt.Sprintf("${%s}", secret.GenerateVariableName(value.ValueFrom.SecretKey, logPipeline)), nil
+		return fmt.Sprintf("${%s}", value.ValueFrom.SecretKey.EnvVarName(logPipeline)), nil
 	}
 	return "", fmt.Errorf("value not defined")
 }

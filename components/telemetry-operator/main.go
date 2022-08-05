@@ -174,7 +174,7 @@ func main() {
 		FsBufferLimit:     fluentBitFsBufferLimit,
 	}
 
-	daemonSetConfig := sync.FluentBitDaemonSetConfig{
+	daemonSetConfig := sync.Config{
 		FluentBitDaemonSetName: types.NamespacedName{
 			Namespace: fluentBitNs,
 			Name:      fluentBitDaemonSet,
@@ -193,7 +193,7 @@ func main() {
 			Namespace: fluentBitNs,
 		},
 	}
-	parserDaemonSetConfig := logparser2.FluentBitDaemonSetConfig{
+	parserDaemonSetConfig := logparser2.Config{
 		FluentBitDaemonSetName: types.NamespacedName{
 			Namespace: fluentBitNs,
 			Name:      fluentBitDaemonSet,

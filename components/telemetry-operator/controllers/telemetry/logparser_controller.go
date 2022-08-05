@@ -41,7 +41,7 @@ type LogParserReconciler struct {
 	DaemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
-func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
+func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.Config, restartsTotal prometheus.Counter) *LogParserReconciler {
 	var lpr LogParserReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme

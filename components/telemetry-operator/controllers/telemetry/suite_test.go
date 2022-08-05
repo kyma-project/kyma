@@ -45,7 +45,7 @@ import (
 )
 
 var (
-	daemonSetConfig = sync.FluentBitDaemonSetConfig{
+	daemonSetConfig = sync.Config{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "default"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "logging-fluent-bit-sections", Namespace: "default"},
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "logging-fluent-bit-files", Namespace: "default"},

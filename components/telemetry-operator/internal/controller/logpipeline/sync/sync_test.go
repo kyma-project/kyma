@@ -6,7 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync/mocks"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -22,7 +21,7 @@ import (
 )
 
 var (
-	daemonSetConfig = FluentBitDaemonSetConfig{
+	daemonSetConfig = Config{
 		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "cm-ns"},
 		FluentBitSectionsConfigMap: types.NamespacedName{Name: "section-cm", Namespace: "cm-ns"},
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
@@ -41,7 +40,7 @@ func TestGetOrCreateWithConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndN
 	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
 	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "some-cm", Namespace: "cm-ns"}}
 	err := sut.Utils.GetOrCreate(context.Background(), &cm)
@@ -55,7 +54,7 @@ func TestGetOrCreateWithConfigMapAnyOtherErrorPropagates(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "some-cm", Namespace: "cm-ns"}}
 	err := sut.Utils.GetOrCreate(context.Background(), &cm)
@@ -68,7 +67,7 @@ func TestGetOrCreateWithSecretIsNotFoundCreatesNewWithGivenNamespacedNameAndNoEr
 	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
 	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "some-secret", Namespace: "secret-ns"}}
 	err := sut.Utils.GetOrCreate(context.Background(), &secret)
@@ -82,7 +81,7 @@ func TestGetOrCreateWithSecretAnyOtherErrorPropagates(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "some-secret", Namespace: "secret-ns"}}
 	err := sut.Utils.GetOrCreate(context.Background(), &secret)
@@ -94,7 +93,7 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
@@ -107,7 +106,7 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
@@ -176,7 +175,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	}
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret, &lp).Build()
 
-	lps := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
+	lps := NewSyncer(mockClient, daemonSetConfig, pipelineConfig)
 	restartRequired, err := lps.syncVariables(context.Background())
 	require.NoError(t, err)
 	require.True(t, restartRequired)
@@ -184,6 +183,6 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)
 	require.NoError(t, err)
-	targetSecretKey := secret.GenerateVariableName(secretKeyRef, "my-pipeline")
+	targetSecretKey := secretKeyRef.EnvVarName("my-pipeline")
 	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
 }

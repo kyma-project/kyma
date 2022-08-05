@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
 	"time"
@@ -96,4 +97,28 @@ func TestSetCondition(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSecretKeyRef(t *testing.T) {
+	t.Run("EnvVarName with lowercase", func(t *testing.T) {
+		expected := "PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY_123"
+		secretRef := SecretKeyRef{
+			Name:      "test-name",
+			Key:       "test-key.123",
+			Namespace: "test-namespace",
+		}
+		actual := secretRef.EnvVarName("pipeline")
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("EnvVarName", func(t *testing.T) {
+		expected := "PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY_123"
+		secretRef := SecretKeyRef{
+			Name:      "test-name",
+			Key:       "TEST_KEY_123",
+			Namespace: "test-namespace",
+		}
+		actual := secretRef.EnvVarName("pipeline")
+		require.Equal(t, expected, actual)
+	})
 }

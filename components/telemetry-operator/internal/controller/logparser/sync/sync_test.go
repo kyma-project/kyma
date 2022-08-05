@@ -18,7 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var daemonSetConfig = FluentBitDaemonSetConfig{
+var daemonSetConfig = Config{
 	FluentBitDaemonSetName:    types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "cm-ns"},
 	FluentBitParsersConfigMap: types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "cm-ns"},
 }

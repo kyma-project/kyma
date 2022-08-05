@@ -17,7 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -126,6 +128,16 @@ type SecretKeyRef struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 	Key       string `json:"key,omitempty"`
+}
+
+// EnvVarName generates env variable name for a given secret reference by concatenating pipeline name, namespace, secret name and secret key.
+// Dots and dashes are replaced by underscores to be compliant with env variable name requirements.
+func (r *SecretKeyRef) EnvVarName(pipelineName string) string {
+	result := fmt.Sprintf("%s_%s_%s_%s", pipelineName, r.Namespace, r.Name, r.Key)
+	result = strings.ToUpper(result)
+	result = strings.Replace(result, ".", "_", -1)
+	result = strings.Replace(result, "-", "_", -1)
+	return result
 }
 
 type LogPipelineConditionType string

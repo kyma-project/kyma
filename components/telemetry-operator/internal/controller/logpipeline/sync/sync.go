@@ -7,7 +7,6 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -19,37 +18,34 @@ const (
 	filesFinalizer             = "FLUENT_BIT_FILES"
 )
 
-type FluentBitDaemonSetConfig struct {
+type Config struct {
 	FluentBitDaemonSetName     types.NamespacedName
 	FluentBitSectionsConfigMap types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 }
 
-type LogPipelineSyncer struct {
+type Syncer struct {
 	client.Client
-	DaemonSetConfig         FluentBitDaemonSetConfig
+	DaemonSetConfig         Config
 	PipelineConfig          fluentbit.PipelineConfig
 	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
-	SecretHelper            *secret.Helper
+	SecretHelper            *Helper
 	Utils                   *kubernetes.Utils
 }
 
-func NewLogPipelineSyncer(client client.Client,
-	daemonSetConfig FluentBitDaemonSetConfig,
-	pipelineConfig fluentbit.PipelineConfig,
-) *LogPipelineSyncer {
-	var lps LogPipelineSyncer
-	lps.Client = client
-	lps.DaemonSetConfig = daemonSetConfig
-	lps.PipelineConfig = pipelineConfig
-	lps.SecretHelper = secret.NewSecretHelper(client)
-	lps.Utils = kubernetes.NewUtils(client)
-	return &lps
+func NewSyncer(client client.Client, config Config, pipelineConfig fluentbit.PipelineConfig) *Syncer {
+	var syncer Syncer
+	syncer.Client = client
+	syncer.DaemonSetConfig = config
+	syncer.PipelineConfig = pipelineConfig
+	syncer.SecretHelper = NewSecretHelper(client)
+	syncer.Utils = kubernetes.NewUtils(client)
+	return &syncer
 }
 
-func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *Syncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 
 	sectionsChanged, err := s.syncSectionsConfigMap(ctx, logPipeline)
@@ -79,7 +75,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 }
 
 // Synchronize LogPipeline with ConfigMap of DaemonSetUtils sections (Input, Filter and Output).
-func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *Syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitSectionsConfigMap)
 	if err != nil {
@@ -126,7 +122,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 	return changed, nil
 }
 
-func (s *LogPipelineSyncer) syncUnsupportedPluginsTotal(ctx context.Context) error {
+func (s *Syncer) syncUnsupportedPluginsTotal(ctx context.Context) error {
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	err := s.List(ctx, &logPipelines)
 	if err != nil {
@@ -138,7 +134,7 @@ func (s *LogPipelineSyncer) syncUnsupportedPluginsTotal(ctx context.Context) err
 }
 
 // Synchronize file references with Fluent Bit files ConfigMap.
-func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *Syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitFilesConfigMap)
 	if err != nil {
@@ -182,7 +178,7 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 }
 
 // syncVariables copies referenced secrets to global Fluent Bit environment secret.
-func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
+func (s *Syncer) syncVariables(ctx context.Context) (bool, error) {
 	log := logf.FromContext(ctx)
 	oldSecret, err := s.Utils.GetOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
 	if err != nil {
@@ -204,7 +200,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 		}
 		for _, varRef := range l.Spec.Variables {
 			if varRef.ValueFrom.IsSecretRef() {
-				err := s.SecretHelper.CopySecretData(ctx, varRef.ValueFrom, varRef.Name, newSecret.Data)
+				err := s.SecretHelper.copySecretData(ctx, varRef.ValueFrom, varRef.Name, newSecret.Data)
 				if err != nil {
 					log.Error(err, "unable to find secret for environment variable")
 					return false, err
@@ -212,21 +208,21 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 			}
 		}
 		if l.Spec.Output.HTTP.Host.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.Host.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.Host.ValueFrom.SecretKey, l.Name), newSecret.Data)
+			err := s.SecretHelper.copySecretData(ctx, l.Spec.Output.HTTP.Host.ValueFrom, l.Spec.Output.HTTP.Host.ValueFrom.SecretKey.EnvVarName(l.Name), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
 				return false, err
 			}
 		}
 		if l.Spec.Output.HTTP.User.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.User.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.User.ValueFrom.SecretKey, l.Name), newSecret.Data)
+			err := s.SecretHelper.copySecretData(ctx, l.Spec.Output.HTTP.User.ValueFrom, l.Spec.Output.HTTP.User.ValueFrom.SecretKey.EnvVarName(l.Name), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http user")
 				return false, err
 			}
 		}
 		if l.Spec.Output.HTTP.Password.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.Password.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.Password.ValueFrom.SecretKey, l.Name), newSecret.Data)
+			err := s.SecretHelper.copySecretData(ctx, l.Spec.Output.HTTP.Password.ValueFrom, l.Spec.Output.HTTP.Password.ValueFrom.SecretKey.EnvVarName(l.Name), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http password")
 				return false, err
@@ -234,7 +230,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 		}
 	}
 
-	needsSecretUpdate := secret.CheckIfSecretHasChanged(newSecret.Data, oldSecret.Data)
+	needsSecretUpdate := checkIfSecretHasChanged(newSecret.Data, oldSecret.Data)
 	if !needsSecretUpdate {
 		return false, nil
 	}

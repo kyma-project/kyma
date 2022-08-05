@@ -17,20 +17,20 @@ const (
 	parserConfigMapFinalizer = "FLUENT_BIT_PARSERS_CONFIG_MAP"
 )
 
-type FluentBitDaemonSetConfig struct {
+type Config struct {
 	FluentBitDaemonSetName    types.NamespacedName
 	FluentBitParsersConfigMap types.NamespacedName
 }
 type Syncer struct {
 	client.Client
-	DaemonSetConfig FluentBitDaemonSetConfig
+	DaemonSetConfig Config
 	Utils           *kubernetes.Utils
 }
 
-func NewSyncer(client client.Client, daemonSetConfig FluentBitDaemonSetConfig) *Syncer {
+func NewSyncer(client client.Client, config Config) *Syncer {
 	var lps Syncer
 	lps.Client = client
-	lps.DaemonSetConfig = daemonSetConfig
+	lps.DaemonSetConfig = config
 	lps.Utils = kubernetes.NewUtils(client)
 	return &lps
 }
