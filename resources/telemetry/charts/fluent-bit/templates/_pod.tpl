@@ -112,10 +112,10 @@ containers:
       containerPort: 2021
       protocol: TCP
     env:
-      - name: MAX_FSBUFFER_SIZE
-        value: "500000000"
       - name: STORAGE_PATH
         value: /data/log/flb-storage/
+      - name: DIRECTORIES_SIZE_METRIC
+        value: telemetry_fsbuffer_usage_bytes
     volumeMounts:
       - name: varfluentbit
         mountPath: /data

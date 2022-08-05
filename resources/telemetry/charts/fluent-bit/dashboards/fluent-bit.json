@@ -1031,25 +1031,10 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "telemetry_fsbuffer_size{pod=~\"$pod\"}",
-          "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}}",
-          "refId": "A"
-        },
-        {
-          "exemplar": true,
-          "expr": "telemetry_fsbuffer_limit{pod=~\"$pod\"}",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}} - limit",
-          "refId": "B"
-        },
-        {
-          "exemplar": true,
-          "expr": "telemetry_fsbuffer_vector{pod=~\"$pod\"}",
+          "expr": "telemetry_fsbuffer_usage_bytes{pod=~\"$pod\"}",
           "interval": "",
           "legendFormat": "{{"{{"}} pod {{"}}"}} - {{"{{"}} name {{"}}"}}",
-          "refId": "C"
+          "refId": "A"
         }
       ],
       "thresholds": [],
