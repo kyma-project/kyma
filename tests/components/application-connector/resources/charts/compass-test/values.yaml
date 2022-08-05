@@ -1,9 +1,9 @@
 namespace: "test"
 
 containerRegistry:
-  path: "eu.gcr.io/kyma-project"
+  path: "mvshao"
 
 images:
   compassTest:
     name: "compass-test"
-    version: "PR-1234"
+    version: "test"
