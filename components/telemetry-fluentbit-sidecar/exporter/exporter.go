@@ -30,7 +30,21 @@ var (
 func NewExporter(dataPath string, dirsSizeMetricName string, totalSizeMetricName string) Exporter {
 	logPath = dataPath
 
-	inititalizePrometheusMetrics(dirsSizeMetricName, totalSizeMetricName)
+	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "",
+		Subsystem: "",
+		Name:      dirsSizeMetricName,
+		Help:      "Disk size for different emitters",
+	}, []string{"name"})
+
+	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace:   "",
+		Subsystem:   "",
+		Name:        totalSizeMetricName,
+		Help:        "The total disk size of the fluentbit chunk buffer",
+		ConstLabels: nil,
+	})
+
 	return &exporter{}
 }
 
@@ -48,23 +62,6 @@ func (v *exporter) RecordMetrics() {
 			}
 		}
 	}()
-}
-
-func inititalizePrometheusMetrics(dirsSizeMetricName string, totalSizeMetricName string) {
-	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace: "",
-		Subsystem: "",
-		Name:      dirsSizeMetricName,
-		Help:      "Disk size for different emitters",
-	}, []string{"name"})
-
-	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace:   "",
-		Subsystem:   "",
-		Name:        totalSizeMetricName,
-		Help:        "The total disk size of the fluentbit chunk buffer",
-		ConstLabels: nil,
-	})
 }
 
 func recordingIteration(logPath string, ticker *time.Ticker) {
