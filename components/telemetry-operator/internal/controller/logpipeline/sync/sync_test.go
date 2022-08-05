@@ -4,13 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync/mocks"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"

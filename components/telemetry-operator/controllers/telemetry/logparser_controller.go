@@ -20,10 +20,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logparser/sync"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -37,17 +37,17 @@ type LogParserReconciler struct {
 	client.Client
 	Scheme             *runtime.Scheme
 	FluentBitDaemonSet types.NamespacedName
-	Parser             *parserSync.LogParserSyncer
+	Parser             *sync.Syncer
 	DaemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
-func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig parserSync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
+func NewLogParserReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, restartsTotal prometheus.Counter) *LogParserReconciler {
 	var lpr LogParserReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 	lpr.DaemonSetUtils = fluentbit.NewDaemonSetUtils(client, daemonSetConfig.FluentBitDaemonSetName, restartsTotal)
-	lpr.Parser = parserSync.NewLogParserSyncer(client, daemonSetConfig)
+	lpr.Parser = sync.NewSyncer(client, daemonSetConfig)
 
 	return &lpr
 }

@@ -1,15 +1,16 @@
-package parserSync
+package sync
 
 import (
 	"context"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync/mocks"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -26,7 +27,7 @@ func TestSyncParsersConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogParserSyncer(mockClient, daemonSetConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig)
 
 	lp := telemetryv1alpha1.LogParser{
 		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "fooNs"},
@@ -50,7 +51,7 @@ Format regex`},
 	err := telemetryv1alpha1.AddToScheme(s)
 	require.NoError(t, err)
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(lp).Build()
-	sut := NewLogParserSyncer(mockClient, daemonSetConfig)
+	sut := NewSyncer(mockClient, daemonSetConfig)
 
 	changed, err := sut.SyncParsersConfigMap(context.Background(), lp)
 

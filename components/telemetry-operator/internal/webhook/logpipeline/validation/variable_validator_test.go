@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync/mocks"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

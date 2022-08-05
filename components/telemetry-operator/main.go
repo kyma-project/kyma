@@ -23,6 +23,9 @@ import (
 	"strings"
 	"time"
 
+	logparser2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logparser/sync"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
@@ -30,8 +33,6 @@ import (
 	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -43,8 +44,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -194,7 +193,7 @@ func main() {
 			Namespace: fluentBitNs,
 		},
 	}
-	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
+	parserDaemonSetConfig := logparser2.FluentBitDaemonSetConfig{
 		FluentBitDaemonSetName: types.NamespacedName{
 			Namespace: fluentBitNs,
 			Name:      fluentBitDaemonSet,

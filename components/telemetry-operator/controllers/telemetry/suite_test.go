@@ -21,12 +21,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync"
+
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 

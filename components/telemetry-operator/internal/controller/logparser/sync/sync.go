@@ -1,4 +1,4 @@
-package parserSync
+package sync
 
 import (
 	"context"
@@ -21,24 +21,22 @@ type FluentBitDaemonSetConfig struct {
 	FluentBitDaemonSetName    types.NamespacedName
 	FluentBitParsersConfigMap types.NamespacedName
 }
-type LogParserSyncer struct {
+type Syncer struct {
 	client.Client
 	DaemonSetConfig FluentBitDaemonSetConfig
 	Utils           *kubernetes.Utils
 }
 
-func NewLogParserSyncer(client client.Client,
-	daemonSetConfig FluentBitDaemonSetConfig,
-) *LogParserSyncer {
-	var lps LogParserSyncer
+func NewSyncer(client client.Client, daemonSetConfig FluentBitDaemonSetConfig) *Syncer {
+	var lps Syncer
 	lps.Client = client
 	lps.DaemonSetConfig = daemonSetConfig
 	lps.Utils = kubernetes.NewUtils(client)
 	return &lps
 }
 
-// Synchronize LogParser with ConfigMap of DaemonSetUtils parsers.
-func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
+// SyncParsersConfigMap synchronizes LogParser with ConfigMap that contains Fluent Bit parsers
+func (s *Syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
@@ -91,7 +89,6 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
 			changed = true
 		}
-
 	}
 
 	if !changed {

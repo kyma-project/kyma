@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/prometheus/client_golang/prometheus"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
