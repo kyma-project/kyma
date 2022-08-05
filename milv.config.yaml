@@ -54,4 +54,4 @@ files:
       "http://central-application-gateway.kyma-system:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH"]
   - path: "./kyma/tests/components/application-connector/README.md"
     config:
-      external-links-to-ignore: [ "./resources/charts/gateway-test/templates/service-account.yml#L2" ]
+      internal-links-to-ignore: [ "./resources/charts/gateway-test/templates/service-account.yml#L2" ]
