@@ -1,11 +1,11 @@
 package main
 
 import (
+	"directory-size-exporter/exporter"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
-	"telemetry-fluentbit-sidecar/exporter"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

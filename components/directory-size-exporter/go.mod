@@ -1,4 +1,4 @@
-module telemetry-fluentbit-sidecar
+module directory-size-exporter
 
 go 1.18
 

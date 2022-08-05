@@ -10,7 +10,10 @@ import (
 func TestMainMetric(t *testing.T) {
 	os.Setenv("STORAGE_PATH", "/data/log")
 	os.Setenv("DIRECTORIES_SIZE_METRIC", "telemetry_fsbuffer_vector")
-	//main()
+	// go main()
+	// res, err := http.Get("http://localhost:2021")
+	// require.NoError(t, err)
+	// println(res)
 	require.True(t, true)
 }
 
