@@ -1,5 +1,4 @@
 namespace: "test"
-
 mockServiceName: "mock-application"
 
 containerRegistry:
