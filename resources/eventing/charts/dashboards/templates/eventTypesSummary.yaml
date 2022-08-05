@@ -437,7 +437,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Throughput of Events Published per Event Type",
+            "title": "Total Events Published per Event Type",
             "tooltip": {
               "shared": true,
               "sort": 0,

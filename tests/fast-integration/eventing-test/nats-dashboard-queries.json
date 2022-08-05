@@ -108,7 +108,7 @@
     "query":"count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{}) by (event_type)"
   },
   {
-    "title":"JetStream Event Types Summary: Throughput of Events Published per Event Type",
+    "title":"JetStream Event Types Summary: Total Events Published per Event Type",
     "query":"sum(event_type_published) by (event_type)"
   }
 ]
