@@ -1,19 +1,35 @@
 package main
 
 import (
+	"bufio"
+	"flag"
+	"net/http"
 	"os"
 	"testing"
+	"time"
+
+	"directory-size-exporter/utils"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestMainMetric(t *testing.T) {
-	os.Setenv("STORAGE_PATH", "/data/log")
-	os.Setenv("DIRECTORIES_SIZE_METRIC", "telemetry_fsbuffer_vector")
-	// go main()
-	// res, err := http.Get("http://localhost:2021")
-	// require.NoError(t, err)
-	// println(res)
+	flag.Set("test.timeout", "2m0s")
+	dirPath, err := utils.PrepareMockDirectories(t.TempDir())
+	require.NoError(t, err)
+
+	os.Setenv("STORAGE_PATH", dirPath)
+	os.Setenv("DIRECTORIES_SIZE_METRIC", "telemetry_fsbuffer_usage_bytes")
+	go main()
+	time.Sleep(35 * time.Second)
+	res, err := http.Get("http://localhost:2021/metrics")
+	require.NoError(t, err)
+	defer res.Body.Close()
+	scanner := bufio.NewScanner(res.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		println(line)
+	}
 	require.True(t, true)
 }
 
