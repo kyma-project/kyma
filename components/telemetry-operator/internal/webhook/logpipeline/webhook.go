@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/google/uuid"

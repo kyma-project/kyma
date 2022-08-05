@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 	mock "github.com/stretchr/testify/mock"
 )
 

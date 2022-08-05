@@ -20,9 +20,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 
 	"github.com/prometheus/client_golang/prometheus"

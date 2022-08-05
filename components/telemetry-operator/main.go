@@ -23,13 +23,13 @@ import (
 	"strings"
 	"time"
 
-	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
-	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
+	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
+	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 

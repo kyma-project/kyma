@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/utils"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	v1 "k8s.io/api/core/v1"
@@ -129,6 +129,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 
 		return configFiles, nil
 	}
+
 	return []utils.File{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
 }
 
