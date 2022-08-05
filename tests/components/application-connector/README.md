@@ -177,3 +177,12 @@ make test-gateway-debug
    ```bash
    make enable-sidecar-after-mtls-test
    ```
+   - Optionally, run the tests in the debugging mode:
+   
+      ```bash
+      make test-gateway-debug
+      ```
+      In this mode, you must remember to enable the sidecars as soon as the test is completed:
+      ```bash
+      make enable-sidecar-after-mtls-test
+      ```
