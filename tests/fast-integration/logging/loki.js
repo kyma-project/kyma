@@ -41,13 +41,12 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
-function isJsonString(str) {
+function parseJson(str) {
   try {
-    JSON.parse(str);
+    return JSON.parse(str);
   } catch (e) {
-    return false;
+    return undefined;
   }
-  return true;
 }
 
 async function verifyIstioAccessLogFormat(startTimestamp) {
@@ -57,7 +56,13 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
 
   assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
   const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-  assert.isTrue(isJsonString(entry.log), `Istio access log is not in JSON format: ${entry.log}` );
+  const log = parseJson(entry.log);
+  assert.isDefined(log, `Istio access log is not in JSON format: ${entry.log}`);
+  assert.isDefined(log['response_code'], `Istio access log does not have 'response_code' field: ${log}`);
+  assert.isDefined(log['bytes_received'], `Istio access log does not have 'bytes_received' field: ${log}`);
+  assert.isDefined(log['bytes_sent'], `Istio access log does not have 'bytes_sent' field: ${log}`);
+  assert.isDefined(log['duration'], `Istio access log does not have 'duration' field: ${log}`);
+  assert.isDefined(log['start_time'], `Istio access log does not have 'start_time' field: ${log}`);
 }
 
 module.exports = {
