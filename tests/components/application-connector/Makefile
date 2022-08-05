@@ -9,9 +9,9 @@ APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
 TEST_TIMEOUT = "2m"
 
 
-.PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug test-compass test-compass-debug image-compass-test clean-compass-test publish-compass-test image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
+.PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug test-compass-runtime-agent test-compass-debug image-compass-test clean-compass-test publish-compass-test image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 
-test: test-gateway test-compass
+test: test-gateway test-compass-runtime-agent
 image: image-gateway-test image-compass-test
 clean: clean-gateway-test clean-compass-test
 
@@ -44,7 +44,7 @@ publish-gateway-test: image-gateway-test
 image-gateway-test:
 	docker build -t $(GATEWAY_TEST_IMAGE) -f Dockerfile.gateway .
 
-test-compass: test-compass-debug clean-compass-test
+test-compass-runtime-agent: test-compass-debug clean-compass-test
 
 test-compass-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
