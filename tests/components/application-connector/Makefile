@@ -32,7 +32,7 @@ test-gateway-debug:
 	@echo ""
 	@echo "Gateway test results:"
 
-	./scripts/check-pod-logs.sh
+	./scripts/check-pod-logs.sh application-gateway-test
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test  | kubectl delete -f -
@@ -59,7 +59,7 @@ test-compass-debug:
 	@echo ""
 	@echo "Compass test results:"
 
-	./scripts/check-pod-logs.sh
+	./scripts/check-pod-logs.sh compass-runtime-agent-test
 
 clean-compass-test:
 	helm template resources/charts/compass-test  | kubectl delete -f -
