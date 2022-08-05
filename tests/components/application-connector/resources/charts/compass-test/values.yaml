@@ -1,4 +1,3 @@
-serviceAccountName: "test-account"
 namespace: "test"
 
 mockServiceName: "mock-application"
