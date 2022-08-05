@@ -4,6 +4,9 @@ kind: LogPipeline
 metadata:
   name: loki
 spec:
+  input:
+    application:
+      includeSystemNamespaces: true
   output:
     grafana-loki:
       Url:
