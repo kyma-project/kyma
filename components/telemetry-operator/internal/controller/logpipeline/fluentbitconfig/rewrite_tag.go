@@ -1,4 +1,4 @@
-package fluentbit
+package fluentbitconfig
 
 import (
 	"fmt"

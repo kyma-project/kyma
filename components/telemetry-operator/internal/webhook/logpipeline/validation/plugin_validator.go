@@ -6,10 +6,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	"github.com/pkg/errors"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
@@ -107,7 +108,7 @@ func validateCustomOutput(content string, denied []string) error {
 		return nil
 	}
 
-	customSection, err := fluentbit.ParseSection(content)
+	customSection, err := fluentbitconfig.ParseSection(content)
 	if err != nil {
 		return err
 	}

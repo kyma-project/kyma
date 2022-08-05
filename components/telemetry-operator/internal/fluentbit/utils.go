@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -77,7 +79,7 @@ func (f *DaemonSetUtils) IsFluentBitDaemonSetReady(ctx context.Context) (bool, e
 func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 	currentBaseDirectory, fluentBitParsersConfigMapKey string,
 	fluentBitConfigMap types.NamespacedName,
-	pipelineConfig PipelineConfig,
+	pipelineConfig fluentbitconfig.PipelineConfig,
 	pipeline *telemetryv1alpha1.LogPipeline,
 	parser *telemetryv1alpha1.LogParser) ([]utils.File, error) {
 	var configFiles []utils.File
@@ -108,7 +110,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 		if err = f.client.List(ctx, &logParsers); err != nil {
 			return []utils.File{}, err
 		}
-		parsersConfig := MergeParsersConfig(&logParsers)
+		parsersConfig := fluentbitconfig.MergeParsersConfig(&logParsers)
 		configFiles = append(configFiles, utils.File{
 			Path: fluentBitParsersConfigDirectory,
 			Name: fluentBitParsersConfigMapKey,
@@ -120,7 +122,7 @@ func (f *DaemonSetUtils) GetFluentBitConfig(ctx context.Context,
 
 	if parser != nil {
 		logParsers.Items = appendUniqueParsers(logParsers.Items, parser)
-		parsersConfig := MergeParsersConfig(&logParsers)
+		parsersConfig := fluentbitconfig.MergeParsersConfig(&logParsers)
 		configFiles = append(configFiles, utils.File{
 			Path: fluentBitParsersConfigDirectory,
 			Name: fluentBitParsersConfigMapKey,
@@ -146,7 +148,7 @@ func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telem
 func appendFluentBitConfigFile(
 	configFiles []utils.File,
 	logPipeline telemetryv1alpha1.LogPipeline,
-	pipelineConfig PipelineConfig,
+	pipelineConfig fluentbitconfig.PipelineConfig,
 	fluentBitSectionsConfigDirectory string,
 	fluentBitFilesDirectory string) ([]utils.File, error) {
 	for _, file := range logPipeline.Spec.Files {
@@ -157,7 +159,7 @@ func appendFluentBitConfigFile(
 		})
 	}
 
-	sectionsConfig, err := MergeSectionsConfig(&logPipeline, pipelineConfig)
+	sectionsConfig, err := fluentbitconfig.MergeSectionsConfig(&logPipeline, pipelineConfig)
 	if err != nil {
 		return []utils.File{}, err
 	}

@@ -4,13 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync/mocks"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -27,7 +28,7 @@ var (
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
-	pipelineConfig = fluentbit.PipelineConfig{
+	pipelineConfig = fluentbitconfig.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

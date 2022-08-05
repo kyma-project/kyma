@@ -21,13 +21,14 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync"
 
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -105,7 +106,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := fluentbitconfig.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

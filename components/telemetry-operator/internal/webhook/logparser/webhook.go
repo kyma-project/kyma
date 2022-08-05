@@ -20,6 +20,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
@@ -53,7 +55,7 @@ type ValidatingWebhookHandler struct {
 	client.Client
 	fluentBitConfigMap types.NamespacedName
 	parserValidator    validation.ParserValidator
-	pipelineConfig     fluentbit.PipelineConfig
+	pipelineConfig     fluentbitconfig.PipelineConfig
 	dryRunner          DryRunner
 	fsWrapper          utils.FileSystem
 	decoder            *admission.Decoder
@@ -65,7 +67,7 @@ func NewValidatingWebhookHandler(
 	fluentBitConfigMap string,
 	namespace string,
 	parserValidator validation.ParserValidator,
-	pipelineConfig fluentbit.PipelineConfig,
+	pipelineConfig fluentbitconfig.PipelineConfig,
 	dryRunner DryRunner,
 	fsWrapper utils.FileSystem,
 	restartsTotal prometheus.Counter,

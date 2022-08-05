@@ -3,8 +3,9 @@ package validation
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 //go:generate mockery --name ParserValidator --filename parser_validator.go
@@ -23,7 +24,7 @@ func (v *parserValidator) Validate(logParser *telemetryv1alpha1.LogParser) error
 	if len(logParser.Spec.Parser) == 0 {
 		return fmt.Errorf("log parser '%s' has no parser defined", logParser.Name)
 	}
-	section, err := fluentbit.ParseSection(logParser.Spec.Parser)
+	section, err := fluentbitconfig.ParseSection(logParser.Spec.Parser)
 	if err != nil {
 		return err
 	}

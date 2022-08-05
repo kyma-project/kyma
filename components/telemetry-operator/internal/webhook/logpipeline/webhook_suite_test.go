@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/mocks"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
@@ -32,7 +34,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -116,7 +117,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := fluentbitconfig.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

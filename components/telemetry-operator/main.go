@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	logparser2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logparser/sync"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/sync"
 
@@ -43,7 +45,6 @@ import (
 	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -167,7 +168,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := fluentbitconfig.PipelineConfig{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,

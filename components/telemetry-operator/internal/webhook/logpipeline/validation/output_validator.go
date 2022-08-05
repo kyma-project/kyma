@@ -3,8 +3,9 @@ package validation
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 //go:generate mockery --name OutputValidator --filename output_validator.go
@@ -21,13 +22,13 @@ func NewOutputValidator() OutputValidator {
 
 func (v *outputValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
 
-	section, err := fluentbit.ParseSection(logPipeline.Spec.Output.Custom)
+	section, err := fluentbitconfig.ParseSection(logPipeline.Spec.Output.Custom)
 	if err != nil {
 		return err
 	}
 
-	if _, hasKey := section[fluentbit.OutputStorageMaxSizeKey]; hasKey {
-		return fmt.Errorf("log pipeline '%s' contains forbidden configuration key '%s'", logPipeline.Name, fluentbit.OutputStorageMaxSizeKey)
+	if _, hasKey := section[fluentbitconfig.OutputStorageMaxSizeKey]; hasKey {
+		return fmt.Errorf("log pipeline '%s' contains forbidden configuration key '%s'", logPipeline.Name, fluentbitconfig.OutputStorageMaxSizeKey)
 	}
 
 	return nil

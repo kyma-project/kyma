@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/controller/logpipeline/fluentbitconfig"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
@@ -60,7 +62,7 @@ type ValidatingWebhookHandler struct {
 	maxPipelinesValidator validation.MaxPipelinesValidator
 	outputValidator       validation.OutputValidator
 	fileValidator         validation.FilesValidator
-	pipelineConfig        fluentbit.PipelineConfig
+	pipelineConfig        fluentbitconfig.PipelineConfig
 	fsWrapper             utils.FileSystem
 	decoder               *admission.Decoder
 	daemonSetUtils        *fluentbit.DaemonSetUtils
@@ -77,7 +79,7 @@ func NewValidatingWebhookHandler(
 	maxPipelinesValidator validation.MaxPipelinesValidator,
 	outputValidator validation.OutputValidator,
 	fileValidator validation.FilesValidator,
-	pipelineConfig fluentbit.PipelineConfig,
+	pipelineConfig fluentbitconfig.PipelineConfig,
 	fsWrapper utils.FileSystem,
 	restartsTotal prometheus.Counter) *ValidatingWebhookHandler {
 	fluentBitConfigMapNamespacedName := types.NamespacedName{
