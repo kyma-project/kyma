@@ -100,15 +100,15 @@ spec:
                   grafana-loki:
                     description: LokiOutput describes a Fluent Bit Loki output configuration
                     properties:
-                      Labels:
+                      labels:
                         additionalProperties:
                           type: string
                         type: object
-                      RemoveKeys:
+                      removeKeys:
                         items:
                           type: string
                         type: array
-                      Url:
+                      url:
                         properties:
                           value:
                             type: string

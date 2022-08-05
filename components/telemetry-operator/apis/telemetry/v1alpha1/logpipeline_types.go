@@ -63,9 +63,9 @@ type Filter struct {
 
 // LokiOutput describes a Fluent Bit Loki output configuration
 type LokiOutput struct {
-	URL        ValueType         `json:"Url,omitempty"`
-	Labels     map[string]string `json:"Labels,omitempty"`
-	RemoveKeys []string          `json:"RemoveKeys,omitempty"`
+	URL        ValueType         `json:"url,omitempty"`
+	Labels     map[string]string `json:"labels,omitempty"`
+	RemoveKeys []string          `json:"removeKeys,omitempty"`
 }
 
 // HttpOutput describes a Fluent Bit HTTP output configuration
