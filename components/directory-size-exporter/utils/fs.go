@@ -28,18 +28,25 @@ func PrepareMockDirectory(dirPath string, dirName string, size int64) error {
 		return err
 	}
 
-	var newFile *os.File = nil
-	newFile, err = os.Create(dirPath + "/" + dirName + "/" + fileName)
-	if err != nil {
-		return err
-	}
-
-	err = os.Truncate(dirPath+"/"+dirName+"/"+fileName, size)
-	if err != nil {
-		newFile.Close()
-		return err
-	}
-	newFile.Close()
+	_, err = WriteMockFileToDirectory(dirPath+"/"+dirName, fileName, size)
 
 	return err
+}
+
+func WriteMockFileToDirectory(dirPath string, filename string, size int64) (*os.File, error) {
+	var newFile *os.File = nil
+	newFile, err := os.Create(dirPath + "/" + filename)
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.Truncate(dirPath+"/"+filename, size)
+	if err != nil {
+		newFile.Close()
+		return nil, err
+	}
+
+	newFile.Close()
+
+	return newFile, err
 }
