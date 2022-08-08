@@ -27,9 +27,9 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
-	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
-	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
@@ -210,21 +210,17 @@ func main() {
 		FluentBitPluginDir: fluentBitPluginDirectory,
 	}
 
-	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(mgr.GetClient(),
-		fluentBitConfigMap,
-		fluentBitNs,
-		validation3.NewInputValidator(),
-		validation3.NewVariablesValidator(mgr.GetClient()),
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig),
-		validation3.NewPluginValidator(
+	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logpipelinevalidation.NewInputValidator(),
+		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
+		logpipelinevalidation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-		validation3.NewMaxPipelinesValidator(maxPipelines),
-		validation3.NewOutputValidator(),
-		validation3.NewFilesValidator(),
-		pipelineConfig,
-		utils.NewFileSystem(),
-		restartsTotal)
+		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
+		logpipelinevalidation.NewOutputValidator(),
+		logpipelinevalidation.NewFilesValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
@@ -253,7 +249,7 @@ func main() {
 	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		validation2.NewParserValidator(),
+		logparservalidation.NewParserValidator(),
 		pipelineConfig,
 		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig),
 		utils.NewFileSystem(),
