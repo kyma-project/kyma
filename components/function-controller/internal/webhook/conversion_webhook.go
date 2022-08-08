@@ -170,7 +170,7 @@ func applyV1Alpha1ToV1Alpha2Annotations(in *serverlessv1alpha1.Function, out *se
 func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
 	out.Spec.Env = in.Spec.Env
 	out.Spec.MaxReplicas = in.Spec.MaxReplicas
-	out.Spec.MinReplicas = in.Spec.MaxReplicas
+	out.Spec.MinReplicas = in.Spec.MinReplicas
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
