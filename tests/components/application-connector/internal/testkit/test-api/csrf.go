@@ -17,10 +17,10 @@ type CSRFHandler struct {
 	tokens map[string]interface{}
 }
 
-func NewCSRF() CSRFHandler {
+func NewCSRF(tokens map[string]interface{}) CSRFHandler {
 	return CSRFHandler{
 		mutex:  sync.RWMutex{},
-		tokens: make(map[string]interface{}),
+		tokens: tokens,
 	}
 }
 

@@ -10,15 +10,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, tokens map[string]OAuthToken) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, oauthTokens map[string]OAuthToken, csrfTokens map[string]interface{}) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
-	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
-	csrf := NewCSRF()
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, oauthTokens)
+	csrf := NewCSRF(csrfTokens)
 
 	{
 		api.HandleFunc("/oauth/token", oauth.Token).Methods(http.MethodPost)
@@ -71,14 +71,15 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	return router
 }
 
-func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, tokens map[string]OAuthToken) http.Handler {
+func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, oauthTokens map[string]OAuthToken, csrfTokens map[string]interface{}) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
-	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, oauthTokens)
+	csrf := NewCSRF(csrfTokens)
 
 	{
 		r := api.PathPrefix("/mtls").Subrouter()
@@ -88,6 +89,12 @@ func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, tokens
 
 	{
 		r := api.PathPrefix("/mtls").Subrouter()
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+	{
+		r := api.PathPrefix("/csrf-mtls").Subrouter()
+		r.Use(csrf.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
