@@ -56,7 +56,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 
 ### Step 1: Create an Input
 
-1. To create a LogPipeline and define from which resources logs should be included create a LogPipeline with a name and input:
+1. To create a LogPipeline and define from which resources logs should be included create a LogPipeline with a name and spec with input:
     ```yaml
     kind: LogPipeline
     apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -73,7 +73,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
         application: ...
     ```
 
-3. Selection mechanisms for application logs can be done on namespace or container level. If nothing is set all namespaces will be considered except the system namespaces `kube-system`, `istio-system`, `kyma-system`, `kyma-integration` which are excluded by default.
+3. Selection mechanisms for application logs can be applied on namespace or container level. If nothing is set all namespaces will be considered except the system namespaces `kube-system`, `istio-system`, `kyma-system`, `kyma-integration` which are excluded by default.
     ```yaml
     spec:
       input:
