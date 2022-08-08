@@ -189,7 +189,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/bad-csrf-token-mtls-oauth"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-mtls-oauth"
           credentials:
             secretName: mtls-oauth-negative-case
             authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
@@ -204,7 +204,7 @@ spec:
       entries:
         - type: API
           targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/bad-csrf-endpoint-mtls-oauth"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-mtls-oauth"
           credentials:
             secretName: mtls-oauth-negative-case
             authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
@@ -219,7 +219,7 @@ spec:
       entries:
         - type: API
           targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/bad-csrf-token-mtls"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-mtls"
           credentials:
             secretName: mtls-negative-case
             type: CertificateGen
@@ -233,7 +233,7 @@ spec:
       entries:
         - type: API
           targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/bad-csrf-endpoint-mtls"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-mtls"
           credentials:
             secretName: mtls-negative-case
             type: CertificateGen
