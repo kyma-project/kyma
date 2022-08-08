@@ -19,6 +19,9 @@ rules:
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]
     verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
 {{- if .Values.podSecurityPolicy.enabled }}
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
