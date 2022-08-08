@@ -25,8 +25,6 @@ import (
 	"testing"
 	"time"
 
-	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/mocks"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
 	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation/mocks"
 	"github.com/prometheus/client_golang/prometheus"
@@ -63,7 +61,6 @@ var (
 	maxPipelinesValidatorMock *validationmocks.MaxPipelinesValidator
 	outputValidatorMock       *validationmocks.OutputValidator
 	fileValidatorMock         *validationmocks.FilesValidator
-	fileSystemMock            *utilsmocks.FileSystem
 	dryRunnerMock             *mocks.DryRunner
 )
 
@@ -128,7 +125,6 @@ var _ = BeforeSuite(func() {
 	})
 	metrics.Registry.MustRegister(restartsTotal)
 
-	fileSystemMock = &utilsmocks.FileSystem{}
 	logPipelineValidator := NewValidatingWebhookHandler(mgr.GetClient(), inputValidatorMock, variableValidatorMock, pluginValidatorMock, maxPipelinesValidatorMock, outputValidatorMock, fileValidatorMock, dryRunnerMock)
 
 	By("registering LogPipeline webhook")

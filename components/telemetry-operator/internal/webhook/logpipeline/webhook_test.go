@@ -110,8 +110,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should accept valid LogPipeline", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
@@ -129,8 +127,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject LogPipeline with invalid config", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
@@ -153,8 +149,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject LogPipeline with forbidden plugin", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			pluginErr := errors.New("output plugin stdout is not allowed")
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -175,8 +169,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject LogPipeline with invalid output", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
@@ -198,8 +190,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject LogPipeline when exceeding pipeline limit", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			maxPipelinesErr := errors.New("too many pipelines")
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(maxPipelinesErr).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -217,8 +207,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject LogPipeline when duplicate filename is used", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			pluginValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline"),
 				mock.AnythingOfType("*v1alpha1.LogPipelineList")).Return(nil).Times(1)
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
@@ -246,8 +234,6 @@ var _ = Describe("LogPipeline webhook", func() {
 
 	Context("When updating LogPipeline", func() {
 		It("Should create valid LogPipeline", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(4)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -265,8 +251,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should update previously created valid LogPipeline", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(7)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -291,8 +275,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject new update of previously created LogPipeline", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(9)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
@@ -320,8 +302,6 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject new update with invalid plugin usage of previously created LogPipeline", func() {
-			fileSystemMock.On("CreateAndWrite", mock.AnythingOfType("utils.File")).Return(nil).Times(9)
-			fileSystemMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			pluginErr := errors.New("output plugin stdout is not allowed")
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)

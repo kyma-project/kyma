@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -77,7 +76,7 @@ func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.
 	return d.run(ctx, args)
 }
 
-func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline, parser *telemetryv1alpha1.LogParser) ([]utils.File, error) {
+func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline, parser *telemetryv1alpha1.LogParser) ([]File, error) {
 	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
 
 	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
@@ -87,12 +86,12 @@ func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *teleme
 	var cm v1.ConfigMap
 	var err error
 	if err := d.client.Get(ctx, d.config.FluentBitConfigMapName, &cm); err != nil {
-		return []utils.File{}, err
+		return []File{}, err
 	}
 
-	var configFiles []utils.File
+	var configFiles []File
 	for key, data := range cm.Data {
-		configFiles = append(configFiles, utils.File{
+		configFiles = append(configFiles, File{
 			Path: currentBaseDirectory,
 			Name: key,
 			Data: data,
@@ -104,13 +103,13 @@ func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *teleme
 	if pipeline != nil {
 		configFiles, err = appendFluentBitConfigFile(configFiles, *pipeline, d.config.PipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
 		if err != nil {
-			return []utils.File{}, err
+			return []File{}, err
 		}
 		if err = d.client.List(ctx, &logParsers); err != nil {
-			return []utils.File{}, err
+			return []File{}, err
 		}
 		parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
-		configFiles = append(configFiles, utils.File{
+		configFiles = append(configFiles, File{
 			Path: fluentBitParsersConfigDirectory,
 			Name: fluentBitParsersConfigMapKey,
 			Data: parsersConfig,
@@ -122,7 +121,7 @@ func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *teleme
 	if parser != nil {
 		logParsers.Items = appendUniqueParsers(logParsers.Items, parser)
 		parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
-		configFiles = append(configFiles, utils.File{
+		configFiles = append(configFiles, File{
 			Path: fluentBitParsersConfigDirectory,
 			Name: fluentBitParsersConfigMapKey,
 			Data: parsersConfig,
@@ -131,7 +130,7 @@ func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *teleme
 		return configFiles, nil
 	}
 
-	return []utils.File{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
+	return []File{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
 }
 
 func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telemetryv1alpha1.LogParser) []telemetryv1alpha1.LogParser {
@@ -145,13 +144,13 @@ func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telem
 }
 
 func appendFluentBitConfigFile(
-	configFiles []utils.File,
+	configFiles []File,
 	logPipeline telemetryv1alpha1.LogPipeline,
 	pipelineConfig fluentbit.PipelineConfig,
 	fluentBitSectionsConfigDirectory string,
-	fluentBitFilesDirectory string) ([]utils.File, error) {
+	fluentBitFilesDirectory string) ([]File, error) {
 	for _, file := range logPipeline.Spec.Files {
-		configFiles = append(configFiles, utils.File{
+		configFiles = append(configFiles, File{
 			Path: fluentBitFilesDirectory,
 			Name: file.Name,
 			Data: file.Content,
@@ -160,10 +159,10 @@ func appendFluentBitConfigFile(
 
 	sectionsConfig, err := fluentbit.MergeSectionsConfig(&logPipeline, pipelineConfig)
 	if err != nil {
-		return []utils.File{}, err
+		return []File{}, err
 	}
 
-	configFiles = append(configFiles, utils.File{
+	configFiles = append(configFiles, File{
 		Path: fluentBitSectionsConfigDirectory,
 		Name: logPipeline.Name + ".conf",
 		Data: sectionsConfig,
