@@ -20,16 +20,10 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
-
-	"github.com/prometheus/client_golang/prometheus"
-
-	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,11 +37,6 @@ type DryRunner interface {
 	DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
 }
 
-const (
-	fluentBitConfigDirectory     = "/tmp/dry-run"
-	fluentBitParsersConfigMapKey = "parsers.conf"
-)
-
 //+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
@@ -55,34 +44,15 @@ type ValidatingWebhookHandler struct {
 	parserValidator    validation.ParserValidator
 	pipelineConfig     fluentbit.PipelineConfig
 	dryRunner          DryRunner
-	fsWrapper          utils.FileSystem
 	decoder            *admission.Decoder
-	daemonSetUtils     *fluentbit.DaemonSetUtils
 }
 
-func NewValidatingWebhookHandler(
-	client client.Client,
-	fluentBitConfigMap string,
-	namespace string,
-	parserValidator validation.ParserValidator,
-	pipelineConfig fluentbit.PipelineConfig,
-	dryRunner DryRunner,
-	fsWrapper utils.FileSystem,
-	restartsTotal prometheus.Counter,
-) *ValidatingWebhookHandler {
-	fluentBitConfigMapNamespacedName := types.NamespacedName{
-		Name:      fluentBitConfigMap,
-		Namespace: namespace,
-	}
-	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
+func NewValidatingWebhookHandler(client client.Client, parserValidator validation.ParserValidator, pipelineConfig fluentbit.PipelineConfig, dryRunner DryRunner) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
-		Client:             client,
-		fluentBitConfigMap: fluentBitConfigMapNamespacedName,
-		parserValidator:    parserValidator,
-		pipelineConfig:     pipelineConfig,
-		dryRunner:          dryRunner,
-		fsWrapper:          fsWrapper,
-		daemonSetUtils:     daemonSetUtils,
+		Client:          client,
+		parserValidator: parserValidator,
+		pipelineConfig:  pipelineConfig,
+		dryRunner:       dryRunner,
 	}
 }
 
@@ -116,21 +86,6 @@ func (v *ValidatingWebhookHandler) validateLogParser(ctx context.Context, logPar
 	err := v.parserValidator.Validate(logParser)
 	if err != nil {
 		return err
-	}
-
-	var pipeLine *telemetryv1alpha1.LogPipeline
-	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
-
-	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
-	if err != nil {
-		return err
-	}
-	log.Info("Fluent Bit config files count", "count", len(configFiles))
-	for _, configFile := range configFiles {
-		if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
-			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
-			return err
-		}
 	}
 
 	if err = v.dryRunner.DryRunParser(ctx, logParser); err != nil {

@@ -23,8 +23,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
 	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
@@ -246,15 +244,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(),
-		fluentBitConfigMap,
-		fluentBitNs,
-		logparservalidation.NewParserValidator(),
-		pipelineConfig,
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig),
-		utils.NewFileSystem(),
-		restartsTotal,
-	)
+	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(), logparservalidation.NewParserValidator(), pipelineConfig, dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",
 		&k8sWebhook.Admission{Handler: logParserValidationHandler})
