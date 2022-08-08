@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, oauthTokens map[string]OAuthToken, csrfTokens map[string]interface{}) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, oauthTokens map[string]OAuthToken, csrfTokens CSRFTokens) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
@@ -71,7 +71,7 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	return router
 }
 
-func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, oauthTokens map[string]OAuthToken, csrfTokens map[string]interface{}) http.Handler {
+func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, oauthTokens map[string]OAuthToken, csrfTokens CSRFTokens) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")

@@ -31,7 +31,7 @@ func main() {
 	oAuthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
 	expectedRequestParameters := test_api.ExpectedRequestParameters{Headers: cfg.RequestHeaders, QueryParameters: cfg.RequestQueryParameters}
 	oauthTokens := make(map[string]test_api.OAuthToken)
-	csrfTokens := make(map[string]interface{})
+	csrfTokens := make(test_api.CSRFTokens)
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.Port)

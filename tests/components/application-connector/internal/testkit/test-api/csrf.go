@@ -12,12 +12,14 @@ const (
 	csrfTokenCookie = "csrftokencookie"
 )
 
+type CSRFTokens map[string]interface{}
+
 type CSRFHandler struct {
 	mutex  sync.RWMutex
 	tokens map[string]interface{}
 }
 
-func NewCSRF(tokens map[string]interface{}) CSRFHandler {
+func NewCSRF(tokens CSRFTokens) CSRFHandler {
 	return CSRFHandler{
 		mutex:  sync.RWMutex{},
 		tokens: tokens,
