@@ -68,11 +68,13 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		log.Error(err, "Failed to sync variables")
 		return false, err
 	}
+
 	err = s.syncUnsupportedPluginsTotal(ctx)
 	if err != nil {
 		log.Error(err, "Failed to sync unsupported mode metrics")
 		return false, err
 	}
+
 	return sectionsChanged || filesChanged || variablesChanged, nil
 }
 

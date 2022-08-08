@@ -383,12 +383,23 @@ config:
 
   # This allows adding more files with arbitary filenames to /fluent-bit/etc by providing key/value pairs.
   # The key becomes the filename, the value becomes the file content.
-  extraFiles: {}
-#     example.conf: |
-#       [OUTPUT]
-#           Name example
-#           Match foo.*
-#           Host bar
+  extraFiles:
+      loki-labelmap.json: |
+            {
+              "kubernetes": {
+                  "container_name": "container",
+                  "host": "node",
+                  "labels": {
+                    "app": "app",
+                    "app.kubernetes.io/component": "component",
+                    "app.kubernetes.io/name": "app",
+                    "serverless.kyma-project.io/function-name": "function"
+                  },
+                  "namespace_name": "namespace",
+                  "pod_name": "pod"
+                },
+              "stream": "stream"
+            }
 
 # The config volume is mounted by default, either to the existingConfigMap value, or the default of "fluent-bit.fullname"
 volumeMounts:

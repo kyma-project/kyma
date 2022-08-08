@@ -50,7 +50,13 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r.URL.Path = path
 
-	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier)
+	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
+	if err != nil {
+		handleErrors(w, err)
+		return
+	}
+
+	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -59,7 +65,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
 
-	err = p.addAuthorization(newRequest, cacheEntry)
+	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -76,21 +82,17 @@ func (p *proxy) extractPath(path string) (model.APIIdentifier, string, apperrors
 	return apiIdentifier, path, nil
 }
 
-func (p *proxy) getOrCreateCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry, apperrors.AppError) {
+func (p *proxy) getOrCreateCacheEntry(apiIdentifier model.APIIdentifier, serviceAPI model.API) (*CacheEntry, apperrors.AppError) {
 	cacheObj, found := p.cache.Get(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry)
 
 	if found {
 		return cacheObj, nil
 	}
 
-	return p.createCacheEntry(apiIdentifier)
+	return p.createCacheEntry(apiIdentifier, serviceAPI)
 }
 
-func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry, apperrors.AppError) {
-	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
-	if err != nil {
-		return nil, err
-	}
+func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier, serviceAPI model.API) (*CacheEntry, apperrors.AppError) {
 	clientCertificate := clientcert.NewClientCertificate(nil)
 	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
@@ -129,15 +131,15 @@ func (p *proxy) setRequestTimeout(r *http.Request) (*http.Request, context.Cance
 	return newRequest, cancel
 }
 
-func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
+func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry, skipTLSVerify bool) apperrors.AppError {
 
-	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
+	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r, skipTLSVerify)
 
 	if err != nil {
 		return err
 	}
 
-	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
+	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r, skipTLSVerify)
 }
 
 func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {

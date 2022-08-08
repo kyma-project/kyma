@@ -3,8 +3,8 @@ title: Event names
 ---
 
 Event names depend on the type of event. Eventing supports the following event types:
-- [Cloud Events](https://cloudevents.io/) - they use a specification for describing event data in a common way.
-- legacy events - they are converted to Cloud Events by [Event Publisher Proxy](./00-architecture/evnt-01-architecture.md#event-publisher-proxy), which also adds a `sap.kyma.custom` prefix.
+- [CloudEvents](https://cloudevents.io/) - they use a specification for describing event data in a common way.
+- legacy events - they are converted to CloudEvents by [Event Publisher Proxy](./00-architecture/evnt-01-architecture.md#event-publisher-proxy), which also adds a `sap.kyma.custom` prefix.
 
 ## Event name format
 
@@ -18,7 +18,7 @@ The event type is composed of the following components:
 
 For publishers, the event type takes this sample form:
 - `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application
-- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1` for Cloud Events
+- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1` for CloudEvents
 
 ## Event name cleanup
 

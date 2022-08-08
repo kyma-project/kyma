@@ -67,7 +67,7 @@ npm run test-eventing
 > ```
 > MOCK_NAMESPACE=mock2 make ci-test-eventing
 > ```
-> Using a different Namespace changes the host used for the Commerce Mock API Rule as well. 
+> Using a different Namespace changes the host used for the Commerce Mock APIRule as well.
 > This allows different Commerce Mocks to co-exist in different Namespaces.
 
 ## Local development

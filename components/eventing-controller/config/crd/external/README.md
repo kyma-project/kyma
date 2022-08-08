@@ -1,10 +1,10 @@
-# External custom resource definitions
+# External Custom Resource Definitions
 
 ## Overview
 
-This directory contains the external custom resource definitions used for testing purposes.
+This directory contains the external CustomResourceDefinitions used for testing purposes.
 
-## Custom resource definitions
+## Custom Resource Definitions
 
 | Kind    | API Version                      | Description                                                              | Reference                                                                                       |
 |---------|----------------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|

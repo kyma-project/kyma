@@ -18,7 +18,7 @@ Alternatively, you can set the **token_from.location** parameter to `query_param
 
 ## Examples
 
-See these sample excerpts from API Rule custom resources that show the **rules** attribute for services secured with OAuth2, JWT, and an OAuth2 and JWT combination.
+See these sample excerpts from APIRule custom resources that show the **rules** attribute for services secured with OAuth2, JWT, and an OAuth2 and JWT combination.
 
 
 <div tabs>
@@ -84,4 +84,4 @@ See these sample excerpts from API Rule custom resources that show the **rules**
 
 </div>
 
->**TIP:** To learn more, read about the [API Rule custom resource](./00-custom-resources/apix-01-apirule.md). You can also follow the [tutorial](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) to learn how to expose and secure services.
+>**TIP:** To learn more, read about the [APIRule custom resource](./00-custom-resources/apix-01-apirule.md). You can also follow the [tutorial](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) to learn how to expose and secure services.

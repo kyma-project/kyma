@@ -13,5 +13,5 @@ There's a fixed logs retention time and size. If the default time is exceeded, t
 ## Remedy
 
 - If you want to see logs older than 5 days, [increase the retention period](../../operations/obsv-02-adjust-loki.md#adjust-log-retention-period).
-- If your logs aren't saved because your volume size is too small, [expand the Persistent Volume Claims](../../operations/obsv-02-adjust-loki.md#adjust-volume-size).
+- If your logs aren't saved because your volume size is too small, [expand the PersistentVolumeClaims](../../operations/obsv-02-adjust-loki.md#adjust-volume-size).
 - If your logs persistently exceed the ingestion limit, [expand the ingestion rate](../../operations/obsv-02-adjust-loki.md#adjust-ingestion-limit).

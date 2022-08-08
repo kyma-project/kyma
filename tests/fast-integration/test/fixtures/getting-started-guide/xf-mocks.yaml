@@ -22,7 +22,7 @@ kind: TokenRequest
 metadata:
   name: commerce-mock
 ---
-apiVersion: serverless.kyma-project.io/v1alpha2
+apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: orders-function
@@ -33,6 +33,7 @@ metadata:
 spec:
   maxReplicas: 1
   minReplicas: 1
+  runtime: nodejs14
   resourceConfiguration:
     function:
       resources:

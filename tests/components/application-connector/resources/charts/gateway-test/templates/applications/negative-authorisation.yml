@@ -35,6 +35,94 @@ spec:
             secretName: wrong-oauth-test
             authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
+    - displayName: mtls-oauth-other-ca
+      name: mtls-oauth-other-ca
+      providerDisplayName: mTLS-OAuth
+      description: Should return 500 for mTLS Oauth with client certificate generated from other CA
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-other-ca"
+          credentials:
+            secretName: mtls-oauth-negative-other-ca
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls-oauth-incorrect-clientid
+      name: mtls-oauth-incorrect-clientid
+      providerDisplayName: mTLS-OAuth
+      description: Should return 500 for mTLS Oauth with valid certificate but invalid client id
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-incorrect-clientid"
+          credentials:
+            secretName: mtls-oauth-negative-incorrect-clientid
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls-oauth-negative-expired-client-cert
+      name: mtls-oauth-negative-expired-client-cert
+      providerDisplayName: mTLS-OAuth
+      description: Should return 500 for mTLS Oauth with expired client certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-negative-expired-client-cert"
+          credentials:
+            secretName: mtls-oauth-negative-expired-client-cert
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls-oauth-negative-expired-server-cert
+      name: mtls-oauth-negative-expired-server-cert
+      providerDisplayName: mTLS-OAuth
+      description: Should return 500 for mTLS Oauth with expired server certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-negative-expired-server-cert"
+          credentials:
+            secretName: mtls-oauth-negative-expired-server-cert
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8091/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+    - displayName: mtls-negative-other-ca
+      name: mtls-negative-other-ca
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with client certificate generated from other CA
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-other-ca"
+          credentials:
+            secretName: mtls-negative-other-ca
+            type: CertificateGen
+    - displayName: mtls-negative-expired-client-cert
+      name: mtls-negative-expired-client-cert
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with expired client certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-client-cert"
+          credentials:
+            secretName: mtls-negative-expired-client-cert
+            type: CertificateGen
+    - displayName: mtls-negative-expired-server-cert
+      name: mtls-negative-expired-server-cert
+      providerDisplayName: mTLS
+      description: Should return 502 for mTLS with expired server certificate
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8091/v1/api/mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-server-cert"
+          credentials:
+            secretName: mtls-negative-expired-client-cert
+            type: CertificateGen
     - displayName: bad csrf token basic
       name: bad-csrf-token-basic
       providerDisplayName: Basic with CSRF
@@ -106,45 +194,3 @@ spec:
           credentials:
             secretName: basic-test
             type: Basic
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: basic-test-negative-case
-  namespace: kyma-integration
-type: Opaque
-data:
-  password: {{ "passwd" | b64enc }}
-  username: {{ "user" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: oauth-test-negative-case
-  namespace: kyma-integration
-type: Opaque
-data:
-  clientId: {{ "clientID" | b64enc }}
-  clientSecret: {{ "clientSecret" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: wrong-oauth-test
-  namespace: kyma-integration
-type: Opaque
-data:
-  clientId: {{ "bad id" | b64enc }}
-  clientSecret: {{ "bad secret" | b64enc }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: wrong-request-parameters-test
-  namespace: kyma-integration
-type: Opaque
-stringData:
-  headers: |-
-    {"Hkey1":["Wrong-value"],"Wrong-key":["Hval22"]}
-  queryParameters: |-
-    {"Wrong-key":["Qval1"],"Qkey2":["Qval21","Qval22","Additional-value"]}

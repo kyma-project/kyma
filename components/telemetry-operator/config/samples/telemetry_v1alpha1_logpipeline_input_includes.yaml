@@ -1,0 +1,15 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: logpipeline-include-sample
+spec:
+  input:
+    application:
+      namespaces:
+        - kyma-system
+      excludeNamespaces: []
+      containers:  []
+      excludeContainers: []
+  output:
+    custom: |
+      Name               stdout

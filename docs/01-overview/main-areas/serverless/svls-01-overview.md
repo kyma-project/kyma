@@ -9,4 +9,4 @@ Kyma offers a service (known as "functions-as-a-service" or "FaaS") that provide
 Such a Function can be:
 
 - Triggered by other workloads in the cluster (in-cluster events) or business events coming from external sources. You can subscribe to them using a [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md).
-- Exposed to an external endpoint (HTTPS). With an [API Rule CR](../../../05-technical-reference/00-custom-resources/apix-01-apirule.md), you can define who can reach the endpoint and what operations they can perform on it.
+- Exposed to an external endpoint (HTTPS). With an [APIRule CR](../../../05-technical-reference/00-custom-resources/apix-01-apirule.md), you can define who can reach the endpoint and what operations they can perform on it.

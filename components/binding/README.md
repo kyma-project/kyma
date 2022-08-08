@@ -1,7 +1,6 @@
 ## Overview
 
-Kyma Binding is a component that allows you to inject values from a Secret or Config Map to the 
-resources such as Deployment, which have a Pod template underneath.
+Kyma Binding is a component that allows you to inject values from a Secret or ConfigMap to the resources such as Deployment, which have a Pod template underneath.
 
 ## Prerequisites
 
@@ -20,13 +19,13 @@ helm install binding ./charts/binding --wait
 
 Go through the short tutorial that presents the useage and capabilities of the component.
 
-1. Register a Target Kind. It's a resource that defines how and where environments can be injected.
+1. Register a TargetKind. It's a resource that defines how and where environments can be injected.
 
 ```bash
 kubectl apply -f ./examples/target-kind-deployment.yaml
 ``` 
 
-2. Check if the Target Kind is registered properly:
+2. Check if the TargetKind is registered properly:
 
 ```bash
 kubectl get targetkinds.bindings.kyma-project.io
@@ -60,7 +59,7 @@ kubectl apply -f ./examples/secret-binding.yaml
 
 8. Check again the browser. Environments are now injected under the **Password** and **Token** keys.
 
-9. You can also inject environments from a Config Map. To check this out, create a Config Map and a Binding that injects parameters to our Pod:
+9. You can also inject environments from a ConfigMap. To check this out, create a ConfigMap and a Binding that injects parameters to our Pod:
 
 ```bash
 kubectl apply -f ./examples/config-map.yaml

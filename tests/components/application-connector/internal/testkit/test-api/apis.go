@@ -10,14 +10,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, tokens map[string]OAuthToken) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
-	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
 	csrf := NewCSRF()
 
 	{
@@ -36,7 +36,7 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	}
 	{
 		r := api.PathPrefix("/basic").Subrouter()
-		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
@@ -49,7 +49,7 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	{
 		r := api.PathPrefix("/csrf-basic").Subrouter()
 		r.Use(csrf.Middleware())
-		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
@@ -62,8 +62,8 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	}
 	{
 		r := api.PathPrefix("/request-parameters-basic").Subrouter()
-		r.Use(RequestParameters(expectedRequestParameters.Headers, expectedRequestParameters.QueryParameters))
-		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.Use(RequestParameters(expectedRequestParameters))
+		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 		r.HandleFunc("/echo", echo)
 	}
@@ -71,14 +71,34 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	return router
 }
 
-type BasicAuthCredentials struct {
-	User     string
-	Password string
+func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, tokens map[string]OAuthToken) http.Handler {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
+	api := router.PathPrefix("/v1/api").Subrouter()
+	api.Use(Logger(logOut, logger.DevLoggerType))
+
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, tokens)
+
+	{
+		r := api.PathPrefix("/mtls").Subrouter()
+		r.Use(oauth.Middleware())
+		api.HandleFunc("/mtls-oauth/token", oauth.MTLSToken).Methods(http.MethodPost)
+	}
+
+	{
+		r := api.PathPrefix("/mtls").Subrouter()
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+		r.HandleFunc("/echo", echo)
+	}
+
+	return router
 }
 
-type ExpectedRequestParameters struct {
-	Headers         map[string][]string
-	QueryParameters map[string][]string
+func Logger(out io.Writer, t logger.Type) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return logger.Handler(next, out, t)
+	}
 }
 
 func handleError(w http.ResponseWriter, code int, format string, a ...interface{}) {
