@@ -509,7 +509,7 @@ data:
                 }
              ],
              "title":"Total Consumers",
-             "description": "Total number of consumers on NATS server",
+             "description": "Total number of consumers on NATS servers",
              "type":"stat"
           },
           {
@@ -605,7 +605,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_stream_total_bytes) by (stream_name)",
+                   "expr":"nats_stream_total_bytes{is_stream_leader=\"true\"}",
                    "interval":"",
                    "legendFormat":"{{stream_name}}",
                    "refId":"A"
@@ -693,7 +693,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_stream_consumer_count) by (stream_name)",
+                   "expr":"nats_stream_consumer_count{is_stream_leader=\"true\"}",
                    "interval":"",
                    "legendFormat":"{{stream_name}}",
                    "refId":"A"
@@ -781,7 +781,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_stream_total_messages) by (stream_name)",
+                   "expr":"nats_stream_total_messages{is_stream_leader=\"true\"}",
                    "interval":"",
                    "legendFormat":"{{stream_name}}",
                    "refId":"A"
@@ -869,7 +869,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(rate(nats_stream_total_messages{pod=~\"$server\",stream_name=~\"$stream\"}[$__rate_interval])) by (stream_name)",
+                   "expr":"sum(rate(nats_stream_total_messages{stream_name=~\"$stream\",is_stream_leader=\"true\"}[$__rate_interval])) by (stream_name)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{stream_name}}",
@@ -974,7 +974,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(rate(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}[$__rate_interval])) by (consumer_desc)",
+                   "expr":"sum(rate(nats_consumer_num_pending{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)",
                    "hide":false,
                    "instant":false,
                    "interval":"",
@@ -983,7 +983,7 @@ data:
                    "refId":"B"
                 },
                 {
-                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\",consumer_desc=~\"$consumer\"}[$__rate_interval])) by (consumer_desc)",
+                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_desc}} -",
@@ -1072,7 +1072,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
+                   "expr":"nats_consumer_num_pending{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_desc}}",
@@ -1162,7 +1162,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
+                   "expr":"nats_consumer_num_ack_pending{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_desc}}",
@@ -1251,7 +1251,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_redelivered{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
+                   "expr":"nats_consumer_num_redelivered{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_desc}}",
