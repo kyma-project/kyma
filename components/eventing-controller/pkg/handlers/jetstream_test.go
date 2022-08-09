@@ -1185,10 +1185,17 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 	require.False(t, subscriber.IsRunning())
 	ev2data := "newsampletestdata"
 	require.NoError(t, SendEventToJetStream(jsBackend, ev2data)) // send an event
+
 	// check that the stream contains one message that was not acknowledged
-	info, err := testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-	require.Equal(t, info.State.Msgs, uint64(1))
+	const expectedNotAcknowledgedMsgs = uint64(1)
+	var info *nats.StreamInfo
+
+	require.Eventually(t, func() bool {
+		info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+		require.NoError(t, err)
+		return info.State.Msgs == expectedNotAcknowledgedMsgs
+	}, 60*time.Second, 5*time.Second)
+
 	// shutdown the nats server
 	testEnvironment.natsServer.Shutdown()
 	require.Eventually(t, func() bool {
@@ -1204,7 +1211,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 	require.Eventually(t, func() bool {
 		info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
 		require.NoError(t, err)
-		return info.State.Msgs == uint64(1)
+		return info.State.Msgs == expectedNotAcknowledgedMsgs
 	}, 60*time.Second, 5*time.Second)
 	// sync the subscription again to recreate invalid subscriptions or consumers, if any
 	err = jsBackend.SyncSubscription(sub)

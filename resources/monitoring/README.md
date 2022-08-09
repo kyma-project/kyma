@@ -10,7 +10,7 @@ All the monitoring components run in the `kyma-system` Namespace.
 
 ## Custom resource definitions
 
-Custom resource definitions for `crd-alertmanager.yaml`, `crd-podmonitor.yaml`, and `crd-servicemonitor.yaml` have been moved to the `resources/cluster-essentials/templates` folder and will be maintained there. Along with the next update of the Prometheus Operator, update the listed files in the [Cluster Essentials](https://github.com/kyma-project/kyma/tree/main/resources/cluster-essentials) chart.
+CustomResourceDefinitions for `crd-alertmanager.yaml`, `crd-podmonitor.yaml`, and `crd-servicemonitor.yaml` have been moved to the `resources/cluster-essentials/templates` folder and will be maintained there. Along with the next update of the Prometheus Operator, update the listed files in the [Cluster Essentials](https://github.com/kyma-project/kyma/tree/main/resources/cluster-essentials) chart.
 
 ## Kyma customizations
 

@@ -1,15 +1,47 @@
-const {KEBConfig, KEBClient, provisionSKR}= require('../../kyma-environment-broker');
-const {GardenerClient, GardenerConfig} = require('../../gardener');
-const {DirectorClient, DirectorConfig} = require('../../compass');
-const {addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
-const {KCPWrapper, KCPConfig} = require('../../kcp/client');
-const {BTPOperatorCreds} = require('../../smctl/helpers');
-const {debug} = require('../../utils');
+const {
+  getSKRConfig,
+  withSuffix,
+  withInstanceID,
+  gatherOptions,
+  getEnvOrThrow,
+  genRandom,
+  debug,
+  kcp,
+  gardener,
+  keb,
+  initK8sConfig,
+} = require('../helpers');
 
-const keb = new KEBClient(KEBConfig.fromEnv());
-const gardener = new GardenerClient(GardenerConfig.fromEnv());
-const director = new DirectorClient(DirectorConfig.fromEnv());
-const kcp = new KCPWrapper(KCPConfig.fromEnv());
+const {provisionSKR}= require('../../kyma-environment-broker');
+const {BTPOperatorCreds} = require('../../smctl/helpers');
+
+async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout) {
+  let shoot;
+  if (skipProvisioning) {
+    console.log('Gather information from externally provisioned SKR and prepare resources');
+    const instanceID = getEnvOrThrow('INSTANCE_ID');
+    let suffix = process.env.TEST_SUFFIX;
+    if (suffix === undefined) {
+      suffix = genRandom(4);
+    }
+    options = gatherOptions(
+        withInstanceID(instanceID),
+        withSuffix(suffix),
+    );
+    shoot = await getSKRConfig(instanceID);
+  } else {
+    console.log('Provisioning new SKR instance...');
+    shoot = await provisionSKRInstance(options, provisioningTimeout);
+  }
+
+  console.log('Initiating K8s config...');
+  await initK8sConfig(shoot);
+
+  return {
+    options,
+    shoot,
+  };
+}
 
 async function provisionSKRInstance(options, timeout) {
   try {
@@ -28,16 +60,9 @@ async function provisionSKRInstance(options, timeout) {
         timeout);
 
     debug('SKR is provisioned!');
-    const shoot = skr.shoot;
-
-    console.log('Adding scenario to compass...');
-    await addScenarioInCompass(director, options.scenarioName);
-
-    console.log('Assigning runtime to scenario...');
-    await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
-    return shoot;
+    return skr.shoot;
   } catch (e) {
-    throw new Error(`Provisioning failed: ${e.toString()}`);
+    throw new Error(`Provisioning failed: ${e.toString(), e.stack}`);
   } finally {
     debug('Fetching runtime status...');
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
@@ -48,10 +73,6 @@ async function provisionSKRInstance(options, timeout) {
 
 
 module.exports = {
-  keb,
-  kcp,
-  director,
-  gardener,
-  provisionSKRInstance,
+  getOrProvisionSKR,
 };
 

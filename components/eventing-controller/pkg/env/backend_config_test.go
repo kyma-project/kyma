@@ -1,7 +1,6 @@
 package env
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -15,16 +14,9 @@ func Test_GetBackendConfig(t *testing.T) {
 		"PUBLISHER_REQUESTS_MEMORY": "128Mi",
 		"PUBLISHER_REQUEST_TIMEOUT": "10s",
 	}
-	defer func() {
-		for k := range envs {
-			err := os.Unsetenv(k)
-			g.Expect(err).ShouldNot(HaveOccurred())
-		}
-	}()
 
 	for k, v := range envs {
-		err := os.Setenv(k, v)
-		g.Expect(err).ShouldNot(HaveOccurred())
+		t.Setenv(k, v)
 	}
 	backendConfig := GetBackendConfig()
 	// Ensure optional variables can be set

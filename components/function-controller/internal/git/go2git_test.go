@@ -72,7 +72,7 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 			fetcher := &git2goFetcherMock{repoPath: repoPath}
 
 			opts := Options{Reference: testcase.refName, URL: repoPath}
-			client := Git2GoClient{fetcher: fetcher}
+			client := git2GoClient{fetcher: fetcher}
 			//WHEN
 			commitID, err := client.LastCommit(opts)
 
@@ -109,7 +109,7 @@ func TestGo2GitClient_Clone(t *testing.T) {
 	cloner := &git2goClonerMock{repoPath: repoPath}
 	assertHeadCommitNotEqual(t, repoPath, secondCommitID)
 
-	client := Git2GoClient{cloner: cloner}
+	client := git2GoClient{cloner: cloner}
 	opts := Options{Reference: secondCommitID}
 	//WHEN
 	commitID, err := client.Clone("", opts)

@@ -34,7 +34,7 @@ func TestCertificateGenStrategy(t *testing.T) {
 		// when
 		err = certGenStrategy.AddAuthorization(request, func(cert *tls.Certificate) {
 			clientCert.SetCertificate(cert)
-		})
+		}, false)
 		require.NoError(t, err)
 
 		// then
@@ -52,7 +52,7 @@ func TestCertificateGenStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, nil)
+		err = certGenStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.Error(t, err)
@@ -67,7 +67,7 @@ func TestCertificateGenStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, nil)
+		err = certGenStrategy.AddAuthorization(request, nil, false)
 
 		// then
 		require.Error(t, err)

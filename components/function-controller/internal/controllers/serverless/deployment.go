@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (
@@ -76,11 +75,11 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentCreated,
+			Reason:             serverlessv1alpha2.ConditionReasonDeploymentCreated,
 			Message:            fmt.Sprintf("Deployment %s created", d.GetName()),
 		}
 
@@ -112,11 +111,11 @@ func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLa
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentUpdated,
+			Reason:             serverlessv1alpha2.ConditionReasonDeploymentUpdated,
 			Message:            fmt.Sprintf("Deployment %s updated", deploymentName),
 		}
 
@@ -135,11 +134,11 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	if s.isDeploymentReady() {
 		r.log.Info(fmt.Sprintf("deployment ready %q", deploymentName))
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionTrue,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentReady,
+			Reason:             serverlessv1alpha2.ConditionReasonDeploymentReady,
 			Message:            fmt.Sprintf("Deployment %s is ready", deploymentName),
 		}
 
@@ -154,11 +153,11 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	if s.hasDeploymentConditionFalseStatusWithReason(appsv1.DeploymentAvailable, MinimumReplicasUnavailable) {
 		r.log.Info(fmt.Sprintf("deployment unhealthy: %q", deploymentName))
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonMinReplicasNotAvailable,
+			Reason:             serverlessv1alpha2.ConditionReasonMinReplicasNotAvailable,
 			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deploymentName),
 		}
 
@@ -169,11 +168,11 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	if s.hasDeploymentConditionTrueStatus(appsv1.DeploymentProgressing) {
 		r.log.Info(fmt.Sprintf("deployment %q not ready", deploymentName))
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentWaiting,
+			Reason:             serverlessv1alpha2.ConditionReasonDeploymentWaiting,
 			Message:            fmt.Sprintf("Deployment %s is not ready yet", deploymentName),
 		}
 
@@ -192,11 +191,11 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 
 	msg := fmt.Sprintf("Deployment %s failed with condition: \n%s", deploymentName, yamlConditions)
 
-	condition := serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionRunning,
+	condition := serverlessv1alpha2.Condition{
+		Type:               serverlessv1alpha2.ConditionRunning,
 		Status:             corev1.ConditionFalse,
 		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonDeploymentFailed,
+		Reason:             serverlessv1alpha2.ConditionReasonDeploymentFailed,
 		Message:            msg,
 	}
 

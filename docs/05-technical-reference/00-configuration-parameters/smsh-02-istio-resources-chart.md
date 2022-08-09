@@ -14,4 +14,4 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **monitoring.enabled** | Allows enabling Istio monitoring options. | `true` |
 | **monitoring.dashboards.enabled** | Enables Istio monitoring dashboards. Requires **monitoring.enabled** set to `true`.| `true` |
-| **monitoring.istio.Service.Monitor.enabled** | Enables Istio Service Monitor. Requires **monitoring.enabled** set to `true`. | `true` |
+| **monitoring.istio.Service.Monitor.enabled** | Enables Istio ServiceMonitor. Requires **monitoring.enabled** set to `true`. | `true` |

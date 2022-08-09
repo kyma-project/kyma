@@ -43,10 +43,10 @@ readinessProbe:
 resources:
   limits:
     cpu: 100m
-    memory: 300Mi
+    memory: 100Mi
   requests:
-    cpu: 10m
-    memory: 200Mi
+    cpu: 5m
+    memory: 20Mi
 
 terminationGracePeriodSeconds: 10
 

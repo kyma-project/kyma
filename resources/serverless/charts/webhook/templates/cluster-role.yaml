@@ -28,6 +28,7 @@ rules:
       - update
       - list
       - watch
+      - delete
   - apiGroups:
       - coordination.k8s.io
     resources:
@@ -37,3 +38,19 @@ rules:
       - list
       - create
       - update
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - serverless.kyma-project.io
+    resources:
+      - gitrepositories
+    verbs:
+      - get
+      - list
+      - watch
+      - create

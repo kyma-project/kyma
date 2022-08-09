@@ -3,31 +3,18 @@ kind: LogPipeline
 metadata:
   name: logpipeline-sample
 spec:
-  parsers: [ ]
-  multilineParsers:
-    - content: |
-        # Example from https://docs.fluentbit.io/manual/pipeline/filters/multiline-stacktrace
-        Name          multiline-custom-regex
-        Type          regex
-        Flush_timeout 1000
-        Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
-        Rule      "cont"          "/^\s+at.*/"                     "cont"
   filters:
     - custom: |
         Name    grep
-        Match   logpipeline-sample.*
         Regex   $kubernetes['labels']['app'] my-deployment
     - custom: |
         Name    grep
-        Match   logpipeline-sample.*
         Exclude $kubernetes['namespace_name'] kyma-system|kube-system|kyma-integration|istio-system
     - custom: |
         Name    record_modifier
-        Match   logpipeline-sample.*
         Record  cluster_identifier ${KUBERNETES_SERVICE_HOST}
   output:
     custom: |
       Name               stdout
-      Match              logpipeline-sample.*
   files: [ ]
   variables: [ ]

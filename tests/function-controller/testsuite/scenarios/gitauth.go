@@ -9,9 +9,8 @@ import (
 
 	"github.com/vrischmann/envconfig"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/gitrepository"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -35,8 +34,8 @@ type testRepo struct {
 	expectedResponse string
 	reference        string
 	secretData       map[string]string
-	runtime          serverlessv1alpha1.Runtime
-	auth             *serverlessv1alpha1.RepositoryAuth
+	runtime          serverlessv1alpha2.Runtime
+	auth             *serverlessv1alpha2.RepositoryAuth
 }
 
 type config struct {
@@ -147,20 +146,12 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			secret,
 			fmt.Sprintf("Create %s Auth Secret", tr.provider),
 			tr.secretData),
-		teststep.NewCreateGitRepository(
-			genericContainer.Log,
-			gitrepository.New(fmt.Sprintf("%s-repo", tr.name), genericContainer),
-			fmt.Sprintf("Create GitRepository for %s", tr.provider),
-			gitops.AuthRepositorySpecWithURL(
-				tr.url,
-				tr.auth,
-			)),
 		teststep.CreateFunction(
 			genericContainer.Log,
 			function.NewFunction(tr.name, genericContainer),
 			fmt.Sprintf("Create %s Function", tr.provider),
 			gitops.GitopsFunction(
-				fmt.Sprintf("%s-repo", tr.name),
+				tr.url,
 				tr.baseDir,
 				tr.reference,
 				tr.runtime),
@@ -194,9 +185,9 @@ func getAzureDevopsTestcase(cfg *config) testRepo {
 		baseDir:          cfg.Azure.BaseDir,
 		reference:        cfg.Azure.Reference,
 		expectedResponse: "Hello azure",
-		runtime:          serverlessv1alpha1.Nodejs14,
-		auth: &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthBasic,
+		runtime:          serverlessv1alpha2.NodeJs14,
+		auth: &serverlessv1alpha2.RepositoryAuth{
+			Type:       serverlessv1alpha2.RepositoryAuthBasic,
 			SecretName: "azure-devops-auth-secret",
 		},
 		secretData: createBasicAuthSecretData(cfg.Azure.BasicAuth)}
@@ -214,9 +205,9 @@ func getGithubTestcase(cfg *config) (testRepo, error) {
 		baseDir:          cfg.Github.BaseDir,
 		reference:        cfg.Github.Reference,
 		expectedResponse: "hello github",
-		runtime:          serverlessv1alpha1.Python39,
-		auth: &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
+		runtime:          serverlessv1alpha2.Python39,
+		auth: &serverlessv1alpha2.RepositoryAuth{
+			Type:       serverlessv1alpha2.RepositoryAuthSSHKey,
 			SecretName: "github-auth-secret",
 		},
 		secretData: secretData,

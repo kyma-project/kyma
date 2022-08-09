@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220525-4bd6d72e"
+      version: "20220720-94f56c6a"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
@@ -69,7 +69,7 @@ global:
       directory: "external/bitnami"
     alpine:
       name: "alpine"
-      version: "3.15.3"
+      version: "3.16.0"
       directory: "external"
 
 headerRewrite:
@@ -84,6 +84,7 @@ maintenance:
 
 # Overrides for the Hydra chart
 hydra:
+  enabled: true
   ingress:
     public:
       enabled: false
@@ -134,11 +135,12 @@ hydra:
   hydra-maester:
     globalAccess: true
     config:
-      # Must be in-sync with hydra.hydra.config.existingSecret
+      # Must be in-sync with hydra.config.existingSecret
       hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
+  enabled: true
   oathkeeper:
     config:
       authenticators:
@@ -245,6 +247,8 @@ oathkeeper:
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80
+    annotations:
+      readiness.status.sidecar.istio.io/initialDelaySeconds: "10"
   oathkeeper-maester:
     deployment:
       annotations:

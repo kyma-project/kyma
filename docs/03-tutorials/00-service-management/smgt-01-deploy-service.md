@@ -27,7 +27,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     sleep 120
     ```
 
-    >**CAUTION:** There's a known issue with the [webhook connection](https://cert-manager.io/docs/concepts/webhook/#webhook-connection-problems-shortly-after-cert-manager-installation) shortly after cert-manager installation, and with the BTP operator webhook. If you see the `failed calling webhook` error after running this and/or the next command, wait a moment and repeat the operation. 
+    >**CAUTION:** There's a known issue with the [webhook connection](https://cert-manager.io/docs/concepts/webhook/#webhook-connection-problems-shortly-after-cert-manager-installation) shortly after cert-manager installation, and with the BTP operator webhook. If you see the `failed calling webhook` error after running this and/or the next command, wait a moment and repeat the operation.
 
 2. Obtain the access credentials for the SAP BTP service operator as described in step 2 of the [SAP BTP operator setup](https://github.com/SAP/sap-btp-service-operator#setup). Then, save the credentials to the `creds.json` file.
 
@@ -36,6 +36,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     ```bash
     kubectl create ns sap-btp-operator
     kubectl label namespace sap-btp-operator istio-injection=disabled
+    helm repo add sap-btp-operator https://sap.github.io/sap-btp-service-operator
     helm upgrade --install btp-operator sap-btp-operator/sap-btp-operator --create-namespace --namespace=sap-btp-operator --set manager.secret.clientid="$(jq --raw-output '.clientid' creds.json)" --set manager.secret.clientsecret="$(jq --raw-output '.clientsecret' creds.json)" --set manager.secret.url="$(jq --raw-output '.sm_url' creds.json)" --set manager.secret.tokenurl="$(jq --raw-output '.url' creds.json)"
 
     echo "Wait 30 seconds to make btp-operator webhook ready"
@@ -109,4 +110,4 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     kubectl delete ns sap-btp-operator
     ```
 
->**TIP:** You can use Kyma Dashboard to create and manage resources such as Service Instances and Service Bindings. To do so, navigate to your Namespace view and go to the **Service Management** tab in the left navigation. Still, you need to obtain service details, such as service name and plan, from the BTP Cockpit.
+>**TIP:** You can use Kyma Dashboard to create and manage resources such as ServiceInstances and ServiceBindings. To do so, navigate to your Namespace view and go to the **Service Management** tab in the left navigation. Still, you need to obtain service details, such as service name and plan, from the BTP Cockpit.

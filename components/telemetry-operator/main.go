@@ -23,30 +23,39 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
+	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
+	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
+
+	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-logr/zapr"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -138,6 +147,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+	metrics.Registry.MustRegister(restartsTotal)
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
@@ -169,10 +184,7 @@ func main() {
 			Name:      fluentBitSectionsConfigMap,
 			Namespace: fluentBitNs,
 		},
-		FluentBitParsersConfigMap: types.NamespacedName{
-			Name:      fluentBitParsersConfigMap,
-			Namespace: fluentBitNs,
-		},
+
 		FluentBitFilesConfigMap: types.NamespacedName{
 			Name:      fluentBitFilesConfigMap,
 			Namespace: fluentBitNs,
@@ -182,34 +194,69 @@ func main() {
 			Namespace: fluentBitNs,
 		},
 	}
+	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName: types.NamespacedName{
+			Namespace: fluentBitNs,
+			Name:      fluentBitDaemonSet,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      fluentBitParsersConfigMap,
+			Namespace: fluentBitNs,
+		},
+	}
 
-	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
+	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		validation.NewVariablesValidator(mgr.GetClient()),
-		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
-		validation.NewPluginValidator(
+		validation3.NewInputValidator(),
+		validation3.NewVariablesValidator(mgr.GetClient()),
+		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
+		validation3.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-		validation.NewMaxPipelinesValidator(maxPipelines),
-		validation.NewOutputValidator(),
+		validation3.NewMaxPipelinesValidator(maxPipelines),
+		validation3.NewOutputValidator(),
+		validation3.NewFilesValidator(),
 		pipelineConfig,
-		fs.NewWrapper(),
-	)
+		utils.NewFileSystem(),
+		restartsTotal)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
-		&k8sWebhook.Admission{Handler: logPipelineValidator})
+		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
 
-	reconciler := controllers.NewLogPipelineReconciler(
+	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		daemonSetConfig,
-		pipelineConfig)
+		pipelineConfig,
+		restartsTotal)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
+	parserReconciler := telemetrycontrollers.NewLogParserReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		parserDaemonSetConfig,
+		restartsTotal)
+	if err = parserReconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		os.Exit(1)
+	}
+
+	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(),
+		fluentBitConfigMap,
+		fluentBitNs,
+		validation2.NewParserValidator(),
+		pipelineConfig,
+		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
+		utils.NewFileSystem(),
+		restartsTotal,
+	)
+	mgr.GetWebhookServer().Register(
+		"/validate-logparser",
+		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

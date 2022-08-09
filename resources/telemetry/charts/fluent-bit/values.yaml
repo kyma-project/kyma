@@ -290,7 +290,36 @@ networkPolicy:
 #   ingress:
 #     from: []
 
-luaScripts: {}
+luaScripts:
+  filter-script.lua: |
+    function kubernetes_map_keys(tag, timestamp, record)
+      if record.kubernetes == nil then
+        return 0
+      end
+      map_keys(record.kubernetes.annotations)
+      map_keys(record.kubernetes.labels)
+      return 1, timestamp, record
+    end
+    function map_keys(table)
+      if table == nil then
+        return
+      end
+      local new_table = {}
+      local changed_keys = {}
+      for key, val in pairs(table) do
+        local mapped_key = string.gsub(key, "[%/%.]", "_")
+        if mapped_key ~= key then
+            new_table[mapped_key] = val
+            changed_keys[key] = true
+        end
+      end
+      for key in pairs(changed_keys) do
+        table[key] = nil
+      end
+      for key, val in pairs(new_table) do
+        table[key] = val
+      end
+    end
 
 ## https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
 config:
@@ -313,13 +342,19 @@ config:
     [INPUT]
         Name tail
         Path /var/log/containers/*.log
-        multiline.parser docker, cri
+        multiline.parser docker, cri, go, python, java
         Tag tele.*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
         Refresh_Interval 10
         DB /data/flb_kube.db
         storage.type  filesystem
+
+    [INPUT]
+        Name tail
+        Path /null.log
+        Tag null.*
+        Alias dummy
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
@@ -335,7 +370,8 @@ config:
   outputs: |
     [OUTPUT]
         Name null
-        Match tele.*
+        Match null.*
+        Alias dummy
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]
@@ -347,12 +383,23 @@ config:
 
   # This allows adding more files with arbitary filenames to /fluent-bit/etc by providing key/value pairs.
   # The key becomes the filename, the value becomes the file content.
-  extraFiles: {}
-#     example.conf: |
-#       [OUTPUT]
-#           Name example
-#           Match foo.*
-#           Host bar
+  extraFiles:
+      loki-labelmap.json: |
+            {
+              "kubernetes": {
+                  "container_name": "container",
+                  "host": "node",
+                  "labels": {
+                    "app": "app",
+                    "app.kubernetes.io/component": "component",
+                    "app.kubernetes.io/name": "app",
+                    "serverless.kyma-project.io/function-name": "function"
+                  },
+                  "namespace_name": "namespace",
+                  "pod_name": "pod"
+                },
+              "stream": "stream"
+            }
 
 # The config volume is mounted by default, either to the existingConfigMap value, or the default of "fluent-bit.fullname"
 volumeMounts:

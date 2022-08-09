@@ -53,33 +53,26 @@ func TestUnavailableNATSServer(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	subscription := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, utils.NewUncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
-	utils.TestSubscriptionOnK8s(
-		ens.TestEnsemble,
-		subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{utils.NewCleanEventType("")}),
 	)
 
 	ens.NatsServer.Shutdown()
-	utils.TestSubscriptionOnK8s(
-		ens.TestEnsemble,
-		subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
 	ens.NatsServer = startJetStream(natsPort)
-	utils.TestSubscriptionOnK8s(
-		ens.TestEnsemble,
-		subscription,
-		reconcilertesting.HaveSubscriptionReady(),
-	)
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.Cancel)
 }
@@ -93,7 +86,7 @@ func TestCreateSubscription(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	t.Cleanup(ens.Cancel)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	var testCases = []struct {
 		name                  string
@@ -106,11 +99,13 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+				reconcilertesting.WithFinalizers([]string{}),
 			},
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					reconcilertesting.OrderCreatedEventType: {
@@ -223,7 +218,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
@@ -317,6 +312,7 @@ func TestCreateSubscription(t *testing.T) {
 			}
 		})
 	}
+	t.Cleanup(ens.Cancel)
 }
 
 // TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
@@ -327,6 +323,7 @@ func TestChangeSubscription(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	var testCases = []struct {
 		name                  string
@@ -709,6 +706,7 @@ func TestChangeSubscription(t *testing.T) {
 			}
 		})
 	}
+	t.Cleanup(ens.Cancel)
 }
 
 // TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the EventTypePrefix is empty.
@@ -719,6 +717,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
+	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	// when
 	subscription := utils.CreateSubscription(ens.TestEnsemble,

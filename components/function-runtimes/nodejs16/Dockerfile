@@ -1,7 +1,8 @@
-FROM node:16-alpine3.14
+FROM node:16-alpine3.16
 
 ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV
+ENV npm_config_cache /tmp/
 
 RUN mkdir -p /usr/src/app
 RUN mkdir -p /usr/src/app/lib

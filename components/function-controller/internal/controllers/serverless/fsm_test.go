@@ -5,10 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"go.uber.org/zap"
-
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -87,13 +86,46 @@ func Test_reconciler_reconcile(t *testing.T) {
 
 			m.log.Info("starting...")
 
-			got, err := m.reconcile(ctx, v1alpha1.Function{})
+			got, err := m.reconcile(ctx, v1alpha2.Function{})
 
 			m.log.Info("done")
 
 			if err != nil {
 				require.EqualError(t, tt.wantErr, err.Error())
 			}
+
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func dummyFunctionForTest_stateFnName(_ context.Context, r *reconciler, s *systemState) stateFn {
+	return nil
+}
+
+func Test_stateFnName(t *testing.T) {
+	type fields struct {
+		fn stateFn
+	}
+	tests := []struct {
+		name    string
+		fn      stateFn
+		want    string
+		wantErr error
+	}{
+		{
+			name: "function name is short",
+			fn:   dummyFunctionForTest_stateFnName,
+			want: "dummyFunctionForTest_stateFnName",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &reconciler{
+				fn: tt.fn,
+			}
+
+			got := m.stateFnName()
 
 			require.Equal(t, tt.want, got)
 		})

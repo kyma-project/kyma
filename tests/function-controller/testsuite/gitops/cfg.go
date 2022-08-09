@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/gitrepository"
-
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
@@ -13,7 +11,6 @@ import (
 type GitopsConfig struct {
 	FnName               string
 	Fn                   *function.Function
-	Repo                 *gitrepository.GitRepository
 	RepoName             string
 	GitServerImage       string
 	GitServerServiceName string
@@ -29,7 +26,7 @@ const (
 	gitServerEndpointFormat = "http://%s.%s.svc.cluster.local:%v/%s.git"
 )
 
-func NewGitopsConfig(fnName, repoName, gitServerImage, gitServerRepoName string, toolbox shared.Container) (GitopsConfig, error) {
+func NewGitopsConfig(fnName, gitServerImage, gitServerRepoName string, toolbox shared.Container) (GitopsConfig, error) {
 	inClusterURL, err := url.Parse(fmt.Sprintf("http://%s.%s.svc.cluster.local", fnName, toolbox.Namespace))
 	if err != nil {
 		return GitopsConfig{}, err
@@ -38,8 +35,6 @@ func NewGitopsConfig(fnName, repoName, gitServerImage, gitServerRepoName string,
 	return GitopsConfig{
 		FnName:               fnName,
 		Fn:                   function.NewFunction(fnName, toolbox),
-		Repo:                 gitrepository.New(repoName, toolbox),
-		RepoName:             repoName,
 		GitServerImage:       gitServerImage,
 		GitServerServicePort: gitServerServicePort,
 		GitServerServiceName: gitServerServiceName,

@@ -2,7 +2,7 @@
 title: Enable mTLS for custom metrics    
 ---
 
-To enable Strict mTLS scraping for a component, configure the Istio TLS certificates in the corresponding Service Monitor:
+To enable Strict mTLS scraping for a component, configure the Istio TLS certificates in the corresponding ServiceMonitor:
 
 ```yaml
 ---

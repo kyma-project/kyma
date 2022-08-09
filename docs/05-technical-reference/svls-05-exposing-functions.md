@@ -10,7 +10,7 @@ To access a Function within the cluster, use the `{function-name}.{namespace}.sv
 
 2. The API Gateway Controller detects a new APIRule CR and reads its definition.
 
-3. The API Gateway Controller creates an Istio Virtual Service and Access Rules according to details specified in the CR. Such a Function service is available under the `{host-name}.{domain}` endpoint, such as `my-function.kyma.local`.
+3. The API Gateway Controller creates an Istio VirtualService and Access Rules according to details specified in the CR. Such a Function service is available under the `{host-name}.{domain}` endpoint, such as `my-function.kyma.local`.
 
 This way you can specify multiple APIRules with different authentication methods for a single Function service.
 

@@ -53,7 +53,7 @@ It checks the following conditions for these CRs:
    - The format of deps, envs, labels, and the Function name ([RFC 1035](https://tools.ietf.org/html/rfc1035)) is correct.
    - The Function CR contains any envs reserved for the Deployment: `FUNC_RUNTIME`, `FUNC_HANDLER`, `FUNC_PORT`, `MOD_NAME`, `NODE_PATH`, `PYTHONPATH`.
 
-2. [Git Repository CR](./00-custom-resources/svls-02-gitrepository.md)
+2. [GitRepository CR](./00-custom-resources/svls-02-gitrepository.md)
 
    - The **spec.url** parameter must:
 

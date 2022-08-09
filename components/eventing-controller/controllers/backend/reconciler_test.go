@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
+	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/assert"
 
@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -30,23 +31,26 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
-	useExistingCluster       = false
-	attachControlPlaneOutput = false
-	kymaSystemNamespace      = "kyma-system"
-	timeout                  = 15 * time.Second
-	pollingInterval          = 1 * time.Second
-	eventingBackendName      = "eventing-backend"
-	bebSecret1name           = "beb-secret-1"
-	bebSecret2name           = "beb-secret-2"
+	testEnvStartDelay           = time.Minute
+	testEnvStartAttempts        = 10
+	beforeSuiteTimeoutInSeconds = testEnvStartAttempts * 60
+	useExistingCluster          = false
+	attachControlPlaneOutput    = false
+	kymaSystemNamespace         = "kyma-system"
+	timeout                     = 15 * time.Second
+	pollingInterval             = 1 * time.Second
+	eventingBackendName         = "eventing-backend"
+	bebSecret1name              = "beb-secret-1"
+	bebSecret2name              = "beb-secret-2"
 )
 
 var (
@@ -145,20 +149,8 @@ func TestAPIs(t *testing.T) {
 
 // Prepare the test suite.
 var _ = BeforeSuite(func(done Done) {
-	var err error
-	// populate with required env variables
-	natsConfig := env.NatsConfig{
-		EventTypePrefix: reconcilertesting.EventTypePrefix,
-		JSStreamName:    reconcilertesting.JSStreamName,
-	}
-
-	defaultLogger, err = logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	Expect(err).To(BeNil())
-	ctrl.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
-
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
-
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("../../", "config", "crd", "bases"),
@@ -168,7 +160,33 @@ var _ = BeforeSuite(func(done Done) {
 		UseExistingCluster:       &useExistingCluster,
 	}
 
-	cfg, err := testEnv.Start()
+	var err error
+	defaultLogger, err = logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	Expect(err).To(BeNil())
+	ctrl.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
+
+	var cfg *rest.Config
+	err = retry.Do(func() error {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("panic recovered:", r)
+			}
+		}()
+
+		cfg, err = testEnv.Start()
+		return err
+	},
+		retry.Delay(testEnvStartDelay),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(testEnvStartAttempts),
+		retry.OnRetry(func(n uint, err error) {
+			log.Printf("[%v] try failed to start testenv: %s", n, err)
+			if stopErr := testEnv.Stop(); stopErr != nil {
+				log.Printf("failed to stop testenv: %s", stopErr)
+			}
+		}),
+	)
+
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
@@ -188,6 +206,12 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).To(BeNil())
 
+	// populate with required env variables
+	natsConfig := env.NatsConfig{
+		EventTypePrefix: reconcilertesting.EventTypePrefix,
+		JSStreamName:    reconcilertesting.JSStreamName,
+	}
+
 	err = NewReconciler(
 		context.Background(),
 		natsSubMgr,
@@ -206,10 +230,16 @@ var _ = BeforeSuite(func(done Done) {
 	}()
 
 	close(done)
-}, 60)
+}, beforeSuiteTimeoutInSeconds)
 
 // Post-process the test suite.
 var _ = AfterSuite(func() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("panic recovered:", r)
+		}
+	}()
+
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
@@ -618,16 +648,11 @@ func ensurePublisherProxyDeploymentUpdated(ctx context.Context, opts ...deployme
 
 		err = k8sClient.Update(ctx, d)
 		Expect(err).Should(BeNil())
-	})
-
-	By("Making sure publisher proxy deployment ResourceVersion is changed", func() {
-		Eventually(publisherProxyDeploymentResourceVersionGetter(ctx), timeout, pollingInterval).ShouldNot(Equal(resourceVersionBeforeUpdate))
-
-		d, err := publisherProxyDeploymentGetter(ctx)()
-		Expect(err).Should(BeNil())
-		Expect(d).ShouldNot(BeNil())
-
 		resourceVersionAfterUpdate = d.ResourceVersion
+
+		// make sure publisher proxy deployment ResourceVersion is changed
+		Expect(resourceVersionAfterUpdate).ShouldNot(Equal(resourceVersionBeforeUpdate))
+		Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).ShouldNot(Equal(resourceVersionBeforeUpdate))
 	})
 
 	return resourceVersionAfterUpdate
@@ -672,8 +697,8 @@ func bebSecretExists(ctx context.Context) bool {
 	return len(secretList.Items) > 0
 }
 
-// creates a secret containing the oauth2 credentials that is expected to be
-// created by the Hydra operator
+// createOAuth2Secret creates a secret containing the oauth2 credentials that is expected to be
+// created by the Hydra operator.
 func createOAuth2Secret(ctx context.Context, clientID, clientSecret []byte) {
 	sec := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
