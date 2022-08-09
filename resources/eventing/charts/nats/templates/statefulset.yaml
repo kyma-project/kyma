@@ -40,38 +40,30 @@ spec:
       labels:
         {{- include "nats.selectorLabels" . | nindent 8 }}
         {{- if .Values.statefulSetPodLabels }}
-        {{- tpl (toYaml .Values.statefulSetPodLabels) . | nindent 8 }}
+        {{ toYaml .Values.statefulSetPodLabels | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.securityContext }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
+{{- with .Values.securityContext }}
       securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
       affinity:
-        {{- tpl (toYaml .) $ | nindent 8 }}
-      {{- end }}
-      {{- if .Values.priorityClassName }}
-      priorityClassName: {{ .Values.priorityClassName | quote }}
-      {{- end }}
+{{- tpl (toYaml .) $ | nindent 8 }}
+{{- end }}
       # Common volumes for the containers.
       volumes:
       - name: config-volume
-        {{- if .Values.nats.customConfigSecret }}
+        {{ if .Values.nats.customConfigSecret }}
         secret:
           secretName: {{ .Values.nats.customConfigSecret.name }}
-        {{- else }}
+        {{ else }}
         configMap:
           name: {{ include "nats.fullname" . }}-config
-        {{- end }}
-
-      {{- /* User extended config volumes*/}}
-      {{- if .Values.nats.config }}
-      # User extended config volumes
-      {{- with .Values.nats.config }}
-      {{- toYaml . | nindent 6 }}
-      {{- end }}
-      {{- end }}
+        {{ end }}
 
       # Local volume shared with the reloader.
       - name: pid
@@ -143,11 +135,6 @@ spec:
           - containerPort: 7777
             name: metrics
       {{- end }}
-
-      {{- if .Values.additionalContainers }}
-      {{- toYaml .Values.additionalContainers | nindent 6 }}
-      {{- end }}
-
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
@@ -191,8 +178,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        - name: SERVER_NAME
-          value: {{ .Values.nats.serverNamePrefix }}$(POD_NAME)
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -245,31 +230,10 @@ spec:
         {{- end }}
         {{- end }}
 
-        {{- with .Values.nats.healthcheck.readiness }}
-        {{- if .enabled }}
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 8222
-          initialDelaySeconds: {{ .initialDelaySeconds }}
-          timeoutSeconds: {{ .timeoutSeconds }}
-          periodSeconds: {{ .periodSeconds }}
-          successThreshold: {{ .successThreshold }}
-          failureThreshold: {{ .failureThreshold }}
-        {{- end }}
-        {{- end }}
-
         {{- if .Values.nats.healthcheck.startup.enabled }}
         startupProbe:
           httpGet:
-            {{- $simpleVersion := .Values.global.images.nats.version | default "latest" | regexFind "\\d+(\\.\\d+)?(\\.\\d+)?" | default "2.7.1"  }}
-            {{- if and .Values.nats.healthcheck.enableHealthz (or (not .Values.nats.healthcheck.detectHealthz) (semverCompare ">=2.7.1" $simpleVersion)) }}
-            # for NATS server versions >=2.7.1, healthz will be enabled to allow for a grace period
-            # in case of JetStream enabled deployments to form quorum and streams to catch up.
             path: /healthz
-            {{- else }}
-            path: /
-            {{- end }}
             port: 8222
         {{- with .Values.nats.healthcheck.startup }}
           initialDelaySeconds: {{ .initialDelaySeconds }}

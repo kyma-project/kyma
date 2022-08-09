@@ -13,15 +13,6 @@ nats:
     leafnodes: 7422
     gateways: 7522
 
-  # The servers name prefix, must be used for example when we want a NATS cluster
-  # spanning multiple Kubernetes clusters.
-  serverNamePrefix: ""
-
-  # Server Tags
-  serverTags:
-  # - "foo"
-  # - "bar"
-
   # Toggle profiling.
   # This enables nats-server pprof (profiling) port, so you can see goroutines
   # stacks, memory heap sizes, etc.
@@ -30,9 +21,6 @@ nats:
     port: 6000
 
   healthcheck:
-    # /healthz health check endpoint was introduced in NATS Server 2.7.1
-    # Attempt to detect /healthz support by inspecting if tag is >=2.7.1
-    detectHealthz: true
     # Enable /healthz startupProbe for controlled upgrades of NATS JetStream
     enableHealthz: true
 
@@ -60,19 +48,6 @@ nats:
       failureThreshold: 3
       # Only for Kubernetes +1.22 that have pod level probes enabled.
       terminationGracePeriodSeconds:
-
-    # Periodically check for the server to be ready for connections while
-    # the NATS container is running.
-    # Disabled by default since covered by startup probe and it is the same
-    # as the liveness check.
-    readiness:
-      enabled: true
-
-      initialDelaySeconds: 10
-      timeoutSeconds: 5
-      periodSeconds: 10
-      successThreshold: 1
-      failureThreshold: 3
 
     # Enable startup checks to confirm server is ready for traffic.
     # This is recommended for JetStream deployments since in cluster mode
@@ -131,10 +106,6 @@ nats:
     maxPending:
     maxPings:
 
-    # How many seconds should pass before sending a PING
-    # to a client that has no activity.
-    pingInterval:
-
     # grace period after pod begins shutdown before starting to close client connections
     lameDuckGracePeriod: "10s"
 
@@ -150,33 +121,6 @@ nats:
     logtime:
     connectErrorReports:
     reconnectErrorReports:
-
-  # customConfigSecret can be used to use an custom secret for the config
-  # of the NATS Server.
-  # NOTE: For this to work the name of the configuration has to be
-  # called `nats.conf`.
-  # e.g. kubectl create secret generic custom-nats-conf --from-file nats.conf
-  # customConfigSecret:
-  #  name:
-  #
-  # Alternately, the generated config can be extended with extra imports using the below syntax.
-  # The benefit of this is that cluster settings can be built up via helm values, but external
-  # secrets can be referenced and imported alongside it.
-  #
-  # config:
-  #   <name-of-config-item>:
-  #     <configMap|secret>
-  #       name: "<configMap|secret name>"
-  #
-  # e.g:
-  #
-  #  config:
-  #    - name: ssh-key
-  #      secret:
-  #        secretName: ssh-key
-  #    - name: config-vol
-  #      configMap:
-  #        name: log-config
 
   jetstream:
     #enabled: JetStream can be enabled via .Values.global.jetstream.enabled
@@ -233,7 +177,6 @@ nats:
       # key: "value"
 
 nameOverride: ""
-namespaceOverride: ""
 
 # Toggle whether to use setup a Pod Security Context
 # ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -271,29 +214,11 @@ statefulSetPodLabels:
 # Annotations to add to the NATS Service
 serviceAnnotations: {}
 
-# additionalContainers are the sidecar containers to add to the NATS StatefulSet
-additionalContainers: []
-
-# additionalVolumes are the additional volumes to add to the NATS StatefulSet
-additionalVolumes: []
-
-# additionalVolumeMounts are the additional volume mounts to add to the nats-server and nats-server-config-reloader containers
-additionalVolumeMounts: []
-
 cluster:
-  enabled: true
+  enabled: false
   name: eventing-nats
   replicas: 3
   noAdvertise: false
-
-  # Explicitly set routes for clustering.
-  # When JetStream is enabled, the serverName must be unique in the cluster.
-  extraRoutes: []
-
-  # authorization:
-  #   user: foo
-  #   password: pwd
-  #   timeout: 0.5
 
 appProtocol:
   enabled: true
@@ -301,9 +226,6 @@ appProtocol:
 # Cluster Domain configured on the kubelets
 # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
 k8sClusterDomain: cluster.local
-
-# Define if NATS is using FQDN name for clustering (i.e. nats-0.nats.default.svc.cluster.local) or short name (i.e. nats-0.nats.default).
-useFQDN: true
 
 # Add labels to all the deployed resources
 commonLabels: {}

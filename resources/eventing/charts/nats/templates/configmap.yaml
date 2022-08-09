@@ -14,34 +14,15 @@ data:
     # PID file shared with configuration reloader.
     pid_file: "/var/run/nats/nats.pid"
 
-    {{- if .Values.nats.config }}
-    ###########
-    #         #
-    # Imports #
-    #         #
-    ###########
-    {{- range .Values.nats.config }}
-    include ./{{ .name }}/{{ .name }}.conf
-    {{- end}}
-    {{- end }}
-
     ###############
     #             #
     # Monitoring  #
     #             #
     ###############
     http: 8222
-    server_name: {{- if .Values.nats.serverNamePrefix  }}$SERVER_NAME{{- else }}$POD_NAME{{- end }}
+    server_name: $POD_NAME
 
-    {{- if .Values.nats.serverTags }}
-    server_tags: [
-      {{- range .Values.nats.serverTags }}
-        "{{ . }}",
-      {{- end }}
-    ]
-    {{- end }}
-
-    {{- if .Values.global.jetstream.enabled  }}
+    {{- if .Values.global.jetstream.enabled }}
     ###################################
     #                                 #
     # NATS JetStream                  #
@@ -104,7 +85,6 @@ data:
 
       routes = [
         {{ include "nats.clusterRoutes" . }}
-        {{ include "nats.extraRoutes" . }}
       ]
       cluster_advertise: $CLUSTER_ADVERTISE
 

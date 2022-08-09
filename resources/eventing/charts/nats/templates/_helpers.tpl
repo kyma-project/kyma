@@ -5,10 +5,6 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "nats.namespace" -}}
-{{- default .Release.Namespace .Values.namespaceOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 
 {{- define "nats.fullname" -}}
 {{- if .Values.fullnameOverride -}}
@@ -36,7 +32,7 @@ Common labels
 {{- define "nats.labels" -}}
 helm.sh/chart: {{ include "nats.chart" . }}
 {{- range $name, $value := .Values.commonLabels }}
-{{ $name }}: {{ tpl $value $ }}
+{{ $name }}: {{ $value }}
 {{- end }}
 {{ include "nats.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
@@ -49,8 +45,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "nats.selectorLabels" -}}
-{{- if .Values.nats.selectorLabels }}
-{{ tpl (toYaml .Values.nats.selectorLabels) . }}
+{{- if .Values.nats.selectorLabels -}}
+{{ .Values.nats.selectorLabels | toYaml }}
 {{- else -}}
 app.kubernetes.io/name: {{ include "nats.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -63,11 +59,7 @@ kyma-project.io/dashboard: eventing
 Return the proper NATS image name
 */}}
 {{- define "nats.clusterAdvertise" -}}
-{{- if $.Values.useFQDN }}
 {{- printf "$(POD_NAME).%s.$(POD_NAMESPACE).svc.%s" (include "nats.fullname" . ) $.Values.k8sClusterDomain }}
-{{- else }}
-{{- printf "$(POD_NAME).%s.$(POD_NAMESPACE)" (include "nats.fullname" . ) }}
-{{- end }}
 {{- end }}
 
 {{/*
@@ -75,19 +67,8 @@ Return the NATS cluster routes.
 */}}
 {{- define "nats.clusterRoutes" -}}
 {{- $name := (include "nats.fullname" . ) -}}
-{{- $namespace := (include "nats.namespace" . ) -}}
 {{- range $i, $e := until (.Values.cluster.replicas | int) -}}
-{{- if $.Values.useFQDN }}
-{{- printf "nats://%s-%d.%s.%s.svc.%s:6222," $name $i $name $namespace $.Values.k8sClusterDomain -}}
-{{- else }}
-{{- printf "nats://%s-%d.%s.%s:6222," $name $i $name $namespace -}}
-{{- end }}
-{{- end -}}
-{{- end }}
-
-{{- define "nats.extraRoutes" -}}
-{{- range $i, $url := .Values.cluster.extraRoutes -}}
-{{- printf "%s," $url -}}
+{{- printf "nats://%s-%d.%s.%s.svc.%s:6222," $name $i $name $.Release.Namespace $.Values.k8sClusterDomain -}}
 {{- end -}}
 {{- end }}
 
@@ -101,6 +82,6 @@ Usage:
   {{- if typeIs "string" .value }}
     {{- tpl .value .context }}
   {{- else }}
-    {{- tpl (toYaml .value) .context }}
+    {{- tpl (.value | toYaml) .context }}
   {{- end }}
 {{- end -}}

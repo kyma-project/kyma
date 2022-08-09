@@ -23,24 +23,12 @@ $ kubectl -n nats port-forward nats-1 4222
 
 ## Configuration
 
-### Server Image
-
-```yaml
-nats:
-  image: nats:2.8.4-alpine
-  pullPolicy: IfNotPresent
-```
-
 ### Limits
 
 ```yaml
 nats:
   # The number of connect attempts against discovered routes.
   connectRetries: 30
-
-  # How many seconds should pass before sending a PING
-  # to a client that has no activity.
-  pingInterval:
 
   # Server settings.
   limits:
@@ -81,12 +69,6 @@ https://docs.nats.io/nats-server/configuration/clustering#nats-server-clustering
 cluster:
   enabled: true
   replicas: 3
-```
-
-Example:
-
-```sh
-$ helm install nats nats/nats --set cluster.enabled=true
 ```
 
 ## JetStream
