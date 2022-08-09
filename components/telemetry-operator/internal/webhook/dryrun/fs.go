@@ -1,36 +1,17 @@
 package dryrun
 
 import (
-	"fmt"
 	"os"
 )
 
-type fileHandler struct {
-	path string
-	name string
-	data string
+func WriteFile(path string, data string) error {
+	return os.WriteFile(path, []byte(data), 0666)
 }
 
-type fileSystem struct {
+func MakeDir(path string) error {
+	return os.MkdirAll(path, 0755)
 }
 
-func (fs *fileSystem) CreateAndWrite(f fileHandler) error {
-	if err := os.MkdirAll(f.path, 0755); err != nil {
-		return err
-	}
-
-	file, err := os.Create(fmt.Sprintf("%s/%s", f.path, f.name))
-	if err != nil {
-		return err
-	}
-
-	if _, err := file.Write([]byte(f.data)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (fs *fileSystem) RemoveDirectory(path string) error {
+func RemoveAll(path string) error {
 	return os.RemoveAll(path)
 }

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -18,14 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	errDescription = "Validation of the supplied configuration failed with the following reason: "
-	// From https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
-	ansiColorsRegex = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
-
-	fluentBitConfigDirectory     = "/tmp/dry-run"
-	fluentBitParsersConfigMapKey = "parsers.conf"
-)
+const errDescription = "Validation of the supplied configuration failed with the following reason: "
 
 func fluentBitArgs() []string {
 	return []string{"--dry-run", "--quiet"}
@@ -50,128 +44,110 @@ func NewDryRunner(c client.Client, config *Config) *DryRunner {
 	}
 }
 
-func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
-	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
-	path := filepath.Join(currentBaseDirectory, "fluent-bit.conf")
-	args := append(fluentBitArgs(), "--config", path)
-	// log.Info("Fluent Bit config files count", "count", len(configFiles))
-	// for _, configFile := range configFiles {
-	// 	if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
-	// 		log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
-	// 		return err
-	// 	}
-	// }
-	// defer func() {
-	// 	if err := v.fsWrapper.RemoveDirectory(currentBaseDirectory); err != nil {
-	// 		log.Error(err, "Failed to remove Fluent Bit config directory")
-	// 	}
-	// }()
-	return d.run(ctx, args)
-}
-
 func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
-	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
-	path := filepath.Join(currentBaseDirectory, "dynamic-parsers", "parsers.conf")
-	args := append(fluentBitArgs(), "--parser", path)
-	return d.run(ctx, args)
+	// TODO Parsers
+	//workDir := "/tmp/dry-run" + uuid.New().String()
+	//path := filepath.Join(workDir, "dynamic-parsers", "parsers.conf")
+	//args := append(fluentBitArgs(), "--parser", path)
+	//return d.run(ctx, args)
+	return nil
 }
 
-func (d *DryRunner) prepareFluentBitConfig(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline, parser *telemetryv1alpha1.LogParser) ([]fileHandler, error) {
-	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
+// Will run:  fluent-bit/bin/fluent-bit --dry-run --quiet --config /tmp/dry-run018231-123123-123123-123/fluent-bit.conf -e plugin1 -e plugin2 -e plugin3
+func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+	workDir, err := createNewWorkDir()
+	if err != nil {
+		return err
+	}
+	if err = d.writeConfig(ctx, workDir); err != nil {
+		return err
+	}
+	if err = d.writeFiles(pipeline, workDir); err != nil {
+		return err
+	}
+	if err = d.writeSections(pipeline, workDir); err != nil {
+		return err
+	}
+	if err = d.writeParsers(ctx, workDir); err != nil {
+		return err
+	}
+	defer func() {
+		if err = RemoveAll(workDir); err != nil {
+			log := logf.FromContext(ctx)
+			log.Error(err, "Failed to remove Fluent Bit config directory")
+		}
+	}()
 
-	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
-	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
-	fluentBitFilesDirectory := currentBaseDirectory + "/files"
+	path := filepath.Join(workDir, "fluent-bit.conf")
+	args := append(fluentBitArgs(), "--config", path)
 
+	return d.runCmd(ctx, args)
+}
+
+func createNewWorkDir() (string, error) {
+	var newWorkDir = "/tmp/dry-run" + uuid.New().String()
+	err := MakeDir(newWorkDir)
+	if err != nil {
+		return "", err
+	}
+	return newWorkDir, nil
+}
+
+func (d *DryRunner) writeConfig(ctx context.Context, basePath string) error {
 	var cm v1.ConfigMap
 	var err error
-	if err := d.client.Get(ctx, d.config.FluentBitConfigMapName, &cm); err != nil {
-		return []fileHandler{}, err
+	if err = d.client.Get(ctx, d.config.FluentBitConfigMapName, &cm); err != nil {
+		return err
 	}
-
-	var configFiles []fileHandler
 	for key, data := range cm.Data {
-		configFiles = append(configFiles, fileHandler{
-			path: currentBaseDirectory,
-			name: key,
-			data: data,
-		})
-	}
-
-	var logParsers telemetryv1alpha1.LogParserList
-	// If validating pipeline then check pipelines + parsers
-	if pipeline != nil {
-		configFiles, err = appendFluentBitConfigFile(configFiles, *pipeline, d.config.PipelineConfig, fluentBitSectionsConfigDirectory, fluentBitFilesDirectory)
+		err = WriteFile(filepath.Join(basePath, key), data)
 		if err != nil {
-			return []fileHandler{}, err
+			return err
 		}
-		if err = d.client.List(ctx, &logParsers); err != nil {
-			return []fileHandler{}, err
-		}
-		parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
-		configFiles = append(configFiles, fileHandler{
-			path: fluentBitParsersConfigDirectory,
-			name: fluentBitParsersConfigMapKey,
-			data: parsersConfig,
-		})
-
-		return configFiles, nil
 	}
-
-	if parser != nil {
-		logParsers.Items = appendUniqueParsers(logParsers.Items, parser)
-		parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
-		configFiles = append(configFiles, fileHandler{
-			path: fluentBitParsersConfigDirectory,
-			name: fluentBitParsersConfigMapKey,
-			data: parsersConfig,
-		})
-
-		return configFiles, nil
-	}
-
-	return []fileHandler{}, fmt.Errorf("either Pipeline or Parser should be passed to be validated")
+	return nil
 }
 
-func appendUniqueParsers(logParsers []telemetryv1alpha1.LogParser, parser *telemetryv1alpha1.LogParser) []telemetryv1alpha1.LogParser {
-	for _, l := range logParsers {
-		if l.Name == parser.Name {
-			l = *parser
-			return logParsers
+func (d *DryRunner) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
+	for _, file := range pipeline.Spec.Files {
+		err := WriteFile(filepath.Join(basePath, "files", file.Name), file.Content)
+		if err != nil {
+			return err
 		}
 	}
-	return append(logParsers, *parser)
+	return nil
 }
 
-func appendFluentBitConfigFile(
-	configFiles []fileHandler,
-	logPipeline telemetryv1alpha1.LogPipeline,
-	pipelineConfig fluentbit.PipelineConfig,
-	fluentBitSectionsConfigDirectory string,
-	fluentBitFilesDirectory string) ([]fileHandler, error) {
-	for _, file := range logPipeline.Spec.Files {
-		configFiles = append(configFiles, fileHandler{
-			path: fluentBitFilesDirectory,
-			name: file.Name,
-			data: file.Content,
-		})
-	}
-
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(&logPipeline, pipelineConfig)
+func (d *DryRunner) writeSections(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(pipeline, d.config.PipelineConfig)
 	if err != nil {
-		return []fileHandler{}, err
+		return err
 	}
-
-	configFiles = append(configFiles, fileHandler{
-		path: fluentBitSectionsConfigDirectory,
-		name: logPipeline.Name + ".conf",
-		data: sectionsConfig,
-	})
-	return configFiles, nil
+	return WriteFile(filepath.Join(basePath, "dynamic", pipeline.Name+".conf"), sectionsConfig)
 }
 
-func (d *DryRunner) run(ctx context.Context, args []string) error {
-	plugins, err := listPlugins(d.config.FluentBitPluginDir)
+func (d *DryRunner) writeParsers(ctx context.Context, basePath string) error {
+	var logParsers telemetryv1alpha1.LogParserList
+	if err := d.client.List(ctx, &logParsers); err != nil {
+		return err
+	}
+	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
+
+	return WriteFile(filepath.Join(basePath, "dynamic-parsers", "parsers.conf"), parsersConfig)
+}
+
+func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
+	var plugins []string
+	files, err := ioutil.ReadDir(d.config.FluentBitPluginDir)
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		plugins = append(plugins, filepath.Join(d.config.FluentBitPluginDir, f.Name()))
+	}
 	if err != nil {
 		return err
 	}
@@ -179,7 +155,9 @@ func (d *DryRunner) run(ctx context.Context, args []string) error {
 		args = append(args, "-e", plugin)
 	}
 
-	out, err := runCmd(ctx, d.config.FluentBitBinPath, args...)
+	cmd := exec.CommandContext(ctx, d.config.FluentBitBinPath, args...)
+	outBytes, err := cmd.CombinedOutput()
+	out := string(outBytes)
 	if err != nil {
 		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))
@@ -189,60 +167,36 @@ func (d *DryRunner) run(ctx context.Context, args []string) error {
 	return nil
 }
 
-func listPlugins(pluginPath string) ([]string, error) {
-	var plugins []string
-	files, err := ioutil.ReadDir(pluginPath)
-	if err != nil {
-		return nil, err
-	}
-	for _, f := range files {
-		if f.IsDir() {
-			continue
-		}
-		plugins = append(plugins, filepath.Join(pluginPath, f.Name()))
-	}
-	return plugins, err
-}
-
-func runCmd(ctx context.Context, name string, args ...string) (string, error) {
-	cmd := exec.CommandContext(ctx, name, args...)
-
-	outBytes, err := cmd.CombinedOutput()
-	out := string(outBytes)
-	return out, err
-}
-
-// extractError extracts the error message from the output of fluent-bit
-// Thereby, it supports the following error patterns:
-// 1. [<time>] [error] [config] error in path/to/file.conf:3: <msg>
-// 2. [<time>] [error] [config] <msg>
-// 3. [<time>] [error] [parser] <msg> in path/to/file.conf
-// 4. [<time>] [error] <msg>
-// 5. error<msg>
 func extractError(output string) string {
-	rColors := regexp.MustCompile(ansiColorsRegex)
+	// Found in https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
+	rColors := regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
 	output = rColors.ReplaceAllString(output, "")
 
+	// Error pattern: [<time>] [error] [config] error in path/to/file.conf:3: <msg>
 	r1 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config].+:\s)(?P<description>.+)`)
 	if r1Matches := r1.FindStringSubmatch(output); r1Matches != nil {
 		return r1Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
+	// Error pattern: [<time>] [error] [config] <msg>
 	r2 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config]\s)(?P<description>.+)`)
 	if r2Matches := r2.FindStringSubmatch(output); r2Matches != nil {
 		return r2Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
+	// Error pattern: [<time>] [error] [parser] <msg> in path/to/file.conf
 	r3 := regexp.MustCompile(`.*(?P<label>\[error]\s\[parser]\s)(?P<description>.+)(\sin.+)`)
 	if r3Matches := r3.FindStringSubmatch(output); r3Matches != nil {
 		return r3Matches[2] // 0: complete output, 1: label, 2: description 3: file name
 	}
 
+	// Error pattern: [<time>] [error] <msg>
 	r4 := regexp.MustCompile(`.*(?P<label>\[error]\s)(?P<description>.+)`)
 	if r4Matches := r4.FindStringSubmatch(output); r4Matches != nil {
 		return r4Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
+	// Error pattern: error<msg>
 	r5 := regexp.MustCompile(`error.+`)
 	return r5.FindString(output)
 }
