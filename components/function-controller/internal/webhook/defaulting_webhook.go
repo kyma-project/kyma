@@ -4,7 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,22 +17,25 @@ import (
 )
 
 type DefaultingWebHook struct {
-	config  *serverlessv1alpha2.DefaultingConfig
-	client  ctrlclient.Client
-	decoder *admission.Decoder
+	configAlphaV2 *serverlessv1alpha2.DefaultingConfig
+	configAlphaV1 *serverlessv1alpha1.DefaultingConfig
+	client        ctrlclient.Client
+	decoder       *admission.Decoder
 }
 
-func NewDefaultingWebhook(config *serverlessv1alpha2.DefaultingConfig, client ctrlclient.Client) *DefaultingWebHook {
+func NewDefaultingWebhook(configV1Alpha1 *serverlessv1alpha1.DefaultingConfig, configV1Alpha2 *serverlessv1alpha2.DefaultingConfig, client ctrlclient.Client) *DefaultingWebHook {
 	return &DefaultingWebHook{
-		config: config,
-		client: client,
+		configAlphaV1: configV1Alpha1,
+		configAlphaV2: configV1Alpha2,
+		client:        client,
 	}
 }
+
 func (w *DefaultingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
-	if req.RequestKind.Kind == "Function" {
+	if req.Kind.Kind == "Function" {
 		return w.handleFunctionDefaulting(req)
 	}
-	if req.RequestKind.Kind == "GitRepository" {
+	if req.Kind.Kind == "GitRepository" {
 		return w.handleGitRepoDefaulting()
 	}
 	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.RequestKind.Kind))
@@ -39,12 +47,30 @@ func (w *DefaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 }
 
 func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admission.Response {
-	f := &serverlessv1alpha2.Function{}
-	if err := w.decoder.Decode(req, f); err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
+	var f interface{}
+	switch req.Kind.Version {
+	case resources.ServerlessV1Alpha1Version:
+		{
+			fn := &serverlessv1alpha1.Function{}
+			if err := w.decoder.Decode(req, fn); err != nil {
+				return admission.Errored(http.StatusBadRequest, err)
+			}
+			fn.Default(w.configAlphaV1)
+			f = fn
+		}
+	case resources.ServerlessV1Alpha2Version:
+		{
+			fn := &serverlessv1alpha2.Function{}
+			if err := w.decoder.Decode(req, fn); err != nil {
+				return admission.Errored(http.StatusBadRequest, err)
+			}
+			fn.Default(w.configAlphaV2)
+			f = fn
+
+		}
+	default:
+		return admission.Errored(http.StatusBadRequest, errors.Errorf("Invalid resource version provided: %s", req.Kind.Version))
 	}
-	// apply defaults
-	f.Default(w.config)
 
 	fBytes, err := json.Marshal(f)
 	if err != nil {

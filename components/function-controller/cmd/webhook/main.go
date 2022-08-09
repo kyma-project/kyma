@@ -54,8 +54,10 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	validationConfig := webhook.ReadValidationConfigOrDie()
-	defaultingConfig := webhook.ReadDefaultingConfigOrDie()
+	validationConfigv1alpha1 := webhook.ReadValidationConfigV1Alpha1OrDie()
+	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
+	defaultingConfigv1alpha1 := webhook.ReadDefaultingConfigV1Alpha1OrDie()
+	defaultingConfigv1alpha2 := webhook.ReadDefaultingConfigV1Alpha2OrDie()
 
 	// manager setup
 	log.Info("setting up controller-manager")
@@ -96,12 +98,12 @@ func main() {
 
 	whs.Register(resources.FunctionDefaultingWebhookPath,
 		&ctrlwebhook.Admission{
-			Handler: webhook.NewDefaultingWebhook(defaultingConfig, mgr.GetClient()),
+			Handler: webhook.NewDefaultingWebhook(defaultingConfigv1alpha1, defaultingConfigv1alpha2, mgr.GetClient()),
 		},
 	)
 	whs.Register(resources.FunctionValidationWebhookPath,
 		&ctrlwebhook.Admission{
-			Handler: webhook.NewValidatingHook(validationConfig, mgr.GetClient()),
+			Handler: webhook.NewValidatingHook(validationConfigv1alpha1, validationConfigv1alpha2, mgr.GetClient()),
 		},
 	)
 

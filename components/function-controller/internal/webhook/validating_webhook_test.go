@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
+
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/admission/v1"
@@ -40,7 +42,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Accept valid git function",
 			fields: fields{
-				config:  ReadValidationConfigOrDie(),
+				config:  ReadValidationConfigV1Alpha2OrDie(),
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
@@ -48,7 +50,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
   "apiVersion": "serverless.kyma-project.io/v1alpha2",
@@ -105,7 +107,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Accept valid function",
 			fields: fields{
-				config:  ReadValidationConfigOrDie(),
+				config:  ReadValidationConfigV1Alpha2OrDie(),
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
@@ -113,7 +115,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha2",
 								"kind": "Function",
@@ -167,7 +169,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Deny invalid function",
 			fields: fields{
-				config:  ReadValidationConfigOrDie(),
+				config:  ReadValidationConfigV1Alpha2OrDie(),
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
@@ -175,7 +177,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha2",
 								"kind": "Function",
@@ -196,7 +198,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Bad request",
 			fields: fields{
-				config:  ReadValidationConfigOrDie(),
+				config:  ReadValidationConfigV1Alpha2OrDie(),
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
@@ -204,7 +206,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"bad request"`),
 						},
@@ -216,7 +218,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Deny on invalid kind",
 			fields: fields{
-				config:  ReadValidationConfigOrDie(),
+				config:  ReadValidationConfigV1Alpha2OrDie(),
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
@@ -224,7 +226,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
 								"apiVersion": "serverless.kyma-project.io/v1alpha2",
@@ -247,9 +249,9 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &ValidatingWebHook{
-				config:  tt.fields.config,
-				client:  tt.fields.client,
-				decoder: tt.fields.decoder,
+				configv1alpha2: tt.fields.config,
+				client:         tt.fields.client,
+				decoder:        tt.fields.decoder,
 			}
 			got := w.Handle(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.responseCode, got.Result.Code)
