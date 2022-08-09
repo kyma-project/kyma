@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
@@ -19,9 +19,10 @@ import (
 
 func TestValidatingWebHook_Handle(t *testing.T) {
 	type fields struct {
-		config  *serverlessv1alpha2.ValidationConfig
-		client  ctrlclient.Client
-		decoder *admission.Decoder
+		configV1Alpha1 *serverlessv1alpha1.ValidationConfig
+		configV1Alpha2 *serverlessv1alpha2.ValidationConfig
+		client         ctrlclient.Client
+		decoder        *admission.Decoder
 	}
 	type args struct {
 		ctx context.Context
@@ -42,15 +43,15 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Accept valid git function",
 			fields: fields{
-				config:  ReadValidationConfigV1Alpha2OrDie(),
-				client:  fake.NewClientBuilder().Build(),
-				decoder: decoder,
+				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				client:         fake.NewClientBuilder().Build(),
+				decoder:        decoder,
 			},
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
   "apiVersion": "serverless.kyma-project.io/v1alpha2",
@@ -105,61 +106,39 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			responseCode: http.StatusOK,
 		},
 		{
-			name: "Accept valid function",
+			name: "Accept valid v1alpha2 function",
 			fields: fields{
-				config:  ReadValidationConfigV1Alpha2OrDie(),
-				client:  fake.NewClientBuilder().Build(),
-				decoder: decoder,
+				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				client:         fake.NewClientBuilder().Build(),
+				decoder:        decoder,
 			},
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
+						Kind: metav1.GroupVersionKind{Kind: serverlessv1alpha2.FunctionKind, Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
-							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha2",
-								"kind": "Function",
-								"metadata": {
-									"name": "testfunc",
-									"namespace": "default"
-								},
-								"spec": {
-									"resourceConfiguration": {
-										"build": {
-											"resources": {
-										            "limits": {
-											         "cpu": "700m",
-											         "memory": "700Mi"
-										            },
-										            "requests": {
-											        "cpu": "200m",
-											        "memory": "200Mi"
-										            }
-											}
-										}, 
-										"function": {
-								                    "resources": {
-										        "limits": {
-											    "cpu": "400m",
-											    "memory": "512Mi"
-										        },
-										        "requests": {
-											    "cpu": "200m",
-											    "memory": "256Mi"
-										        }
-									            }
-										}
-									},
-									"maxReplicas": 1,
-									"minReplicas": 1,
-									"runtime": "python39",
-									"source": {
-										"inline":  {
-											"source": "def main(event, context):\n  return \"hello world\"\n"
-										}
-								        }
-								}   
-							}`),
+							Raw: []byte(ValidV1Alpha2Function(t)),
+						},
+					},
+				},
+			},
+			responseCode: http.StatusOK,
+		},
+		{
+			name: "Accept valid v1alpha1 function",
+			fields: fields{
+				configV1Alpha1: ReadValidationConfigV1Alpha1OrDie(),
+				client:         fake.NewClientBuilder().Build(),
+				decoder:        decoder,
+			},
+			args: args{
+				ctx: context.Background(),
+				req: admission.Request{
+					AdmissionRequest: v1.AdmissionRequest{
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: serverlessv1alpha1.FunctionVersion},
+						Object: runtime.RawExtension{
+							Raw: []byte(ValidV1Alpha1Function(t)),
 						},
 					},
 				},
@@ -169,15 +148,15 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Deny invalid function",
 			fields: fields{
-				config:  ReadValidationConfigV1Alpha2OrDie(),
-				client:  fake.NewClientBuilder().Build(),
-				decoder: decoder,
+				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				client:         fake.NewClientBuilder().Build(),
+				decoder:        decoder,
 			},
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha2",
 								"kind": "Function",
@@ -198,15 +177,15 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Bad request",
 			fields: fields{
-				config:  ReadValidationConfigV1Alpha2OrDie(),
-				client:  fake.NewClientBuilder().Build(),
-				decoder: decoder,
+				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				client:         fake.NewClientBuilder().Build(),
+				decoder:        decoder,
 			},
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"bad request"`),
 						},
@@ -218,15 +197,15 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 		{
 			name: "Deny on invalid kind",
 			fields: fields{
-				config:  ReadValidationConfigV1Alpha2OrDie(),
-				client:  fake.NewClientBuilder().Build(),
-				decoder: decoder,
+				configV1Alpha2: ReadValidationConfigV1Alpha2OrDie(),
+				client:         fake.NewClientBuilder().Build(),
+				decoder:        decoder,
 			},
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
 					AdmissionRequest: v1.AdmissionRequest{
-						Kind: metav1.GroupVersionKind{Kind: "Function", Version: resources.ServerlessV1Alpha2Version},
+						Kind: metav1.GroupVersionKind{Kind: "Function", Version: serverlessv1alpha2.FunctionVersion},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
 								"apiVersion": "serverless.kyma-project.io/v1alpha2",
@@ -249,7 +228,8 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &ValidatingWebHook{
-				configv1alpha2: tt.fields.config,
+				configv1alpha2: tt.fields.configV1Alpha2,
+				configv1alpha1: tt.fields.configV1Alpha1,
 				client:         tt.fields.client,
 				decoder:        tt.fields.decoder,
 			}

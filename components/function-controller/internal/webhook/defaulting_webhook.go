@@ -9,7 +9,6 @@ import (
 
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -50,7 +49,7 @@ func (w *DefaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admission.Response {
 	var f interface{}
 	switch req.Kind.Version {
-	case resources.ServerlessV1Alpha1Version:
+	case serverlessv1alpha1.FunctionVersion:
 		{
 			fn := &serverlessv1alpha1.Function{}
 			if err := w.decoder.Decode(req, fn); err != nil {
@@ -59,7 +58,7 @@ func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admi
 			fn.Default(w.configAlphaV1)
 			f = fn
 		}
-	case resources.ServerlessV1Alpha2Version:
+	case serverlessv1alpha2.FunctionVersion:
 		{
 			fn := &serverlessv1alpha2.Function{}
 			if err := w.decoder.Decode(req, fn); err != nil {

@@ -4,6 +4,9 @@ import (
 	"context"
 	"reflect"
 
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+
 	"github.com/pkg/errors"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -25,11 +28,9 @@ const (
 	ValidatingWebHook WebHookType = "Validating"
 
 	serverlessAPIGroup          = "serverless.kyma-project.io"
-	ServerlessV1Alpha1Version   = "v1alpha1"
-	ServerlessV1Alpha2Version   = "v1alpha2"
-	ServerlessCurrentAPIVersion = ServerlessV1Alpha2Version
+	ServerlessCurrentAPIVersion = serverlessv1alpha2.FunctionVersion
 
-	DeprecatedServerlessAPIVersion = ServerlessV1Alpha1Version
+	DeprecatedServerlessAPIVersion = serverlessv1alpha1.FunctionVersion
 	DefaultingWebhookName          = "defaulting.webhook.serverless.kyma-project.io"
 	SecretMutationWebhookName      = "mutating.secret.webhook.serverless.kyma-project.io"
 	ValidationWebhookName          = "validation.webhook.serverless.kyma-project.io"

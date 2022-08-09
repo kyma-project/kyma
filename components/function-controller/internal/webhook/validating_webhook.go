@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -50,7 +49,7 @@ func (w *ValidatingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 
 func (w *ValidatingWebHook) handleFunctionValidation(req admission.Request) admission.Response {
 	switch req.Kind.Version {
-	case resources.ServerlessV1Alpha1Version:
+	case serverlessv1alpha1.FunctionVersion:
 		{
 			fn := &serverlessv1alpha1.Function{}
 			if err := w.decoder.Decode(req, fn); err != nil {
@@ -60,7 +59,7 @@ func (w *ValidatingWebHook) handleFunctionValidation(req admission.Request) admi
 				return admission.Denied(fmt.Sprintf("validation failed: %s", err.Error()))
 			}
 		}
-	case resources.ServerlessV1Alpha2Version:
+	case serverlessv1alpha2.FunctionVersion:
 		{
 			fn := &serverlessv1alpha2.Function{}
 			if err := w.decoder.Decode(req, fn); err != nil {
