@@ -91,7 +91,7 @@ global:
       version: "05dc6c5b"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "05dc6c5b"
+      version: "de9d45d3"
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "05dc6c5b"
