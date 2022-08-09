@@ -166,14 +166,14 @@ func createSubscriberSvcInK8s(ens *TestEnsemble) {
 					return err
 				}
 				return nil
-			}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
+			}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "unable to create the namespace for the subscriber")
 		}
 	}
 
 	g.Eventually(func() error {
 		// create subscriber svc on cluster
 		return ens.K8sClient.Create(ens.Ctx, ens.SubscriberSvc)
-	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
+	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "unable to create the subscriber service")
 }
 
 // createSubscriptionInK8s creates a Subscription on the K8s client of the testEnsemble. All the reconciliation
@@ -187,8 +187,7 @@ func createSubscriptionInK8s(ens *TestEnsemble, subscription *eventingv1alpha1.S
 		if namespace.Name != "default" {
 			err := ens.K8sClient.Create(ens.Ctx, namespace)
 			if !k8serrors.IsAlreadyExists(err) {
-				fmt.Println(err)
-				g.Expect(err).ShouldNot(gomega.HaveOccurred(), "unable to create the subscription")
+				g.Expect(err).ShouldNot(gomega.HaveOccurred(), "unable to create the namespace for the subscription")
 			}
 		}
 	}
@@ -196,7 +195,7 @@ func createSubscriptionInK8s(ens *TestEnsemble, subscription *eventingv1alpha1.S
 	// create subscription on cluster
 	g.Eventually(func() error {
 		return ens.K8sClient.Create(ens.Ctx, subscription)
-	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
+	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "unable to create subscription")
 	return subscription
 }
 
