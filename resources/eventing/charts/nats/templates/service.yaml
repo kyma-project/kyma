@@ -8,14 +8,13 @@ metadata:
     {{- include "nats.labels" . | nindent 4 }}
   {{- if .Values.serviceAnnotations}}
   annotations:
-  {{- range $key, $value := .Values.serviceAnnotations }}
-    {{ $key }}: {{ $value | quote }}
-  {{- end }}
+    {{- toYaml .Values.serviceAnnotations | nindent 4 }}
   {{- end }}
 spec:
   selector:
     {{- include "nats.selectorLabels" . | nindent 4 }}
   clusterIP: None
+  publishNotReadyAddresses: true
   ports:
   {{- if .Values.nats.profiling.enabled }}
   - name: profiling
