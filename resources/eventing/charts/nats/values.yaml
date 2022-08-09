@@ -281,7 +281,7 @@ additionalVolumes: []
 additionalVolumeMounts: []
 
 cluster:
-  enabled: false
+  enabled: true
   name: eventing-nats
   replicas: 3
   noAdvertise: false
@@ -311,7 +311,7 @@ commonLabels: {}
 
 # podManagementPolicy controls how pods are created during initial scale up,
 # when replacing pods on nodes, or when scaling down.
-podManagementPolicy: Parallel # TODO for now is OrderedReady
+podManagementPolicy: Parallel
 
 # Prometheus NATS Exporter configuration.
 exporter:
