@@ -1,8 +1,6 @@
 package dryrun
 
 import (
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,32 +47,32 @@ func TestExtractError(t *testing.T) {
 	}
 }
 
-func TestListPlugins(t *testing.T) {
-	plugins := []string{"flb-out_sequentialhttp.so", "out_grafana_loki.so"}
-	dir, err := os.MkdirTemp("", "plugins")
-	assert.NoError(t, err)
+// func TestListPlugins(t *testing.T) {
+// 	plugins := []string{"flb-out_sequentialhttp.so", "out_grafana_loki.so"}
+// 	dir, err := os.MkdirTemp("", "plugins")
+// 	assert.NoError(t, err)
 
-	defer os.RemoveAll(dir)
+// 	defer os.RemoveAll(dir)
 
-	for _, plugin := range plugins {
-		_, err := os.Create(dir + "/" + plugin)
-		assert.NoError(t, err)
-	}
+// 	for _, plugin := range plugins {
+// 		_, err := os.Create(dir + "/" + plugin)
+// 		assert.NoError(t, err)
+// 	}
 
-	// should be ignored
-	err = os.Mkdir(dir+"/test", 0777)
-	assert.NoError(t, err)
+// 	// should be ignored
+// 	err = os.Mkdir(dir+"/test", 0777)
+// 	assert.NoError(t, err)
 
-	actual, err := listPlugins(dir)
-	assert.NoError(t, err)
-	assert.Equal(t, len(plugins), len(actual))
+// 	actual, err := listPlugins(dir)
+// 	assert.NoError(t, err)
+// 	assert.Equal(t, len(plugins), len(actual))
 
-	for _, found := range actual {
-		assert.True(t, strings.HasPrefix(found, dir))
-		file := strings.TrimPrefix(found, dir+"/")
-		assert.Contains(t, plugins, file)
-	}
+// 	for _, found := range actual {
+// 		assert.True(t, strings.HasPrefix(found, dir))
+// 		file := strings.TrimPrefix(found, dir+"/")
+// 		assert.Contains(t, plugins, file)
+// 	}
 
-	_, err = listPlugins("/not/existing/dir")
-	assert.Error(t, err)
-}
+// 	_, err = listPlugins("/not/existing/dir")
+// 	assert.Error(t, err)
+// }
