@@ -15,7 +15,7 @@ tracing:
   jaegerAgentHost:
 
 fluent-bit:
-  enabled: true
+  enabled: false
 
 loki:
   enabled: true
@@ -46,7 +46,7 @@ global:
       name: kyma-gateway
       namespace: kyma-system
   telemetry:
-    enabled: false
+    enabled: true
   tracing:
     enabled: true
   highPriorityClassName: "kyma-system-priority"
