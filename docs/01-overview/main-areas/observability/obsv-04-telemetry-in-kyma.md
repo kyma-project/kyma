@@ -85,13 +85,6 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           includeSystemNamespaces: false
     ```
 
-Selectors:
-- `namespaces`: a list of namespaces logs should be collected from (mutually exclusive with `exludeNamespaces`)
-- `exludeNamespaces`: a list namespaces to exclude from log collection from all namespaces (mutually exclusive with `namespaces`)
-- `containers`: a list of container namesto collect from (mutually exclusive with `excludeContainers`)
-- `excludeContainers`: a list of container names to exclude (mutually exclusive with `containers`)
-- `includeSystemNamespaces`: if not any selection via `namespaces` or `exludeNamespaces` is done set this to true to include all system namespaces. Has no effect any constraint on namespace level is set.
-
 Valid input example:
   ```yaml
   spec:
@@ -318,6 +311,13 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 | Parameter | Type | Description |
 |---|---|---|
+| input | object | Definition where to collect logs including selector mechanims. |
+| input.application | object | Input type for application logs collection. |
+| input.application.namespaces | []string | List of namespaces logs should be collected from (mutually exclusive with `exludeNamespaces`). |
+| input.application.excludeNamespaces | []string | List namespaces to exclude from log collection from all namespaces (mutually exclusive with `namespaces`) |
+| input.application.containers | []string | List of container names to collect from (mutually exclusive with `excludeContainers`) |
+| input.application.excludeContainers | []string | List of container names to exclude (mutually exclusive with `containers`) |
+| input.application.includeSystemNamespaces | boolean | If no selection from `namespaces` or `exludeNamespaces` is done, this can be set to include all system namespaces without listing them manually. Defaults to `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
