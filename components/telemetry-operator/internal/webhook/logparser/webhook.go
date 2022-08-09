@@ -26,7 +26,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -40,18 +39,15 @@ type DryRunner interface {
 //+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
-	fluentBitConfigMap types.NamespacedName
-	parserValidator    validation.ParserValidator
-	pipelineConfig     fluentbit.PipelineConfig
-	dryRunner          DryRunner
-	decoder            *admission.Decoder
+	parserValidator validation.ParserValidator
+	dryRunner       DryRunner
+	decoder         *admission.Decoder
 }
 
 func NewValidatingWebhookHandler(client client.Client, parserValidator validation.ParserValidator, pipelineConfig fluentbit.PipelineConfig, dryRunner DryRunner) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
 		Client:          client,
 		parserValidator: parserValidator,
-		pipelineConfig:  pipelineConfig,
 		dryRunner:       dryRunner,
 	}
 }
