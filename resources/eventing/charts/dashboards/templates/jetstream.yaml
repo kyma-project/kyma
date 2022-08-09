@@ -983,7 +983,7 @@ data:
                    "refId":"B"
                 },
                 {
-                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)",
+                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_desc}} -",

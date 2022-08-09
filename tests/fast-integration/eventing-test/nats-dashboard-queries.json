@@ -89,7 +89,7 @@
   },
   {
     "title":"NATS JetStream: Messages per second (++/--) - 2",
-    "query":"- sum(rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)"
+    "query":"- sum(rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)"
   },
   {
     "title":"NATS JetStream: Pending Re-delivery Messages",
