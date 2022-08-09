@@ -338,8 +338,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 }
 
 func (s *systemState) podLabels() map[string]string {
-	selectorLabels := s.deploymentSelectorLabels()
-	return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
+	return s.deploymentSelectorLabels()
 }
 
 type buildDeploymentArgs struct {

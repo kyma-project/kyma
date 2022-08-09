@@ -11,7 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"k8s.io/apimachinery/pkg/api/validation"
-	v1validation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
 	utilvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -53,7 +52,6 @@ func (fn *Function) getBasicValidations() []validationFunction {
 	return []validationFunction{
 		fn.validateObjectMeta,
 		fn.Spec.validateEnv,
-		fn.Spec.validateLabels,
 		fn.Spec.validateReplicas,
 		fn.Spec.validateFunctionResources,
 		fn.Spec.validateBuildResources,
@@ -290,14 +288,6 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 			*maxReplicas, minValue))
 	}
 	return returnAllErrs("invalid values", allErrs)
-}
-
-func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
-	labels := spec.Template.Labels
-	fieldPath := field.NewPath("spec.labels")
-
-	errs := v1validation.ValidateLabels(labels, fieldPath)
-	return errs.ToAggregate()
 }
 
 type property struct {

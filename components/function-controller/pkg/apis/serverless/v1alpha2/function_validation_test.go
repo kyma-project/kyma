@@ -98,12 +98,6 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Value: "test",
 						},
 					},
-					Template: Template{
-						Labels: map[string]string{
-							"shoul-be-ok": "test",
-							"test":        "test",
-						},
-					},
 					MinReplicas: pointer.Int32(1),
 					MaxReplicas: pointer.Int32(1),
 					ResourceConfiguration: ResourceConfiguration{
@@ -232,12 +226,6 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
-						},
-					},
-					Template: Template{
-						Labels: map[string]string{
-							"shoul-be-ok":      "test",
-							"should BE not OK": "test",
 						},
 					},
 				},

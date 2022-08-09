@@ -90,13 +90,6 @@ type ConfigMapRef struct {
 	Namespace string `json:"namespace"`
 }
 
-type Template struct {
-	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
-	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
-}
-
 type ResourceRequirements struct {
 	// +optional
 	Profile string `json:"profile,omitempty"`
@@ -140,9 +133,6 @@ type FunctionSpec struct {
 
 	// +kubebuilder:validation:Minimum:=1
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
-
-	// +optional
-	Template Template `json:"template,omitempty"`
 }
 
 //TODO: Status related things needs to be developed.
