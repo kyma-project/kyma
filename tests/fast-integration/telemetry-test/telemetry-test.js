@@ -142,11 +142,10 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     }
   });
 
-  it('Should exclude system namespace by default', async () => {
-    await sleep(5 * 1000);
+  it('Should push the logs to the loki output', async () => {
     const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-    assert.isFalse(logsPresent, 'No logs present in Loki');
+    assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
   it('Should parse the logs using regex', async () => {

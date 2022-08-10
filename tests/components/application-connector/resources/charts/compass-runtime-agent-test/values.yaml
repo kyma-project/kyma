@@ -1,0 +1,9 @@
+namespace: "test"
+
+containerRegistry:
+  path: "eu.gcr.io/kyma-project"
+
+images:
+  compassTest:
+    name: "compass-runtime-agent-test"
+    version: "PR-15024"
