@@ -15,7 +15,7 @@ title: Logging Architecture
 5. The Loki server processes the log data and stores it in the log store. The data is indexed based on the passed labels
 6. The user queries the logs using Grafana dashboards to analyze and visualize logs fetched and processed by Loki. Learn more about [accessing Grafana](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md).
 
-## Telemetry Component (alpha feature)
+## Telemetry Component
 
 ![](./assets/obsv-configurable-logging-architecture.drawio.svg)
 
