@@ -14,7 +14,6 @@ spec:
   selector:
     {{- include "nats.selectorLabels" . | nindent 4 }}
   clusterIP: None
-  publishNotReadyAddresses: true
   ports:
   {{- if .Values.nats.profiling.enabled }}
   - name: profiling
@@ -50,6 +49,3 @@ spec:
     {{- end }}
   - name: gateways
     port: {{ .Values.nats.ports.gateways }}
-    {{- if .Values.appProtocol.enabled }}
-    appProtocol: tcp
-    {{- end }}

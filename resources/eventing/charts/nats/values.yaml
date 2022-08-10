@@ -20,6 +20,7 @@ nats:
     enabled: false
     port: 6000
 
+  # Toggle using health check probes to better detect failures.
   healthcheck:
     # Enable /healthz startupProbe for controlled upgrades of NATS JetStream
     enableHealthz: true
@@ -71,16 +72,12 @@ nats:
     privileged: false
 
   # Toggle to disable client advertisements (connect_urls),
-  # in case of running behind a load balancer (which is not recommended)
+  # in case of running behind a load balancer
   # it might be required to disable advertisements.
   advertise: true
 
   # The number of connect attempts against discovered routes.
   connectRetries: 120
-
-  # How many seconds should pass before sending a PING
-  # to a client that has no activity.
-  pingInterval:
 
   # selector matchLabels for the server and service.
   # If left empty defaults are used.
@@ -106,14 +103,19 @@ nats:
     maxPending:
     maxPings:
 
+    # How many seconds should pass before sending a PING
+    # to a client that has no activity.
+    pingInterval:
+
     # grace period after pod begins shutdown before starting to close client connections
     lameDuckGracePeriod: "10s"
 
-    # NOTE: this should be at least the same as 'terminationGracePeriodSeconds'
+    # duration over which to slowly close client connections after lameDuckGracePeriod has passed
     lameDuckDuration: "120s"
 
-  # Default lame duck duration in the server is 2 minutes.
-  terminationGracePeriodSeconds: 120
+  # terminationGracePeriodSeconds determines how long to wait for graceful shutdown
+  # this should be at least `lameDuckGracePeriod` + `lameDuckDuration` + 20s shutdown overhead
+  terminationGracePeriodSeconds: 150
 
   logging:
     debug: true

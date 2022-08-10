@@ -20,7 +20,9 @@ spec:
   replicas: 1
   {{- end }}
   serviceName: {{ include "nats.fullname" . }}
+
   podManagementPolicy: {{ .Values.podManagementPolicy }}
+
   template:
     metadata:
       {{- if or .Values.exporter.enabled .Values.nats.configChecksumAnnotation .Values.podAnnotations }}
@@ -57,13 +59,8 @@ spec:
       # Common volumes for the containers.
       volumes:
       - name: config-volume
-        {{ if .Values.nats.customConfigSecret }}
-        secret:
-          secretName: {{ .Values.nats.customConfigSecret.name }}
-        {{ else }}
         configMap:
           name: {{ include "nats.fullname" . }}-config
-        {{ end }}
 
       # Local volume shared with the reloader.
       - name: pid
@@ -163,11 +160,11 @@ spec:
         {{- end }}
 
         command:
-        - "nats-server"
-        - "--config"
-        - "/etc/nats-config/nats.conf"
+         - "nats-server"
+         - "--config"
+         - "/etc/nats-config/nats.conf"
         {{- if .Values.nats.profiling.enabled }}
-        - "--profile={{ .Values.nats.profiling.port }}"
+         - "--profile={{ .Values.nats.profiling.port }}"
         {{- end }}
 
         # Required to be able to define an environment variable
