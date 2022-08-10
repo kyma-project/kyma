@@ -54,7 +54,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 
 ## Setting up a LogPipeline
 
-### Step 1: Create an Input
+### Step 1: Create an input
 
 1. To create a LogPipeline and define from which resources logs should be included create a LogPipeline with a name and spec with input:
     ```yaml
@@ -73,7 +73,8 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
         application: ...
     ```
 
-3. Selection mechanisms for application logs can be applied on namespace or container level. If nothing is set all namespaces will be considered except the system namespaces `kube-system`, `istio-system`, `kyma-system`, `kyma-integration` which are excluded by default.
+3. Optionally, you can apply selection mechanisms for application logs on Namespace or container level.
+   If nothing is set, all Namespaces are considered, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default.
     ```yaml
     spec:
       input:
@@ -95,9 +96,9 @@ Valid input example:
           - fluent-bit
   ```
 
-### Step 2: Create an Output
+### Step 2: Create an output
 
-1. To ship application logs to a new output, define an output spec for the LogPipeline like this:
+1. To ship application logs to a new output, define an output spec for the LogPipeline:
 
     ```yaml
     kind: LogPipeline
@@ -165,7 +166,8 @@ Valid input example:
 
 ### Step 3: Add filters
 
-To enrich logs with attributes or drop whole lines, add filters to the existing pipeline. In the following example, three filters are added, which are executed in sequence.
+To enrich logs with attributes or drop whole lines, add filters to the existing pipeline. 
+The following example contains three filters, which are executed in sequence.
 
 ```yaml
 kind: LogPipeline
@@ -311,13 +313,13 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 
 | Parameter | Type | Description |
 |---|---|---|
-| input | object | Definition where to collect logs including selector mechanims. |
+| input | object | Definition where to collect logs, including selector mechanisms. |
 | input.application | object | Input type for application logs collection. |
-| input.application.namespaces | []string | List of namespaces logs should be collected from (mutually exclusive with `exludeNamespaces`). |
-| input.application.excludeNamespaces | []string | List namespaces to exclude from log collection from all namespaces (mutually exclusive with `namespaces`) |
-| input.application.containers | []string | List of container names to collect from (mutually exclusive with `excludeContainers`) |
-| input.application.excludeContainers | []string | List of container names to exclude (mutually exclusive with `containers`) |
-| input.application.includeSystemNamespaces | boolean | If no selection from `namespaces` or `exludeNamespaces` is done, this can be set to include all system namespaces without listing them manually. Defaults to `false`. |
+| input.application.namespaces | []string | List of Namespaces from which logs are collected (mutually exclusive with `exludeNamespaces`). |
+| input.application.excludeNamespaces | []string | List of Namespaces to exclude during log collection from all Namespaces (mutually exclusive with `namespaces`) |
+| input.application.containers | []string | List of containers to collect from (mutually exclusive with `excludeContainers`) |
+| input.application.excludeContainers | []string | List of containers to exclude (mutually exclusive with `containers`) |
+| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
