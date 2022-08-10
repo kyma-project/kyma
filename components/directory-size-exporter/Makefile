@@ -47,19 +47,6 @@ help: ## Display this help.
 
 ##@ Development
 
-# Generate manifests e.g. CRD, RBAC etc.
-# manifests-local: controller-gen-local
-# 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-
-# copy-manifests-local: manifests-local
-# 	@cp ./config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml ./../../installation/resources/crds/telemetry/logpipelines.crd.yaml
-# 	@cp ./config/crd/bases/telemetry.kyma-project.io_logparsers.yaml ./../../installation/resources/crds/telemetry/logparsers.crd.yaml
-# 	@cp ./config/rbac/role.yaml ./../../resources/telemetry/charts/operator/templates/role.yaml
-
-
-# generate-local: controller-gen-local
-# 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
-
 resolve-local:
 	GO111MODULE=on go mod vendor -v
 
@@ -102,12 +89,6 @@ run-local: gen-webhook-cert-local fmt-local vet-local ## Run a controller from y
 release: resolve generate verify build-image push-image
 
 ##@ Deployment
-
-# install-crds-local: manifests-local ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-# 	kustomize build config/crd | kubectl apply -f -
-
-# uninstall-crds-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
-# 	kustomize build config/crd | kubectl delete -f -
 
 ENVTEST = $(PROJECT_DIR)/bin/$(OS)/setup-envtest
 .PHONY: envtest

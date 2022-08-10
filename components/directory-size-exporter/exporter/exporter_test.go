@@ -42,3 +42,8 @@ func TestDirSize(t *testing.T) {
 
 	require.Equal(t, int64(300), size)
 }
+
+func TestNewExporter(t *testing.T) {
+	exporter := NewExporter("data/log", "metric_name")
+	require.NotNil(t, exporter)
+}
