@@ -11,48 +11,35 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/scheme"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func loadCmFromFile(filepath string) (*corev1.ConfigMap, error) {
-	cmYAML, err := os.ReadFile("testdata/given/fluent-bit-cm.yaml")
+func mustLoadManifest[T runtime.Object](scheme *runtime.Scheme, filepath string) T {
+	manifest, err := os.ReadFile(filepath)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	decode := scheme.Codecs.UniversalDeserializer().Decode
-	cmRuntimeObj, _, err := decode(cmYAML, nil, nil)
+	decode := serializer.NewCodecFactory(scheme).UniversalDeserializer().Decode
+	obj, _, err := decode(manifest, nil, nil)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return cmRuntimeObj.(*corev1.ConfigMap), nil
+	return obj.(T)
 }
 
 func TestPreparePipelineDryRun(t *testing.T) {
-	fluentBitCm, err := loadCmFromFile("testdata/given/fluent-bit-cm.yaml")
-	require.NoError(t, err)
-
-	parser := &telemetryv1alpha1.LogParser{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "regex-parser",
-		},
-		Spec: telemetryv1alpha1.LogParserSpec{
-			Parser: `
-Format regex
-Regex  ^(?<user>[^ ]*) (?<pass>[^ ]*)$
-Time_Key time
-Time_Format %d/%b/%Y:%H:%M:%S %z
-Types user:string pass:string
-`,
-		},
-	}
-
 	scheme := runtime.NewScheme()
-	corev1.AddToScheme(scheme)
+	clientgoscheme.AddToScheme(scheme)
 	telemetryv1alpha1.AddToScheme(scheme)
+
+	fluentBitCm := mustLoadManifest[*corev1.ConfigMap](scheme, "testdata/given/fluent-bit-configmap.yaml")
+	parser := mustLoadManifest[*telemetryv1alpha1.LogParser](scheme, "testdata/given/regex-logparser.yaml")
+
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(fluentBitCm, parser).Build()
 
 	sut := fileWriter{
@@ -72,6 +59,12 @@ Types user:string pass:string
 			Name: "local",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Files: []telemetryv1alpha1.FileMount{
+				{
+					Name:    "dummy.txt",
+					Content: "dummy",
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{Value: "127.0.0.1"},
@@ -80,11 +73,14 @@ Types user:string pass:string
 		},
 	}
 
-	_, err = sut.preparePipelineDryRun(context.Background(), "testdata/actual", pipeline)
+	_, err := sut.preparePipelineDryRun(context.Background(), "testdata/actual", pipeline)
 	require.NoError(t, err)
 
 	requireEqualFiles(t, "testdata/expected/fluent-bit.conf", "testdata/actual/fluent-bit.conf")
 	requireEqualFiles(t, "testdata/expected/custom_parsers.conf", "testdata/actual/custom_parsers.conf")
+	requireEqualFiles(t, "testdata/expected/dynamic-parsers/parsers.conf", "testdata/actual/dynamic-parsers/parsers.conf")
+	requireEqualFiles(t, "testdata/expected/dynamic/local.conf", "testdata/actual/dynamic/local.conf")
+	requireEqualFiles(t, "testdata/expected/files/dummy.txt", "testdata/actual/files/dummy.txt")
 }
 
 func requireEqualFiles(t *testing.T, expectedFilePath, actualFilePath string) {
