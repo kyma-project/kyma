@@ -1,26 +1,33 @@
 package gitops
 
 import (
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-func GitopsFunction(repoName, baseDir, reference string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
+func GitopsFunction(repoURL, baseDir, reference string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	if baseDir == "" {
 		baseDir = "/"
 	}
+
 	if reference == "" {
 		reference = "main"
 	}
-	return &function.FunctionData{
-		SourceType: serverlessv1alpha1.SourceTypeGit,
-		Body:       repoName,
-		Repository: serverlessv1alpha1.Repository{
-			BaseDir:   baseDir,
-			Reference: reference,
+
+	var minReplicas int32 = 1
+	var maxReplicas int32 = 2
+
+	return serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			GitRepository: &serverlessv1alpha2.GitRepositorySource{
+				URL: repoURL,
+				Repository: serverlessv1alpha2.Repository{
+					BaseDir:   baseDir,
+					Reference: reference,
+				},
+			},
 		},
-		MinReplicas: 1,
-		MaxReplicas: 2,
-		Runtime:     rtm,
+		MinReplicas: &minReplicas,
+		MaxReplicas: &maxReplicas,
 	}
 }

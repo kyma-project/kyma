@@ -11,7 +11,7 @@ This diagram explains the event flow in Kyma, from the moment an event source se
 
 ![Eventing flow](./assets/evnt-architecture.svg)
 
-1. The Eventing Controller watches the Subscription Custom Resource. It detects if there are any new incoming events.
+1. The Eventing Controller watches the Subscription custom resource. It detects if there are any new incoming events.
 
 2. The Eventing Controller creates an infrastructure for the NATS server.
 
@@ -26,11 +26,11 @@ This diagram explains the event flow in Kyma, from the moment an event source se
 
 ## Event Publisher Proxy
 
-Event Publisher Proxy receives legacy and Cloud Events, and publishes them to the configured eventing backend. All the legacy events are automatically converted to Cloud Events.
+Event Publisher Proxy receives legacy and CloudEvents, and publishes them to the configured Eventing backend. All the legacy events are automatically converted to CloudEvents.
 
 ## Eventing Controller
 
-Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription Custom Resources. When an event is received, Eventing Controller dispatches the message to the configured sink.
+Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription custom resources. When an event is received, Eventing Controller dispatches the message to the configured sink.
 
 ## JetStream
 

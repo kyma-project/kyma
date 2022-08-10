@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -28,7 +28,7 @@ func mergeLabels(labelsCollection ...map[string]string) map[string]string {
 	return result
 }
 
-func getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {
+func getConditionStatus(conditions []serverlessv1alpha2.Condition, conditionType serverlessv1alpha2.ConditionType) corev1.ConditionStatus {
 	for _, condition := range conditions {
 		if condition.Type == conditionType {
 			return condition.Status
@@ -38,9 +38,9 @@ func getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType
 	return corev1.ConditionUnknown
 }
 
-func updateCondition(conditions []serverlessv1alpha1.Condition, condition serverlessv1alpha1.Condition) []serverlessv1alpha1.Condition {
-	conditionTypes := make(map[serverlessv1alpha1.ConditionType]interface{}, 3)
-	var result []serverlessv1alpha1.Condition
+func updateCondition(conditions []serverlessv1alpha2.Condition, condition serverlessv1alpha2.Condition) []serverlessv1alpha2.Condition {
+	conditionTypes := make(map[serverlessv1alpha2.ConditionType]interface{}, 3)
+	var result []serverlessv1alpha2.Condition
 
 	result = append(result, condition)
 	conditionTypes[condition.Type] = nil
@@ -55,12 +55,12 @@ func updateCondition(conditions []serverlessv1alpha1.Condition, condition server
 	return result
 }
 
-func equalConditions(existing, expected []serverlessv1alpha1.Condition) bool {
+func equalConditions(existing, expected []serverlessv1alpha2.Condition) bool {
 	if len(existing) != len(expected) {
 		return false
 	}
 
-	existingMap := make(map[serverlessv1alpha1.ConditionType]serverlessv1alpha1.Condition, len(existing))
+	existingMap := make(map[serverlessv1alpha2.ConditionType]serverlessv1alpha2.Condition, len(existing))
 	for _, value := range existing {
 		existingMap[value.Type] = value
 	}
@@ -74,7 +74,7 @@ func equalConditions(existing, expected []serverlessv1alpha1.Condition) bool {
 	return true
 }
 
-func equalRepositories(existing serverlessv1alpha1.Repository, new *serverlessv1alpha1.Repository) bool {
+func equalRepositories(existing serverlessv1alpha2.Repository, new *serverlessv1alpha2.Repository) bool {
 	if new == nil {
 		return true
 	}
@@ -84,14 +84,13 @@ func equalRepositories(existing serverlessv1alpha1.Repository, new *serverlessv1
 		existing.BaseDir == expected.BaseDir
 }
 
-func equalFunctionStatus(left, right serverlessv1alpha1.FunctionStatus) bool {
+func equalFunctionStatus(left, right serverlessv1alpha2.FunctionStatus) bool {
 	if !equalConditions(left.Conditions, right.Conditions) {
 		return false
 	}
 
 	if left.Repository != right.Repository ||
 		left.Commit != right.Commit ||
-		left.Source != right.Source ||
 		left.Runtime != right.Runtime {
 		return false
 	}
@@ -132,9 +131,9 @@ func getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
 	return volumeMounts
 }
 
-func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
+func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14, serverlessv1alpha1.Nodejs16:
+	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",
@@ -143,7 +142,7 @@ func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []co
 				SubPath:   ".npmrc",
 			},
 		}
-	case serverlessv1alpha1.Python39:
+	case serverlessv1alpha2.Python39:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",
@@ -266,11 +265,11 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 	return *first == *second
 }
 
-func isScalingEnabled(instance *serverlessv1alpha1.Function) bool {
+func isScalingEnabled(instance *serverlessv1alpha2.Function) bool {
 	return !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas)
 }
 
-func getConditionReason(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) serverlessv1alpha1.ConditionReason {
+func getConditionReason(conditions []serverlessv1alpha2.Condition, conditionType serverlessv1alpha2.ConditionType) serverlessv1alpha2.ConditionReason {
 	for _, condition := range conditions {
 		if condition.Type == conditionType {
 			return condition.Reason
@@ -280,22 +279,21 @@ func getConditionReason(conditions []serverlessv1alpha1.Condition, conditionType
 	return ""
 }
 
-func calculateImageTag(instance *serverlessv1alpha1.Function) string {
+func calculateInlineImageTag(instance *serverlessv1alpha2.Function) string {
 	hash := sha256.Sum256([]byte(strings.Join([]string{
 		string(instance.GetUID()),
-		instance.Spec.Source,
-		instance.Spec.Deps,
+		fmt.Sprintf("%v", *instance.Spec.Source.Inline),
 		string(instance.Status.Runtime),
 	}, "-")))
 
 	return fmt.Sprintf("%x", hash)
 }
 
-func calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
+func calculateGitImageTag(instance *serverlessv1alpha2.Function) string {
 	data := strings.Join([]string{
 		string(instance.GetUID()),
 		instance.Status.Commit,
-		instance.Status.Repository.BaseDir,
+		instance.Status.BaseDir,
 		string(instance.Status.Runtime),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))

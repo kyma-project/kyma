@@ -3,13 +3,13 @@ package test_api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,12 +47,12 @@ type OAuthHandler struct {
 	tokens       map[string]OAuthToken
 }
 
-func NewOAuth(clientID, clientSecret string) OAuthHandler {
+func NewOAuth(clientID, clientSecret string, tokens map[string]OAuthToken) OAuthHandler {
 	return OAuthHandler{
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		mutex:        sync.RWMutex{},
-		tokens:       make(map[string]OAuthToken),
+		tokens:       tokens,
 	}
 }
 
@@ -75,18 +75,10 @@ func (oh *OAuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	oh.mutex.Lock()
-	oh.tokens[token] = OAuthToken{exp: time.Now().Add(exp)}
-	oh.mutex.Unlock()
+	oh.storeTokenInCache(token, exp)
 
 	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: int64(exp.Seconds())}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		handleError(w, http.StatusInternalServerError, "Failed to encode token response")
-		return
-	}
-	w.WriteHeader(http.StatusOK)
+	oh.respondWithToken(w, response)
 }
 
 func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
@@ -96,15 +88,22 @@ func (oh *OAuthHandler) BadToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := uuid.New().String()
-
 	response := OauthResponse{AccessToken: token, TokenType: "bearer"}
+	oh.respondWithToken(w, response)
+}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		handleError(w, http.StatusInternalServerError, "Failed to encode token response")
+func (oh *OAuthHandler) MTLSToken(w http.ResponseWriter, r *http.Request) {
+	if ok, status, message := oh.isMTLSRequestValid(r); !ok {
+		handleError(w, status, message)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+
+	token := uuid.New().String()
+	exp := defaultTokenExpiresIn
+
+	oh.storeTokenInCache(token, exp)
+	response := OauthResponse{AccessToken: token, TokenType: "bearer", ExpiresIn: 3600}
+	oh.respondWithToken(w, response)
 }
 
 func (oh *OAuthHandler) Middleware() mux.MiddlewareFunc {
@@ -157,4 +156,35 @@ func (oh *OAuthHandler) isRequestValid(r *http.Request) (bool, int, string) {
 
 func (oh *OAuthHandler) verifyClient(id, secret string) bool {
 	return id == oh.clientID && secret == oh.clientSecret
+}
+
+func (oh *OAuthHandler) respondWithToken(w http.ResponseWriter, response OauthResponse) {
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		handleError(w, http.StatusInternalServerError, "Failed to encode token response")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (oh *OAuthHandler) storeTokenInCache(token string, expIn time.Duration) {
+	oh.mutex.Lock()
+	oh.tokens[token] = OAuthToken{exp: time.Now().Add(expIn)}
+	oh.mutex.Unlock()
+}
+
+func (oh *OAuthHandler) isMTLSRequestValid(r *http.Request) (bool, int, string) {
+	err := r.ParseForm()
+	if err != nil {
+		return false, http.StatusInternalServerError, fmt.Sprintf("Failed to parse form: %v", err)
+	}
+
+	clientID := r.FormValue(clientIDKey)
+	grantType := r.FormValue(grantTypeKey)
+
+	if r.TLS == nil || clientID != oh.clientID || grantType != "client_credentials" {
+		return false, http.StatusForbidden, "Client verification failed"
+	}
+
+	return true, 0, ""
 }

@@ -73,7 +73,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to log parser change")
+		log.V(1).Info("Fluent Bit parser configuration was updated. Restarting the DaemonSet")
 
 		if err = r.Update(ctx, &logParser); err != nil {
 			log.Error(err, "Failed updating log parser")
@@ -89,7 +89,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogParserPending,
 		)
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 	}
@@ -112,7 +112,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			telemetryv1alpha1.LogParserRunning,
 		)
 
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
@@ -127,7 +127,7 @@ func (r *LogParserReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *LogParserReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogParserCondition) error {
+func (r *LogParserReconciler) updateLogParserStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogParserCondition) error {
 	log := logf.FromContext(ctx)
 
 	var logParser telemetryv1alpha1.LogParser
@@ -136,7 +136,7 @@ func (r *LogParserReconciler) updateLogPipelineStatus(ctx context.Context, name 
 		return err
 	}
 
-	// Do not update status if the log pipeline is being deleted
+	// Do not update status if the log parser is being deleted
 	if logParser.DeletionTimestamp != nil {
 		return nil
 	}

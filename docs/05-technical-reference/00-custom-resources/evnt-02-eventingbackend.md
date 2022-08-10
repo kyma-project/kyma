@@ -2,7 +2,7 @@
 title: EventingBackend
 ---
 
-The `eventingbackends.eventing.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data used to manage eventing backends within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `eventingbackends.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data used to manage Eventing backends within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```shell
 kubectl get crd eventingbackends.eventing.kyma-project.io -o yaml
@@ -29,7 +29,7 @@ When you fetch an existing EventingBackend CR, the Eventing Controller adds the 
 |:---|:---|
 | **status.backendType** | Specifies the backend type used. |
 | **status.conditions.code** | Conditions defines the ready status of the Eventing Controller and the Eventing Publisher Proxy. |
-| **status.eventingReady** | Current ready status of the Eventing Backend. |
+| **status.eventingReady** | Current ready status of the EventingBackend. |
 
 The `status` field of this CR looks like this:
 

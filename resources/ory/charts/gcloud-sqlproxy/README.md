@@ -89,7 +89,7 @@ The following table lists the configurable parameters of the `gcloud-sqlproxy` c
 | `serviceAccount.create` | Create a service account | `true` |
 | `serviceAccount.annotations` | Annotations for the service account | `{}` |
 | `serviceAccount.name` |  Service account name | Generated using the fullname template |
-| `networkPolicy.enabled`           | Enable Network Policy                    | `false`                                                                                     |
+| `networkPolicy.enabled`           | Enable NetworkPolicy                    | `false`                                                                                     |
 | `networkPolicy.ingress.from`      | List of sources to have access to the Pods selected for this rule. If empty, allows all sources. | `[]`                  |
 | `extraArgs`                       | Additional container arguments          | `{}`                                                                                        |
 | `livenessProbe.enabled`           | Would you like a livenessProbe to be enabled  | `false`                                                                               |

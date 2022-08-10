@@ -5,19 +5,54 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/user"
+	"path/filepath"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
-
-	controllerruntime "sigs.k8s.io/controller-runtime"
 )
+
+func loadRestConfig(context string) (*rest.Config, error) {
+	// If the recommended kubeconfig env variable is not specified,
+	// try the in-cluster config.
+	kubeconfigPath := os.Getenv(clientcmd.RecommendedConfigPathEnvVar)
+	if len(kubeconfigPath) == 0 {
+		if c, err := rest.InClusterConfig(); err == nil {
+			return c, nil
+		}
+	}
+
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	if _, ok := os.LookupEnv("HOME"); !ok {
+		u, err := user.Current()
+		if err != nil {
+			return nil, fmt.Errorf("could not get current user: %w", err)
+		}
+		loadingRules.Precedence = append(loadingRules.Precedence, filepath.Join(u.HomeDir, clientcmd.RecommendedHomeDir, clientcmd.RecommendedFileName))
+	}
+
+	return loadRestConfigWithContext("", loadingRules, context)
+}
+
+func loadRestConfigWithContext(apiServerURL string, loader clientcmd.ClientConfigLoader, context string) (*rest.Config, error) {
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		loader,
+		&clientcmd.ConfigOverrides{
+			ClusterInfo: clientcmdapi.Cluster{
+				Server: apiServerURL,
+			},
+			CurrentContext: context,
+		}).ClientConfig()
+}
 
 type scenario struct {
 	displayName string
@@ -27,7 +62,9 @@ type scenario struct {
 var availableScenarios = map[string][]scenario{
 	"serverless-integration": {
 		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
-		{displayName: "gitops", testSuite: scenarios.GitopsSteps}},
+		{displayName: "gitops", testSuite: scenarios.GitopsSteps},
+		{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest},
+	},
 	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
 }
 
@@ -57,7 +94,12 @@ func main() {
 		logf.Errorf("Scenario %s not exist", scenarioName)
 		os.Exit(1)
 	}
-	restConfig := controllerruntime.GetConfigOrDie()
+
+	restConfig, err := loadRestConfig("")
+	if err != nil {
+		logf.Errorf("Unable to get rest config: %s", err.Error())
+		os.Exit(1)
+	}
 
 	rand.Seed(time.Now().UnixNano())
 

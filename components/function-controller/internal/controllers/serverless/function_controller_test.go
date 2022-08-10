@@ -3,15 +3,15 @@ package serverless
 import (
 	"testing"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 )
 
 func TestFunctionReconciler_getConditionStatus(t *testing.T) {
 	type args struct {
-		conditions    []serverlessv1alpha1.Condition
-		conditionType serverlessv1alpha1.ConditionType
+		conditions    []serverlessv1alpha2.Condition
+		conditionType serverlessv1alpha2.ConditionType
 	}
 	tests := []struct {
 		name string
@@ -21,31 +21,31 @@ func TestFunctionReconciler_getConditionStatus(t *testing.T) {
 		{
 			name: "Should correctly return proper status given slice of conditions",
 			args: args{
-				conditions: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue},
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+				conditions: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+					{Type: serverlessv1alpha2.ConditionRunning, Status: corev1.ConditionTrue},
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse},
 				},
-				conditionType: serverlessv1alpha1.ConditionRunning,
+				conditionType: serverlessv1alpha2.ConditionRunning,
 			},
 			want: corev1.ConditionTrue,
 		},
 		{
 			name: "Should correctly return status unknown if there's no needed conditionType",
 			args: args{
-				conditions: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+				conditions: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse},
 				},
-				conditionType: serverlessv1alpha1.ConditionRunning,
+				conditionType: serverlessv1alpha2.ConditionRunning,
 			},
 			want: corev1.ConditionUnknown,
 		},
 		{
 			name: "Should correctly return status unknown if slice is empty",
 			args: args{
-				conditions:    []serverlessv1alpha1.Condition{},
-				conditionType: serverlessv1alpha1.ConditionRunning,
+				conditions:    []serverlessv1alpha2.Condition{},
+				conditionType: serverlessv1alpha2.ConditionRunning,
 			},
 			want: corev1.ConditionUnknown,
 		},
@@ -61,8 +61,8 @@ func TestFunctionReconciler_getConditionStatus(t *testing.T) {
 
 func TestFunctionReconciler_equalConditions(t *testing.T) {
 	type args struct {
-		existing []serverlessv1alpha1.Condition
-		expected []serverlessv1alpha1.Condition
+		existing []serverlessv1alpha2.Condition
+		expected []serverlessv1alpha2.Condition
 	}
 	tests := []struct {
 		name string
@@ -72,27 +72,27 @@ func TestFunctionReconciler_equalConditions(t *testing.T) {
 		{
 			name: "should work on the same slices",
 			args: args{
-				existing: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
-					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonJobFinished, Message: "blabla"}},
-				expected: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
-					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonJobFinished, Message: "blabla"}},
+				existing: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"},
+					{Type: serverlessv1alpha2.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha2.ConditionReasonServiceCreated, Message: "some message"},
+					{Type: serverlessv1alpha2.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonJobFinished, Message: "blabla"}},
+				expected: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"},
+					{Type: serverlessv1alpha2.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha2.ConditionReasonServiceCreated, Message: "some message"},
+					{Type: serverlessv1alpha2.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonJobFinished, Message: "blabla"}},
 			},
 			want: true,
 		},
 		{
 			name: "should return false on slices with different lengths",
 			args: args{
-				existing: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
-					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonJobFinished, Message: "blabla"}},
-				expected: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated, Message: "some message"},
+				existing: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"},
+					{Type: serverlessv1alpha2.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha2.ConditionReasonServiceCreated, Message: "some message"},
+					{Type: serverlessv1alpha2.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonJobFinished, Message: "blabla"}},
+				expected: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"},
+					{Type: serverlessv1alpha2.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha2.ConditionReasonServiceCreated, Message: "some message"},
 				},
 			},
 			want: false,
@@ -100,40 +100,40 @@ func TestFunctionReconciler_equalConditions(t *testing.T) {
 		{
 			name: "should return false on different conditions",
 			args: args{
-				existing: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"}},
-				expected: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"}},
+				existing: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"}},
+				expected: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionBuildReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"}},
 			},
 			want: false,
 		},
 		{
 			name: "should return false on different Statuses",
 			args: args{
-				existing: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"}},
-				expected: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionUnknown, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"}},
+				existing: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"}},
+				expected: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionUnknown, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"}},
 			},
 			want: false,
 		},
 		{
 			name: "should return false on different Reasons",
 			args: args{
-				existing: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"}},
-				expected: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapCreated, Message: "msg"}},
+				existing: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"}},
+				expected: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapCreated, Message: "msg"}},
 			},
 			want: false,
 		},
 		{
 			name: "should return false on different messages",
 			args: args{
-				existing: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg"}},
-				expected: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapUpdated, Message: "msg-different"}},
+				existing: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg"}},
+				expected: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapUpdated, Message: "msg-different"}},
 			},
 			want: false,
 		},
@@ -313,42 +313,42 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 
 func TestFunctionReconciler_getConditionReason(t *testing.T) {
 	type args struct {
-		conditions    []serverlessv1alpha1.Condition
-		conditionType serverlessv1alpha1.ConditionType
+		conditions    []serverlessv1alpha2.Condition
+		conditionType serverlessv1alpha2.ConditionType
 	}
 	tests := []struct {
 		name string
 		args args
-		want serverlessv1alpha1.ConditionReason
+		want serverlessv1alpha2.ConditionReason
 	}{
 		{
 			name: "Should correctly return proper status given slice of conditions",
 			args: args{
-				conditions: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonConfigMapCreated},
-					{Type: serverlessv1alpha1.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha1.ConditionReasonServiceCreated},
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha1.ConditionReasonDeploymentWaiting},
+				conditions: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonConfigMapCreated},
+					{Type: serverlessv1alpha2.ConditionRunning, Status: corev1.ConditionTrue, Reason: serverlessv1alpha2.ConditionReasonServiceCreated},
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse, Reason: serverlessv1alpha2.ConditionReasonDeploymentWaiting},
 				},
-				conditionType: serverlessv1alpha1.ConditionRunning,
+				conditionType: serverlessv1alpha2.ConditionRunning,
 			},
-			want: serverlessv1alpha1.ConditionReasonServiceCreated,
+			want: serverlessv1alpha2.ConditionReasonServiceCreated,
 		},
 		{
 			name: "Should correctly return status unknown if there's no needed conditionType",
 			args: args{
-				conditions: []serverlessv1alpha1.Condition{
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
-					{Type: serverlessv1alpha1.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+				conditions: []serverlessv1alpha2.Condition{
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse},
+					{Type: serverlessv1alpha2.ConditionConfigurationReady, Status: corev1.ConditionFalse},
 				},
-				conditionType: serverlessv1alpha1.ConditionRunning,
+				conditionType: serverlessv1alpha2.ConditionRunning,
 			},
 			want: "",
 		},
 		{
 			name: "Should correctly return status unknown if slice is empty",
 			args: args{
-				conditions:    []serverlessv1alpha1.Condition{},
-				conditionType: serverlessv1alpha1.ConditionRunning,
+				conditions:    []serverlessv1alpha2.Condition{},
+				conditionType: serverlessv1alpha2.ConditionRunning,
 			},
 			want: "",
 		},

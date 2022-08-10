@@ -250,8 +250,8 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 	defer func() { _ = resp.Body.Close() }()
-	h.collector.RecordLatency(dispatchTime)
-
+	h.collector.RecordLatency(dispatchTime, resp.StatusCode, request.URL.Host)
+	h.collector.RecordRequests(resp.StatusCode, request.URL.Host)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		h.namedLogger().Errorw("Failed to read response body", "error", err)

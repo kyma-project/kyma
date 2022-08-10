@@ -5,7 +5,7 @@ APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
+override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
@@ -29,11 +29,13 @@ test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local:
 	mkdir -p /tmp/artifacts
-	go test -race -coverprofile=/tmp/artifacts/cover.out ./...
+	go test -count=1 -race -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
 # Generate manifests e.g. CRD, RBAC etc.
+CONTROLLER_GEN_VERSION=v0.6.2
+
 .PHONY: manifests
 manifests: controller-gen-local generate-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
@@ -41,6 +43,8 @@ manifests: controller-gen-local generate-local
 		output:crd:artifacts:config=config/crd/bases \
 		output:rbac:artifacts:config=config/rbac \
 		output:webhook:artifacts:config=config/webhook
+	kustomize build config/crd > config/crd/crd-serverless.yaml
+	cp config/crd/crd-serverless.yaml ../../installation/resources/crds/serverless/
 
 # Generate code
 .PHONY: generate-local
@@ -52,18 +56,14 @@ generate-local: controller-gen-local
 .PHONY: controller-gen-local
 controller-gen-local:
 ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.9 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
+	make install-controller-gen
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+install-controller-gen:
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
 
 .PHONY: build-image 
 build-image: build-image-function-webhook \
@@ -142,7 +142,6 @@ install-webhook-k3d: build-image-function-webhook
 
 	k3d image import $(WEBHOOK_NAME):$(HASH_TAG) -c kyma
 	kubectl set image deployment serverless-webhook-svc -n kyma-system webhook=$(WEBHOOK_NAME):$(HASH_TAG)
-
 ######## builder init container image
 
 JOBINIT_NAME = function-build-init

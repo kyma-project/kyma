@@ -5,6 +5,7 @@ metadata:
 spec:
   output:
     http:
+      dedot: true
       host:
         valueFrom:
           secretKeyRef:

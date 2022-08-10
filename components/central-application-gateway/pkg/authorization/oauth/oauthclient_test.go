@@ -24,7 +24,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", "", nil, nil)
+		token, err := oauthClient.GetToken("testID", "testSecret", "", nil, nil, false)
 
 		// then
 		require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		tokenCache.AssertExpectations(t)
 	})
 
-	t.Run("should fetch token from EC when token if not present in cache", func(t *testing.T) {
+	t.Run("should fetch token from server when token if not present in cache", func(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -54,7 +54,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil, false)
 
 		// then
 		require.NoError(t, err)
@@ -62,7 +62,39 @@ func TestOauthClient_GetToken(t *testing.T) {
 		tokenCache.AssertExpectations(t)
 	})
 
-	t.Run("should fetch token using also additional headers and query parameters", func(t *testing.T) {
+	t.Run("should fetch token from insecure server when token if not present in cache", func(t *testing.T) {
+		// given
+		ts := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			checkAccessTokenRequest(t, r)
+
+			response := oauthResponse{AccessToken: "123456789", TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
+
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(response)
+		}))
+
+		ts.StartTLS()
+		defer ts.Close()
+
+		tokenKey := "testID" + ts.URL
+
+		tokenCache := mocks.TokenCache{}
+		tokenCache.On("Get", tokenKey).Return("", false)
+		tokenCache.On("Add", tokenKey, "123456789", 3600).Return()
+
+		oauthClient := NewOauthClient(10, &tokenCache)
+
+		// when
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil, true)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "123456789", token)
+		tokenCache.AssertExpectations(t)
+	})
+
+	t.Run("should fetch token using additional headers and query parameters", func(t *testing.T) {
 		// given
 		headers := map[string][]string{
 			"headerKey": {"headerValue"},
@@ -92,7 +124,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, &headers, &queryParameters)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, &headers, &queryParameters, false)
 
 		// then
 		require.NoError(t, err)
@@ -116,7 +148,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil, false)
 
 		// then
 		require.Error(t, err)
@@ -142,7 +174,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil)
+		token, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil, false)
 
 		// then
 		require.Error(t, err)
@@ -160,11 +192,36 @@ func TestOauthClient_GetToken(t *testing.T) {
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
-		token, err := oauthClient.GetToken("testID", "testSecret", "http://some_no_existent_address.com/token", nil, nil)
+		token, err := oauthClient.GetToken("testID", "testSecret", "http://some_no_existent_address.com/token", nil, nil, false)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, "", token)
+		tokenCache.AssertExpectations(t)
+	})
+
+	t.Run("should fail when calling server protected with self-signed certificate", func(t *testing.T) {
+		// given
+		ts := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+
+		ts.StartTLS()
+		defer ts.Close()
+
+		tokenKey := "testID" + ts.URL
+
+		tokenCache := mocks.TokenCache{}
+		tokenCache.On("Get", tokenKey).Return("", false)
+		//tokenCache.On("Add", mock.Anything, mock.Anything, mock.Anything).Times(0)
+
+		oauthClient := NewOauthClient(10, &tokenCache)
+
+		// when
+		_, err := oauthClient.GetToken("testID", "testSecret", ts.URL, nil, nil, false)
+
+		// then
+		require.Error(t, err)
 		tokenCache.AssertExpectations(t)
 	})
 }

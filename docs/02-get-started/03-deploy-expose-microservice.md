@@ -158,6 +158,7 @@ The operation was successful if the command returns the **uid** of your Service.
          port: 80
          targetPort: 8080
     ```
+
 4. Click **Create**. 
   </details>
 </div>
@@ -168,7 +169,7 @@ We have created the Service. Let's now expose it outside the cluster.
 
 > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md).
 
-To expose our microservice, we must create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
+To expose our microservice, we must create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
 <div tabs name="Expose the microservice" group="deploy-expose-microservice">
   <details open>
@@ -241,7 +242,7 @@ The operation was successful if the command returns the (possibly empty `[]`) li
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the API Rule's **Host**.
+1. From your Services's view, get the APIRule's **Host**.
 
    > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
 

@@ -84,6 +84,7 @@ maintenance:
 
 # Overrides for the Hydra chart
 hydra:
+  enabled: true
   ingress:
     public:
       enabled: false
@@ -134,11 +135,12 @@ hydra:
   hydra-maester:
     globalAccess: true
     config:
-      # Must be in-sync with hydra.hydra.config.existingSecret
+      # Must be in-sync with hydra.config.existingSecret
       hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
+  enabled: true
   oathkeeper:
     config:
       authenticators:
@@ -245,6 +247,8 @@ oathkeeper:
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80
+    annotations:
+      readiness.status.sidecar.istio.io/initialDelaySeconds: "10"
   oathkeeper-maester:
     deployment:
       annotations:

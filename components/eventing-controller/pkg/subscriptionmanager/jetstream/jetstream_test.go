@@ -43,7 +43,7 @@ func TestCleanup(t *testing.T) {
 	// then
 	require.NoError(t, err)
 	gotSub := testEnv.getK8sSubscription(t)
-	wantSubStatus := eventingv1alpha1.SubscriptionStatus{}
+	wantSubStatus := eventingv1alpha1.SubscriptionStatus{CleanEventTypes: []string{}}
 	require.Equal(t, wantSubStatus, gotSub.Status)
 	// test JetStream subscriptions/consumers are gone
 	testEnv.consumersEquals(t, 0)

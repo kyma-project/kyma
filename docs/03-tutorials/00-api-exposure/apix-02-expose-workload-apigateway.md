@@ -27,7 +27,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
-2. Expose the instance of the HttpBin service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the instance of the HttpBin service by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -87,7 +87,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
-2. Expose the sample Function by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the sample Function by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -

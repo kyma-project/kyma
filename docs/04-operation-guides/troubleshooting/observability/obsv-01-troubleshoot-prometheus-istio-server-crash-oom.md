@@ -105,7 +105,7 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
    regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
    ```
 
-6. Save the Config Map and restart `prometheus-istio-server` for the changes to take effect:
+6. Save the ConfigMap and restart `prometheus-istio-server` for the changes to take effect:
 
    ```bash
    kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server

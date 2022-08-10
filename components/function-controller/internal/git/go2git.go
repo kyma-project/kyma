@@ -18,6 +18,20 @@ const (
 	branchRefPattern = "refs/remotes/origin"
 )
 
+type GitClient interface {
+	LastCommit(options Options) (string, error)
+	Clone(path string, options Options) (string, error)
+}
+
+var _ GitClient = &git2GoClient{}
+
+type GitClientFactory struct {
+}
+
+func (f GitClientFactory) GetGitClient(logger *zap.SugaredLogger) GitClient {
+	return NewGit2Go(logger)
+}
+
 type Options struct {
 	URL       string
 	Reference string
@@ -32,13 +46,13 @@ type fetcher interface {
 	git2goFetch(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error)
 }
 
-type Git2GoClient struct {
+type git2GoClient struct {
 	cloner
 	fetcher
 }
 
-func NewGit2Go(logger *zap.SugaredLogger) *Git2GoClient {
-	return &Git2GoClient{
+func NewGit2Go(logger *zap.SugaredLogger) *git2GoClient {
+	return &git2GoClient{
 		cloner:  &git2goCloner{},
 		fetcher: &git2goFetcher{logger: logger},
 	}
@@ -46,20 +60,20 @@ func NewGit2Go(logger *zap.SugaredLogger) *Git2GoClient {
 
 func mkRepoDir(options Options) (string, error) {
 	nameHash := md5.Sum([]byte(options.URL))
-	path := path.Join(tempDir, fmt.Sprintf("%x", nameHash))
+	repoPath := path.Join(tempDir, fmt.Sprintf("%x", nameHash))
 
-	err := os.MkdirAll(path, 0700)
-	return path, err
+	err := os.MkdirAll(repoPath, 0700)
+	return repoPath, err
 }
 
-func (g *Git2GoClient) LastCommit(options Options) (string, error) {
+func (g *git2GoClient) LastCommit(options Options) (string, error) {
 	//commit
 	_, err := git2go.NewOid(options.Reference)
 	if err == nil {
 		return options.Reference, nil
 	}
 
-	// FIXME: This is NOT thread safe. If we ever decide to go with more than one worker, we need to refactor this. But for now it's fine.
+	// TODO: This is NOT thread safe. If we ever decide to go with more than one worker, we need to refactor this. But for now it's fine.
 	repoDir, err := mkRepoDir(options)
 	if err != nil {
 		return "", errors.Wrap(err, "while creating temporary directory")
@@ -85,7 +99,7 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	return commit.Id().String(), nil
 }
 
-func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
+func (g *git2GoClient) Clone(path string, options Options) (string, error) {
 	repo, err := g.cloneRepo(options, path)
 	if err != nil {
 		return "", errors.Wrap(err, "while cloning the repository")
@@ -115,22 +129,22 @@ func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
 	return ref.Target().String(), nil
 }
 
-func (g *Git2GoClient) cloneRepo(opts Options, path string) (*git2go.Repository, error) {
+func (g *git2GoClient) cloneRepo(opts Options, path string) (*git2go.Repository, error) {
 	authCallbacks, err := GetAuth(opts.Auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
-	return g.cloner.git2goClone(opts.URL, path, authCallbacks)
+	return g.git2goClone(opts.URL, path, authCallbacks)
 }
-func (g *Git2GoClient) fetchRepo(opts Options, path string) (*git2go.Repository, error) {
+func (g *git2GoClient) fetchRepo(opts Options, path string) (*git2go.Repository, error) {
 	authCallbacks, err := GetAuth(opts.Auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
-	return g.fetcher.git2goFetch(opts.URL, path, authCallbacks)
+	return g.git2goFetch(opts.URL, path, authCallbacks)
 }
 
-func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {
+func (g *git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {
 	iter, err := repo.NewReferenceIterator()
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating reference iterator")
@@ -149,7 +163,7 @@ func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) 
 	}
 }
 
-func (g *Git2GoClient) isBranch(ref *git2go.Reference, branchName string) bool {
+func (g *git2GoClient) isBranch(ref *git2go.Reference, branchName string) bool {
 	if strings.Contains(ref.Name(), branchRefPattern) {
 		splittedName := strings.Split(ref.Name(), "/")
 		if len(splittedName) < 4 {
@@ -167,7 +181,7 @@ Using this reference we can checkout head to it. From head we can extract commit
 This method will also works with repositories like GitLab in which the tag is reference to the commit.
 The reference has the same id as commit and won't produce errors
 */
-func (g *Git2GoClient) lookupTag(repo *git2go.Repository, tagName string) (*git2go.Commit, error) {
+func (g *git2GoClient) lookupTag(repo *git2go.Repository, tagName string) (*git2go.Commit, error) {
 	ref, err := repo.References.Dwim(tagName)
 	if err != nil {
 		if git2go.IsErrorCode(err, git2go.ErrorCodeNotFound) {

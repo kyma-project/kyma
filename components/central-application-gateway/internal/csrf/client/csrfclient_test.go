@@ -7,10 +7,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	authorizationMocks "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/stretchr/testify/assert"
@@ -59,7 +62,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		c := New(timeoutDuration, fakeCache)
 
 		// when
-		response, appError := c.GetTokenEndpointResponse(testURL, nil)
+		response, appError := c.GetTokenEndpointResponse(testURL, nil, false)
 
 		// then
 		require.Nil(t, appError)
@@ -76,11 +79,11 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 
 		c := New(timeoutDuration, fakeCache)
 
-		srv := startTestServer(t)
+		srv := startTLSTestServer(t)
 		mockURL := srv.URL
 
 		// when
-		response, appError := c.GetTokenEndpointResponse(mockURL, strategy)
+		response, appError := c.GetTokenEndpointResponse(mockURL, strategy, true)
 		item, found := fakeCache.Get(mockURL)
 
 		// then
@@ -96,7 +99,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		assert.Equal(t, endpointResponseCookieName, item.Cookies[0].Name)
 	})
 
-	t.Run("Should return error if the token requested token is not in the cache and can't be retrieved", func(t *testing.T) {
+	t.Run("Should return error if the token requested is not in the cache and can't be retrieved", func(t *testing.T) {
 
 		// given
 		fakeCache := NewTokenCache()
@@ -107,7 +110,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		mockURL := srv.URL
 
 		// when
-		response, appError := c.GetTokenEndpointResponse(mockURL, strategy)
+		response, appError := c.GetTokenEndpointResponse(mockURL, strategy, false)
 		item, found := fakeCache.Get(mockURL)
 
 		// then
@@ -116,6 +119,71 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 
 		require.Nil(t, item)
 		assert.False(t, found)
+	})
+
+	t.Run("Should return error if the token requested is not in the cache and can't be retrieved since the server certificate cannot be verified", func(t *testing.T) {
+
+		// given
+		fakeCache := NewTokenCache()
+
+		c := New(timeoutDuration, fakeCache)
+
+		srv := startTLSTestServer(t)
+		mockURL := srv.URL
+
+		// when
+		response, appError := c.GetTokenEndpointResponse(mockURL, strategy, false)
+		item, found := fakeCache.Get(mockURL)
+
+		// then
+		require.NotNil(t, appError)
+		require.Nil(t, response)
+
+		require.Nil(t, item)
+		assert.False(t, found)
+	})
+
+	t.Run("Should pass skipTLSVerify flag to authorization strategy", func(t *testing.T) {
+
+		// given
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		mockURL := srv.URL
+
+		{
+			// given
+			fakeCache := NewTokenCache()
+
+			c := New(timeoutDuration, fakeCache)
+
+			// when
+			mockStrategy := &authorizationMocks.Strategy{}
+			mockStrategy.On("AddAuthorization", mock.Anything, mock.Anything, true).Return(nil)
+
+			response, appError := c.GetTokenEndpointResponse(mockURL, mockStrategy, true)
+
+			// then
+			require.Nil(t, appError)
+			require.NotNil(t, response)
+		}
+
+		{
+			// given
+			fakeCache := NewTokenCache()
+
+			c := New(timeoutDuration, fakeCache)
+
+			// when
+			mockStrategy := &authorizationMocks.Strategy{}
+			mockStrategy.On("AddAuthorization", mock.Anything, mock.Anything, false).Return(nil)
+
+			response, appError := c.GetTokenEndpointResponse(mockURL, mockStrategy, false)
+
+			// then
+			require.Nil(t, appError)
+			require.NotNil(t, response)
+		}
 	})
 }
 
@@ -135,7 +203,7 @@ func TestAddAuthorization(t *testing.T) {
 		request := getNewEmptyRequest()
 
 		// when
-		err := addAuthorization(request, clientCertificate, strategy)
+		err := addAuthorization(request, clientCertificate, strategy, false)
 		assert.NoError(t, err)
 		// then
 		assert.Len(t, request.Header, 1)
@@ -155,7 +223,7 @@ func TestAddAuthorization(t *testing.T) {
 		request := getNewEmptyRequest()
 
 		// when
-		err := addAuthorization(request, clientCertificate, strategy)
+		err := addAuthorization(request, clientCertificate, strategy, false)
 		assert.NoError(t, err)
 
 		// then
@@ -187,13 +255,16 @@ func getNewEmptyRequest() *http.Request {
 	}
 }
 
-func startTestServer(t *testing.T) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func startTLSTestServer(t *testing.T) *httptest.Server {
+	ts := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkRequest(t, r)
 		w.Header().Add("x-csrf-token", endpointTestToken)
 		http.SetCookie(w, &http.Cookie{Name: endpointResponseCookieName})
 		w.WriteHeader(http.StatusOK)
 	}))
+	ts.StartTLS()
+
+	return ts
 }
 
 func startFailingTestServer(t *testing.T) *httptest.Server {

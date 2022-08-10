@@ -6,18 +6,18 @@ import (
 	"fmt"
 	"net/http"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 type DefaultingWebHook struct {
-	config  *serverlessv1alpha1.DefaultingConfig
+	config  *serverlessv1alpha2.DefaultingConfig
 	client  ctrlclient.Client
 	decoder *admission.Decoder
 }
 
-func NewDefaultingWebhook(config *serverlessv1alpha1.DefaultingConfig, client ctrlclient.Client) *DefaultingWebHook {
+func NewDefaultingWebhook(config *serverlessv1alpha2.DefaultingConfig, client ctrlclient.Client) *DefaultingWebHook {
 	return &DefaultingWebHook{
 		config: config,
 		client: client,
@@ -39,7 +39,7 @@ func (w *DefaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 }
 
 func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admission.Response {
-	f := &serverlessv1alpha1.Function{}
+	f := &serverlessv1alpha2.Function{}
 	if err := w.decoder.Decode(req, f); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}

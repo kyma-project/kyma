@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 )
 
@@ -38,7 +38,7 @@ func TestNodejs_SanitizeDependencies(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := runtime.GetRuntime(v1alpha1.Nodejs12)
+			r := runtime.GetRuntime(v1alpha2.NodeJs12)
 			got := r.SanitizeDependencies(tt.deps)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})

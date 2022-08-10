@@ -5,19 +5,21 @@ metadata:
     serverless.kyma-project.io/function-resources-preset: XS
   name: nodejs14-xs
 spec:
-  deps: |-
-    {
-      "name": "nodejs14-xs",
-      "version": "0.0.1",
-      "dependencies": {}
-    }
   maxReplicas: 1
   minReplicas: 1
   runtime: nodejs14
-  source: |-
-    module.exports = {
-        main: function (event, context) {
-            return 'Hello Serverless'
+  source:
+    inline:
+      deps: |-
+        {
+          "name": "nodejs14-xs",
+          "version": "0.0.1",
+          "dependencies": {}
         }
-    }
+      source: |-
+        module.exports = {
+            main: function (event, context) {
+                return 'Hello Serverless'
+            }
+        }
 

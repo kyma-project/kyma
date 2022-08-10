@@ -1,7 +1,7 @@
 package runtime
 
 import (
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -10,18 +10,18 @@ type Runtime interface {
 }
 
 type Config struct {
-	Runtime                 serverlessv1alpha1.Runtime
+	Runtime                 serverlessv1alpha2.Runtime
 	DependencyFile          string
 	FunctionFile            string
 	DockerfileConfigMapName string
 	RuntimeEnvs             []corev1.EnvVar
 }
 
-func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
+func GetRuntimeConfig(r serverlessv1alpha2.Runtime) Config {
 	switch r {
-	case serverlessv1alpha1.Nodejs12:
+	case serverlessv1alpha2.NodeJs12:
 		return Config{
-			Runtime:                 serverlessv1alpha1.Nodejs12,
+			Runtime:                 serverlessv1alpha2.NodeJs12,
 			DependencyFile:          "package.json",
 			FunctionFile:            "handler.js",
 			DockerfileConfigMapName: "dockerfile-nodejs-12",
@@ -30,9 +30,9 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs12"},
 			},
 		}
-	case serverlessv1alpha1.Nodejs14:
+	case serverlessv1alpha2.NodeJs14:
 		return Config{
-			Runtime:                 serverlessv1alpha1.Nodejs14,
+			Runtime:                 serverlessv1alpha2.NodeJs14,
 			DependencyFile:          "package.json",
 			FunctionFile:            "handler.js",
 			DockerfileConfigMapName: "dockerfile-nodejs-14",
@@ -40,9 +40,9 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs14"},
 			},
 		}
-	case serverlessv1alpha1.Nodejs16:
+	case serverlessv1alpha2.NodeJs16:
 		return Config{
-			Runtime:                 serverlessv1alpha1.Nodejs16,
+			Runtime:                 serverlessv1alpha2.NodeJs16,
 			DependencyFile:          "package.json",
 			FunctionFile:            "handler.js",
 			DockerfileConfigMapName: "dockerfile-nodejs-16",
@@ -50,9 +50,9 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs16"},
 			},
 		}
-	case serverlessv1alpha1.Python39:
+	case serverlessv1alpha2.Python39:
 		return Config{
-			Runtime:                 serverlessv1alpha1.Python39,
+			Runtime:                 serverlessv1alpha2.Python39,
 			DependencyFile:          "requirements.txt",
 			FunctionFile:            "handler.py",
 			DockerfileConfigMapName: "dockerfile-python-39",
@@ -64,7 +64,7 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 		}
 	default:
 		return Config{
-			Runtime:                 serverlessv1alpha1.Nodejs12,
+			Runtime:                 serverlessv1alpha2.NodeJs12,
 			DependencyFile:          "package.json",
 			FunctionFile:            "handler.js",
 			DockerfileConfigMapName: "dockerfile-nodejs-12",
@@ -76,11 +76,11 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 	}
 }
 
-func GetRuntime(r serverlessv1alpha1.Runtime) Runtime {
+func GetRuntime(r serverlessv1alpha2.Runtime) Runtime {
 	switch r {
-	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14:
+	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14:
 		return nodejs{}
-	case serverlessv1alpha1.Python39:
+	case serverlessv1alpha2.Python39:
 		return python{}
 	default:
 		return nodejs{}

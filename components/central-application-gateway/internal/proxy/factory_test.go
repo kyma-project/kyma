@@ -118,7 +118,7 @@ func TestProxyFactory(t *testing.T) {
 
 			authStrategyMock := &authMock.Strategy{}
 			authStrategyMock.
-				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
 				Return(nil).
 				Once()
 
@@ -126,7 +126,7 @@ func TestProxyFactory(t *testing.T) {
 			authStrategyFactoryMock := &authMock.StrategyFactory{}
 			authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
-			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce, false)
 
 			serviceDefServiceMock := testCase.createMockServiceDefServiceFunc(testCase.apiIdentifier, ts.URL, credentials)
 
