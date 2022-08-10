@@ -19,41 +19,26 @@ func TestMainMetric(t *testing.T) {
 	os.Setenv("DIRECTORIES_SIZE_METRIC", "telemetry_fsbuffer_usage_bytes")
 	go main()
 	time.Sleep(35 * time.Second)
-	// res, err := http.Get("http://localhost:2021/metrics")
-	// require.NoError(t, err)
-	// defer res.Body.Close()
-	// scanner := bufio.NewScanner(res.Body)
-	// for scanner.Scan() {
-	// 	line := scanner.Text()
-	// 	println(line)
-	// }
 
 	initialMetrics, err := utils.GetMetrics(2021)
 	require.NoError(t, err)
-	print(initialMetrics)
 
 	emitters, err := ioutil.ReadDir(dirPath)
 	require.NoError(t, err)
+	emitterMetricInitialValue, prs := initialMetrics["telemetry_fsbuffer_usage_bytes{name=\""+emitters[0].Name()+"\"}"]
+	require.True(t, prs)
 
 	_, err = utils.WriteMockFileToDirectory(dirPath+"/"+emitters[0].Name(), "main_test.txt", 500)
 	require.NoError(t, err)
-
 	time.Sleep(35 * time.Second)
-	// res, err = http.Get("http://localhost:2021/metrics")
-	// require.NoError(t, err)
-	// defer res.Body.Close()
-	// scanner = bufio.NewScanner(res.Body)
-	// for scanner.Scan() {
-	// 	line := scanner.Text()
-	// 	println(line)
-	// }
 
 	metrics, err := utils.GetMetrics(2021)
 	require.NoError(t, err)
+	emitterMetricValue, prs := metrics["telemetry_fsbuffer_usage_bytes{name=\""+emitters[0].Name()+"\"}"]
+	require.True(t, prs)
 
-	print(metrics)
-
-	require.True(t, true)
+	require.NotEqual(t, emitterMetricInitialValue, emitterMetricValue)
+	require.Equal(t, "500", emitterMetricValue)
 }
 
 func TestReadEnvironmentVariable(t *testing.T) {
