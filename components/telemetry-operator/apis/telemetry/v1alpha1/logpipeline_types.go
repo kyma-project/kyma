@@ -42,18 +42,22 @@ type Input struct {
 
 // ApplicationInput is the default type of Input that handles application logs
 type ApplicationInput struct {
-	IncludeSystemNamespaces bool     `json:"includeSystemNamespaces,omitempty"`
-	Namespaces              []string `json:"namespaces,omitempty"`
-	ExcludeNamespaces       []string `json:"excludeNamespaces,omitempty"`
-	Containers              []string `json:"containers,omitempty"`
-	ExcludeContainers       []string `json:"excludeContainers,omitempty"`
+	IncludeSystemNamespaces bool                `json:"includeSystemNamespaces,omitempty"`
+	Namespaces              []string            `json:"namespaces,omitempty"`
+	ExcludeNamespaces       []string            `json:"excludeNamespaces,omitempty"`
+	Containers              []string            `json:"containers,omitempty"`
+	ExcludeContainers       []string            `json:"excludeContainers,omitempty"`
+	PodLabels               []map[string]string `json:"podLabels,omitempty"`
+	ExcludePodLabels        []map[string]string `json:"excludePodLabels,omitempty"`
 }
 
 func (a ApplicationInput) HasSelectors() bool {
 	return len(a.Namespaces) > 0 ||
 		len(a.ExcludeNamespaces) > 0 ||
 		len(a.Containers) > 0 ||
-		len(a.ExcludeContainers) > 0
+		len(a.ExcludeContainers) > 0 ||
+		len(a.PodLabels) > 0 ||
+		len(a.ExcludePodLabels) > 0
 }
 
 // Filter describes a Fluent Bit filter configuration

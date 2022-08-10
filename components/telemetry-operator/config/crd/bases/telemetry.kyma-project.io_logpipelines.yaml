@@ -90,6 +90,12 @@ spec:
                         items:
                           type: string
                         type: array
+                      podLabels:
+                        items:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type: array
                     type: object
                 type: object
               output:
