@@ -54,52 +54,9 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 
 ## Setting up a LogPipeline
 
-### Step 1: Create an input
+### Step 1: Create a LogPipeline and output
 
-1. To create a LogPipeline and define from which resources logs should be included create a LogPipeline with a name and spec with input:
-    ```yaml
-    kind: LogPipeline
-    apiVersion: telemetry.kyma-project.io/v1alpha1
-    metadata:
-      name: http-backend
-    spec:
-      input: ...
-    ```
-
-2. As of now only `application` input can be set, meaning the LogPipeline will collect application logs, which is also the default, when omitting the input altogether.
-    ```yaml
-    spec:
-      input:
-        application: ...
-    ```
-
-3. Optionally, you can apply selection mechanisms for application logs on Namespace or container level.
-   If nothing is set, all Namespaces are considered, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default.
-    ```yaml
-    spec:
-      input:
-        application:
-          namespaces: []
-          excludeNamespaces: []
-          containers: []
-          excludeContainers: []
-          includeSystemNamespaces: false
-    ```
-
-Valid input example:
-  ```yaml
-  spec:
-    input:
-      application:
-        includeSystemNamespaces: true
-        excludeContainers:
-          - fluent-bit
-  ```
-
-### Step 2: Create an output
-
-1. To ship application logs to a new output, define an output spec for the LogPipeline:
-
+1. To ship application logs to a new output, create a resource file of kind LogPipeline:
     ```yaml
     kind: LogPipeline
       apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -128,41 +85,67 @@ Valid input example:
       input:
         ...
     ```
+    An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types: 
 
-   An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types: 
+    - `http`, which pushes the data to the specified http destination.
+    - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.     
 
-   - `http`, which pushes the data to the specified http destination.
-   - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.     
-
-   See the following example of the `custom` output:
-   
-   ```yaml
-   spec:
-     output:
-       custom: |
-         Name               http
-         Host               https://myhost/logs
-         Http_User          user
-         Http_Passwd        not-required
-         Format             json
-         Port               80
-         Uri                /
-         Tls                Off
-   ```
+    See the following example of the `custom` output:
+    ```yaml
+    spec:
+      output:
+        custom: |
+          Name               http
+          Host               https://myhost/logs
+          Http_User          user
+          Http_Passwd        not-required
+          Format             json
+          Port               80
+          Uri                /
+          Tls                Off
+    ```
 
 2. To create the instance, apply the resource file in your cluster.
-
-   ```bash
-   kubectl apply -f path/to/my-log-pipeline.yaml
-   ```
+    ```bash
+    kubectl apply -f path/to/my-log-pipeline.yaml
+    ```
 
 3. Check that the status of the LogPipeline in your cluster is `Ready`:
+    ```bash
+    kubectl get logpipeline
+    NAME              STATUS    AGE
+    http-backend      Ready     44s
+    ```
 
-   ```bash
-   kubectl get logpipeline
-   NAME              STATUS    AGE
-   http-backend      Ready     44s
-   ```
+### Step 2: Create an input
+
+To restrict or specify from which resources logs should be included an input spec can be defined optionally, if selection mechanisms for application logs on Namespace or container level are needed.
+Defining an input can be omitted entireley to collect from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. 
+
+```yaml
+kind: LogPipeline
+apiVersion: telemetry.kyma-project.io/v1alpha1
+metadata:
+  name: http-backend
+spec:
+  input:
+    application:
+      namespaces: []
+      excludeNamespaces: []
+      containers: []
+      excludeContainers: []
+      includeSystemNamespaces: false
+```
+
+Example, to collect from all namespaces including system namespaces but excluding on container level from fluent-bit:
+```yaml
+spec:
+  input:
+    application:
+      includeSystemNamespaces: true
+      excludeContainers:
+        - fluent-bit
+```
 
 ### Step 3: Add filters
 
