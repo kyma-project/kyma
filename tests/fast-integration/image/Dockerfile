@@ -1,14 +1,16 @@
-FROM alpine:3.14.6
+FROM alpine:3.16.2
 
 ENV FIT_MAKE_TARGET=ci-skr
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
+RUN apk update; apk upgrade
+
 RUN apk --no-cache add \
     build-base \
     git \
     curl \
-    nodejs=14.19.0-r0 \
+    nodejs=16.16.0-r0 \
     npm
 
 #################################################################
