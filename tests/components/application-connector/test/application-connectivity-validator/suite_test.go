@@ -1,16 +1,25 @@
 package application_connectivity_validator
 
 import (
-	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
+
+	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/stretchr/testify/suite"
+	"k8s.io/client-go/rest"
 )
 
 type ValidatorSuite struct {
 	suite.Suite
+	cli *cli.Clientset
 }
 
 func (gs *ValidatorSuite) SetupSuite() {
+	cfg, err := rest.InClusterConfig()
+	gs.Require().Nil(err)
+
+	gs.cli, err = cli.NewForConfig(cfg)
+	gs.Require().Nil(err)
 }
 
 func (gs *ValidatorSuite) TearDownSuite() {
