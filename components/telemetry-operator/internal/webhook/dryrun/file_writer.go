@@ -18,7 +18,7 @@ type fileWriter struct {
 
 type fileCleaner func()
 
-func (f *fileWriter) doStuff(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline, workDir string) (fileCleaner, error) {
+func (f *fileWriter) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (fileCleaner, error) {
 	if err := MakeDir(workDir); err != nil {
 		return nil, err
 	}

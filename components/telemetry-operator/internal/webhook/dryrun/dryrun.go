@@ -51,7 +51,7 @@ func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.
 // Will run:  fluent-bit/bin/fluent-bit --dry-run --quiet --config /tmp/dry-run018231-123123-123123-123/fluent-bit.conf -e plugin1 -e plugin2 -e plugin3
 func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
 	workDir := "/tmp/dry-run-" + uuid.New().String()
-	cleanFiles, err := d.fileWriter.doStuff(ctx, pipeline, workDir)
+	cleanFiles, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
 	if err != nil {
 		return err
 	}
