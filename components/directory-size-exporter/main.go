@@ -31,23 +31,26 @@ func main() {
 	flag.StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal)")
 
 	exporterLogger, err := logger.New(logger.Format(logFormat), logger.Level(logLevel))
+	if err != nil {
+		panic(err)
+	}
 
 	logPath, err := readEnvironmentVariable("STORAGE_PATH")
 	if err != nil {
-		exporterLogger.WithContext().Error("Error occured during an attempt to read STORAGE_PATH variable!")
+		exporterLogger.WithContext().Error("Error occurred during an attempt to read STORAGE_PATH variable!")
 		panic(err)
 	}
 	exporterLogger.WithContext().Info("Read STORAGE_PATH environment variable")
 
 	dirsSizeMetricName, err := readEnvironmentVariable("DIRECTORIES_SIZE_METRIC")
 	if err != nil {
-		exporterLogger.WithContext().Error("Error occured during an attempt to read DIRECTORIES_SIZE_METRIC variable!")
+		exporterLogger.WithContext().Error("Error occurred during an attempt to read DIRECTORIES_SIZE_METRIC variable!")
 		panic(err)
 	}
 	exporterLogger.WithContext().Info("Read DIRECTORIES_SIZE_METRIC environment variable")
 
 	exp := exporter.NewExporter(logPath, dirsSizeMetricName)
-	exporterLogger.WithContext().Info("Exporter is initalized")
+	exporterLogger.WithContext().Info("Exporter is initialized")
 
 	exp.RecordMetrics()
 	exporterLogger.WithContext().Info("Started recording metrics")

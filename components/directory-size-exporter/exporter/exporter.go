@@ -1,7 +1,6 @@
 package exporter
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
@@ -46,7 +45,7 @@ func (v *exporter) RecordMetrics() {
 		for {
 			select {
 			case <-ticker.C:
-				recordingIteration(logPath, ticker)
+				recordingIteration(logPath)
 			case <-quit:
 				ticker.Stop()
 				return
@@ -55,7 +54,7 @@ func (v *exporter) RecordMetrics() {
 	}()
 }
 
-func recordingIteration(logPath string, ticker *time.Ticker) {
+func recordingIteration(logPath string) {
 	directories, errDirList := listDirs(logPath)
 	if errDirList != nil {
 		panic(errDirList)
@@ -81,7 +80,7 @@ func dirSize(path string) (int64, error) {
 
 func listDirs(path string) ([]directory, error) {
 	directories := make([]directory, 0)
-	files, err := ioutil.ReadDir(path)
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return directories, err
 	}

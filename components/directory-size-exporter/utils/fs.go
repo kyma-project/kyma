@@ -34,7 +34,7 @@ func PrepareMockDirectory(dirPath string, dirName string, size int64) error {
 }
 
 func WriteMockFileToDirectory(dirPath string, filename string, size int64) (*os.File, error) {
-	var newFile *os.File = nil
+	var newFile *os.File
 	newFile, err := os.Create(dirPath + "/" + filename)
 	if err != nil {
 		return nil, err

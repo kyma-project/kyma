@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -23,7 +22,7 @@ func TestMainMetric(t *testing.T) {
 	initialMetrics, err := utils.GetMetrics(2021)
 	require.NoError(t, err)
 
-	emitters, err := ioutil.ReadDir(dirPath)
+	emitters, err := os.ReadDir(dirPath)
 	require.NoError(t, err)
 	emitterMetricInitialValue, prs := initialMetrics["telemetry_fsbuffer_usage_bytes{name=\""+emitters[0].Name()+"\"}"]
 	require.True(t, prs)
