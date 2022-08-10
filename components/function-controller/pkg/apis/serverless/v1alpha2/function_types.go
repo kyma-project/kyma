@@ -48,7 +48,8 @@ type Source struct {
 }
 
 type InlineSource struct {
-	Source       string `json:"source"`
+	Source string `json:"source"`
+	//+optional
 	Dependencies string `json:"dependencies"`
 }
 
