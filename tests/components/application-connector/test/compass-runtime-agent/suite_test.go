@@ -29,6 +29,6 @@ func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
 	gs.Nil(err)
 }
 
-func TestGatewaySuite(t *testing.T) {
+func TestCompassRuntimeAgentSuite(t *testing.T) {
 	suite.Run(t, new(CompassRuntimeAgentSuite))
 }
