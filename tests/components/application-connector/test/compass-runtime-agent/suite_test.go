@@ -9,12 +9,12 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-type CompassSuite struct {
+type CompassRuntimeAgentSuite struct {
 	suite.Suite
 	cli *cli.Clientset
 }
 
-func (gs *CompassSuite) SetupSuite() {
+func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	cfg, err := rest.InClusterConfig()
 	gs.Require().Nil(err)
 
@@ -22,7 +22,7 @@ func (gs *CompassSuite) SetupSuite() {
 	gs.Require().Nil(err)
 }
 
-func (gs *CompassSuite) TearDownSuite() {
+func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
 	_, err := http.Post("http://localhost:15000/quitquitquit", "", nil)
 	gs.Nil(err)
 	_, err = http.Post("http://localhost:15020/quitquitquit", "", nil)
@@ -30,5 +30,5 @@ func (gs *CompassSuite) TearDownSuite() {
 }
 
 func TestGatewaySuite(t *testing.T) {
-	suite.Run(t, new(CompassSuite))
+	suite.Run(t, new(CompassRuntimeAgentSuite))
 }
