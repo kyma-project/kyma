@@ -49,3 +49,6 @@ spec:
     {{- end }}
   - name: gateways
     port: {{ .Values.nats.ports.gateways }}
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
