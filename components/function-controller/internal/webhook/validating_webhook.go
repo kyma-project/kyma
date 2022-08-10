@@ -39,7 +39,7 @@ func (w *ValidatingWebHook) Handle(_ context.Context, req admission.Request) adm
 		return w.handleFunctionValidation(req)
 	}
 
-	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.RequestKind.Kind))
+	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.Kind.Kind))
 }
 
 func (w *ValidatingWebHook) InjectDecoder(decoder *admission.Decoder) error {
