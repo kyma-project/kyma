@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.19.0-alpine3.16 as builder
 
 ARG DOCK_PKG_DIR=/compass-runtime-agent
 WORKDIR $DOCK_PKG_DIR
