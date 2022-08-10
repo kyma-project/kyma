@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -17,6 +16,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const errDescription = "Validation of the supplied configuration failed with the following reason: "
@@ -85,7 +85,7 @@ func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alp
 }
 
 func createNewWorkDir() (string, error) {
-	var newWorkDir = "/tmp/dry-run" + uuid.New().String()
+	var newWorkDir = "/tmp/dry-run-" + uuid.New().String()
 	err := MakeDir(newWorkDir)
 	if err != nil {
 		return "", err
@@ -109,8 +109,13 @@ func (d *DryRunner) writeConfig(ctx context.Context, basePath string) error {
 }
 
 func (d *DryRunner) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
+	filesDir := filepath.Join(basePath, "files")
+	if err := MakeDir(filesDir); err != nil {
+		return err
+	}
+
 	for _, file := range pipeline.Spec.Files {
-		err := WriteFile(filepath.Join(basePath, "files", file.Name), file.Content)
+		err := WriteFile(filepath.Join(filesDir, file.Name), file.Content)
 		if err != nil {
 			return err
 		}
@@ -119,21 +124,31 @@ func (d *DryRunner) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePath
 }
 
 func (d *DryRunner) writeSections(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
+	dynamicDir := filepath.Join(basePath, "dynamic")
+	if err := MakeDir(dynamicDir); err != nil {
+		return err
+	}
+
 	sectionsConfig, err := fluentbit.MergeSectionsConfig(pipeline, d.config.PipelineConfig)
 	if err != nil {
 		return err
 	}
-	return WriteFile(filepath.Join(basePath, "dynamic", pipeline.Name+".conf"), sectionsConfig)
+	return WriteFile(filepath.Join(dynamicDir, pipeline.Name+".conf"), sectionsConfig)
 }
 
 func (d *DryRunner) writeParsers(ctx context.Context, basePath string) error {
+	dynamicParsersDir := filepath.Join(basePath, "dynamic-parsers")
+	if err := MakeDir(dynamicParsersDir); err != nil {
+		return err
+	}
+
 	var logParsers telemetryv1alpha1.LogParserList
 	if err := d.client.List(ctx, &logParsers); err != nil {
 		return err
 	}
 	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 
-	return WriteFile(filepath.Join(basePath, "dynamic-parsers", "parsers.conf"), parsersConfig)
+	return WriteFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
 }
 
 func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
