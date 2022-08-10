@@ -12,21 +12,28 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestPreparePipelineDryRun(t *testing.T) {
-	config, err := os.ReadFile("testdata/given/fluent-bit.conf")
-	require.NoError(t, err)
-
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "fluent-bit",
-		},
-		Data: map[string]string{
-			"fluent-bit.conf": string(config),
-		},
+func loadCmFromFile(filepath string) (*corev1.ConfigMap, error) {
+	cmYAML, err := os.ReadFile("testdata/given/fluent-bit-cm.yaml")
+	if err != nil {
+		return nil, err
 	}
+
+	decode := scheme.Codecs.UniversalDeserializer().Decode
+	cmRuntimeObj, _, err := decode(cmYAML, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return cmRuntimeObj.(*corev1.ConfigMap), nil
+}
+
+func TestPreparePipelineDryRun(t *testing.T) {
+	fluentBitCm, err := loadCmFromFile("testdata/given/fluent-bit-cm.yaml")
+	require.NoError(t, err)
 
 	parser := &telemetryv1alpha1.LogParser{
 		ObjectMeta: metav1.ObjectMeta{
@@ -46,13 +53,12 @@ Types user:string pass:string
 	scheme := runtime.NewScheme()
 	corev1.AddToScheme(scheme)
 	telemetryv1alpha1.AddToScheme(scheme)
-	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(cm, parser).Build()
+	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(fluentBitCm, parser).Build()
 
 	sut := fileWriter{
 		client: client,
 		config: &Config{
-			FluentBitConfigMapName: types.NamespacedName{Name: cm.Name},
-			FluentBitBinPath:       "/usr/local/bin/fluent-bit", //TODO: local testing, remove it
+			FluentBitConfigMapName: types.NamespacedName{Name: fluentBitCm.Name},
 			PipelineConfig: fluentbit.PipelineConfig{
 				FsBufferLimit:     "1G",
 				MemoryBufferLimit: "10M",
@@ -76,4 +82,17 @@ Types user:string pass:string
 
 	_, err = sut.preparePipelineDryRun(context.Background(), "testdata/actual", pipeline)
 	require.NoError(t, err)
+
+	requireEqualFiles(t, "testdata/expected/fluent-bit.conf", "testdata/actual/fluent-bit.conf")
+	requireEqualFiles(t, "testdata/expected/custom_parsers.conf", "testdata/actual/custom_parsers.conf")
+}
+
+func requireEqualFiles(t *testing.T, expectedFilePath, actualFilePath string) {
+	expected, err := os.ReadFile(expectedFilePath)
+	require.NoError(t, err)
+
+	actual, err := os.ReadFile(actualFilePath)
+	require.NoError(t, err)
+
+	require.Equal(t, string(expected), string(actual))
 }
