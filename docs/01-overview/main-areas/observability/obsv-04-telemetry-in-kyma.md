@@ -82,8 +82,6 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           tls:
             disabled: true
             skipCertificateValidation: true
-      input:
-        ...
     ```
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types: 
 
@@ -135,6 +133,8 @@ spec:
       containers: []
       excludeContainers: []
       includeSystemNamespaces: false
+  output:
+    ...
 ```
 
 Example, to collect from all namespaces including system namespaces but excluding on container level from fluent-bit:
