@@ -12,3 +12,15 @@ spec:
           imagePullPolicy: Always
       restartPolicy: Never
   backoffLimit: 0
+  volumeMounts:
+    - name: cert-secret-volume
+      mountPath: /etc/cert-volume
+    - name: incorrect-cert-secret-volume
+      mountPath: /etc/incorrect-cert-volume
+  volumes:
+    - name: cert-secret-volume
+      secret:
+        secretName: cert-secret
+    - name: incorrect-cert-secret-volume
+      secret:
+        secretName: incorrect-cert-secret
