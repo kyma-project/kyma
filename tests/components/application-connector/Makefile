@@ -3,18 +3,21 @@ GOPATH ?= $(shell go env GOPATH)
 
 GATEWAY_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(DOCKER_TAG)"
 VALIDATOR_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/connectivity-validator-test:$(DOCKER_TAG)"
+COMPASS_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/compass-runtime-agent-test:$(DOCKER_TAG)"
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
 MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
 TEST_TIMEOUT = "2m"
 
-.PHONY: release test-os test-skr test image publish clean image-gateway-test publish-gateway-test test-gateway test-gateway-debug image-mock-app publish-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs test-connectivity-validator-debug clean-connectivity-validator-test generate-validator-test-certs
+.PHONY: release test image clean
+.PHONY: test-gateway test-gateway-debug clean-gateway-test publish-gateway-test image-gateway-test publish-mock-app image-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
+.PHONY: test-validator publish-connectivity-validator-test test-connectivity-validator-debug image-connectivity-validator-test clean-connectivity-validator-test generate-validator-test-certs
+.PHONY: test-compass-runtime-agent test-compass-runtime-agent-debug clean-compass-runtime-agent-test image-compass-runtime-agent-test publish-compass-runtime-agent-test
 
-test: test-gateway test-validator
-image: image-gateway-test image-connectivity-validator-test
-clean: clean-gateway-test clean-connectivity-validator-test
-
-release: publish-gateway-test publish-mock-app publish-connectivity-validator-test
+release: publish-gateway-test publish-mock-app publish-connectivity-validator-test publish-compass-runtime-agent-test
+test: test-gateway test-validator test-compass-runtime-agent
+image: image-gateway-test image-connectivity-validator-test image-compass-runtime-agent-test
+clean: clean-gateway-test clean-connectivity-validator-test clean-compass-runtime-agent-test
 
 test-validator: generate-validator-test-certs test-connectivity-validator-debug clean-connectivity-validator-test
 test-gateway: disable-sidecar-for-mtls-test generate-certs test-gateway-debug clean-gateway-test enable-sidecar-after-mtls-test
@@ -97,3 +100,31 @@ generate-validator-test-certs:
 	mkdir -p "./resources/charts/application-connectivity-validator-test/certs/negative"
 	echo "wrong-cert" > ./resources/charts/application-connectivity-validator-test/certs/negative/client.crt
 	echo "wrong-key" > ./resources/charts/application-connectivity-validator-test/certs/negative/client.key
+
+test-compass-runtime-agent: test-compass-runtime-agent-debug clean-compass-runtime-agent-test
+
+test-compass-runtime-agent-debug:
+	@echo $(GOPATH)/bin/go-junit-report --help
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+
+	helm template resources/charts/compass-runtime-agent-test \
+    	--set namespace=$(NAMESPACE) \
+    	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+    | kubectl apply -f -
+
+	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/compass-runtime-agent-test
+	@echo ""
+	@echo "Compass test results:"
+
+	./scripts/check-pod-logs.sh compass-runtime-agent-test
+
+clean-compass-runtime-agent-test:
+	helm template resources/charts/compass-runtime-agent-test  | kubectl delete -f -
+	kubectl delete ns $(NAMESPACE) --ignore-not-found
+
+publish-compass-runtime-agent-test: image-compass-runtime-agent-test
+	docker push $(COMPASS_TEST_IMAGE)
+
+image-compass-runtime-agent-test:
+	docker build -t $(COMPASS_TEST_IMAGE) -f Dockerfile.compass-runtime-agent .
+
