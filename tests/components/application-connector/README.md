@@ -48,16 +48,16 @@ There is the following API for getting tokens to be used for `OAuth` and `CSRF` 
 There is the following API for testing authentication methods:
 ![8080 authorisation methods API](./assets/api-auth-methods.png)
 
-The credentials used for authentication such as `user` and `password` are hardcoded in the [code](./tools/external-api-mock-app/config.go).
+The credentials used for authentication such as `user` and `password` are [hardcoded](./tools/external-api-mock-app/config.go).
 
 ### API exposed on port `8090`
 There is the following API for getting tokens to be used for `OAuth` protected endpoints:
 ![8090 token API](./assets/api-tokens-mtls.png)
 
-There are the following API for testing authentication methods:
+There is the following API for testing authentication methods:
 ![8090 authorisation methods API](./assets/api-auth-methods-mtls.png)
 
-The credentials used for authentication such as `clientID` are hardcoded in the [code](./tools/external-api-mock-app/config.go). 
+The credentials used for authentication such as `clientID` are [hardcoded](./tools/external-api-mock-app/config.go). 
 The server key, server certificate and CA root certificate for port `8090` are defined in [this](./resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml) secret.
 
 > **Note:** Port `8090` needs to be excluded from redirection to Envoy otherwise Application Gateway won't be able to pass client certificate to the mock application.
