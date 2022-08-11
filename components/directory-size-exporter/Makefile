@@ -8,12 +8,6 @@ OS := $(shell uname)
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
-
-# ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.21
-
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifneq (,$(shell which go))
 ifeq (,$(shell go env GOBIN))
@@ -63,8 +57,8 @@ mod-verify-local:
 	GO111MODULE=on go mod verify
 
  ## Run tests.
-test-local: fmt-local vet-local envtest
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
+test-local: fmt-local vet-local
+	go test ./... -coverprofile cover.out
 
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
@@ -72,50 +66,14 @@ build: generate fmt vet ## Build manager binary.
 lint: ## Run various linters
 	../../hack/verify-lint.sh .
 
-tls.key:
-	@openssl genrsa -out tls.key 4096
-
-tls.crt: tls.key
-	@openssl req -sha256 -new -key tls.key -out tls.csr -subj '/CN=localhost'
-	@openssl x509 -req -sha256 -days 3650 -in tls.csr -signkey tls.key -out tls.crt
-	@rm tls.csr
-
-gen-webhook-cert-local: tls.key tls.crt
-
-run-local: gen-webhook-cert-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system --cert-dir=.
+run-local: fmt-local vet-local ## Run a controller from your host.
+	go run ./main.go
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image
 
-##@ Deployment
-
-ENVTEST = $(PROJECT_DIR)/bin/$(OS)/setup-envtest
-.PHONY: envtest
-envtest: ## Download envtest-setup locally if necessary.
-	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
-
-CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(OS)/controller-gen
-.PHONY: controller-gen-local
-controller-gen-local: ## find or download controller-gen if necessary
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0)
-
-# go-get-tool will 'go get' any package $2 and install it to $1.
-define go-get-tool
-@[ -f $(1) ] || { \
-set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
-echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin/$(OS) go install $(2) ;\
-rm -rf $$TMP_DIR ;\
-}
-endef
 
 ##@ Dynamic Function Build
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
-$(eval $(call buildpack-mount,controller-gen))
-$(eval $(call buildpack-mount,manifests))

@@ -23,8 +23,3 @@ testbin/*
 *.swp
 *.swo
 *~
-
-# Test certificates for webhook
-tls.crt
-tls.csr
-tls.key
