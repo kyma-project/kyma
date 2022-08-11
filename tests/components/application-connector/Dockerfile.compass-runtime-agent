@@ -1,0 +1,16 @@
+FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
+
+WORKDIR /compass-test/
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+RUN CGO_ENABLED=0 go test -v -c -o compass-test ./test/compass-runtime-agent/
+
+FROM scratch
+
+COPY --from=builder /compass-test/compass-test /
+ENTRYPOINT [ "/compass-test" ]
+CMD ["-test.v"]
