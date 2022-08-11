@@ -32,9 +32,9 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 
 
 test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
-	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test then \
 	echo "Results:"; \
-	./scripts/check-pod-logs.sh application-gateway-test; \
+	./scripts/check-pod-logs.sh application-gateway-test
 
 create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
