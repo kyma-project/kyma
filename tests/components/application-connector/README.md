@@ -6,7 +6,7 @@ These are the component tests for Application Connector.
 **Table of Contents**
 
 - [Design and architecture](#design-and-architecture)
-- [Mock application](#Mock-application)
+- [Mock application](#mock-application)
 - [Building](#building)
 - [Running](#running)
     - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
