@@ -2,6 +2,7 @@ package dryrun
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -103,9 +104,9 @@ func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
 	out := string(outBytes)
 	if err != nil {
 		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
-			return fmt.Errorf("failed to validate the supplied configuration: %s", extractError(out))
+			return fmt.Errorf("error validating the supplied configuration: %s", extractError(out))
 		}
-		return fmt.Errorf("failed to execute dryrun: %v", err.Error())
+		return errors.New("error validating the supplied configuration")
 	}
 
 	return nil
