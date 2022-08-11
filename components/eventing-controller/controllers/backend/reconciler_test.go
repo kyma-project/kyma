@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/assert"
 
@@ -31,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
@@ -40,7 +39,6 @@ import (
 )
 
 const (
-	testEnvStartDelay           = time.Minute
 	testEnvStartAttempts        = 10
 	beforeSuiteTimeoutInSeconds = testEnvStartAttempts * 60
 	useExistingCluster          = false
@@ -57,6 +55,7 @@ var (
 	defaultLogger *logger.Logger
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
+	k8sCancelFn   context.CancelFunc
 
 	natsSubMgr = &SubMgrMock{}
 	bebSubMgr  = &SubMgrMock{}
@@ -92,7 +91,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "with valid message and namespace data",
+			name:          "with valid message and namespace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			namespaceData: []byte("valid/namespace"),
 			expectedSecret: corev1.Secret{
@@ -119,7 +118,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 			expectedError: errors.New("message is missing from BEB secret"),
 		},
 		{
-			name: "with empty namespace data",
+			name:          "with empty namespace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			expectedError: errors.New("namespace is missing from BEB secret"),
 		},
@@ -166,27 +165,7 @@ var _ = BeforeSuite(func(done Done) {
 	ctrl.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
 
 	var cfg *rest.Config
-	err = retry.Do(func() error {
-		defer func() {
-			if r := recover(); r != nil {
-				log.Println("panic recovered:", r)
-			}
-		}()
-
-		cfg, err = testEnv.Start()
-		return err
-	},
-		retry.Delay(testEnvStartDelay),
-		retry.DelayType(retry.FixedDelay),
-		retry.Attempts(testEnvStartAttempts),
-		retry.OnRetry(func(n uint, err error) {
-			log.Printf("[%v] try failed to start testenv: %s", n, err)
-			if stopErr := testEnv.Stop(); stopErr != nil {
-				log.Printf("failed to stop testenv: %s", stopErr)
-			}
-		}),
-	)
-
+	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
@@ -199,10 +178,12 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(k8sClient).ToNot(BeNil())
 
 	syncPeriod := time.Second * 2
+	shutdownTimeout := time.Duration(0)
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:             scheme.Scheme,
-		SyncPeriod:         &syncPeriod,
-		MetricsBindAddress: "localhost:7071",
+		Scheme:                  scheme.Scheme,
+		SyncPeriod:              &syncPeriod,
+		MetricsBindAddress:      "localhost:7071",
+		GracefulShutdownTimeout: &shutdownTimeout,
 	})
 	Expect(err).To(BeNil())
 
@@ -225,7 +206,10 @@ var _ = BeforeSuite(func(done Done) {
 
 	go func() {
 		defer GinkgoRecover()
-		err = k8sManager.Start(ctrl.SetupSignalHandler())
+		var ctx context.Context
+		ctx, k8sCancelFn = context.WithCancel(ctrl.SetupSignalHandler())
+		err = k8sManager.Start(ctx)
+
 		Expect(err).ToNot(HaveOccurred())
 	}()
 
@@ -234,14 +218,13 @@ var _ = BeforeSuite(func(done Done) {
 
 // Post-process the test suite.
 var _ = AfterSuite(func() {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("panic recovered:", r)
-		}
-	}()
-
 	By("tearing down the test environment")
+	if k8sCancelFn != nil {
+		k8sCancelFn()
+	}
+	By(fmt.Sprintf("Stop %v", time.Now()))
 	err := testEnv.Stop()
+	// testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
 
@@ -315,6 +298,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should switch from NATS to BEB", func() {
 			ctx := context.Background()
 			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
+			ensureNamespaceCreated(ctx, kymaSystemNamespace)
 			createOAuth2Secret(ctx, []byte("id1"), []byte("secret1"))
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
@@ -588,7 +572,7 @@ func newMapFrom(ms ...map[string]string) map[string]string {
 	return mr
 }
 
-func ensureNamespaceCreated(ctx context.Context, namespace string) {
+func ensureNamespaceCreated(ctx context.Context, namespace string) { // nolint:unparam
 	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))
 	ns := reconcilertesting.NewNamespace(namespace)
 	err := k8sClient.Create(ctx, ns)
