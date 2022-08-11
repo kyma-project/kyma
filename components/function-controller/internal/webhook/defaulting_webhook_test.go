@@ -119,12 +119,11 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 				},
 			},
 			want: want{
-				// 7 patch operations added
+				// 6 patch operations added
 				// add /spec/resources
 				// add /spec/buildResources
 				// add /spec/sources/inline/dependencies
-				// add /spec/minReplicas
-				// add /spec/maxReplicas
+				// add /spec/scaleConfig
 				// add /status
 				// add /metadata/creationTimestamp
 				operationsCount: 6,
