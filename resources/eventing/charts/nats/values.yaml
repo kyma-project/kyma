@@ -235,7 +235,7 @@ commonLabels: {}
 
 # podManagementPolicy controls how pods are created during initial scale up,
 # when replacing pods on nodes, or when scaling down.
-podManagementPolicy: Parallel
+podManagementPolicy: OrderedReady
 
 # Prometheus NATS Exporter configuration.
 exporter:
