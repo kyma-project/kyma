@@ -106,8 +106,24 @@ func TestApplicationCrdCompare(t *testing.T) {
 		applicationCRD_bad := &v1alpha1.Application{
 			TypeMeta:   v1.TypeMeta{},
 			ObjectMeta: v1.ObjectMeta{},
-			Spec:       v1alpha1.ApplicationSpec{},
-			Status:     v1alpha1.ApplicationStatus{},
+			Spec: v1alpha1.ApplicationSpec{
+				Description:      "test",
+				SkipInstallation: false,
+				Services:         services,
+				Labels:           nil,
+				Tenant:           "test",
+				Group:            "test",
+				CompassMetadata: &v1alpha1.CompassMetadata{
+					ApplicationID:  "compassID1",
+					Authentication: v1alpha1.Authentication{ClientIds: []string{"11", "22"}},
+				},
+				Tags:                []string{"tag1", "tag2"},
+				DisplayName:         "applicationOneDisplay",
+				ProviderDisplayName: "applicationOneDisplay",
+				LongDescription:     "applicationOne Test",
+				SkipVerify:          true,
+			},
+			Status: v1alpha1.ApplicationStatus{},
 		}
 
 		testCases := []struct {
@@ -129,7 +145,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 
 		for _, test := range testCases {
 			t.Run(test.testMessage, func(t *testing.T) {
-				assert.Equal(t, test.result, Compare(test.application, test.application, comparer))
+				assert.Equal(t, test.result, Compare(test.application, applicationCRD, comparer))
 			})
 		}
 	}
