@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -28,14 +27,16 @@ type Config struct {
 }
 
 type DryRunner struct {
-	fileWriter fileWriter
-	config     *Config
+	fileWriter    fileWriter
+	commandRunner commandRunner
+	config        *Config
 }
 
 func NewDryRunner(c client.Client, config *Config) *DryRunner {
 	return &DryRunner{
-		fileWriter: fileWriter{client: c, config: config},
-		config:     config,
+		fileWriter:    fileWriter{client: c, config: config},
+		commandRunner: &realCommandRunner{},
+		config:        config,
 	}
 }
 
@@ -95,8 +96,7 @@ func (d *DryRunner) externalPluginArgs() ([]string, error) {
 }
 
 func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
-	cmd := exec.CommandContext(ctx, d.config.FluentBitBinPath, args...)
-	outBytes, err := cmd.CombinedOutput()
+	outBytes, err := d.commandRunner.run(ctx, d.config.FluentBitBinPath, args...)
 	out := string(outBytes)
 	if err != nil {
 		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
