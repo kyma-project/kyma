@@ -22,7 +22,13 @@ type realFileWriter struct {
 	config *Config
 }
 
-func (f *realFileWriter) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (func(), error) {
+func (f *realFileWriter) prepareParserDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogParser) error {
+	return nil
+}
+
+type cleanupFiles func()
+
+func (f *realFileWriter) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (cleanupFiles, error) {
 	if err := makeDir(workDir); err != nil {
 		return nil, err
 	}
@@ -39,13 +45,13 @@ func (f *realFileWriter) preparePipelineDryRun(ctx context.Context, workDir stri
 		return nil, err
 	}
 
-	cleaner := func() {
+	cleanupFunc := func() {
 		if err := os.RemoveAll(workDir); err != nil {
 			log := logf.FromContext(ctx)
 			log.Error(err, "Failed to remove Fluent Bit config directory")
 		}
 	}
-	return cleaner, nil
+	return cleanupFunc, nil
 }
 
 func (f *realFileWriter) writeConfig(ctx context.Context, basePath string) error {

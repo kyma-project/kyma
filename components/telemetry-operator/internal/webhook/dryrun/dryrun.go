@@ -41,17 +41,15 @@ func NewDryRunner(c client.Client, config *Config) *DryRunner {
 }
 
 func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
-	// TODO Parsers
-	//workDir := "/tmp/dry-run" + uuid.New().String()
-	//path := filepath.Join(workDir, "dynamic-parsers", "parsers.conf")
-	//args := append(fluentBitArgs(), "--parser", path)
-	//return d.run(ctx, args)
-	return nil
+	workDir := d.newWorkDirPath()
+
+	path := filepath.Join(workDir, "dynamic-parsers", "parsers.conf")
+	args := append(dryRunArgs(), "--parser", path)
+	return d.runCmd(ctx, args)
 }
 
-// Will run:  fluent-bit/bin/fluent-bit --dry-run --quiet --config /tmp/dry-run018231-123123-123123-123/fluent-bit.conf -e plugin1 -e plugin2 -e plugin3
 func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
-	workDir := "/tmp/dry-run-" + uuid.New().String()
+	workDir := d.newWorkDirPath()
 	cleanFiles, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
 	if err != nil {
 		return err
@@ -68,6 +66,10 @@ func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alp
 	args = append(args, externalPluginArgs...)
 
 	return d.runCmd(ctx, args)
+}
+
+func (d *DryRunner) newWorkDirPath() string {
+	return "/tmp/dry-run-" + uuid.New().String()
 }
 
 func (d *DryRunner) externalPluginArgs() ([]string, error) {
@@ -112,31 +114,26 @@ func extractError(output string) string {
 	// Found in https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
 	rColors := regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
 	output = rColors.ReplaceAllString(output, "")
-
 	// Error pattern: [<time>] [error] [config] error in path/to/file.conf:3: <msg>
 	r1 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config].+:\s)(?P<description>.+)`)
 	if r1Matches := r1.FindStringSubmatch(output); r1Matches != nil {
 		return r1Matches[2] // 0: complete output, 1: label, 2: description
 	}
-
 	// Error pattern: [<time>] [error] [config] <msg>
 	r2 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config]\s)(?P<description>.+)`)
 	if r2Matches := r2.FindStringSubmatch(output); r2Matches != nil {
 		return r2Matches[2] // 0: complete output, 1: label, 2: description
 	}
-
 	// Error pattern: [<time>] [error] [parser] <msg> in path/to/file.conf
 	r3 := regexp.MustCompile(`.*(?P<label>\[error]\s\[parser]\s)(?P<description>.+)(\sin.+)`)
 	if r3Matches := r3.FindStringSubmatch(output); r3Matches != nil {
 		return r3Matches[2] // 0: complete output, 1: label, 2: description 3: file name
 	}
-
 	// Error pattern: [<time>] [error] <msg>
 	r4 := regexp.MustCompile(`.*(?P<label>\[error]\s)(?P<description>.+)`)
 	if r4Matches := r4.FindStringSubmatch(output); r4Matches != nil {
 		return r4Matches[2] // 0: complete output, 1: label, 2: description
 	}
-
 	// Error pattern: error<msg>
 	r5 := regexp.MustCompile(`error.+`)
 	return r5.FindString(output)

@@ -34,8 +34,8 @@ func mustLoadManifest[T runtime.Object](scheme *runtime.Scheme, filepath string)
 
 func TestPreparePipelineDryRun(t *testing.T) {
 	scheme := runtime.NewScheme()
-	clientgoscheme.AddToScheme(scheme)
-	telemetryv1alpha1.AddToScheme(scheme)
+	_ = clientgoscheme.AddToScheme(scheme)
+	_ = telemetryv1alpha1.AddToScheme(scheme)
 
 	fluentBitCm := mustLoadManifest[*corev1.ConfigMap](scheme, "testdata/given/fluent-bit-configmap.yaml")
 	parser := mustLoadManifest[*telemetryv1alpha1.LogParser](scheme, "testdata/given/regex-logparser.yaml")
