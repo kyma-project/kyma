@@ -11,16 +11,16 @@ tags:
     description: Endpoints returning CSRF tokens
   - name: No authentication
     description: Endpoints not protected by any authentication method
-  - name: Basic Authorization
+  - name: Basic Authentication
     description: Endpoints protected by Basic Authentication
   - name: OAuth
     description: Endpoints protected by OAuth method expecting valid OAuth token
-  - name: Basic Authorisation and CSRF token
-    description: Endpoints protected by Basic Authorisation and CSRF methods
+  - name: Basic Authentication and CSRF token
+    description: Endpoints protected by Basic Authentication and CSRF methods
   - name: OAuth and CSRF
     description: Endpoints protected by OAuth and CSRF methods
-  - name: Basic Authorisation and request parameters
-    description: Endpoints protected by Basic Authorisation and additional request parameters
+  - name: Basic Authentication and request parameters
+    description: Endpoints protected by Basic Authentication and additional request parameters
 paths:
   /v1/api/oauth/token:
     post:
@@ -124,35 +124,35 @@ paths:
   /v1/api/basic/ok:
     get:
       tags:
-        - Basic Authorization
-      summary: Returns status 200 OK if authorisation is successful
+        - Basic Authentication
+      summary: Returns status 200 OK if authentication is successful
       operationId: onBasicAuth
       responses:
         '200':
-          description: Authorisation successful
+          description: Authentication successful
         '403':
           description: Username or password doesn't match
   /v1/api/oauth/ok:
     get:
       tags:
         - OAuth
-      summary: Returns status 200 OK if authorisation is successful
+      summary: Returns status 200 OK if authentication is successful
       operationId: onOAuth
       responses:
         '200':
-          description: Authorisation successful
+          description: Authentication successful
         '401':
           description: Authorization header missing or contains invalid token
 
   /v1/api/csrf-basic/ok:
     get:
       tags:
-        - Basic Authorisation and CSRF token
-      summary: Returns status 200 OK if authorisation is successful
+        - Basic Authentication and CSRF token
+      summary: Returns status 200 OK if authentication is successful
       operationId: onCsrfBasic
       responses:
         '200':
-          description: Authorisation successful
+          description: Authentication successful
         '403':
           description: Username or password doesn't match or invalid CSRF token passed
 
@@ -160,11 +160,11 @@ paths:
     get:
       tags:
         - OAuth and CSRF
-      summary: Returns status 200 OK if authorisation is successful
+      summary: Returns status 200 OK if authentication is successful
       operationId: onCsrfOAuth
       responses:
         '200':
-          description: Authorisation successful
+          description: Authentication successful
         '401':
           description: Authorization header missing or contains invalid token
         '403':
@@ -173,12 +173,12 @@ paths:
   /v1/api/request-parameters-basic/ok:
     get:
       tags:
-        - Basic Authorisation and request parameters
-      summary: Returns status 200 OK if authorisation is successful
+        - Basic Authentication and request parameters
+      summary: Returns status 200 OK if authentication is successful
       operationId: onRequestParamsBasic
       responses:
         '200':
-          description: Authorisation successful
+          description: Authentication successful
         '400':
           description: Expected headers and request params not passed
         '403':
