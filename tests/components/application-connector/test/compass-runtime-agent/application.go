@@ -1,7 +1,6 @@
 package compass_runtime_agent
 
 import (
-	"bytes"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"reflect"
 )
@@ -16,28 +15,12 @@ func (s Secret) Do(secretType, actual, expected string) bool {
 	return true
 }
 
-
-DisplayName:         "applicationOneDisplay",
-ProviderDisplayName: "applicationOneDisplay",
-LongDescription:     "applicationOne Test",
-SkipVerify:          true,
-
 func Compare(applicationCRD *v1alpha1.Application, applicationCRD_expected *v1alpha1.Application, comparer SecretComparer) bool {
 
+	specEqual := compareSpec(applicationCRD.Spec, applicationCRD_expected.Spec)
 	nameAndNamespaceEqual := applicationCRD.Name == applicationCRD_expected.Name && applicationCRD.Namespace == applicationCRD_expected.Namespace
-	descriptionEqual := applicationCRD.Spec.Description == applicationCRD_expected.Spec.Description
-	skipInstalationEqual := applicationCRD.Spec.SkipInstallation == applicationCRD_expected.Spec.SkipInstallation
-	servicesEqual := compareServices(applicationCRD.Spec.Services, applicationCRD_expected.Spec.Services)
-	labelsEqual := compareLabels(applicationCRD.Spec.Labels,applicationCRD_expected.Spec.Labels)
-	tenantEqual := applicationCRD.Spec.Tenant == applicationCRD_expected.Spec.Tenant
-	groupEqual := applicationCRD.Spec.Group == applicationCRD_expected.Spec.Group
-	compassMetadataEqual := compareCompassMetadata(applicationCRD.Spec.CompassMetadata, applicationCRD_expected.Spec.CompassMetadata)
-	tagsEqual := compareTags(applicationCRD.Spec.Tags, applicationCRD_expected.Spec.Tags)
-	displayNameEqual := applicationCRD.Spec.DisplayName == applicationCRD_expected.Spec.DisplayName
-	providerDisplayNameEqual := applicationCRD.Spec.ProviderDisplayName == applicationCRD_expected.Spec.ProviderDisplayName
-	longDescriptionEqual := applicationCRD.Spec.LongDescription == applicationCRD_expected.Spec.LongDescription
-	skipVerifyEqual := applicationCRD.Spec.SkipVerify == applicationCRD_expected.Spec.SkipVerify
-	return nameAndNamespaceEqual && descriptionEqual && compassMetadataEqual && servicesEqual
+
+	return nameAndNamespaceEqual && specEqual
 }
 
 func compareLabels(actual, expected map[string]string) bool {
@@ -45,7 +28,7 @@ func compareLabels(actual, expected map[string]string) bool {
 		return false
 	}
 
-	return true
+	return reflect.DeepEqual(actual, expected)
 }
 
 func compareTags(actual, expected []string) bool {
@@ -53,7 +36,7 @@ func compareTags(actual, expected []string) bool {
 		return false
 	}
 
-	return true
+	return reflect.DeepEqual(actual, expected)
 }
 
 func compareCompassMetadata(actual, expected *v1alpha1.CompassMetadata) bool {
@@ -64,12 +47,12 @@ func compareCompassMetadata(actual, expected *v1alpha1.CompassMetadata) bool {
 	return applicationIdEqual && authenticationEqual
 }
 
-func compareAuthentication (actual, expected v1alpha1.Authentication) bool {
+func compareAuthentication(actual, expected v1alpha1.Authentication) bool {
 	if len(actual.ClientIds) != len(expected.ClientIds) {
 		return false
 	}
 
-	return reflect.DeepEqual(actual.ClientIds,expected.ClientIds)
+	return reflect.DeepEqual(actual.ClientIds, expected.ClientIds)
 }
 
 func compareServices(actual, expected []v1alpha1.Service) bool {
@@ -88,6 +71,7 @@ func compareServices(actual, expected []v1alpha1.Service) bool {
 			descriptionEqual := serviceExpected.Description == serviceActual.Description
 			entriesEqual := compareEntries(serviceActual.Entries, serviceExpected.Entries)
 			authParameterSchemaEqual := serviceExpected.AuthCreateParameterSchema == serviceActual.AuthCreateParameterSchema
+
 			isFound = nameEqual && idEqual && identifierEqual && displayNameEqual && descriptionEqual && entriesEqual && authParameterSchemaEqual
 		}
 		if !isFound {
@@ -149,7 +133,22 @@ func compareCSRF(actual, expected *v1alpha1.CSRFInfo) bool {
 	return actual.TokenEndpointURL == expected.TokenEndpointURL
 }
 
-//future
 func compareSpec(actual, expected v1alpha1.ApplicationSpec) bool {
-	return false
+
+	descriptionEqual := actual.Description == expected.Description
+	skipInstallationEqual := actual.SkipInstallation == expected.SkipInstallation
+	servicesEqual := compareServices(actual.Services, expected.Services)
+	labelsEqual := compareLabels(actual.Labels, expected.Labels)
+	tenantEqual := actual.Tenant == expected.Tenant
+	groupEqual := actual.Group == expected.Group
+	compassMetadataEqual := compareCompassMetadata(actual.CompassMetadata, expected.CompassMetadata)
+	tagsEqual := compareTags(actual.Tags, expected.Tags)
+	displayNameEqual := actual.DisplayName == expected.DisplayName
+	providerDisplayNameEqual := actual.ProviderDisplayName == expected.ProviderDisplayName
+	longDescriptionEqual := actual.LongDescription == expected.LongDescription
+	skipVerifyEqual := actual.SkipVerify == expected.SkipVerify
+
+	return descriptionEqual && compassMetadataEqual && skipInstallationEqual &&
+		servicesEqual && labelsEqual && tenantEqual && groupEqual && tagsEqual && displayNameEqual && providerDisplayNameEqual &&
+		longDescriptionEqual && skipVerifyEqual
 }
