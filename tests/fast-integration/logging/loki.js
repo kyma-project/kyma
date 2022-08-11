@@ -50,7 +50,7 @@ function parseJson(str) {
 }
 
 async function verifyIstioAccessLogFormat(startTimestamp) {
-  const query = '{container="istio-proxy",job="fluent-bit",namespace="kyma-system",pod="logging-loki-0"}';
+  const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
 
   const responseBody = await queryLoki(query, startTimestamp);
 

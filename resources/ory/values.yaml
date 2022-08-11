@@ -247,6 +247,8 @@ oathkeeper:
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80
+    annotations:
+      readiness.status.sidecar.istio.io/initialDelaySeconds: "10"
   oathkeeper-maester:
     deployment:
       annotations:

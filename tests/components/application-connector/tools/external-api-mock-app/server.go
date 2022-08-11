@@ -30,17 +30,18 @@ func main() {
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
 	oAuthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
 	expectedRequestParameters := test_api.ExpectedRequestParameters{Headers: cfg.RequestHeaders, QueryParameters: cfg.RequestQueryParameters}
-	tokens := make(map[string]test_api.OAuthToken)
+	oauthTokens := make(map[string]test_api.OAuthToken)
+	csrfTokens := make(test_api.CSRFTokens)
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.Port)
-		router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials, expectedRequestParameters, tokens)
+		router := test_api.SetupRoutes(os.Stdout, basicAuthCredentials, oAuthCredentials, expectedRequestParameters, oauthTokens, csrfTokens)
 		log.Fatal(http.ListenAndServe(address, router))
 	}()
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.mTLS.port)
-		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, tokens)
+		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, oauthTokens, csrfTokens)
 		mtlsServer := newMTLSServer(cfg.mTLS.caCertPath, address, router)
 		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.mTLS.serverCertPath, cfg.mTLS.serverKeyPath))
 		wg.Done()
@@ -48,7 +49,7 @@ func main() {
 
 	go func() {
 		address := fmt.Sprintf(":%d", cfg.mTLSExpiredCerts.port)
-		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, tokens)
+		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, oauthTokens, csrfTokens)
 		mtlsServer := newMTLSServer(cfg.mTLSExpiredCerts.caCertPath, address, router)
 		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.mTLSExpiredCerts.serverCertPath, cfg.mTLSExpiredCerts.serverKeyPath))
 		wg.Done()

@@ -15,7 +15,7 @@ title: Logging Architecture
 5. The Loki server processes the log data and stores it in the log store. The data is indexed based on the passed labels
 6. The user queries the logs using Grafana dashboards to analyze and visualize logs fetched and processed by Loki. Learn more about [accessing Grafana](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md).
 
-## Telemetry Component (alpha feature)
+## Telemetry Component
 
 ![](./assets/obsv-configurable-logging-architecture.drawio.svg)
 
@@ -24,5 +24,3 @@ Kyma's classic in-cluster logging features (1-6) are unchanged, but with the int
 7. The telemetry component provides your custom output configuration for Fluent Bit.
 8. As specified in your configuration, Fluent Bit sends the log data to observability systems outside the Kyma cluster.
 9. The user accesses the external observability system to analyze and vizualize the logs.
-
-Learn how to [enable the telemetry component](../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md).
