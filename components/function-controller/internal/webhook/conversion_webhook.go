@@ -185,9 +185,6 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 			Resources: in.Spec.Resources,
 		},
 	}
-	out.Spec.Template = serverlessv1alpha2.Template{
-		Labels: in.Spec.Labels,
-	}
 	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
 		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
 	}
@@ -284,9 +281,6 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 
 	out.Spec.BuildResources = in.Spec.ResourceConfiguration.Build.Resources
 	out.Spec.Resources = in.Spec.ResourceConfiguration.Function.Resources
-
-	out.Spec.Labels = in.Spec.Template.Labels
-
 	return w.convertSourceV1Alpha2ToV1Alpha1(in, out)
 }
 
