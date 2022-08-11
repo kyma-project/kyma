@@ -30,7 +30,7 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	{
 		r := api.PathPrefix("/unsecure").Subrouter()
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
+		r.HandleFunc("/echo", echo).Methods(http.MethodPut, http.MethodPost, http.MethodDelete)
 		r.HandleFunc("/code/{code:[0-9]+}", resCode).Methods(http.MethodGet)
 		r.HandleFunc("/timeout", timeout).Methods(http.MethodGet)
 	}
