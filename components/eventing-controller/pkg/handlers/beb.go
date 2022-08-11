@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"go.uber.org/zap"
 
@@ -27,6 +26,22 @@ const (
 	BEBSubscriptionNameLogKey    = "bebSubscriptionName"
 	ErrorLogKey                  = "error"
 )
+
+type HTTPStatusError struct {
+	StatusCode int
+}
+
+func (e HTTPStatusError) Error() string {
+	return fmt.Sprintf("%v", e.StatusCode)
+}
+
+func (e *HTTPStatusError) Is(target error) bool {
+	t, ok := target.(*HTTPStatusError)
+	if !ok {
+		return false
+	}
+	return (e.StatusCode == t.StatusCode)
+}
 
 // compile time check
 var _ BEBBackend = &BEB{}
@@ -140,8 +155,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
 			log.Errorw("Failed to get BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
-			httpStatusNotFoundError := errors.New(strconv.Itoa(http.StatusNotFound))
-			if errors.As(err, &httpStatusNotFoundError) {
+			httpStatusNotFoundError := HTTPStatusError{StatusCode: http.StatusNotFound}
+			if errors.Is(err, httpStatusNotFoundError) {
 				log.Infow("Recreating BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name)
 				bebSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
 				if err != nil {
@@ -299,7 +314,7 @@ func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 		return nil, fmt.Errorf("get subscription failed: %v", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("get subscription failed: %w; %v", errors.New(strconv.Itoa(resp.StatusCode)), resp.Message)
+		return nil, fmt.Errorf("get subscription failed: %w; %v", HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
 	}
 	return bebSubscription, nil
 }
@@ -318,7 +333,7 @@ func (b *BEB) deleteSubscription(name string) error {
 		return fmt.Errorf("delete subscription failed: %v", err)
 	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
-		return fmt.Errorf("delete subscription failed: %w; %v", errors.New(strconv.Itoa(resp.StatusCode)), resp.Message)
+		return fmt.Errorf("delete subscription failed: %w; %v", HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
 	}
 	return nil
 }
@@ -329,7 +344,7 @@ func (b *BEB) createSubscription(subscription *types.Subscription, log *zap.Suga
 		return fmt.Errorf("create subscription failed: %v", err)
 	}
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
-		return fmt.Errorf("create subscription failed: %w; %v", errors.New(strconv.Itoa(createResponse.StatusCode)), createResponse.Message)
+		return fmt.Errorf("create subscription failed: %w; %v", HTTPStatusError{StatusCode: createResponse.StatusCode}, createResponse.Message)
 	}
 	log.Debug("create subscription succeeded")
 	return nil
