@@ -37,9 +37,9 @@ The test Job and the mock application deployment are in the `test` Namespace.
 ## Mock application
 
 Mock application exposes the following APIs:
-- endpoints implementing various authentication methods and returning tokens exposed on port `8080`
-- endpoints implementing `mTLS` authentication and returning `OAuth` tokens exposed on port `8090`
-- endpoints implementing `mTLS` authentication and using expired server certificate exposed on port `8091`
+- API exposed on port `8080` implementing various authentication methods and returning tokens
+- API exposed on port `8090` implementing `mTLS` authentication and returning `OAuth` tokens
+- API exposed on port `8091` implementing `mTLS` authentication and using expired server certificate
 
 ### API exposed on port 8080 
 There is the following API for getting tokens to be used for `OAuth` and `CSRF` protected endpoints: 
