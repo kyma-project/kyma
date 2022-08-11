@@ -1,8 +1,11 @@
-[PARSER]
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogParser
+metadata:
+  name: parser-1
+spec:
+  parser: |
     Format      regex
     Regex       ^(?<user>[^ ]*) (?<pass>[^ ]*)$
     Time_Key    time
     Time_Format %d/%b/%Y:%H:%M:%S %z
     Types       user:string pass:string
-    Name parser-1
-

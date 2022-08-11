@@ -134,9 +134,9 @@ var _ = Describe("LogPipeline webhook", func() {
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
-			configErr := errors.New("Error in line 4: Invalid indentation level")
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			configErr := errors.New("Error in line 4: Invalid indentation level")
+			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(configErr).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)

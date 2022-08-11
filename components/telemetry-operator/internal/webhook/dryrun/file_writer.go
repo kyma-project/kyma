@@ -27,9 +27,6 @@ func (f *fileWriterImpl) prepareParserDryRun(ctx context.Context, workDir string
 	if err := makeDir(workDir); err != nil {
 		return nil, err
 	}
-	if err := f.writeConfig(ctx, workDir); err != nil {
-		return nil, err
-	}
 	if err := f.writeParsersWithParser(ctx, workDir, parser); err != nil {
 		return nil, err
 	}
@@ -125,27 +122,25 @@ func (f *fileWriterImpl) writeParsersWithParser(ctx context.Context, basePath st
 		return err
 	}
 
-	var logParsers *telemetryv1alpha1.LogParserList
-	if err := f.client.List(ctx, logParsers); err != nil {
+	var logParsers telemetryv1alpha1.LogParserList
+	if err := f.client.List(ctx, &logParsers); err != nil {
 		return err
 	}
 
-	logParsers = appendOrReplace(logParsers, parser)
-	parsersConfig := fluentbit.MergeParsersConfig(logParsers)
+	appendOrReplace(&logParsers, parser)
+	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 
 	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
 }
 
-func appendOrReplace(parsers *telemetryv1alpha1.LogParserList, parser *telemetryv1alpha1.LogParser) *telemetryv1alpha1.LogParserList {
-	for _, l := range parsers.Items {
-		if l.Name == parser.Name {
-			l = *parser
-			return parsers
+func appendOrReplace(parsers *telemetryv1alpha1.LogParserList, parser *telemetryv1alpha1.LogParser) {
+	for i := range parsers.Items {
+		if parsers.Items[i].Name == parser.Name {
+			parsers.Items[i] = *parser
+			return
 		}
 	}
-
 	parsers.Items = append(parsers.Items, *parser)
-	return parsers
 }
 
 func deleteWorkDir(ctx context.Context, workDir string) {
@@ -160,5 +155,5 @@ func makeDir(path string) error {
 }
 
 func writeFile(path string, data string) error {
-	return os.WriteFile(path, []byte(data), 0666)
+	return os.WriteFile(path, []byte(data), 0600)
 }

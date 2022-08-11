@@ -42,11 +42,11 @@ func NewDryRunner(c client.Client, config *Config) *DryRunner {
 
 func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
 	workDir := d.newWorkDirPath()
-	cleanFiles, err := d.fileWriter.prepareParserDryRun(ctx, workDir, parser)
+	cleanup, err := d.fileWriter.prepareParserDryRun(ctx, workDir, parser)
 	if err != nil {
 		return err
 	}
-	defer cleanFiles()
+	defer cleanup()
 
 	path := filepath.Join(workDir, "dynamic-parsers", "parsers.conf")
 	args := append(dryRunArgs(), "--parser", path)
@@ -55,11 +55,11 @@ func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.
 
 func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
 	workDir := d.newWorkDirPath()
-	cleanFiles, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
+	cleanup, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
 	if err != nil {
 		return err
 	}
-	defer cleanFiles()
+	defer cleanup()
 
 	path := filepath.Join(workDir, "fluent-bit.conf")
 	args := dryRunArgs()
