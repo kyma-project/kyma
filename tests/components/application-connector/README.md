@@ -216,4 +216,9 @@ To run the tests without removing all the created resources afterwards, run:
 ``` shell
 make disable-sidecar-for-mtls-test test-gateway-debug
 ```
-> **CAUTION:** Remember to execute 'make clean-gateway-test enable-sidecar-for-mtls-test' command once finished
+
+Once you finished debugging, run:
+
+``` shell
+make clean-gateway-test enable-sidecar-for-mtls-test
+```
