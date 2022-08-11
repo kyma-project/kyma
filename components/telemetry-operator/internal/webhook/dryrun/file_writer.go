@@ -22,8 +22,18 @@ type fileWriterImpl struct {
 	config *Config
 }
 
-func (f *fileWriterImpl) prepareParserDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogParser) error {
-	return nil
+func (f *fileWriterImpl) prepareParserDryRun(ctx context.Context, workDir string, parser *telemetryv1alpha1.LogParser) (func(), error) {
+	if err := makeDir(workDir); err != nil {
+		return nil, err
+	}
+	if err := f.writeConfig(ctx, workDir); err != nil {
+		return nil, err
+	}
+	if err := f.writeParsersWithParser(ctx, workDir, parser); err != nil {
+		return nil, err
+	}
+
+	return func() { deleteWorkDir(ctx, workDir) }, nil
 }
 
 func (f *fileWriterImpl) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (func(), error) {
@@ -43,13 +53,7 @@ func (f *fileWriterImpl) preparePipelineDryRun(ctx context.Context, workDir stri
 		return nil, err
 	}
 
-	cleanupFunc := func() {
-		if err := os.RemoveAll(workDir); err != nil {
-			log := logf.FromContext(ctx)
-			log.Error(err, "Failed to remove Fluent Bit config directory")
-		}
-	}
-	return cleanupFunc, nil
+	return func() { deleteWorkDir(ctx, workDir) }, nil
 }
 
 func (f *fileWriterImpl) writeConfig(ctx context.Context, basePath string) error {
@@ -64,6 +68,7 @@ func (f *fileWriterImpl) writeConfig(ctx context.Context, basePath string) error
 			return err
 		}
 	}
+	
 	return nil
 }
 
@@ -72,7 +77,6 @@ func (f *fileWriterImpl) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, bas
 	if err := makeDir(filesDir); err != nil {
 		return err
 	}
-
 	for _, file := range pipeline.Spec.Files {
 		err := writeFile(filepath.Join(filesDir, file.Name), file.Content)
 		if err != nil {
@@ -87,7 +91,6 @@ func (f *fileWriterImpl) writeSections(pipeline *telemetryv1alpha1.LogPipeline, 
 	if err := makeDir(dynamicDir); err != nil {
 		return err
 	}
-
 	sectionsConfig, err := fluentbit.MergeSectionsConfig(pipeline, f.config.PipelineConfig)
 	if err != nil {
 		return err
@@ -100,7 +103,6 @@ func (f *fileWriterImpl) writeParsers(ctx context.Context, basePath string) erro
 	if err := makeDir(dynamicParsersDir); err != nil {
 		return err
 	}
-
 	var logParsers telemetryv1alpha1.LogParserList
 	if err := f.client.List(ctx, &logParsers); err != nil {
 		return err
@@ -108,6 +110,40 @@ func (f *fileWriterImpl) writeParsers(ctx context.Context, basePath string) erro
 	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 
 	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
+}
+
+func (f *fileWriterImpl) writeParsersWithParser(ctx context.Context, basePath string, parser *telemetryv1alpha1.LogParser) error {
+	dynamicParsersDir := filepath.Join(basePath, "dynamic-parsers")
+	if err := makeDir(dynamicParsersDir); err != nil {
+		return err
+	}
+	var logParsers *telemetryv1alpha1.LogParserList
+	if err := f.client.List(ctx, logParsers); err != nil {
+		return err
+	}
+	logParsers = appendOrReplace(logParsers, parser)
+	parsersConfig := fluentbit.MergeParsersConfig(logParsers)
+
+	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
+}
+
+func appendOrReplace(parsers *telemetryv1alpha1.LogParserList, parser *telemetryv1alpha1.LogParser) *telemetryv1alpha1.LogParserList {
+	for _, l := range parsers.Items {
+		if l.Name == parser.Name {
+			l = *parser
+			return parsers
+		}
+	}
+	parsers.Items = append(parsers.Items, *parser)
+
+	return parsers
+}
+
+func deleteWorkDir(ctx context.Context, workDir string) {
+	if err := os.RemoveAll(workDir); err != nil {
+		log := logf.FromContext(ctx)
+		log.Error(err, "Failed to remove Fluent Bit config directory")
+	}
 }
 
 func makeDir(path string) error {
