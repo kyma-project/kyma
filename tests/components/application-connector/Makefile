@@ -6,7 +6,7 @@ COMPASS_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/compass-
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
 MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
-TEST_TIMEOUT = "2m"
+TEST_TIMEOUT = "3m"
 
 
 .PHONY: release test image clean
@@ -32,9 +32,9 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 
 
 test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
-	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test then \
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; \
 	echo "Results:"; \
-	./scripts/check-pod-logs.sh application-gateway-test
+	./scripts/check-pod-logs.sh application-gateway-test; \
 
 create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
