@@ -333,9 +333,10 @@ func TestChangeSubscription(t *testing.T) {
 		wantAfter             utils.Want
 	}{
 		{
-			// Ensure subscriptions on NATS are added when adding a Subscription filter and providing an invalid sink.
-			// issue: https://github.com/kyma-project/kyma/issues/14152
-			name: "NATS subscriptions are in sync even though the sink becomes invalid: adding a filter",
+			// Ensure subscriptions on NATS are not added when adding a Subscription filter and providing an invalid sink to prevent event-loss.
+			// The reason for this is that the dispatcher will retry only for a finite number and then give up.
+			// Since the sink is invalid, the dispatcher cannot dispatch the event and will stop if the maximum number of retries is reached.
+			name: "NATS subscriptions are not in sync when the sink becomes invalid: adding a filter",
 			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
 				// valid sink
@@ -380,79 +381,9 @@ func TestChangeSubscription(t *testing.T) {
 					utils.NewCleanEventType("0"): {
 						natstesting.BeExistingSubscription(),
 					},
-					// ensure the newly added filter is synced to NATS
+					// the newly added filter is not synced to NATS as the sink is invalid
 					utils.NewCleanEventType("1"): {
-						natstesting.BeExistingSubscription(),
-					},
-				},
-			},
-		},
-		{
-			// Ensure subscriptions on NATS are deleted when deleting a Subscription filter and providing an invalid sink.
-			// issue: https://github.com/kyma-project/kyma/issues/14152
-			name: "NATS subscriptions are in sync even though the sink becomes invalid: deleting a filter",
-			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
-				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
-				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1")),
-				// some valid sink
-				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
-			},
-			wantBefore: utils.Want{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveSubscriptionReady(),
-					// // for each filter we want to have a clean event type
-					reconcilertesting.HaveCleanEventTypes([]string{
-						utils.NewCleanEventType("0"),
-						utils.NewCleanEventType("1"),
-					}),
-				},
-				K8sEvents: nil,
-				// ensure that each filter results in a NATS consumer
-				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
-					utils.NewCleanEventType("0"): {
-						natstesting.BeExistingSubscription(),
-						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0")),
-					},
-					utils.NewCleanEventType("1"): {
-						natstesting.BeExistingSubscription(),
-						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("1")),
-					},
-				},
-			},
-			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
-				// delete the first filter
-				subscription.Spec.Filter.Filters = nil
-				reconcilertesting.AddFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1"), subscription)
-
-				// induce an error by making the sink invalid
-				subscription.Spec.Sink = "invalid"
-			},
-			wantAfter: utils.Want{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveSubscriptionNotReady(),
-					// filter was deleted
-					gomega.Not(reconcilertesting.HaveCleanEventTypes([]string{
-						utils.NewCleanEventType("0"),
-					})),
-					// filter is still there
-					reconcilertesting.HaveCleanEventTypes([]string{
-						utils.NewCleanEventType("1"),
-					}),
-				},
-				K8sEvents: nil,
-				// ensure that each filter results in a NATS consumer
-				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
-					// the filter was removed from the subscription -> it should be removed on NATS as well
-					utils.NewCleanEventType("0"): {
 						gomega.Not(natstesting.BeExistingSubscription()),
-					},
-					// nothing changed for this filter
-					utils.NewCleanEventType("1"): {
-						natstesting.BeExistingSubscription(),
-						natstesting.BeValidSubscription(),
-						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("1")),
 					},
 				},
 			},

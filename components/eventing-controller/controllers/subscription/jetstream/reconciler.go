@@ -140,17 +140,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	// Synchronize Kyma subscription to JetStream backend
-	// NOTE: This steps needs to be executed before doing the sink validation to keep the NATS subscriptions in sync with the Kyma eventing subscriptions.
-	//       See also the regression tests for ticket: https://github.com/kyma-project/kyma/issues/14152
-	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
-		log.Errorw("Failed to sync subscription", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
-		}
-		return ctrl.Result{}, err
-	}
-
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
 		log.Errorw("Failed to validate sink URL", "error", err)
@@ -158,6 +147,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
+		return ctrl.Result{}, err
+	}
+
+	// Synchronize Kyma subscription to JetStream backend
+	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
+		log.Errorw("Failed to sync subscription", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
+			return ctrl.Result{}, syncErr
+		}
 		return ctrl.Result{}, err
 	}
 
