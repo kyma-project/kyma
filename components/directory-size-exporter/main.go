@@ -49,6 +49,13 @@ func main() {
 	}
 	exporterLogger.WithContext().Info("Read DIRECTORIES_SIZE_METRIC environment variable")
 
+	port, err := readEnvironmentVariable("METRICS_PORT")
+	if err != nil {
+		exporterLogger.WithContext().Error("Error occurred during an attempt to read METRICS_PORT variable!")
+		panic(err)
+	}
+	exporterLogger.WithContext().Info("Read METRICS_PORT environment variable")
+
 	exp := exporter.NewExporter(logPath, dirsSizeMetricName)
 	exporterLogger.WithContext().Info("Exporter is initialized")
 
@@ -56,10 +63,9 @@ func main() {
 	exporterLogger.WithContext().Info("Started recording metrics")
 
 	http.Handle("/metrics", promhttp.Handler())
-	err = http.ListenAndServe(":2021", nil)
+	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		panic(err)
 	}
-	exporterLogger.WithContext().Info("Listening port '2021'")
-
+	exporterLogger.WithContext().Info("Listening port '" + port + "'")
 }

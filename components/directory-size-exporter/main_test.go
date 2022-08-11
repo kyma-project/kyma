@@ -16,6 +16,7 @@ func TestMainMetric(t *testing.T) {
 
 	os.Setenv("STORAGE_PATH", dirPath)
 	os.Setenv("DIRECTORIES_SIZE_METRIC", "telemetry_fsbuffer_usage_bytes")
+	os.Setenv("METRICS_PORT", "2021")
 	go main()
 	time.Sleep(35 * time.Second)
 
