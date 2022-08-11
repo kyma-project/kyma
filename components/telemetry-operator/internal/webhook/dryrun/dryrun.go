@@ -42,6 +42,11 @@ func NewDryRunner(c client.Client, config *Config) *DryRunner {
 
 func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
 	workDir := d.newWorkDirPath()
+	cleanFiles, err := d.fileWriter.prepareParserDryRun(ctx, workDir, parser)
+	if err != nil {
+		return err
+	}
+	defer cleanFiles()
 
 	path := filepath.Join(workDir, "dynamic-parsers", "parsers.conf")
 	args := append(dryRunArgs(), "--parser", path)
@@ -112,7 +117,7 @@ func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
 
 func extractError(output string) string {
 	// Found in https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
-	rColors := regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
+	rColors := regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\a|(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~])")
 	output = rColors.ReplaceAllString(output, "")
 	// Error pattern: [<time>] [error] [config] error in path/to/file.conf:3: <msg>
 	r1 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config].+:\s)(?P<description>.+)`)

@@ -15,6 +15,7 @@ import (
 //go:generate mockery --name fileWriter --filename file_writer.go
 type fileWriter interface {
 	preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (func(), error)
+	prepareParserDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogParser) (func(), error)
 }
 
 type fileWriterImpl struct {
@@ -62,13 +63,14 @@ func (f *fileWriterImpl) writeConfig(ctx context.Context, basePath string) error
 	if err = f.client.Get(ctx, f.config.FluentBitConfigMapName, &cm); err != nil {
 		return err
 	}
+
 	for key, data := range cm.Data {
 		err = writeFile(filepath.Join(basePath, key), data)
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
@@ -77,12 +79,14 @@ func (f *fileWriterImpl) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, bas
 	if err := makeDir(filesDir); err != nil {
 		return err
 	}
+
 	for _, file := range pipeline.Spec.Files {
 		err := writeFile(filepath.Join(filesDir, file.Name), file.Content)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -91,10 +95,12 @@ func (f *fileWriterImpl) writeSections(pipeline *telemetryv1alpha1.LogPipeline, 
 	if err := makeDir(dynamicDir); err != nil {
 		return err
 	}
+
 	sectionsConfig, err := fluentbit.MergeSectionsConfig(pipeline, f.config.PipelineConfig)
 	if err != nil {
 		return err
 	}
+
 	return writeFile(filepath.Join(dynamicDir, pipeline.Name+".conf"), sectionsConfig)
 }
 
@@ -103,12 +109,13 @@ func (f *fileWriterImpl) writeParsers(ctx context.Context, basePath string) erro
 	if err := makeDir(dynamicParsersDir); err != nil {
 		return err
 	}
+
 	var logParsers telemetryv1alpha1.LogParserList
 	if err := f.client.List(ctx, &logParsers); err != nil {
 		return err
 	}
-	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 
+	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
 }
 
@@ -117,10 +124,12 @@ func (f *fileWriterImpl) writeParsersWithParser(ctx context.Context, basePath st
 	if err := makeDir(dynamicParsersDir); err != nil {
 		return err
 	}
+
 	var logParsers *telemetryv1alpha1.LogParserList
 	if err := f.client.List(ctx, logParsers); err != nil {
 		return err
 	}
+
 	logParsers = appendOrReplace(logParsers, parser)
 	parsersConfig := fluentbit.MergeParsersConfig(logParsers)
 
@@ -134,8 +143,8 @@ func appendOrReplace(parsers *telemetryv1alpha1.LogParserList, parser *telemetry
 			return parsers
 		}
 	}
-	parsers.Items = append(parsers.Items, *parser)
 
+	parsers.Items = append(parsers.Items, *parser)
 	return parsers
 }
 
