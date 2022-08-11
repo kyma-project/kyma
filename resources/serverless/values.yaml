@@ -82,7 +82,7 @@ global:
       version: "PR-15080"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15049"
+      version: "PR-15080"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-15038"
