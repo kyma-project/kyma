@@ -64,7 +64,7 @@ nats:
 
   # Adds a hash of the ConfigMap as a pod annotation
   # This will cause the StatefulSet to roll when the ConfigMap is updated
-  configChecksumAnnotation: true
+  configChecksumAnnotation: false
 
   # securityContext for the nats container
   securityContext:
