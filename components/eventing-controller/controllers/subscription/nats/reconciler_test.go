@@ -9,23 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
-	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	natsreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
@@ -34,6 +18,20 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	natsreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
+	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 )
 
 const (

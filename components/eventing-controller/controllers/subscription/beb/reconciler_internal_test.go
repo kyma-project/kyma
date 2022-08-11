@@ -5,34 +5,31 @@ import (
 	"testing"
 	"time"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	. "github.com/onsi/gomega"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
