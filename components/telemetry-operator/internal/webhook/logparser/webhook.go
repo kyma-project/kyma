@@ -21,7 +21,6 @@ import (
 	"net/http"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -44,7 +43,7 @@ type ValidatingWebhookHandler struct {
 	decoder         *admission.Decoder
 }
 
-func NewValidatingWebhookHandler(client client.Client, parserValidator validation.ParserValidator, pipelineConfig fluentbit.PipelineConfig, dryRunner DryRunner) *ValidatingWebhookHandler {
+func NewValidatingWebhookHandler(client client.Client, parserValidator validation.ParserValidator, dryRunner DryRunner) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
 		Client:          client,
 		parserValidator: parserValidator,

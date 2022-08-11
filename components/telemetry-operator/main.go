@@ -204,8 +204,10 @@ func main() {
 	}
 
 	dryRunConfig := &dryrun.Config{
-		FluentBitBinPath:   fluentBitPath,
-		FluentBitPluginDir: fluentBitPluginDirectory,
+		FluentBitBinPath:       fluentBitPath,
+		FluentBitPluginDir:     fluentBitPluginDirectory,
+		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
+		PipelineConfig:         pipelineConfig,
 	}
 
 	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(
@@ -244,7 +246,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(), logparservalidation.NewParserValidator(), pipelineConfig, dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
+	logParserValidationHandler := logparser.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logparservalidation.NewParserValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",
 		&k8sWebhook.Admission{Handler: logParserValidationHandler})
