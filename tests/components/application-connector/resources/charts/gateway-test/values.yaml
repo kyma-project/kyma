@@ -9,8 +9,8 @@ containerRegistry:
 images:
   gatewayTest:
     name: "gateway-test"
-    version: "PR-14804"
+    version: "PR-14996"
 
   mockApplication:
     name: "mock-app"
-    version: "PR-14804"
+    version: "PR-14996"
