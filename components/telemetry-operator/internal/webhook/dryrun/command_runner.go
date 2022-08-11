@@ -10,8 +10,8 @@ type commandRunner interface {
 	run(ctx context.Context, command string, args ...string) ([]byte, error)
 }
 
-type realCommandRunner struct{}
+type commandRunnerImpl struct{}
 
-func (r *realCommandRunner) run(ctx context.Context, command string, args ...string) ([]byte, error) {
+func (r *commandRunnerImpl) run(ctx context.Context, command string, args ...string) ([]byte, error) {
 	return exec.CommandContext(ctx, command, args...).CombinedOutput()
 }
