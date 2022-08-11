@@ -32,7 +32,7 @@ import (
 
 //go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
-	DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error
+	RunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error
 }
 
 const (
@@ -145,7 +145,7 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, logP
 		return err
 	}
 
-	if err := v.dryRunner.DryRunPipeline(ctx, logPipeline); err != nil {
+	if err := v.dryRunner.RunPipeline(ctx, logPipeline); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}

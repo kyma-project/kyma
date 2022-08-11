@@ -33,7 +33,7 @@ import (
 
 //go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
-	DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
+	RunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
 }
 
 //+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
@@ -84,7 +84,7 @@ func (v *ValidatingWebhookHandler) validateLogParser(ctx context.Context, logPar
 		return err
 	}
 
-	if err = v.dryRunner.DryRunParser(ctx, logParser); err != nil {
+	if err = v.dryRunner.RunParser(ctx, logParser); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}

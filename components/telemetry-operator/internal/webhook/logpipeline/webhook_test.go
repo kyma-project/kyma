@@ -118,7 +118,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -136,7 +136,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(configErr).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(configErr).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -177,7 +177,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
 			outputErr := errors.New("invalid output")
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(outputErr).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -194,7 +194,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			maxPipelinesErr := errors.New("too many pipelines")
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(maxPipelinesErr).Times(1)
 			variableValidatorMock.On("Validate", mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -215,7 +215,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			maxPipelinesValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
 			inputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.Input")).Return(nil).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			fileError := errors.New("duplicate file name: 1st-file")
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(fileError).Times(1)
@@ -243,7 +243,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -260,7 +260,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			outputValidatorMock.On("Validate", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(nil).Times(1)
 			pluginValidatorMock.On("ContainsCustomPlugin", mock.AnythingOfType("*v1alpha1.LogPipeline")).Return(false).Times(1)
 			fileValidatorMock.On("Validate", mock.Anything, mock.Anything).Return(nil).Times(1)
-			dryRunnerMock.On("DryRunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
+			dryRunnerMock.On("RunPipeline", mock.Anything, mock.Anything).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
 			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)

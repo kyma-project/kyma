@@ -16,7 +16,7 @@ type DryRunner struct {
 }
 
 // DryRunPipeline provides a mock function with given fields: ctx, pipeline
-func (_m *DryRunner) DryRunPipeline(ctx context.Context, pipeline *v1alpha1.LogPipeline) error {
+func (_m *DryRunner) RunPipeline(ctx context.Context, pipeline *v1alpha1.LogPipeline) error {
 	ret := _m.Called(ctx, pipeline)
 
 	var r0 error

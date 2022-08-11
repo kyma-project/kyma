@@ -40,7 +40,7 @@ func NewDryRunner(c client.Client, config *Config) *DryRunner {
 	}
 }
 
-func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
+func (d *DryRunner) RunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
 	workDir := newWorkDirPath()
 	cleanup, err := d.fileWriter.prepareParserDryRun(ctx, workDir, parser)
 	if err != nil {
@@ -53,7 +53,7 @@ func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.
 	return d.runCmd(ctx, args)
 }
 
-func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+func (d *DryRunner) RunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
 	workDir := newWorkDirPath()
 	cleanup, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
 	if err != nil {

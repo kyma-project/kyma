@@ -16,7 +16,7 @@ type DryRunner struct {
 }
 
 // DryRunParser provides a mock function with given fields: ctx, parser
-func (_m *DryRunner) DryRunParser(ctx context.Context, parser *v1alpha1.LogParser) error {
+func (_m *DryRunner) RunParser(ctx context.Context, parser *v1alpha1.LogParser) error {
 	ret := _m.Called(ctx, parser)
 
 	var r0 error
