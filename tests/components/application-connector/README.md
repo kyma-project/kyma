@@ -37,37 +37,37 @@ The test Job and the mock application deployment are in the `test` Namespace.
 ## Mock application
 
 Mock application exposes the following APIs:
-- endpoints implementing various authentication methods and returning tokens exposed on 8080 port
-- endpoints implementing mTLS authentication method and returning OAuth tokens exposed on 8090 port
-- endpoints implementing mTLS authentication method and returning OAuth tokens exposed on 8091 port
+- endpoints implementing various authentication methods and returning tokens exposed on port `8080`
+- endpoints implementing `mTLS` authentication and returning `OAuth` tokens exposed on port `8090`
+- endpoints implementing `mTLS` authentication and using expired server certificate exposed on port `8091`
 
-### API exposed on 8080 port
-There are the following endpoints for getting tokens to be used for OAuth and CSRF protected endpoints: 
+### API exposed on port 8080 
+There is the following API for getting tokens to be used for `OAuth` and `CSRF` protected endpoints: 
 ![8080 token API](./assets/api-tokens.png)
 
-There are the following endpoints for testing authentication methods:
+There are the following API for testing authentication methods:
 ![8080 authorisation methods API](./assets/api-auth-methods.png)
 
 The credentials used for authentication such as Basic Auth user and password are hardcoded in [Mock Application's configuration](./tools/external-api-mock-app/config.go).
 
-### API exposed on 8090 port
+### API exposed on port 8090
+There is the following API for getting tokens to be used for `OAuth` protected endpoints:
 ![8090 token API](./assets/api-tokens-mtls.png)
 
-There are the following endpoints for testing authentication methods:
+There are the following API for testing authentication methods:
 ![8090 authorisation methods API](./assets/api-auth-methods-mtls.png)
 
-The credentials used for authentication such as OAuth `clientID` are hardcoded in [Mock Application's configuration](./tools/external-api-mock-app/config.go). 
-The server key, server certificate and CA root certificate for port 8090 are defined in [this](./resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml) secret.
+The credentials used for authentication such as `OAuth` `clientID` are hardcoded in [Mock Application's configuration](./tools/external-api-mock-app/config.go). 
+The server key, server certificate and CA root certificate for port `8090` are defined in [this](./resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml) secret.
 
-> **Note:** Port 8090 needs to be excluded from redirection to Envoy otherwise Application Gateway won't be able to pass client certificate to the mock application.
+> **Note:** Port `8090` needs to be excluded from redirection to Envoy otherwise Application Gateway won't be able to pass client certificate to the mock application.
 
-### API exposed on 8091 port
+### API exposed on port 8091
 
+The API is identical to the one exposed on port '8090'. HTTPS server on port `8091` uses expired server certificate.
 The server key, server certificate and CA root certificate for port 8091 are defined in [this](./resources/charts/gateway-test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml) secret.
 
-The credentials used for authentication such as OAuth `clientID` are hardcoded in [Mock Application's configuration](./tools/external-api-mock-app/config.go).
 > **Note:** Port 8091 needs to be excluded from redirection to Envoy otherwise Application Gateway won't be able to pass client certificate to the mock application.
-> **Note:** HTTPS server on port 8091 uses expired server certificate so that
  
 ### Certificates
 In order to test mTLS related authentication methods the following is needed:
