@@ -41,7 +41,7 @@ func NewDryRunner(c client.Client, config *Config) *DryRunner {
 }
 
 func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
-	workDir := d.newWorkDirPath()
+	workDir := newWorkDirPath()
 	cleanup, err := d.fileWriter.prepareParserDryRun(ctx, workDir, parser)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func (d *DryRunner) DryRunParser(ctx context.Context, parser *telemetryv1alpha1.
 }
 
 func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
-	workDir := d.newWorkDirPath()
+	workDir := newWorkDirPath()
 	cleanup, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
 	if err != nil {
 		return err
@@ -71,10 +71,6 @@ func (d *DryRunner) DryRunPipeline(ctx context.Context, pipeline *telemetryv1alp
 	args = append(args, externalPluginArgs...)
 
 	return d.runCmd(ctx, args)
-}
-
-func (d *DryRunner) newWorkDirPath() string {
-	return "/tmp/dry-run-" + uuid.New().String()
 }
 
 func (d *DryRunner) externalPluginArgs() ([]string, error) {
@@ -113,6 +109,10 @@ func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
 	}
 
 	return nil
+}
+
+func newWorkDirPath() string {
+	return "/tmp/dry-run-" + uuid.New().String()
 }
 
 func extractError(output string) string {
