@@ -1,5 +1,5 @@
 ---
-title: Telemetry (alpha)
+title: Telemetry
 ---
 
 ## Kyma's telemetry component
@@ -10,7 +10,6 @@ To support the logging domain, the telemetry component provides a log collector,
 
 ## Prerequisites
 
-- The telemetry component is in an alpha state. You must [explicitly install it](./../../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md).
 - Your application must log to `stdout` or `stderr`.
 
 ## Architecture
@@ -227,7 +226,7 @@ stringData:
 
 ### Step 5: Rotate the Secret
 
-A Secret being referenced with the `secretKeyRef` construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.  
+A Secret being referenced with the `secretKeyRef` construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
 Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
 ```yaml
@@ -497,5 +496,5 @@ Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. 
 
 ### Max amount of pipelines - CPU/Mem constraints
 
-In the production profile, no more than 5 LogPipelines.  
+In the production profile, no more than 5 LogPipelines.
 In the evaluation profile, no more than 3 LogPipelines.
