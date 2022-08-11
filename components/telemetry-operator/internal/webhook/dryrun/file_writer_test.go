@@ -42,7 +42,7 @@ func TestPreparePipelineDryRun(t *testing.T) {
 
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(fluentBitCm, parser).Build()
 
-	sut := fileWriter{
+	sut := realFileWriter{
 		client: client,
 		config: &Config{
 			FluentBitConfigMapName: types.NamespacedName{Name: fluentBitCm.Name},

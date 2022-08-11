@@ -12,14 +12,17 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type fileWriter struct {
+//go:generate mockery --name fileWriter --filename file_writer.go
+type fileWriter interface {
+	preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (func(), error)
+}
+
+type realFileWriter struct {
 	client client.Client
 	config *Config
 }
 
-type fileCleaner func()
-
-func (f *fileWriter) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (fileCleaner, error) {
+func (f *realFileWriter) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (func(), error) {
 	if err := makeDir(workDir); err != nil {
 		return nil, err
 	}
@@ -45,7 +48,7 @@ func (f *fileWriter) preparePipelineDryRun(ctx context.Context, workDir string, 
 	return cleaner, nil
 }
 
-func (f *fileWriter) writeConfig(ctx context.Context, basePath string) error {
+func (f *realFileWriter) writeConfig(ctx context.Context, basePath string) error {
 	var cm v1.ConfigMap
 	var err error
 	if err = f.client.Get(ctx, f.config.FluentBitConfigMapName, &cm); err != nil {
@@ -60,7 +63,7 @@ func (f *fileWriter) writeConfig(ctx context.Context, basePath string) error {
 	return nil
 }
 
-func (f *fileWriter) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
+func (f *realFileWriter) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
 	filesDir := filepath.Join(basePath, "files")
 	if err := makeDir(filesDir); err != nil {
 		return err
@@ -75,7 +78,7 @@ func (f *fileWriter) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePat
 	return nil
 }
 
-func (f *fileWriter) writeSections(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
+func (f *realFileWriter) writeSections(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
 	dynamicDir := filepath.Join(basePath, "dynamic")
 	if err := makeDir(dynamicDir); err != nil {
 		return err
@@ -88,7 +91,7 @@ func (f *fileWriter) writeSections(pipeline *telemetryv1alpha1.LogPipeline, base
 	return writeFile(filepath.Join(dynamicDir, pipeline.Name+".conf"), sectionsConfig)
 }
 
-func (f *fileWriter) writeParsers(ctx context.Context, basePath string) error {
+func (f *realFileWriter) writeParsers(ctx context.Context, basePath string) error {
 	dynamicParsersDir := filepath.Join(basePath, "dynamic-parsers")
 	if err := makeDir(dynamicParsersDir); err != nil {
 		return err
