@@ -60,7 +60,7 @@ func TestPreparePipelineDryRun(t *testing.T) {
 	requireEqualFiles(t, "testdata/expected/pipelines/fluent-bit.conf", "testdata/actual/pipelines/fluent-bit.conf")
 	requireEqualFiles(t, "testdata/expected/pipelines/custom_parsers.conf", "testdata/actual/pipelines/custom_parsers.conf")
 	requireEqualFiles(t, "testdata/expected/pipelines/dynamic-parsers/parsers.conf", "testdata/actual/pipelines/dynamic-parsers/parsers.conf")
-	requireEqualFiles(t, "testdata/expected/pipelines/dynamic/local.conf", "testdata/actual/pipelines/dynamic/local.conf")
+	requireEqualFiles(t, "testdata/expected/pipelines/dynamic/logpipeline-1.conf", "testdata/actual/pipelines/dynamic/logpipeline-1.conf")
 	requireEqualFiles(t, "testdata/expected/pipelines/files/dummy.txt", "testdata/actual/pipelines/files/dummy.txt")
 }
 
