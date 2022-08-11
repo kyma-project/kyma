@@ -73,14 +73,14 @@ func TestPreparePipelineDryRun(t *testing.T) {
 		},
 	}
 
-	_, err := sut.preparePipelineDryRun(context.Background(), "testdata/actual", pipeline)
+	_, err := sut.preparePipelineDryRun(context.Background(), "testdata/actual/pipelines", pipeline)
 	require.NoError(t, err)
 
-	requireEqualFiles(t, "testdata/expected/fluent-bit.conf", "testdata/actual/fluent-bit.conf")
-	requireEqualFiles(t, "testdata/expected/custom_parsers.conf", "testdata/actual/custom_parsers.conf")
-	requireEqualFiles(t, "testdata/expected/dynamic-parsers/parsers.conf", "testdata/actual/dynamic-parsers/parsers.conf")
-	requireEqualFiles(t, "testdata/expected/dynamic/local.conf", "testdata/actual/dynamic/local.conf")
-	requireEqualFiles(t, "testdata/expected/files/dummy.txt", "testdata/actual/files/dummy.txt")
+	requireEqualFiles(t, "testdata/expected/pipelines/fluent-bit.conf", "testdata/actual/pipelines/fluent-bit.conf")
+	requireEqualFiles(t, "testdata/expected/pipelines/custom_parsers.conf", "testdata/actual/pipelines/custom_parsers.conf")
+	requireEqualFiles(t, "testdata/expected/pipelines/dynamic-parsers/parsers.conf", "testdata/actual/pipelines/dynamic-parsers/parsers.conf")
+	requireEqualFiles(t, "testdata/expected/pipelines/dynamic/local.conf", "testdata/actual/pipelines/dynamic/local.conf")
+	requireEqualFiles(t, "testdata/expected/pipelines/files/dummy.txt", "testdata/actual/pipelines/files/dummy.txt")
 }
 
 func requireEqualFiles(t *testing.T, expectedFilePath, actualFilePath string) {
