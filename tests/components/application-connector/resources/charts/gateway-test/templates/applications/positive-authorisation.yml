@@ -82,6 +82,50 @@ spec:
             type: Basic
             csrfInfo:
               tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: csrf-oauth
+      name: csrf-oauth
+      providerDisplayName: OAuth with CSRF
+      description: Should return 200 when calling endpoint protected with OAuth with CSRF
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            type: OAuth
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: csrf-mtls-oauth
+      name: csrf-mtls-oauth
+      providerDisplayName: mTLS-OAuth with CSRF
+      description: Should return 200 when calling endpoint protected with mTLS OAuth with CSRF
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-mtls-oauth"
+          credentials:
+            secretName: mtls-oauth-positive
+            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            type: OAuthWithCert
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+    - displayName: csrf-mtls
+      name: csrf-mtls
+      providerDisplayName: mTLS with CSRF
+      description: Should return 200 when calling endpoint protected with mTLS with CSRF
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-mtls"
+          credentials:
+            secretName: mtls-positive
+            type: CertificateGen
+            csrfInfo:
+              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
     - displayName: basic-auth-with-request-parameters
       name: basic-auth-with-request-parameters
       providerDisplayName: Basic

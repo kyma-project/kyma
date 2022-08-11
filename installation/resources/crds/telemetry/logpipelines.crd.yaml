@@ -44,6 +44,7 @@ spec:
           metadata:
             type: object
           spec:
+            description: LogPipelineSpec defines the desired state of LogPipeline
             properties:
               files:
                 items:
@@ -97,16 +98,17 @@ spec:
                   custom:
                     type: string
                   grafana-loki:
+                    description: LokiOutput describes a Fluent Bit Loki output configuration
                     properties:
-                      Labels:
+                      labels:
                         additionalProperties:
                           type: string
                         type: object
-                      RemoveKeys:
+                      removeKeys:
                         items:
                           type: string
                         type: array
-                      Url:
+                      url:
                         properties:
                           value:
                             type: string
@@ -125,7 +127,7 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: HTTPOutput describes a Fluent Bit HTTP output configuration
+                    description: HttpOutput describes a Fluent Bit HTTP output configuration
                     properties:
                       compress:
                         type: string

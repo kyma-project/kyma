@@ -15,6 +15,13 @@ import (
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	natsserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/onsi/gomega"
+	gomegatypes "github.com/onsi/gomega/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
@@ -25,12 +32,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
-	natsserver "github.com/nats-io/nats-server/v2/server"
-	"github.com/onsi/gomega"
-	gomegatypes "github.com/onsi/gomega/types"
-	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 const (

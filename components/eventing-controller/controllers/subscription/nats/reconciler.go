@@ -4,18 +4,11 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
 	"github.com/nats-io/nats.go"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -26,10 +19,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
