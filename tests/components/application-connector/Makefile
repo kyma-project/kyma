@@ -22,11 +22,11 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
-	$(MAKE) clean; \
+	$(MAKE) clean-gateway-test; \
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
-	$(MAKE) clean; \
+	$(MAKE) clean-gateway-test; \
 	exit 1; \
 	fi
 
