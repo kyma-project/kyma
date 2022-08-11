@@ -2,6 +2,7 @@ package dryrun
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -19,7 +20,7 @@ type fileWriter struct {
 type fileCleaner func()
 
 func (f *fileWriter) preparePipelineDryRun(ctx context.Context, workDir string, pipeline *telemetryv1alpha1.LogPipeline) (fileCleaner, error) {
-	if err := MakeDir(workDir); err != nil {
+	if err := makeDir(workDir); err != nil {
 		return nil, err
 	}
 	if err := f.writeConfig(ctx, workDir); err != nil {
@@ -36,7 +37,7 @@ func (f *fileWriter) preparePipelineDryRun(ctx context.Context, workDir string, 
 	}
 
 	cleaner := func() {
-		if err := RemoveAll(workDir); err != nil {
+		if err := os.RemoveAll(workDir); err != nil {
 			log := logf.FromContext(ctx)
 			log.Error(err, "Failed to remove Fluent Bit config directory")
 		}
@@ -51,7 +52,7 @@ func (f *fileWriter) writeConfig(ctx context.Context, basePath string) error {
 		return err
 	}
 	for key, data := range cm.Data {
-		err = WriteFile(filepath.Join(basePath, key), data)
+		err = writeFile(filepath.Join(basePath, key), data)
 		if err != nil {
 			return err
 		}
@@ -61,12 +62,12 @@ func (f *fileWriter) writeConfig(ctx context.Context, basePath string) error {
 
 func (f *fileWriter) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
 	filesDir := filepath.Join(basePath, "files")
-	if err := MakeDir(filesDir); err != nil {
+	if err := makeDir(filesDir); err != nil {
 		return err
 	}
 
 	for _, file := range pipeline.Spec.Files {
-		err := WriteFile(filepath.Join(filesDir, file.Name), file.Content)
+		err := writeFile(filepath.Join(filesDir, file.Name), file.Content)
 		if err != nil {
 			return err
 		}
@@ -76,7 +77,7 @@ func (f *fileWriter) writeFiles(pipeline *telemetryv1alpha1.LogPipeline, basePat
 
 func (f *fileWriter) writeSections(pipeline *telemetryv1alpha1.LogPipeline, basePath string) error {
 	dynamicDir := filepath.Join(basePath, "dynamic")
-	if err := MakeDir(dynamicDir); err != nil {
+	if err := makeDir(dynamicDir); err != nil {
 		return err
 	}
 
@@ -84,12 +85,12 @@ func (f *fileWriter) writeSections(pipeline *telemetryv1alpha1.LogPipeline, base
 	if err != nil {
 		return err
 	}
-	return WriteFile(filepath.Join(dynamicDir, pipeline.Name+".conf"), sectionsConfig)
+	return writeFile(filepath.Join(dynamicDir, pipeline.Name+".conf"), sectionsConfig)
 }
 
 func (f *fileWriter) writeParsers(ctx context.Context, basePath string) error {
 	dynamicParsersDir := filepath.Join(basePath, "dynamic-parsers")
-	if err := MakeDir(dynamicParsersDir); err != nil {
+	if err := makeDir(dynamicParsersDir); err != nil {
 		return err
 	}
 
@@ -99,5 +100,13 @@ func (f *fileWriter) writeParsers(ctx context.Context, basePath string) error {
 	}
 	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
 
-	return WriteFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
+	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
+}
+
+func makeDir(path string) error {
+	return os.MkdirAll(path, 0755)
+}
+
+func writeFile(path string, data string) error {
+	return os.WriteFile(path, []byte(data), 0666)
 }
