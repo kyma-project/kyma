@@ -34,8 +34,8 @@ type DryRunner struct {
 
 func NewDryRunner(c client.Client, config *Config) *DryRunner {
 	return &DryRunner{
-		fileWriter:    &realFileWriter{client: c, config: config},
-		commandRunner: &realCommandRunner{},
+		fileWriter:    &fileWriterImpl{client: c, config: config},
+		commandRunner: &commandRunnerImpl{},
 		config:        config,
 	}
 }
