@@ -54,13 +54,6 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 			},
 			MinReplicas: &one,
 			MaxReplicas: &two,
-			Template: serverlessv1alpha2.Template{
-				Labels: map[string]string{
-					testBindingLabel1: "foobar",
-					testBindingLabel2: testBindingLabelValue,
-					"foo":             "bar",
-				},
-			},
 		},
 	}
 }
@@ -107,13 +100,6 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			},
 			MinReplicas: &one,
 			MaxReplicas: &two,
-			Template: serverlessv1alpha2.Template{
-				Labels: map[string]string{
-					testBindingLabel1: "foobar",
-					testBindingLabel2: testBindingLabelValue,
-					"foo":             "bar",
-				},
-			},
 		},
 	}
 }

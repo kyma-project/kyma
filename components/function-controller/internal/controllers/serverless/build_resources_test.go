@@ -312,13 +312,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				Name: "fn-name",
 				UID:  "fn-uuid",
 			},
-				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: serverlessv1alpha2.Template{
-						Labels: map[string]string{
-							"test-some": "test-label",
-						},
-					},
-				}}},
+				Spec: serverlessv1alpha2.FunctionSpec{}}},
 			want: map[string]string{
 				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
@@ -333,15 +327,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				Name: "fn-name",
 				UID:  "fn-uuid",
 			},
-				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: serverlessv1alpha2.Template{
-						Labels: map[string]string{
-							"test-some":                              "test-label",
-							serverlessv1alpha2.FunctionResourceLabel: "job",
-							serverlessv1alpha2.FunctionNameLabel:     "some-other-name",
-						},
-					},
-				}}},
+				Spec: serverlessv1alpha2.FunctionSpec{}}},
 			want: map[string]string{
 				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
