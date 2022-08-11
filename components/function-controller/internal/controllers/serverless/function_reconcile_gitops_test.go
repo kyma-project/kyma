@@ -322,16 +322,12 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			expectedImage := s.buildImageAddress("registry.kyma.local")
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
-			g.Expect(deployment).To(haveLabelLen(7))
+			g.Expect(deployment).To(haveLabelLen(4))
 			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionNameLabel, function.Name))
 			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionManagedByLabel, serverlessv1alpha2.FunctionControllerValue))
 			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionUUIDLabel, string(function.UID)))
 			g.Expect(deployment).To(haveLabelWithValue(
 				serverlessv1alpha2.FunctionResourceLabel, serverlessv1alpha2.FunctionResourceLabelDeploymentValue))
-
-			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel1, "foobar"))
-			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel2, testBindingLabelValue))
-			g.Expect(deployment).To(haveLabelWithValue("foo", "bar"))
 
 			t.Log("service creation")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
@@ -569,16 +565,12 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			expectedImage := s.buildImageAddress("registry.kyma.local")
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
-			g.Expect(deployment).To(haveLabelLen(7))
+			g.Expect(deployment).To(haveLabelLen(4))
 			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionNameLabel, function.Name))
 			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionManagedByLabel, serverlessv1alpha2.FunctionControllerValue))
 			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionUUIDLabel, string(function.UID)))
 			g.Expect(deployment).To(haveLabelWithValue(
 				serverlessv1alpha2.FunctionResourceLabel, serverlessv1alpha2.FunctionResourceLabelDeploymentValue))
-
-			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel1, "foobar"))
-			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel2, testBindingLabelValue))
-			g.Expect(deployment).To(haveLabelWithValue("foo", "bar"))
 
 			t.Log("change function branch")
 			function.Spec.Source.GitRepository.Reference = "newone"
