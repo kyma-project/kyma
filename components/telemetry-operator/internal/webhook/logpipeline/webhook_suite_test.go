@@ -131,7 +131,7 @@ var _ = BeforeSuite(func() {
 	outputValidatorMock = &validationmocks.OutputValidator{}
 	fileValidatorMock = &validationmocks.FilesValidator{}
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_restarts_total",
+		Name: "telemetry_fluentbit_triggered_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
 	metrics.Registry.MustRegister(restartsTotal)
