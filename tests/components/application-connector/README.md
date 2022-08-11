@@ -220,5 +220,5 @@ make disable-sidecar-for-mtls-test test-gateway-debug
 Once you finished debugging, run:
 
 ``` shell
-make clean-gateway-test enable-sidecar-for-mtls-test
+make clean-gateway-test enable-sidecar-after-mtls-test
 ```
