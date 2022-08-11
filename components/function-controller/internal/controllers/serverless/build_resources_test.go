@@ -318,7 +318,6 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
 				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-				"test-some":                               "test-label",
 			},
 		},
 		{
@@ -333,7 +332,6 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
 				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-				"test-some":                               "test-label",
 			},
 		},
 	}
