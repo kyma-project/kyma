@@ -62,35 +62,18 @@ func compareServices(actual, expected []v1alpha1.Service) bool {
 	}
 
 	for i := 0; i < len(actual); i++ {
-		nameEqual := expected[i].Name == serviceActual.Name
-		idEqual := expected[i].ID == serviceActual.ID
-		identifierEqual := expected[i].Identifier == serviceActual.Identifier
-		displayNameEqual := serviceExpected.DisplayName == serviceActual.DisplayName
-		descriptionEqual := serviceExpected.Description == serviceActual.Description
-		entriesEqual := compareEntries(serviceActual.Entries, serviceExpected.Entries)
-		authParameterSchemaEqual := serviceExpected.AuthCreateParameterSchema == serviceActual.AuthCreateParameterSchema
+		nameEqual := expected[i].Name == actual[i].Name
+		idEqual := expected[i].ID == actual[i].ID
+		identifierEqual := expected[i].Identifier == actual[i].Identifier
+		displayNameEqual := expected[i].DisplayName == actual[i].DisplayName
+		descriptionEqual := expected[i].Description == actual[i].Description
+		entriesEqual := compareEntries(actual[i].Entries, expected[i].Entries)
+		authParameterSchemaEqual := expected[i].AuthCreateParameterSchema == actual[i].AuthCreateParameterSchema
 
+		if !(nameEqual && idEqual && identifierEqual && displayNameEqual && descriptionEqual && entriesEqual && authParameterSchemaEqual) {
+			return false
+		}
 	}
-
-	//for _, serviceActual := range actual {
-	//	isFound := false
-	//	for _, serviceExpected := range expected {
-	//		nameEqual := serviceExpected.Name == serviceActual.Name
-	//		idEqual := serviceExpected.ID == serviceActual.ID
-	//		identifierEqual := serviceExpected.Identifier == serviceActual.Identifier
-	//		displayNameEqual := serviceExpected.DisplayName == serviceActual.DisplayName
-	//		descriptionEqual := serviceExpected.Description == serviceActual.Description
-	//		entriesEqual := compareEntries(serviceActual.Entries, serviceExpected.Entries)
-	//		authParameterSchemaEqual := serviceExpected.AuthCreateParameterSchema == serviceActual.AuthCreateParameterSchema
-	//
-	//		if nameEqual && idEqual && identifierEqual && displayNameEqual && descriptionEqual && entriesEqual && authParameterSchemaEqual {
-	//			isFound = true
-	//		}
-	//	}
-	//	if !isFound {
-	//		return false
-	//	}
-	//}
 	return true
 }
 
@@ -100,24 +83,18 @@ func compareEntries(actual, expected []v1alpha1.Entry) bool {
 		return false
 	}
 
-	for _, entryActual := range actual {
-		isFound := false
-		for _, entryExpected := range expected {
-			typeEqual := entryActual.Type == entryExpected.Type
-			targetUrlEqual := entryActual.TargetUrl == entryExpected.TargetUrl
-			specificationUrlEqual := entryActual.SpecificationUrl == entryExpected.SpecificationUrl
-			apiTypeEqual := entryActual.ApiType == entryExpected.ApiType
-			credentialsEqual := compareCredentials(entryActual.Credentials, entryExpected.Credentials)
-			requestParameterSecretEqual := entryActual.RequestParametersSecretName == entryExpected.RequestParametersSecretName
-			nameEqual := entryActual.Name == entryExpected.Name
-			idEqual := entryActual.ID == entryExpected.ID
-			centralGatewayUrlEqual := entryActual.CentralGatewayUrl == entryExpected.CentralGatewayUrl
+	for i := 0; i < len(actual); i++ {
+		typeEqual := actual[i].Type == actual[i].Type
+		targetUrlEqual := actual[i].TargetUrl == actual[i].TargetUrl
+		specificationUrlEqual := actual[i].SpecificationUrl == actual[i].SpecificationUrl
+		apiTypeEqual := actual[i].ApiType == actual[i].ApiType
+		credentialsEqual := compareCredentials(actual[i].Credentials, actual[i].Credentials)
+		requestParameterSecretEqual := actual[i].RequestParametersSecretName == actual[i].RequestParametersSecretName
+		nameEqual := actual[i].Name == actual[i].Name
+		idEqual := actual[i].ID == actual[i].ID
+		centralGatewayUrlEqual := actual[i].CentralGatewayUrl == actual[i].CentralGatewayUrl
 
-			if typeEqual && targetUrlEqual && specificationUrlEqual && apiTypeEqual && credentialsEqual && requestParameterSecretEqual && nameEqual && idEqual && centralGatewayUrlEqual {
-				isFound = true
-			}
-		}
-		if !isFound {
+		if !(typeEqual && targetUrlEqual && specificationUrlEqual && apiTypeEqual && credentialsEqual && requestParameterSecretEqual && nameEqual && idEqual && centralGatewayUrlEqual) {
 			return false
 		}
 	}
