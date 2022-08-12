@@ -335,7 +335,7 @@ func TestChangeSubscription(t *testing.T) {
 			// Ensure subscriptions on NATS are not added when adding a Subscription filter and providing an invalid sink to prevent event-loss.
 			// The reason for this is that the dispatcher will retry only for a finite number and then give up.
 			// Since the sink is invalid, the dispatcher cannot dispatch the event and will stop if the maximum number of retries is reached.
-			name: "NATS subscriptions are not in sync when the sink becomes invalid: adding a filter",
+			name: "Disallow the creation of a NATS subscription with an invalid sink",
 			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
 				// valid sink
