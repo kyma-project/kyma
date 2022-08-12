@@ -41,6 +41,26 @@ var _ = Describe("LogPipeline controller", func() {
 		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
+    name                  nest
+    match                 *
+    operation             lift
+    nested_under          kubernetes
+    add_prefix            k8s_
+
+[FILTER]
+    name                  record_modifier
+    match                 *
+    remove_key            k8s_annotations
+
+[FILTER]
+    name                  nest
+    match                 *
+    operation             nest
+    wildcard              k8s_*
+    nest_under            kubernetes
+    remove_prefix         k8s_
+
+[FILTER]
     Name                  rewrite_tag
     Match                 kube.*
     Emitter_Name          log-pipeline

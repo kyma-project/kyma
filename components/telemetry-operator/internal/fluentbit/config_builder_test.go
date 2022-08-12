@@ -73,6 +73,45 @@ call                  kubernetes_map_keys`
 	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
 }
 
+func TestGenerateApplicationFilterDropAll(t *testing.T) {
+	expected := `[FILTER]
+    name                  nest
+    match                 *
+    operation             lift
+    nested_under          kubernetes
+    add_prefix            k8s_
+
+[FILTER]
+    name                  record_modifier
+    match                 *
+    remove_key            k8s_annotations
+
+[FILTER]
+    name                  record_modifier
+    match                 *
+    remove_key            k8s_labels
+
+[FILTER]
+    name                  nest
+    match                 *
+    operation             nest
+    wildcard              k8s_*
+    nest_under            kubernetes
+    remove_prefix         k8s_
+
+`
+
+	actual := createApplicationFilter(false, true)
+	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
+}
+
+func TestGenerateApplicationFilterKeepAll(t *testing.T) {
+	expected := ""
+
+	actual := createApplicationFilter(true, false)
+	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
+}
+
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
     Name                  rewrite_tag
@@ -113,6 +152,12 @@ func TestFilter(t *testing.T) {
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
 			Filters: []telemetryv1alpha1.Filter{
 				{
 					Custom: `
@@ -167,6 +212,12 @@ func TestCustomOutput(t *testing.T) {
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				Custom: `
     name               http`,
@@ -224,6 +275,12 @@ func TestHTTPOutput(t *testing.T) {
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
@@ -292,6 +349,12 @@ func TestHTTPOutputWithSecretReference(t *testing.T) {
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				HTTP: telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
@@ -388,6 +451,12 @@ func TestLokiOutputPlugin(t *testing.T) {
 			Namespace: "lokiNs",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
 			Output: telemetryv1alpha1.Output{
 				Loki: telemetryv1alpha1.LokiOutput{
 					URL: telemetryv1alpha1.ValueType{

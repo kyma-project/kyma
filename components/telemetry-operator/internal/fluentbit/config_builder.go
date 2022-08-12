@@ -33,11 +33,33 @@ name                  lua
 match                 %s.*
 script                /fluent-bit/scripts/filter-script.lua
 call                  kubernetes_map_keys`
+	LiftKubernetesKeys string = `
+name                  nest
+match                 *
+operation             lift
+nested_under          kubernetes
+add_prefix            k8s_
+`
+	DropKubernetesKeyTemplate string = `
+name                  record_modifier
+match                 *
+remove_key            k8s_%s
+`
+	NestKubernetesKey string = `
+name                  nest
+match                 *
+operation             nest
+wildcard              k8s_*
+nest_under            kubernetes
+remove_prefix         k8s_
+`
 )
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
+
+	sb.WriteString(createApplicationFilter(logPipeline.Spec.Input.Application.KeepAnnotations, logPipeline.Spec.Input.Application.DropLabels))
 	sb.WriteString(CreateRewriteTagFilter(pipelineConfig, logPipeline))
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
@@ -63,6 +85,26 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 	sb.WriteString(buildConfigSectionFromMap(OutputConfigHeader, outputSection))
 
 	return sb.String(), nil
+}
+
+// createApplicationFilter makes the collection of kubernetes annotations and labels optional
+// by adding dedicated Fluent Bit filters.
+func createApplicationFilter(keepAnnotations, dropLabels bool) string {
+	if keepAnnotations && !dropLabels {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, LiftKubernetesKeys))
+	if !keepAnnotations {
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(DropKubernetesKeyTemplate, "annotations")))
+	}
+
+	if dropLabels {
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(DropKubernetesKeyTemplate, "labels")))
+	}
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, NestKubernetesKey))
+	return sb.String()
 }
 
 func BuildConfigSection(header ConfigHeader, content string) string {
