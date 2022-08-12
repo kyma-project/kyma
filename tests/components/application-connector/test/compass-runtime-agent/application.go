@@ -61,23 +61,36 @@ func compareServices(actual, expected []v1alpha1.Service) bool {
 		return false
 	}
 
-	for _, serviceActual := range actual {
-		isFound := false
-		for _, serviceExpected := range expected {
-			nameEqual := serviceExpected.Name == serviceActual.Name
-			idEqual := serviceExpected.ID == serviceActual.ID
-			identifierEqual := serviceExpected.Identifier == serviceActual.Identifier
-			displayNameEqual := serviceExpected.DisplayName == serviceActual.DisplayName
-			descriptionEqual := serviceExpected.Description == serviceActual.Description
-			entriesEqual := compareEntries(serviceActual.Entries, serviceExpected.Entries)
-			authParameterSchemaEqual := serviceExpected.AuthCreateParameterSchema == serviceActual.AuthCreateParameterSchema
+	for i := 0; i < len(actual); i++ {
+		nameEqual := expected[i].Name == serviceActual.Name
+		idEqual := expected[i].ID == serviceActual.ID
+		identifierEqual := expected[i].Identifier == serviceActual.Identifier
+		displayNameEqual := serviceExpected.DisplayName == serviceActual.DisplayName
+		descriptionEqual := serviceExpected.Description == serviceActual.Description
+		entriesEqual := compareEntries(serviceActual.Entries, serviceExpected.Entries)
+		authParameterSchemaEqual := serviceExpected.AuthCreateParameterSchema == serviceActual.AuthCreateParameterSchema
 
-			isFound = nameEqual && idEqual && identifierEqual && displayNameEqual && descriptionEqual && entriesEqual && authParameterSchemaEqual
-		}
-		if !isFound {
-			return false
-		}
 	}
+
+	//for _, serviceActual := range actual {
+	//	isFound := false
+	//	for _, serviceExpected := range expected {
+	//		nameEqual := serviceExpected.Name == serviceActual.Name
+	//		idEqual := serviceExpected.ID == serviceActual.ID
+	//		identifierEqual := serviceExpected.Identifier == serviceActual.Identifier
+	//		displayNameEqual := serviceExpected.DisplayName == serviceActual.DisplayName
+	//		descriptionEqual := serviceExpected.Description == serviceActual.Description
+	//		entriesEqual := compareEntries(serviceActual.Entries, serviceExpected.Entries)
+	//		authParameterSchemaEqual := serviceExpected.AuthCreateParameterSchema == serviceActual.AuthCreateParameterSchema
+	//
+	//		if nameEqual && idEqual && identifierEqual && displayNameEqual && descriptionEqual && entriesEqual && authParameterSchemaEqual {
+	//			isFound = true
+	//		}
+	//	}
+	//	if !isFound {
+	//		return false
+	//	}
+	//}
 	return true
 }
 
@@ -100,7 +113,9 @@ func compareEntries(actual, expected []v1alpha1.Entry) bool {
 			idEqual := entryActual.ID == entryExpected.ID
 			centralGatewayUrlEqual := entryActual.CentralGatewayUrl == entryExpected.CentralGatewayUrl
 
-			isFound = typeEqual && targetUrlEqual && specificationUrlEqual && apiTypeEqual && credentialsEqual && requestParameterSecretEqual && nameEqual && idEqual && centralGatewayUrlEqual
+			if typeEqual && targetUrlEqual && specificationUrlEqual && apiTypeEqual && credentialsEqual && requestParameterSecretEqual && nameEqual && idEqual && centralGatewayUrlEqual {
+				isFound = true
+			}
 		}
 		if !isFound {
 			return false
