@@ -583,7 +583,6 @@ spec:
                       source:
                         type: string
                     required:
-                    - dependencies
                     - source
                     type: object
                 type: object

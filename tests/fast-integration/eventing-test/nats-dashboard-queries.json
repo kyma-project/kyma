@@ -69,46 +69,46 @@
   },
   {
     "title":"NATS JetStream: Stream data size",
-    "query":"sum(nats_stream_total_bytes) by (stream_name)"
+    "query":"nats_stream_total_bytes{is_stream_leader=\"true\"}"
   },
   {
     "title":"NATS JetStream: Stream consumer count",
-    "query":"sum(nats_stream_consumer_count) by (stream_name)"
+    "query":"nats_stream_consumer_count{is_stream_leader=\"true\"}"
   },
   {
     "title":"NATS JetStream: Stream message count",
-    "query":"sum(nats_stream_total_messages) by (stream_name)"
+    "query":"nats_stream_total_messages{is_stream_leader=\"true\"}"
   },
   {
     "title":"NATS JetStream: Message Rate (per second)",
-    "query":"sum(rate(nats_stream_total_messages{pod=~\"$server\",stream_name=~\"$stream\"}[$__rate_interval])) by (stream_name)"
+    "query":"sum(rate(nats_stream_total_messages{stream_name=~\"$stream\",is_stream_leader=\"true\"}[$__rate_interval])) by (stream_name)"
   },
   {
     "title":"NATS JetStream: Messages per second (++/--) - 1",
-    "query":"sum(rate(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)"
+    "query":"sum(rate(nats_consumer_num_pending{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)"
   },
   {
     "title":"NATS JetStream: Messages per second (++/--) - 2",
-    "query":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)"
+    "query":"- sum(rate(nats_consumer_delivered_consumer_seq{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}[$__rate_interval])) by (consumer_desc)"
   },
   {
     "title":"NATS JetStream: Pending Re-delivery Messages",
-    "query":"sum(nats_consumer_num_redelivered{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+    "query":"nats_consumer_num_redelivered{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}"
   },
   {
     "title":"NATS JetStream: Pending messages",
-    "query":"sum(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+    "query":"nats_consumer_num_pending{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}"
   },
   {
     "title":"NATS JetStream: Message Acks Pending",
-    "query":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+    "query":"nats_consumer_num_ack_pending{stream_name=~\"$stream\",consumer_desc=~\"$consumer\",is_consumer_leader=\"true\"}"
   },
   {
     "title":"JetStream Event Types Summary: Published Event Types with a Subscription",
-    "query":"count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{}) by (event_type)"
+    "query":"count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{}) by (event_type)"
   },
   {
-    "title":"JetStream Event Types Summary: Throughput of Events Published per Event Type",
+    "title":"JetStream Event Types Summary: Total Events Published per Event Type",
     "query":"sum(event_type_published) by (event_type)"
   }
 ]
