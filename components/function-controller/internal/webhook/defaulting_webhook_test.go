@@ -122,7 +122,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 				// add /spec/maxReplicas
 				// add /status
 				// add /metadata/creationTimestamp
-				operationsCount: 7,
+				operationsCount: 6,
 			},
 		},
 		{
