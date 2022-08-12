@@ -2,9 +2,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    directory_size_exporter:
-        name: "directory-size-exporter"
-        version: "PR-15068"
     telemetry_operator:
       name: "telemetry-operator"
       version: "f2689a5b"

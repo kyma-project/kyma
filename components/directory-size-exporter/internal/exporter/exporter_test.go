@@ -1,13 +1,14 @@
 package exporter
 
 import (
+	"bufio"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
-
-	"github.com/kyma-project/kyma/components/directory-size-exporter/utils"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -41,8 +42,80 @@ func initExporterAndRecordMetrics(path string) {
 	exporterLogger.WithContext().Info("Listening on port '2021'")
 }
 
+func getMetrics(port int) (map[string]string, error) {
+	metrics := map[string]string{}
+	res, err := http.Get("http://localhost:" + fmt.Sprint(port) + "/metrics")
+	if err != nil {
+		return metrics, err
+	}
+	defer res.Body.Close()
+	scanner := bufio.NewScanner(res.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		lineMetrics := strings.Split(line, " ")
+		if len(lineMetrics) < 2 {
+			continue
+		}
+
+		metrics[lineMetrics[0]] = lineMetrics[1]
+	}
+	return metrics, err
+}
+
+func prepareMockDirectories(testDir string) (string, error) {
+	dirPath := testDir + "/test-data"
+	err := os.Mkdir(dirPath, 0700)
+	if err != nil {
+		return "", err
+	}
+
+	emitters := []string{"emitter1", "emitter2", "emitter3"}
+	for i, emitterName := range emitters {
+		err = prepareMockDirectory(dirPath, emitterName, int64(i*100))
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return dirPath, err
+}
+
+func prepareMockDirectory(dirPath string, dirName string, size int64) error {
+	const fileName string = "test.txt"
+
+	err := os.Mkdir(dirPath+"/"+dirName, 0700)
+	if err != nil {
+		return err
+	}
+
+	err = writeMockFileToDirectory(dirPath+"/"+dirName, fileName, size)
+
+	return err
+}
+
+func writeMockFileToDirectory(dirPath string, filename string, size int64) error {
+	newFile, err := os.Create(dirPath + "/" + filename)
+	if err != nil {
+		return err
+	}
+
+	err = os.Truncate(dirPath+"/"+filename, size)
+	if err != nil {
+		newFile.Close()
+		return err
+	}
+
+	newFile.Close()
+
+	return err
+}
+
 func TestListDir(t *testing.T) {
-	dirPath, errDirs := utils.PrepareMockDirectories(t.TempDir())
+	dirPath, errDirs := prepareMockDirectories(t.TempDir())
 	assert.NoError(t, errDirs)
 
 	expectedDirectories := []directory{
@@ -66,7 +139,7 @@ func TestListDir(t *testing.T) {
 }
 
 func TestDirSize(t *testing.T) {
-	dirPath, errDirs := utils.PrepareMockDirectories(t.TempDir())
+	dirPath, errDirs := prepareMockDirectories(t.TempDir())
 	assert.NoError(t, errDirs)
 
 	size, err := dirSize(dirPath)
@@ -81,13 +154,13 @@ func TestNewExporter(t *testing.T) {
 }
 
 func TestRecordMetric(t *testing.T) {
-	dirPath, err := utils.PrepareMockDirectories(t.TempDir())
+	dirPath, err := prepareMockDirectories(t.TempDir())
 	require.NoError(t, err)
 
 	go initExporterAndRecordMetrics(dirPath)
 	time.Sleep(10 * time.Second)
 
-	initialMetrics, err := utils.GetMetrics(2021)
+	initialMetrics, err := getMetrics(2021)
 	require.NoError(t, err)
 
 	emitters, err := os.ReadDir(dirPath)
@@ -95,11 +168,11 @@ func TestRecordMetric(t *testing.T) {
 	emitterMetricInitialValue, prs := initialMetrics["telemetry_fsbuffer_usage_bytes{directory=\""+emitters[0].Name()+"\"}"]
 	require.True(t, prs)
 
-	_, err = utils.WriteMockFileToDirectory(dirPath+"/"+emitters[0].Name(), "main_test.txt", 500)
+	err = writeMockFileToDirectory(dirPath+"/"+emitters[0].Name(), "main_test.txt", 500)
 	require.NoError(t, err)
 	time.Sleep(10 * time.Second)
 
-	metrics, err := utils.GetMetrics(2021)
+	metrics, err := getMetrics(2021)
 	require.NoError(t, err)
 	emitterMetricValue, prs := metrics["telemetry_fsbuffer_usage_bytes{directory=\""+emitters[0].Name()+"\"}"]
 	require.True(t, prs)
