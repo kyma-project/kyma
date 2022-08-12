@@ -120,14 +120,11 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 	}
 
 	g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(s.buildImageAddress(registryAddress)))
-	g.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7))
+	g.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(4))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha2.FunctionNameLabel]).To(gomega.Equal(function.Name))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha2.FunctionManagedByLabel]).To(gomega.Equal(serverlessv1alpha2.FunctionControllerValue))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha2.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha2.FunctionResourceLabel]).To(gomega.Equal(serverlessv1alpha2.FunctionResourceLabelDeploymentValue))
-	g.Expect(deployment.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal("foobar"))
-	g.Expect(deployment.Spec.Template.Labels[testBindingLabel2]).To(gomega.Equal(testBindingLabelValue))
-	g.Expect(deployment.Spec.Template.Labels["foo"]).To(gomega.Equal("bar"))
 
 	if !redeployment {
 		t.Log("service creation")
