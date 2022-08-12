@@ -10,42 +10,41 @@ import (
 )
 
 type Exporter interface {
-	RecordMetrics()
+	RecordMetrics(interval int)
 }
 
-type exporter struct{}
+type exporter struct {
+	FsBuffeLabelsVector *prometheus.GaugeVec
+	LogPath             string
+}
 
 type directory struct {
 	name string
 	size int64
 }
 
-var (
-	fsBuffeLabelsVector *prometheus.GaugeVec
-	logPath             string
-)
-
 func NewExporter(dataPath string, dirsSizeMetricName string) Exporter {
-	logPath = dataPath
-
-	fsBuffeLabelsVector = promauto.NewGaugeVec(prometheus.GaugeOpts{
+	metricsGague := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "",
 		Subsystem: "",
 		Name:      dirsSizeMetricName,
 		Help:      "Disk size for different emitters",
-	}, []string{"name"})
+	}, []string{"directory"})
 
-	return &exporter{}
+	return &exporter{
+		FsBuffeLabelsVector: metricsGague,
+		LogPath:             dataPath,
+	}
 }
 
-func (v *exporter) RecordMetrics() {
-	ticker := time.NewTicker(30 * time.Second)
+func (v *exporter) RecordMetrics(interval int) {
+	ticker := time.NewTicker(time.Duration(interval) * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				recordingIteration(logPath)
+				v.recordingIteration(v.LogPath)
 			case <-quit:
 				ticker.Stop()
 				return
@@ -54,13 +53,13 @@ func (v *exporter) RecordMetrics() {
 	}()
 }
 
-func recordingIteration(logPath string) {
+func (v *exporter) recordingIteration(logPath string) {
 	directories, errDirList := listDirs(logPath)
 	if errDirList != nil {
 		panic(errDirList)
 	}
 	for _, dir := range directories {
-		fsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
+		v.FsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
 	}
 }
 
@@ -70,7 +69,7 @@ func dirSize(path string) (int64, error) {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
+		if info.Mode().IsRegular() {
 			size += info.Size()
 		}
 		return err
