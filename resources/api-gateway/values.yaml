@@ -110,9 +110,9 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "2.3.4"
-      directory: "i566483"
+      version: "PR-144"
+      directory: incubator
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "1.0.4"
-      directory: "i566483"
+      version: "PR-144"
+      directory: incubator
