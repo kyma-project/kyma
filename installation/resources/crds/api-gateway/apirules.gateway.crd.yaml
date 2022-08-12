@@ -18,7 +18,6 @@ spec:
     strategy: Webhook
     webhook:
       clientConfig:
-        caBundle: Cg==
         service:
           namespace: kyma-system
           name: api-gateway-webhook-service
@@ -28,7 +27,7 @@ spec:
         - v1alpha1
   versions:
   - deprecated: true
-    deprecationWarning: v1alpha1 is deprecatated as of Kyma 2.5.X
+    deprecationWarning: v1alpha1 is deprecated as of Kyma 2.5.X
     name: v1alpha1
     schema:
       openAPIV3Schema:
