@@ -235,7 +235,7 @@ config:
     additional: ""
   outputs:
     loki:
-      enabled: true
+      enabled: false
       alias: "loki-output"
       match: "loki.*"
       serviceName: "logging-loki"
@@ -343,11 +343,15 @@ config:
       # Specify the format of the date. Supported formats are double, epoch and iso8601.
       jsonDateFormat: ""
       headers: []
-    additional: ""
+    additional: |
+      [OUTPUT]
+          Name  null
+          Match *
 
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   parsers:
     additional: ""
+
 
   # extra can be used to pass extra configuration to Fluent Bit. Find below a sample configuration.
   extra: #|

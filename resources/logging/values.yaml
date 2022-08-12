@@ -15,7 +15,7 @@ tracing:
   jaegerAgentHost:
 
 fluent-bit:
-  enabled: false
+  enabled: true
 
 loki:
   enabled: true
