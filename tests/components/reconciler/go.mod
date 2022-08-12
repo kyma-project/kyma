@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/cucumber/godog v0.12.5
-	github.com/kyma-incubator/testdrape v0.1.0
+	github.com/kyma-incubator/testdrape v0.2.0
 	go.uber.org/zap v1.22.0
 )
 
