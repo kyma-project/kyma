@@ -85,7 +85,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
     - `http`, which pushes the data to the specified http destination.
-    - `grafana-loki`, which pushes the data to a Grafana Loki service
+    - `grafana-loki`, which pushes the data to the Grafana Loki service.
     - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
     See the following example of the `custom` output:
