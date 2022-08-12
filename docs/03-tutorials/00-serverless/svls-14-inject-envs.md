@@ -1,10 +1,10 @@
 ---
-title: Inject Environment Variables
+title: Inject environment variables
 ---
 
-This tutorial shows how to inject environment variables into funtion.
+This tutorial shows how to inject environment variables into Function.
 
-You can specify environment variables in the function definition iself or define references to kubernetes secrets or configmaps.
+You can specify environment variables in the Function definition, or define references to the Kubernetes Secrets or ConfigMaps.
 
 ## Prerequisites
 
@@ -16,13 +16,13 @@ Before you start, make sure you have these tools installed:
 
 Follow these steps:
 
-1. Prepare config map
+1. Create your ConfigMap
 
 ```bash
 kubectl create configmap my-config --from-literal config-env="I come from config map"
 ```
 
-2. Prepare secret
+2. Create your Secret
 
 ```bash
 kubectl create secret generic  my-secret  --from-literal secret-env="I come from secret"
@@ -35,13 +35,13 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
   Kyma CLI
   </summary>
 
-3. Generate function configuration and sources:
+3. Generate the Function's configuration and sources:
 
     ```bash
     kyma init function --name my-function
     ```
 
-4. Define ENVs as part of function configuration file. Modify `config.yaml` with the following:
+4. Define environment variables as part of the Function configuration file. Modify `config.yaml` with the following:
     ```yaml
     name: my-function
     namespace: default
@@ -62,7 +62,7 @@ kubectl create secret generic  my-secret  --from-literal secret-env="I come from
             name: my-secret
             key: secret-env
     ```
-5. Use injected ENVs in the handler file. Modify `handler.js` with the following:
+5. Use injected environment variables in the handler file. Modify `handler.js` with the following:
     ```js
     module.exports = {
         main: function (event, context) {
