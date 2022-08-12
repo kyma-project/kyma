@@ -562,6 +562,9 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 func (s *systemState) defaultReplicas() (int32, int32) {
 	var min = int32(1)
 	var max int32
+	if s.instance.Spec.ScaleConfig == nil {
+		return min, min
+	}
 	spec := s.instance.Spec
 	if spec.ScaleConfig.MinReplicas != nil && *spec.ScaleConfig.MinReplicas > 0 {
 		min = *spec.ScaleConfig.MinReplicas
