@@ -227,6 +227,20 @@ spec:
         {{- end }}
         {{- end }}
 
+        {{- with .Values.nats.healthcheck.readiness }}
+        {{- if .enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+        {{- end }}
+        {{- end }}
+
         {{- if .Values.nats.healthcheck.startup.enabled }}
         startupProbe:
           httpGet:

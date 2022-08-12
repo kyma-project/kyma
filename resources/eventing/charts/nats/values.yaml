@@ -50,11 +50,27 @@ nats:
       # Only for Kubernetes +1.22 that have pod level probes enabled.
       terminationGracePeriodSeconds:
 
+    # Periodically check for the server to be ready for connections while
+    # the NATS container is running.
+    # Disabled by default since covered by startup probe and it is the same
+    # as the liveness check.
+    readiness:
+      enabled: true
+
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+
     # Enable startup checks to confirm server is ready for traffic.
     # This is recommended for JetStream deployments since in cluster mode
     # it will try to ensure that the server is ready to serve streams.
+
+    # since this check is recommended to use in cluster mode and the cluster mode ist disabled per default
+    # this check is also defaulted to false
     startup:
-      enabled: true
+      enabled: false
 
       initialDelaySeconds: 10
       timeoutSeconds: 5
