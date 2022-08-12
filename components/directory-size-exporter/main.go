@@ -4,7 +4,7 @@ import (
 	"flag"
 	"net/http"
 
-	"directory-size-exporter/internal/exporter"
+	"github.com/kyma-project/kyma/components/directory-size-exporter/internal/exporter"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

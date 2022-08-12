@@ -1,12 +1,13 @@
 package exporter
 
 import (
-	"directory-size-exporter/utils"
 	"flag"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/directory-size-exporter/utils"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

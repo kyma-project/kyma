@@ -1,4 +1,4 @@
-module directory-size-exporter
+module github.com/kyma-project/kyma/components/directory-size-exporter
 
 go 1.18
 
