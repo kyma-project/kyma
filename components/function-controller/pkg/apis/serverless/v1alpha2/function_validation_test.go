@@ -218,25 +218,6 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
-		"Should return error on labels validation": {
-			givenFunc: Function{
-				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
-				Spec: FunctionSpec{
-					Runtime: NodeJs12,
-					Source: Source{
-						Inline: &InlineSource{
-							Source: "test-source",
-						},
-					},
-				},
-			},
-			expectedError: gomega.HaveOccurred(),
-			specifiedExpectedError: gomega.And(
-				gomega.ContainSubstring(
-					"spec.labels",
-				),
-			),
-		},
 		"Should return error on replicas validation": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
