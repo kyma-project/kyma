@@ -10,7 +10,7 @@ const {
   sleep,
   waitForK8sObject,
 } = require('../utils');
-const {logsPresentInLoki} = require('../logging');
+const {logsPresentInLoki, queryLoki} = require('../logging');
 const {
   exposeGrafana,
   unexposeGrafana,
@@ -178,5 +178,15 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No kyma-system logs present in Loki');
+  });
+
+  it('Should verify that Kubernetes annotations are not pushed', async () => {
+    const labels = '{namespace="mockserver", container="mockserver"}';
+    const responseBody = await queryLoki(labels, testStartTimestamp);
+    assert.isTrue(responseBody.data.result.length > 0, 'No mockserver logs present in Loki');
+    const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
+
+    expect(entry.log).not.to.have.string('annotations');
+    expect(entry.log).to.have.string('labels');
   });
 });
