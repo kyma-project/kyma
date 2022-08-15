@@ -24,7 +24,7 @@ func main() {
 
 	flag.StringVar(&storagePath, "storage-path", "/data/log/flb-storage/", "Path to the data folder we observe")
 	flag.StringVar(&dirsSizeMetricName, "metric-name", "telemetry_fsbuffer_usage_bytes", "Buffer size prometheus metric name")
-	flag.StringVar(&port, "port", "2021", "Application port name")
+	flag.StringVar(&port, "port", "2021", "Application port")
 	flag.IntVar(&interval, "interval", 30, "Interval with which we reord our metrics")
 
 	exporterLogger, err := logger.New(logger.Format(logFormat), logger.Level(logLevel))
