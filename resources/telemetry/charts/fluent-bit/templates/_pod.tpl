@@ -102,7 +102,7 @@ containers:
     {{- end }}
   {{- if .Values.exporter.enabled }}
   - name: exporter
-    image: teneroy1/exporter:latest
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}"
     {{- with .Values.exporter.resources }}
     resources:
       {{- toYaml . | nindent 6 }}
@@ -111,11 +111,6 @@ containers:
     - name: http-metrics
       containerPort: 2021
       protocol: TCP
-    env:
-      - name: STORAGE_PATH
-        value: /data/log/flb-storage/
-      - name: DIRECTORIES_SIZE_METRIC
-        value: telemetry_fsbuffer_usage_bytes
     volumeMounts:
       - name: varfluentbit
         mountPath: /data
