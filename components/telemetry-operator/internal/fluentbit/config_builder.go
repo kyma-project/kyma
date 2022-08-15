@@ -33,25 +33,25 @@ name                  lua
 match                 %s.*
 script                /fluent-bit/scripts/filter-script.lua
 call                  kubernetes_map_keys`
-	LiftKubernetesKeys string = `
+	LiftKubernetesKeysTemplate string = `
 name                  nest
-match                 *
+match                 %s.*
 operation             lift
 nested_under          kubernetes
-add_prefix            k8s_
+add_prefix            __k8s__
 `
 	DropKubernetesKeyTemplate string = `
 name                  record_modifier
-match                 *
-remove_key            k8s_%s
+match                 %s.*
+remove_key            __k8s__%s
 `
-	NestKubernetesKey string = `
+	NestKubernetesKeyTemplate string = `
 name                  nest
-match                 *
+match                 %s.*
 operation             nest
-wildcard              k8s_*
+wildcard              __k8s__*
 nest_under            kubernetes
-remove_prefix         k8s_
+remove_prefix         __k8s__
 `
 )
 
@@ -59,7 +59,6 @@ remove_prefix         k8s_
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 
-	sb.WriteString(createApplicationFilter(logPipeline.Spec.Input.Application.KeepAnnotations, logPipeline.Spec.Input.Application.DropLabels))
 	sb.WriteString(CreateRewriteTagFilter(pipelineConfig, logPipeline))
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
@@ -73,6 +72,8 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 
 		sb.WriteString(buildConfigSectionFromMap(FilterConfigHeader, section))
 	}
+
+	sb.WriteString(createApplicationFilter(logPipeline.Name, logPipeline.Spec.Input.Application.KeepAnnotations, logPipeline.Spec.Input.Application.DropLabels))
 
 	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
@@ -89,21 +90,21 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 
 // createApplicationFilter makes the collection of kubernetes annotations and labels optional
 // by adding dedicated Fluent Bit filters.
-func createApplicationFilter(keepAnnotations, dropLabels bool) string {
+func createApplicationFilter(pipelineName string, keepAnnotations, dropLabels bool) string {
 	if keepAnnotations && !dropLabels {
 		return ""
 	}
 
 	var sb strings.Builder
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, LiftKubernetesKeys))
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LiftKubernetesKeysTemplate, pipelineName)))
 	if !keepAnnotations {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(DropKubernetesKeyTemplate, "annotations")))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(DropKubernetesKeyTemplate, pipelineName, "annotations")))
 	}
 
 	if dropLabels {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(DropKubernetesKeyTemplate, "labels")))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(DropKubernetesKeyTemplate, pipelineName, "labels")))
 	}
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, NestKubernetesKey))
+	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(NestKubernetesKeyTemplate, pipelineName)))
 	return sb.String()
 }
 

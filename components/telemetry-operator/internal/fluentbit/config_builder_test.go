@@ -76,39 +76,39 @@ call                  kubernetes_map_keys`
 func TestGenerateApplicationFilterDropAll(t *testing.T) {
 	expected := `[FILTER]
     name                  nest
-    match                 *
+    match                 test-logpipeline.*
     operation             lift
     nested_under          kubernetes
-    add_prefix            k8s_
+    add_prefix            __k8s__
 
 [FILTER]
     name                  record_modifier
-    match                 *
-    remove_key            k8s_annotations
+    match                 test-logpipeline.*
+    remove_key            __k8s__annotations
 
 [FILTER]
     name                  record_modifier
-    match                 *
-    remove_key            k8s_labels
+    match                 test-logpipeline.*
+    remove_key            __k8s__labels
 
 [FILTER]
     name                  nest
-    match                 *
+    match                 test-logpipeline.*
     operation             nest
-    wildcard              k8s_*
+    wildcard              __k8s__*
     nest_under            kubernetes
-    remove_prefix         k8s_
+    remove_prefix         __k8s__
 
 `
 
-	actual := createApplicationFilter(false, true)
+	actual := createApplicationFilter("test-logpipeline", false, true)
 	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
 }
 
 func TestGenerateApplicationFilterKeepAll(t *testing.T) {
 	expected := ""
 
-	actual := createApplicationFilter(true, false)
+	actual := createApplicationFilter("test-logpipeline", true, false)
 	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
 }
 

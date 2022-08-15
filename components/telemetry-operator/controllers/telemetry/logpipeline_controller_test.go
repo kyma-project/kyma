@@ -41,26 +41,6 @@ var _ = Describe("LogPipeline controller", func() {
 		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
-    name                  nest
-    match                 *
-    operation             lift
-    nested_under          kubernetes
-    add_prefix            k8s_
-
-[FILTER]
-    name                  record_modifier
-    match                 *
-    remove_key            k8s_annotations
-
-[FILTER]
-    name                  nest
-    match                 *
-    operation             nest
-    wildcard              k8s_*
-    nest_under            kubernetes
-    remove_prefix         k8s_
-
-[FILTER]
     Name                  rewrite_tag
     Match                 kube.*
     Emitter_Name          log-pipeline
@@ -77,6 +57,26 @@ var _ = Describe("LogPipeline controller", func() {
     match log-pipeline.*
     name grep
     regex $kubernetes['labels']['app'] my-deployment
+
+[FILTER]
+    name                  nest
+    match                 log-pipeline.*
+    operation             lift
+    nested_under          kubernetes
+    add_prefix            __k8s__
+
+[FILTER]
+    name                  record_modifier
+    match                 log-pipeline.*
+    remove_key            __k8s__annotations
+
+[FILTER]
+    name                  nest
+    match                 log-pipeline.*
+    operation             nest
+    wildcard              __k8s__*
+    nest_under            kubernetes
+    remove_prefix         __k8s__
 
 [OUTPUT]
     match log-pipeline.*
