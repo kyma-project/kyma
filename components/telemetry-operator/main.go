@@ -23,13 +23,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
-	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
-	validation3 "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
@@ -205,21 +203,24 @@ func main() {
 		},
 	}
 
-	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(mgr.GetClient(),
-		fluentBitConfigMap,
-		fluentBitNs,
-		validation3.NewInputValidator(),
-		validation3.NewVariablesValidator(mgr.GetClient()),
-		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
-		validation3.NewPluginValidator(
+	dryRunConfig := &dryrun.Config{
+		FluentBitBinPath:       fluentBitPath,
+		FluentBitPluginDir:     fluentBitPluginDirectory,
+		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
+		PipelineConfig:         pipelineConfig,
+	}
+
+	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logpipelinevalidation.NewInputValidator(),
+		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
+		logpipelinevalidation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-		validation3.NewMaxPipelinesValidator(maxPipelines),
-		validation3.NewOutputValidator(),
-		validation3.NewFilesValidator(),
-		pipelineConfig,
-		utils.NewFileSystem(),
-		restartsTotal)
+		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
+		logpipelinevalidation.NewOutputValidator(),
+		logpipelinevalidation.NewFilesValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
@@ -245,15 +246,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	logParserValidationHandler := logparser.NewValidatingWebhookHandler(mgr.GetClient(),
-		fluentBitConfigMap,
-		fluentBitNs,
-		validation2.NewParserValidator(),
-		pipelineConfig,
-		dryrun.NewDryRunner(fluentBitPath, fluentBitPluginDirectory),
-		utils.NewFileSystem(),
-		restartsTotal,
-	)
+	logParserValidationHandler := logparser.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logparservalidation.NewParserValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",
 		&k8sWebhook.Admission{Handler: logParserValidationHandler})

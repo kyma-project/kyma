@@ -1,0 +1,11 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogParser
+metadata:
+  name: parser-2
+spec:
+  parser: |
+    Format      regex
+    Regex       time="(?<time>[^ ]*)" level=(?<level>[^ ]*) msg="(?<msg>[^ ].*)"
+    Time_Key    time
+    Time_Format %Y-%m-%dT%H:%M:%S.%L
+    Time_Keep   On

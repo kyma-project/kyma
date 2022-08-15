@@ -8,6 +8,9 @@ metadata:
     {{- include "nats.labels" . | nindent 4 }}
 data:
   nats.conf: |
+    # NATS Clients Port
+    port: {{ .Values.nats.ports.client }}
+
     # PID file shared with configuration reloader.
     pid_file: "/var/run/nats/nats.pid"
 
@@ -51,6 +54,10 @@ data:
       {{- else }}
       {{- .Values.nats.jetstream.fileStorage.size }}
       {{- end }}
+      {{- end }}
+
+      {{- if .Values.nats.jetstream.uniqueTag }}
+      unique_tag: {{ .Values.nats.jetstream.uniqueTag }}
       {{- end }}
     }
     {{- end }}
@@ -139,6 +146,10 @@ data:
 
     {{- with .Values.nats.limits.writeDeadline }}
     write_deadline: {{ . }}
+    {{- end }}
+
+    {{- with .Values.nats.limits.lameDuckGracePeriod }}
+    lame_duck_grace_period: {{ . }}
     {{- end }}
 
     {{- with .Values.nats.limits.lameDuckDuration }}
