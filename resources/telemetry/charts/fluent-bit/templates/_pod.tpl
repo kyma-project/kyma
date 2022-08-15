@@ -100,8 +100,25 @@ containers:
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
-  {{- if .Values.extraContainers }}
-    {{- toYaml .Values.extraContainers | nindent 2 }}
+  {{- if .Values.exporter.enabled }}
+  - name: exporter
+    image: teneroy1/exporter:latest
+    {{- with .Values.exporter.resources }}
+    resources:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+    ports:
+    - name: http-metrics
+      containerPort: 2021
+      protocol: TCP
+    env:
+      - name: STORAGE_PATH
+        value: /data/log/flb-storage/
+      - name: DIRECTORIES_SIZE_METRIC
+        value: telemetry_fsbuffer_usage_bytes
+    volumeMounts:
+      - name: varfluentbit
+        mountPath: /data
   {{- end }}
 volumes:
   - name: config

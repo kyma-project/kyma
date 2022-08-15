@@ -252,6 +252,34 @@ extraPorts: []
 #     name: tcp
 #     nodePort: 30517
 
+exporter:
+   enabled: true
+   resources:
+     limits:
+       cpu: 100m
+       memory: 50Mi
+     requests:
+       memory: 5Mi
+   containerPorts:
+     - port: 2021
+       targetPort: http-metrics
+       protocol: TCP
+       name: http-metrics
+
+   serviceMonitorPorts:
+     - port: http-metrics
+       path: /metrics
+       ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+       scheme: https
+       ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+       ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+       tlsConfig:
+         caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+         certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+         keyFile: /etc/prometheus/secrets/istio.default/key.pem
+         insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+
+
 extraVolumes:
   - name: shared-fluent-bit-config
     emptyDir: {}
@@ -335,7 +363,8 @@ config:
         HTTP_Listen 0.0.0.0
         HTTP_Port {{ .Values.metricsPort }}
         Health_Check On
-        storage.path /data/flb-storage/
+        storage.path /data/log/flb-storage/
+        storage.metrics on
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |
