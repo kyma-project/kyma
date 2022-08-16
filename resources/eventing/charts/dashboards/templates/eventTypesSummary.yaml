@@ -538,7 +538,7 @@ data:
             ],
             "timeFrom": null,
             "timeShift": null,
-            "title": "Events lost",
+            "title": "Events Published but not Dispatched",
             "type": "stat"
           },
           {

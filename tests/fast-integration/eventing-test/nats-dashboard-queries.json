@@ -110,5 +110,9 @@
   {
     "title":"JetStream Event Types Summary: Total Events Published per Event Type",
     "query":"sum(event_type_published) by (event_type)"
+  },
+  {
+    "title":"JetStream Event Types Summary: Events Published but not Dispatched",
+    "query":"sum(increase(events_published_total{}[$__range])) - sum(increase(events_dispatched_total{}[$__range]))"
   }
 ]
