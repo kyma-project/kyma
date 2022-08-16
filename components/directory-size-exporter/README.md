@@ -2,7 +2,7 @@
 
 ## Overview
 
-The directory size exporter is monitoring operators storage by collecting information about the size of top level directories and pushing this information to the Prometheus. 
+The directory size exporter is monitoring operators storage by collecting information about the size of top level directories as metrics. Meanwhile, Prometheus will pull the metrics. 
 
 One can path specific values for such things like path to the directory one want to monitor or prometheus metrics as parameters. 
 The list of parameters goes as follows:
@@ -26,7 +26,7 @@ For development, you can use the following commands:
 make
 ```
 
-- Run the exporter locally (uses current kubeconfig context)
+- Run the exporter locally
 
 ```bash
 make run-local
