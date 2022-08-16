@@ -6,7 +6,7 @@ COMPASS_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/compass-
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
 MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
-TEST_TIMEOUT = "2m"
+TEST_TIMEOUT = "3m"
 
 
 .PHONY: release test image clean
@@ -18,22 +18,31 @@ test: test-gateway test-compass-runtime-agent
 image: image-gateway-test image-compass-runtime-agent-test
 clean: clean-gateway-test clean-compass-runtime-agent-test
 
-test-gateway: disable-sidecar-for-mtls-test generate-certs test-gateway-debug clean-gateway-test enable-sidecar-after-mtls-test
+test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
+	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
+	echo "Success! Results:"; \
+	./scripts/check-pod-logs.sh application-gateway-test; \
+	$(MAKE) clean-gateway-test; \
+	else \
+	echo "Tests failed! Results:"; \
+	./scripts/check-pod-logs.sh application-gateway-test; \
+	$(MAKE) clean-gateway-test; \
+	exit 1; \
+	fi
 
-test-gateway-debug:
-	@echo $(GOPATH)/bin/go-junit-report --help
+
+test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; \
+	echo "Results:"; \
+	./scripts/check-pod-logs.sh application-gateway-test; \
+
+create-resources:
+	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
 	helm template resources/charts/gateway-test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
-
-	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test
-	@echo ""
-	@echo "Gateway test results:"
-
-	./scripts/check-pod-logs.sh application-gateway-test
 
 clean-gateway-test:
 	helm template resources/charts/gateway-test  | kubectl delete -f -
@@ -88,5 +97,3 @@ publish-compass-runtime-agent-test: image-compass-runtime-agent-test
 
 image-compass-runtime-agent-test:
 	docker build -t $(COMPASS_TEST_IMAGE) -f Dockerfile.compass-runtime-agent .
-
-

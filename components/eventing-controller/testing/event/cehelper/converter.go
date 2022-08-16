@@ -13,15 +13,18 @@ import (
 // contains all the CloudEvent related data. Here is an example of a possible output:
 //
 // Context Attributes,
-//   specversion: 1.0
-//   type: prefix.testapp1023.order.created.v1
-//   source: /default/sap.kyma/id
-//   subject: prefix.testapp1023.order.created.v1
-//   id: 1.0
-//   time: 2022-07-15T18:40:15.808918Z
-//   datacontenttype: application/json
+//
+//	specversion: 1.0
+//	type: prefix.testapp1023.order.created.v1
+//	source: /default/sap.kyma/id
+//	subject: prefix.testapp1023.order.created.v1
+//	id: 1.0
+//	time: 2022-07-15T18:40:15.808918Z
+//	datacontenttype: application/json
+//
 // Data,
-//   "{\"foo\":\"bar\"}"
+//
+//	"{\"foo\":\"bar\"}"
 func RequestToEventString(r *http.Request) (string, error) {
 	msg := cehttp.NewMessageFromHttpRequest(r)
 	event, err := cebinding.ToEvent(context.Background(), msg)

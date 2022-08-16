@@ -1,5 +1,5 @@
 ---
-title: Telemetry (alpha)
+title: Telemetry
 ---
 
 ## Kyma's telemetry component
@@ -10,7 +10,6 @@ To support the logging domain, the telemetry component provides a log collector,
 
 ## Prerequisites
 
-- The telemetry component is in an alpha state. You must [explicitly install it](./../../../04-operation-guides/operations/obsv-00-enable-telemetry_component.md).
 - Your application must log to `stdout` or `stderr`.
 
 ## Architecture
@@ -83,10 +82,11 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
             disabled: true
             skipCertificateValidation: true
     ```
-    An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types: 
+    An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
     - `http`, which pushes the data to the specified http destination.
-    - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.     
+    - `grafana-loki`, which pushes the data to the Grafana Loki service.
+    - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
     See the following example of the `custom` output:
     ```yaml
@@ -118,7 +118,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 ### Step 2: Create an input
 
 If you need selection mechanisms for application logs on Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
-If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. 
+If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default.
 
 ```yaml
 kind: LogPipeline
@@ -149,7 +149,7 @@ spec:
 
 ### Step 3: Add filters
 
-To enrich logs with attributes or drop whole lines, add filters to the existing pipeline. 
+To enrich logs with attributes or drop whole lines, add filters to the existing pipeline.
 The following example contains three filters, which are executed in sequence.
 
 ```yaml
@@ -227,7 +227,7 @@ stringData:
 
 ### Step 5: Rotate the Secret
 
-A Secret being referenced with the `secretKeyRef` construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.  
+A Secret being referenced with the `secretKeyRef` construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
 Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
 ```yaml
@@ -306,6 +306,12 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
+| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/latest/clients/fluentbit/). |
+| output.grafana-loki.url | object | Grafana Loki URL. |
+| output.grafana-loki.url.value | string | URL value. |
+| output.grafana-loki.url.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
+| output.grafana-loki.labels | map[string]string | Labels to set for each log record. |
+| output.grafana-loki.removeKeys | []string | Attributes to be removed from a log record. |
 | output.http | object | [Fluent Bit http output](https://docs.fluentbit.io/manual/pipeline/outputs/http). |
 | output.http.compress | string | Payload compression mechanism. |
 | output.http.dedot | boolean | If `true`, replaces dots with underscores ("dedotting") in the log field names `kubernetes.annotations` and `kubernetes.labels`. Default is `false`. |
@@ -497,5 +503,5 @@ Each Fluent Bit Pod can process up to 10 MB/s of logs for a single LogPipeline. 
 
 ### Max amount of pipelines - CPU/Mem constraints
 
-In the production profile, no more than 5 LogPipelines.  
+In the production profile, no more than 5 LogPipelines.
 In the evaluation profile, no more than 3 LogPipelines.

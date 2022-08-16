@@ -4,120 +4,143 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os/exec"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/google/uuid"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	errDescription = "Validation of the supplied configuration failed with the following reason: "
-	// From https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
-	ansiColorsRegex = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
-)
-
-func fluentBitArgs() []string {
+func dryRunArgs() []string {
 	return []string{"--dry-run", "--quiet"}
 }
 
-type DryRunner struct {
-	fluentBitPath   string
-	pluginDirectory string
+type Config struct {
+	FluentBitBinPath       string
+	FluentBitPluginDir     string
+	FluentBitConfigMapName types.NamespacedName
+	PipelineConfig         fluentbit.PipelineConfig
 }
 
-func NewDryRunner(fluentBitPath string, pluginDirectory string) DryRunner {
-	return DryRunner{
-		fluentBitPath:   fluentBitPath,
-		pluginDirectory: pluginDirectory,
+type DryRunner struct {
+	fileWriter    fileWriter
+	commandRunner commandRunner
+	config        *Config
+}
+
+func NewDryRunner(c client.Client, config *Config) *DryRunner {
+	return &DryRunner{
+		fileWriter:    &fileWriterImpl{client: c, config: config},
+		commandRunner: &commandRunnerImpl{},
+		config:        config,
 	}
 }
 
-func (v DryRunner) RunConfig(ctx context.Context, configsDirectory string) error {
-	path := filepath.Join(configsDirectory, "fluent-bit.conf")
-	args := append(fluentBitArgs(), "--config", path)
-	return v.run(ctx, args)
-}
-
-func (v DryRunner) RunParser(ctx context.Context, configsDirectory string) error {
-	path := filepath.Join(configsDirectory, "dynamic-parsers", "parsers.conf")
-	args := append(fluentBitArgs(), "--parser", path)
-	return v.run(ctx, args)
-}
-
-func (v *DryRunner) run(ctx context.Context, args []string) error {
-	plugins, err := listPlugins(v.pluginDirectory)
+func (d *DryRunner) RunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
+	workDir := newWorkDirPath()
+	cleanup, err := d.fileWriter.prepareParserDryRun(ctx, workDir, parser)
 	if err != nil {
 		return err
 	}
-	for _, plugin := range plugins {
-		args = append(args, "-e", plugin)
-	}
+	defer cleanup()
 
-	out, err := runCmd(ctx, v.fluentBitPath, args...)
-	if err != nil {
-		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
-			return errors.New(errDescription + extractError(out))
-		}
-		return fmt.Errorf("error while validating Fluent Bit config: %v", err.Error())
-	}
-	return nil
+	path := filepath.Join(workDir, "dynamic-parsers", "parsers.conf")
+	args := append(dryRunArgs(), "--parser", path)
+	return d.runCmd(ctx, args)
 }
 
-func listPlugins(pluginPath string) ([]string, error) {
+func (d *DryRunner) RunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+	workDir := newWorkDirPath()
+	cleanup, err := d.fileWriter.preparePipelineDryRun(ctx, workDir, pipeline)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	path := filepath.Join(workDir, "fluent-bit.conf")
+	args := dryRunArgs()
+	args = append(args, "--config", path)
+	externalPluginArgs, err := d.externalPluginArgs()
+	if err != nil {
+		return err
+	}
+	args = append(args, externalPluginArgs...)
+
+	return d.runCmd(ctx, args)
+}
+
+func (d *DryRunner) externalPluginArgs() ([]string, error) {
+	if d.config.FluentBitPluginDir == "" {
+		return nil, nil
+	}
+
 	var plugins []string
-	files, err := ioutil.ReadDir(pluginPath)
+	files, err := os.ReadDir(d.config.FluentBitPluginDir)
 	if err != nil {
 		return nil, err
 	}
+
 	for _, f := range files {
 		if f.IsDir() {
 			continue
 		}
-		plugins = append(plugins, filepath.Join(pluginPath, f.Name()))
+		plugins = append(plugins, filepath.Join(d.config.FluentBitPluginDir, f.Name()))
 	}
-	return plugins, err
+
+	var args []string
+	for _, plugin := range plugins {
+		args = append(args, "-e", plugin)
+	}
+	return args, nil
 }
 
-func runCmd(ctx context.Context, name string, args ...string) (string, error) {
-	cmd := exec.CommandContext(ctx, name, args...)
-
-	outBytes, err := cmd.CombinedOutput()
+func (d *DryRunner) runCmd(ctx context.Context, args []string) error {
+	outBytes, err := d.commandRunner.run(ctx, d.config.FluentBitBinPath, args...)
 	out := string(outBytes)
-	return out, err
+	if err != nil {
+		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
+			return fmt.Errorf("error validating the supplied configuration: %s", extractError(out))
+		}
+		return errors.New("error validating the supplied configuration")
+	}
+
+	return nil
 }
 
-// extractError extracts the error message from the output of fluent-bit
-// Thereby, it supports the following error patterns:
-// 1. [<time>] [error] [config] error in path/to/file.conf:3: <msg>
-// 2. [<time>] [error] [config] <msg>
-// 3. [<time>] [error] [parser] <msg> in path/to/file.conf
-// 4. [<time>] [error] <msg>
-// 5. error<msg>
-func extractError(output string) string {
-	rColors := regexp.MustCompile(ansiColorsRegex)
-	output = rColors.ReplaceAllString(output, "")
+func newWorkDirPath() string {
+	return "/tmp/dry-run-" + uuid.New().String()
+}
 
+func extractError(output string) string {
+	// Found in https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
+	rColors := regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\a|(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~])")
+	output = rColors.ReplaceAllString(output, "")
+	// Error pattern: [<time>] [error] [config] error in path/to/file.conf:3: <msg>
 	r1 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config].+:\s)(?P<description>.+)`)
 	if r1Matches := r1.FindStringSubmatch(output); r1Matches != nil {
 		return r1Matches[2] // 0: complete output, 1: label, 2: description
 	}
-
+	// Error pattern: [<time>] [error] [config] <msg>
 	r2 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config]\s)(?P<description>.+)`)
 	if r2Matches := r2.FindStringSubmatch(output); r2Matches != nil {
 		return r2Matches[2] // 0: complete output, 1: label, 2: description
 	}
-
+	// Error pattern: [<time>] [error] [parser] <msg> in path/to/file.conf
 	r3 := regexp.MustCompile(`.*(?P<label>\[error]\s\[parser]\s)(?P<description>.+)(\sin.+)`)
 	if r3Matches := r3.FindStringSubmatch(output); r3Matches != nil {
 		return r3Matches[2] // 0: complete output, 1: label, 2: description 3: file name
 	}
-
+	// Error pattern: [<time>] [error] <msg>
 	r4 := regexp.MustCompile(`.*(?P<label>\[error]\s)(?P<description>.+)`)
 	if r4Matches := r4.FindStringSubmatch(output); r4Matches != nil {
 		return r4Matches[2] // 0: complete output, 1: label, 2: description
 	}
-
+	// Error pattern: error<msg>
 	r5 := regexp.MustCompile(`error.+`)
 	return r5.FindString(output)
 }

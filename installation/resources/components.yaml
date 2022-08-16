@@ -9,6 +9,7 @@ prerequisites:
 components:
   - name: "istio-resources"
   - name: "logging"
+  - name: "telemetry"
   - name: "tracing"
   - name: "kiali"
   - name: "monitoring"

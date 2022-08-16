@@ -143,14 +143,14 @@ describe('Telemetry Operator tests, prepare the environment', function() {
   });
 
   it('Should push the logs to the loki output', async () => {
-    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
+    const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
   it('Should parse the logs using regex', async () => {
     try {
-      const labels = '{job="telemetry-fluent-bit", namespace="default"}|json|pass="bar"|user="foo"';
+      const labels = '{namespace="default"}|json|pass="bar"|user="foo"';
       const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
       assert.isTrue(logsPresent, 'No parsed logs present in Loki');
     } catch (e) {
@@ -164,7 +164,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
 
   it('Should push the logs to the http mockserver', async () => {
     // The mockserver prints received logs to stdout, which should finally be pushed to Loki by the other pipeline
-    const labels = '{job="telemetry-fluent-bit", namespace="mockserver"}';
+    const labels = '{namespace="mockserver"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
   });
@@ -175,7 +175,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     await updateLogPipeline(lokiPipeline);
 
     await sleep(10 * 1000);
-    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
+    const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No kyma-system logs present in Loki');
   });

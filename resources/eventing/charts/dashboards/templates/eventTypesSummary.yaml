@@ -116,7 +116,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{event_type=~\"$eventType\"}) by (event_type)",
+                "expr": "count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(event_type_published{event_type=~\"$eventType\"}) by (event_type)",
                 "format": "table",
                 "instant": false,
                 "interval": "",
@@ -220,7 +220,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum(event_type_published{event_type=~\"$eventType\"}) by (event_type) unless (count(event_type_published * on(event_type) group_left() sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type)) by (event_type))",
+                "expr": "sum(event_type_published{event_type=~\"$eventType\"}) by (event_type) unless (count(event_type_published * on(event_type) group_left() sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type)) by (event_type))",
                 "format": "table",
                 "instant": false,
                 "interval": "",
@@ -334,7 +334,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_right() event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(rate(event_type_published{}[$__range])) by (event_type)",
+                "expr": "sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) event_type_subscribed) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(rate(event_type_published{}[$__range])) by (event_type)",
                 "format": "table",
                 "instant": true,
                 "interval": "",
@@ -437,7 +437,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Throughput of Events Published per Event Type",
+            "title": "Total Events Published per Event Type",
             "tooltip": {
               "shared": true,
               "sort": 0,
