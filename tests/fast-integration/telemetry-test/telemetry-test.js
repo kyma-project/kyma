@@ -187,7 +187,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
 
     await sleep(20 * 1000);
     const updatedTestTimestamp = new Date().toISOString();
-    await sleep(20 * 1000);
+    await sleep(40 * 1000);
 
     const labels = '{namespace="mockserver", container="mockserver"}';
     const responseBody = await queryLoki(labels, updatedTestTimestamp);
