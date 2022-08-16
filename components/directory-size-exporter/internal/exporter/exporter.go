@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -16,6 +17,7 @@ type Exporter interface {
 type exporter struct {
 	FsBuffeLabelsVector *prometheus.GaugeVec
 	LogPath             string
+	Logger              *logger.Logger
 }
 
 type directory struct {
@@ -23,7 +25,7 @@ type directory struct {
 	size int64
 }
 
-func NewExporter(dataPath string, dirsSizeMetricName string) Exporter {
+func NewExporter(dataPath string, dirsSizeMetricName string, logger *logger.Logger) Exporter {
 	metricsGague := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "",
 		Subsystem: "",
@@ -34,6 +36,7 @@ func NewExporter(dataPath string, dirsSizeMetricName string) Exporter {
 	return &exporter{
 		FsBuffeLabelsVector: metricsGague,
 		LogPath:             dataPath,
+		Logger:              logger,
 	}
 }
 
@@ -55,8 +58,8 @@ func (v *exporter) RecordMetrics(interval int) {
 
 func (v *exporter) recordingIteration(logPath string) {
 	directories, errDirList := listDirs(logPath)
-	if errDirList != nil {
-		panic(errDirList)
+	if errDirList != nil && v.Logger != nil {
+		v.Logger.WithContext().Error(errDirList)
 	}
 	for _, dir := range directories {
 		v.FsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))

@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	exp := exporter.NewExporter(storagePath, dirsSizeMetricName)
+	exp := exporter.NewExporter(storagePath, dirsSizeMetricName, exporterLogger)
 	exporterLogger.WithContext().Info("Exporter is initialized")
 
 	exp.RecordMetrics(interval)

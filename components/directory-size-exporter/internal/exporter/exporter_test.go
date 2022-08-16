@@ -28,7 +28,7 @@ func initExporterAndRecordMetrics(path string) {
 		panic(err)
 	}
 
-	exp := NewExporter(path, "telemetry_fsbuffer_usage_bytes")
+	exp := NewExporter(path, "telemetry_fsbuffer_usage_bytes", exporterLogger)
 	exporterLogger.WithContext().Info("Exporter is initialized")
 
 	exp.RecordMetrics(5)
@@ -149,7 +149,7 @@ func TestDirSize(t *testing.T) {
 }
 
 func TestNewExporter(t *testing.T) {
-	exporter := NewExporter("data/log", "metric_name")
+	exporter := NewExporter("data/log", "metric_name", nil)
 	require.NotNil(t, exporter)
 }
 
