@@ -169,17 +169,6 @@ describe('Telemetry Operator tests, prepare the environment', function() {
     assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
   });
 
-  it('Include kyma-system namespace on loki pipeline ', async () => {
-    const lokiPipeline = await getLogPipeline('loki');
-    lokiPipeline.spec.input.application.includeSystemNamespaces = true;
-    await updateLogPipeline(lokiPipeline);
-
-    await sleep(10 * 1000);
-    const labels = '{namespace="kyma-system"}';
-    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-    assert.isTrue(logsPresent, 'No kyma-system logs present in Loki');
-  });
-
   it('Should verify that Kubernetes annotations are not pushed', async () => {
     const labels = '{namespace="mockserver", container="mockserver"}';
     const responseBody = await queryLoki(labels, testStartTimestamp);
@@ -188,5 +177,24 @@ describe('Telemetry Operator tests, prepare the environment', function() {
 
     expect(entry.log).not.to.have.string('annotations');
     expect(entry.log).to.have.string('labels');
+  });
+
+  it('Should verify that Kubernetes labels are not pushed', async () => {
+    const httpPipeline = await getLogPipeline('http-mockserver');
+    httpPipeline.spec.input.application.keepAnnotations = true;
+    httpPipeline.spec.input.application.dropLabels = true;
+    await updateLogPipeline(httpPipeline);
+
+    await sleep(20 * 1000);
+    const updatedTestTimestamp = new Date().toISOString();
+    await sleep(20 * 1000);
+
+    const labels = '{namespace="mockserver", container="mockserver"}';
+    const responseBody = await queryLoki(labels, updatedTestTimestamp);
+    assert.isTrue(responseBody.data.result.length > 0, 'No mockserver logs present in Loki');
+    const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
+
+    expect(entry.log).not.to.have.string('labels');
+    expect(entry.log).to.have.string('annotations');
   });
 });

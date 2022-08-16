@@ -17,7 +17,7 @@ func TestBuildSection(t *testing.T) {
 
 `
 	content := "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
-	actual := BuildConfigSection(ParserConfigHeader, content)
+	actual := BuildConfigSection(parserConfigHeader, content)
 
 	require.Equal(t, expected, actual, "Fluent Bit Config Build is invalid")
 }
@@ -30,7 +30,7 @@ func TestBuildSectionWithWrongIndentation(t *testing.T) {
 
 `
 	content := "Name   dummy_test   \n  Format   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
-	actual := BuildConfigSection(ParserConfigHeader, content)
+	actual := BuildConfigSection(parserConfigHeader, content)
 
 	require.Equal(t, expected, actual, "Fluent Bit config indentation has not been fixed")
 }
@@ -46,7 +46,7 @@ func TestBuildConfigSectionFromMap(t *testing.T) {
 		"Key_A": "Value_A",
 		"Key_B": "Value_B",
 	}
-	actual := buildConfigSectionFromMap(FilterConfigHeader, content)
+	actual := buildConfigSectionFromMap(filterConfigHeader, content)
 
 	require.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
 
@@ -58,7 +58,7 @@ name                  record_modifier
 match                 foo.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
 
-	actual := generateFilter(PermanentFilterTemplate, "foo")
+	actual := generateFilter(permanentFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit Permanent parser config is invalid")
 }
 
@@ -69,7 +69,7 @@ match                 foo.*
 script                /fluent-bit/scripts/filter-script.lua
 call                  kubernetes_map_keys`
 
-	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
+	actual := generateFilter(luaDeDotFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
 }
 
@@ -101,14 +101,14 @@ func TestGenerateApplicationFilterDropAll(t *testing.T) {
 
 `
 
-	actual := createApplicationFilter("test-logpipeline", false, true)
+	actual := createKubernetesMetadataFilter("test-logpipeline", false, true)
 	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
 }
 
 func TestGenerateApplicationFilterKeepAll(t *testing.T) {
 	expected := ""
 
-	actual := createApplicationFilter("test-logpipeline", true, false)
+	actual := createKubernetesMetadataFilter("test-logpipeline", true, false)
 	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
 }
 
