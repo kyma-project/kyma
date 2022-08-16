@@ -370,8 +370,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	envs = append(envs, deploymentEnvs...)
 
 	minReplicas := DefaultDeploymentReplicas
-	if s.instance.Spec.MinReplicas != nil {
-		minReplicas = *s.instance.Spec.MinReplicas
+	if s.instance.Spec.ScaleConfig != nil && s.instance.Spec.ScaleConfig.MinReplicas != nil {
+		minReplicas = *s.instance.Spec.ScaleConfig.MinReplicas
 	}
 
 	return appsv1.Deployment{
@@ -562,15 +562,18 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 func (s *systemState) defaultReplicas() (int32, int32) {
 	var min = int32(1)
 	var max int32
+	if s.instance.Spec.ScaleConfig == nil {
+		return min, min
+	}
 	spec := s.instance.Spec
-	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
-		min = *spec.MinReplicas
+	if spec.ScaleConfig.MinReplicas != nil && *spec.ScaleConfig.MinReplicas > 0 {
+		min = *spec.ScaleConfig.MinReplicas
 	}
 	// special case
-	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+	if spec.ScaleConfig.MaxReplicas == nil || min > *spec.ScaleConfig.MaxReplicas {
 		max = min
 	} else {
-		max = *spec.MaxReplicas
+		max = *spec.ScaleConfig.MaxReplicas
 	}
 	return min, max
 }

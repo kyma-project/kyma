@@ -272,10 +272,15 @@ func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU re
 	}
 	return allErrs
 }
+
 func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
+	if spec.ScaleConfig == nil {
+		return errors.New("spec.scaleConfig can't be nil")
+	}
+
 	minValue := vc.Function.Replicas.MinValue
-	maxReplicas := spec.MaxReplicas
-	minReplicas := spec.MinReplicas
+	maxReplicas := spec.ScaleConfig.MaxReplicas
+	minReplicas := spec.ScaleConfig.MinReplicas
 	allErrs := []string{}
 	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
 		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than spec.minReplicas(%d)",
