@@ -52,6 +52,7 @@ func main() {
 
 	metricsCollector := pkgmetrics.NewCollector()
 	metricsCollector.RegisterMetrics()
+	metricsCollector.InitMetrics()
 
 	var natsSubMgr subscriptionmanager.Manager
 	natsConfig := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)

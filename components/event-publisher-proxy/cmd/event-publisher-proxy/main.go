@@ -90,6 +90,7 @@ func main() {
 	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
 		setupLogger.Infow("Failed to start metrics server", "error", err)
 	}
+	metricsCollector.InitMetrics()
 
 	setupLogger.Infof("Starting publisher to: %v", cfg.Backend)
 

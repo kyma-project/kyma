@@ -398,8 +398,8 @@ data:
             "id": 8,
             "legend": {
               "alignAsTable": true,
-              "avg": true,
-              "current": false,
+              "avg": false,
+              "current": true,
               "hideEmpty": false,
               "max": false,
               "min": false,
@@ -463,6 +463,178 @@ data:
               },
               {
                 "$$hashKey": "object:45",
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "datasource": null,
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "decimals": 4,
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                },
+                "unit": "none"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 7,
+              "x": 0,
+              "y": 19
+            },
+            "id": 10,
+            "options": {
+              "colorMode": "value",
+              "graphMode": "none",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": [
+                    "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "text": {},
+              "textMode": "value"
+            },
+            "pluginVersion": "",
+            "targets": [
+              {
+                "exemplar": true,
+                "expr": "sum(increase(events_published_total{}[$__range])) - sum(increase(events_dispatched_total{}[$__range]))",
+                "format": "time_series",
+                "instant": false,
+                "interval": "",
+                "legendFormat": "",
+                "refId": "A"
+              }
+            ],
+            "timeFrom": null,
+            "timeShift": null,
+            "title": "Events lost",
+            "type": "stat"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
+            "fieldConfig": {
+              "defaults": {},
+              "overrides": []
+            },
+            "fill": 2,
+            "fillGradient": 0,
+            "gridPos": {
+              "h": 8,
+              "w": 17,
+              "x": 7,
+              "y": 19
+            },
+            "hiddenSeries": false,
+            "id": 11,
+            "legend": {
+              "alignAsTable": false,
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "rightSide": false,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "nullPointMode": "null",
+            "options": {
+              "alertThreshold": true
+            },
+            "percentage": false,
+            "pluginVersion": "",
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "exemplar": true,
+                "expr": "sum(increase(events_published_total{}[$__range]))",
+                "interval": "",
+                "legendFormat": "increase_in_events_published",
+                "refId": "A"
+              },
+              {
+                "exemplar": true,
+                "expr": "- \nsum(increase(events_dispatched_total{}[$__range]))",
+                "hide": false,
+                "interval": "",
+                "legendFormat": "increase_in_events_dispatched",
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Increase in the number of Events Published and Dispatched",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "transparent": true,
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "$$hashKey": "object:576",
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "$$hashKey": "object:577",
                 "format": "short",
                 "label": null,
                 "logBase": 1,

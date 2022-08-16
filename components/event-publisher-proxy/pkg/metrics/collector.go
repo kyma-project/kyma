@@ -14,8 +14,10 @@ const (
 	Latency = "event_publish_to_messaging_server_latency"
 	// EventTypePublishedMetricKey name of the eventType metric
 	EventTypePublishedMetricKey = "event_type_published"
-	//EventRequests name if the eventRequests metric
+	// EventRequests name of the eventRequests metric
 	EventRequests = "event_requests"
+	// EventsPublishedTotal name of the eventsPublishedTotal metric
+	EventsPublishedTotal = "events_published_total"
 	// errorsHelp help for the errors metric
 	errorsHelp = "The total number of errors while sending Events to the messaging server"
 	// latencyHelp help for the latency metric
@@ -24,6 +26,8 @@ const (
 	EventTypePublishedMetricHelp = "The total number of events published for a given eventType"
 	// EventRequestsHelp help for event requests metric
 	EventRequestsHelp = "The total number of event requests"
+	// EventsPublishedTotalHelp help for eventsPublishedTotal metric
+	EventsPublishedTotalHelp = "The total number of events published across event types"
 	//responseCode is the name of the status code labels used by multiple metrics
 	responseCode = "response_code"
 	//destSvc is the name of the destination service label used by multiple metrics
@@ -36,6 +40,7 @@ type Collector struct {
 	latency   *prometheus.HistogramVec
 	eventType *prometheus.CounterVec
 	requests  *prometheus.CounterVec
+	published *prometheus.CounterVec
 }
 
 // NewCollector a new instance of Collector
@@ -69,6 +74,13 @@ func NewCollector() *Collector {
 			},
 			[]string{responseCode, destSvc},
 		),
+		published: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: EventsPublishedTotal,
+				Help: EventsPublishedTotalHelp,
+			},
+			[]string{},
+		),
 	}
 }
 
@@ -78,6 +90,7 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.latency.Describe(ch)
 	c.eventType.Describe(ch)
 	c.requests.Describe(ch)
+	c.published.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface Collect method
@@ -86,6 +99,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.latency.Collect(ch)
 	c.eventType.Collect(ch)
 	c.requests.Collect(ch)
+	c.published.Collect(ch)
 }
 
 // RecordError records an error metric
@@ -101,9 +115,15 @@ func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destSv
 // RecordEventType records a eventType metric
 func (c *Collector) RecordEventType(eventType, eventSource string) {
 	c.eventType.WithLabelValues(eventType, eventSource).Inc()
+	c.published.WithLabelValues().Inc()
 }
 
 // RecordRequests records the eventRequests metric
 func (c *Collector) RecordRequests(statusCode int, destSvc string) {
 	c.requests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
+}
+
+// InitMetrics initializes the required metrics to a particular value
+func (c *Collector) InitMetrics() {
+	c.published.WithLabelValues().Add(0)
 }
