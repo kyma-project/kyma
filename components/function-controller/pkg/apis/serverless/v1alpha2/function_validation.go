@@ -318,7 +318,7 @@ func (spec *FunctionSpec) validateRepository(_ *ValidationConfig) error {
 }
 
 func urlIsSSH(repoURL string) bool {
-	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?`)
+	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(/)?`)
 	if err != nil {
 		panic(err)
 	}
