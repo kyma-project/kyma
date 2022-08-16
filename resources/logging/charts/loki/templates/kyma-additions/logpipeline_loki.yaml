@@ -14,5 +14,6 @@ spec:
       labels:
         "job": "telemetry-fluent-bit"
       removeKeys: ["kubernetes", "stream"]
-      storage.total_limit_size:  {{ .Values.kyma.logPipeline.fsBufferSize }}
+      storage:
+        total_limit_size:  {{ .Values.kyma.logPipeline.fsBufferSize }}
 {{ end}}

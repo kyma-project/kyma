@@ -1035,7 +1035,7 @@
           "exemplar": true,
           "expr": "telemetry_fsbuffer_usage_bytes{pod=~\"$pod\"}",
           "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}} - {{"{{"}} name {{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - {{"{{"}} directory {{"}}"}}",
           "refId": "A"
         }
       ],
