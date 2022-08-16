@@ -8,7 +8,7 @@ The following configuration options are available:
 * `log-format` - Log format parameter for logger (`json` or `text`)
 * `log-level` - Log level parameter for logger (`debug`, `info`, `warn`, `error`, `fatal`)
 * `storage-path` - the path to the root directory to be observed by the exporter (default `/data/log/flb-storage/`)
-* `metric-name` - which name we use for our metrics in prometheus (default `telemetry_fsbuffer_usage_bytes`)
+* `metric-name` - the metric name to use for the metric exposure (default `telemetry_fsbuffer_usage_bytes`)
 * `port` - which port application listens (default `2021`)
 * `interval` - how frequently we record to prometheus in seconds (default `30`)
 
