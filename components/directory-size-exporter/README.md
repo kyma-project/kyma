@@ -10,7 +10,7 @@ The following configuration options are available:
 * `storage-path` - the path to the root directory to be observed by the exporter (default `/data/log/flb-storage/`)
 * `metric-name` - the metric name to use for the metric exposure (default `telemetry_fsbuffer_usage_bytes`)
 * `port` - the port under which the metrics will be exposed in the prometheus format (default `2021`)
-* `interval` - how frequently we record to prometheus in seconds (default `30`)
+* `interval` - interval in seconds in which the exporter should check the storage (default `30`)
 
 
 ## Development
