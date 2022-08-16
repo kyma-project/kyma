@@ -303,6 +303,8 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | input.application.containers | []string | List of containers to collect from (mutually exclusive with `excludeContainers`) |
 | input.application.excludeContainers | []string | List of containers to exclude (mutually exclusive with `containers`) |
 | input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. |
+| input.application.keepAnnotations | boolean | Indicates whether to keep all Kubernetes annotations. Default is `false`. |
+| input.application.dropLabels | boolean | Indicates whether to drop all Kubernetes labels. Default is `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
@@ -492,6 +494,8 @@ You cannot enable the following plugins, because they potentially harm the stabi
 - Multiline Filter
 - Kubernetes Filter
 - Rewrite_Tag Filter
+
+In addition, the prefix `__k8s__` is reserved by the LogPipeline and should not be used in any Filter definition.
 
 ### Buffer limits
 
