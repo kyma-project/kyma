@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
+	github.com/kyma-incubator/compass/components/director v0.0.0-20220125140301-bfb0c437ad31
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
