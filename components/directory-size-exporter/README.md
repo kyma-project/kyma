@@ -4,8 +4,7 @@
 
 The directory size exporter is monitoring operators storage by collecting information about the size of top level directories as metrics. Meanwhile, Prometheus will pull the metrics. 
 
-One can path specific values for such things like path to the directory one want to monitor or prometheus metrics as parameters. 
-The list of parameters goes as follows:
+The following configuration options are available:
 * `log-format` - Log format parameter for logger (`json` or `text`)
 * `log-level` - Log level parameter for logger (`debug`, `info`, `warn`, `error`, `fatal`)
 * `storage-path` - the path to the root directory which data we want to observe (default `/data/log/flb-storage/`)
