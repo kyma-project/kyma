@@ -526,13 +526,7 @@ spec:
                     type: object
                 type: object
               runtime:
-                description: Runtime enumerates runtimes that are currently supported
-                  by Function Controller. It is a subset of RuntimeExtended.
-                enum:
-                - nodejs12
-                - nodejs14
-                - nodejs16
-                - python39
+                description: Runtime specifies the name of the Function's runtime.
                 type: string
               runtimeImageOverride:
                 type: string
