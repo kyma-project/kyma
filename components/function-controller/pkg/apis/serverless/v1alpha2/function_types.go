@@ -184,22 +184,6 @@ const (
 	ConditionReasonMinReplicasNotAvailable        ConditionReason = "MinReplicasNotAvailable"
 )
 
-//TODO: to remove
-
-// RuntimeExtended enumerates runtimes that are either currently supported or
-// no longer supported but there still might be "read-only" Functions using them
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;nodejs10;python38;python39
-type RuntimeExtended string
-
-const (
-	RuntimeExtendedNodeJs10 RuntimeExtended = "nodejs10"
-	RuntimeExtendedNodeJs12 RuntimeExtended = "nodejs12"
-	RuntimeExtendedNodeJs14 RuntimeExtended = "nodejs14"
-	RuntimeExtendedNodeJs16 RuntimeExtended = "nodejs16"
-	RuntimeExtendedPython38 RuntimeExtended = "python38"
-	RuntimeExtendedPython39 RuntimeExtended = "python39"
-)
-
 type Condition struct {
 	Type               ConditionType      `json:"type,omitempty"`
 	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
@@ -215,8 +199,8 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Runtime              RuntimeExtended `json:"runtime,omitempty"`
-	Conditions           []Condition     `json:"conditions,omitempty"`
+	Runtime              Runtime     `json:"runtime,omitempty"`
+	Conditions           []Condition `json:"conditions,omitempty"`
 	Repository           `json:",inline,omitempty"`
 	Commit               string `json:"commit,omitempty"`
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`

@@ -613,7 +613,7 @@ func (s *systemState) gitFnSrcChanged(commit string) bool {
 	return s.instance.Status.Commit == "" ||
 		commit != s.instance.Status.Commit ||
 		s.instance.Spec.Source.GitRepository.Reference != s.instance.Status.Reference ||
-		serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime) != s.instance.Status.Runtime ||
+		s.instance.Spec.Runtime != s.instance.Status.Runtime ||
 		s.instance.Spec.Source.GitRepository.BaseDir != s.instance.Status.BaseDir ||
 		getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady) == corev1.ConditionFalse
 
