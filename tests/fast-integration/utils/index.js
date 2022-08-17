@@ -982,6 +982,20 @@ async function getContainerRestartsForAllNamespaces() {
       }));
 }
 
+async function labelNamespaceWithIstioInject(targetNamespace, enabled){
+  const patch = [
+    {
+        "op": "add",
+        "path":"/metadata/labels",
+        "value": {
+            "istio-injection": `${enabled}`
+        }
+    }
+  ];
+
+  await k8sCoreV1Api.patchNamespace(mockNamespace,patch).then(() => { console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`)}).catch((err) => { console.log("Error: "); console.log(err)});
+}
+
 async function getKymaAdminBindings() {
   const {body} = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
   const adminRoleBindings = body.items;
