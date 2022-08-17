@@ -4,7 +4,6 @@ const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
 const execa = require('execa');
-const { mockNamespace } = require('../eventing-test/utils');
 
 const kc = new k8s.KubeConfig();
 let k8sDynamicApi;
