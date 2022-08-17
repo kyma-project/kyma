@@ -76,11 +76,11 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
     ```
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
-    - `http`, which pushes the data to the specified http destination.
-    - `grafana-loki`, which pushes the data to the Grafana Loki service.
-    - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.
+    - **http**, which pushes the data to the specified http destination.
+    - **grafana-loki**, which pushes the data to the Grafana Loki service.
+    - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
-    See the following example of the `custom` output:
+    See the following example of the **custom** output:
     ```yaml
     spec:
       output:
@@ -180,7 +180,7 @@ spec:
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets.
 
-With the `http` and the `grafana-loki` output definition, the `valueFrom` attribute allows the mapping of Secret keys as visible in the following `http` output example:
+With the **http** and the **grafana-loki** output definition, the **valueFrom** attribute allows the mapping of Secret keys as visible in the following **http** output example:
 
 ```yaml
 kind: LogPipeline
@@ -231,7 +231,7 @@ stringData:
   HTTP_PASSWORD: XXX
 ```
 
-To leverage data provided by a Kubernetes Secrets in a `custom` output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the Secret keys in the `variables` section, like in the following example:
+To leverage data provided by a Kubernetes Secrets in a **custom** output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the Secret keys in the **variables** section, like in the following example:
 
 ```yaml
 kind: LogPipeline
@@ -261,7 +261,7 @@ spec:
 
 ### Step 5: Rotate the Secret
 
-A Secret being referenced with the `secretKeyRef` construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
+A Secret being referenced with the **secretKeyRef** construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
 Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
 ```yaml
