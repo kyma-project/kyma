@@ -180,48 +180,7 @@ spec:
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
 
-To leverage data provided by a Kubernetes Secrets in a `custom` output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the keys of the Secret in the `variables` section, like in the following example:
-
-```yaml
-kind: LogPipeline
-apiVersion: telemetry.kyma-project.io/v1alpha1
-metadata:
-  name: http-backend
-spec:
-  output:
-    custom: |
-      Name               http
-      Host               ${ENDPOINT} # Defined in Secret
-      HTTP_User          ${USER} # Defined in Secret
-      HTTP_Password      ${PASSWORD} # Defined in Secret
-      Tls                On
-  variables:
-    - name: ENDPOINT
-      valueFrom:
-        secretKeyRef:
-        - name: http-backend-credentials
-          namespace: default
-          key: HTTP_ENDPOINT
-  input:
-    ...
-  filters:
-    ...
-```
-
-The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
-
-```yaml
-kind: Secret
-apiVersion: v1
-metadata:
-  name: http-backend-credentials
-stringData:
-  HTTP_ENDPOINT: https://myhost/logs
-  HTTP_USER: myUser
-  HTTP_PASSWORD: XXX
-```
-
-With the `http` and the `grafana-loki` output definition, the `valueFrom` attribute allows the mapping of Secret keys as visible in the following `http` output example:   
+With the `http` and the `grafana-loki` output definition, the `valueFrom` attribute allows the mapping of Secret keys as visible in the following `http` output example:
 
 ```yaml
 kind: LogPipeline
@@ -258,6 +217,47 @@ spec:
     ...
 ```
 
+
+The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
+
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: http-backend-credentials
+stringData:
+  HTTP_ENDPOINT: https://myhost/logs
+  HTTP_USER: myUser
+  HTTP_PASSWORD: XXX
+```
+
+To leverage data provided by a Kubernetes Secrets in a `custom` output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the Secret keys in the `variables` section, like in the following example:
+
+```yaml
+kind: LogPipeline
+apiVersion: telemetry.kyma-project.io/v1alpha1
+metadata:
+  name: http-backend
+spec:
+  output:
+    custom: |
+      Name               http
+      Host               ${ENDPOINT} # Defined in Secret
+      HTTP_User          ${USER} # Defined in Secret
+      HTTP_Password      ${PASSWORD} # Defined in Secret
+      Tls                On
+  variables:
+    - name: ENDPOINT
+      valueFrom:
+        secretKeyRef:
+        - name: http-backend-credentials
+          namespace: default
+          key: HTTP_ENDPOINT
+  input:
+    ...
+  filters:
+    ...
+```
 
 ### Step 5: Rotate the Secret
 
