@@ -6,7 +6,7 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
-  waitForK8sObject,
+  waitForK8sObject, info,
 } = require('../utils');
 const {logsPresentInLoki, queryLoki} = require('../logging');
 const {
@@ -85,13 +85,13 @@ async function cleanEnvironment() {
   await deploymentPromise;
 }
 
-describe('Telemetry Operator tests, prepare the environment', function() {
-  before('Expose Grafana', async () => {
+describe('Telemetry Operator tests', function() {
+  before('Prepare environment, expose Grafana', async () => {
     await prepareEnvironment();
     await exposeGrafana();
   });
 
-  after('Unexpose Grafana, clean the environment', async () => {
+  after('Clean environment, unexpose Grafana', async () => {
     await cleanEnvironment();
     await unexposeGrafana();
   });
@@ -195,6 +195,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
       assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
       const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
       assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
+      info('entry', entry['kubernetes']);
 
       expect(entry['kubernetes']).not.to.have.property('labels');
       expect(entry['kubernetes']).to.have.property('annotations');
