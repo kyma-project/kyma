@@ -8,8 +8,6 @@ metadata:
   name: lastorder
 spec:
   deps: '{ "name": "orders", "version": "1.0.0", "dependencies": {"axios": "^0.19.2"}}'
-  maxReplicas: 1
-  minReplicas: 1
   runtime: nodejs14
   source: |
     let lastOrder = {};

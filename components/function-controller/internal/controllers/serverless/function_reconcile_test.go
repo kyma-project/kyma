@@ -1040,8 +1040,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		t.Log("updating function to use fixed replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.MinReplicas = &two
-		function.Spec.MaxReplicas = &two
+		function.Spec.ScaleConfig.MinReplicas = &two
+		function.Spec.ScaleConfig.MaxReplicas = &two
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("updating deployment with new number of replicas")
@@ -1089,7 +1089,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		t.Log("updating function to use scalable replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.MaxReplicas = &four
+		function.Spec.ScaleConfig.MaxReplicas = &four
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("creating hpa")

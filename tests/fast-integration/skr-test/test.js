@@ -23,6 +23,9 @@ describe('SKR test', function() {
   const getShootInfoFunc = function() {
     return skr.shoot;
   };
+  const getShootOptionsFunc = function() {
+    return options;
+  };
 
   before('Ensure SKR is provisioned', async function() {
     this.timeout(provisioningTimeout);
@@ -31,7 +34,7 @@ describe('SKR test', function() {
   });
 
   // Run the OIDC tests
-  oidcE2ETest(options, getShootInfoFunc);
+  oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);

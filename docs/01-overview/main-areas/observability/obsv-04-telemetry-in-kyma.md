@@ -147,6 +147,9 @@ spec:
         - fluent-bit
 ```
 
+It might happen that Fluent Bit prints an error per processed log line that is then collected and re-processed.
+To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. 
+
 ### Step 3: Add filters
 
 To enrich logs with attributes or drop whole lines, add filters to the existing pipeline.
