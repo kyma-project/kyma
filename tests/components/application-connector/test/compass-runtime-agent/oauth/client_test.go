@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -11,15 +10,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
-	core "k8s.io/client-go/kubernetes/typed/core/v1"
-)
-
-const (
-	namespace  = "kcp-system"
-	secretName = "kcp-provisioner-registration"
 )
 
 func TestOauthClient_GetAuthorizationToken(t *testing.T) {
@@ -54,12 +44,7 @@ func TestOauthClient_GetAuthorizationToken(t *testing.T) {
 			}
 		})
 
-		coreV1 := fake.NewSimpleClientset()
-		secrets := coreV1.CoreV1().Secrets(namespace)
-
-		createFakeCredentialsSecret(t, secrets, credentials)
-
-		oauthClient := NewOauthClient(client, secrets, secretName)
+		oauthClient := NewOauthClient(client, credentials)
 
 		//when
 		responseToken, err := oauthClient.GetAuthorizationToken()
@@ -82,27 +67,4 @@ type RoundTripFunc func(req *http.Request) *http.Response
 
 func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req), nil
-}
-
-func createFakeCredentialsSecret(t *testing.T, secrets core.SecretInterface, credentials credentials) {
-
-	secret := &v1.Secret{
-		ObjectMeta: meta.ObjectMeta{
-			Name:      secretName,
-			Namespace: namespace,
-		},
-		TypeMeta: meta.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: "v1",
-		},
-		Data: map[string][]byte{
-			clientIDKey:       []byte(credentials.clientID),
-			clientSecretKey:   []byte(credentials.clientSecret),
-			tokensEndpointKey: []byte(credentials.tokensEndpoint),
-		},
-	}
-
-	_, err := secrets.Create(context.Background(), secret, meta.CreateOptions{})
-
-	require.NoError(t, err)
 }
