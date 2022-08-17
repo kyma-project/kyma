@@ -21,9 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Runtime enumerates runtimes that are currently supported by Function Controller.
-// It is a subset of RuntimeExtended.
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;python39
+// Runtime specifies the name of the Function's runtime.
 type Runtime string
 
 const (
@@ -185,6 +183,8 @@ const (
 	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
 	ConditionReasonMinReplicasNotAvailable        ConditionReason = "MinReplicasNotAvailable"
 )
+
+//TODO: to remove
 
 // RuntimeExtended enumerates runtimes that are either currently supported or
 // no longer supported but there still might be "read-only" Functions using them
