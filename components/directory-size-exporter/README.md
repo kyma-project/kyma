@@ -19,13 +19,13 @@ The following configuration options are available:
 
 For development, use the following commands:
 
-- Run all tests and validation
+- Run all tests and validation:
 
 ```bash
 make
 ```
 
-- Run the exporter locally
+- Run the exporter locally:
 
 ```bash
 make run-local
