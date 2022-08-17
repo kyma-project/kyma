@@ -147,7 +147,8 @@ spec:
         - fluent-bit
 ```
 
-It is recommended to exclude the logs of the Fluent Bit container to avoid problems with recursive logs in case Fluent Bit will print an error per processed log line which then gets collected and processed again.
+It might happen that Fluent Bit prints an error per processed log line that is then collected and re-processed.
+To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. 
 
 ### Step 3: Add filters
 
@@ -304,7 +305,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | input.application.excludeNamespaces | []string | List of Namespaces to exclude during log collection from all Namespaces (mutually exclusive with `namespaces`) |
 | input.application.containers | []string | List of containers to collect from (mutually exclusive with `excludeContainers`) |
 | input.application.excludeContainers | []string | List of containers to exclude (mutually exclusive with `containers`) |
-| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. If enabled, it is recommended to exclude the logs from the Fluent Bit container to avoid problems with recursive logs, see also [Create a LogPipeline Input](#step-2-create-an-input) |
+| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. If enabled, it is recommended to exclude the logs from the Fluent Bit container to avoid problems with recursive logs. See also [Create a LogPipeline Input](#step-2-create-an-input). |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
