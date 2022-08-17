@@ -4,7 +4,7 @@ ENV FIT_MAKE_TARGET=ci-skr
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
-RUN apk update; apk upgrade
+RUN apk update; apk upgrade; rm /var/cache/apk/*
 
 RUN apk --no-cache add \
     build-base \
