@@ -748,7 +748,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
-	description := "nats subscriptions should be as defined"
+	description := "Failed to match nats subscriptions"
 	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...), description)
 }
 
@@ -758,13 +758,13 @@ func testSubscriptionDeletion(ens *jetStreamTestEnsemble, subscription *eventing
 	g.Eventually(func() error {
 		return ens.K8sClient.Delete(ens.Ctx, subscription)
 	}, utils.SmallTimeout, utils.SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
-	utils.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).Should(reconcilertesting.HaveNotFoundSubscription(), "subscription should be deleted")
+	utils.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).Should(reconcilertesting.HaveNotFoundSubscription(), "Failed to delete subscription")
 }
 
 // ensureNATSSubscriptionIsDeleted ensures that the NATS subscription is not found anymore.
 // This ensures the controller did delete it correctly then the Subscription was deleted.
 func ensureNATSSubscriptionIsDeleted(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
-	getSubscriptionFromJetStream(ens, subscription, subject).ShouldNot(natstesting.BeExistingSubscription(), "NATS subscription should be deleted")
+	getSubscriptionFromJetStream(ens, subscription, subject).ShouldNot(natstesting.BeExistingSubscription(), "Failed to delete NATS subscription")
 }
 
 func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *jetStreamTestEnsemble {
