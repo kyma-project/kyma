@@ -25,7 +25,7 @@ func BasicNodeJSFunctionWithCustomDependency(msg string, rtm serverlessv1alpha2.
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
-				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": { "@kyma/kyma-npm-test": "^1.0.0" } }`,
+				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": { "camelcase": "^7.0.0" } }`,
 			},
 		},
 	}

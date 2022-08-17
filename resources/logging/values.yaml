@@ -30,7 +30,7 @@ global:
       directory: tpi
     loki:
       name: loki
-      version: 2.2.1-0f8bfdfb
+      version: 2.2.1-4256edd8
       directory: tpi
     alpine:
       name: "alpine"

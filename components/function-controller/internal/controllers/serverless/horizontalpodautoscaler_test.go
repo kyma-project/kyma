@@ -317,8 +317,10 @@ func Test_isScalingEnabled(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			instance := &serverlessv1alpha2.Function{
 				Spec: serverlessv1alpha2.FunctionSpec{
-					MinReplicas: &tt.args.minReplicas,
-					MaxReplicas: &tt.args.maxReplicas,
+					ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+						MinReplicas: &tt.args.minReplicas,
+						MaxReplicas: &tt.args.maxReplicas,
+					},
 				},
 			}
 
