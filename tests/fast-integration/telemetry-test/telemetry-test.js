@@ -6,8 +6,7 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
-  waitForK8sObject
-  sleep,
+  waitForK8sObject,
 } = require('../utils');
 const {logsPresentInLoki, queryLoki} = require('../logging');
 const {
@@ -142,7 +141,7 @@ describe('Telemetry Operator tests', function() {
       assert.fail(e);
     }
   });
-  
+
   context('Should verify HTTP LogPipeline', async () => {
     it(`Should create HTTP LogPipeline '${httpLogPipelineName}'`, async () => {
       await k8sApply(httpLogPipelineCR, telemetryNamespace);
