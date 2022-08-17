@@ -15,10 +15,12 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
 Follow these steps to set up your custom domain and prepare a certificate required to expose a workload.
 
 1. Create a Namespace and export it as an environment variable. Run:
-
+   
+   **CAUTION:** Istio sidecar proxy injection is disabled by default. To enable it set the `istio-injection=enabled` flag at the Namespace level.
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
+   kubectl label namespace default istio-injection=enabled --overwrite
    ```
 
 2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
