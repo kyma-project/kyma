@@ -17,7 +17,7 @@ The following configuration options are available:
 
 ### Available Commands
 
-For development, you can use the following commands:
+For development, use the following commands:
 
 - Run all tests and validation
 
