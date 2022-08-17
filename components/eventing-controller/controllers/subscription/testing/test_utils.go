@@ -192,6 +192,9 @@ func StartSubscriberSvc(ens *TestEnsemble) {
 	createSubscriberSvcInK8s(ens)
 }
 
+// createSubscriberSvcInK8s ensures the subscriber service in the k8s cluster is creates succesfully.
+// The subscriber service is taken from the TestEnsemble struct and should not be nil.
+// If the namespace of the subscriber service does not exist, it will be created.
 func createSubscriberSvcInK8s(ens *TestEnsemble) {
 	g := ens.G
 
