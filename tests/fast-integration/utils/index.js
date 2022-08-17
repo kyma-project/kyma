@@ -737,18 +737,18 @@ async function deleteNamespaces(namespaces, wait = true) {
     return;
   }
   const waitForNamespacesResult = waitForK8sObject(
-    '/api/v1/namespaces',
-    {},
-    (type, _, watchObj) => {
-      if (type === 'DELETED') {
-        namespaces = namespaces.filter(
-            (n) => n !== watchObj.object.metadata.name,
-        );
-      }
-      return namespaces.length === 0 || !wait;
-    },
-    10 * 60 * 1000,
-    'Timeout for deleting namespaces: ' + namespaces,
+      '/api/v1/namespaces',
+      {},
+      (type, _, watchObj) => {
+        if (type === 'DELETED') {
+          namespaces = namespaces.filter(
+              (n) => n !== watchObj.object.metadata.name,
+          );
+        }
+        return namespaces.length === 0 || !wait;
+      },
+      10 * 60 * 1000,
+      'Timeout for deleting namespaces: ' + namespaces,
   );
 
   for (const name of namespaces) {
