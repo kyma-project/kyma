@@ -6,7 +6,7 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
-  waitForK8sObject, info,
+  waitForK8sObject, info, sleep,
 } = require('../utils');
 const {logsPresentInLoki, queryLoki} = require('../logging');
 const {
@@ -186,6 +186,7 @@ describe('Telemetry Operator tests', function() {
     it(`Should create Loki LogPipeline '${dropLabelsLogPipelineName}'`, async () =>{
       await k8sApply(dropLabelsLogPipelineCR, telemetryNamespace);
       await waitForLogPipelineStatusCondition(dropLabelsLogPipelineName, 'Running', 180000);
+      await sleep(10 * 1000);
     });
 
     it(`Should verify that only annotations are pushed to Loki`, async () =>{
