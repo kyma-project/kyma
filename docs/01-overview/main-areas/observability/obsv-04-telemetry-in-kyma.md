@@ -65,22 +65,14 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
       output:
         http:
           dedot: false
-          format: "json"
-          host:
-            valueFrom:
-              secretKeyRef:
-                name: my-secret
-                namespace: my-namespace
-                key: host
           port: "80"
           uri: "/"
+          host:
+            value: https://myhost/logs
           user:
             value: "user"
           password:
             value: "not-required"
-          tls:
-            disabled: true
-            skipCertificateValidation: true
     ```
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
@@ -100,7 +92,8 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           Format             json
           Port               80
           Uri                /
-          Tls                Off
+          Tls                on
+          tls.verify         on
     ```
 
 2. To create the instance, apply the resource file in your cluster.
@@ -187,7 +180,7 @@ spec:
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
 
-To leverage data provided by a Kubernetes Secrets in a custom output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the keys of the Secret in the `variables` section, like in the following example:
+To leverage data provided by a Kubernetes Secrets in a `custom` output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the keys of the Secret in the `variables` section, like in the following example:
 
 ```yaml
 kind: LogPipeline
@@ -208,7 +201,7 @@ spec:
         secretKeyRef:
         - name: http-backend-credentials
           namespace: default
-          key: ENDPOINT
+          key: HTTP_ENDPOINT
   input:
     ...
   filters:
@@ -227,6 +220,44 @@ stringData:
   HTTP_USER: myUser
   HTTP_PASSWORD: XXX
 ```
+
+With the `http` and the `grafana-loki` output definition, the `valueFrom` attribute allows the mapping of Secret keys as visible in the following `http` output example:   
+
+```yaml
+kind: LogPipeline
+apiVersion: telemetry.kyma-project.io/v1alpha1
+metadata:
+  name: http-backend
+spec:
+  output:
+     http:
+        dedot: false
+        port: "80"
+        uri: "/"
+        host:
+           valueFrom:
+              secretKeyRef:
+                 name: http-backend-credentials
+                 namespace: default
+                 key: HTTP_ENDPOINT
+        user:
+           valueFrom:
+              secretKeyRef:
+                 name: http-backend-credentials
+                 namespace: default
+                 key: HTTP_USER
+        password:
+           valueFrom:
+              secretKeyRef:
+                 name: http-backend-credentials
+                 namespace: default
+                 key: HTTP_PASSWORD
+  input:
+    ...
+  filters:
+    ...
+```
+
 
 ### Step 5: Rotate the Secret
 
