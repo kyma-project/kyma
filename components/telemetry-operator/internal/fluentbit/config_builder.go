@@ -39,6 +39,7 @@ call                  kubernetes_map_keys`
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 	sb.WriteString(CreateRewriteTagFilter(pipelineConfig, logPipeline))
+
 	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
