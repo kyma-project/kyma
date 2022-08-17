@@ -19,6 +19,7 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"time"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
@@ -51,7 +52,7 @@ type LogPipelineReconciler struct {
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig fluentbit.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, pipelineConfig configbuilder.PipelineConfig, restartsTotal prometheus.Counter) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme

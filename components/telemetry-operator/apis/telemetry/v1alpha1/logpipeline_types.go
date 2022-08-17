@@ -111,7 +111,7 @@ type ValueType struct {
 }
 
 func (v *ValueType) IsDefined() bool {
-	return v.Value != "" || (v.ValueFrom.SecretKey.Name != "" && v.ValueFrom.SecretKey.Key != "")
+	return v.Value != "" || v.ValueFrom.IsSecretRef()
 }
 
 func (v *ValueFromType) IsSecretRef() bool {

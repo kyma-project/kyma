@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"os"
 	"strings"
 	"time"
@@ -40,7 +41,6 @@ import (
 	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -166,7 +166,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := configbuilder.PipelineConfig{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,

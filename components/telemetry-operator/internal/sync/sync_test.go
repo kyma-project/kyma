@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
@@ -9,7 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -27,7 +27,7 @@ var (
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
-	pipelineConfig = fluentbit.PipelineConfig{
+	pipelineConfig = configbuilder.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

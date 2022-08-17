@@ -2,9 +2,9 @@ package parserSync
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -57,7 +57,7 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 				return false, err
 			}
 
-			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
+			fluentBitParsersConfig := configbuilder.MergeParsersConfig(&logParsers)
 			if fluentBitParsersConfig == "" {
 				cm.Data = nil
 			} else {
@@ -74,7 +74,7 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			return false, err
 		}
 
-		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
+		fluentBitParsersConfig := configbuilder.MergeParsersConfig(&logParsers)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[parsersConfigMapKey] = fluentBitParsersConfig

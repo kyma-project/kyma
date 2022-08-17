@@ -2,11 +2,11 @@ package dryrun
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"os"
 	"path/filepath"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -93,7 +93,7 @@ func (f *fileWriterImpl) writeSections(pipeline *telemetryv1alpha1.LogPipeline, 
 		return err
 	}
 
-	sectionsConfig, err := fluentbit.MergeSectionsConfig(pipeline, f.config.PipelineConfig)
+	sectionsConfig, err := configbuilder.MergeSectionsConfig(pipeline, f.config.PipelineConfig)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (f *fileWriterImpl) writeParsers(ctx context.Context, basePath string) erro
 		return err
 	}
 
-	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
+	parsersConfig := configbuilder.MergeParsersConfig(&logParsers)
 	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
 }
 
@@ -128,7 +128,7 @@ func (f *fileWriterImpl) writeParsersWithParser(ctx context.Context, basePath st
 	}
 
 	appendOrReplace(&logParsers, parser)
-	parsersConfig := fluentbit.MergeParsersConfig(&logParsers)
+	parsersConfig := configbuilder.MergeParsersConfig(&logParsers)
 
 	return writeFile(filepath.Join(dynamicParsersDir, "parsers.conf"), parsersConfig)
 }
