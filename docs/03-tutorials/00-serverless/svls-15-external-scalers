@@ -1,0 +1,130 @@
+---
+title: External scalers
+---
+
+This tutorial shows how to use external resource scaler (like `HPA` or Keda's `ScaledObject`) with serverless Function.
+
+## Prerequisites
+
+Before you start, make sure you have these tools installed:
+
+- Kyma installed on a cluster
+
+## Steps
+
+Follow these steps:
+
+<div tabs name="steps" group="create-function">
+  <details>
+  <summary label="hpa">
+  HorizontalPodAutoscaler
+  </summary>
+
+1. Create function with the `replicas` value set to 1 to prevent internal serverless `HPA` creation:
+
+    ```yaml
+    cat <<EOF | kubectl apply -f -
+    apiVersion: serverless.kyma-project.io/v1alpha2
+    kind: Function
+    metadata:
+      name: scaled-function
+    spec:
+      runtime: nodejs14
+      replicas: 1
+      source:
+        inline:
+          dependencies: ""
+          source: |
+            module.exports = {
+              main: function(event, context) {
+                return 'Hello World!'
+              }
+            }
+    EOF
+    ```
+
+2. Create `HPA` using the `kubectl`:
+
+    ```bash
+    kubectl autoscale function scaled-function --cpu-percent=50 --min=5 --max=10
+    ```
+
+3. After a few seconds the `HPA` should be up to date and contain information about actual replicas:
+
+    ```bash
+    kubectl get hpa hpa-function
+    ```
+
+    Resoult should looks like this:
+
+    ```bash
+
+    ```
+
+  </details>
+  <details>
+  <summary label="keda">
+  Keda
+  </summary>
+
+1. Install Keda (read more [here](https://keda.sh/docs/2.8/deploy/))
+
+2. Create function with the `replicas` value set to 1 to prevent internal serverless `HPA` creation:
+
+    ```yaml
+    cat <<EOF | kubectl apply -f -
+    apiVersion: serverless.kyma-project.io/v1alpha2
+    kind: Function
+    metadata:
+      name: scaled-function
+    spec:
+      runtime: nodejs14
+      replicas: 1
+      source:
+        inline:
+          dependencies: ""
+          source: |
+            module.exports = {
+              main: function(event, context) {
+                return 'Hello World!'
+              }
+            }
+    EOF
+    ```
+
+3. Create the `ScaledObject` resource:
+
+  ```yaml
+    cat <<EOF | kubectl apply -f -
+    apiVersion: keda.sh/v1alpha1
+    kind: ScaledObject
+    metadata:
+      name: scaled-function
+    spec:
+      scaleTargetRef:
+        apiVersion:    serverless.kyma-project.io/v1alpha2
+        kind:          Function
+        name:          scaled-function
+    minReplicaCount:  5
+    maxReplicaCount:  10
+    triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "50"
+    EOF
+    ```
+4. After a few seconds the `ScaledObject` should be up to date and contain information about actual replicas:
+
+  ```bash
+  kubectl get scaledobject scaled-function
+  ```
+
+  Resoult should looks like this:
+
+  ```bash
+
+  ```
+
+</details>
+</div>
