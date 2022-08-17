@@ -12,14 +12,17 @@ const {keb, kcp, gardener} = require('../helpers');
 
 const updateTimeout = 1000 * 60 * 20; // 20m
 
-function oidcE2ETest(options, getShootInfoFunc) {
+function oidcE2ETest(getShootOptionsFunc, getShootInfoFunc) {
   describe('OIDC Test', function() {
     let shoot = undefined;
+    let options = undefined;
     let givenOidcConfig = undefined;
 
     before('Get provisioned Shoot Info', async function() {
       shoot = getShootInfoFunc();
+      options = getShootOptionsFunc();
       expect(shoot).to.not.be.undefined;
+      expect(options).to.not.be.undefined;
       givenOidcConfig = shoot.oidcConfig;
     });
 
