@@ -47,7 +47,9 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 	statsCollector := &automock.StatsCollector{}
 	statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+	gitFactory := &automock.GitClientFactory{}
+	gitFactory.On("GetGitClient", mock.Anything).Return(nil)
+	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
