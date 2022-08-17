@@ -15,7 +15,7 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
-   kubectl label namespace default istio-injection=enabled --overwrite
+   kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
 <div tabs>

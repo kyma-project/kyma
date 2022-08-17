@@ -19,7 +19,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
-   kubectl label namespace default istio-injection=enabled --overwrite
+   kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
 2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
