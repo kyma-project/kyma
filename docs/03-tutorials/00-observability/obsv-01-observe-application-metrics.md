@@ -31,6 +31,7 @@ Follow this tutorial to:
 
    ```bash
    kubectl create namespace testing-monitoring
+   kubectl label namespace testing-monitoring istio-injection=enabled --overwrite
    ```
 
 2. Deploy the sample service in the `testing-monitoring` Namespace.
