@@ -6,10 +6,9 @@ import (
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/gomega"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )

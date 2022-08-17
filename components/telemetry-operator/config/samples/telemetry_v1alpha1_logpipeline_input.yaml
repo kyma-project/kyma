@@ -1,0 +1,14 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: logpipeline-empty-inputs
+spec:
+  input:
+    application:
+      namespaces: []
+      excludeNamespaces: []
+      containers:  []
+      excludeContainers: []
+  output:
+    custom: |
+      Name               stdout

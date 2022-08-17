@@ -15,9 +15,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
-	roundTripper := httptools.NewRoundTripper(httptools.WithTLSSkipVerify(skipVerify), httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate))
-	retryableRoundTripper := NewRetryableRoundTripper(roundTripper, authorizationStrategy, csrfTokenStrategy, clientCertificate, timeout)
+func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipTLSVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
+	roundTripper := httptools.NewRoundTripper(httptools.WithTLSSkipVerify(skipTLSVerify), httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate))
+	retryableRoundTripper := NewRetryableRoundTripper(roundTripper, authorizationStrategy, csrfTokenStrategy, clientCertificate, timeout, skipTLSVerify)
 	return newProxy(targetURL, requestParameters, serviceName, retryableRoundTripper)
 }
 

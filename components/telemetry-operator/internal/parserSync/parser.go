@@ -37,7 +37,7 @@ func NewLogParserSyncer(client client.Client,
 	return &lps
 }
 
-// Synchronize LogParser with ConfigMap of DaemonSetUtils parsers.
+// SyncParsersConfigMap synchronizes LogParser with ConfigMap of DaemonSetUtils parsers.
 func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
@@ -91,7 +91,6 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
 			changed = true
 		}
-
 	}
 
 	if !changed {

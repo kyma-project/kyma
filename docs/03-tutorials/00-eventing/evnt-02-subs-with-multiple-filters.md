@@ -2,7 +2,7 @@
 title: Create Subscription subscribing to multiple event types
 ---
 
-The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource definition (CRD) is used to subscribe to events. In this tutorial, you learn how to subscribe to one or more event types using the Kyma Subscription.
+The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) CustomResourceDefinition (CRD) is used to subscribe to events. In this tutorial, you learn how to subscribe to one or more event types using the Kyma Subscription.
 
 ## Prerequisites
 

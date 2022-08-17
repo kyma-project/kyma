@@ -18,7 +18,7 @@ This usually happens when the workstation is using certain routers.
 
 ## Remedy
 
-Add the Virtual Service domains manually to the hosts file of your local system.
+Add the VirtualService domains manually to the hosts file of your local system.
 
 Run the following command:
 

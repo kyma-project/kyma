@@ -40,7 +40,7 @@ $ ko apply -f config/event-publisher-proxy/
 
 ### Send Events
 
-This command supports **cloud events**: 
+This command supports **CloudEvents**: 
 ```bash
 curl -v -X POST \
     -H "Content-Type: application/cloudevents+json" \
@@ -87,14 +87,14 @@ curl -v -X GET \
 
 | Environment Variable    | Default Value | Description                                                                                |
 | ----------------------- | ------------- |------------------------------------------------------------------------------------------- |
-| INGRESS_PORT            | 8080          | The ingress port for the Cloud Events Gateway Proxy.                                        |
+| INGRESS_PORT            | 8080          | The ingress port for the CloudEvents Gateway Proxy.                                        |
 | MAX_IDLE_CONNS          | 100           | The maximum number of idle (keep-alive) connections across all hosts. Zero means no limit. |
 | MAX_IDLE_CONNS_PER_HOST | 2             | The maximum idle (keep-alive) connections to keep per-host. Zero means the default value.  |
 | REQUEST_TIMEOUT         | 5s            | The timeout for the outgoing requests to the Messaging server.                             |
 | CLIENT_ID               |               | The Client ID used to acquire Access Tokens from the Authentication server.                |
 | CLIENT_SECRET           |               | The Client Secret used to acquire Access Tokens from the Authentication server.            |
 | TOKEN_ENDPOINT          |               | The Authentication Server Endpoint to provide Access Tokens.                               |
-| EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing Cloud Events to it.                   |
+| EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                   |
 | BEB_NAMESPACE           |               | The name of the namespace in BEB.                                                          |
 | EVENT_TYPE_PREFIX       |               | The prefix of the eventType as per the BEB event specification.                            |
 

@@ -4,6 +4,7 @@ const {
   lokiSecretData,
   tryGetLokiPersistentVolumeClaim,
   logsPresentInLoki,
+  queryLoki,
 } = require('./client');
 const {info} = require('../utils');
 
@@ -40,9 +41,34 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
+function parseJson(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return undefined;
+  }
+}
+
+async function verifyIstioAccessLogFormat(startTimestamp) {
+  const query = '{container="istio-proxy",namespace="kyma-system",pod="logging-loki-0"}';
+
+  const responseBody = await queryLoki(query, startTimestamp);
+
+  assert.isTrue(responseBody.data.result[0].values.length > 0, 'No Istio access logs found for loki');
+  const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
+  const log = parseJson(entry.log);
+  assert.isDefined(log, `Istio access log is not in JSON format: ${entry.log}`);
+  assert.isDefined(log['response_code'], `Istio access log does not have 'response_code' field: ${log}`);
+  assert.isDefined(log['bytes_received'], `Istio access log does not have 'bytes_received' field: ${log}`);
+  assert.isDefined(log['bytes_sent'], `Istio access log does not have 'bytes_sent' field: ${log}`);
+  assert.isDefined(log['duration'], `Istio access log does not have 'duration' field: ${log}`);
+  assert.isDefined(log['start_time'], `Istio access log does not have 'start_time' field: ${log}`);
+}
+
 module.exports = {
   checkCommerceMockLogs,
   checkKymaLogs,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
+  verifyIstioAccessLogFormat,
 };

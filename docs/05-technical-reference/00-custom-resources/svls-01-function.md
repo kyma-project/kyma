@@ -2,7 +2,7 @@
 title: Function
 ---
 
-The `functions.serverless.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
 kubectl get crd functions.serverless.kyma-project.io -o yaml
@@ -131,8 +131,8 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 
 | Reason                           | Type                 | Description                                                                                                                                                   |
 | -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ConfigMapCreated`               | `ConfigurationReady` | A new Config Map was created based on the Function CR definition.                                                                                              |
-| `ConfigMapUpdated`               | `ConfigurationReady` | The existing Config Map was updated after changes in the Function CR name, its source code or dependencies.                                                    |
+| `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                                                              |
+| `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.                                                    |
 | `SourceUpdated`                  | `ConfigurationReady` | The Function Controller managed to fetch changes in the Functions's source code and configuration from the Git repository (`type: git`).                |
 | `SourceUpdateFailed`             | `ConfigurationReady` | The Function Controller failed to fetch changes in the Functions's source code and configuration from the Git repository.                            |
 | `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                                                             |
@@ -158,11 +158,11 @@ These are the resources related to this CR:
 
 | Custom resource                                                                                              | Description                                                                           |
 | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [Config Map](https://kubernetes.io/docs/concepts/configuration/configmap/)                             | Stores the Function's source code and dependencies.                                   |
+| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)                             | Stores the Function's source code and dependencies.                                   |
 | [Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/)              | Builds an image with the Function's code in a runtime.                                |
 | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)                   | Serves the Function's image as a microservice.                                        |
 | [Service](https://kubernetes.io/docs/concepts/services-networking/service/)                           | Exposes the Function's Deployment as a network service inside the Kubernetes cluster. |
-| [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) | Automatically scales the number of Function's Pods.                                   |
+| [HorizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) | Automatically scales the number of Function's Pods.                                   |
 
 These components use this CR:
 

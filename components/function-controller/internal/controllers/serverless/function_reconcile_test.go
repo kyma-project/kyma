@@ -47,7 +47,9 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	statsCollector := &automock.StatsCollector{}
 	statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+	gitFactory := &automock.GitClientFactory{}
+	gitFactory.On("GetGitClient", mock.Anything).Return(nil)
+	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -502,7 +504,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		statsCollector := &automock.StatsCollector{}
 		statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-		reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+		gitFactory := &automock.GitClientFactory{}
+		gitFactory.On("GetGitClient", mock.Anything).Return(nil)
+
+		reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 		reconciler.config.Build.MaxSimultaneousJobs = 1
 
 		s := systemState{
@@ -1035,8 +1040,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		t.Log("updating function to use fixed replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.MinReplicas = &two
-		function.Spec.MaxReplicas = &two
+		function.Spec.ScaleConfig.MinReplicas = &two
+		function.Spec.ScaleConfig.MaxReplicas = &two
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("updating deployment with new number of replicas")
@@ -1084,7 +1089,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		t.Log("updating function to use scalable replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.MaxReplicas = &four
+		function.Spec.ScaleConfig.MaxReplicas = &four
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("creating hpa")

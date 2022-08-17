@@ -2,7 +2,7 @@
 title: Expose and secure a workload with JWT
 ---
 
-This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The Controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
+This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The Controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio VirtualService and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
 
 You can use it as a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
@@ -27,7 +27,7 @@ To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
    export GATEWAY=$NAMESPACE/httpbin-gateway #If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-2. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -78,7 +78,7 @@ To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
    export GATEWAY=$NAMESPACE/httpbin-gateway #If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-2. Expose the Function and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the Function and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -

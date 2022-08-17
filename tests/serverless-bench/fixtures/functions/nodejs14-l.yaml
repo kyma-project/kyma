@@ -1,16 +1,17 @@
-apiVersion: serverless.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 metadata:
   labels:
     serverless.kyma-project.io/function-resources-preset: L
   name: nodejs14-l
 spec:
-  maxReplicas: 1
-  minReplicas: 1
+  scaleConfig:
+    maxReplicas: 1
+    minReplicas: 1
   runtime: nodejs14
   source:
     inline:
-      deps: |-
+      dependencies: |-
         {
           "name": "nodejs14-l",
           "version": "0.0.1",

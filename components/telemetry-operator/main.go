@@ -23,12 +23,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
+	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
+	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
 
 	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -143,7 +146,7 @@ func main() {
 	}
 
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_restarts_total",
+		Name: "telemetry_fluentbit_triggered_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
 	metrics.Registry.MustRegister(restartsTotal)
@@ -200,23 +203,27 @@ func main() {
 		},
 	}
 
-	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
-		fluentBitConfigMap,
-		fluentBitNs,
-		validation.NewVariablesValidator(mgr.GetClient()),
-		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
-		validation.NewPluginValidator(
+	dryRunConfig := &dryrun.Config{
+		FluentBitBinPath:       fluentBitPath,
+		FluentBitPluginDir:     fluentBitPluginDirectory,
+		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
+		PipelineConfig:         pipelineConfig,
+	}
+
+	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logpipelinevalidation.NewInputValidator(),
+		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
+		logpipelinevalidation.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
 			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-		validation.NewMaxPipelinesValidator(maxPipelines),
-		validation.NewOutputValidator(),
-		pipelineConfig,
-		fs.NewWrapper(),
-		restartsTotal,
-	)
+		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
+		logpipelinevalidation.NewOutputValidator(),
+		logpipelinevalidation.NewFilesValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
-		&k8sWebhook.Admission{Handler: logPipelineValidator})
+		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
 
 	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
 		mgr.GetClient(),
@@ -239,18 +246,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	logParserValidator := webhook.NewLogParserValidator(mgr.GetClient(),
-		fluentBitConfigMap,
-		fluentBitNs,
-		validation.NewParserValidator(),
-		pipelineConfig,
-		validation.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
-		fs.NewWrapper(),
-		restartsTotal,
-	)
+	logParserValidationHandler := logparser.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logparservalidation.NewParserValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
 		"/validate-logparser",
-		&k8sWebhook.Admission{Handler: logParserValidator})
+		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

@@ -8,7 +8,7 @@ NATS JetStream backend stopped receiving events due to full storage.
 
 You see one of the following messages:
 - `507 Insufficient Storage` error from Event Publisher Proxy.
-- `no space left on device` from the eventing backend.
+- `no space left on device` from the Eventing backend.
 
 ## Cause
 

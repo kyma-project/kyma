@@ -12,10 +12,10 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **bindings.kymaEssentials.groups** | Specifies the array of groups used in Cluster Role Binding to the **kyma-essentials** Cluster Role. | `[]` |
-| **bindings.kymaView.groups** | Specifies the array of groups used in Cluster Role Binding to the **kyma-view** Cluster Role. | `[]` |
-| **bindings.kymaEdit.groups** | Specifies the array of groups used in Cluster Role Binding to the **kyma-edit** Cluster Role. | `[]` |
-| **bindings.kymaAdmin.groups** | Specifies the array of groups used in Cluster Role Binding to the **kyma-admin** Cluster Role. | `[]` |
-| **bindings.kymaDeveloper.groups** | Specifies the array of groups used in Cluster Role Binding to the **kyma-developer** Cluster Role. | `[]` |
-| **users.administrators** | Specifies the array of names used in Cluster Role Binding to the **kyma-admin** Cluster Role. | `["admin@kyma.cx"]` |
-| **users.adminGroup** | Specifies the name of the group used in Cluster Role Binding to the **kyma-admin** Cluster Role. | `""` |
+| **bindings.kymaEssentials.groups** | Specifies the array of groups used in ClusterRoleBinding to the **kyma-essentials** ClusterRole. | `[]` |
+| **bindings.kymaView.groups** | Specifies the array of groups used in ClusterRoleBinding to the **kyma-view** ClusterRole. | `[]` |
+| **bindings.kymaEdit.groups** | Specifies the array of groups used in ClusterRoleBinding to the **kyma-edit** ClusterRole. | `[]` |
+| **bindings.kymaAdmin.groups** | Specifies the array of groups used in ClusterRoleBinding to the **kyma-admin** ClusterRole. | `[]` |
+| **bindings.kymaDeveloper.groups** | Specifies the array of groups used in ClusterRoleBinding to the **kyma-developer** ClusterRole. | `[]` |
+| **users.administrators** | Specifies the array of names used in ClusterRoleBinding to the **kyma-admin** ClusterRole. | `["admin@kyma.cx"]` |
+| **users.adminGroup** | Specifies the name of the group used in ClusterRoleBinding to the **kyma-admin** ClusterRole. | `""` |

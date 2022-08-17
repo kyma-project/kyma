@@ -2,7 +2,7 @@
 title: Expose and secure a workload with Istio
 ---
 
-This tutorial shows how to expose and secure a workload using Istio built-in security features. You will expose the workload by creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/). Then, you will secure access to your workload by adding the JWT validation verified by the Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) and [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
+This tutorial shows how to expose and secure a workload using Istio built-in security features. You will expose the workload by creating a [VirtualService](https://istio.io/latest/docs/reference/config/networking/virtual-service/). Then, you will secure access to your workload by adding the JWT validation verified by the Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) and [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 ## Expose your workload using a Virtual Service
 
-Follow the instructions in the tabs to expose the HttpBin workload or the Function using a Virtual Service.
+Follow the instructions in the tabs to expose the HttpBin workload or the Function using a VirtualService.
 
 <div tabs>
 
@@ -29,7 +29,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-2. Create a Virtual Service:
+2. Create a VirtualService:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -68,7 +68,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-2. Create a Virtual Service:
+2. Create a VirtualService:
 
    ```shell
    cat <<EOF | kubectl apply -f -

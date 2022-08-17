@@ -29,11 +29,11 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
   ```
 
-3. Create a DNS Provider and a DNS Entry CRs.
+3. Create a DNSProvider and a DNSEntry custom resource (CR).
 
    - Export the following values as environment variables and run the command provided.
   
-   As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNS Provider CR.
+   As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
 
    ```bash
    export SPEC_TYPE={PROVIDER_TYPE}

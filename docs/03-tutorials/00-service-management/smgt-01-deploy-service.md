@@ -108,4 +108,4 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     kubectl delete ns sap-btp-operator
     ```
 
->**TIP:** You can use Kyma Dashboard to create and manage resources such as Service Instances and Service Bindings. To do so, navigate to your Namespace view and go to the **Service Management** tab in the left navigation. Still, you need to obtain service details, such as service name and plan, from the BTP Cockpit.
+>**TIP:** You can use Kyma Dashboard to create and manage resources such as ServiceInstances and ServiceBindings. To do so, navigate to your Namespace view and go to the **Service Management** tab in the left navigation. Still, you need to obtain service details, such as service name and plan, from the BTP Cockpit.
