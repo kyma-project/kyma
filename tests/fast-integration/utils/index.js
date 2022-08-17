@@ -4,6 +4,7 @@ const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
 const execa = require('execa');
+const { mockNamespace } = require('../eventing-test/utils');
 
 const kc = new k8s.KubeConfig();
 let k8sDynamicApi;
@@ -736,20 +737,6 @@ async function deleteNamespaces(namespaces, wait = true) {
   if (namespaces.length === 0) {
     return;
   }
-  const waitForNamespacesResult = waitForK8sObject(
-      '/api/v1/namespaces',
-      {},
-      (type, _, watchObj) => {
-        if (type === 'DELETED') {
-          namespaces = namespaces.filter(
-              (n) => n !== watchObj.object.metadata.name,
-          );
-        }
-        return namespaces.length === 0 || !wait;
-      },
-      10 * 60 * 1000,
-      'Timeout for deleting namespaces: ' + namespaces,
-  );
 
   for (const name of namespaces) {
     k8sDynamicApi
@@ -999,6 +986,20 @@ async function getKymaAdminBindings() {
             .filter((sub) => sub.kind === 'Group')
             .map((sub) => sub.name),
       }));
+}
+
+async function labelNamespaceWithIstioInject(targetNamespace, enabled){
+  const patch = [
+    {
+        "op": "add",
+        "path":"/metadata/labels",
+        "value": {
+            "istio-injection": `${enabled}`
+        }
+    }
+  ];
+
+  await k8sCoreV1Api.patchNamespace(mockNamespace,patch).then(() => { console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`)}).catch((err) => { console.log("Error: "); console.log(err)});
 }
 
 async function findKymaAdminBindingForUser(targetUser) {
