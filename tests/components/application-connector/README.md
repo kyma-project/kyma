@@ -5,19 +5,28 @@ These are the component tests for Application Connector.
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
-- [Design and architecture](#design-and-architecture)
-- [Mock application](#mock-application)
-- [Building](#building)
-- [Running](#running)
-    - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
-    - [Run the tests](#run-the-tests)
-- [Debugging](#debugging)
-    - [Running locally](#running-locally)
-    - [Running without cleanup](#running-without-cleanup)
+- [Component tests for Application Connector](#component-tests-for-application-connector)
+   - [Application Gateway](#application-gateway)
+      - [Design and architecture](#design-and-architecture)
+      - [Mock application](#mock-application)
+         - [Certificates](#certificates)
+         - [API exposed on port `8080`](#api-exposed-on-port-8080)
+         - [API exposed on port `8090`](#api-exposed-on-port-8090)
+         - [API exposed on port `8091`](#api-exposed-on-port-8091)
+      - [Building](#building)
+      - [Running](#running)
+         - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
+         - [Run the tests](#run-the-tests)
+      - [Debugging](#debugging)
+         - [Running locally](#running-locally)
+         - [Running without cleanup](#running-without-cleanup)
+   - [Application Connectivity Validator](#application-connectivity-validator)
 
 <!-- markdown-toc end -->
 
-## Design and architecture
+## Application Gateway
+
+### Design and architecture
 
 The tests consist of:
 - [Application CRs](./resources/charts/gateway-test/templates/applications/) describing the test cases
@@ -27,21 +36,21 @@ The tests consist of:
 
 Additionally, the following resources are created on the cluster:
 - [Service Account](./resources/charts/gateway-test/templates/service-account.yml#L2) used by the tests to read the Application CRs
-- [Secrets](./resources/charts/gateway-test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers 
+- [Secrets](./resources/charts/gateway-test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
 
-The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed. 
-The test Job and the mock application deployment are in the `test` Namespace. 
+The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
+The test Job and the mock application deployment are in the `test` Namespace.
 
 ![Application Gateway tests architecture](./assets/app-gateway-tests-architecture.svg)
 
-## Mock application
+### Mock application
 
 Mock application exposes the following APIs:
 - API on port `8080` implementing various authentication methods and returning the `OAuth` and `CSRF` tokens
 - API on port `8090` implementing the `mTLS` authentication and returning the `OAuth` tokens
 - API on port `8091` implementing the `mTLS` authentication and using an expired server certificate
 
-### Certificates
+#### Certificates
 
 To test mTLS-related authentication methods, you need:
 - Server certificate, key, and the CA certificate for the mock application
@@ -52,9 +61,9 @@ The target is executed before the tests are run, and it invokes [`generate-self-
 
 > **NOTE:** Since self-signed certificates are used, Application CRs have the **skipVerify: true** property set to `true` to force Application Gateway to skip certificate verification.
 
-### API exposed on port `8080` 
+#### API exposed on port `8080`
 
-To get tokens for the `OAuth` and `CSRF` protected endpoints, we have the following API: 
+To get tokens for the `OAuth` and `CSRF` protected endpoints, we have the following API:
 ![8080 token API](./assets/api-tokens.png)
 
 To test authentication methods, we have the following API:
@@ -62,7 +71,7 @@ To test authentication methods, we have the following API:
 
 The credentials used for authentication, such as `user` and `password`, are [hardcoded](./tools/external-api-mock-app/config.go).
 
-### API exposed on port `8090`
+#### API exposed on port `8090`
 
 To get tokens for the `OAuth` protected endpoints, we have the following API:
 ![8090 token API](./assets/api-tokens-mtls.png)
@@ -70,20 +79,20 @@ To get tokens for the `OAuth` protected endpoints, we have the following API:
 To test authentication methods, we have the following API:
 ![8090 authorisation methods API](./assets/api-auth-methods-mtls.png)
 
-The credentials used for authentication, such as `clientID`, are [hardcoded](./tools/external-api-mock-app/config.go). 
+The credentials used for authentication, such as `clientID`, are [hardcoded](./tools/external-api-mock-app/config.go).
 The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](./resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml).
 
 > **NOTE:** Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
-### API exposed on port `8091`
+#### API exposed on port `8091`
 
-This API is identical to the one exposed on port `8090`. 
+This API is identical to the one exposed on port `8090`.
 The HTTPS server on port `8091` uses an expired server certificate.
 The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](./resources/charts/gateway-test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml).
 
 > **NOTE:** Port `8091` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
-## Building
+### Building
 
 Pipelines build the mock application and the Gateway test using the `release` target from the `Makefile`.
 
@@ -97,13 +106,13 @@ This will build the following images:
 - `{DOCKER_PUSH_REPOSITORY}/gateway-test:{DOCKER_TAG}`
 - `{DOCKER_PUSH_REPOSITORY}/mock-app:{DOCKER_TAG}`
 
-## Running
+### Running
 
 Tests can be run on any Kyma cluster with Application Gateway.
 
 Pipelines run the tests using the `test-gateway` target from the `Makefile`.
 
-### Deploy a Kyma cluster locally
+#### Deploy a Kyma cluster locally
 
 1. Provision a local Kubernetes cluster with k3d:
    ```sh
@@ -135,9 +144,9 @@ Pipelines run the tests using the `test-gateway` target from the `Makefile`.
     </details>
     </div>
 
-    >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).
+   >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).
 
-### Run the tests
+#### Run the tests
 
 ``` sh
 make test-gateway
@@ -147,9 +156,9 @@ By default, the tests clean up after themselves, removing all the previously cre
 
 > **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
 
-## Debugging
+### Debugging
 
-### Running locally
+#### Running locally
 
 > **CAUTION:** Because of the way it accesses the Application CRs, the test Job must run **on a cluster**.
 > Application Gateway and the mock application can both be run locally.
@@ -161,7 +170,7 @@ To run the mock application locally, follow these steps:
 3. Deploy all the resources on the cluster.
    > **NOTE:** You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
 4. Build the mock application:
-   
+
    <div tabs name="Mock App Build Flavor" group="mock-app-flavor">
    <details open>
    <summary label="dockerized">
@@ -187,7 +196,7 @@ To run the mock application locally, follow these steps:
    </details>
    </div>
 5. Run the mock application:
-   
+
    <div tabs name="Mock App Run Flavor" group="mock-app-flavor">
    <details open>
    <summary label="dockerized">
@@ -215,7 +224,7 @@ To run the mock application locally, follow these steps:
 
 You can now send requests to Application Gateway, and debug its behavior locally.
 
-### Running without cleanup
+#### Running without cleanup
 
 To run the tests without removing all the created resources afterwards, run them in the debugging mode.
 
@@ -230,3 +239,5 @@ To run the tests without removing all the created resources afterwards, run them
    ``` shell
    make clean-gateway-test enable-sidecar-after-mtls-test
    ```
+
+## Application Connectivity Validator
