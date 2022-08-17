@@ -159,31 +159,6 @@ describe('Telemetry Operator tests', function() {
     });
   });
   let createCRTimestamp;
-  context('Should verify Kubernetes metadata scenario 1: drop annotations, keep labels', async () => {
-    it(`Should create Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
-      await k8sApply(keepLabelsLogPipelineCR, telemetryNamespace);
-      await waitForLogPipelineStatusCondition(keepLabelsLogPipelineName, 'Running', 180000);
-      createCRTimestamp = new Date().toISOString();
-      await sleep(10 * 1000);
-    });
-
-    it(`Should verify that only labels are pushed to Loki`, async () =>{
-      const labels = '{namespace="kyma-system", job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
-      const responseBody = await queryLoki(labels, testStartTimestamp);
-
-      assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
-      const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-      assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
-
-      expect(entry['kubernetes']).not.to.have.property('annotations');
-      expect(entry['kubernetes']).to.have.property('labels');
-    });
-
-    it(`Should delete Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
-      await k8sDelete(keepLabelsLogPipelineCR, telemetryNamespace);
-    });
-  });
-
   context('Should verify Kubernetes metadata scenario 2: keep annotations, drop labels', async () => {
     it(`Should create Loki LogPipeline '${dropLabelsLogPipelineName}'`, async () =>{
       await k8sApply(dropLabelsLogPipelineCR, telemetryNamespace);
@@ -199,7 +174,7 @@ describe('Telemetry Operator tests', function() {
       assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
       const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
       assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
-      info('entry', entry);
+      info('entry', responseBody.data.result[0].values);
 
       expect(entry['kubernetes']).not.to.have.property('labels');
       expect(entry['kubernetes']).to.have.property('annotations');
@@ -207,6 +182,32 @@ describe('Telemetry Operator tests', function() {
 
     it(`Should delete Loki LogPipeline '${dropLabelsLogPipelineName}'`, async () =>{
       await k8sDelete(dropLabelsLogPipelineCR, telemetryNamespace);
+    });
+  });
+
+  context('Should verify Kubernetes metadata scenario 1: drop annotations, keep labels', async () => {
+    it(`Should create Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
+      await k8sApply(keepLabelsLogPipelineCR, telemetryNamespace);
+      await waitForLogPipelineStatusCondition(keepLabelsLogPipelineName, 'Running', 180000);
+      createCRTimestamp = new Date().toISOString();
+      await sleep(10 * 1000);
+    });
+
+    it(`Should verify that only labels are pushed to Loki`, async () =>{
+      const labels = '{namespace="kyma-system", job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
+      const responseBody = await queryLoki(labels, testStartTimestamp);
+
+      assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
+      const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
+      info('entry', responseBody.data.result[0].values);
+      assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
+
+      expect(entry['kubernetes']).not.to.have.property('annotations');
+      expect(entry['kubernetes']).to.have.property('labels');
+    });
+
+    it(`Should delete Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
+      await k8sDelete(keepLabelsLogPipelineCR, telemetryNamespace);
     });
   });
 });
