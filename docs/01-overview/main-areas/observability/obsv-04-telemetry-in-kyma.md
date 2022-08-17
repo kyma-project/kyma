@@ -178,7 +178,7 @@ spec:
 
 ### Step 4: Add authentication details from Secrets
 
-Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
+Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets.
 
 With the `http` and the `grafana-loki` output definition, the `valueFrom` attribute allows the mapping of Secret keys as visible in the following `http` output example:
 
