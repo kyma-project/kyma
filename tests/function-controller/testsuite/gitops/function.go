@@ -27,7 +27,9 @@ func GitopsFunction(repoURL, baseDir, reference string, rtm serverlessv1alpha2.R
 				},
 			},
 		},
-		MinReplicas: &minReplicas,
-		MaxReplicas: &maxReplicas,
+		ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+			MinReplicas: &minReplicas,
+			MaxReplicas: &maxReplicas,
+		},
 	}
 }

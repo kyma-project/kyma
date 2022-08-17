@@ -4,11 +4,14 @@ kind: LogPipeline
 metadata:
   name: loki
 spec:
+  input:
+    application:
+      includeSystemNamespaces: true
   output:
     grafana-loki:
-      Url:
+      url:
         value: "http://logging-loki:3100/loki/api/v1/push"
-      Labels:
+      labels:
         "job": "telemetry-fluent-bit"
-      RemoveKeys: ["kubernetes", "stream"]
+      removeKeys: ["kubernetes", "stream"]
 {{ end}}

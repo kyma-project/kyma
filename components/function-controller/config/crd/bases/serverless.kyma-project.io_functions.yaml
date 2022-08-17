@@ -456,14 +456,6 @@ spec:
                   - name
                   type: object
                 type: array
-              maxReplicas:
-                format: int32
-                minimum: 1
-                type: integer
-              minReplicas:
-                format: int32
-                minimum: 1
-                type: integer
               resourceConfiguration:
                 properties:
                   build:
@@ -544,6 +536,17 @@ spec:
                 type: string
               runtimeImageOverride:
                 type: string
+              scaleConfig:
+                properties:
+                  maxReplicas:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  minReplicas:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
               source:
                 properties:
                   gitRepository:
@@ -583,7 +586,6 @@ spec:
                       source:
                         type: string
                     required:
-                    - dependencies
                     - source
                     type: object
                 type: object
