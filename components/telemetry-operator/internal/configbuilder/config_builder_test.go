@@ -73,11 +73,11 @@ call                  kubernetes_map_keys`
 
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
+    Emitter_Mem_Buf_Limit 10M
     Emitter_Name          foo
     Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
+    Match                 kube.*
+    Name                  rewrite_tag
     Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
@@ -98,14 +98,14 @@ func TestFilter(t *testing.T) {
 
 [OUTPUT]
     allow_duplicated_headers true
-    format json
-    host localhost
-    match foo.*
-    name http
-    port 443
+    format                   json
+    host                     localhost
+    match                    foo.*
+    name                     http
+    port                     443
     storage.total_limit_size 1G
-    tls on
-    tls.verify on
+    tls                      on
+    tls.verify               on
 
 `
 

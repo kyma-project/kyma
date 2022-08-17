@@ -20,23 +20,20 @@ func CreateOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config Pipelin
 }
 
 func generateCustomOutput(output *telemetryv1alpha1.Output, fsBufferLimit string, name string) string {
-	sb := NewSectionBuilder()
-	sb.CreateOutputSection()
+	sb := NewOutputSectionBuilder()
 	customOutputParams := parseMultiline(output.Custom)
 	for _, p := range customOutputParams {
 		sb.AddConfigParam(p.key, p.value)
 	}
 	sb.AddConfigParam(MatchKey, generateMatchCondition(name))
 	sb.AddConfigParam(OutputStorageMaxSizeKey, fsBufferLimit)
-	return sb.String()
+	return sb.Build()
 }
 
 func generateHTTPOutput(httpOutput *telemetryv1alpha1.HTTPOutput, fsBufferLimit string, name string) string {
-	sb := NewSectionBuilder()
-	sb.CreateOutputSection()
+	sb := NewOutputSectionBuilder()
 	sb.AddConfigParam("name", "http")
 	sb.AddConfigParam("port", "443")
-	sb.AddConfigParam("tls", "on")
 	sb.AddConfigParam("allow_duplicated_headers", "true")
 	sb.AddConfigParam("format", "json")
 	sb.AddConfigParam(MatchKey, generateMatchCondition(name))
@@ -59,16 +56,19 @@ func generateHTTPOutput(httpOutput *telemetryv1alpha1.HTTPOutput, fsBufferLimit 
 	sb.AddIfNotEmpty("compress", httpOutput.Compress)
 	if httpOutput.TLSConfig.Disabled {
 		sb.AddConfigParam("tls", "off")
+	} else {
+		sb.AddConfigParam("tls", "on")
 	}
 	if httpOutput.TLSConfig.SkipCertificateValidation {
 		sb.AddConfigParam("tls.verify", "off")
+	} else {
+		sb.AddConfigParam("tls.verify", "on")
 	}
-	return sb.String()
+	return sb.Build()
 }
 
 func generateLokiOutput(lokiOutput *telemetryv1alpha1.LokiOutput, fsBufferLimit string, name string) string {
-	sb := NewSectionBuilder()
-	sb.CreateOutputSection()
+	sb := NewOutputSectionBuilder()
 	sb.AddConfigParam("labelMapPath", "/fluent-bit/etc/loki-labelmap.json")
 	sb.AddConfigParam("loglevel", "warn")
 	sb.AddConfigParam("lineformat", "json")
@@ -85,7 +85,7 @@ func generateLokiOutput(lokiOutput *telemetryv1alpha1.LokiOutput, fsBufferLimit 
 		str := strings.Join(lokiOutput.RemoveKeys, ", ")
 		sb.AddConfigParam("removeKeys", str)
 	}
-	return sb.String()
+	return sb.Build()
 }
 
 func parseMultiline(section string) []configParam {
@@ -109,7 +109,6 @@ func concatenateLabels(labels map[string]string) string {
 	for k, v := range labels {
 		labelString = append(labelString, fmt.Sprintf("%s=\"%s\"", k, v))
 	}
-	// {key="value", key="value", key="value", key="value"}
 	return fmt.Sprintf("{%s}", strings.Join(labelString, ", "))
 }
 

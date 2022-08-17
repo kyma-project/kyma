@@ -9,8 +9,7 @@ import (
 
 // CreateRewriteTagFilterSection creates the Fluent Bit Rewrite Tag Filter section
 func CreateRewriteTagFilterSection(config PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
-	var sectionBuilder = NewSectionBuilder().
-		CreateFilterSection().
+	var sectionBuilder = NewFilterSectionBuilder().
 		AddConfigParam("Name", "rewrite_tag").
 		AddConfigParam("Match", fmt.Sprintf("%s.*", config.InputTag)).
 		AddConfigParam("Emitter_Name", logPipeline.Name).
@@ -24,7 +23,7 @@ func CreateRewriteTagFilterSection(config PipelineConfig, logPipeline *telemetry
 			sectionBuilder.AddConfigParam("Rule",
 				fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*\" %s.$TAG true", logPipeline.Name))
 		}
-		return sectionBuilder.String()
+		return sectionBuilder.Build()
 	}
 
 	if len(logPipeline.Spec.Input.Application.Namespaces) > 0 {
@@ -51,5 +50,5 @@ func CreateRewriteTagFilterSection(config PipelineConfig, logPipeline *telemetry
 				strings.Join(logPipeline.Spec.Input.Application.ExcludeContainers, "$|"), logPipeline.Name))
 	}
 
-	return sectionBuilder.String()
+	return sectionBuilder.Build()
 }
