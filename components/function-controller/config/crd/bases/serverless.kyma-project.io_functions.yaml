@@ -627,16 +627,7 @@ spec:
               reference:
                 type: string
               runtime:
-                description: RuntimeExtended enumerates runtimes that are either currently
-                  supported or no longer supported but there still might be "read-only"
-                  Functions using them
-                enum:
-                - nodejs12
-                - nodejs14
-                - nodejs16
-                - nodejs10
-                - python38
-                - python39
+                description: Runtime specifies the name of the Function's runtime.
                 type: string
               runtimeImageOverride:
                 type: string
