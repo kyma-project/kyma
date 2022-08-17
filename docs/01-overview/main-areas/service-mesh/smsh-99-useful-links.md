@@ -10,7 +10,7 @@ If you're interested in learning more about Service Mesh in Kyma, follow these l
 
 - Perform some simple and more advanced tasks:
 
-  - [Disable Istio Sidecar Proxy Injection](../../../04-operation-guides/operations/smsh-01-istio-disable-sidecar-injection.md)
+  - [Disable Istio Sidecar Proxy Injection](../../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md)
 
 - Troubleshoot Service Mesh-related issues when:
 
