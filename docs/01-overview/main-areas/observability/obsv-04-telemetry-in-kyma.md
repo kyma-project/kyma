@@ -529,7 +529,7 @@ You cannot enable the following plugins, because they potentially harm the stabi
 - Kubernetes Filter
 - Rewrite_Tag Filter
 
-In addition, the prefix `__k8s__` is reserved by the LogPipeline and should not be used in any Filter definition.
+In addition, the strings `__k8s__` and `kubernetes` are reserved by the LogPipeline and should not be used in the log payload, otherwise they will be overwritten.
 
 ### Buffer limits
 
