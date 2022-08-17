@@ -1016,20 +1016,6 @@ async function getKymaAdminBindings() {
       }));
 }
 
-async function labelNamespaceWithIstioInject(targetNamespace, enabled){
-  const patch = [
-    {
-        "op": "add",
-        "path":"/metadata/labels",
-        "value": {
-            "istio-injection": `${enabled}`
-        }
-    }
-  ];
-
-  await k8sCoreV1Api.patchNamespace(mockNamespace,patch).then(() => { console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`)}).catch((err) => { console.log("Error: "); console.log(err)});
-}
-
 async function findKymaAdminBindingForUser(targetUser) {
   const kymaAdminBindings = await getKymaAdminBindings();
   return kymaAdminBindings.find(
