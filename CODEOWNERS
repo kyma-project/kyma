@@ -31,6 +31,7 @@
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/telemetry-operator @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
 # All files and subdirectories in /docs
 /docs @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
