@@ -16,7 +16,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 1. Create a Namespace and export it as an environment variable. Run:
    
-   **CAUTION:** Istio sidecar proxy injection is disabled by default. To enable it set the `istio-injection=enabled` flag at the Namespace level.
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
