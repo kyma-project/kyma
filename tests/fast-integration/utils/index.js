@@ -982,18 +982,22 @@ async function getContainerRestartsForAllNamespaces() {
       }));
 }
 
-async function labelNamespaceWithIstioInject(targetNamespace, enabled){
+async function labelNamespaceWithIstioInject(targetNamespace, enabled) {
   const patch = [
     {
-        "op": "add",
-        "path":"/metadata/labels",
-        "value": {
-            "istio-injection": `${enabled}`
-        }
-    }
+      'op': 'add',
+      'path': '/metadata/labels',
+      'value': {
+        'istio-injection': `${enabled}`,
+      },
+    },
   ];
 
-  await k8sCoreV1Api.patchNamespace(mockNamespace,patch).then(() => { console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`)}).catch((err) => { console.log("Error: "); console.log(err)});
+  await k8sCoreV1Api.patchNamespace(targetNamespace, patch).then(() => {
+    console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`);
+  }).catch((err) => {
+    console.log('Error: '); console.log(err);
+  });
 }
 
 async function getKymaAdminBindings() {
@@ -1698,4 +1702,5 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
+  labelNamespaceWithIstioInject,
 };
