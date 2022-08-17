@@ -180,7 +180,7 @@ spec:
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets.
 
-With the **http** and the **grafana-loki** output definition, the **valueFrom** attribute allows the mapping of Secret keys as visible in the following **http** output example:
+With the **http** and the **grafana-loki** output definition, the **valueFrom** attribute allows for mapping of Secret keys as visible in the following **http** output example:
 
 ```yaml
 kind: LogPipeline
