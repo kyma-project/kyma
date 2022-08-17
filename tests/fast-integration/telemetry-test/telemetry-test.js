@@ -4,10 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const {
   k8sCoreV1Api,
-  k8sDynamicApi,
   k8sApply,
   k8sDelete,
-  sleep,
   waitForK8sObject,
 } = require('../utils');
 const {logsPresentInLoki, queryLoki} = require('../logging');
@@ -28,8 +26,10 @@ const mockserverDeployment = loadResourceFromFile('./resources/deployments/mocks
 // Load Telemetry CR's
 const httpLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/http-logpipeline.yaml');
 const invalidLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/invalid-logpipeline.yaml');
-const dropLabelsLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/loki-k8s-metadata-filter-drop-labels-logpipeline.yaml');
-const keepLabelsLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/loki-k8s-metadata-filter-keep-labels-logpipeline.yaml');
+const dropLabelsLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/loki-k8s-metadata-filter-drop-labels-logpipeline.yaml');
+const keepLabelsLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/loki-k8s-metadata-filter-keep-labels-logpipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/regex-logparser.yaml');
 
 // CR names
@@ -144,7 +144,7 @@ describe('Telemetry Operator tests, prepare the environment', function() {
   context('Should verify HTTP LogPipeline', async () => {
     it(`Should create HTTP LogPipeline '${httpLogPipelineName}'`, async () => {
       await k8sApply(httpLogPipelineCR, telemetryNamespace);
-      await waitForLogPipelineStatusCondition('http-mockserver', 'Running', 180000);
+      await waitForLogPipelineStatusCondition(httpLogPipelineName, 'Running', 180000);
     });
 
     it('Should push logs to the HTTP mockserver', async () => {
