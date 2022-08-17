@@ -12,9 +12,11 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
 
 1. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
 
+   **CAUTION:** Istio sidecar proxy injection is disabled by default. To enable it set the `istio-injection=enabled` flag at the Namespace level.
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
+   kubectl label namespace default istio-injection=enabled --overwrite
    ```
 
 <div tabs>
