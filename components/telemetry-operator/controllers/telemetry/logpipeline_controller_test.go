@@ -164,7 +164,9 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
-					Input:     telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{IncludeSystemNamespaces: true}},
+					Input: telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{
+						Namespaces: telemetryv1alpha1.InputNamespaces{
+							System: true}}},
 					Filters:   []telemetryv1alpha1.Filter{filter},
 					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:     []telemetryv1alpha1.FileMount{file},
