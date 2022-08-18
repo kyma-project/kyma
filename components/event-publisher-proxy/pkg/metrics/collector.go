@@ -60,7 +60,7 @@ func NewCollector() *Collector {
 				Name: EventTypePublishedMetricKey,
 				Help: EventTypePublishedMetricHelp,
 			},
-			[]string{"event_type", "event_source"},
+			[]string{"event_type", "event_source", responseCode},
 		),
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -99,8 +99,8 @@ func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destSv
 }
 
 // RecordEventType records a eventType metric
-func (c *Collector) RecordEventType(eventType, eventSource string) {
-	c.eventType.WithLabelValues(eventType, eventSource).Inc()
+func (c *Collector) RecordEventType(eventType, eventSource string, statusCode int) {
+	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
 }
 
 // RecordRequests records the eventRequests metric
