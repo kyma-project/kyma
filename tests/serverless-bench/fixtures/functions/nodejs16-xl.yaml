@@ -5,8 +5,9 @@ metadata:
     serverless.kyma-project.io/function-resources-preset: XL
   name: nodejs16-xl
 spec:
-  maxReplicas: 1
-  minReplicas: 1
+  scaleConfig:
+    maxReplicas: 1
+    minReplicas: 1
   runtime: nodejs16
   source:
     inline:

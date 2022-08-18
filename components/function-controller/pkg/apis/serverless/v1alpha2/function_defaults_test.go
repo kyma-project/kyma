@@ -115,8 +115,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 			expectedFunc: Function{Spec: FunctionSpec{
@@ -147,8 +149,10 @@ func TestSetDefaults(t *testing.T) {
 						},
 					},
 				},
-				MinReplicas: &two,
-				MaxReplicas: &two,
+				ScaleConfig: &ScaleConfig{
+					MinReplicas: &two,
+					MaxReplicas: &two,
+				},
 			},
 			},
 		},
@@ -182,8 +186,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 			expectedFunc: Function{
@@ -215,8 +221,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 		},
@@ -249,8 +257,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 			expectedFunc: Function{
@@ -282,8 +292,11 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
+				},
 			},
 		},
 		"Should return default webhook": {
@@ -305,8 +318,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &one,
-					MaxReplicas: &one,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
+					},
 				},
 			},
 		},
@@ -331,7 +346,9 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+					},
 				},
 			},
 			expectedFunc: Function{
@@ -363,8 +380,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 		},
@@ -389,7 +408,9 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MaxReplicas: &zero,
+					ScaleConfig: &ScaleConfig{
+						MaxReplicas: &zero,
+					},
 				},
 			},
 			expectedFunc: Function{
@@ -421,8 +442,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &zero,
-					MaxReplicas: &zero,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &zero,
+						MaxReplicas: &zero,
+					},
 				},
 			},
 		},
@@ -487,7 +510,9 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+					},
 				},
 			},
 			expectedFunc: Function{
@@ -525,8 +550,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 		},
@@ -559,8 +586,10 @@ func TestSetDefaults(t *testing.T) {
 						Resources: fastBuildResources,
 					},
 				},
-				MinReplicas: &two,
-				MaxReplicas: &two,
+				ScaleConfig: &ScaleConfig{
+					MinReplicas: &two,
+					MaxReplicas: &two,
+				},
 			},
 			},
 		},
@@ -586,8 +615,10 @@ func TestSetDefaults(t *testing.T) {
 						Resources: MRuntimeResources,
 					},
 				},
-				MinReplicas: &one,
-				MaxReplicas: &one,
+				ScaleConfig: &ScaleConfig{
+					MinReplicas: &one,
+					MaxReplicas: &one,
+				},
 			}},
 		},
 		"Should properly merge resources presets - case with missing buildResources Requests": {
@@ -619,7 +650,9 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+					},
 				},
 			},
 			expectedFunc: Function{
@@ -657,8 +690,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: &two,
-					MaxReplicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 		},

@@ -40,6 +40,9 @@ describe('SKR-Upgrade-test', function() {
   const getShootInfoFunc = function() {
     return skr.shoot;
   };
+  const getShootOptionsFunc = function() {
+    return options;
+  };
 
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
@@ -48,7 +51,7 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Run the OIDC tests
-  oidcE2ETest(options, getShootInfoFunc);
+  oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   it('Perform Upgrade', async function() {
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
