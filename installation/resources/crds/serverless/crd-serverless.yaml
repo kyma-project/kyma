@@ -637,6 +637,8 @@ spec:
                   - status
                   type: object
                 type: array
+              podSelector:
+                type: string
               reference:
                 type: string
               replicas:
@@ -647,15 +649,13 @@ spec:
                 type: string
               runtimeImageOverride:
                 type: string
-              selector:
-                type: string
             type: object
         type: object
     served: true
     storage: true
     subresources:
       scale:
-        labelSelectorPath: .status.selector
+        labelSelectorPath: .status.podSelector
         specReplicasPath: .spec.replicas
         statusReplicasPath: .status.replicas
       status: {}
