@@ -82,18 +82,15 @@ service:
 
 serviceMonitor:
   enabled: true
-  serviceMonitorPorts:
+  serviceMonitorPorts: |-
     - port: http-metrics
       path: /metrics
-      ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
       scheme: https
-      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
-      ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
       tlsConfig:
         caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
         certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
         keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+        insecureSkipVerify: true
 
 #   namespace: monitoring
 #   interval: 10s
@@ -273,16 +270,8 @@ metricsPort: 2020
 extraPorts:
   - name: http-metrics
     port: 2021
-    containerPort: 5170
     protocol: TCP
-    targetPort: http-metrics
-    
 
-#   - port: 5170
- #     containerPort: 5170
- #     protocol: TCP
- #     name: tcp
- #     nodePort: 30517
 
 extraVolumes:
   - name: shared-fluent-bit-config
