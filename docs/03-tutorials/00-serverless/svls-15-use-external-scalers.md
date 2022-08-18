@@ -1,8 +1,8 @@
 ---
-title: External scalers
+title: Use external scalers
 ---
 
-This tutorial shows how to use external resource scaler (like `HPA` or Keda's `ScaledObject`) with serverless Function.
+This tutorial shows how to use external resource scaler (like HorizontalPodAutoscaler or Keda's ScaledObject) with the Serverless Function.
 
 Keep in mind that serverless functions implements the [scale-subresource](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#scale-subresource) which mean that you can use every `kubernetes-based` scaler instead of these described in this tutorial.
 
@@ -22,7 +22,7 @@ Follow these steps:
   HorizontalPodAutoscaler
   </summary>
 
-1. Create function with the `replicas` value set to 1 to prevent internal serverless `HPA` creation:
+1. Create the Function with the `replicas` value set to 1 to prevent the internal Serverless HorizontalPodAutoscaler creation:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -45,19 +45,19 @@ Follow these steps:
     EOF
     ```
 
-2. Create `HPA` using the `kubectl`:
+2. Create the HorizontalPodAutoscaler using the kubectl:
 
     ```bash
     kubectl autoscale function scaled-function --cpu-percent=50 --min=5 --max=10
     ```
 
-3. After a few seconds the `HPA` should be up to date and contain information about actual replicas:
+3. After a few seconds the HorizontalPodAutoscaler should be up to date and contain information about actual replicas:
 
     ```bash
     kubectl get hpa scaled-function
     ```
 
-    Resoult should looks like this:
+    You should get a result similar to this example:
 
     ```bash
     NAME              REFERENCE                  TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
@@ -72,7 +72,7 @@ Follow these steps:
 
 1. Install [Keda](https://keda.sh/docs/2.8/deploy/) if it does not present on your cluster.
 
-2. Create function with the `replicas` value set to 1 to prevent internal serverless `HPA` creation:
+2. Create the Function with the `replicas` value set to 1 to prevent the internal Serverless HorizontalPodAutoscaler creation:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -95,7 +95,7 @@ Follow these steps:
     EOF
     ```
 
-3. Create the `ScaledObject` resource:
+3. Create the ScaledObject resource:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -118,15 +118,15 @@ Follow these steps:
     EOF
     ```
 
-    >**NOTE:** in this tutorial we use the `CPU` trigger because its configuration is really easy. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
+    >**NOTE:** in this tutorial we use the `cpu` trigger because its configuration is really easy. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
 
-4. After a few seconds the `ScaledObject` should be up to date and contain information about actual replicas:
+4. After a few seconds the ScaledObject should be up to date and contain information about actual replicas:
 
     ```bash
     kubectl get scaledobject scaled-function
     ```
 
-    Resoult should looks like this:
+    You should get a result similar to this example:
 
     ```bash
     NAME              SCALETARGETKIND                                SCALETARGETNAME   MIN   MAX   TRIGGERS   AUTHENTICATION   READY   ACTIVE   FALLBACK   AGE
