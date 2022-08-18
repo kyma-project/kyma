@@ -2,9 +2,10 @@ package configbuilder
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"sort"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )

@@ -2,9 +2,10 @@ package dryrun
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"os"
 	"path/filepath"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	v1 "k8s.io/api/core/v1"

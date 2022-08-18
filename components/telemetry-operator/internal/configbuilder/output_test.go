@@ -9,17 +9,16 @@ import (
 
 func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 	expected := `[OUTPUT]
-    match foo.*
-    name null
+    match                    foo.*
+    name                     null
     storage.total_limit_size 1G
 
 `
-
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				Custom: `
-    name               null`,
+    name null`,
 			},
 		},
 	}
@@ -27,7 +26,7 @@ func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
 
 	actual := CreateOutputSection(logPipeline, pipelineConfig)
-	require.Empty(t, actual)
+	require.NotEmpty(t, actual)
 	require.Equal(t, expected, actual)
 }
 
@@ -35,16 +34,16 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 	expected := `[OUTPUT]
     allow_duplicated_headers true
     format                   json
-    host localhost
-    http_passwd password
-    http_user user
-    match foo.*
-    name http
-    port 443
+    host                     localhost
+    http_passwd              password
+    http_user                user
+    match                    foo.*
+    name                     http
+    port                     443
     storage.total_limit_size 1G
-    tls on
-    tls.verify on
-    uri /customindex/kyma
+    tls                      on
+    tls.verify               on
+    uri                      /customindex/kyma
 
 `
 	logPipeline := &telemetryv1alpha1.LogPipeline{
@@ -77,17 +76,17 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 	expected := `[OUTPUT]
     allow_duplicated_headers true
-    format json
-    host localhost
-    http_passwd ${FOO_MY_NAMESPACE_SECRET_KEY}
-    http_user user
-    match foo.*
-    name http
-    port 443
+    format                   json
+    host                     localhost
+    http_passwd              ${FOO_MY_NAMESPACE_SECRET_KEY}
+    http_user                user
+    match                    foo.*
+    name                     http
+    port                     443
     storage.total_limit_size 1G
-    tls on
-    tls.verify on
-    uri /my-uri
+    tls                      on
+    tls.verify               on
+    uri                      /my-uri
 
 `
 	logPipeline := &telemetryv1alpha1.LogPipeline{
@@ -125,16 +124,16 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 
 func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	expected := `[OUTPUT]
-    alias foo
-    labelMapPath /fluent-bit/etc/loki-labelmap.json
-    labels {job="telemetry-fluent-bit", job2="telemetry-fluent-bit2"}
-    lineformat json
-    loglevel warn
-    match foo.*
-    name grafana-loki
-    removeKeys key1, key2
+    alias                    foo
+    labelMapPath             /fluent-bit/etc/loki-labelmap.json
+    labels                   {cluster-id="123", job="telemetry-fluent-bit"}
+    lineformat               json
+    loglevel                 warn
+    match                    foo.*
+    name                     grafana-loki
+    removeKeys               key1, key2
     storage.total_limit_size 1G
-    url http:loki:3100
+    url                      http:loki:3100
 
 `
 	logPipeline := &telemetryv1alpha1.LogPipeline{
@@ -145,8 +144,8 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 						Value: "http:loki:3100",
 					},
 					Labels: map[string]string{
-						"job":  "telemetry-fluent-bit",
-						"job2": "telemetry-fluent-bit2"},
+						"job":        "telemetry-fluent-bit",
+						"cluster-id": "123"},
 					RemoveKeys: []string{"key1", "key2"},
 				},
 			},

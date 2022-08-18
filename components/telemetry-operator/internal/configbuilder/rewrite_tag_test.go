@@ -28,11 +28,11 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
+    Emitter_Mem_Buf_Limit 10M
     Emitter_Name          logpipeline1
     Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
+    Match                 kube.*
+    Name                  rewrite_tag
     Rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
 
 `
@@ -59,11 +59,11 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
+    Emitter_Mem_Buf_Limit 10M
     Emitter_Name          logpipeline1
     Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
+    Match                 kube.*
+    Name                  rewrite_tag
     Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
@@ -90,11 +90,11 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
+    Emitter_Mem_Buf_Limit 10M
     Emitter_Name          logpipeline1
     Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
+    Match                 kube.*
+    Name                  rewrite_tag
     Rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
 
 `
@@ -121,11 +121,11 @@ func TestGenerateEmitterExcludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
+    Emitter_Mem_Buf_Limit 10M
     Emitter_Name          logpipeline1
     Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
+    Match                 kube.*
+    Name                  rewrite_tag
     Rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
 
 `
@@ -153,13 +153,13 @@ func TestGenerateEmitterExcludeNamespacesAndExcludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
+    Emitter_Mem_Buf_Limit 10M
     Emitter_Name          logpipeline1
     Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
+    Match                 kube.*
+    Name                  rewrite_tag
     Rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
 	actual := CreateRewriteTagFilterSection(pipelineConfig, logPipeline)

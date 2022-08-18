@@ -2,8 +2,11 @@ package configbuilder
 
 import (
 	"fmt"
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"sort"
 	"strings"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 )
 
 // CreateOutputSection creates the Fluent Bit Output section
@@ -11,9 +14,11 @@ func CreateOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config Pipelin
 	output := &pipeline.Spec.Output
 	if len(output.Custom) > 0 {
 		return generateCustomOutput(output, config.FsBufferLimit, pipeline.Name)
-	} else if output.HTTP.Host.IsDefined() {
+	}
+	if output.HTTP.Host.IsDefined() {
 		return generateHTTPOutput(&output.HTTP, config.FsBufferLimit, pipeline.Name)
-	} else if output.Loki.URL.IsDefined() {
+	}
+	if output.Loki.URL.IsDefined() {
 		return generateLokiOutput(&output.Loki, config.FsBufferLimit, pipeline.Name)
 	}
 	return ""
@@ -105,11 +110,12 @@ func parseMultiline(section string) []configParam {
 }
 
 func concatenateLabels(labels map[string]string) string {
-	var labelString []string
+	var labelsSlice []string
 	for k, v := range labels {
-		labelString = append(labelString, fmt.Sprintf("%s=\"%s\"", k, v))
+		labelsSlice = append(labelsSlice, fmt.Sprintf("%s=\"%s\"", k, v))
 	}
-	return fmt.Sprintf("{%s}", strings.Join(labelString, ", "))
+	sort.Strings(labelsSlice)
+	return fmt.Sprintf("{%s}", strings.Join(labelsSlice, ", "))
 }
 
 func resolveValue(value telemetryv1alpha1.ValueType, logPipeline string) string {
@@ -117,15 +123,7 @@ func resolveValue(value telemetryv1alpha1.ValueType, logPipeline string) string 
 		return value.Value
 	}
 	if value.ValueFrom.IsSecretRef() {
-		return fmt.Sprintf("${%s}", generateVariableName(value.ValueFrom.SecretKey, logPipeline))
+		return fmt.Sprintf("${%s}", envvar.GenerateName(logPipeline, value.ValueFrom.SecretKey))
 	}
 	return ""
-}
-
-func generateVariableName(secretRef telemetryv1alpha1.SecretKeyRef, pipelineName string) string {
-	result := fmt.Sprintf("%s_%s_%s_%s", pipelineName, secretRef.Namespace, secretRef.Name, secretRef.Key)
-	result = strings.ToUpper(result)
-	result = strings.Replace(result, ".", "_", -1)
-	result = strings.Replace(result, "-", "_", -1)
-	return result
 }

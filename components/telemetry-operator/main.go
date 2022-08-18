@@ -19,10 +19,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"

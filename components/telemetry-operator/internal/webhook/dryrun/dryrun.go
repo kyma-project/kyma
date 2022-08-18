@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"

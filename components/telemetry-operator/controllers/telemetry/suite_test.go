@@ -18,9 +18,10 @@ package telemetry
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"path/filepath"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 

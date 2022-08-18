@@ -2,10 +2,11 @@ package sync
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
+
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -183,6 +184,6 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)
 	require.NoError(t, err)
-	targetSecretKey := secret.GenerateVariableName(secretKeyRef, "my-pipeline")
+	targetSecretKey := envvar.GenerateName("my-pipeline", secretKeyRef)
 	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
 }
