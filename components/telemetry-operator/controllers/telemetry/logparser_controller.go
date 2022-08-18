@@ -72,8 +72,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
-	if changed.CrUpdated {
-		log.Info("Parser CR updated")
+	if changed.CRUpdated {
 		if err = r.Update(ctx, &logParser); err != nil {
 			log.Error(err, "Failed updating log parser")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err

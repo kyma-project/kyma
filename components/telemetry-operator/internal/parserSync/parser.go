@@ -28,7 +28,7 @@ type LogParserSyncer struct {
 }
 type Result struct {
 	ConfigMapUpdated bool
-	CrUpdated        bool
+	CRUpdated        bool
 }
 
 func NewLogParserSyncer(client client.Client,
@@ -93,15 +93,15 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			syncRes.CrUpdated = true
+			syncRes.CRUpdated = true
 		}
 	}
 
-	if !syncRes.CrUpdated && !syncRes.ConfigMapUpdated {
+	if !syncRes.CRUpdated && !syncRes.ConfigMapUpdated {
 		return syncRes, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.CrUpdated = false
+		syncRes.CRUpdated = false
 		syncRes.ConfigMapUpdated = false
 		return syncRes, err
 	}

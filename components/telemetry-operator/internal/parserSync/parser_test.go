@@ -56,7 +56,7 @@ Format regex`},
 	changed, err := sut.SyncParsersConfigMap(context.Background(), lp)
 	var expectedResult Result
 	expectedResult.ConfigMapUpdated = true
-	expectedResult.CrUpdated = true
+	expectedResult.CRUpdated = true
 
 	require.NoError(t, err)
 	require.Equal(t, expectedResult, changed)

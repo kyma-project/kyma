@@ -121,14 +121,14 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
-	if changed.CrUpdated {
+	if changed.CRUpdated {
 		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 	}
 
-	if changed.ConfigMapChanged {
+	if changed.ConfigMapUpdated {
 		log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
 		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")

@@ -180,7 +180,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	lps := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 	restartRequired, err := lps.syncVariables(context.Background())
 	require.NoError(t, err)
-	require.True(t, restartRequired.ConfigMapChanged)
+	require.True(t, restartRequired.ConfigMapUpdated)
 
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)

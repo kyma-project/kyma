@@ -37,8 +37,8 @@ type LogPipelineSyncer struct {
 }
 
 type Result struct {
-	ConfigMapChanged bool
-	CrUpdated        bool
+	ConfigMapUpdated bool
+	CRUpdated        bool
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -81,12 +81,11 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		return syncRes, err
 	}
 
-	if sectionsChanged.ConfigMapChanged || filesChanged.ConfigMapChanged || variablesChanged.ConfigMapChanged {
-		syncRes.ConfigMapChanged = true
-	} else if sectionsChanged.CrUpdated || filesChanged.CrUpdated || variablesChanged.CrUpdated {
-		syncRes.CrUpdated = true
+	if sectionsChanged.ConfigMapUpdated || filesChanged.ConfigMapUpdated || variablesChanged.ConfigMapUpdated {
+		syncRes.ConfigMapUpdated = true
+	} else if sectionsChanged.CRUpdated || filesChanged.CRUpdated || variablesChanged.CRUpdated {
+		syncRes.CRUpdated = true
 	}
-	log.Info("debug: ", "sync: %v", syncRes)
 
 	return syncRes, nil
 }
@@ -106,7 +105,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
-			syncRes.CrUpdated = true
+			syncRes.CRUpdated = true
 		}
 	} else {
 		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
@@ -117,24 +116,24 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
 			cm.Data = data
-			syncRes.ConfigMapChanged = true
+			syncRes.ConfigMapUpdated = true
 		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != fluentBitConfig {
 			cm.Data[cmKey] = fluentBitConfig
-			syncRes.ConfigMapChanged = true
+			syncRes.ConfigMapUpdated = true
 		}
 		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
-			syncRes.CrUpdated = true
+			syncRes.CRUpdated = true
 		}
 	}
 
-	if !syncRes.CrUpdated && !syncRes.ConfigMapChanged {
+	if !syncRes.CRUpdated && !syncRes.ConfigMapUpdated {
 		return syncRes, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.CrUpdated = false
-		syncRes.ConfigMapChanged = false
+		syncRes.CRUpdated = false
+		syncRes.ConfigMapUpdated = false
 		return syncRes, err
 	}
 
@@ -166,34 +165,32 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 			if _, hasKey := cm.Data[file.Name]; hasKey {
 				delete(cm.Data, file.Name)
 				controllerutil.RemoveFinalizer(logPipeline, filesFinalizer)
-				syncRes.CrUpdated = true
+				syncRes.CRUpdated = true
 			}
 		} else {
 			if cm.Data == nil {
 				data := make(map[string]string)
 				data[file.Name] = file.Content
 				cm.Data = data
-				syncRes.ConfigMapChanged = true
+				syncRes.ConfigMapUpdated = true
 			} else if oldContent, hasKey := cm.Data[file.Name]; !hasKey || oldContent != file.Content {
 				cm.Data[file.Name] = file.Content
-				syncRes.ConfigMapChanged = true
+				syncRes.ConfigMapUpdated = true
 			}
 			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
 				log.Info("Adding finalizer")
 				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
-				syncRes.CrUpdated = true
+				syncRes.CRUpdated = true
 			}
 		}
 	}
-	log.Info("CHECKING!!!")
 
-	if !syncRes.CrUpdated && !syncRes.ConfigMapChanged {
-		log.Info(" I am here!!!!")
+	if !syncRes.CRUpdated && !syncRes.ConfigMapUpdated {
 		return syncRes, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.CrUpdated = false
-		syncRes.ConfigMapChanged = false
+		syncRes.CRUpdated = false
+		syncRes.ConfigMapUpdated = false
 		return syncRes, err
 	}
 
@@ -258,7 +255,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (Result, error) {
 	if !needsSecretUpdate {
 		return syncRes, nil
 	}
-	syncRes.ConfigMapChanged = needsSecretUpdate
+	syncRes.ConfigMapUpdated = needsSecretUpdate
 
 	if err = s.Update(ctx, &newSecret); err != nil {
 		log.Error(err, err.Error())
