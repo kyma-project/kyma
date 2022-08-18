@@ -52,8 +52,8 @@
   "editable": true,
   "gnetId": 7752,
   "graphTooltip": 1,
-  "id": 46,
-  "iteration": 1653490887383,
+  "id": null,
+  "iteration": 1612355253484,
   "links": [],
   "panels": [
     {
@@ -123,7 +123,7 @@
       "pluginVersion": "",
       "targets": [
         {
-          "expr": "sum(kube_pod_info{pod=~\".*telemetry-fluent-bit.*\"})",
+          "expr": "sum(kube_pod_info{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1354,7 +1354,7 @@
           "value": "$__all"
         },
         "datasource": "$DS_PROMETHEUS",
-        "definition": "label_values(kube_pod_info{pod=~\".*telemetry-fluent-bit.*\"}, pod)",
+        "definition": "label_values(kube_pod_info{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\"}, pod)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -1363,10 +1363,7 @@
         "multi": false,
         "name": "pod",
         "options": [],
-        "query": {
-          "query": "label_values(kube_pod_info{pod=~\".*telemetry-fluent-bit.*\"}, pod)",
-          "refId": "Prometheus-pod-Variable-Query"
-        },
+        "query": "label_values(kube_pod_info{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\"}, pod)",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
@@ -1410,6 +1407,6 @@
   },
   "timezone": "",
   "title": "Kyma / Telemetry / Fluent Bit",
-  "uid": "telemetry-fluent-bit",
-  "version": 1
+  "uid": "{{ include "fluent-bit.fullname" . }}",
+  "version": 2
  }
