@@ -100,20 +100,8 @@ containers:
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
-  {{- if .Values.exporter.enabled }}
-  - name: exporter
-    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}"
-    {{- with .Values.exporter.resources }}
-    resources:
-      {{- toYaml . | nindent 6 }}
-  {{- end }}
-    ports:
-    - name: http-metrics
-      containerPort: 2021
-      protocol: TCP
-    volumeMounts:
-      - name: varfluentbit
-        mountPath: /data
+  {{- if .Values.extraContainers }}
+    {{- toYaml .Values.extraContainers | nindent 2 }}
   {{- end }}
 volumes:
   - name: config
