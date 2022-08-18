@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: cert-secret
-  namespace: kyma-system
+  namespace: {{ .Values.namespace }}
 type: Opaque
 data:
   crt: {{ "good.crt" | b64enc }}
@@ -12,7 +12,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: incorrect-cert-secret
-  namespace: kyma-system
+  namespace: {{ .Values.namespace }}
 type: Opaque
 data:
   crt: {{ "wrong.crt" | b64enc }}
