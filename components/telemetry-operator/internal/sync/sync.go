@@ -110,7 +110,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
-			log.Info("Adding finalizer")
+			log.Info("Call add finalizer")
 			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
 			changed = true
 		}
@@ -164,7 +164,7 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 				changed = true
 			}
 			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
-				log.Info("Adding finalizer")
+				log.Info("Call add finalizer")
 				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
 				changed = true
 			}
