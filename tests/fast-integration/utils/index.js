@@ -281,6 +281,11 @@ async function k8sApply(resources, namespace, patch = true) {
     if (!resource.metadata.namespace) {
       resource.metadata.namespace = namespace;
     }
+    if (resource.kind == 'Namespace') {
+      resource.metadata.labels = {
+        'istio-injection': 'enabled',
+      };
+    }
     try {
       await k8sDynamicApi.patch(
           resource,
@@ -1599,25 +1604,6 @@ async function attachTraceChildSpans(parentSpan, trace) {
   }
 }
 
-async function labelNamespaceWithIstioInject(targetNamespace, enabled) {
-  const patch = [
-    {
-      'op': 'add',
-      'path': '/metadata/labels',
-      'value': {
-        'istio-injection': `${enabled}`,
-      },
-    },
-  ];
-
-  await k8sCoreV1Api.patchNamespace(targetNamespace, patch).then(() => {
-    console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`);
-  }).catch((err) => {
-    console.log('Error: '); console.log(err);
-  });
-}
-
-
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1703,5 +1689,4 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
-  labelNamespaceWithIstioInject,
 };

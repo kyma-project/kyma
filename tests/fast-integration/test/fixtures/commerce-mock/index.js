@@ -33,7 +33,6 @@ const {
   namespaceObj,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
-  labelNamespaceWithIstioInject,
 } = require('../../../utils');
 
 const {
@@ -636,7 +635,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(prepareCommerceObjs(mockNamespace));
   await k8sApply(functionObjs, targetNamespace, true);
-  await labelNamespaceWithIstioInject(targetNamespace, 'enabled');
   await waitForFunction('lastorder', targetNamespace);
   await k8sApply([
     eventingSubscription(
