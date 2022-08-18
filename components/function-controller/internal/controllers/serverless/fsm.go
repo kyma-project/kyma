@@ -135,7 +135,7 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, rep
 			r.log.Warnf("failed to get selector for labelSelector: %w", err)
 			return nil
 		}
-		currentFunction.Status.Selector = selector.String()
+		currentFunction.Status.PodSelector = selector.String()
 
 		if len(s.deployments.Items) > 0 {
 			currentFunction.Status.Replicas = s.deployments.Items[0].Status.Replicas

@@ -478,10 +478,6 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 
 func (s *systemState) getReplicas(defaultVal int32) *int32 {
 	if s.instance.Spec.ScaleConfig != nil {
-		// TODO: question - should it looks like this?
-		// Maybe better way is to return s.deployments.Items[0].Spec.Replicas?
-		// this resource is managed by HPA and returning always minReplicas is confusing
-
 		return s.instance.Spec.ScaleConfig.MinReplicas
 	}
 	if s.instance.Spec.Replicas != nil {

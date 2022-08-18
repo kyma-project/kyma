@@ -206,7 +206,7 @@ type FunctionStatus struct {
 	Conditions           []Condition `json:"conditions,omitempty"`
 	Repository           `json:",inline,omitempty"`
 	Replicas             int32  `json:"replicas,omitempty"`
-	Selector             string `json:"selector,omitempty"`
+	PodSelector          string `json:"podSelector,omitempty"`
 	Commit               string `json:"commit,omitempty"`
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 }
@@ -224,7 +224,7 @@ const (
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:storageversion
-//+kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
+//+kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.podSelector
 //+kubebuilder:printcolumn:name="Configured",type="string",JSONPath=".status.conditions[?(@.type=='ConfigurationReady')].status"
 //+kubebuilder:printcolumn:name="Built",type="string",JSONPath=".status.conditions[?(@.type=='BuildReady')].status"
 //+kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"

@@ -280,10 +280,6 @@ func TestFunctionReconciler_equalHorizontalPodAutoscalers(t *testing.T) {
 }
 
 func Test_isScalingEnabled(t *testing.T) {
-	type args struct {
-		minReplicas int32
-		maxReplicas int32
-	}
 	tests := []struct {
 		name        string
 		scaleConfig *serverlessv1alpha2.ScaleConfig

@@ -65,24 +65,18 @@ func (fn *Function) Default(config *DefaultingConfig) {
 }
 
 func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
+	if spec.Replicas != nil {
+		return
+	}
+
 	defaultingConfig := config.Function.Replicas
 	replicasPreset := mergeReplicasPreset(fn, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
 
-	if spec.Replicas == nil && spec.ScaleConfig == nil && replicasPreset.Max == replicasPreset.Min {
-		spec.defaultSpecReplicas(&replicasPreset.Min)
-	}
-
-	if spec.Replicas == nil {
-		spec.defaultScaleConfig(replicasPreset)
-	}
-}
-
-func (spec *FunctionSpec) defaultScaleConfig(rp ReplicasPreset) {
 	if spec.ScaleConfig == nil {
 		spec.ScaleConfig = &ScaleConfig{}
 	}
 	if spec.ScaleConfig.MinReplicas == nil {
-		newMin := rp.Min
+		newMin := replicasPreset.Min
 		if spec.ScaleConfig.MaxReplicas != nil && *spec.ScaleConfig.MaxReplicas < newMin {
 			newMin = *spec.ScaleConfig.MaxReplicas
 		}
@@ -90,17 +84,13 @@ func (spec *FunctionSpec) defaultScaleConfig(rp ReplicasPreset) {
 		spec.ScaleConfig.MinReplicas = &newMin
 	}
 	if spec.ScaleConfig.MaxReplicas == nil {
-		newMax := rp.Max
+		newMax := replicasPreset.Max
 		if *spec.ScaleConfig.MinReplicas > newMax {
 			newMax = *spec.ScaleConfig.MinReplicas
 		}
 
 		spec.ScaleConfig.MaxReplicas = &newMax
 	}
-}
-
-func (spec *FunctionSpec) defaultSpecReplicas(replicas *int32) {
-	spec.Replicas = replicas
 }
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {

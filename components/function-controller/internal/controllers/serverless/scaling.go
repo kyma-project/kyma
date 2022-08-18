@@ -11,7 +11,7 @@ import (
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
 
-func initStateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	namespace := s.instance.GetNamespace()
 	labels := s.internalFunctionLabels()
 

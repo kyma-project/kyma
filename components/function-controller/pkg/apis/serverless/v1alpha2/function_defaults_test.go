@@ -318,7 +318,10 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					Replicas: &one,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
+					},
 				},
 			},
 		},
@@ -343,9 +346,7 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 			expectedFunc: Function{
@@ -377,10 +378,7 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 		},
@@ -612,7 +610,10 @@ func TestSetDefaults(t *testing.T) {
 						Resources: MRuntimeResources,
 					},
 				},
-				Replicas: &one,
+				ScaleConfig: &ScaleConfig{
+					MinReplicas: &one,
+					MaxReplicas: &one,
+				},
 			}},
 		},
 		"Should properly merge resources presets - case with missing buildResources Requests": {
