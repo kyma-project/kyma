@@ -1,0 +1,26 @@
+[
+  {
+    "op": "replace",
+    "path": "/spec/template/spec/containers/0/args",
+    "value": [
+      "/app/centralapplicationconnectivityvalidator",
+      "--proxyPort=8080",
+      "--externalAPIPort=8081",
+      "--eventingPathPrefixV1=/anything/%%APP_NAME%%/v1/events",
+      "--eventingPathPrefixV2=/anything/%%APP_NAME%%/v2/events",
+      "--eventingPublisherHost=httpbin.org",
+      "--eventingDestinationPath=/anything/publish",
+      "--eventingPathPrefixEvents=/anything/%%APP_NAME%%/events",
+      "--appNamePlaceholder=%%APP_NAME%%",
+      "--cacheExpirationSeconds=90",
+      "--cacheCleanupIntervalSeconds=15"
+    ]
+  },
+  {
+    "op": "add",
+    "path": "/spec/template/metadata/annotations",
+    "value": {
+      "traffic.sidecar.istio.io/excludeOutboundPorts": "8080"
+    }
+  }
+]

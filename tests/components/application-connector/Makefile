@@ -11,15 +11,15 @@ TEST_TIMEOUT = "3m"
 
 .PHONY: release test image clean
 .PHONY: test-gateway test-gateway-debug clean-gateway-test publish-gateway-test image-gateway-test publish-mock-app image-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
-.PHONY: test-validator publish-connectivity-validator-test test-connectivity-validator-debug image-connectivity-validator-test clean-connectivity-validator-test
 .PHONY: test-compass-runtime-agent test-compass-runtime-agent-debug clean-compass-runtime-agent-test image-compass-runtime-agent-test publish-compass-runtime-agent-test
+.PHONY: patch-for-validator-test unpatch-after-validator-test test-connectivity-validator test-connectivity-validator-debug connectivity-validator-create-resources clean-connectivity-validator-test publish-connectivity-validator-test
 
 release: publish-gateway-test publish-mock-app publish-connectivity-validator-test publish-compass-runtime-agent-test
 test: test-gateway test-validator test-compass-runtime-agent
 image: image-gateway-test image-connectivity-validator-test image-compass-runtime-agent-test
 clean: clean-gateway-test clean-connectivity-validator-test clean-compass-runtime-agent-test
 
-test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
+test-gateway: disable-sidecar-for-mtls-test generate-certs gateway-create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
@@ -31,17 +31,17 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 	exit 1; \
 	fi
 
-test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
+test-gateway-debug: disable-sidecar-for-mtls-test generate-certs gateway-create-resources
 	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; \
 	echo "Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
 
-create-resources:
+gateway-create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test \
-    	--set namespace=$(NAMESPACE) \
-    	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+		--set namespace=$(NAMESPACE) \
+		--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
 
 clean-gateway-test:
@@ -71,30 +71,37 @@ generate-certs:
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
 
-test-validator: test-connectivity-validator-debug clean-connectivity-validator-test
-
-disable-sidecar-for-validator-test:
-	kubectl -n kyma-system patch deployment central-application-connectivity-validator -p '{"spec":{"template":{"metadata":{"annotations":{"traffic.sidecar.istio.io/excludeInboundPorts": "8080"}}}}}'
+patch-for-validator-test:
+	kubectl -n kyma-system patch deployment central-application-connectivity-validator --type json --patch-file resources/patches/central-application-connectivity-validator.json
 	kubectl rollout status deploy central-application-connectivity-validator -n kyma-system --timeout=1m
 
-enable-sidecar-after-validator-test:
-	kubectl -n kyma-system patch deployment central-application-connectivity-validator --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
+unpatch-after-validator-test:
+	kubectl rollout undo deployment/central-application-connectivity-validator
 
-test-connectivity-validator-debug:
-	@echo $(GOPATH)/bin/go-junit-report --help
+test-connectivity-validator: patch-for-validator-test connectivity-validator-create-resources
+	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test; then \
+	echo "Success! Results:"; \
+	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
+	$(MAKE) clean-connectivity-validator-test; \
+	else \
+	echo "Tests failed! Results:"; \
+	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
+	$(MAKE) clean-connectivity-validator-test; \
+	exit 1; \
+	fi
+
+test-connectivity-validator-debug: patch-for-validator-test connectivity-validator-create-resources
+	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test; \
+	echo "Results:"; \
+	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
+
+connectivity-validator-create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
 	helm template resources/charts/application-connectivity-validator-test \
 		--set namespace=$(NAMESPACE) \
-	| kubectl apply -f -
+    | kubectl apply -f -
 
-	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test
-	@echo ""
-	@echo "Application Connectivity Validator test results:"
-
-	./scripts/check-pod-logs.sh application-connectivity-validator-test
-
-clean-connectivity-validator-test:
+clean-connectivity-validator-test: unpatch-after-validator-test
 	helm template resources/charts/application-connectivity-validator-test | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
 
@@ -104,7 +111,6 @@ publish-connectivity-validator-test: image-connectivity-validator-test
 image-connectivity-validator-test:
 	docker build -t $(VALIDATOR_TEST_IMAGE) -f Dockerfile.connectivity-validator .
 
-
 test-compass-runtime-agent: test-compass-runtime-agent-debug clean-compass-runtime-agent-test
 
 test-compass-runtime-agent-debug:
@@ -112,8 +118,8 @@ test-compass-runtime-agent-debug:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 
 	helm template resources/charts/compass-runtime-agent-test \
-    	--set namespace=$(NAMESPACE) \
-    	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+		--set namespace=$(NAMESPACE) \
+		--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
 
 	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/compass-runtime-agent-test
