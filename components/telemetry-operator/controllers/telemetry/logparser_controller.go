@@ -67,19 +67,19 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	var changed, err = r.Parser.SyncParsersConfigMap(ctx, &logParser)
+	var syncRes, err = r.Parser.SyncParsersConfigMap(ctx, &logParser)
 	if err != nil {
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
-	if changed.CRUpdated {
+	if syncRes.CRUpdated {
 		if err = r.Update(ctx, &logParser); err != nil {
 			log.Error(err, "Failed updating log parser")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 	}
 
-	if changed.ConfigMapUpdated {
+	if syncRes.ConfigMapUpdated {
 		log.Info("Fluent Bit parser configuration was updated. Restarting the DaemonSet")
 
 		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
