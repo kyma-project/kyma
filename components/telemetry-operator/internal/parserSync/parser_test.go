@@ -35,7 +35,7 @@ Format regex`},
 	}
 	res, err := sut.SyncParsersConfigMap(context.Background(), &lp)
 
-	var syncRes result
+	var syncRes Result
 	require.Error(t, err)
 	require.Equal(t, res, syncRes)
 }
@@ -54,7 +54,7 @@ Format regex`},
 	sut := NewLogParserSyncer(mockClient, daemonSetConfig)
 
 	changed, err := sut.SyncParsersConfigMap(context.Background(), lp)
-	var expectedResult result
+	var expectedResult Result
 	expectedResult.ConfigMapUpdated = true
 	expectedResult.CrUpdated = true
 

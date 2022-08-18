@@ -26,7 +26,7 @@ type LogParserSyncer struct {
 	DaemonSetConfig FluentBitDaemonSetConfig
 	Utils           *kubernetes.Utils
 }
-type result struct {
+type Result struct {
 	ConfigMapUpdated bool
 	CrUpdated        bool
 }
@@ -42,9 +42,9 @@ func NewLogParserSyncer(client client.Client,
 }
 
 // SyncParsersConfigMap synchronizes LogParser with ConfigMap of DaemonSetUtils parsers.
-func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (result, error) {
+func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (Result, error) {
 	log := logf.FromContext(ctx)
-	var syncRes result
+	var syncRes Result
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
 		return syncRes, err
