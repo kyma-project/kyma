@@ -102,13 +102,14 @@ Follow these steps:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
-    apiVersion: gateway.kyma-project.io/v1alpha1
+    apiVersion: gateway.kyma-project.io/v1beta1
     kind: APIRule
     metadata:
       name: $NAME
       namespace: $NAMESPACE
     spec:
       gateway: kyma-system/kyma-gateway
+      host: $NAME.$DOMAIN
       rules:
       - path: /.*
         accessStrategies:
@@ -120,7 +121,6 @@ Follow these steps:
         - PUT
         - DELETE
       service:
-        host: $NAME.$DOMAIN
         name: $NAME
         port: 80
     EOF
