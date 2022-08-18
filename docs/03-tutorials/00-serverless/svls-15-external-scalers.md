@@ -118,6 +118,8 @@ Follow these steps:
     EOF
     ```
 
+    >**NOTE:** in this tutorial we use the `CPU` trigger because its configuration is really easy. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
+
 4. After a few seconds the `ScaledObject` should be up to date and contain information about actual replicas:
 
     ```bash
