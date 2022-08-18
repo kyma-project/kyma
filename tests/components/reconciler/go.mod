@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/tests/components/reconciler
 
-go 1.18
+go 1.19
 
 require (
 	github.com/cucumber/godog v0.12.5
