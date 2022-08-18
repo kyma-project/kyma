@@ -305,14 +305,10 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	out.Spec.Type = serverlessv1alpha1.SourceTypeGit
 
 	// check repo name in the annotations,
+	// if not exists it means that the function was created as v1alpha2
 	repoName := ""
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
-	}
-
-	if repoName == "" {
-		// TODO: Improve logging interface
-		w.log.Error(fmt.Errorf("Unable to find GitRepository annotation for function: "), fmt.Sprintf("%s/%s", in.Namespace, in.Name))
 	}
 
 	out.Spec.Source = repoName

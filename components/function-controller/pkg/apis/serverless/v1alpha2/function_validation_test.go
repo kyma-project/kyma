@@ -604,6 +604,16 @@ func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Valid ssh without .git extension",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "git@github.com:kyma-project/kyma",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
