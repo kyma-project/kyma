@@ -44,7 +44,7 @@ func TestBuildConfigSectionFromMap(t *testing.T) {
 		"Key_A": "Value_A",
 		"Key_B": "Value_B",
 	}
-	actual := buildConfigSectionFromMap(FilterConfigHeader, content)
+	actual := buildConfigSectionFromMap(filterConfigHeader, content)
 
 	require.Equal(t, expected, actual, "Fluent Bit config Build from Map is invalid")
 
@@ -69,6 +69,45 @@ call                  kubernetes_map_keys`
 
 	actual := generateFilter(LuaDeDotFilterTemplate, "foo")
 	require.Equal(t, expected, actual, "Fluent Bit lua parser config is invalid")
+}
+
+func TestGenerateApplicationFilterDropAll(t *testing.T) {
+	expected := `[FILTER]
+    name                  nest
+    match                 test-logpipeline.*
+    operation             lift
+    nested_under          kubernetes
+    add_prefix            __k8s__
+
+[FILTER]
+    name                  record_modifier
+    match                 test-logpipeline.*
+    remove_key            __k8s__annotations
+
+[FILTER]
+    name                  record_modifier
+    match                 test-logpipeline.*
+    remove_key            __k8s__labels
+
+[FILTER]
+    name                  nest
+    match                 test-logpipeline.*
+    operation             nest
+    wildcard              __k8s__*
+    nest_under            kubernetes
+    remove_prefix         __k8s__
+
+`
+
+	actual := createKubernetesMetadataFilter("test-logpipeline", false, true)
+	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
+}
+
+func TestGenerateApplicationFilterKeepAll(t *testing.T) {
+	expected := ""
+
+	actual := createKubernetesMetadataFilter("test-logpipeline", true, false)
+	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
 }
 
 func TestFilter(t *testing.T) {
@@ -111,6 +150,12 @@ func TestFilter(t *testing.T) {
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
 			Filters: []telemetryv1alpha1.Filter{
 				{
 					Custom: `

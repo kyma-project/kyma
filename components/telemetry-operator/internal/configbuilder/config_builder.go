@@ -21,8 +21,7 @@ type PipelineConfig struct {
 
 const (
 	ParserConfigHeader      ConfigHeader = "[PARSER]"
-	FilterConfigHeader      ConfigHeader = "[FILTER]"
-	OutputConfigHeader      ConfigHeader = "[OUTPUT]"
+	filterConfigHeader      ConfigHeader = "[FILTER]"
 	MatchKey                string       = "match"
 	OutputStorageMaxSizeKey string       = "storage.total_limit_size"
 	PermanentFilterTemplate string       = `
@@ -34,13 +33,33 @@ name                  lua
 match                 %s.*
 script                /fluent-bit/scripts/filter-script.lua
 call                  kubernetes_map_keys`
+	liftKubernetesKeysTemplate string = `
+name                  nest
+match                 %s.*
+operation             lift
+nested_under          kubernetes
+add_prefix            __k8s__
+`
+	dropKubernetesKeyTemplate string = `
+name                  record_modifier
+match                 %s.*
+remove_key            __k8s__%s
+`
+	nestKubernetesKeyTemplate string = `
+name                  nest
+match                 %s.*
+operation             nest
+wildcard              __k8s__*
+nest_under            kubernetes
+remove_prefix         __k8s__
+`
 )
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
 	sb.WriteString(CreateRewriteTagFilterSection(pipelineConfig, logPipeline))
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
+	sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := fluentbit.ParseSection(filter.Custom)
@@ -50,17 +69,39 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 
 		section[MatchKey] = generateMatchCondition(logPipeline.Name)
 
-		sb.WriteString(buildConfigSectionFromMap(FilterConfigHeader, section))
+		sb.WriteString(buildConfigSectionFromMap(filterConfigHeader, section))
 	}
 
+	sb.WriteString(createKubernetesMetadataFilter(logPipeline.Name, logPipeline.Spec.Input.Application.KeepAnnotations, logPipeline.Spec.Input.Application.DropLabels))
+
 	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
+		sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
 	}
 
 	outputSection := CreateOutputSection(logPipeline, pipelineConfig)
 	sb.WriteString(outputSection)
 
 	return sb.String(), nil
+}
+
+// createKubernetesMetadataFilter makes the collection of kubernetes annotations and labels optional
+// by adding dedicated Fluent Bit filters.
+func createKubernetesMetadataFilter(pipelineName string, keepAnnotations, dropLabels bool) string {
+	if keepAnnotations && !dropLabels {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(liftKubernetesKeysTemplate, pipelineName)))
+	if !keepAnnotations {
+		sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(dropKubernetesKeyTemplate, pipelineName, "annotations")))
+	}
+
+	if dropLabels {
+		sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(dropKubernetesKeyTemplate, pipelineName, "labels")))
+	}
+	sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(nestKubernetesKeyTemplate, pipelineName)))
+	return sb.String()
 }
 
 func buildConfigSectionFromMap(header ConfigHeader, section map[string]string) string {
