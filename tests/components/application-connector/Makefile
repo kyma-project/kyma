@@ -71,8 +71,14 @@ generate-certs:
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
 
-
 test-validator: test-connectivity-validator-debug clean-connectivity-validator-test
+
+disable-sidecar-for-validator-test:
+	kubectl -n kyma-system patch deployment central-application-connectivity-validator -p '{"spec":{"template":{"metadata":{"annotations":{"traffic.sidecar.istio.io/excludeInboundPorts": "8080"}}}}}'
+	kubectl rollout status deploy central-application-connectivity-validator -n kyma-system --timeout=1m
+
+enable-sidecar-after-validator-test:
+	kubectl -n kyma-system patch deployment central-application-connectivity-validator --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
 test-connectivity-validator-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help

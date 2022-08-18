@@ -6,21 +6,14 @@ metadata:
 spec:
   backoffLimit: 0
   template:
+    metadata:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundPorts: "8080"
     spec:
       restartPolicy: Never
       containers:
         - name: application-connectivity-validator-test
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.validatorTest) }}
           imagePullPolicy: Always
-          volumeMounts:
-            - name: cert-secret-volume
-              mountPath: /etc/cert-volume
-            - name: incorrect-cert-secret-volume
-              mountPath: /etc/incorrect-cert-volume
-      volumes:
-        - name: cert-secret-volume
-          secret:
-            secretName: cert-secret
-        - name: incorrect-cert-secret-volume
-          secret:
-            secretName: incorrect-cert-secret
+      restartPolicy: Never
+  backoffLimit: 0
