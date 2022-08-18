@@ -5,8 +5,7 @@ metadata:
 spec:
   output:
     grafana-loki:
-      Url:
+      url:
         value: "http://logging-loki:3100/loki/api/v1/push"
-      Labels:
+      labels:
         job: "sample-fluent-bit"
-      RemoveKeys: ["kubernetes", "stream"]
