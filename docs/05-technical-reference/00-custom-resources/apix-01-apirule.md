@@ -49,16 +49,16 @@ spec:
 >**NOTE:** Since Kyma 2.5 the `v1alpha1` resource has been deprecated. However, you can still create it. It is stored as `v1beta1`. 
 
 ```yaml
-apiVersion: gateway.kyma-project.io/v1beta1
+apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
   name: service-secured
 spec:
   gateway: kyma-system/kyma-gateway
-  host: foo.bar
   service:
     name: foo-service
     port: 8080
+    host: foo.bar
   rules:
     - path: /.*
       methods: ["GET"]
