@@ -195,12 +195,12 @@ func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineC
 	return newConditions
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:resource:scope=Cluster
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
-//+kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
-//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+// +kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -210,7 +210,7 @@ type LogPipeline struct {
 	Status LogPipelineStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 // LogPipelineList contains a list of LogPipeline
 type LogPipelineList struct {
 	metav1.TypeMeta `json:",inline"`
