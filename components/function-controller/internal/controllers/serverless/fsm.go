@@ -126,7 +126,7 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, rep
 			currentFunction.Status.Commit = commit
 		}
 
-		currentFunction.Status.Runtime = serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime)
+		currentFunction.Status.Runtime = s.instance.Spec.Runtime
 		currentFunction.Status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
 
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {

@@ -65,30 +65,22 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
       output:
         http:
           dedot: false
-          format: "json"
-          host:
-            valueFrom:
-              secretKeyRef:
-                name: my-secret
-                namespace: my-namespace
-                key: host
           port: "80"
           uri: "/"
+          host:
+            value: https://myhost/logs
           user:
             value: "user"
           password:
             value: "not-required"
-          tls:
-            disabled: true
-            skipCertificateValidation: true
     ```
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
-    - `http`, which pushes the data to the specified http destination.
-    - `grafana-loki`, which pushes the data to the Grafana Loki service.
-    - `custom`, which supports the configuration of any destination in the Fluent Bit configuration syntax.
+    - **http**, which pushes the data to the specified http destination.
+    - **grafana-loki**, which pushes the data to the Grafana Loki service.
+    - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
-    See the following example of the `custom` output:
+    See the following example of the **custom** output:
     ```yaml
     spec:
       output:
@@ -100,7 +92,8 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           Format             json
           Port               80
           Uri                /
-          Tls                Off
+          Tls                on
+          tls.verify         on
     ```
 
 2. To create the instance, apply the resource file in your cluster.
@@ -185,9 +178,60 @@ spec:
 
 ### Step 4: Add authentication details from Secrets
 
-Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets. The key-value entries of the Secrets can be mapped to environment variables of the Fluent Bit Pods, and with that, are available for usage in [placeholder expressions](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables).
+Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets.
 
-To leverage data provided by a Kubernetes Secrets in a custom output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the keys of the Secret in the `variables` section, like in the following example:
+With the **http** and the **grafana-loki** output definition, the **valueFrom** attribute allows for mapping of Secret keys as visible in the following **http** output example:
+
+```yaml
+kind: LogPipeline
+apiVersion: telemetry.kyma-project.io/v1alpha1
+metadata:
+  name: http-backend
+spec:
+  output:
+     http:
+        dedot: false
+        port: "80"
+        uri: "/"
+        host:
+           valueFrom:
+              secretKeyRef:
+                 name: http-backend-credentials
+                 namespace: default
+                 key: HTTP_ENDPOINT
+        user:
+           valueFrom:
+              secretKeyRef:
+                 name: http-backend-credentials
+                 namespace: default
+                 key: HTTP_USER
+        password:
+           valueFrom:
+              secretKeyRef:
+                 name: http-backend-credentials
+                 namespace: default
+                 key: HTTP_PASSWORD
+  input:
+    ...
+  filters:
+    ...
+```
+
+
+The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
+
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: http-backend-credentials
+stringData:
+  HTTP_ENDPOINT: https://myhost/logs
+  HTTP_USER: myUser
+  HTTP_PASSWORD: XXX
+```
+
+To leverage data provided by a Kubernetes Secrets in a **custom** output definition, use placeholder expressions for the data provided by the Secret. Then specify the actual mapping to the Secret keys in the **variables** section, like in the following example:
 
 ```yaml
 kind: LogPipeline
@@ -208,29 +252,16 @@ spec:
         secretKeyRef:
         - name: http-backend-credentials
           namespace: default
-          key: ENDPOINT
+          key: HTTP_ENDPOINT
   input:
     ...
   filters:
     ...
 ```
 
-The related Secret must fulfill the referenced name and Namespace, and contain the mapped key as in the following example:
-
-```yaml
-kind: Secret
-apiVersion: v1
-metadata:
-  name: http-backend-credentials
-stringData:
-  HTTP_ENDPOINT: https://myhost/logs
-  HTTP_USER: myUser
-  HTTP_PASSWORD: XXX
-```
-
 ### Step 5: Rotate the Secret
 
-A Secret being referenced with the `secretKeyRef` construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
+A Secret being referenced with the **secretKeyRef** construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
 Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
 
 ```yaml
@@ -305,7 +336,9 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | input.application.excludeNamespaces | []string | List of Namespaces to exclude during log collection from all Namespaces (mutually exclusive with `namespaces`) |
 | input.application.containers | []string | List of containers to collect from (mutually exclusive with `excludeContainers`) |
 | input.application.excludeContainers | []string | List of containers to exclude (mutually exclusive with `containers`) |
-| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. If enabled, it is recommended to exclude the logs from the Fluent Bit container to avoid problems with recursive logs. See also [Create a LogPipeline Input](#step-2-create-an-input). |
+| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. |
+| input.application.keepAnnotations | boolean | Indicates whether to keep all Kubernetes annotations. Default is `false`. |
+| input.application.dropLabels | boolean | Indicates whether to drop all Kubernetes labels. Default is `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
@@ -495,6 +528,8 @@ You cannot enable the following plugins, because they potentially harm the stabi
 - Multiline Filter
 - Kubernetes Filter
 - Rewrite_Tag Filter
+
+In addition, the prefix `__k8s__` is reserved by the LogPipeline and should not be used in any Filter definition.
 
 ### Buffer limits
 
