@@ -256,7 +256,7 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_fluentbit_restarts_total") {
+					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") {
 						return true
 					}
 				}

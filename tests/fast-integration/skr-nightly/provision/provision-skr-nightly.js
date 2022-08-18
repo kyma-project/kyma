@@ -47,6 +47,9 @@ describe('SKR nightly', function() {
   const options = gatherOptions(
       withRuntimeName('kyma-nightly'),
       withScenarioName('test-nightly'));
+  const getShootOptionsFunc = function() {
+    return options;
+  };
 
   before('Fetch last SKR and deprovision if needed', async function() {
     try {
@@ -96,6 +99,6 @@ describe('SKR nightly', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  oidcE2ETest(options, getShootInfoFunc);
+  oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
   commerceMockTest(options);
 });

@@ -11,23 +11,6 @@ import (
 	"testing"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8slabels "k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	// gcp auth etc.
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -36,6 +19,20 @@ import (
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8slabels "k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
@@ -46,6 +43,7 @@ import (
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	beb2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
@@ -66,6 +64,7 @@ const (
 
 var (
 	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
+	k8sCancelFn       context.CancelFunc
 )
 
 var _ = Describe("Subscription Reconciliation Tests", func() {
@@ -121,7 +120,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
-			Context("a Subscription without filters", func() {
+			By("a Subscription without filters", func() {
 				By("should have no clean event types", func() {
 					getSubscription(ctx, subscription).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -134,7 +133,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Addition of filters to a Subscription", func() {
+			By("Addition of filters to a Subscription", func() {
 				publishToSubjects := []string{
 					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventType),
 					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventType),
@@ -164,7 +163,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Updating Subscription filters", func() {
+			By("Updating Subscription filters", func() {
 				cleanEventTypes := []string{
 					fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedEventType),
 					fmt.Sprintf("%s1alpha", reconcilertesting.OrderCreatedEventType),
@@ -190,7 +189,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Deletion Subscription filters", func() {
+			By("Deletion Subscription filters", func() {
 				cleanEventTypes := []string{
 					fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedEventType),
 				}
@@ -212,7 +211,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Updating the Subscription filter with an invalid prefix", func() {
+			By("Updating the Subscription filter with an invalid prefix", func() {
 				By("updating the Subscription filter", func() {
 					subscription.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("invalid%s", reconcilertesting.OrderCreatedEventType)
 					ensureSubscriptionUpdated(ctx, subscription)
@@ -230,7 +229,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Updating the invalid Subscription filter with a valid prefix", func() {
+			By("Updating the invalid Subscription filter with a valid prefix", func() {
 				bebSubscriptionName := "test-validc1971deb47ad85e05c215e9271f111b0d3051283"
 				By("updating the Subscription filter", func() {
 					subscription.Spec.Filter.Filters[0].EventType.Value = reconcilertesting.OrderCreatedEventType
@@ -960,7 +959,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
-			Context("Given the subscription is ready", func() {
+			By("Given the subscription is ready", func() {
 				getSubscription(ctx, givenSubscription).Should(And(
 					reconcilertesting.HaveSubscriptionName(subscriptionName),
 					reconcilertesting.HaveSubscriptionReady(),
@@ -1004,7 +1003,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			var kymaSubscription *eventingv1alpha1.Subscription
 			kymaSubscriptionName := "test-subscription"
 
-			Context("Setup Kyma Subscription required resources", func() {
+			By("Setup Kyma Subscription required resources", func() {
 				var svc *v1.Service
 				By("Creating Subscriber service", func() {
 					svc = reconcilertesting.NewSubscriberSvc("test-service", namespaceName)
@@ -1030,7 +1029,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Check Kyma Subscription ready", func() {
+			By("Check Kyma Subscription ready", func() {
 				By("Checking BEB mock server creation requests to contain Subscription creation request", func() {
 					Eventually(wasSubscriptionCreated(kymaSubscription)).Should(BeTrue())
 				})
@@ -1043,13 +1042,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Delete BEB Subscription", func() {
+			By("Delete BEB Subscription", func() {
 				By("Deleting its entry in BEB mock internal cache", func() {
 					beb.Subscriptions.DeleteSubscriptionsByName(nameMapper.MapSubscriptionName(kymaSubscription))
 				})
 			})
 
-			Context("Trigger Kyma Subscription reconciliation request", func() {
+			By("Trigger Kyma Subscription reconciliation request", func() {
 				By("Labeling Kyma Subscription", func() {
 					labels := map[string]string{"reconcile": "true"}
 					kymaSubscription.Labels = labels
@@ -1057,7 +1056,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Check BEB Subscription was recreated", func() {
+			By("Check BEB Subscription was recreated", func() {
 				By("Checking BEB mock server received a second creation request", func() {
 					Eventually(func() int {
 						_, countPost, _ := countBEBRequests(nameMapper.MapSubscriptionName(kymaSubscription))
@@ -1454,7 +1453,7 @@ var _ = BeforeSuite(func(done Done) {
 		Qos:                      string(bebtypes.QosAtLeastOnce),
 	}
 
-	credentials := &handlers.OAuth2ClientCredentials{
+	credentials := &beb2.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
@@ -1463,8 +1462,8 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
-	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
-	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
+	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, beb2.MaxBEBSubscriptionNameLength)
+	bebHandler := beb2.NewBEB(credentials, nameMapper, defaultLogger)
 
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
 	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
@@ -1474,7 +1473,9 @@ var _ = BeforeSuite(func(done Done) {
 
 	go func() {
 		defer GinkgoRecover()
-		err = k8sManager.Start(ctrl.SetupSignalHandler())
+		var ctx context.Context
+		ctx, k8sCancelFn = context.WithCancel(ctrl.SetupSignalHandler())
+		err = k8sManager.Start(ctx)
 		Expect(err).ToNot(HaveOccurred())
 	}()
 
@@ -1485,13 +1486,10 @@ var _ = BeforeSuite(func(done Done) {
 }, beforeSuiteTimeoutInSeconds)
 
 var _ = AfterSuite(func() {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("panic recovered:", r)
-		}
-	}()
-
 	By("tearing down the test environment")
+	if k8sCancelFn != nil {
+		k8sCancelFn()
+	}
 	err := testEnv.Stop()
 	mock.Stop()
 	Expect(err).ToNot(HaveOccurred())
@@ -1529,8 +1527,9 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	return subscription, apiRule
 }
 
-//nolint:unparam
 // countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
+//
+//nolint:unparam
 func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete int) {
 	countGet, countPost, countDelete = 0, 0, 0
 	beb.Requests.ReadEach(

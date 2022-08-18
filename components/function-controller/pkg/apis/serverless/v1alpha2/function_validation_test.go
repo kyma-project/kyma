@@ -45,9 +45,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
@@ -104,8 +106,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							"test":        "test",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{
@@ -259,8 +263,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(-1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(-1),
+					},
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -280,8 +286,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
-					MaxReplicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
+						MaxReplicas: pointer.Int32(1),
+					},
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -377,9 +385,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					MinReplicas: pointer.Int32(0),
-					MaxReplicas: pointer.Int32(0),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(0),
+						MaxReplicas: pointer.Int32(0),
+					},
+					Runtime: NodeJs12,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -466,9 +476,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -508,9 +520,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 				},
 			},
 			specifiedExpectedError: gomega.And(

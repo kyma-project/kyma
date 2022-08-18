@@ -169,8 +169,12 @@ func applyV1Alpha1ToV1Alpha2Annotations(in *serverlessv1alpha1.Function, out *se
 
 func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
 	out.Spec.Env = in.Spec.Env
-	out.Spec.MaxReplicas = in.Spec.MaxReplicas
-	out.Spec.MinReplicas = in.Spec.MaxReplicas
+	if in.Spec.MinReplicas != nil || in.Spec.MaxReplicas != nil {
+		out.Spec.ScaleConfig = &serverlessv1alpha2.ScaleConfig{
+			MinReplicas: in.Spec.MinReplicas,
+			MaxReplicas: in.Spec.MaxReplicas,
+		}
+	}
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
@@ -277,10 +281,12 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 
 func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
 	out.Spec.Env = in.Spec.Env
-	out.Spec.MaxReplicas = in.Spec.MaxReplicas
-	out.Spec.MinReplicas = in.Spec.MaxReplicas
 	out.Spec.Runtime = serverlessv1alpha1.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
+	if in.Spec.ScaleConfig != nil {
+		out.Spec.MinReplicas = in.Spec.ScaleConfig.MinReplicas
+		out.Spec.MaxReplicas = in.Spec.ScaleConfig.MaxReplicas
+	}
 
 	out.Spec.BuildResources = in.Spec.ResourceConfiguration.Build.Resources
 	out.Spec.Resources = in.Spec.ResourceConfiguration.Function.Resources

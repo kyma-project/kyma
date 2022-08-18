@@ -31,8 +31,6 @@ metadata:
     app: orders-function
     example: orders-function
 spec:
-  maxReplicas: 1
-  minReplicas: 1
   runtime: nodejs14
   resourceConfiguration:
     function:

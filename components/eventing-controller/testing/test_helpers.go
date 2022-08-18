@@ -26,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	ce "github.com/cloudevents/sdk-go/v2"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 )
 
@@ -388,7 +389,7 @@ func WithNotCleanFilter() SubscriptionOpt {
 }
 
 // WithEmptyFilter is a SubscriptionOpt for creating a subscription with an empty event type filter.
-//  Note that this is different from setting Filter to nil.
+// Note that this is different from setting Filter to nil.
 func WithEmptyFilter() SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{

@@ -21,18 +21,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
-	"github.com/prometheus/client_golang/prometheus"
-
-	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
 	admissionv1 "k8s.io/api/admission/v1"
-	"k8s.io/apimachinery/pkg/types"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -40,65 +32,36 @@ import (
 
 //go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
-	RunConfig(ctx context.Context, configFilePath string) error
+	RunPipeline(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error
 }
 
 const (
-	fluentBitConfigDirectory       = "/tmp/dry-run"
 	StatusReasonConfigurationError = "InvalidConfiguration"
-	fluentBitParsersConfigMapKey   = "parsers.conf"
 )
 
 //+kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
-	fluentBitConfigMap    types.NamespacedName
 	inputValidator        validation.InputValidator
 	variablesValidator    validation.VariablesValidator
-	dryRunner             DryRunner
 	pluginValidator       validation.PluginValidator
 	maxPipelinesValidator validation.MaxPipelinesValidator
 	outputValidator       validation.OutputValidator
 	fileValidator         validation.FilesValidator
-	pipelineConfig        fluentbit.PipelineConfig
-	fsWrapper             utils.FileSystem
 	decoder               *admission.Decoder
-	daemonSetUtils        *fluentbit.DaemonSetUtils
+	dryRunner             DryRunner
 }
 
-func NewValidatingWebhookHandler(
-	client client.Client,
-	fluentBitConfigMap string,
-	namespace string,
-	inputValidator validation.InputValidator,
-	variablesValidator validation.VariablesValidator,
-	dryRunner DryRunner,
-	pluginValidator validation.PluginValidator,
-	maxPipelinesValidator validation.MaxPipelinesValidator,
-	outputValidator validation.OutputValidator,
-	fileValidator validation.FilesValidator,
-	pipelineConfig fluentbit.PipelineConfig,
-	fsWrapper utils.FileSystem,
-	restartsTotal prometheus.Counter) *ValidatingWebhookHandler {
-	fluentBitConfigMapNamespacedName := types.NamespacedName{
-		Name:      fluentBitConfigMap,
-		Namespace: namespace,
-	}
-	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
-
+func NewValidatingWebhookHandler(client client.Client, inputValidator validation.InputValidator, variablesValidator validation.VariablesValidator, pluginValidator validation.PluginValidator, maxPipelinesValidator validation.MaxPipelinesValidator, outputValidator validation.OutputValidator, fileValidator validation.FilesValidator, dryRunner DryRunner) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
 		Client:                client,
-		fluentBitConfigMap:    fluentBitConfigMapNamespacedName,
 		inputValidator:        inputValidator,
 		variablesValidator:    variablesValidator,
-		dryRunner:             dryRunner,
 		pluginValidator:       pluginValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
 		outputValidator:       outputValidator,
 		fileValidator:         fileValidator,
-		fsWrapper:             fsWrapper,
-		pipelineConfig:        pipelineConfig,
-		daemonSetUtils:        daemonSetUtils,
+		dryRunner:             dryRunner,
 	}
 }
 
@@ -111,9 +74,7 @@ func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Req
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
-
-	if err := v.validateLogPipeline(ctx, currentBaseDirectory, logPipeline); err != nil {
+	if err := v.validateLogPipeline(ctx, logPipeline); err != nil {
 		log.Error(err, "LogPipeline rejected")
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
@@ -146,66 +107,45 @@ func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Req
 	return admission.Allowed("LogPipeline validation successful")
 }
 
-func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) error {
+func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) error {
 	log := logf.FromContext(ctx)
-
-	defer func() {
-		if err := v.fsWrapper.RemoveDirectory(currentBaseDirectory); err != nil {
-			log.Error(err, "Failed to remove Fluent Bit config directory")
-		}
-	}()
-
-	var parser *telemetryv1alpha1.LogParser
-
-	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, logPipeline, parser)
-	if err != nil {
-		return err
-	}
-
-	log.Info("Fluent Bit config files count", "count", len(configFiles))
-	for _, configFile := range configFiles {
-		if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
-			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
-			return err
-		}
-	}
 
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	if err := v.List(ctx, &logPipelines); err != nil {
 		return err
 	}
 
-	if err = v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
+	if err := v.maxPipelinesValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Maximum number of log pipelines reached")
 		return err
 	}
 
-	if err = v.inputValidator.Validate(&logPipeline.Spec.Input); err != nil {
+	if err := v.inputValidator.Validate(&logPipeline.Spec.Input); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit input")
 		return err
 	}
 
-	if err = v.variablesValidator.Validate(ctx, logPipeline, &logPipelines); err != nil {
+	if err := v.variablesValidator.Validate(ctx, logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate variables")
 		return err
 	}
 
-	if err = v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
+	if err := v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate plugins")
 		return err
 	}
 
-	if err = v.outputValidator.Validate(logPipeline); err != nil {
+	if err := v.outputValidator.Validate(logPipeline); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit output")
 		return err
 	}
 
-	if err = v.dryRunner.RunConfig(ctx, currentBaseDirectory); err != nil {
+	if err := v.fileValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
 
-	if err = v.fileValidator.Validate(logPipeline, &logPipelines); err != nil {
+	if err := v.dryRunner.RunPipeline(ctx, logPipeline); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}

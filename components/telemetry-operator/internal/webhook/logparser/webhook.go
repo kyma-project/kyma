@@ -20,19 +20,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils"
-
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
-
-	"github.com/prometheus/client_golang/prometheus"
-
-	"github.com/google/uuid"
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -40,49 +32,22 @@ import (
 
 //go:generate mockery --name DryRunner --filename dryrun.go
 type DryRunner interface {
-	RunParser(ctx context.Context, configFilePath string) error
+	RunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
 }
-
-const (
-	fluentBitConfigDirectory     = "/tmp/dry-run"
-	fluentBitParsersConfigMapKey = "parsers.conf"
-)
 
 //+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
-	fluentBitConfigMap types.NamespacedName
-	parserValidator    validation.ParserValidator
-	pipelineConfig     fluentbit.PipelineConfig
-	dryRunner          DryRunner
-	fsWrapper          utils.FileSystem
-	decoder            *admission.Decoder
-	daemonSetUtils     *fluentbit.DaemonSetUtils
+	parserValidator validation.ParserValidator
+	dryRunner       DryRunner
+	decoder         *admission.Decoder
 }
 
-func NewValidatingWebhookHandler(
-	client client.Client,
-	fluentBitConfigMap string,
-	namespace string,
-	parserValidator validation.ParserValidator,
-	pipelineConfig fluentbit.PipelineConfig,
-	dryRunner DryRunner,
-	fsWrapper utils.FileSystem,
-	restartsTotal prometheus.Counter,
-) *ValidatingWebhookHandler {
-	fluentBitConfigMapNamespacedName := types.NamespacedName{
-		Name:      fluentBitConfigMap,
-		Namespace: namespace,
-	}
-	daemonSetUtils := fluentbit.NewDaemonSetUtils(client, fluentBitConfigMapNamespacedName, restartsTotal)
+func NewValidatingWebhookHandler(client client.Client, parserValidator validation.ParserValidator, dryRunner DryRunner) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
-		Client:             client,
-		fluentBitConfigMap: fluentBitConfigMapNamespacedName,
-		parserValidator:    parserValidator,
-		pipelineConfig:     pipelineConfig,
-		dryRunner:          dryRunner,
-		fsWrapper:          fsWrapper,
-		daemonSetUtils:     daemonSetUtils,
+		Client:          client,
+		parserValidator: parserValidator,
+		dryRunner:       dryRunner,
 	}
 }
 
@@ -118,22 +83,7 @@ func (v *ValidatingWebhookHandler) validateLogParser(ctx context.Context, logPar
 		return err
 	}
 
-	var pipeLine *telemetryv1alpha1.LogPipeline
-	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
-
-	configFiles, err := v.daemonSetUtils.GetFluentBitConfig(ctx, currentBaseDirectory, fluentBitParsersConfigMapKey, v.fluentBitConfigMap, v.pipelineConfig, pipeLine, logParser)
-	if err != nil {
-		return err
-	}
-	log.Info("Fluent Bit config files count", "count", len(configFiles))
-	for _, configFile := range configFiles {
-		if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
-			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
-			return err
-		}
-	}
-
-	if err = v.dryRunner.RunParser(ctx, currentBaseDirectory); err != nil {
+	if err = v.dryRunner.RunParser(ctx, logParser); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
