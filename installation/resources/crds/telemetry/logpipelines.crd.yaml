@@ -73,7 +73,6 @@ spec:
                       handles application logs
                     properties:
                       containers:
-<<<<<<< HEAD
                         properties:
                           exclude:
                             items:
@@ -84,29 +83,14 @@ spec:
                               type: string
                             type: array
                         type: object
-=======
-                        items:
-                          type: string
-                        type: array
                       dropLabels:
                         description: DropLabels indicates whether to drop all Kubernetes
                           labels. The default is false.
-                        type: boolean
-                      excludeContainers:
-                        items:
-                          type: string
-                        type: array
-                      excludeNamespaces:
-                        items:
-                          type: string
-                        type: array
-                      includeSystemNamespaces:
                         type: boolean
                       keepAnnotations:
                         description: KeepAnnotations indicates whether to keep all
                           Kubernetes annotations. The default is false.
                         type: boolean
->>>>>>> main
                       namespaces:
                         properties:
                           exclude:
