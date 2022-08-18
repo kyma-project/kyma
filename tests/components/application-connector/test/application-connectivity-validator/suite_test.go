@@ -1,8 +1,7 @@
 package application_connectivity_validator
 
 import (
-	"crypto/tls"
-	_ "embed"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -28,26 +27,19 @@ func TestValidatorSuite(t *testing.T) {
 	suite.Run(t, new(ValidatorSuite))
 }
 
-//go:embed events.crt
-var eventsCrt []byte
+const url = "http://central-application-connectivity-validator.kyma-system.svc.cluster.local:8080/event-test/events"
 
-//go:embed client.key
-var eventsKey []byte
+func (vs *ValidatorSuite) TestGoodCert() {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	vs.Nil(err)
 
-func (vs *ValidatorSuite) TestValidator() {
-	cert, err := tls.X509KeyPair(eventsCrt, eventsKey)
+	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=event-test"))
 
-	cli := http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				Certificates: []tls.Certificate{cert},
-			},
-		},
-	}
+	res, err := http.DefaultClient.Do(req)
+	vs.Nil(err)
+	vs.Equal(http.StatusOK, res.StatusCode)
+}
 
-	// const url = "localhost:8080"
-	const url = "central-application-connectivity-validator.kyma-system.svc.cluster.local:8080"
-	req, err := http.NewRequest(http.MethodGet, "https://"+url+"/event-test/events", nil)
 	vs.Nil(err)
 
 	req.Header.Add("X-Forwarded-Client-Cert", "Subject=\"CN=event-test\"")
@@ -55,4 +47,7 @@ func (vs *ValidatorSuite) TestValidator() {
 	res, err := cli.Do(req)
 	vs.Nil(err)
 	vs.Equal(http.StatusOK, res.StatusCode)
+
+func certFields(subject string) string {
+	return fmt.Sprintf("Subject=%q", subject)
 }
