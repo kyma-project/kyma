@@ -6,10 +6,8 @@ spec:
   input:
     application:
       namespaces:
-        - kyma-system
-      excludeNamespaces: []
-      containers:  []
-      excludeContainers: []
+        include:
+          - kyma-system
   output:
     custom: |
       Name               stdout

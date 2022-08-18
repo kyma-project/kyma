@@ -6,7 +6,8 @@ metadata:
 spec:
   input:
     application:
-      includeSystemNamespaces: true
+      namespaces:
+        system: true
   output:
     grafana-loki:
       url:
