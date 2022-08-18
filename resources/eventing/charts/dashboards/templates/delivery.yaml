@@ -103,7 +103,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Failed Event Publisher Requests per Event Type",
+            "title": "Failed Events Published per Event Type",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -217,7 +217,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Failed Events Dispatch per Event Type",
+            "title": "Failed Events Dispatched per Event Type",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -314,7 +314,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Successful Event Publisher Requests per Event Type",
+            "title": "Successfully Published Events per Event Type",
             "tooltip": {
               "shared": true,
               "sort": 0,
