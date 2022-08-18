@@ -181,7 +181,7 @@ Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: orders-service
@@ -190,8 +190,8 @@ metadata:
     app: orders-service
     example: orders-service
 spec:
+  host: orders-service.$CLUSTER_DOMAIN
   service:
-    host: orders-service.$CLUSTER_DOMAIN
     name: orders-service
     port: 80
   gateway: kyma-system/kyma-gateway

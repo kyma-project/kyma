@@ -31,14 +31,14 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: httpbin
      namespace: $NAMESPACE
    spec:
+     host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
-       host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
        name: httpbin
        port: 8000
      gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
@@ -91,17 +91,17 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    ```shell
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: function
      namespace: $NAMESPACE
    spec:
      gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      rules:
        - path: /function
          methods: ["GET"]

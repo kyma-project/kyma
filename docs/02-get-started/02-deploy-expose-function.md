@@ -84,13 +84,14 @@ Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
-  apiVersion: gateway.kyma-project.io/v1alpha1
+  apiVersion: gateway.kyma-project.io/v1beta1
   kind: APIRule
   metadata:
     name: hello-world
     namespace: default
   spec:
     gateway: kyma-system/kyma-gateway
+    host: hello-world.$CLUSTER_DOMAIN
     rules:
       - accessStrategies:
         - config: {}
@@ -104,7 +105,6 @@ cat <<EOF | kubectl apply -f -
           - HEAD
         path: /.*
     service:
-      host: hello-world.$CLUSTER_DOMAIN
       name: hello-world
       port: 80
 EOF
