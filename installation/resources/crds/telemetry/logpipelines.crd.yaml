@@ -73,23 +73,29 @@ spec:
                       handles application logs
                     properties:
                       containers:
-                        items:
-                          type: string
-                        type: array
-                      excludeContainers:
-                        items:
-                          type: string
-                        type: array
-                      excludeNamespaces:
-                        items:
-                          type: string
-                        type: array
-                      includeSystemNamespaces:
-                        type: boolean
+                        properties:
+                          exclude:
+                            items:
+                              type: string
+                            type: array
+                          include:
+                            items:
+                              type: string
+                            type: array
+                        type: object
                       namespaces:
-                        items:
-                          type: string
-                        type: array
+                        properties:
+                          exclude:
+                            items:
+                              type: string
+                            type: array
+                          include:
+                            items:
+                              type: string
+                            type: array
+                          system:
+                            type: boolean
+                        type: object
                     type: object
                 type: object
               output:
