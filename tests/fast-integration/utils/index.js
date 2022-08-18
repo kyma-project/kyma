@@ -1610,7 +1610,7 @@ async function labelNamespaceWithIstioInject(targetNamespace, enabled) {
     },
   ];
 
-  await k8sCoreV1Api.patchNamespace(mockNamespace, patch).then(() => {
+  await k8sCoreV1Api.patchNamespace(targetNamespace, patch).then(() => {
     console.log(`Patched namespace ${targetNamespace} with istio-injection=${enabled}`);
   }).catch((err) => {
     console.log('Error: '); console.log(err);

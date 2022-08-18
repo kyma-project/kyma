@@ -635,8 +635,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(prepareCommerceObjs(mockNamespace));
-  await labelNamespaceWithIstioInject(targetNamespace, 'enabled');
   await k8sApply(functionObjs, targetNamespace, true);
+  await labelNamespaceWithIstioInject(targetNamespace, 'enabled');
   await waitForFunction('lastorder', targetNamespace);
   await k8sApply([
     eventingSubscription(
