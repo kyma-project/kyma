@@ -5,9 +5,8 @@ metadata:
   namespace: kyma-system
 type: Opaque
 data:
-  {{- $files := .Files }}
-  crt: {{ $files.Get "certs/positive/client.crt" | b64enc  }}
-  key: {{ $files.Get "certs/positive/client.key" | b64enc  }}
+  crt: {{ "good.crt" | b64enc }}
+  key: {{ "good.key" | b64enc }}
 ---
 apiVersion: v1
 kind: Secret
@@ -16,6 +15,5 @@ metadata:
   namespace: kyma-system
 type: Opaque
 data:
-  {{- $files := .Files }}
-  crt: {{ $files.Get "certs/negative/client.crt" | b64enc  }}
-  key: {{ $files.Get "certs/negative/client.key" | b64enc  }}
+  crt: {{ "wrong.crt" | b64enc }}
+  key: {{ "wrong.key" | b64enc }}
