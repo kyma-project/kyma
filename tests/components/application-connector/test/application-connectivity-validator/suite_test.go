@@ -40,13 +40,16 @@ func (vs *ValidatorSuite) TestGoodCert() {
 	vs.Equal(http.StatusOK, res.StatusCode)
 }
 
+func (vs *ValidatorSuite) TestBadCert() {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
 
-	req.Header.Add("X-Forwarded-Client-Cert", "Subject=\"CN=event-test\"")
+	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=nonexistant"))
 
-	res, err := cli.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	vs.Nil(err)
-	vs.Equal(http.StatusOK, res.StatusCode)
+	vs.Equal(http.StatusForbidden, res.StatusCode)
+}
 
 func certFields(subject string) string {
 	return fmt.Sprintf("Subject=%q", subject)
