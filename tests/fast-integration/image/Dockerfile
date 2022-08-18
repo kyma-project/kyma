@@ -1,15 +1,15 @@
-FROM alpine:3.14.6
+FROM node:14.20.0-alpine3.16
 
 ENV FIT_MAKE_TARGET=ci-skr
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
+RUN apk update; apk upgrade; rm /var/cache/apk/*
+
 RUN apk --no-cache add \
     build-base \
     git \
-    curl \
-    nodejs=14.19.0-r0 \
-    npm
+    curl
 
 #################################################################
 ################ Install kcp-cli ################################

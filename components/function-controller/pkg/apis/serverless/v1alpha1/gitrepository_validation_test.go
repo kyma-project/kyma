@@ -88,6 +88,18 @@ func TestGitRepositoryValidation(t *testing.T) {
 			},
 			expectedError: gomega.BeNil(),
 		},
+		"Valid ssh without .git extension": {
+			givenFunc: GitRepository{
+				Spec: GitRepositorySpec{
+					URL: "git@github.com:kyma-project/kyma",
+					Auth: &RepositoryAuth{
+						Type:       RepositoryAuthSSHKey,
+						SecretName: "my-secret",
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
+		},
 		"should be invalid git ssh, no auth provided": {
 			givenFunc: GitRepository{
 				Spec: GitRepositorySpec{

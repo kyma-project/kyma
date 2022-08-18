@@ -244,7 +244,7 @@ func (w *ConvertingWebhook) convertGitRepositoryV1Alpha1ToV1Alpha2(in *serverles
 func (w *ConvertingWebhook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionStatus, out *serverlessv1alpha2.FunctionStatus) {
 	out.Repository = serverlessv1alpha2.Repository(in.Repository)
 	out.Commit = in.Commit
-	out.Runtime = serverlessv1alpha2.RuntimeExtended(in.Runtime)
+	out.Runtime = serverlessv1alpha2.Runtime(in.Runtime)
 	out.RuntimeImageOverride = in.RuntimeImageOverride
 
 	out.Conditions = []serverlessv1alpha2.Condition{}
@@ -305,14 +305,10 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	out.Spec.Type = serverlessv1alpha1.SourceTypeGit
 
 	// check repo name in the annotations,
+	// if not exists it means that the function was created as v1alpha2
 	repoName := ""
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
-	}
-
-	if repoName == "" {
-		// TODO: Improve logging interface
-		w.log.Error(fmt.Errorf("Unable to find GitRepository annotation for function: "), fmt.Sprintf("%s/%s", in.Namespace, in.Name))
 	}
 
 	out.Spec.Source = repoName

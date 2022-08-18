@@ -58,6 +58,26 @@ var _ = Describe("LogPipeline controller", func() {
     name grep
     regex $kubernetes['labels']['app'] my-deployment
 
+[FILTER]
+    name                  nest
+    match                 log-pipeline.*
+    operation             lift
+    nested_under          kubernetes
+    add_prefix            __k8s__
+
+[FILTER]
+    name                  record_modifier
+    match                 log-pipeline.*
+    remove_key            __k8s__annotations
+
+[FILTER]
+    name                  nest
+    match                 log-pipeline.*
+    operation             nest
+    wildcard              __k8s__*
+    nest_under            kubernetes
+    remove_prefix         __k8s__
+
 [OUTPUT]
     match                    log-pipeline.*
     name                     stdout

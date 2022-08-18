@@ -47,6 +47,10 @@ type ApplicationInput struct {
 	ExcludeNamespaces       []string `json:"excludeNamespaces,omitempty"`
 	Containers              []string `json:"containers,omitempty"`
 	ExcludeContainers       []string `json:"excludeContainers,omitempty"`
+	// KeepAnnotations indicates whether to keep all Kubernetes annotations. The default is false.
+	KeepAnnotations bool `json:"keepAnnotations,omitempty"`
+	// DropLabels indicates whether to drop all Kubernetes labels. The default is false.
+	DropLabels bool `json:"dropLabels,omitempty"`
 }
 
 func (a ApplicationInput) HasSelectors() bool {

@@ -140,6 +140,25 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			},
 			expectedError: gomega.BeNil(),
 		},
+		"Should return error on unexpected runtime name": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: "unknown-runtime-name",
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.runtime",
+				),
+			),
+		},
 		"Should return error when more than one source is filled": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
@@ -600,6 +619,16 @@ func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
 				Source: Source{
 					GitRepository: &GitRepositorySource{
 						URL: "git@github.com:kyma-project/kyma.git",
+					},
+				},
+			},
+		},
+		{
+			name: "Valid ssh without .git extension",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "git@github.com:kyma-project/kyma",
 					},
 				},
 			},

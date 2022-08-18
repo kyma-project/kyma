@@ -4,6 +4,7 @@ const {GardenerClient, GardenerConfig} = require('../gardener');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const fs = require('fs');
 const os = require('os');
+const {expect} = require('chai');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
