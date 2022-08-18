@@ -19,27 +19,48 @@ type PipelineConfig struct {
 }
 
 const (
-	ParserConfigHeader      ConfigHeader = "[PARSER]"
-	FilterConfigHeader      ConfigHeader = "[FILTER]"
-	OutputConfigHeader      ConfigHeader = "[OUTPUT]"
-	MatchKey                string       = "match"
+	parserConfigHeader      ConfigHeader = "[PARSER]"
+	filterConfigHeader      ConfigHeader = "[FILTER]"
+	outputConfigHeader      ConfigHeader = "[OUTPUT]"
+	matchKey                string       = "match"
 	OutputStorageMaxSizeKey string       = "storage.total_limit_size"
-	PermanentFilterTemplate string       = `
+	permanentFilterTemplate string       = `
 name                  record_modifier
 match                 %s.*
 Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}`
-	LuaDeDotFilterTemplate string = `
+	luaDeDotFilterTemplate string = `
 name                  lua
 match                 %s.*
 script                /fluent-bit/scripts/filter-script.lua
 call                  kubernetes_map_keys`
+	liftKubernetesKeysTemplate string = `
+name                  nest
+match                 %s.*
+operation             lift
+nested_under          kubernetes
+add_prefix            __k8s__
+`
+	dropKubernetesKeyTemplate string = `
+name                  record_modifier
+match                 %s.*
+remove_key            __k8s__%s
+`
+	nestKubernetesKeyTemplate string = `
+name                  nest
+match                 %s.*
+operation             nest
+wildcard              __k8s__*
+nest_under            kubernetes
+remove_prefix         __k8s__
+`
 )
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	var sb strings.Builder
+
 	sb.WriteString(CreateRewriteTagFilter(pipelineConfig, logPipeline))
-	sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(PermanentFilterTemplate, logPipeline.Name)))
+	sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(permanentFilterTemplate, logPipeline.Name)))
 
 	for _, filter := range logPipeline.Spec.Filters {
 		section, err := ParseSection(filter.Custom)
@@ -47,22 +68,44 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCon
 			return "", err
 		}
 
-		section[MatchKey] = generateMatchCondition(logPipeline.Name)
+		section[matchKey] = generateMatchCondition(logPipeline.Name)
 
-		sb.WriteString(buildConfigSectionFromMap(FilterConfigHeader, section))
+		sb.WriteString(buildConfigSectionFromMap(filterConfigHeader, section))
 	}
 
+	sb.WriteString(createKubernetesMetadataFilter(logPipeline.Name, logPipeline.Spec.Input.Application.KeepAnnotations, logPipeline.Spec.Input.Application.DropLabels))
+
 	if logPipeline.Spec.Output.HTTP.Host.IsDefined() && logPipeline.Spec.Output.HTTP.Dedot {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateFilter(LuaDeDotFilterTemplate, logPipeline.Name)))
+		sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(luaDeDotFilterTemplate, logPipeline.Name)))
 	}
 
 	outputSection, err := generateOutputSection(logPipeline, pipelineConfig)
 	if err != nil {
 		return "", err
 	}
-	sb.WriteString(buildConfigSectionFromMap(OutputConfigHeader, outputSection))
+	sb.WriteString(buildConfigSectionFromMap(outputConfigHeader, outputSection))
 
 	return sb.String(), nil
+}
+
+// createKubernetesMetadataFilter makes the collection of kubernetes annotations and labels optional
+// by adding dedicated Fluent Bit filters.
+func createKubernetesMetadataFilter(pipelineName string, keepAnnotations, dropLabels bool) string {
+	if keepAnnotations && !dropLabels {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(liftKubernetesKeysTemplate, pipelineName)))
+	if !keepAnnotations {
+		sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(dropKubernetesKeyTemplate, pipelineName, "annotations")))
+	}
+
+	if dropLabels {
+		sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(dropKubernetesKeyTemplate, pipelineName, "labels")))
+	}
+	sb.WriteString(BuildConfigSection(filterConfigHeader, generateFilter(nestKubernetesKeyTemplate, pipelineName)))
+	return sb.String()
 }
 
 func BuildConfigSection(header ConfigHeader, content string) string {
@@ -127,7 +170,7 @@ func generateLokiOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConf
 	lokiConfig := logPipeline.Spec.Output.Loki
 	var err error
 	result := getLokiDefaults()
-	result[MatchKey] = generateMatchCondition(logPipeline.Name)
+	result[matchKey] = generateMatchCondition(logPipeline.Name)
 	result[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
 	result["name"] = "grafana-loki"
 	result["alias"] = logPipeline.Name
@@ -169,7 +212,7 @@ func getHTTPOutputDefaults() map[string]string {
 
 func generateHTTPOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (map[string]string, error) {
 	result := getHTTPOutputDefaults()
-	result[MatchKey] = generateMatchCondition(logPipeline.Name)
+	result[matchKey] = generateMatchCondition(logPipeline.Name)
 	result[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
 	var err error
 	if logPipeline.Spec.Output.HTTP.Host.IsDefined() {
@@ -228,7 +271,7 @@ func generateCustomOutput(logPipeline *telemetryv1alpha1.LogPipeline, pipelineCo
 		return nil, err
 	}
 
-	section[MatchKey] = generateMatchCondition(logPipeline.Name)
+	section[matchKey] = generateMatchCondition(logPipeline.Name)
 	section[OutputStorageMaxSizeKey] = pipelineConfig.FsBufferLimit
 
 	return section, nil
@@ -249,7 +292,7 @@ func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 		if logParser.DeletionTimestamp == nil {
 			name := fmt.Sprintf("Name %s", logParser.Name)
 			parser := fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
-			sb.WriteString(BuildConfigSection(ParserConfigHeader, parser))
+			sb.WriteString(BuildConfigSection(parserConfigHeader, parser))
 		}
 	}
 	return sb.String()

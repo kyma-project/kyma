@@ -83,6 +83,14 @@ spec:
                               type: string
                             type: array
                         type: object
+                      dropLabels:
+                        description: DropLabels indicates whether to drop all Kubernetes
+                          labels. The default is false.
+                        type: boolean
+                      keepAnnotations:
+                        description: KeepAnnotations indicates whether to keep all
+                          Kubernetes annotations. The default is false.
+                        type: boolean
                       namespaces:
                         properties:
                           exclude:

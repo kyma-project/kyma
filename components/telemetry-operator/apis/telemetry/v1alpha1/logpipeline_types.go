@@ -44,6 +44,10 @@ type Input struct {
 type ApplicationInput struct {
 	Namespaces InputNamespaces `json:"namespaces,omitempty"`
 	Containers InputContainers `json:"containers,omitempty"`
+	// KeepAnnotations indicates whether to keep all Kubernetes annotations. The default is false.
+	KeepAnnotations bool `json:"keepAnnotations,omitempty"`
+	// DropLabels indicates whether to drop all Kubernetes labels. The default is false.
+	DropLabels bool `json:"dropLabels,omitempty"`
 }
 
 type InputNamespaces struct {
@@ -56,13 +60,6 @@ type InputContainers struct {
 	Include []string `json:"include,omitempty"`
 	Exclude []string `json:"exclude,omitempty"`
 }
-
-//func (a *ApplicationInput) HasSelectors() bool {
-//	return len(a.Namespaces) > 0 ||
-//		len(a.ExcludeNamespaces) > 0 ||
-//		len(a.Containers) > 0 ||
-//		len(a.ExcludeContainers) > 0
-//}
 
 // Filter describes a Fluent Bit filter configuration
 type Filter struct {

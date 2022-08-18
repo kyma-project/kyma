@@ -244,7 +244,7 @@ func (w *ConvertingWebhook) convertGitRepositoryV1Alpha1ToV1Alpha2(in *serverles
 func (w *ConvertingWebhook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionStatus, out *serverlessv1alpha2.FunctionStatus) {
 	out.Repository = serverlessv1alpha2.Repository(in.Repository)
 	out.Commit = in.Commit
-	out.Runtime = serverlessv1alpha2.RuntimeExtended(in.Runtime)
+	out.Runtime = serverlessv1alpha2.Runtime(in.Runtime)
 	out.RuntimeImageOverride = in.RuntimeImageOverride
 
 	out.Conditions = []serverlessv1alpha2.Condition{}
