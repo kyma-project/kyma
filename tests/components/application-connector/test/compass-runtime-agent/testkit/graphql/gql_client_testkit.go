@@ -2,9 +2,9 @@ package graphql
 
 import (
 	"errors"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/third_party/machinebox/graphql"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/third_party/machinebox/graphql"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,6 +8,10 @@ MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
 TEST_TIMEOUT = "3m"
 
+OAUTH_COMPASS_CLIENT_ID="aaa"
+OAUTH_COMPASS_CLIENT_SECRET="bbb"
+OAUTH_COMPASS_TOKENS_ENDPOINT="ccc"
+
 
 .PHONY: release test image clean
 .PHONY: test-gateway test-gateway-debug clean-gateway-test publish-gateway-test image-gateway-test publish-mock-app image-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
@@ -67,7 +71,7 @@ disable-sidecar-for-mtls-test:
 enable-sidecar-after-mtls-test:
 	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
-generate-certs:
+generate-certs:.
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
 	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
 
@@ -80,6 +84,9 @@ test-compass-runtime-agent-debug:
 	helm template resources/charts/compass-runtime-agent-test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+    	--set compassCredentials.clientID=$(OAUTH_COMPASS_CLIENT_ID) \
+    	--set compassCredentials.clientSecret=$(OAUTH_COMPASS_CLIENT_SECRET) \
+    	--set compassCredentials.tokensEndpoint=$(OAUTH_COMPASS_TOKENS_ENDPOINT) \
     | kubectl apply -f -
 
 	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/compass-runtime-agent-test

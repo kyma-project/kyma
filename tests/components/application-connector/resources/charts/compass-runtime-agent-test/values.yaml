@@ -7,3 +7,8 @@ images:
   compassTest:
     name: "compass-runtime-agent-test"
     version: "PR-15024"
+
+compassCredentials:
+  clientID: ""
+  clientSecret: ""
+  tokensEndpoint: ""

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/third_party/machinebox/graphql"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/third_party/machinebox/graphql"
 	mock "github.com/stretchr/testify/mock"
 )
 
