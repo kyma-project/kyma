@@ -30,7 +30,10 @@ describe('Provision SKR instance', function() {
   });
 
   after('Print Shoot Info', async function() {
-    // print data out for spinnaker
+    // Print data out for spinnaker.
+    // It is used in spinnaker to pass data to next stages.
+    // More info: https://spinnaker.io/docs/guides/user/kubernetes-v2/run-job-manifest/#spinnaker_property_
+
     if (options && options.instanceID) {
       console.log(`SPINNAKER_PROPERTY_INSTANCE_ID=${options.instanceID}`);
     }
