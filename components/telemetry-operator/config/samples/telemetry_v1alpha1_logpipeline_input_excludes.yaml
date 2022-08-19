@@ -5,12 +5,10 @@ metadata:
 spec:
   input:
     application:
-      namespaces:
-        exclude:
-          - kyma-system
-      containers:
-        exclude:
-          - fluent-bit
+      namespaces: []
+      excludeNamespaces:
+        - kyma-system
+      containers:  []
   output:
     custom: |
       Name               stdout
