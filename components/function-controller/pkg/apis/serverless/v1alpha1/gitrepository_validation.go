@@ -66,7 +66,7 @@ func (in *RepositoryAuth) validateSSHAuth(path string) error {
 	return returnAllErrs("", allErrs)
 }
 func isRepoURLIsSSH(repoURL string) bool {
-	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?`)
+	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(/)?`)
 	if err != nil {
 		panic(err)
 	}

@@ -1,0 +1,61 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "api-gateway.fullname" . }}-init
+  labels:
+    app: {{ include "api-gateway.name" . }}-init
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: init-certificates
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_webhook_certificates) }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SERVICE_NAME
+          value: {{ include "api-gateway.fullname" . }}-webhook-service
+        - name: SECRET_NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: SECRET_NAME
+          value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
+      serviceAccountName: {{ include "api-gateway.name" . }}-certificates-account
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "api-gateway.fullname" . }}-certifates-cronjob
+  labels:
+    app: {{ include "api-gateway.name" . }}-certifates-cronjob
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  # Run cronjob two times per week on Sunday and on Thursday
+  schedule: "0 0 * * 0,4"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: init-certificates
+            image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_webhook_certificates) }}"
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: SERVICE_NAME
+              value: {{ include "api-gateway.fullname" . }}-webhook-service
+            - name: SECRET_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: SECRET_NAME
+              value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
+          serviceAccountName: {{ include "api-gateway.name" . }}-certificates-account
