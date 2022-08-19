@@ -111,8 +111,9 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 ### Step 2: Create an input
 
 If you need selection mechanisms for application logs on Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
-If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default.
+If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. You can either define the included Namespaces to collect from, or exclude from all Namespaces or only set system Namespaces to be included. See all parameters [here](#parameters).
 
+The following example collects input from all Namespaces excluding `kyma-system` and only from `istio-proxy` containers:
 ```yaml
 kind: LogPipeline
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -121,23 +122,14 @@ metadata:
 spec:
   input:
     application:
-      namespaces: []
-      excludeNamespaces: []
-      containers: []
-      excludeContainers: []
-      includeSystemNamespaces: false
+      namespaces:
+        exclude:
+          - kyma-system
+      containers:
+        include:
+          - istio-proxy
   output:
     ...
-```
-
-The following example collects input from all Namespaces including system Namespaces, but excludes the Fluent Bit container:
-```yaml
-spec:
-  input:
-    application:
-      includeSystemNamespaces: true
-      excludeContainers:
-        - fluent-bit
 ```
 
 It might happen that Fluent Bit prints an error per processed log line that is then collected and re-processed.
@@ -332,11 +324,13 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 |---|---|---|
 | input | object | Definition where to collect logs, including selector mechanisms. |
 | input.application | object | Input type for application logs collection. |
-| input.application.namespaces | []string | List of Namespaces from which logs are collected (mutually exclusive with `exludeNamespaces`). |
-| input.application.excludeNamespaces | []string | List of Namespaces to exclude during log collection from all Namespaces (mutually exclusive with `namespaces`) |
-| input.application.containers | []string | List of containers to collect from (mutually exclusive with `excludeContainers`) |
-| input.application.excludeContainers | []string | List of containers to exclude (mutually exclusive with `containers`) |
-| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. |
+| input.application.namespaces | object | Provides selectors for Namespaces. Selectors are mutually exclusive. |
+| input.application.namespaces.include | []string | List of Namespaces from which logs are collected. |
+| input.application.namespaces.exclude | []string | List of Namespaces to exclude during log collection from all Namespaces. |
+| input.application.namespaces.system | boolean | Set to `true` if collecting from all namespaces should include system Namespaces as well. |
+| input.application.containers | []string | Provides selectors for containers. Selectors are mutually exclusive. |
+| input.application.containers.include | []string | List of containers to collect from. |
+| input.application.containers.exclude | []string | List of containers to exclude. |
 | input.application.keepAnnotations | boolean | Indicates whether to keep all Kubernetes annotations. Default is `false`. |
 | input.application.dropLabels | boolean | Indicates whether to drop all Kubernetes labels. Default is `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
