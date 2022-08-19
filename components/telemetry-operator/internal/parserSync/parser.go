@@ -44,10 +44,10 @@ func NewLogParserSyncer(client client.Client,
 // SyncParsersConfigMap synchronizes LogParser with ConfigMap of DaemonSetUtils parsers.
 func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (Result, error) {
 	log := logf.FromContext(ctx)
-	var syncRes Result
+	var result Result
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
-		return syncRes, err
+		return result, err
 	}
 
 	var logParsers telemetryv1alpha1.LogParserList
@@ -58,7 +58,7 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 
 			err = s.List(ctx, &logParsers)
 			if err != nil {
-				return syncRes, err
+				return result, err
 			}
 
 			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
@@ -70,13 +70,13 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 				cm.Data = data
 			}
 			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
-			syncRes.ConfigurationChanged = true
-			syncRes.LogParserChanged = true
+			result.ConfigurationChanged = true
+			result.LogParserChanged = true
 		}
 	} else {
 		err = s.List(ctx, &logParsers)
 		if err != nil {
-			return syncRes, err
+			return result, err
 		}
 
 		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
@@ -84,28 +84,28 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			data := make(map[string]string)
 			data[parsersConfigMapKey] = fluentBitParsersConfig
 			cm.Data = data
-			syncRes.ConfigurationChanged = true
+			result.ConfigurationChanged = true
 		} else {
 			if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
 				cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
-				syncRes.ConfigurationChanged = true
+				result.ConfigurationChanged = true
 			}
 		}
 		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			syncRes.LogParserChanged = true
+			result.LogParserChanged = true
 		}
 	}
 
-	if !syncRes.LogParserChanged && !syncRes.ConfigurationChanged {
-		return syncRes, nil
+	if !result.LogParserChanged && !result.ConfigurationChanged {
+		return result, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.LogParserChanged = false
-		syncRes.ConfigurationChanged = false
-		return syncRes, err
+		result.LogParserChanged = false
+		result.ConfigurationChanged = false
+		return result, err
 	}
 
-	return syncRes, nil
+	return result, nil
 }

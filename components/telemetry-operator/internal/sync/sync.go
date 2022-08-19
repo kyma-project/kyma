@@ -55,30 +55,30 @@ func NewLogPipelineSyncer(client client.Client,
 }
 
 func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (Result, error) {
-	var syncRes Result
+	var result Result
 	log := logf.FromContext(ctx)
 
 	sectionsChanged, err := s.syncSectionsConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
-		return syncRes, err
+		return result, err
 	}
 
 	filesChanged, err := s.syncFilesConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
-		return syncRes, err
+		return result, err
 	}
 	variablesChanged, err := s.syncVariables(ctx)
 	if err != nil {
 		log.Error(err, "Failed to sync variables")
-		return syncRes, err
+		return result, err
 	}
 
 	err = s.syncUnsupportedPluginsTotal(ctx)
 	if err != nil {
 		log.Error(err, "Failed to sync unsupported mode metrics")
-		return syncRes, err
+		return result, err
 	}
 
 	return Result{
@@ -91,10 +91,10 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 // Synchronize LogPipeline with ConfigMap of DaemonSetUtils sections (Input, Filter and Output).
 func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (Result, error) {
 	log := logf.FromContext(ctx)
-	var syncRes Result
+	var result Result
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitSectionsConfigMap)
 	if err != nil {
-		return syncRes, err
+		return result, err
 	}
 
 	cmKey := logPipeline.Name + ".conf"
@@ -103,40 +103,40 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
-			syncRes.LogPipelineChanged = true
-			syncRes.ConfigurationChanged = true
+			result.LogPipelineChanged = true
+			result.ConfigurationChanged = true
 		}
 	} else {
 		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
 		if err != nil {
-			return syncRes, err
+			return result, err
 		}
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
 			cm.Data = data
-			syncRes.ConfigurationChanged = true
+			result.ConfigurationChanged = true
 		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != fluentBitConfig {
 			cm.Data[cmKey] = fluentBitConfig
-			syncRes.ConfigurationChanged = true
+			result.ConfigurationChanged = true
 		}
 		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
-			syncRes.LogPipelineChanged = true
+			result.LogPipelineChanged = true
 		}
 	}
 
-	if !syncRes.LogPipelineChanged && !syncRes.ConfigurationChanged {
-		return syncRes, nil
+	if !result.LogPipelineChanged && !result.ConfigurationChanged {
+		return result, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.LogPipelineChanged = false
-		syncRes.ConfigurationChanged = false
-		return syncRes, err
+		result.LogPipelineChanged = false
+		result.ConfigurationChanged = false
+		return result, err
 	}
 
-	return syncRes, nil
+	return result, nil
 }
 
 func (s *LogPipelineSyncer) syncUnsupportedPluginsTotal(ctx context.Context) error {
@@ -153,10 +153,10 @@ func (s *LogPipelineSyncer) syncUnsupportedPluginsTotal(ctx context.Context) err
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (Result, error) {
 	log := logf.FromContext(ctx)
-	var syncRes Result
+	var result Result
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitFilesConfigMap)
 	if err != nil {
-		return syncRes, err
+		return result, err
 	}
 
 	for _, file := range logPipeline.Spec.Files {
@@ -164,46 +164,46 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 			if _, hasKey := cm.Data[file.Name]; hasKey {
 				delete(cm.Data, file.Name)
 				controllerutil.RemoveFinalizer(logPipeline, filesFinalizer)
-				syncRes.LogPipelineChanged = true
-				syncRes.ConfigurationChanged = true
+				result.LogPipelineChanged = true
+				result.ConfigurationChanged = true
 			}
 		} else {
 			if cm.Data == nil {
 				data := make(map[string]string)
 				data[file.Name] = file.Content
 				cm.Data = data
-				syncRes.ConfigurationChanged = true
+				result.ConfigurationChanged = true
 			} else if oldContent, hasKey := cm.Data[file.Name]; !hasKey || oldContent != file.Content {
 				cm.Data[file.Name] = file.Content
-				syncRes.ConfigurationChanged = true
+				result.ConfigurationChanged = true
 			}
 			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
 				log.Info("Adding finalizer")
 				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
-				syncRes.LogPipelineChanged = true
+				result.LogPipelineChanged = true
 			}
 		}
 	}
 
-	if !syncRes.LogPipelineChanged && !syncRes.ConfigurationChanged {
-		return syncRes, nil
+	if !result.LogPipelineChanged && !result.ConfigurationChanged {
+		return result, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.LogPipelineChanged = false
-		syncRes.ConfigurationChanged = false
-		return syncRes, err
+		result.LogPipelineChanged = false
+		result.ConfigurationChanged = false
+		return result, err
 	}
 
-	return syncRes, nil
+	return result, nil
 }
 
 // syncVariables copies referenced secrets to global Fluent Bit environment secret.
 func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (Result, error) {
 	log := logf.FromContext(ctx)
-	var syncRes Result
+	var result Result
 	oldSecret, err := s.Utils.GetOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
 	if err != nil {
-		return syncRes, err
+		return result, err
 	}
 
 	newSecret := oldSecret
@@ -212,7 +212,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (Result, error) {
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	err = s.List(ctx, &logPipelines)
 	if err != nil {
-		return syncRes, err
+		return result, err
 	}
 
 	for _, l := range logPipelines.Items {
@@ -224,7 +224,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (Result, error) {
 				err := s.SecretHelper.CopySecretData(ctx, varRef.ValueFrom, varRef.Name, newSecret.Data)
 				if err != nil {
 					log.Error(err, "unable to find secret for environment variable")
-					return syncRes, err
+					return result, err
 				}
 			}
 		}
@@ -232,36 +232,36 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (Result, error) {
 			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.Host.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.Host.ValueFrom.SecretKey, l.Name), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
-				return syncRes, err
+				return result, err
 			}
 		}
 		if l.Spec.Output.HTTP.User.ValueFrom.IsSecretRef() {
 			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.User.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.User.ValueFrom.SecretKey, l.Name), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http user")
-				return syncRes, err
+				return result, err
 			}
 		}
 		if l.Spec.Output.HTTP.Password.ValueFrom.IsSecretRef() {
 			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.Password.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.Password.ValueFrom.SecretKey, l.Name), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http password")
-				return syncRes, err
+				return result, err
 			}
 		}
 	}
 
 	needsSecretUpdate := secret.CheckIfSecretHasChanged(newSecret.Data, oldSecret.Data)
 	if !needsSecretUpdate {
-		return syncRes, nil
+		return result, nil
 	}
-	syncRes.ConfigurationChanged = needsSecretUpdate
+	result.ConfigurationChanged = needsSecretUpdate
 
 	if err = s.Update(ctx, &newSecret); err != nil {
 		log.Error(err, err.Error())
-		return syncRes, err
+		return result, err
 	}
-	return syncRes, nil
+	return result, nil
 }
 
 func updateUnsupportedPluginsTotal(pipelines *telemetryv1alpha1.LogPipelineList) int {

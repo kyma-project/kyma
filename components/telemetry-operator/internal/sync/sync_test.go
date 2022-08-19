@@ -98,9 +98,9 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	lp := telemetryv1alpha1.LogPipeline{}
 	res, err := sut.syncSectionsConfigMap(context.Background(), &lp)
 
-	var syncRes Result
+	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, syncRes)
+	require.Equal(t, res, result)
 }
 
 func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
@@ -112,9 +112,9 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	lp := telemetryv1alpha1.LogPipeline{}
 	res, err := sut.syncFilesConfigMap(context.Background(), &lp)
 
-	var syncRes Result
+	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, syncRes)
+	require.Equal(t, res, result)
 }
 
 func TestUnsupportedTotal(t *testing.T) {

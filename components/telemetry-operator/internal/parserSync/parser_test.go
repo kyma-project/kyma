@@ -35,9 +35,9 @@ Format regex`},
 	}
 	res, err := sut.SyncParsersConfigMap(context.Background(), &lp)
 
-	var syncRes Result
+	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, syncRes)
+	require.Equal(t, res, result)
 }
 
 func TestSuccessfulParserConfigMap(t *testing.T) {
