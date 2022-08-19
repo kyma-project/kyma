@@ -4,7 +4,7 @@ endif
 
 .PHONY: resolve
 resolve:
-	go mod tidy -compat=1.17
+	go mod tidy
 
 .PHONY: test
 test:
