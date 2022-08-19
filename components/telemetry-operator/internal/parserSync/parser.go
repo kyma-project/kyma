@@ -71,6 +71,7 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			}
 			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
 			syncRes.ConfigMapUpdated = true
+			syncRes.CRUpdated = true
 		}
 	} else {
 		err = s.List(ctx, &logParsers)

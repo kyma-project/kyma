@@ -106,6 +106,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
 			syncRes.CRUpdated = true
+			syncRes.ConfigMapUpdated = true
 		}
 	} else {
 		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
@@ -166,6 +167,7 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 				delete(cm.Data, file.Name)
 				controllerutil.RemoveFinalizer(logPipeline, filesFinalizer)
 				syncRes.CRUpdated = true
+				syncRes.ConfigMapUpdated = true
 			}
 		} else {
 			if cm.Data == nil {
