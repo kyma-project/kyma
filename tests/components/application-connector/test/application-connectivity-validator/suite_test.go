@@ -28,10 +28,9 @@ func TestValidatorSuite(t *testing.T) {
 	suite.Run(t, new(ValidatorSuite))
 }
 
-const url = "http://central-application-connectivity-validator.kyma-system.svc.cluster.local:8080/event-test/events"
-
 func (vs *ValidatorSuite) TestGoodCert() {
 	cli := httpd.NewCli(vs.T())
+	url := validatorURL("event-test", "events")
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
@@ -45,6 +44,7 @@ func (vs *ValidatorSuite) TestGoodCert() {
 
 func (vs *ValidatorSuite) TestBadCert() {
 	cli := httpd.NewCli(vs.T())
+	url := validatorURL("event-test", "events")
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
