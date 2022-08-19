@@ -529,7 +529,10 @@ You cannot enable the following plugins, because they potentially harm the stabi
 - Kubernetes Filter
 - Rewrite_Tag Filter
 
-In addition, the strings `__k8s__` and `kubernetes` are reserved by the LogPipeline and should not be used in the log payload, otherwise they will be overwritten.
+### Reserved log attributes
+The log attribute with name `kubernetes` is a special attribute being enriched by the `kubernetes` filter. When using that attribute as part of your structured log payload, the metadata enriched by the filter gets overwritten by the payload data. Filters which are relying on that metadata might not work anymore as expected.
+
+Furthermore, the prefix `__k8s__` is used for internals. When using the attribute prefix in your log data, the data might get overwritten.
 
 ### Buffer limits
 
