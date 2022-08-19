@@ -133,7 +133,17 @@ spec:
 ```
 
 It might happen that Fluent Bit prints an error per processed log line that is then collected and re-processed.
-To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. 
+To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. The following example collects input from all Namespaces including system Namespaces, but excludes the Fluent Bit container:
+
+```yaml
+spec:
+  input:
+    application:
+      includeSystemNamespaces: true
+      excludeContainers:
+        - fluent-bit
+```
+
 
 ### Step 3: Add filters
 
