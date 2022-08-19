@@ -8,7 +8,7 @@ This tutorial shows how to use the available CLI commands to manage Functions in
 2. Generate a Function custom resource (CR) from these files and apply it on your cluster (`kyma apply function`).
 3. Fetch the current state of your Function's cluster configuration after it was modified (`kyma sync function`).
 
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md) and learn how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md)
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 This tutorial is based on a sample Python Function run on a lightweight [k3d](https://k3d.io/) cluster.
 
