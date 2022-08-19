@@ -48,7 +48,7 @@ RUN set -ex \
 	&& tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz \
 	&& rm python.tar.xz \
 	\
-	&& apk add --no-chacje --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+	&& apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
 		sqlite-dev=3.39.2-r0 \
 	&& apk add --no-cache --virtual .build-deps  \
 		bluez-dev \
