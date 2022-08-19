@@ -27,8 +27,8 @@ type LogParserSyncer struct {
 	Utils           *kubernetes.Utils
 }
 type Result struct {
-	ConfigMapUpdated bool
-	CRUpdated        bool
+	ConfigurationChanged bool
+	LogParserChanged     bool
 }
 
 func NewLogParserSyncer(client client.Client,
@@ -70,8 +70,8 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 				cm.Data = data
 			}
 			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
-			syncRes.ConfigMapUpdated = true
-			syncRes.CRUpdated = true
+			syncRes.ConfigurationChanged = true
+			syncRes.LogParserChanged = true
 		}
 	} else {
 		err = s.List(ctx, &logParsers)
@@ -84,26 +84,26 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			data := make(map[string]string)
 			data[parsersConfigMapKey] = fluentBitParsersConfig
 			cm.Data = data
-			syncRes.ConfigMapUpdated = true
+			syncRes.ConfigurationChanged = true
 		} else {
 			if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
 				cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
-				syncRes.ConfigMapUpdated = true
+				syncRes.ConfigurationChanged = true
 			}
 		}
 		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			syncRes.CRUpdated = true
+			syncRes.LogParserChanged = true
 		}
 	}
 
-	if !syncRes.CRUpdated && !syncRes.ConfigMapUpdated {
+	if !syncRes.LogParserChanged && !syncRes.ConfigurationChanged {
 		return syncRes, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.CRUpdated = false
-		syncRes.ConfigMapUpdated = false
+		syncRes.LogParserChanged = false
+		syncRes.ConfigurationChanged = false
 		return syncRes, err
 	}
 

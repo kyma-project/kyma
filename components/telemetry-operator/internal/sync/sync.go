@@ -37,8 +37,8 @@ type LogPipelineSyncer struct {
 }
 
 type Result struct {
-	ConfigMapUpdated bool
-	CRUpdated        bool
+	ConfigurationChanged bool
+	LogPipelineChanged   bool
 }
 
 func NewLogPipelineSyncer(client client.Client,
@@ -81,10 +81,10 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		return syncRes, err
 	}
 
-	if sectionsChanged.ConfigMapUpdated || filesChanged.ConfigMapUpdated || variablesChanged.ConfigMapUpdated {
-		syncRes.ConfigMapUpdated = true
-	} else if sectionsChanged.CRUpdated || filesChanged.CRUpdated || variablesChanged.CRUpdated {
-		syncRes.CRUpdated = true
+	if sectionsChanged.ConfigurationChanged || filesChanged.ConfigurationChanged || variablesChanged.ConfigurationChanged {
+		syncRes.ConfigurationChanged = true
+	} else if sectionsChanged.LogPipelineChanged || filesChanged.LogPipelineChanged || variablesChanged.LogPipelineChanged {
+		syncRes.LogPipelineChanged = true
 	}
 
 	return syncRes, nil
@@ -105,8 +105,8 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
-			syncRes.CRUpdated = true
-			syncRes.ConfigMapUpdated = true
+			syncRes.LogPipelineChanged = true
+			syncRes.ConfigurationChanged = true
 		}
 	} else {
 		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
@@ -117,24 +117,24 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
 			cm.Data = data
-			syncRes.ConfigMapUpdated = true
+			syncRes.ConfigurationChanged = true
 		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != fluentBitConfig {
 			cm.Data[cmKey] = fluentBitConfig
-			syncRes.ConfigMapUpdated = true
+			syncRes.ConfigurationChanged = true
 		}
 		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
-			syncRes.CRUpdated = true
+			syncRes.LogPipelineChanged = true
 		}
 	}
 
-	if !syncRes.CRUpdated && !syncRes.ConfigMapUpdated {
+	if !syncRes.LogPipelineChanged && !syncRes.ConfigurationChanged {
 		return syncRes, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.CRUpdated = false
-		syncRes.ConfigMapUpdated = false
+		syncRes.LogPipelineChanged = false
+		syncRes.ConfigurationChanged = false
 		return syncRes, err
 	}
 
@@ -166,33 +166,33 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 			if _, hasKey := cm.Data[file.Name]; hasKey {
 				delete(cm.Data, file.Name)
 				controllerutil.RemoveFinalizer(logPipeline, filesFinalizer)
-				syncRes.CRUpdated = true
-				syncRes.ConfigMapUpdated = true
+				syncRes.LogPipelineChanged = true
+				syncRes.ConfigurationChanged = true
 			}
 		} else {
 			if cm.Data == nil {
 				data := make(map[string]string)
 				data[file.Name] = file.Content
 				cm.Data = data
-				syncRes.ConfigMapUpdated = true
+				syncRes.ConfigurationChanged = true
 			} else if oldContent, hasKey := cm.Data[file.Name]; !hasKey || oldContent != file.Content {
 				cm.Data[file.Name] = file.Content
-				syncRes.ConfigMapUpdated = true
+				syncRes.ConfigurationChanged = true
 			}
 			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
 				log.Info("Adding finalizer")
 				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
-				syncRes.CRUpdated = true
+				syncRes.LogPipelineChanged = true
 			}
 		}
 	}
 
-	if !syncRes.CRUpdated && !syncRes.ConfigMapUpdated {
+	if !syncRes.LogPipelineChanged && !syncRes.ConfigurationChanged {
 		return syncRes, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		syncRes.CRUpdated = false
-		syncRes.ConfigMapUpdated = false
+		syncRes.LogPipelineChanged = false
+		syncRes.ConfigurationChanged = false
 		return syncRes, err
 	}
 
@@ -257,7 +257,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (Result, error) {
 	if !needsSecretUpdate {
 		return syncRes, nil
 	}
-	syncRes.ConfigMapUpdated = needsSecretUpdate
+	syncRes.ConfigurationChanged = needsSecretUpdate
 
 	if err = s.Update(ctx, &newSecret); err != nil {
 		log.Error(err, err.Error())
