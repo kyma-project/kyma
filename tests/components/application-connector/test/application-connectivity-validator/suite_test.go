@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
+	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/httpd"
 )
 
 type ValidatorSuite struct {
 	suite.Suite
-	cli *cli.Clientset
 }
 
 func (vs *ValidatorSuite) SetupSuite() {
@@ -30,24 +31,28 @@ func TestValidatorSuite(t *testing.T) {
 const url = "http://central-application-connectivity-validator.kyma-system.svc.cluster.local:8080/event-test/events"
 
 func (vs *ValidatorSuite) TestGoodCert() {
+	cli := httpd.NewCli(vs.T())
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
 
 	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=event-test"))
 
-	res, err := http.DefaultClient.Do(req)
-	vs.Nil(err)
+	res, _, err := cli.Do(req)
+	vs.Require().Nil(err)
 	vs.Equal(http.StatusOK, res.StatusCode)
 }
 
 func (vs *ValidatorSuite) TestBadCert() {
+	cli := httpd.NewCli(vs.T())
+
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
 
 	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=nonexistant"))
 
-	res, err := http.DefaultClient.Do(req)
-	vs.Nil(err)
+	res, _, err := cli.Do(req)
+	vs.Require().Nil(err)
 	vs.Equal(http.StatusForbidden, res.StatusCode)
 }
 
