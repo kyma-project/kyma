@@ -4,7 +4,7 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
->**NOTE:** Learn why you want sidecar and how to enabled them. Follow [Istio sidecars in Kyma and why you want them](../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md), [Default Istio setup in Kyma](../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md) and [Enable automatic Istio sidecar proxy injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md)
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). For more details, see [Default Istio setup in Kyma](../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md) and learn how to [enable automatic Istio sidecar proxy injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md)
 
 ## Create a function
 
