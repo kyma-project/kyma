@@ -281,6 +281,11 @@ async function k8sApply(resources, namespace, patch = true) {
     if (!resource.metadata.namespace) {
       resource.metadata.namespace = namespace;
     }
+    if (resource.kind == 'Namespace') {
+      resource.metadata.labels = {
+        'istio-injection': 'enabled',
+      };
+    }
     try {
       await k8sDynamicApi.patch(
           resource,
