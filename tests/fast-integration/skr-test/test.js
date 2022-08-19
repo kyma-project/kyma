@@ -35,8 +35,8 @@ describe('SKR test', function() {
 
   oidcE2ETest(options, getShootInfoFunc);
 
-  after('Cleanup the resources', async function() {
+  /*after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
     await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, false);
-  });
+  });*/
 });
