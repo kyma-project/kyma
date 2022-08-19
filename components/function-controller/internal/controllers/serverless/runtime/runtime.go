@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 )
