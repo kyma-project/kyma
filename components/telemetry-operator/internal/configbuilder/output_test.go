@@ -25,7 +25,7 @@ func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 	logPipeline.Name = "foo"
 	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
 
-	actual := CreateOutputSection(logPipeline, pipelineConfig)
+	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
 	require.Equal(t, expected, actual)
 }
@@ -68,7 +68,7 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 	logPipeline.Name = "foo"
 	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
 
-	actual := CreateOutputSection(logPipeline, pipelineConfig)
+	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
 	require.Equal(t, expected, actual)
 }
@@ -117,7 +117,7 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 	logPipeline.Name = "foo"
 	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
 
-	actual := CreateOutputSection(logPipeline, pipelineConfig)
+	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
 	require.Equal(t, expected, actual)
 }
@@ -154,7 +154,7 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	logPipeline.Name = "foo"
 	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
 
-	actual := CreateOutputSection(logPipeline, pipelineConfig)
+	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
 	require.Equal(t, expected, actual)
 }

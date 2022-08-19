@@ -9,18 +9,20 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 )
 
-// CreateOutputSection creates the Fluent Bit Output section
-func CreateOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config PipelineConfig) string {
+func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config PipelineConfig) string {
 	output := &pipeline.Spec.Output
 	if len(output.Custom) > 0 {
 		return generateCustomOutput(output, config.FsBufferLimit, pipeline.Name)
 	}
+
 	if output.HTTP.Host.IsDefined() {
 		return generateHTTPOutput(&output.HTTP, config.FsBufferLimit, pipeline.Name)
 	}
+
 	if output.Loki.URL.IsDefined() {
 		return generateLokiOutput(&output.Loki, config.FsBufferLimit, pipeline.Name)
 	}
+
 	return ""
 }
 
@@ -30,8 +32,8 @@ func generateCustomOutput(output *telemetryv1alpha1.Output, fsBufferLimit string
 	for _, p := range customOutputParams {
 		sb.AddConfigParam(p.key, p.value)
 	}
-	sb.AddConfigParam(MatchKey, generateMatchCondition(name))
-	sb.AddConfigParam(OutputStorageMaxSizeKey, fsBufferLimit)
+	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
+	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
 	return sb.Build()
 }
 
@@ -41,8 +43,8 @@ func generateHTTPOutput(httpOutput *telemetryv1alpha1.HTTPOutput, fsBufferLimit 
 	sb.AddConfigParam("port", "443")
 	sb.AddConfigParam("allow_duplicated_headers", "true")
 	sb.AddConfigParam("format", "json")
-	sb.AddConfigParam(MatchKey, generateMatchCondition(name))
-	sb.AddConfigParam(OutputStorageMaxSizeKey, fsBufferLimit)
+	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
+	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
 	if httpOutput.Host.IsDefined() {
 		value := resolveValue(httpOutput.Host, name)
 		sb.AddConfigParam("host", value)
@@ -77,8 +79,8 @@ func generateLokiOutput(lokiOutput *telemetryv1alpha1.LokiOutput, fsBufferLimit 
 	sb.AddConfigParam("labelMapPath", "/fluent-bit/etc/loki-labelmap.json")
 	sb.AddConfigParam("loglevel", "warn")
 	sb.AddConfigParam("lineformat", "json")
-	sb.AddConfigParam(MatchKey, generateMatchCondition(name))
-	sb.AddConfigParam(OutputStorageMaxSizeKey, fsBufferLimit)
+	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
+	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
 	sb.AddConfigParam("name", "grafana-loki")
 	sb.AddConfigParam("alias", name)
 	sb.AddConfigParam("url", resolveValue(lokiOutput.URL, name))
