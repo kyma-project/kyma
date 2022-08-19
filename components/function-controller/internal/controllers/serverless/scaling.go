@@ -11,7 +11,7 @@ import (
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
 
-func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	namespace := s.instance.GetNamespace()
 	labels := s.internalFunctionLabels()
 
@@ -20,6 +20,24 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 		return nil
 	}
 
+	if s.instance.Spec.Replicas != nil {
+		return stateFnCheckReplicas(ctx, r, s)
+	}
+
+	return stateFnCheckHPA(ctx, r, s)
+}
+
+func stateFnCheckReplicas(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	numHpa := len(s.hpas.Items)
+
+	if numHpa > 0 {
+		return stateFnDeleteAllHorizontalPodAutoscalers
+	}
+
+	return stateFnUpdateDeploymentStatus
+}
+
+func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	if !s.hpaEqual(r.cfg.fn.TargetCPUUtilizationPercentage) {
 		return stateFnUpdateDeploymentStatus
 	}
@@ -28,7 +46,7 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 	expectedHPA := s.buildHorizontalPodAutoscaler(r.cfg.fn.TargetCPUUtilizationPercentage)
 
 	if numHpa == 0 {
-		if !equalInt32Pointer(s.instance.Spec.MinReplicas, s.instance.Spec.MaxReplicas) {
+		if !equalInt32Pointer(s.instance.Spec.ScaleConfig.MinReplicas, s.instance.Spec.ScaleConfig.MaxReplicas) {
 			return buildStateFnCreateHorizontalPodAutoscaler(expectedHPA)
 		}
 		return nil
@@ -38,7 +56,7 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 		return stateFnDeleteAllHorizontalPodAutoscalers
 	}
 
-	if numHpa == 1 && equalInt32Pointer(s.instance.Spec.MinReplicas, s.instance.Spec.MaxReplicas) {
+	if numHpa == 1 && equalInt32Pointer(s.instance.Spec.ScaleConfig.MinReplicas, s.instance.Spec.ScaleConfig.MaxReplicas) {
 		// this case is when we previously created HPA with maxReplicas > minReplicas, but now user changed
 		// function spec and NOW maxReplicas == minReplicas, so hpa is not needed anymore
 		return stateFnDeleteAllHorizontalPodAutoscalers

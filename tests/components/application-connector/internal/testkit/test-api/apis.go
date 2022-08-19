@@ -30,42 +30,37 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	{
 		r := api.PathPrefix("/unsecure").Subrouter()
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
-		r.HandleFunc("/code/{code:[0-9]+}", resCode)
-		r.HandleFunc("/timeout", timeout)
+		r.HandleFunc("/echo", echo).Methods(http.MethodPut, http.MethodPost, http.MethodDelete)
+		r.HandleFunc("/code/{code:[0-9]+}", resCode).Methods(http.MethodGet)
+		r.HandleFunc("/timeout", timeout).Methods(http.MethodGet)
 	}
 	{
 		r := api.PathPrefix("/basic").Subrouter()
 		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/oauth").Subrouter()
 		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/csrf-basic").Subrouter()
 		r.Use(csrf.Middleware())
 		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/csrf-oauth").Subrouter()
 		r.Use(csrf.Middleware())
 		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/request-parameters-basic").Subrouter()
 		r.Use(RequestParameters(expectedRequestParameters))
 		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 
 	return router
@@ -90,13 +85,11 @@ func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, oauthT
 	{
 		r := api.PathPrefix("/mtls").Subrouter()
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/csrf-mtls").Subrouter()
 		r.Use(csrf.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 
 	return router

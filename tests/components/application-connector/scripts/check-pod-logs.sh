@@ -9,7 +9,7 @@ if [ $# -ne 1 ]; then
 fi
 
 if ([[ ${EXPORT_RESULT} == true ]]); then
-	kubectl -n $NAMESPACE logs -f job/"$JOB_NAME" | tee /dev/stderr | $GOPATH/bin/go-junit-report -set-exit-code > junit-report.xml
+	kubectl -n $NAMESPACE logs -f job/$JOB_NAME | tee /dev/stderr | $GOPATH/bin/go-junit-report -subtest-mode exclude-parents -set-exit-code > junit-report.xml
 else
-	kubectl -n $NAMESPACE logs -f job/"$JOB_NAME"
+	kubectl -n $NAMESPACE logs -f job/$JOB_NAME
 fi

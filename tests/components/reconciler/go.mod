@@ -1,10 +1,10 @@
 module github.com/kyma-project/kyma/tests/components/reconciler
 
-go 1.19
+go 1.18
 
 require (
 	github.com/cucumber/godog v0.12.5
-	github.com/kyma-incubator/testdrape v0.2.0
+	github.com/kyma-incubator/testdrape v0.1.0
 	go.uber.org/zap v1.22.0
 )
 

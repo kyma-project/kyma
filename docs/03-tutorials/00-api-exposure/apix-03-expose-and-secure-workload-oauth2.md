@@ -122,17 +122,17 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
 
    ```shell
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: httpbin
      namespace: $NAMESPACE
    spec:
      gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: httpbin
        port: 8000
-       host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
      rules:
        - path: /.*
          methods: ["GET"]
@@ -170,17 +170,17 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
 
    ```shell
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: function
      namespace: $NAMESPACE
    spec:
      gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      rules:
        - path: /function
          methods: ["GET"]

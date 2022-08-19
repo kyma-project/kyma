@@ -9,23 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
-	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	natsreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
@@ -34,6 +18,20 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	natsreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
+	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 )
 
 const (
@@ -107,10 +105,12 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					reconcilertesting.OrderCreatedEventType: {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+					},
 				},
 			},
 		},
@@ -270,10 +270,12 @@ func TestCreateSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					reconcilertesting.OrderCreatedEventType: {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+					},
 				},
 			},
 		},
@@ -285,7 +287,11 @@ func TestCreateSubscription(t *testing.T) {
 			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.want.K8sSubscription...)
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.want.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription.Name, tc.want.NatsSubscription...)
+
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.want.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, eventType, matchers...)
+			}
 			testDeletion(ens, subscription)
 		})
 	}
@@ -435,10 +441,12 @@ func TestChangeSubscription(t *testing.T) {
 						},
 					),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(utils.NewCleanEventType("")),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					utils.NewCleanEventType(""): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeSubscriptionWithSubject(utils.NewCleanEventType("")),
+					},
 				},
 			},
 		},
@@ -513,16 +521,22 @@ func TestChangeSubscription(t *testing.T) {
 
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantBefore.K8sSubscription...)
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantBefore.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription.Name, tc.wantBefore.NatsSubscription...)
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, eventType, matchers...)
+			}
 
 			// when
 			tc.changeSubscription(subscription)
-			utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, subscription)
+			g.Expect(ens.K8sClient.Update(ens.Ctx, subscription)).ShouldNot(gomega.HaveOccurred())
 
 			// then
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantAfter.K8sSubscription...)
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantAfter.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription.Name, tc.wantAfter.NatsSubscription...)
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, eventType, matchers...)
+			}
 			testDeletion(ens, subscription)
 		})
 	}

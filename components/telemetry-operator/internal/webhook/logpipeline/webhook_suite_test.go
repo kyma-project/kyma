@@ -1,19 +1,18 @@
-///*
-//Copyright 2021.
+// /*
+// Copyright 2021.
 //
-//Licensed under the Apache License, Version 2.0 (the "License");
-//you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
-//*/
-//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// */
 package logpipeline
 
 import (
@@ -25,14 +24,11 @@ import (
 	"testing"
 	"time"
 
-	utilsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/mocks"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/mocks"
 	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation/mocks"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -64,7 +60,6 @@ var (
 	maxPipelinesValidatorMock *validationmocks.MaxPipelinesValidator
 	outputValidatorMock       *validationmocks.OutputValidator
 	fileValidatorMock         *validationmocks.FilesValidator
-	fileSystemMock            *utilsmocks.FileSystem
 	dryRunnerMock             *mocks.DryRunner
 )
 
@@ -116,13 +111,6 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	pipelineConfig := fluentbit.PipelineConfig{
-		InputTag:          "kube",
-		MemoryBufferLimit: "10M",
-		StorageType:       "filesystem",
-		FsBufferLimit:     "1G",
-	}
-
 	inputValidatorMock = &validationmocks.InputValidator{}
 	variableValidatorMock = &validationmocks.VariablesValidator{}
 	dryRunnerMock = &mocks.DryRunner{}
@@ -131,27 +119,12 @@ var _ = BeforeSuite(func() {
 	outputValidatorMock = &validationmocks.OutputValidator{}
 	fileValidatorMock = &validationmocks.FilesValidator{}
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_restarts_total",
+		Name: "telemetry_fluentbit_triggered_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
 	})
 	metrics.Registry.MustRegister(restartsTotal)
 
-	fileSystemMock = &utilsmocks.FileSystem{}
-	logPipelineValidator := NewValidatingWebhookHandler(
-		mgr.GetClient(),
-		FluentBitConfigMapName,
-		ControllerNamespace,
-		inputValidatorMock,
-		variableValidatorMock,
-		dryRunnerMock,
-		pluginValidatorMock,
-		maxPipelinesValidatorMock,
-		outputValidatorMock,
-		fileValidatorMock,
-		pipelineConfig,
-		fileSystemMock,
-		restartsTotal,
-	)
+	logPipelineValidator := NewValidatingWebhookHandler(mgr.GetClient(), inputValidatorMock, variableValidatorMock, pluginValidatorMock, maxPipelinesValidatorMock, outputValidatorMock, fileValidatorMock, dryRunnerMock)
 
 	By("registering LogPipeline webhook")
 	mgr.GetWebhookServer().Register(

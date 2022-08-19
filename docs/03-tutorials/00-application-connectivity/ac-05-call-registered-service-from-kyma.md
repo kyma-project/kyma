@@ -17,6 +17,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 
 > **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 ## Steps
 
 1. Build a path to access your registered service:
@@ -79,7 +80,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: my-function
@@ -88,6 +89,7 @@ This guide shows how to call a registered external service from Kyma using a sim
        function: my-function
    spec:
      gateway: kyma-system/kyma-gateway
+     host: my-function.$CLUSTER_DOMAIN
      rules:
      - path: /.*
        accessStrategies:
@@ -96,7 +98,6 @@ This guide shows how to call a registered external service from Kyma using a sim
        methods:
        - GET
      service:
-       host: my-function.$CLUSTER_DOMAIN
        name: my-function
        port: 80
    EOF
