@@ -11,7 +11,7 @@ import (
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
 
-func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	namespace := s.instance.GetNamespace()
 	labels := s.internalFunctionLabels()
 
@@ -20,6 +20,24 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 		return nil
 	}
 
+	if s.instance.Spec.Replicas != nil {
+		return stateFnCheckReplicas(ctx, r, s)
+	}
+
+	return stateFnCheckHPA(ctx, r, s)
+}
+
+func stateFnCheckReplicas(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	numHpa := len(s.hpas.Items)
+
+	if numHpa > 0 {
+		return stateFnDeleteAllHorizontalPodAutoscalers
+	}
+
+	return stateFnUpdateDeploymentStatus
+}
+
+func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	if !s.hpaEqual(r.cfg.fn.TargetCPUUtilizationPercentage) {
 		return stateFnUpdateDeploymentStatus
 	}

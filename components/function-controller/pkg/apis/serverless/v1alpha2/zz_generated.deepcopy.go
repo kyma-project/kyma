@@ -245,6 +245,11 @@ func (in *FunctionSpec) DeepCopyInto(out *FunctionSpec) {
 		*out = new(ScaleConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Replicas != nil {
+		in, out := &in.Replicas, &out.Replicas
+		*out = new(int32)
+		**out = **in
+	}
 	in.Template.DeepCopyInto(&out.Template)
 }
 

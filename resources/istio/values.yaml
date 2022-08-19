@@ -28,7 +28,7 @@ helmValues:
       autoscaleEnabled: true
 
   sidecarInjectorWebhook:
-    enableNamespacesByDefault: true
+    enableNamespacesByDefault: false
     objectSelector:
       autoInject: true
       enabled: false
@@ -127,7 +127,6 @@ monitoring:
     enabled: true
     scrapeInterval: ""
 
-
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -135,15 +134,15 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.14.1-distroless"
+      version: "1.14.3-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.14.1-distroless"
+      version: "1.14.3-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
-  sidecarMigration: true
+  sidecarMigration: false

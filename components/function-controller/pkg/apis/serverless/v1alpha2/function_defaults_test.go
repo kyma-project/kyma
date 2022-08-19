@@ -346,9 +346,7 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 			expectedFunc: Function{
@@ -380,10 +378,7 @@ func TestSetDefaults(t *testing.T) {
 							},
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 		},
