@@ -81,13 +81,11 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		return syncRes, err
 	}
 
-	if sectionsChanged.ConfigurationChanged || filesChanged.ConfigurationChanged || variablesChanged.ConfigurationChanged {
-		syncRes.ConfigurationChanged = true
-	} else if sectionsChanged.LogPipelineChanged || filesChanged.LogPipelineChanged || variablesChanged.LogPipelineChanged {
-		syncRes.LogPipelineChanged = true
-	}
+	return Result{
+		ConfigurationChanged: sectionsChanged.ConfigurationChanged || filesChanged.ConfigurationChanged || variablesChanged.ConfigurationChanged,
+		LogPipelineChanged:   sectionsChanged.LogPipelineChanged || filesChanged.LogPipelineChanged || variablesChanged.LogPipelineChanged,
+	}, nil
 
-	return syncRes, nil
 }
 
 // Synchronize LogPipeline with ConfigMap of DaemonSetUtils sections (Input, Filter and Output).
