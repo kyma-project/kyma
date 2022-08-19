@@ -2,7 +2,7 @@
 title: Function
 ---
 
-:warning: Current **apiVersion** is `serverless.kyma-project.io/v1alpha2`. Version `serverless.kyma-project.io/v1alpha1` is still supported but depreciated - for documentations see [FunctionV1Alpha1](../../../2.5/05-technical-reference/00-custom-resources/svls-01-function.md)
+>**WARNING:** Current **apiVersion** is `serverless.kyma-project.io/v1alpha2`. Version `serverless.kyma-project.io/v1alpha1` is still supported but depreciated - for documentation see [Function for version 2.5](../../../2.5/05-technical-reference/00-custom-resources/svls-01-function.md)
 
 The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
@@ -119,25 +119,25 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.inline**                        |       No       | Specifies Function's source code and dependencies. Can't be used at the same time with **spec.source.gitRepository**. |
 | **spec.source.inline.dependencies**           |      Yes       | Specifies the Function's dependencies. |
 | **spec.source.inline.source**                 |      Yes       | Provides the Function's full source code of Function. |
-| **spec.source.gitRepository**                 |       No       | Specifies object pointing to a Git repository with the Function's source code and dependencies|
+| **spec.source.gitRepository**                 |       No       | Specifies object pointing to a Git repository with the Function's source code and dependencies. Can't be used at the same time with **spec.source.inline**. |
 | **spec.source.gitRepository.url**             |      Yes       | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix. |
 | **spec.source.gitRepository.baseDir**         |       No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built. |
 | **spec.source.gitRepository.reference**       |       No       | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in Function's code and dependencies. |
-| **spec.source.gitRepository.auth**            |No (Yes for SSH)| Specifies that you must authenticate to the Git repository. |
+| **spec.source.gitRepository.auth**            |       No       | Specifies that you must authenticate to the Git repository. Required for SSH. |
 | **spec.source.gitRepository.auth.type**       |      Yes       | Defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). For SSH, this parameter must be set to `key`. |
 | **spec.source.gitRepository.auth.secretName** |      Yes       | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the GitRepository CR. |
 | **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map). |
 | **spec.resourceConfiguration**                |       No       | Specifies resources requested by Function and build Job. |
 | **spec.resourceConfiguration.function**       |      Yes       | Specifies resources requested by the Function's Pod. |
 | **spec.resourceConfiguration.function.profile**                         |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.function.resources**. |
-| **spec.resourceConfiguration.function.resources**                       |       No       | |
+| **spec.resourceConfiguration.function.resources**                       |       No       | Defines amount of resources available for the Function's Pod to use. Can't be used at the same time with **spec.resourceConfiguration.function.profile**. |
 | **spec.resourceConfiguration.function.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use. |
 | **spec.resourceConfiguration.function.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use. |
 | **spec.resourceConfiguration.function.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate. |
 | **spec.resourceConfiguration.function.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate. |
 | **spec.resourceConfiguration.build**          |      Yes       | Specifies resources requested by the build Job's Pod. |
 | **spec.resourceConfiguration.build.profile**  |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.build.resources**. |
-| **spec.resourceConfiguration.build.resources**                       |       No       | |
+| **spec.resourceConfiguration.build.resources**                       |       No       | Defines amount of resources available for the build Job's Pod to use. Can't be used at the same time with **spec.resourceConfiguration.build.profile**. |
 | **spec.resourceConfiguration.build.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available to use for the Kubernetes Job's Pod responsible for building the Function's image.      |
 | **spec.resourceConfiguration.build.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
 | **spec.resourceConfiguration.build.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
