@@ -6,7 +6,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 >**NOTE:** Learn how to [register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks](ac-04-register-secured-api.md).
 
->**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+>**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
 
 ## Prerequisites
 
