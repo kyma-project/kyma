@@ -21,6 +21,13 @@ These are the component tests for Application Connector.
          - [Running locally](#running-locally)
          - [Running without cleanup](#running-without-cleanup)
    - [Application Connectivity Validator](#application-connectivity-validator)
+       - [Design and architecture](#design-and-architecture-1)
+      - [Building](#building-1)
+      - [Running](#running-1)
+         - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally-1)
+         - [Run the tests](#run-the-tests-1)
+      - [Debugging](#debugging-1)
+         - [Running without cleanup](#running-without-cleanup-1)
 
 <!-- markdown-toc end -->
 
@@ -251,7 +258,7 @@ The tests consist of:
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Connectivity Validator is installed. The test Job is deployed in the `test` Namespace.
 ![Connectivity Validator tests architecture](./assets/connectivity-validator-tests-architecture.svg)
 
-> **NOTE:** Port `8080` must be excluded from redirection to Envoy, otherwise Connectivity Validator test Pod cannot pass the `X-Forwarded-Client-Cert` header to the Connectivity Validator.
+> **NOTE:** Port `8080` must be excluded from redirection to Envoy, otherwise Connectivity Validator test Pod cannot pass the `X-Forwarded-Client-Cert` header to Connectivity Validator.
 
 ### Building
 
@@ -279,20 +286,11 @@ Pipelines run the tests using the `test-validator` target from the `Makefile`.
    kyma provision k3d
    ```
 
-2. Install the minimal set of components required to run Application Connectivity Validator for Kyma SKR:
-
-    <div>
-    <details>
-    <summary label="SKR">
-    SKR
-    </summary>
+2. Install the minimal set of components required to run Application Connectivity Validator **for Kyma SKR (Compass mode)**:
 
     ```bash
     kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml 
     ```
-
-    </details>
-    </div>
 
    >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).
 
