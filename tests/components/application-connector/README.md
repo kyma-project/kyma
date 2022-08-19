@@ -131,7 +131,7 @@ Pipelines run the tests using the `test-gateway` target from the `Makefile`.
     <div tabs name="Kyma flavor" group="minimal-kyma-installation">
     <details open>
     <summary label="OS">
-    Kyma OS
+    Kyma OS (standalone mode)
     </summary>
 
     ```sh
@@ -141,7 +141,7 @@ Pipelines run the tests using the `test-gateway` target from the `Makefile`.
     </details>
     <details>
     <summary label="SKR">
-    SKR
+    SKR (Compass mode)
     </summary>
 
     ```bash
