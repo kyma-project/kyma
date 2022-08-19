@@ -17,6 +17,8 @@ When you complete this tutorial, you get a Function that:
 
 This tutorial is based on an existing Function. To create one, follow the [Create a Function](./svls-01-create-inline-function.md) tutorial.
 
+>**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
 ## Steps
 
 Follow these steps:

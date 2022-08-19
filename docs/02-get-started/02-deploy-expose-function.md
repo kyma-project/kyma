@@ -4,6 +4,8 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
+>**NOTE: You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
 ## Create a function
 
 First, let's create the Function and apply it.

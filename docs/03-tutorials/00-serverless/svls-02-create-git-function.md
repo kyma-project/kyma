@@ -6,6 +6,8 @@ This tutorial shows how you can build a Function from code and dependencies stor
 
 >**NOTE:** To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](../../05-technical-reference/svls-04-git-source-type.md).
 
+>**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
 ## Steps
 
 Follow these steps:

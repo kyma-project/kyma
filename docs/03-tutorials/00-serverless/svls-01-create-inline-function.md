@@ -8,6 +8,8 @@ This tutorial shows how you can create a simple "Hello World" Function in Node.j
 
 >**TIP:** Read about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
+>**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
 ## Steps
 
 Follow these steps:

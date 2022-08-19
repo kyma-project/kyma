@@ -26,6 +26,8 @@ Follow these steps:
 
 1. Run the `init` Kyma CLI command to create local files with the default configuration for a Python Function. Go to the folder in which you want to initiate the workspace content and run this command:
 
+  >**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
   ```bash
   kyma init function --runtime python39 --name {FUNCTION_NAME}
   ```

@@ -6,6 +6,8 @@ The [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subs
 
 ## Prerequisites
 
+>**NOTE:** You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
 1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
 2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) in the Getting Started guide.
 

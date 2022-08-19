@@ -5,6 +5,8 @@ title: Deploy and expose a microservice
 You already know how to [deploy](02-deploy-expose-function.md#create-a-function) and [expose a Function](02-deploy-expose-function.md#expose-the-function). Let's now do the same with a container microservice.
 We'll use the Kyma example [`orders-service`](https://github.com/kyma-project/examples/blob/master/orders-service/README.md) for this.
 
+>**NOTE: You need to enable Istio sidecar proxy injection, which is disabled on the Kyma clusters by default. To do this, follow the [Enable Istio Sidecar Injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md).
+
 ## Deploy the microservice
 
 First, let's create a Deployment that provides the microservice definition and lets you run it on the cluster.
