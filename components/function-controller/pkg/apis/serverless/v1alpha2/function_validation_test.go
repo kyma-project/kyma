@@ -552,6 +552,50 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			),
 			expectedError: gomega.HaveOccurred(),
 		},
+		"Should return error because replicas field is use together with scaleConfig": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Replicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs14,
+					ResourceConfiguration: ResourceConfiguration{
+						Function: ResourceRequirements{
+							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
+								corev1.ResourceCPU:    resource.MustParse("100m"),
+								corev1.ResourceMemory: resource.MustParse("128Mi"),
+							},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+						Build: ResourceRequirements{
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+		},
 	} {
 		t.Run(testName, func(t *testing.T) {
 			tn := testName
