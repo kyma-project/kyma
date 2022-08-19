@@ -14,8 +14,8 @@ describe('Provision SKR instance', function() {
   this.slow(slowTime);
 
   let skr;
-  let options;
-  let shootInfo;
+  let options = undefined;
+  let shootInfo = undefined;
 
   before('Gather default options', async function() {
     options = gatherOptions(); // with default values
@@ -30,13 +30,13 @@ describe('Provision SKR instance', function() {
   });
 
   after('Print Shoot Info', async function() {
-    if (shootInfo != undefined) {
-      console.log(options);
-
-      // print data out for spinnaker
-      console.log('***Print out data for spinnaker***');
-      console.log(`SPINNAKER_PROPERTY_PROVISIONED=true`);
+    // print data out for spinnaker
+    if (options && options.instanceID) {
       console.log(`SPINNAKER_PROPERTY_INSTANCE_ID=${options.instanceID}`);
+    }
+
+    if (shootInfo) {
+      console.log(`SPINNAKER_PROPERTY_PROVISIONED=true`);
     }
   });
 });
