@@ -5,7 +5,8 @@ metadata:
 spec:
   input:
     application:
-      includeSystemNamespaces: true
+      namespaces:
+        system: true
       keepAnnotations: false
       dropLabels: false
   output:
