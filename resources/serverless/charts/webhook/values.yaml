@@ -69,6 +69,10 @@ container:
       value: serverless-webhook
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
+    logLevel:
+      value: "info"
+    logFormat:
+      value: "json"
 
 values:
   reservedEnvs:

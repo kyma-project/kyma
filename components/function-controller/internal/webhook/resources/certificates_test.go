@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
+
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
 	"github.com/stretchr/testify/require"
@@ -63,11 +65,12 @@ func TestEnsureWebhookSecret(t *testing.T) {
 	ctx := context.Background()
 	cert, key, err := generateWebhookCertificates(testServiceName, testNamespaceName)
 	require.NoError(t, err)
+	fakeLogger := zap.NewNop().Sugar()
 
 	t.Run("can ensure the secret if it doesn't exist", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
 
-		err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		secret := &corev1.Secret{}
@@ -95,7 +98,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -127,7 +130,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -162,7 +165,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -203,7 +206,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err = client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -244,7 +247,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err = client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
