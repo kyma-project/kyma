@@ -77,7 +77,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
     - **http**, which pushes the data to the specified http destination.
-    - **grafana-loki**, which pushes the data to the Grafana Loki service.
+    - **grafana-loki**, which pushes the data to the Kyma-internal Loki instance. Note: This output might not be compatible with latest Loki versions. For that, use the `custom` output with name `loki` instead.
     - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
     See the following example of the **custom** output:
@@ -95,6 +95,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           Tls                on
           tls.verify         on
     ```
+> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 2. To create the instance, apply the resource file in your cluster.
     ```bash
@@ -171,6 +172,7 @@ spec:
   output:
     ...
 ```
+> **NOTE:** Usage of a `custom` filter will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
  The telemetry operator supports different types of [Fluent Bit filter](https://docs.fluentbit.io/manual/concepts/data-pipeline/filter). The example uses the [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) and the [record_modifier](https://docs.fluentbit.io/manual/pipeline/filters/record-modifier) filter.
 
@@ -260,6 +262,7 @@ spec:
   filters:
     ...
 ```
+> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 ### Step 5: Rotate the Secret
 
@@ -310,6 +313,7 @@ spec:
   output:
     ...
 ```
+> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 Instead of defining a filter, you can [annotate](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) your workload in the following way. Here, the parser is activated only for the annotated workload.
 
@@ -346,13 +350,13 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
-| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/latest/clients/fluentbit/). |
+| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/). Note: This output might not be compatible with latest Loki versions. For that, use the `custom` output with name `loki` instead.|
 | output.grafana-loki.url | object | Grafana Loki URL. |
 | output.grafana-loki.url.value | string | URL value. |
 | output.grafana-loki.url.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
 | output.grafana-loki.labels | map[string]string | Labels to set for each log record. |
 | output.grafana-loki.removeKeys | []string | Attributes to be removed from a log record. |
-| output.http | object | [Fluent Bit http output](https://docs.fluentbit.io/manual/pipeline/outputs/http). |
+| output.http | object | Maps to a [Fluent Bit http output](https://docs.fluentbit.io/manual/pipeline/outputs/http). |
 | output.http.compress | string | Payload compression mechanism. |
 | output.http.dedot | boolean | If `true`, replaces dots with underscores ("dedotting") in the log field names `kubernetes.annotations` and `kubernetes.labels`. Default is `false`. |
 | output.http.format | string | Data format to be used in the HTTP request body. Default is `json`. |
@@ -389,6 +393,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | conditions[].lastTransitionTime | []object | An array of conditions describing the status of the pipeline.
 | conditions[].reason | []object | An array of conditions describing the status of the pipeline.
 | conditions[].type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
+| unsupportedMode | bool | Is active when the LogPipeline uses a `custom` output or filter; see [unsupported mode](#unsupported-mode).
 
 ### LogParser.spec attribute
 
@@ -524,6 +529,10 @@ As per LogPipeline definition, a dedicated [rewrite_tag](https://docs.fluentbit.
 ## Limitations
 
 Currently there are the following limitations for LogPipelines that are served by Fluent Bit:
+
+### Unsupported Mode
+
+If you use a `custom` filter or output, you directly access the API of the underlying Fluent Bit configuration. Because Kyma cannot test every feature provided by Fluent Bit, a LogPipeline using custom filters or outputs runs in `unsupported mode`. Also, Kyma cannot guarantee full compatibility over subsequent releases.
 
 ### Fluent Bit plugins
 
