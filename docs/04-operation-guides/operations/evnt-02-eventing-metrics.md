@@ -2,7 +2,7 @@
 title: Kyma Eventing Metrics
 ---
 
-Kyma Eventing provides several Grafana Dashboards, using various [Metrics](./evnt-02-eventing-metrics.md), so you can monitor statistics and other information in real time.
+Kyma Eventing provides several Grafana Dashboard with various [metrics](./evnt-02-eventing-metrics.md), so you can monitor statistics and other information in real time.
 
 ### Metrics Emitted by Eventing Publisher Proxy:
 
