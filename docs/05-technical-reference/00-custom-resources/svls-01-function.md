@@ -115,11 +115,11 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
 | **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
-| **spec.source**                               |      Yes       | Defines Function's source code or Git repository with it. |
-| **spec.source.inline**                        |       No       | Specifies Function's source code and dependencies. Can't be used at the same time with **spec.source.gitRepository**. |
+| **spec.source**                               |      Yes       | Defines Function's source code or Git repository with it. Only one source configuration is allowed. |
+| **spec.source.inline**                        |       No       | Configure function as inline. |
 | **spec.source.inline.dependencies**           |       No       | Specifies the Function's dependencies. |
 | **spec.source.inline.source**                 |      Yes       | Provides the Function's full source code of Function. |
-| **spec.source.gitRepository**                 |       No       | Specifies object pointing to a Git repository with the Function's source code and dependencies. Can't be used at the same time with **spec.source.inline**. |
+| **spec.source.gitRepository**                 |       No       | Configure function as git sourced. |
 | **spec.source.gitRepository.url**             |      Yes       | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix. |
 | **spec.source.gitRepository.baseDir**         |       No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built. |
 | **spec.source.gitRepository.reference**       |       No       | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in Function's code and dependencies. |
