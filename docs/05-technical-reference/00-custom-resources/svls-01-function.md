@@ -144,8 +144,8 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resourceConfiguration.build.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
 | **spec.replicas**                             |       No       | Defines exact number of Function's Pods to run at a time. Can't be used at the same time with **spec.scaleConfig**. |
 | **spec.scaleConfig**                          |       No       | Defines minimum and maximum number of Function's Pods to run at a time. Can't be used at the same time with **spec.replicas**. |
-| **spec.scaleConfig.minReplicas**              |       No       | Defines the minimum number of Function's Pods to run at a time. |
-| **spec.scaleConfig.maxReplicas**              |       No       | Defines the maximum number of Function's Pods to run at a time. |
+| **spec.scaleConfig.minReplicas**              |      Yes       | Defines the minimum number of Function's Pods to run at a time. |
+| **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
