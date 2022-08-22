@@ -52,6 +52,7 @@ describe('Eventing tests preparation', function() {
     debug(`Test namespace: ${testNamespace}`);
     debug(`Is SKR cluster: ${isSKR}`);
     debug(`SKR instance Id: ${skrInstanceId}`);
+    debug(`SKR shoot name: ${shootName}`);
     debug(`Test Compass flow enabled: ${testCompassFlow}`);
   });
 
