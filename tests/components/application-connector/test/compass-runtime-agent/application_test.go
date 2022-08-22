@@ -12,11 +12,11 @@ func TestApplicationCrdCompare(t *testing.T) {
 	services := make([]v1alpha1.Service, 0, 0)
 	entries := make([]v1alpha1.Entry, 0, 0)
 
-	comparer := Secret{}
+	comparer := Secret{t: t}
 
 	credentials := v1alpha1.Credentials{
 		Type:              "OAuth",
-		SecretName:        "secretTest", //TODO secret comaparsion, other application -> pass to other "klocek"!
+		SecretName:        "oauth-test", //TODO secret comaparsion, other application -> pass to other "klocek"!
 		AuthenticationUrl: "authURL",
 		CSRFInfo:          &v1alpha1.CSRFInfo{TokenEndpointURL: "csrfTokenURL"},
 	}

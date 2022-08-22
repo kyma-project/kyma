@@ -3,21 +3,26 @@ package compass_runtime_agent
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"reflect"
+	"testing"
 )
 
+const actualSecretNamespace string = "kyma-integration"
+
 type SecretComparer interface {
-	Do(secretType, actual, expected string) bool
+	Do(actual, expected string) bool
 }
 
-type Secret struct{}
+type Secret struct {
+	t *testing.T
+}
 
-func (s Secret) Do(secretType, actual, expected string) bool {
-	return true
+func (s Secret) Do(actual, expected string) bool {
+	return SecretDataCompare(actual, expected, s.t)
 }
 
 func Compare(applicationCRD *v1alpha1.Application, applicationCRD_expected *v1alpha1.Application, comparer SecretComparer) bool {
 
-	specEqual := compareSpec(applicationCRD.Spec, applicationCRD_expected.Spec)
+	specEqual := compareSpec(applicationCRD.Spec, applicationCRD_expected.Spec, comparer)
 	nameAndNamespaceEqual := applicationCRD.Name == applicationCRD_expected.Name && applicationCRD.Namespace == applicationCRD_expected.Namespace
 
 	return nameAndNamespaceEqual && specEqual
@@ -55,7 +60,7 @@ func compareAuthentication(actual, expected v1alpha1.Authentication) bool {
 	return reflect.DeepEqual(actual.ClientIds, expected.ClientIds)
 }
 
-func compareServices(actual, expected []v1alpha1.Service) bool {
+func compareServices(actual, expected []v1alpha1.Service, comparer SecretComparer) bool {
 
 	if len(actual) != len(expected) {
 		return false
@@ -67,7 +72,7 @@ func compareServices(actual, expected []v1alpha1.Service) bool {
 		identifierEqual := expected[i].Identifier == actual[i].Identifier
 		displayNameEqual := expected[i].DisplayName == actual[i].DisplayName
 		descriptionEqual := expected[i].Description == actual[i].Description
-		entriesEqual := compareEntries(actual[i].Entries, expected[i].Entries)
+		entriesEqual := compareEntries(actual[i].Entries, expected[i].Entries, comparer)
 		authParameterSchemaEqual := expected[i].AuthCreateParameterSchema == actual[i].AuthCreateParameterSchema
 
 		if !(nameEqual && idEqual && identifierEqual && displayNameEqual && descriptionEqual && entriesEqual && authParameterSchemaEqual) {
@@ -77,7 +82,7 @@ func compareServices(actual, expected []v1alpha1.Service) bool {
 	return true
 }
 
-func compareEntries(actual, expected []v1alpha1.Entry) bool {
+func compareEntries(actual, expected []v1alpha1.Entry, comparer SecretComparer) bool {
 
 	if len(actual) != len(expected) {
 		return false
@@ -88,7 +93,7 @@ func compareEntries(actual, expected []v1alpha1.Entry) bool {
 		targetUrlEqual := actual[i].TargetUrl == actual[i].TargetUrl
 		specificationUrlEqual := actual[i].SpecificationUrl == actual[i].SpecificationUrl
 		apiTypeEqual := actual[i].ApiType == actual[i].ApiType
-		credentialsEqual := compareCredentials(actual[i].Credentials, actual[i].Credentials)
+		credentialsEqual := compareCredentials(actual[i].Credentials, actual[i].Credentials, comparer)
 		requestParameterSecretEqual := actual[i].RequestParametersSecretName == actual[i].RequestParametersSecretName
 		nameEqual := actual[i].Name == actual[i].Name
 		idEqual := actual[i].ID == actual[i].ID
@@ -102,18 +107,23 @@ func compareEntries(actual, expected []v1alpha1.Entry) bool {
 }
 
 //TODO compare whole credentials data, not only .yaml name
-func compareCredentials(actual, expected v1alpha1.Credentials) bool {
+func compareCredentials(actual, expected v1alpha1.Credentials, comparer SecretComparer) bool {
 
 	if actual == (v1alpha1.Credentials{}) && expected != (v1alpha1.Credentials{}) || expected == (v1alpha1.Credentials{}) && actual != (v1alpha1.Credentials{}) {
 		return false
 	}
 
 	typeEqual := actual.Type == expected.Type
+
+	if !typeEqual {
+		return false
+	}
+
+	dataEqual := comparer.Do(actual.SecretName, "oauth-test-expected")
 	secretNameEqual := actual.SecretName == expected.SecretName
 	authenticationUrlEqual := actual.AuthenticationUrl == expected.AuthenticationUrl
 	csrfInfoEqual := compareCSRF(actual.CSRFInfo, expected.CSRFInfo)
-
-	return typeEqual && secretNameEqual && authenticationUrlEqual && csrfInfoEqual
+	return typeEqual && secretNameEqual && authenticationUrlEqual && csrfInfoEqual && dataEqual
 }
 
 func compareCSRF(actual, expected *v1alpha1.CSRFInfo) bool {
@@ -125,11 +135,11 @@ func compareCSRF(actual, expected *v1alpha1.CSRFInfo) bool {
 	return actual.TokenEndpointURL == expected.TokenEndpointURL
 }
 
-func compareSpec(actual, expected v1alpha1.ApplicationSpec) bool {
+func compareSpec(actual, expected v1alpha1.ApplicationSpec, comparer SecretComparer) bool {
 
 	descriptionEqual := actual.Description == expected.Description
 	skipInstallationEqual := actual.SkipInstallation == expected.SkipInstallation
-	servicesEqual := compareServices(actual.Services, expected.Services)
+	servicesEqual := compareServices(actual.Services, expected.Services, comparer)
 	labelsEqual := compareLabels(actual.Labels, expected.Labels)
 	tenantEqual := actual.Tenant == expected.Tenant
 	groupEqual := actual.Group == expected.Group
