@@ -15,11 +15,33 @@ const (
 	TenantHeader        = "Tenant"
 )
 
-//go:generate mockery -name=DirectorClient
+/*
+Process of pairing application with compass JS
+
+async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
+  const appID = await registerOrReturnApplication(client, appName, scenarioName);
+  debug(`Application ID in Compass ${appID}`);
+
+  const pairingData = await client.requestOneTimeTokenForApplication(appID);
+  const pairingToken = toBase64(JSON.stringify(pairingData));
+  const pairingBody = {
+    token: pairingToken,
+    baseUrl: mockHost,
+    insecure: true,
+  };
+
+  debug(`Connecting ${mockHost}`);
+  await connectCommerceMock(mockHost, pairingBody);
+
+  debug('Commerce mock connected to Compass');
+}
+*/
+
+//go:generate mockery --name=DirectorClient
 type DirectorClient interface {
 	RegisterApplication(appName, scenario, tenant string) (string, error)
-	UnregisterApplication(id string) error
-	RequestOneTimeTokenForApplication() error
+	UnregisterApplication(id string, tenant string) error
+	//RequestOneTimeTokenForApplication() error
 }
 
 type directorClient struct {
@@ -92,13 +114,32 @@ func (cc *directorClient) RegisterApplication(appName, scenario, tenant string) 
 	return response.Result.ID, nil
 }
 
-func (cc *directorClient) UnregisterApplication(appID string) error {
+func (cc *directorClient) UnregisterApplication(appID, tenant string) error {
+	runtimeQuery := cc.queryProvider.unregisterApplicationMutation(appID)
+
+	var response DeleteApplicationResponse
+	err := cc.executeDirectorGraphQLCall(runtimeQuery, tenant, &response)
+	if err != nil {
+		return fmt.Errorf("Failed to unregister application %s in Director", appID)
+	}
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return fmt.Errorf("Failed to unregister application %s in Director: received nil response.", appID)
+	}
+
+	if response.Result.ID != appID {
+		return fmt.Errorf("Failed to unregister application %s in Director: received unexpected applicationID.", appID)
+	}
+
+	log.Infof("Successfully unregistered Application %s in Director for tenant %s", appID, tenant)
+
 	return nil
 }
 
-func (cc *directorClient) RequestOneTimeTokenForApplication() error {
-	return nil
-}
+//func (cc *directorClient) RequestOneTimeTokenForApplication() error {
+//	// To be implemented
+//	return nil
+//}
 
 func (cc *directorClient) executeDirectorGraphQLCall(directorQuery string, tenant string, response interface{}) error {
 	if cc.token.EmptyOrExpired() {

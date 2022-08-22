@@ -95,7 +95,7 @@ func (c *oauthClient) getAuthorizationToken(credentials credentials) (Token, err
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return Token{}, fmt.Errorf("Failed to read token response body from '%s': %s", err.Error())
+		return Token{}, fmt.Errorf("Failed to read token response body from '%s': %s", credentials.tokensEndpoint, err.Error())
 	}
 
 	tokenResponse := Token{}

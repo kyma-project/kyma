@@ -8,18 +8,11 @@ type CreateApplicationResponse struct {
 	Result *graphql.Application `json:"result"`
 }
 
-//type GetRuntimeResponse struct {
-//	Result *graphql.RuntimeExt `json:"result"`
-//}
-//
-//type GetRuntimesResponse struct {
-//	Result *graphql.RuntimePage `json:"result"`
-//}
-//
-//type DeleteApplicationResponse struct {
-//	Result *graphql.Runtime `json:"result"`
-//}
+type DeleteApplicationResponse struct {
+	Result *graphql.Application `json:"result"`
+}
 
+// not sure if this will be needed
 type OneTimeTokenResponse struct {
 	Result *graphql.OneTimeTokenForApplicationExt `json:"result"`
 }
