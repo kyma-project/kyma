@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
+func TestCreateRewriteTagFilterIncludeNamespaces(t *testing.T) {
 	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
@@ -22,7 +22,9 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
 		},
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
-				Namespaces: []string{"namespace1", "namespace2"},
+				Namespaces: v1alpha1.InputNamespaces{
+					Include: []string{"namespace1", "namespace2"},
+				},
 			}},
 		},
 	}
@@ -40,7 +42,7 @@ func TestGenerateEmitterIncludeNamespaces(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
+func TestCreateRewriteTagFilterExcludeNamespaces(t *testing.T) {
 	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
@@ -53,7 +55,8 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
 		},
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
-				ExcludeNamespaces: []string{"namespace1", "namespace2"},
+				Namespaces: v1alpha1.InputNamespaces{
+					Exclude: []string{"namespace1", "namespace2"}},
 			}},
 		},
 	}
@@ -71,7 +74,7 @@ func TestGenerateEmitterExcludeNamespaces(t *testing.T) {
 	require.Equal(t, expected, actual)
 }
 
-func TestGenerateEmitterIncludeContainers(t *testing.T) {
+func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
 	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
@@ -84,7 +87,8 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
 		},
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
-				Containers: []string{"container1", "container2"},
+				Containers: v1alpha1.InputContainers{
+					Include: []string{"container1", "container2"}},
 			}},
 		},
 	}
@@ -96,13 +100,14 @@ func TestGenerateEmitterIncludeContainers(t *testing.T) {
     Match                 kube.*
     Name                  rewrite_tag
     Rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
 
-func TestGenerateEmitterExcludeContainers(t *testing.T) {
+func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
 	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
@@ -115,7 +120,8 @@ func TestGenerateEmitterExcludeContainers(t *testing.T) {
 		},
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
-				ExcludeContainers: []string{"container1", "container2"},
+				Containers: v1alpha1.InputContainers{
+					Exclude: []string{"container1", "container2"}},
 			}},
 		},
 	}
@@ -127,13 +133,14 @@ func TestGenerateEmitterExcludeContainers(t *testing.T) {
     Match                 kube.*
     Name                  rewrite_tag
     Rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
+    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
 
-func TestGenerateEmitterExcludeNamespacesAndExcludeContainers(t *testing.T) {
+func TestCreateRewriteTagFilterExcludeNamespacesAndExcludeContainers(t *testing.T) {
 	pipelineConfig := PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
@@ -146,8 +153,10 @@ func TestGenerateEmitterExcludeNamespacesAndExcludeContainers(t *testing.T) {
 		},
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
-				ExcludeNamespaces: []string{"namespace1", "namespace2"},
-				ExcludeContainers: []string{"container1"},
+				Namespaces: v1alpha1.InputNamespaces{
+					Exclude: []string{"namespace1", "namespace2"}},
+				Containers: v1alpha1.InputContainers{
+					Exclude: []string{"container1"}},
 			}},
 		},
 	}

@@ -1,14 +1,17 @@
 package configbuilder
 
 import (
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"testing"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateKubernetesMetadataFilterKeepAll(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-logpipeline"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Input: telemetryv1alpha1.Input{
 				Application: telemetryv1alpha1.ApplicationInput{
@@ -47,6 +50,7 @@ func TestCreateKubernetesMetadataFilterDropAll(t *testing.T) {
 
 `
 	logPipeline := &telemetryv1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-logpipeline"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Input: telemetryv1alpha1.Input{
 				Application: telemetryv1alpha1.ApplicationInput{
@@ -54,5 +58,5 @@ func TestCreateKubernetesMetadataFilterDropAll(t *testing.T) {
 					DropLabels:      true}}}}
 
 	actual := createKubernetesMetadataFilter(logPipeline)
-	require.Equal(t, expected, actual, "Fluent Bit application filters are invalid")
+	require.Equal(t, expected, actual)
 }

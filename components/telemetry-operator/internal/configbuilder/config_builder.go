@@ -61,13 +61,13 @@ func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
 		if logParser.DeletionTimestamp == nil {
 			name := fmt.Sprintf("Name %s", logParser.Name)
 			parser := fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
-			sb.WriteString(BuildConfigSection("[PARSER]", parser))
+			sb.WriteString(buildConfigSection("[PARSER]", parser))
 		}
 	}
 	return sb.String()
 }
 
-func BuildConfigSection(header string, content string) string {
+func buildConfigSection(header string, content string) string {
 	var sb strings.Builder
 	sb.WriteString(header)
 	sb.WriteByte('\n')
@@ -79,8 +79,4 @@ func BuildConfigSection(header string, content string) string {
 	sb.WriteByte('\n')
 
 	return sb.String()
-}
-
-func generateFilter(template string, params ...any) string {
-	return fmt.Sprintf(template, params...)
 }

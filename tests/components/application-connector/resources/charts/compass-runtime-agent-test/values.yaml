@@ -6,4 +6,4 @@ containerRegistry:
 images:
   compassTest:
     name: "compass-runtime-agent-test"
-    version: "PR-15024"
+    version: "7717b983"

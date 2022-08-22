@@ -466,6 +466,9 @@ spec:
                   - name
                   type: object
                 type: array
+              replicas:
+                format: int32
+                type: integer
               resourceConfiguration:
                 properties:
                   build:
@@ -634,8 +637,13 @@ spec:
                   - status
                   type: object
                 type: array
+              podSelector:
+                type: string
               reference:
                 type: string
+              replicas:
+                format: int32
+                type: integer
               runtime:
                 description: Runtime specifies the name of the Function's runtime.
                 type: string
@@ -646,6 +654,10 @@ spec:
     served: true
     storage: true
     subresources:
+      scale:
+        labelSelectorPath: .status.podSelector
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
       status: {}
 status:
   acceptedNames:

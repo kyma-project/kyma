@@ -72,17 +72,17 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220809-564c9388"
+      version: "20220819-0c178fc7"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15121"
+      version: "PR-14704"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15121"
+      version: "PR-14704"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15121"
+      version: "PR-14704"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-15038"
@@ -110,7 +110,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-14976"
+      version: "PR-14704"
     git_server:
       name: "gitserver"
       version: "708f6a87"

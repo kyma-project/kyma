@@ -5,6 +5,7 @@ import (
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/utils/pointer"
 
 	"github.com/onsi/gomega"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -279,48 +280,46 @@ func TestFunctionReconciler_equalHorizontalPodAutoscalers(t *testing.T) {
 }
 
 func Test_isScalingEnabled(t *testing.T) {
-	type args struct {
-		minReplicas int32
-		maxReplicas int32
-	}
 	tests := []struct {
-		name string
-		args args
-		want bool
+		name        string
+		scaleConfig *serverlessv1alpha2.ScaleConfig
+		want        bool
 	}{
 		{
 			name: "scaling enabled",
-			args: args{
-				minReplicas: 1,
-				maxReplicas: 2,
+			scaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: pointer.Int32(1),
+				MaxReplicas: pointer.Int32(2),
 			},
 			want: true,
 		},
 		{
 			name: "scaling disabled",
-			args: args{
-				minReplicas: 1,
-				maxReplicas: 1,
+			scaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: pointer.Int32(1),
+				MaxReplicas: pointer.Int32(1),
 			},
 			want: false,
 		},
 		{
 			name: "scaling disabled with multiple replicas",
-			args: args{
-				minReplicas: 5,
-				maxReplicas: 5,
+			scaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: pointer.Int32(5),
+				MaxReplicas: pointer.Int32(5),
 			},
 			want: false,
+		},
+		{
+			name:        "scaling disabled with no scaleConfig",
+			scaleConfig: nil,
+			want:        false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			instance := &serverlessv1alpha2.Function{
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ScaleConfig: &serverlessv1alpha2.ScaleConfig{
-						MinReplicas: &tt.args.minReplicas,
-						MaxReplicas: &tt.args.maxReplicas,
-					},
+					ScaleConfig: tt.scaleConfig,
 				},
 			}
 

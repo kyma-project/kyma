@@ -49,34 +49,34 @@ var _ = Describe("LogPipeline controller", func() {
     Rule                  $log "^.*$" log-pipeline.$TAG true
 
 [FILTER]
-    name                  record_modifier
-    match                 log-pipeline.*
-    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+    match  log-pipeline.*
+    name   record_modifier
+    record cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
 [FILTER]
     match log-pipeline.*
-    name grep
+    name  grep
     regex $kubernetes['labels']['app'] my-deployment
 
 [FILTER]
-    name                  nest
-    match                 log-pipeline.*
-    operation             lift
-    nested_under          kubernetes
-    add_prefix            __k8s__
+    add_prefix   __k8s__
+    match        log-pipeline.*
+    name         nest
+    nested_under kubernetes
+    operation    lift
 
 [FILTER]
-    name                  record_modifier
-    match                 log-pipeline.*
-    remove_key            __k8s__annotations
+    match      log-pipeline.*
+    name       record_modifier
+    remove_key __k8s__annotations
 
 [FILTER]
-    name                  nest
-    match                 log-pipeline.*
-    operation             nest
-    wildcard              __k8s__*
-    nest_under            kubernetes
-    remove_prefix         __k8s__
+    match         log-pipeline.*
+    name          nest
+    nest_under    kubernetes
+    operation     nest
+    remove_prefix __k8s__
+    wildcard      __k8s__*
 
 [OUTPUT]
     match                    log-pipeline.*
@@ -184,7 +184,9 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
-					Input:     telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{IncludeSystemNamespaces: true}},
+					Input: telemetryv1alpha1.Input{Application: telemetryv1alpha1.ApplicationInput{
+						Namespaces: telemetryv1alpha1.InputNamespaces{
+							System: true}}},
 					Filters:   []telemetryv1alpha1.Filter{filter},
 					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:     []telemetryv1alpha1.FileMount{file},

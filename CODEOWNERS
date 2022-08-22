@@ -92,7 +92,7 @@
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/tests/components/istio @strekm @veichtj @dariusztutaj @cnvergence @barchw
+/tests/components/istio @strekm @dariusztutaj @cnvergence @barchw
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 
 # performance tests
