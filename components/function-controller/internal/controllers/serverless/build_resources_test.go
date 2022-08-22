@@ -306,34 +306,6 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
 			},
 		},
-		{
-			name: "Should work with function with some labels",
-			args: args{instance: &serverlessv1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
-				Spec: serverlessv1alpha2.FunctionSpec{}}},
-			want: map[string]string{
-				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
-				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
-				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-			},
-		},
-		{
-			name: "Should not overwrite internal labels",
-			args: args{instance: &serverlessv1alpha2.Function{ObjectMeta: metav1.ObjectMeta{
-				Name: "fn-name",
-				UID:  "fn-uuid",
-			},
-				Spec: serverlessv1alpha2.FunctionSpec{}}},
-			want: map[string]string{
-				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
-				serverlessv1alpha2.FunctionNameLabel:      "fn-name",
-				serverlessv1alpha2.FunctionResourceLabel:  serverlessv1alpha2.FunctionResourceLabelDeploymentValue,
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
