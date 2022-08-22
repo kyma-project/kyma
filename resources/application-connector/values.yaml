@@ -32,7 +32,7 @@ global:
   images:
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "f6af2ecd"
+      version: "PR-15185"
     central_application_gateway:
       name: "central-application-gateway"
       version: "f6af2ecd"
