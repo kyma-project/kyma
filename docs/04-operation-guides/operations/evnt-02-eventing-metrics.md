@@ -2,7 +2,7 @@
 title: Kyma Eventing Metrics
 ---
 
-Kyma Eventing emits several custom metrics which are then visualized using [Grafana Dashboards](./evnt-01-eventing-dashboards.md) to monitor statistics and other information for the Eventing backbone in real time.
+Kyma Eventing provides several Grafana Dashboards, using various [Metrics](./evnt-02-eventing-metrics.md), so you can monitor statistics and other information in real time.
 
 ### Metrics Emitted by Eventing Publisher Proxy:
 
@@ -22,5 +22,5 @@ Kyma Eventing emits several custom metrics which are then visualized using [Graf
 
 ### Metrics Emitted by NATS Exporter:
 
-The [Prometheus NATS Exporter](https://github.com/nats-io/prometheus-nats-exporter) also emits metrics which can be used for monitoring purposes. More information on NATS Monitoring can be found [here](https://docs.nats.io/running-a-nats-service/configuration/monitoring#jetstream-information).  
+The [Prometheus NATS Exporter](https://github.com/nats-io/prometheus-nats-exporter) also emits metrics that you can monitor. Learn more about [NATS Monitoring](https://docs.nats.io/running-a-nats-service/configuration/monitoring#jetstream-information).  
  
