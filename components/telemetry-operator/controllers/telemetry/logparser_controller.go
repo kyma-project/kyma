@@ -87,6 +87,7 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
+		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
 	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
