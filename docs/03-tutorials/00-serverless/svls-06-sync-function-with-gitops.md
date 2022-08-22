@@ -87,6 +87,7 @@ You can now install the Flux operator, connect it with a specific Git repository
 
   ```bash
   kubectl create namespace flux
+  kubectl label namespace flux istio-injection=enabled --overwrite
   ```
 
 3. Export details of your GitHub repository - its name, the account name, and related e-mail address. You must also specify the name of the folder in your GitHub repository to which you will push the Function CR built from local sources. If you don't have this folder in your repository yet, you will create it in further steps. Flux will synchronize the cluster with the content of this folder on the `main` branch.

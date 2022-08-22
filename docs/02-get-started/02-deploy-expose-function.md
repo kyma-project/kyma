@@ -4,6 +4,8 @@ title: Deploy and expose a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+
 ## Create a function
 
 First, let's create the Function and apply it.
@@ -84,13 +86,14 @@ Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
-  apiVersion: gateway.kyma-project.io/v1alpha1
+  apiVersion: gateway.kyma-project.io/v1beta1
   kind: APIRule
   metadata:
     name: hello-world
     namespace: default
   spec:
     gateway: kyma-system/kyma-gateway
+    host: hello-world.$CLUSTER_DOMAIN
     rules:
       - accessStrategies:
         - config: {}
@@ -104,7 +107,6 @@ cat <<EOF | kubectl apply -f -
           - HEAD
         path: /.*
     service:
-      host: hello-world.$CLUSTER_DOMAIN
       name: hello-world
       port: 80
 EOF

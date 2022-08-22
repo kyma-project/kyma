@@ -5,7 +5,7 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-15102
+      version: PR-15154
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -16,11 +16,11 @@ global:
       directory: external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
-      version: 0.7.0
+      version: 0.7.2
       directory: external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
-      version: 0.9.3
+      version: 0.10.0
       directory: external
 
   jetstream:

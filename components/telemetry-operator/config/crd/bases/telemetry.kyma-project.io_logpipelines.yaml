@@ -73,31 +73,37 @@ spec:
                       handles application logs
                     properties:
                       containers:
-                        items:
-                          type: string
-                        type: array
+                        properties:
+                          exclude:
+                            items:
+                              type: string
+                            type: array
+                          include:
+                            items:
+                              type: string
+                            type: array
+                        type: object
                       dropLabels:
                         description: DropLabels indicates whether to drop all Kubernetes
                           labels. The default is false.
-                        type: boolean
-                      excludeContainers:
-                        items:
-                          type: string
-                        type: array
-                      excludeNamespaces:
-                        items:
-                          type: string
-                        type: array
-                      includeSystemNamespaces:
                         type: boolean
                       keepAnnotations:
                         description: KeepAnnotations indicates whether to keep all
                           Kubernetes annotations. The default is false.
                         type: boolean
                       namespaces:
-                        items:
-                          type: string
-                        type: array
+                        properties:
+                          exclude:
+                            items:
+                              type: string
+                            type: array
+                          include:
+                            items:
+                              type: string
+                            type: array
+                          system:
+                            type: boolean
+                        type: object
                     type: object
                 type: object
               output:
