@@ -72,31 +72,11 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
-	var errMap = make(map[string]error)
+	if result.LogParserChanged || result.ConfigurationChanged {
+		crUpdateError := r.updateCR(ctx, result.LogParserChanged, logParser)
+		restartFBError := r.restartFluentBit(ctx, result.ConfigurationChanged)
 
-	if result.LogParserChanged {
-		if err = r.Update(ctx, &logParser); err != nil {
-			// Return the error if we are only updating the CR
-			if !result.ConfigurationChanged {
-				log.Error(err, "Failed updating log parser")
-				return ctrl.Result{Requeue: shouldRetryOn(err)}, err
-			}
-			errMap["Failed updating log parser"] = err
-		}
-	}
-
-	if result.ConfigurationChanged {
-		log.Info("Fluent Bit parser configuration was updated. Restarting the DaemonSet")
-
-		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
-			errMap["Failed restarting fluent bit daemon set"] = err
-		}
-
-		// Aggregate the errors from both CR Update and Configuration Update and print them at end and requeue the request at end
-		if len(errMap) != 0 {
-			for k, v := range errMap {
-				log.Error(v, k)
-			}
+		if err = getError(crUpdateError, restartFBError); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
@@ -133,6 +113,28 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *LogParserReconciler) updateCR(ctx context.Context, updateCR bool, logParser telemetryv1alpha1.LogParser) error {
+	if !updateCR {
+		return nil
+	}
+	if err := r.Update(ctx, &logParser); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *LogParserReconciler) restartFluentBit(ctx context.Context, configChanged bool) error {
+	log := logf.FromContext(ctx)
+	if !configChanged {
+		return nil
+	}
+	log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
+	if err := r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
+		return err
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

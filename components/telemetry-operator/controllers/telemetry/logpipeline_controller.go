@@ -120,30 +120,11 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
-	var errMap = make(map[string]error)
-	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
-	if result.LogPipelineChanged {
-		if err = r.Update(ctx, &logPipeline); err != nil {
-			// Return the error if we are only updating the CR
-			if !result.ConfigurationChanged {
-				log.Error(err, "Failed updating log pipeline")
-				return ctrl.Result{Requeue: shouldRetryOn(err)}, err
-			}
-			errMap["Failed updating log pipeline"] = err
-		}
-	}
+	if result.LogPipelineChanged || result.ConfigurationChanged {
+		crUpdateError := r.updateCR(ctx, result.LogPipelineChanged, logPipeline)
+		restartFBError := r.restartFluentBit(ctx, result.ConfigurationChanged)
 
-	if result.ConfigurationChanged {
-		log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
-		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
-			errMap["Failed restarting fluent bit daemon set"] = err
-		}
-
-		// Aggregate the errors from both CR Update and Configuration Update and print them at end and requeue the request at end
-		if len(errMap) != 0 {
-			for k, v := range errMap {
-				log.Error(v, k)
-			}
+		if err = getError(crUpdateError, restartFBError); err != nil {
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
@@ -196,6 +177,38 @@ func shouldRetryOn(err error) bool {
 		!errors.IsUnauthorized(err) &&
 		!errors.IsForbidden(err) &&
 		!errors.IsNotFound(err)
+}
+
+func getError(crUpdateError, fbRestartError error) error {
+	if crUpdateError != nil {
+		return crUpdateError
+	}
+	if fbRestartError != nil {
+		return fbRestartError
+	}
+	return nil
+}
+
+func (r *LogPipelineReconciler) updateCR(ctx context.Context, updateCR bool, logPipeline telemetryv1alpha1.LogPipeline) error {
+	if !updateCR {
+		return nil
+	}
+	if err := r.Update(ctx, &logPipeline); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context, configChanged bool) error {
+	log := logf.FromContext(ctx)
+	if !configChanged {
+		return nil
+	}
+	log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
+	if err := r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition, unSupported bool) error {
