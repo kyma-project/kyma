@@ -170,7 +170,7 @@ spec:
   output:
     ...
 ```
-> **NOTE:** Usage of a `custom` filter will put the LogPipeline in [unsupported mode](#limitations-unsupported_mode).
+> **NOTE:** Usage of a `custom` filter will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
  The telemetry operator supports different types of [Fluent Bit filter](https://docs.fluentbit.io/manual/concepts/data-pipeline/filter). The example uses the [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) and the [record_modifier](https://docs.fluentbit.io/manual/pipeline/filters/record-modifier) filter.
 
