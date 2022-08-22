@@ -145,9 +145,6 @@ function oidcE2ETest(options, getShootInfoFunc) {
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);
     });
-
-    console.log("KEB USER ID = :")
-    console.log(options.kebUserId[0]);
   });
 }
 

@@ -985,8 +985,7 @@ async function getContainerRestartsForAllNamespaces() {
 async function getKymaAdminBindings() {
   const {body} = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
   const adminRoleBindings = body.items;
-
-  const roles = adminRoleBindings
+  return adminRoleBindings
       .filter(
           (clusterRoleBinding) => clusterRoleBinding.roleRef.name === 'cluster-admin',
       )
@@ -1000,21 +999,13 @@ async function getKymaAdminBindings() {
             .filter((sub) => sub.kind === 'Group')
             .map((sub) => sub.name),
       }));
-      return roles;
 }
 
 async function findKymaAdminBindingForUser(targetUser) {
   const kymaAdminBindings = await getKymaAdminBindings();
-  console.log("Bindings dg:");
-  console.log(kymaAdminBindings);
-  console.log("Target user dg:");
-  console.log(targetUser);
-  console.log("Find res dg:")
-  const findResult = kymaAdminBindings.find(
+  return kymaAdminBindings.find(
       (binding) => binding.users.indexOf(targetUser) >= 0,
   );
-  console.log(findResult)
-  return findResult;
 }
 
 async function ensureKymaAdminBindingExistsForUser(targetUser) {
