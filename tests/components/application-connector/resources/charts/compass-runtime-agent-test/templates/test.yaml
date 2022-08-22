@@ -10,12 +10,16 @@ spec:
         - name: compass-runtime-agent-test
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.compassTest) }}
           imagePullPolicy: Always
-          volumeMounts:
-          - name: secret-volume
-            mountPath: /etc/oauth-credentials
-      restartPolicy: Never
-      volumes:
-      - name: secret-volume
-        secret:
-          secretName: oauth-compass-credentials
+          env:
+          - name: APP_DIRECTOR_URL
+            value: {{ .Values.directorUrl }}
+          - name: APP_TESTING_TENANT
+            value: {{ .Values.testTenant }}
+          - name: APP_SKIP_DIRECTOR_CERT_VERIFICATION
+            value: {{ .Values.skipDirectorCertVerification}}
+          - name: APP_OAUTH_CREDENTIALS_SECRET_NAME
+            value: {{.Values.oauthCredentialsSecretName}}
+          - name: APP_OAUTH_CREDENTIALS_NAMESPACE
+            value: {{.Values.oauthCredentialsNamespace}}
+
   backoffLimit: 0

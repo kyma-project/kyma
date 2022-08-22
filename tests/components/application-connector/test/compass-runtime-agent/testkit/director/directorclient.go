@@ -42,6 +42,12 @@ type DirectorClient interface {
 	RegisterApplication(appName, scenario, tenant string) (string, error)
 	UnregisterApplication(id string, tenant string) error
 	//RequestOneTimeTokenForApplication() error
+
+	// Checmy pokryc wsyztkie typy autoryzacji czyli miec jedna apkę która będzie miala wszystkie typy autoryzacji
+	// Mozemy po prostu zahardkodować pelna mutację albo kilka mutacji
+	//
+	// jakie będą scenariusze?
+
 }
 
 type directorClient struct {

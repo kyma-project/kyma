@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
+	"github.com/vrischmann/envconfig"
 	"net/http"
 	"testing"
 	"time"
@@ -18,16 +19,23 @@ import (
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
 	appClientSet *cli.Clientset
+	testConfig   config
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {
+
+	err := envconfig.InitWithPrefix(&gs.testConfig, "APP")
+	gs.Require().Nil(err)
+
 	cfg, err := rest.InClusterConfig()
 	gs.Require().Nil(err)
 
 	gs.appClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
-	_, err = gs.newDirectorClient("drectorURL", "test", "oauthCreds", true, cfg)
+	gs.T().Log("Config: %s", gs.testConfig.String())
+
+	_, err = gs.newDirectorClient(gs.testConfig.DirectorURL, gs.testConfig.OauthCredentialsNamespace, gs.testConfig.OauthCredentialsSecretName, gs.testConfig.SkipDirectorCertVerification, cfg)
 	gs.Require().Nil(err)
 }
 
