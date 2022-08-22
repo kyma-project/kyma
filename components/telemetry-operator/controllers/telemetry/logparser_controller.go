@@ -72,10 +72,11 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
+	var errMap = make(map[string]error)
+
 	if result.LogParserChanged {
 		if err = r.Update(ctx, &logParser); err != nil {
-			log.Error(err, "Failed updating log parser")
-			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
+			errMap["Failed updating log parser"] = err
 		}
 	}
 
@@ -83,7 +84,14 @@ func (r *LogParserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		log.Info("Fluent Bit parser configuration was updated. Restarting the DaemonSet")
 
 		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
-			log.Error(err, "Failed restarting fluent bit daemon set")
+			errMap["Failed restarting fluent bit daemon set"] = err
+		}
+
+		// Aggregate the errors from both CR Update and Configuration Update and print them at end and requeue the request at end
+		if len(errMap) != 0 {
+			for k, v := range errMap {
+				log.Error(v, k)
+			}
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
