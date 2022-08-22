@@ -56,9 +56,6 @@ describe('Eventing tests preparation', function() {
   });
 
   it('Prepare EventMesh secret', async function() {
-    // runs once before the first test in this block
-    debug('Running with mockNamespace =', mockNamespace);
-
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else skip this step and use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
     if (!eventMeshSecretFilePath) {
@@ -81,7 +78,7 @@ describe('Eventing tests preparation', function() {
     }
 
     if (isK8sClientInitialized()) {
-      info(`Skipping fetching SKR kubeconfig because k8s client is already initialized.`)
+      info(`Skipping fetching SKR kubeconfig because k8s client is already initialized.`);
       this.skip();
     }
 
@@ -89,8 +86,8 @@ describe('Eventing tests preparation', function() {
     expect(skrInstanceId).to.not.be.empty;
 
     // 'skr-test/helpers' initializes KEB clients on import, that is why it is imported only if needed
-    const {getSKRConfig} = require("../skr-test/helpers");
-    const {initK8sConfig} = require("../skr-test/helpers");
+    const {getSKRConfig} = require('../skr-test/helpers');
+    const {initK8sConfig} = require('../skr-test/helpers');
 
     debug(`Fetching SKR config for Instance Id: ${skrInstanceId}`);
     const shoot = await getSKRConfig(skrInstanceId);
@@ -129,8 +126,7 @@ describe('Eventing tests preparation', function() {
     }
   });
 
-  //// **** Helper functions ****
-
+  // // **** Helper functions ****
   // prepareAssetsForOSSTests - Sets up CommerceMost for the OSS
   async function prepareAssetsForOSSTests() {
     debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');

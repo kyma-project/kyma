@@ -45,7 +45,7 @@ function initializeK8sClient(opts) {
 initializeK8sClient();
 
 function isK8sClientInitialized() {
-    return k8sClientReady;
+  return k8sClientReady;
 }
 
 /**
