@@ -2,12 +2,10 @@ package director
 
 import (
 	"fmt"
-	"github.com/docker/cli/cli/command/config"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	gql "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
 	gcli "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/third_party/machinebox/graphql"
-	gql "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,9 +17,9 @@ const (
 
 //go:generate mockery -name=DirectorClient
 type DirectorClient interface {
-	RegisterApplication(appName, scenario string) (string, error)
+	RegisterApplication(appName, scenario, tenant string) (string, error)
 	UnregisterApplication(id string) error
-	//	RequestOneTimeTokenForApplication() error
+	RequestOneTimeTokenForApplication() error
 }
 
 type directorClient struct {
@@ -42,34 +40,64 @@ func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client) DirectorC
 	}
 }
 
-func (cc *directorClient) RegisterApplication(appName, scenario string) (string, error) {
-	log.Infof("Registering Application on Director service")
-
-	runtimeInput, err := cc.graphqlizer.RuntimeInputToGQL(directorInput)
+func (cc *directorClient) getToken() error {
+	token, err := cc.oauthClient.GetAuthorizationToken()
 	if err != nil {
-		log.Infof("Failed to create graphQLized Runtime input")
-		return "", fmt.Errorf("Failed to create graphQLized Runtime input: %s", err.Error())
+		return errors.New("Error while obtaining token")
 	}
 
-	registerAppQuery := cc.queryProvider.registerApplicationMutation(runtimeInput)
+	if token.EmptyOrExpired() {
+		return errors.New("Obtained empty or expired token")
+	}
 
+	cc.token = token
+	return nil
+}
+
+func (cc *directorClient) RegisterApplication(appName, scenario, tenant string) (string, error) {
+	log.Infof("Registering Application on Director service")
+
+	//var labels graphql.Labels
+	//if config.Labels != nil {
+	//	l := graphql.Labels(config.Labels)
+	//	labels = l
+	//}
+	//
+	//
+	//directorInput := graphql.ApplicationRegisterInput{
+	//	Name: appName,
+	//	//Labels:      labels,
+	//}
+	//appInput, err := cc.graphqlizer.ApplicationRegisterInputToGQL(directorInput)
+	//if err != nil {
+	//	log.Infof("Failed to create graphQLized Runtime input")
+	//	return "", fmt.Errorf("Failed to create graphQLized Runtime input: %s", err.Error())
+	//}
+
+	registerAppQuery := cc.queryProvider.registerApplicationMutation(appName, scenario)
+
+	var response CreateApplicationResponse
 	appErr := cc.executeDirectorGraphQLCall(registerAppQuery, tenant, &response)
 	if appErr != nil {
-		return "", errors.Wrap("Failed to register runtime in Director. Request failed")
+		return "", errors.Wrap(appErr, "Failed to register application in Director. Request failed")
 	}
 
 	// Nil check is necessary due to GraphQL client not checking response code
 	if response.Result == nil {
-		return "", apperrors.Internal("Failed to register runtime in Director: Received nil response.").SetComponent(apperrors.ErrCompassDirector).SetReason(apperrors.ErrDirectorNilResponse)
+		return "", errors.New("Failed to register application in Director: Received nil response.")
 	}
 
-	log.Infof("Successfully registered Runtime %s in Director for tenant %s", config.Name, tenant)
+	log.Infof("Successfully registered application %s in Director for tenant %s", appName, tenant)
 
 	return response.Result.ID, nil
 }
 
 func (cc *directorClient) UnregisterApplication(appID string) error {
+	return nil
+}
 
+func (cc *directorClient) RequestOneTimeTokenForApplication() error {
+	return nil
 }
 
 func (cc *directorClient) executeDirectorGraphQLCall(directorQuery string, tenant string, response interface{}) error {
@@ -86,9 +114,9 @@ func (cc *directorClient) executeDirectorGraphQLCall(directorQuery string, tenan
 
 	if err := cc.gqlClient.Do(req, response); err != nil {
 		if egErr, ok := err.(gcli.ExtendedError); ok {
-			return mapDirectorErrorToProvisionerError(egErr).Append("Failed to execute GraphQL request to Director")
+			return errors.Wrap(egErr, "Failed to execute GraphQL request to Director")
 		}
-		return apperrors.Internal("Failed to execute GraphQL request to Director: %v", err)
+		return fmt.Errorf("Failed to execute GraphQL request to Director: %v", err)
 	}
 
 	return nil

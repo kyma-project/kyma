@@ -1,11 +1,14 @@
 package oauth
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -19,19 +22,41 @@ type Client interface {
 }
 
 type oauthClient struct {
-	httpClient       *http.Client
-	oauthCredentials credentials
+	httpClient    *http.Client
+	secretsClient v1.SecretInterface
+	secretName    string
 }
 
-func NewOauthClient(client *http.Client, creds credentials) Client {
+func NewOauthClient(client *http.Client, secrets v1.SecretInterface, secretName string) Client {
 	return &oauthClient{
-		httpClient:       client,
-		oauthCredentials: creds,
+		httpClient:    client,
+		secretsClient: secrets,
+		secretName:    secretName,
 	}
 }
 
 func (c *oauthClient) GetAuthorizationToken() (Token, error) {
-	return c.getAuthorizationToken(c.oauthCredentials)
+	credentials, err := c.getCredentials()
+
+	if err != nil {
+		return Token{}, err
+	}
+
+	return c.getAuthorizationToken(credentials)
+}
+
+func (c *oauthClient) getCredentials() (credentials, error) {
+	secret, err := c.secretsClient.Get(context.Background(), c.secretName, metav1.GetOptions{})
+
+	if err != nil {
+		return credentials{}, err
+	}
+
+	return credentials{
+		clientID:       string(secret.Data[clientIDKey]),
+		clientSecret:   string(secret.Data[clientSecretKey]),
+		tokensEndpoint: string(secret.Data[tokensEndpointKey]),
+	}, nil
 }
 
 func (c *oauthClient) getAuthorizationToken(credentials credentials) (Token, error) {

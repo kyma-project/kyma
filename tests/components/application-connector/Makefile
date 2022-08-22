@@ -103,4 +103,4 @@ publish-compass-runtime-agent-test: image-compass-runtime-agent-test
 	docker push $(COMPASS_TEST_IMAGE)
 
 image-compass-runtime-agent-test:
-	docker build -t $(COMPASS_TEST_IMAGE) -f Dockerfile.compass-runtime-agent .
+	docker build -f Dockerfile.compass-runtime-agent .
