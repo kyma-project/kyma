@@ -12,6 +12,7 @@ let k8sCoreV1Api;
 let k8sRbacAuthorizationV1Api;
 let k8sLog;
 let k8sServerUrl;
+let k8sClientReady = false;
 
 let watch;
 
@@ -35,11 +36,17 @@ function initializeK8sClient(opts) {
     k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
     k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
+    k8sClientReady = true;
   } catch (err) {
+    k8sClientReady = false;
     console.log(err.message);
   }
 }
 initializeK8sClient();
+
+function isK8sClientInitialized() {
+    return k8sClientReady;
+}
 
 /**
  * Gets the shoot name from k8s server url
@@ -1607,6 +1614,7 @@ async function attachTraceChildSpans(parentSpan, trace) {
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
+  isK8sClientInitialized,
   retryPromise,
   convertAxiosError,
   ignore404,
