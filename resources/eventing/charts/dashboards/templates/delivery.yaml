@@ -82,7 +82,7 @@ data:
               },
               {
                 "exemplar": true,
-                "expr": "sum by (event_type) (rate(event_type_published{response_code=~\"[4].*\"}[5m]))",
+                "expr": "sum by (event_type) (rate(event_type_published{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 4xx",
@@ -303,7 +303,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by (event_type) (rate(event_type_published{response_code=~\"[2].*\"}[5m]))",
+                "expr": "sum by (event_type) (rate(event_type_published{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 2xx",

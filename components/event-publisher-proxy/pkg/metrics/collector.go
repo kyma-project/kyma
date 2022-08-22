@@ -28,6 +28,10 @@ const (
 	responseCode = "response_code"
 	//destSvc is the name of the destination service label used by multiple metrics
 	destSvc = "destination_service"
+	// eventType is the name of the event type label used by metrics
+	eventType = "event_type"
+	// eventSource is the name of the event source label used by metrics
+	eventSource = "event_source"
 )
 
 // Collector implements the prometheus.Collector interface
@@ -60,7 +64,7 @@ func NewCollector() *Collector {
 				Name: EventTypePublishedMetricKey,
 				Help: EventTypePublishedMetricHelp,
 			},
-			[]string{"event_type", "event_source", responseCode},
+			[]string{eventType, eventSource, responseCode},
 		),
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
