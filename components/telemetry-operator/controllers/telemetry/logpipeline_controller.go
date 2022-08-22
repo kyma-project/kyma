@@ -124,6 +124,11 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
 	if result.LogPipelineChanged {
 		if err = r.Update(ctx, &logPipeline); err != nil {
+			// Return the error if we are only updating the CR
+			if !result.ConfigurationChanged {
+				log.Error(err, "Failed updating log pipeline")
+				return ctrl.Result{Requeue: shouldRetryOn(err)}, err
+			}
 			errMap["Failed updating log pipeline"] = err
 		}
 	}
