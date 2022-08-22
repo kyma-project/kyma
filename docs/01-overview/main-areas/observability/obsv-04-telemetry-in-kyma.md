@@ -111,7 +111,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 ### Step 2: Create an input
 
 If you need selection mechanisms for application logs on Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
-If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. You can either define the included Namespaces to collect from, or exclude from all Namespaces or only set system Namespaces to be included. See all parameters [here](#parameters).
+If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. For example, you can define the Namespaces to include in input collection, exclude Namespaces from input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](#parameters).
 
 The following example collects input from all Namespaces excluding `kyma-system` and only from `istio-proxy` containers:
 ```yaml
@@ -132,7 +132,7 @@ spec:
     ...
 ```
 
-It might happen that Fluent Bit prints an error per processed log line that is then collected and re-processed.
+It might happen that Fluent Bit prints an error per processed log line, which is then collected and re-processed.
 To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. The following example collects input from all Namespaces including system Namespaces, but excludes the Fluent Bit container:
 
 ```yaml
