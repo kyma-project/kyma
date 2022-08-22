@@ -2,7 +2,7 @@
 title: Expose a workload with multiple services
 ---
 
-This tutorial shows how to expose a workload with multiple services under the same host on different paths.
+This tutorial shows how to expose a workload with multiple services that share the same host on different paths.
 
 The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
@@ -18,10 +18,10 @@ Follow the instruction to expose your unsecured instance of the HttpBin service 
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
-2. Expose the instance of the HttpBin service and the instance of the sample function by creating an API Rule CR in your Namespace. If you don't want to use the Kyma domain but your custom domain, replace the following Kyma Gateway: kyma-system/kyma-gateway by your custom domain. Run:
+2. Expose the instance of the HttpBin service and the instance of the sample Function by creating an API Rule CR in your Namespace. If you don't want to use the Kyma domain but your custom domain, replace the following Kyma Gateway: kyma-system/kyma-gateway by your custom domain. Run:
 
 ```yaml
 apiVersion: gateway.kyma-project.io/v1beta1
@@ -56,8 +56,8 @@ spec:
 3. Call the endpoints by sending `GET` requests to the HttpBin service and the sample function:
 
    ```bash
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/ip  #Send a GET request to the HttpBin:
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  #Send a GET request to the Function:
+   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/ip  # Send a GET request to the HttpBin
+   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  # Send a GET request to the Function
 
    ```
 These calls return the code 200 response.
@@ -66,17 +66,17 @@ These calls return the code 200 response.
 
 ## Root level service definition and multiple services definition on different paths
 
-Follow the instruction to expose your unsecured instance of the HttpBin service and your sample Function in different paths with a service defined at the root level - HttpBin in the following example. 
-  >**NOTE:** The services definitions at the **spec.rules** level have higher precedence than the service definition at the **spec.service** level.
+Follow the instruction to expose your unsecured instance of the HttpBin service and your sample Function on different paths with a service defined at the root level - HttpBin in the following example. 
+  >**NOTE:** The services definition at the **spec.rules** level have higher precedence than the service definition at the **spec.service** level.
 
 
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com
    ```
 
-2. Expose the instance of the HttpBin service and the instance of the sample function by creating an API Rule CR in your Namespace. If you don't want to use the Kyma domain but your custom domain, replace the following Kyma Gateway: kyma-system/kyma-gateway by your custom domain. Run:
+2. Expose the instance of the HttpBin service and the instance of the sample Function by creating an API Rule CR in your Namespace. If you don't want to use the Kyma domain but your custom domain, replace the following Kyma Gateway: kyma-system/kyma-gateway by your custom domain. In the following example, the services definition at the **spec.rules** level will overwrite the service definition at the **spec.service** level. Run:
 
 ```yaml
 apiVersion: gateway.kyma-project.io/v1beta1
@@ -110,8 +110,8 @@ spec:
 3. Call the endpoints by sending `GET` requests to the HttpBin service and the sample function:
 
    ```bash
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/ip  #Send a GET request to the HttpBin
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  #Send a GET request to the Function
+   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/ip  # Send a GET request to the HttpBin
+   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  # Send a GET request to the Function
 
    ```
 These calls return the code 200 response.
