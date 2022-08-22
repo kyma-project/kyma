@@ -33,10 +33,17 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.appClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
-	gs.T().Log("Config: %s", gs.testConfig.String())
+	gs.T().Logf("Config: %s", gs.testConfig.String())
 
-	_, err = gs.newDirectorClient(gs.testConfig.DirectorURL, gs.testConfig.OauthCredentialsNamespace, gs.testConfig.OauthCredentialsSecretName, gs.testConfig.SkipDirectorCertVerification, cfg)
+	directorClient, err := gs.newDirectorClient(gs.testConfig.DirectorURL, gs.testConfig.OauthCredentialsNamespace, gs.testConfig.OauthCredentialsSecretName, gs.testConfig.SkipDirectorCertVerification, cfg)
 	gs.Require().Nil(err)
+
+	gs.T().Log("Attempt to register application in compass")
+	appID, err := directorClient.RegisterApplication("oko", "auto-testing", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
+
+	gs.Require().Nil(err)
+
+	gs.T().Logf("Registered applicationID is %s", appID)
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {

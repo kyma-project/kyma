@@ -3,15 +3,16 @@ testTenant: "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae"
 directorUrl: "https://compass-gateway-auth-oauth.mps.dev.kyma.cloud.sap/director/graphql"
 oauthCredentialsSecretName: "oauth-compass-credentials"
 oauthCredentialsNamespace: "test"
-skipDirectorCertVerification: "true"
+skipDirectorCertVerification: true
+serviceAccountName: "test-compass-runtime-agent"
 
 containerRegistry:
-  path: "eu.gcr.io/kyma-project"
+  path: "docker.io/koala7659"
 
 images:
   compassTest:
     name: "compass-runtime-agent-test"
-    version: "PR-15024"
+    version: "PR-7777"
 
 compassCredentials:
   clientID: ""
