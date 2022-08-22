@@ -116,7 +116,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
 | **spec.source**                               |      Yes       | Defines Function's source code or Git repository with it. Only one source configuration is allowed. |
-| **spec.source.inline**                        |       No       | Configure function as inline. |
+| **spec.source.inline**                        |       No       | Defines Function as the inline Function. |
 | **spec.source.inline.dependencies**           |       No       | Specifies the Function's dependencies. |
 | **spec.source.inline.source**                 |      Yes       | Provides the Function's full source code. |
 | **spec.source.gitRepository**                 |       No       | Defines Function as git-sourced. |
