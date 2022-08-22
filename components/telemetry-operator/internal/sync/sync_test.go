@@ -96,11 +96,10 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
-	res, err := sut.syncSectionsConfigMap(context.Background(), &lp)
+	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
 
-	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, result)
+	require.Equal(t, result, false)
 }
 
 func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
@@ -110,11 +109,10 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
-	res, err := sut.syncFilesConfigMap(context.Background(), &lp)
+	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
 
-	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, result)
+	require.Equal(t, result, false)
 }
 
 func TestUnsupportedTotal(t *testing.T) {
@@ -180,7 +178,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	lps := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 	restartRequired, err := lps.syncVariables(context.Background())
 	require.NoError(t, err)
-	require.True(t, restartRequired.ConfigurationChanged)
+	require.True(t, restartRequired)
 
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)
