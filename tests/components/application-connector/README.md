@@ -256,6 +256,7 @@ The tests consist of:
 - [Test runner](./test/application-connectivity-validator/) with all the test cases
 
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Connectivity Validator is installed. The test Job is deployed in the `test` Namespace.
+
 ![Connectivity Validator tests architecture](./assets/connectivity-validator-tests-architecture.svg)
 
 > **NOTE:** Port `8080` must be excluded from redirection to Envoy, otherwise Connectivity Validator test Pod cannot pass the `X-Forwarded-Client-Cert` header to Connectivity Validator.
