@@ -1,4 +1,4 @@
-package configbuilder
+package builder
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ func createCustomFilters(pipeline *telemetryv1alpha1.LogPipeline) string {
 		builder := NewFilterSectionBuilder()
 		customFilterParams := parseMultiline(filter.Custom)
 		for _, p := range customFilterParams {
-			builder.AddConfigParam(p.key, p.value)
+			builder.AddConfigParam(p.Key, p.Value)
 		}
 		builder.AddConfigParam("match", fmt.Sprintf("%s.*", pipeline.Name))
 		filters = append(filters, builder.Build())

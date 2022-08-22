@@ -130,7 +130,7 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, logP
 		return err
 	}
 
-	if err := v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
+	if err := v.pluginValidator.Validate(logPipeline); err != nil {
 		log.Error(err, "Failed to validate plugins")
 		return err
 	}

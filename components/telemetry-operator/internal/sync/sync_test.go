@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
 	"k8s.io/client-go/kubernetes/scheme"
@@ -28,7 +29,7 @@ var (
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
-	pipelineConfig = configbuilder.PipelineConfig{
+	pipelineConfig = builder.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

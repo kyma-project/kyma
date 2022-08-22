@@ -3,7 +3,8 @@ package sync
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
@@ -31,7 +32,7 @@ type FluentBitDaemonSetConfig struct {
 type LogPipelineSyncer struct {
 	client.Client
 	DaemonSetConfig         FluentBitDaemonSetConfig
-	PipelineConfig          configbuilder.PipelineConfig
+	PipelineConfig          builder.PipelineConfig
 	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
 	SecretHelper            *secret.Helper
@@ -45,7 +46,7 @@ type Result struct {
 
 func NewLogPipelineSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
-	pipelineConfig configbuilder.PipelineConfig,
+	pipelineConfig builder.PipelineConfig,
 ) *LogPipelineSyncer {
 	var lps LogPipelineSyncer
 	lps.Client = client
@@ -109,7 +110,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			result.ConfigurationChanged = true
 		}
 	} else {
-		fluentBitConfig, err := configbuilder.MergeSectionsConfig(logPipeline, s.PipelineConfig)
+		fluentBitConfig, err := builder.MergeSectionsConfig(logPipeline, s.PipelineConfig)
 		if err != nil {
 			return result, err
 		}

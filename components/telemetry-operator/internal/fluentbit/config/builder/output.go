@@ -1,9 +1,11 @@
-package configbuilder
+package builder
 
 import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
@@ -30,7 +32,7 @@ func generateCustomOutput(output *telemetryv1alpha1.Output, fsBufferLimit string
 	sb := NewOutputSectionBuilder()
 	customOutputParams := parseMultiline(output.Custom)
 	for _, p := range customOutputParams {
-		sb.AddConfigParam(p.key, p.value)
+		sb.AddConfigParam(p.Key, p.Value)
 	}
 	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
 	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
@@ -95,8 +97,8 @@ func generateLokiOutput(lokiOutput *telemetryv1alpha1.LokiOutput, fsBufferLimit 
 	return sb.Build()
 }
 
-func parseMultiline(section string) []configParam {
-	var result []configParam
+func parseMultiline(section string) []config.Parameter {
+	var result []config.Parameter
 	for _, line := range strings.Split(section, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 || strings.HasPrefix(line, "#") {
@@ -106,7 +108,8 @@ func parseMultiline(section string) []configParam {
 		if !found {
 			continue
 		}
-		result = append(result, configParam{strings.ToLower(strings.TrimSpace(key)), strings.TrimSpace(value)})
+		param := config.Parameter{Key: strings.ToLower(strings.TrimSpace(key)), Value: strings.TrimSpace(value)}
+		result = append(result, param)
 	}
 	return result
 }

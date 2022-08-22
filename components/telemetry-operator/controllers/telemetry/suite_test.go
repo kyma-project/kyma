@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
@@ -105,7 +105,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	pipelineConfig := configbuilder.PipelineConfig{
+	pipelineConfig := builder.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",

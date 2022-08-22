@@ -1,4 +1,4 @@
-package configbuilder
+package builder
 
 import (
 	"testing"

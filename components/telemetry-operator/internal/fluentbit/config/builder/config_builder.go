@@ -1,9 +1,11 @@
-package configbuilder
+package builder
 
 import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
@@ -17,6 +19,11 @@ type PipelineConfig struct {
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(pipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
+	err := validateCustomSections(pipeline)
+	if err != nil {
+		return "", err
+	}
+
 	var sb strings.Builder
 	sb.WriteString(createRewriteTagFilterSection(pipeline, pipelineConfig))
 	sb.WriteString(createRecordModifierFilter(pipeline))
@@ -79,4 +86,22 @@ func buildConfigSection(header string, content string) string {
 	sb.WriteByte('\n')
 
 	return sb.String()
+}
+
+func validateCustomSections(pipeline *telemetryv1alpha1.LogPipeline) error {
+	customOutput := pipeline.Spec.Output.Custom
+	if customOutput != "" {
+		_, err := config.ParseCustomSection(customOutput)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, filter := range pipeline.Spec.Filters {
+		_, err := config.ParseCustomSection(filter.Custom)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

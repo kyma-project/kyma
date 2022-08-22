@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
@@ -46,7 +46,7 @@ func TestPreparePipelineDryRun(t *testing.T) {
 		client: client,
 		config: &Config{
 			FluentBitConfigMapName: types.NamespacedName{Name: fluentBitCm.Name},
-			PipelineConfig: configbuilder.PipelineConfig{
+			PipelineConfig: builder.PipelineConfig{
 				FsBufferLimit:     "1G",
 				MemoryBufferLimit: "10M",
 				StorageType:       "filesystem",

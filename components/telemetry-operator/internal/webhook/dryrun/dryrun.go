@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
 	"github.com/google/uuid"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -25,7 +25,7 @@ type Config struct {
 	FluentBitBinPath       string
 	FluentBitPluginDir     string
 	FluentBitConfigMapName types.NamespacedName
-	PipelineConfig         configbuilder.PipelineConfig
+	PipelineConfig         builder.PipelineConfig
 }
 
 type DryRunner struct {

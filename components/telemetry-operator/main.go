@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configbuilder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
@@ -167,7 +167,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := configbuilder.PipelineConfig{
+	pipelineConfig := builder.PipelineConfig{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,

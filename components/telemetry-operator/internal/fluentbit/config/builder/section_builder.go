@@ -1,18 +1,15 @@
-package configbuilder
+package builder
 
 import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
 )
 
-type configParam struct {
-	key   string
-	value string
-}
-
 type SectionBuilder struct {
-	params  []configParam
+	params  []config.Parameter
 	keyLen  int
 	builder strings.Builder
 }
@@ -43,7 +40,7 @@ func (sb *SectionBuilder) AddConfigParam(key string, value string) *SectionBuild
 	if sb.keyLen < len(key) {
 		sb.keyLen = len(key)
 	}
-	sb.params = append(sb.params, configParam{key, value})
+	sb.params = append(sb.params, config.Parameter{Key: key, Value: value})
 	return sb
 }
 
@@ -56,18 +53,18 @@ func (sb *SectionBuilder) AddIfNotEmpty(key string, value string) *SectionBuilde
 
 func (sb *SectionBuilder) Build() string {
 	sort.Slice(sb.params, func(i, j int) bool {
-		if sb.params[i].key != sb.params[j].key {
-			return sb.params[i].key < sb.params[j].key
+		if sb.params[i].Key != sb.params[j].Key {
+			return sb.params[i].Key < sb.params[j].Key
 		}
-		return sb.params[i].value < sb.params[j].value
+		return sb.params[i].Value < sb.params[j].Value
 	})
 	indentation := strings.Repeat(" ", 4)
 	for _, p := range sb.params {
 		sb.builder.WriteString(fmt.Sprintf("%s%s%s%s",
 			indentation,
-			p.key,
-			strings.Repeat(" ", sb.keyLen-len(p.key)+1),
-			p.value))
+			p.Key,
+			strings.Repeat(" ", sb.keyLen-len(p.Key)+1),
+			p.Value))
 		sb.builder.WriteByte('\n')
 	}
 	sb.builder.WriteByte('\n')
