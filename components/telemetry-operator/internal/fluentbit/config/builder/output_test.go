@@ -9,8 +9,8 @@ import (
 
 func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 	expected := `[OUTPUT]
-    match                    foo.*
     name                     null
+    match                    foo.*
     storage.total_limit_size 1G
 
 `
@@ -32,13 +32,13 @@ func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 
 func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 	expected := `[OUTPUT]
+    name                     http
+    match                    foo.*
     allow_duplicated_headers true
     format                   json
     host                     localhost
     http_passwd              password
     http_user                user
-    match                    foo.*
-    name                     http
     port                     443
     storage.total_limit_size 1G
     tls                      on
@@ -75,13 +75,13 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 
 func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 	expected := `[OUTPUT]
+    name                     http
+    match                    foo.*
     allow_duplicated_headers true
     format                   json
     host                     localhost
     http_passwd              ${FOO_MY_NAMESPACE_SECRET_KEY}
     http_user                user
-    match                    foo.*
-    name                     http
     port                     443
     storage.total_limit_size 1G
     tls                      on
@@ -124,14 +124,14 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 
 func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	expected := `[OUTPUT]
+    name                     grafana-loki
+    match                    foo.*
     alias                    foo
-    labelMapPath             /fluent-bit/etc/loki-labelmap.json
+    labelmappath             /fluent-bit/etc/loki-labelmap.json
     labels                   {cluster-id="123", job="telemetry-fluent-bit"}
     lineformat               json
     loglevel                 warn
-    match                    foo.*
-    name                     grafana-loki
-    removeKeys               key1, key2
+    removekeys               key1, key2
     storage.total_limit_size 1G
     url                      http:loki:3100
 

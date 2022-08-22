@@ -24,25 +24,25 @@ func TestCreateKubernetesMetadataFilterKeepAll(t *testing.T) {
 
 func TestCreateKubernetesMetadataFilterDropAll(t *testing.T) {
 	expected := `[FILTER]
-    add_prefix   __k8s__
-    match        test-logpipeline.*
     name         nest
+    match        test-logpipeline.*
+    add_prefix   __k8s__
     nested_under kubernetes
     operation    lift
 
 [FILTER]
-    match      test-logpipeline.*
     name       record_modifier
+    match      test-logpipeline.*
     remove_key __k8s__annotations
 
 [FILTER]
-    match      test-logpipeline.*
     name       record_modifier
+    match      test-logpipeline.*
     remove_key __k8s__labels
 
 [FILTER]
-    match         test-logpipeline.*
     name          nest
+    match         test-logpipeline.*
     nest_under    kubernetes
     operation     nest
     remove_prefix __k8s__

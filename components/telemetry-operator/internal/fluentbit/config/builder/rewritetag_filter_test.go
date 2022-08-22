@@ -30,12 +30,12 @@ func TestCreateRewriteTagFilterIncludeNamespaces(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
@@ -62,12 +62,12 @@ func TestCreateRewriteTagFilterExcludeNamespaces(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
@@ -94,13 +94,13 @@ func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
-    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
@@ -127,13 +127,13 @@ func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
-    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
@@ -162,13 +162,13 @@ func TestCreateRewriteTagFilterExcludeNamespacesAndExcludeContainers(t *testing.
 	}
 
 	expected := `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
-    Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)

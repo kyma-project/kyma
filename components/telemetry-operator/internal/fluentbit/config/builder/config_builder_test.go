@@ -11,8 +11,8 @@ import (
 
 func TestCreateRecordModifierFilter(t *testing.T) {
 	expected := `[FILTER]
-    match  foo.*
     name   record_modifier
+    match  foo.*
     record cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
 `
@@ -24,9 +24,9 @@ func TestCreateRecordModifierFilter(t *testing.T) {
 
 func TestCreateLuaDedotFilterWithDefinedHostAndDedotSet(t *testing.T) {
 	expected := `[FILTER]
-    call   kubernetes_map_keys
-    match  foo.*
     name   lua
+    match  foo.*
+    call   kubernetes_map_keys
     script /fluent-bit/scripts/filter-script.lua
 
 `
@@ -69,35 +69,35 @@ func TestCreateLuaDedotFilterWithDedotFalse(t *testing.T) {
 
 func TestMergeSectionsConfig(t *testing.T) {
 	expected := `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          foo
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          foo
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
 
 [FILTER]
-    match  foo.*
     name   record_modifier
+    match  foo.*
     record cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
 [FILTER]
-    match foo.*
     name  grep
+    match foo.*
     regex log aa
 
 [FILTER]
-    call   kubernetes_map_keys
-    match  foo.*
     name   lua
+    match  foo.*
+    call   kubernetes_map_keys
     script /fluent-bit/scripts/filter-script.lua
 
 [OUTPUT]
+    name                     http
+    match                    foo.*
     allow_duplicated_headers true
     format                   json
     host                     localhost
-    match                    foo.*
-    name                     http
     port                     443
     storage.total_limit_size 1G
     tls                      on

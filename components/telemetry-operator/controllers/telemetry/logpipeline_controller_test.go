@@ -41,46 +41,46 @@ var _ = Describe("LogPipeline controller", func() {
 		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
-    Emitter_Mem_Buf_Limit 10M
-    Emitter_Name          log-pipeline
-    Emitter_Storage.type  filesystem
-    Match                 kube.*
-    Name                  rewrite_tag
-    Rule                  $log "^.*$" log-pipeline.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          log-pipeline
+    emitter_storage.type  filesystem
+    rule                  $log "^.*$" log-pipeline.$TAG true
 
 [FILTER]
-    match  log-pipeline.*
     name   record_modifier
+    match  log-pipeline.*
     record cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
 [FILTER]
-    match log-pipeline.*
     name  grep
+    match log-pipeline.*
     regex $kubernetes['labels']['app'] my-deployment
 
 [FILTER]
-    add_prefix   __k8s__
-    match        log-pipeline.*
     name         nest
+    match        log-pipeline.*
+    add_prefix   __k8s__
     nested_under kubernetes
     operation    lift
 
 [FILTER]
-    match      log-pipeline.*
     name       record_modifier
+    match      log-pipeline.*
     remove_key __k8s__annotations
 
 [FILTER]
-    match         log-pipeline.*
     name          nest
+    match         log-pipeline.*
     nest_under    kubernetes
     operation     nest
     remove_prefix __k8s__
     wildcard      __k8s__*
 
 [OUTPUT]
-    match                    log-pipeline.*
     name                     stdout
+    match                    log-pipeline.*
     storage.total_limit_size 1G`
 
 	var expectedSecret = make(map[string][]byte)

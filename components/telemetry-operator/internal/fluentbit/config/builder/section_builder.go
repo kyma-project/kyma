@@ -40,7 +40,7 @@ func (sb *SectionBuilder) AddConfigParam(key string, value string) *SectionBuild
 	if sb.keyLen < len(key) {
 		sb.keyLen = len(key)
 	}
-	sb.params = append(sb.params, config.Parameter{Key: key, Value: value})
+	sb.params = append(sb.params, config.Parameter{Key: strings.ToLower(key), Value: value})
 	return sb
 }
 
@@ -54,6 +54,19 @@ func (sb *SectionBuilder) AddIfNotEmpty(key string, value string) *SectionBuilde
 func (sb *SectionBuilder) Build() string {
 	sort.Slice(sb.params, func(i, j int) bool {
 		if sb.params[i].Key != sb.params[j].Key {
+			if sb.params[i].Key == "name" {
+				return true
+			}
+			if sb.params[j].Key == "name" {
+				return false
+			}
+			if sb.params[i].Key == "match" {
+				return true
+			}
+			if sb.params[j].Key == "match" {
+				return false
+			}
+
 			return sb.params[i].Key < sb.params[j].Key
 		}
 		return sb.params[i].Value < sb.params[j].Value
