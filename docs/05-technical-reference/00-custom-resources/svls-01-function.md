@@ -121,7 +121,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.inline.source**                 |      Yes       | Provides the Function's full source code. |
 | **spec.source.gitRepository**                 |       No       | Defines Function as git-sourced. |
 | **spec.source.gitRepository.url**             |      Yes       | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix. |
-| **spec.source.gitRepository.baseDir**         |       No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built. |
+| **spec.source.gitRepository.baseDir**         |       No       | Specifies the relative path to the Git directory that contains the source code from which the Function is built. |
 | **spec.source.gitRepository.reference**       |       No       | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in Function's code and dependencies. |
 | **spec.source.gitRepository.auth**            |       No       | Specifies that you must authenticate to the Git repository. Required for SSH. |
 | **spec.source.gitRepository.auth.type**       |      Yes       | Defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). For SSH, this parameter must be set to `key`. |
