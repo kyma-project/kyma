@@ -1,14 +1,15 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: validator-test-app
-  namespace: "{{ .Values.namespace }}"
+  name: event-test
 spec:
-  description: Application for the Application Connectivity Validator testing purposes
-  labels:
-    app: validator-test-app
+  description: Test app-con-validator
   skipVerify: true
-  compassMetadata:
-    authentication:
-      clientIds:
-        - "clientID"
+  services:
+    - displayName: httpbin
+      name: httpbin
+      providerDisplayName: Kenneth Reitz
+      description: HTTPBin service
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: Events
