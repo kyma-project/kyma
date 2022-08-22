@@ -266,7 +266,10 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 }
 
 func isScalingEnabled(instance *serverlessv1alpha2.Function) bool {
-	return !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas)
+	if instance.Spec.ScaleConfig == nil {
+		return false
+	}
+	return !equalInt32Pointer(instance.Spec.ScaleConfig.MinReplicas, instance.Spec.ScaleConfig.MaxReplicas)
 }
 
 func getConditionReason(conditions []serverlessv1alpha2.Condition, conditionType serverlessv1alpha2.ConditionType) serverlessv1alpha2.ConditionReason {

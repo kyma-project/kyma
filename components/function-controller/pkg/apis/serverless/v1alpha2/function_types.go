@@ -21,9 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Runtime enumerates runtimes that are currently supported by Function Controller.
-// It is a subset of RuntimeExtended.
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;python39
+// Runtime specifies the name of the Function's runtime.
 type Runtime string
 
 const (
@@ -98,6 +96,14 @@ type ResourceRequirements struct {
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
+type ScaleConfig struct {
+	// +kubebuilder:validation:Minimum:=1
+	MinReplicas *int32 `json:"minReplicas,omitempty"`
+
+	// +kubebuilder:validation:Minimum:=1
+	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+}
+
 type ResourceConfiguration struct {
 	// +optional
 	Build ResourceRequirements `json:"build"`
@@ -129,11 +135,11 @@ type FunctionSpec struct {
 	// +optional
 	ResourceConfiguration ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=1
-	MinReplicas *int32 `json:"minReplicas,omitempty"`
+	// +optional
+	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
-	// +kubebuilder:validation:Minimum:=1
-	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+	// +optional
+	Replicas *int32 `json:"replicas,omitempty"`
 }
 
 //TODO: Status related things needs to be developed.
@@ -171,20 +177,6 @@ const (
 	ConditionReasonMinReplicasNotAvailable        ConditionReason = "MinReplicasNotAvailable"
 )
 
-// RuntimeExtended enumerates runtimes that are either currently supported or
-// no longer supported but there still might be "read-only" Functions using them
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs16;nodejs10;python38;python39
-type RuntimeExtended string
-
-const (
-	RuntimeExtendedNodeJs10 RuntimeExtended = "nodejs10"
-	RuntimeExtendedNodeJs12 RuntimeExtended = "nodejs12"
-	RuntimeExtendedNodeJs14 RuntimeExtended = "nodejs14"
-	RuntimeExtendedNodeJs16 RuntimeExtended = "nodejs16"
-	RuntimeExtendedPython38 RuntimeExtended = "python38"
-	RuntimeExtendedPython39 RuntimeExtended = "python39"
-)
-
 type Condition struct {
 	Type               ConditionType      `json:"type,omitempty"`
 	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
@@ -200,9 +192,11 @@ type Repository struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Runtime              RuntimeExtended `json:"runtime,omitempty"`
-	Conditions           []Condition     `json:"conditions,omitempty"`
+	Runtime              Runtime     `json:"runtime,omitempty"`
+	Conditions           []Condition `json:"conditions,omitempty"`
 	Repository           `json:",inline,omitempty"`
+	Replicas             int32  `json:"replicas,omitempty"`
+	PodSelector          string `json:"podSelector,omitempty"`
 	Commit               string `json:"commit,omitempty"`
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 }
@@ -220,6 +214,7 @@ const (
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:storageversion
+//+kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.podSelector
 //+kubebuilder:printcolumn:name="Configured",type="string",JSONPath=".status.conditions[?(@.type=='ConfigurationReady')].status"
 //+kubebuilder:printcolumn:name="Built",type="string",JSONPath=".status.conditions[?(@.type=='BuildReady')].status"
 //+kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"

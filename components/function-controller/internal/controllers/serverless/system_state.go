@@ -368,11 +368,6 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
-	minReplicas := DefaultDeploymentReplicas
-	if s.instance.Spec.MinReplicas != nil {
-		minReplicas = *s.instance.Spec.MinReplicas
-	}
-
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -380,7 +375,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &minReplicas,
+			Replicas: s.getReplicas(DefaultDeploymentReplicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
@@ -480,6 +475,17 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	}
 }
 
+func (s *systemState) getReplicas(defaultVal int32) *int32 {
+	if s.instance.Spec.ScaleConfig != nil {
+		return s.instance.Spec.ScaleConfig.MinReplicas
+	}
+	if s.instance.Spec.Replicas != nil {
+		return s.instance.Spec.Replicas
+	}
+
+	return &defaultVal
+}
+
 //TODO do not negate
 func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
 	return len(s.deployments.Items) == 1 &&
@@ -561,15 +567,18 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 func (s *systemState) defaultReplicas() (int32, int32) {
 	var min = int32(1)
 	var max int32
+	if s.instance.Spec.ScaleConfig == nil {
+		return min, min
+	}
 	spec := s.instance.Spec
-	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
-		min = *spec.MinReplicas
+	if spec.ScaleConfig.MinReplicas != nil && *spec.ScaleConfig.MinReplicas > 0 {
+		min = *spec.ScaleConfig.MinReplicas
 	}
 	// special case
-	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+	if spec.ScaleConfig.MaxReplicas == nil || min > *spec.ScaleConfig.MaxReplicas {
 		max = min
 	} else {
-		max = *spec.MaxReplicas
+		max = *spec.ScaleConfig.MaxReplicas
 	}
 	return min, max
 }
@@ -609,7 +618,7 @@ func (s *systemState) gitFnSrcChanged(commit string) bool {
 	return s.instance.Status.Commit == "" ||
 		commit != s.instance.Status.Commit ||
 		s.instance.Spec.Source.GitRepository.Reference != s.instance.Status.Reference ||
-		serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime) != s.instance.Status.Runtime ||
+		s.instance.Spec.Runtime != s.instance.Status.Runtime ||
 		s.instance.Spec.Source.GitRepository.BaseDir != s.instance.Status.BaseDir ||
 		getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady) == corev1.ConditionFalse
 

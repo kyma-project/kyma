@@ -41,6 +41,10 @@ func (sb *SectionBuilder) ToString() string {
 	return sb.builder.String()
 }
 
+func systemNamespaces() []string {
+	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system"}
+}
+
 // CreateRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
 func CreateRewriteTagFilter(config PipelineConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
 	var sectionBuilder = NewSectionBuilder().
@@ -51,38 +55,40 @@ func CreateRewriteTagFilter(config PipelineConfig, logPipeline *telemetryv1alpha
 		AddConfigurationParameter("Emitter_Storage.type", config.StorageType).
 		AddConfigurationParameter("Emitter_Mem_Buf_Limit", config.MemoryBufferLimit)
 
-	if !logPipeline.Spec.Input.Application.HasSelectors() {
-		if logPipeline.Spec.Input.Application.IncludeSystemNamespaces {
-			sectionBuilder.AddConfigurationParameter("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
-		} else {
-			sectionBuilder.AddConfigurationParameter("Rule",
-				fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*\" %s.$TAG true", logPipeline.Name))
-		}
+	containers := logPipeline.Spec.Input.Application.Containers
+	if len(containers.Include) > 0 {
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['container_name'] \"^(%s)$\" %s.$TAG true",
+				strings.Join(containers.Include, "|"), logPipeline.Name))
+	}
+
+	if len(containers.Exclude) > 0 {
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['container_name'] \"^(?!%s$).*\" %s.$TAG true",
+				strings.Join(containers.Exclude, "$|"), logPipeline.Name))
+	}
+
+	namespaces := logPipeline.Spec.Input.Application.Namespaces
+	if len(namespaces.Include) > 0 {
+		sectionBuilder.AddConfigurationParameter("Rule",
+			fmt.Sprintf("$kubernetes['namespace_name'] \"^(%s)$\" %s.$TAG true",
+				strings.Join(namespaces.Include, "|"), logPipeline.Name))
 		return sectionBuilder.ToString()
 	}
 
-	if len(logPipeline.Spec.Input.Application.Namespaces) > 0 {
-		sectionBuilder.AddConfigurationParameter("Rule",
-			fmt.Sprintf("$kubernetes['namespace_name'] \"^(%s)$\" %s.$TAG true",
-				strings.Join(logPipeline.Spec.Input.Application.Namespaces, "|"), logPipeline.Name))
-	}
-
-	if len(logPipeline.Spec.Input.Application.ExcludeNamespaces) > 0 {
+	if len(namespaces.Exclude) > 0 {
 		sectionBuilder.AddConfigurationParameter("Rule",
 			fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!%s$).*\" %s.$TAG true",
-				strings.Join(logPipeline.Spec.Input.Application.ExcludeNamespaces, "$|"), logPipeline.Name))
+				strings.Join(namespaces.Exclude, "$|"), logPipeline.Name))
+		return sectionBuilder.ToString()
 	}
 
-	if len(logPipeline.Spec.Input.Application.Containers) > 0 {
+	if namespaces.System {
+		sectionBuilder.AddConfigurationParameter("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
+	} else {
 		sectionBuilder.AddConfigurationParameter("Rule",
-			fmt.Sprintf("$kubernetes['container_name'] \"^(%s)$\" %s.$TAG true",
-				strings.Join(logPipeline.Spec.Input.Application.Containers, "|"), logPipeline.Name))
-	}
-
-	if len(logPipeline.Spec.Input.Application.ExcludeContainers) > 0 {
-		sectionBuilder.AddConfigurationParameter("Rule",
-			fmt.Sprintf("$kubernetes['container_name'] \"^(?!%s$).*\" %s.$TAG true",
-				strings.Join(logPipeline.Spec.Input.Application.ExcludeContainers, "$|"), logPipeline.Name))
+			fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!%s$).*\" %s.$TAG true",
+				strings.Join(systemNamespaces(), "$|"), logPipeline.Name))
 	}
 
 	return sectionBuilder.ToString()

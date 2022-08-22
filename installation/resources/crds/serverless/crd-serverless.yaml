@@ -466,13 +466,8 @@ spec:
                   - name
                   type: object
                 type: array
-              maxReplicas:
+              replicas:
                 format: int32
-                minimum: 1
-                type: integer
-              minReplicas:
-                format: int32
-                minimum: 1
                 type: integer
               resourceConfiguration:
                 properties:
@@ -544,16 +539,21 @@ spec:
                     type: object
                 type: object
               runtime:
-                description: Runtime enumerates runtimes that are currently supported
-                  by Function Controller. It is a subset of RuntimeExtended.
-                enum:
-                - nodejs12
-                - nodejs14
-                - nodejs16
-                - python39
+                description: Runtime specifies the name of the Function's runtime.
                 type: string
               runtimeImageOverride:
                 type: string
+              scaleConfig:
+                properties:
+                  maxReplicas:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  minReplicas:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                type: object
               source:
                 properties:
                   gitRepository:
@@ -596,6 +596,17 @@ spec:
                     - source
                     type: object
                 type: object
+              template:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
             required:
             - runtime
             - source
@@ -626,19 +637,15 @@ spec:
                   - status
                   type: object
                 type: array
+              podSelector:
+                type: string
               reference:
                 type: string
+              replicas:
+                format: int32
+                type: integer
               runtime:
-                description: RuntimeExtended enumerates runtimes that are either currently
-                  supported or no longer supported but there still might be "read-only"
-                  Functions using them
-                enum:
-                - nodejs12
-                - nodejs14
-                - nodejs16
-                - nodejs10
-                - python38
-                - python39
+                description: Runtime specifies the name of the Function's runtime.
                 type: string
               runtimeImageOverride:
                 type: string
@@ -647,6 +654,10 @@ spec:
     served: true
     storage: true
     subresources:
+      scale:
+        labelSelectorPath: .status.podSelector
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
       status: {}
 status:
   acceptedNames:

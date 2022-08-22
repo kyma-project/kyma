@@ -42,18 +42,23 @@ type Input struct {
 
 // ApplicationInput is the default type of Input that handles application logs
 type ApplicationInput struct {
-	IncludeSystemNamespaces bool     `json:"includeSystemNamespaces,omitempty"`
-	Namespaces              []string `json:"namespaces,omitempty"`
-	ExcludeNamespaces       []string `json:"excludeNamespaces,omitempty"`
-	Containers              []string `json:"containers,omitempty"`
-	ExcludeContainers       []string `json:"excludeContainers,omitempty"`
+	Namespaces InputNamespaces `json:"namespaces,omitempty"`
+	Containers InputContainers `json:"containers,omitempty"`
+	// KeepAnnotations indicates whether to keep all Kubernetes annotations. The default is false.
+	KeepAnnotations bool `json:"keepAnnotations,omitempty"`
+	// DropLabels indicates whether to drop all Kubernetes labels. The default is false.
+	DropLabels bool `json:"dropLabels,omitempty"`
 }
 
-func (a ApplicationInput) HasSelectors() bool {
-	return len(a.Namespaces) > 0 ||
-		len(a.ExcludeNamespaces) > 0 ||
-		len(a.Containers) > 0 ||
-		len(a.ExcludeContainers) > 0
+type InputNamespaces struct {
+	Include []string `json:"include,omitempty"`
+	Exclude []string `json:"exclude,omitempty"`
+	System  bool     `json:"system,omitempty"`
+}
+
+type InputContainers struct {
+	Include []string `json:"include,omitempty"`
+	Exclude []string `json:"exclude,omitempty"`
 }
 
 // Filter describes a Fluent Bit filter configuration
@@ -195,12 +200,12 @@ func filterOutCondition(conditions []LogPipelineCondition, condType LogPipelineC
 	return newConditions
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:resource:scope=Cluster
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
-//+kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
-//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+// +kubebuilder:printcolumn:name="Unsupported-Mode",type=boolean,JSONPath=`.status.unsupportedMode`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -210,7 +215,7 @@ type LogPipeline struct {
 	Status LogPipelineStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 // LogPipelineList contains a list of LogPipeline
 type LogPipelineList struct {
 	metav1.TypeMeta `json:",inline"`

@@ -72,7 +72,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220809-564c9388"
+      version: "20220819-0c178fc7"
       directory: "tpi"
     function_controller:
       name: "function-controller"
@@ -110,7 +110,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-15023"
+      version: "PR-14704"
     git_server:
       name: "gitserver"
       version: "708f6a87"

@@ -8,9 +8,7 @@ metadata:
     {{- include "nats.labels" . | nindent 4 }}
   {{- if .Values.serviceAnnotations}}
   annotations:
-  {{- range $key, $value := .Values.serviceAnnotations }}
-    {{ $key }}: {{ $value | quote }}
-  {{- end }}
+    {{- toYaml .Values.serviceAnnotations | nindent 4 }}
   {{- end }}
 spec:
   selector:
