@@ -74,7 +74,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by (event_type) (rate(event_type_published{response_code=~\"[5].*\"}[5m]))",
+                "expr": "sum by (event_type) (rate(event_type_published{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 5xx",
