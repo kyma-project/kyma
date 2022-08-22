@@ -113,11 +113,11 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
 | **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
-| **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
+| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
 | **spec.source**                               |      Yes       | Defines Function's source code or Git repository with it. |
 | **spec.source.inline**                        |       No       | Specifies Function's source code and dependencies. Can't be used at the same time with **spec.source.gitRepository**. |
-| **spec.source.inline.dependencies**           |      Yes       | Specifies the Function's dependencies. |
+| **spec.source.inline.dependencies**           |       No       | Specifies the Function's dependencies. |
 | **spec.source.inline.source**                 |      Yes       | Provides the Function's full source code of Function. |
 | **spec.source.gitRepository**                 |       No       | Specifies object pointing to a Git repository with the Function's source code and dependencies. Can't be used at the same time with **spec.source.inline**. |
 | **spec.source.gitRepository.url**             |      Yes       | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix. |
@@ -128,14 +128,14 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.gitRepository.auth.secretName** |      Yes       | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the GitRepository CR. |
 | **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map). |
 | **spec.resourceConfiguration**                |       No       | Specifies resources requested by Function and build Job. |
-| **spec.resourceConfiguration.function**       |      Yes       | Specifies resources requested by the Function's Pod. |
+| **spec.resourceConfiguration.function**       |       No       | Specifies resources requested by the Function's Pod. |
 | **spec.resourceConfiguration.function.profile**                         |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.function.resources**. |
 | **spec.resourceConfiguration.function.resources**                       |       No       | Defines amount of resources available for the Function's Pod to use. Can't be used at the same time with **spec.resourceConfiguration.function.profile**. |
 | **spec.resourceConfiguration.function.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available for the Function's Pod to use. |
 | **spec.resourceConfiguration.function.resources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Function's Pod to use. |
 | **spec.resourceConfiguration.function.resources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the Function's Pod to operate. |
 | **spec.resourceConfiguration.function.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the Function's Pod to operate. |
-| **spec.resourceConfiguration.build**          |      Yes       | Specifies resources requested by the build Job's Pod. |
+| **spec.resourceConfiguration.build**          |       No       | Specifies resources requested by the build Job's Pod. |
 | **spec.resourceConfiguration.build.profile**  |       No       | Defines name of predefined set of values of resource. Can't be used at the same time with **spec.resourceConfiguration.build.resources**. |
 | **spec.resourceConfiguration.build.resources**                       |       No       | Defines amount of resources available for the build Job's Pod to use. Can't be used at the same time with **spec.resourceConfiguration.build.profile**. |
 | **spec.resourceConfiguration.build.resources.limits.cpu**            |       No       | Defines the maximum number of CPUs available to use for the Kubernetes Job's Pod responsible for building the Function's image.      |
@@ -144,8 +144,8 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resourceConfiguration.build.resources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
 | **spec.replicas**                             |       No       | Defines exact number of Function's Pods to run at a time. Can't be used at the same time with **spec.scaleConfig**. |
 | **spec.scaleConfig**                          |       No       | Defines minimum and maximum number of Functions Pods to run at a time. Can't be used at the same time with **spec.replicas**. |
-| **spec.scaleConfig.minReplicas**              |      Yes       | Defines the minimum number of Function's Pods to run at a time. |
-| **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
+| **spec.scaleConfig.minReplicas**              |       No       | Defines the minimum number of Function's Pods to run at a time. |
+| **spec.scaleConfig.maxReplicas**              |       No       | Defines the maximum number of Function's Pods to run at a time. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
