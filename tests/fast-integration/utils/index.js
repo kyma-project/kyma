@@ -1000,16 +1000,21 @@ async function getKymaAdminBindings() {
             .filter((sub) => sub.kind === 'Group')
             .map((sub) => sub.name),
       }));
-      console.log("roles:")
-      console.log(roles)
       return roles;
 }
 
 async function findKymaAdminBindingForUser(targetUser) {
   const kymaAdminBindings = await getKymaAdminBindings();
-  return kymaAdminBindings.find(
+  console.log("Bindings dg:");
+  console.log(kymaAdminBindings);
+  console.log("Target user dg:");
+  console.log(targetUser);
+  console.log("Find res dg:")
+  const findResult = kymaAdminBindings.find(
       (binding) => binding.users.indexOf(targetUser) >= 0,
   );
+  console.log(findResult)
+  return findResult;
 }
 
 async function ensureKymaAdminBindingExistsForUser(targetUser) {
