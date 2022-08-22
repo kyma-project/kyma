@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      restartPolicy: Never
       containers:
         - name: compass-runtime-agent-test
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.compassTest) }}
