@@ -117,21 +117,21 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
-	result, err := r.Syncer.SyncAll(ctx, &logPipeline)
+	changed, err := r.Syncer.SyncAll(ctx, &logPipeline)
 	if err != nil {
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
 
 	r.unsupportedTotal.Set(float64(r.Syncer.UnsupportedPluginsTotal))
-	if result.LogPipelineChanged {
+
+	if changed {
+		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
+
 		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
-	}
 
-	if result.ConfigurationChanged {
-		log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet due to logpipeline change")
 		if err = r.DaemonSetUtils.RestartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
