@@ -337,7 +337,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | input.application.namespaces | object | Provides selectors for Namespaces. Selectors are mutually exclusive. |
 | input.application.namespaces.include | []string | List of Namespaces from which logs are collected. |
 | input.application.namespaces.exclude | []string | List of Namespaces to exclude during log collection from all Namespaces. |
-| input.application.namespaces.system | boolean | Set to `true` if collecting from all namespaces should include system Namespaces as well. |
+| input.application.namespaces.system | boolean | Set to `true` if collecting from all Namespaces should include system Namespaces as well. |
 | input.application.containers | []string | Provides selectors for containers. Selectors are mutually exclusive. |
 | input.application.containers.include | []string | List of containers to collect from. |
 | input.application.containers.exclude | []string | List of containers to exclude. |
