@@ -28,6 +28,10 @@ const (
 	responseCode = "response_code"
 	//destSvc is the name of the destination service label used by multiple metrics
 	destSvc = "destination_service"
+	// eventType is the name of the event type label used by metrics
+	eventType = "event_type"
+	// eventSource is the name of the event source label used by metrics
+	eventSource = "event_source"
 )
 
 // Collector implements the prometheus.Collector interface
@@ -60,7 +64,7 @@ func NewCollector() *Collector {
 				Name: EventTypePublishedMetricKey,
 				Help: EventTypePublishedMetricHelp,
 			},
-			[]string{"event_type", "event_source"},
+			[]string{eventType, eventSource, responseCode},
 		),
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -99,8 +103,8 @@ func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destSv
 }
 
 // RecordEventType records a eventType metric
-func (c *Collector) RecordEventType(eventType, eventSource string) {
-	c.eventType.WithLabelValues(eventType, eventSource).Inc()
+func (c *Collector) RecordEventType(eventType, eventSource string, statusCode int) {
+	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
 }
 
 // RecordRequests records the eventRequests metric

@@ -14,8 +14,8 @@ describe('Provision SKR instance', function() {
   this.slow(slowTime);
 
   let skr;
-  let options;
-  let shootInfo;
+  let options = undefined;
+  let isSKRProvisioned = false;
 
   before('Gather default options', async function() {
     options = gatherOptions(); // with default values
@@ -26,17 +26,17 @@ describe('Provision SKR instance', function() {
     console.log(`SKR Instance ID: ${options.instanceID}`);
     skr = await getOrProvisionSKR(options, false, provisioningTimeout);
     options = skr.options;
-    shootInfo = skr.shoot;
+    isSKRProvisioned = true;
   });
 
   after('Print Shoot Info', async function() {
-    if (shootInfo != undefined) {
-      console.log(options);
+    // Print data out for spinnaker.
+    // It is used in spinnaker to pass data to next stages.
+    // More info: https://spinnaker.io/docs/guides/user/kubernetes-v2/run-job-manifest/#spinnaker_property_
 
-      // print data out for spinnaker
-      console.log('***Print out data for spinnaker***');
-      console.log(`SPINNAKER_PROPERTY_PROVISIONED=true`);
+    if (options && options.instanceID) {
       console.log(`SPINNAKER_PROPERTY_INSTANCE_ID=${options.instanceID}`);
     }
+    console.log(`SPINNAKER_PROPERTY_PROVISIONED=${isSKRProvisioned}`);
   });
 });

@@ -1,8 +1,8 @@
 ---
-title: Monitoring Kyma Eventing
+title: Grafana Dashboards for Kyma Eventing
 ---
 
-Kyma Eventing provides several Grafana Dashboards so you can monitor statistics and other information for the Eventing backbone in real time.
+Kyma Eventing provides several Grafana Dashboard with various [metrics](./evnt-02-eventing-metrics.md), so you can monitor statistics and other information in real time.
 
 > **NOTE:** See how to [expose Grafana securely](../security/sec-06-access-expose-kiali-grafana.md) for easier access in the future.
 
@@ -19,9 +19,7 @@ Kyma Eventing provides several Grafana Dashboards so you can monitor statistics 
 | Dashboard    |  Description |
 |-------------|:--------------|
 | **Eventing Pods** | Information about CPU, memory, and network resources consumed by the Kyma Eventing Pods. |
-| **Eventing Delivery** | Statistics of HTTP requests to application validator, event publisher proxy and NATS subscribers. |
-| **Eventing Delivery per Subscription** | Successful and failed event delivery statistics per subscription. |
+| **Eventing Delivery** | Statistics of HTTP requests to event publisher proxy and NATS subscribers. Also contains successful and failed events published, as well as delivery statistics and analytical information for published and subscribed event types and their respective mapping. |
 | **Eventing Latency** | Latency information in the event delivery lifecycle from Eventing publisher proxy to Eventing backend servers, and from dispatcher to subscriber.  |
 | **NATS Servers** | Information about CPU, memory, and network resources consumed by the NATS Servers  |
 | **NATS JetStream** | NATS JetStream-specific information about streams and consumers.  |
-| **NATS JetStream Event Types Summary** | Analytical information for published and subscribed event types and their respective mapping. |

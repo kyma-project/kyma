@@ -24,7 +24,8 @@ spec:
       name: Auth
       type: string
     deprecated: true
-    deprecationWarning: Git Repository CR will be removed in kyma version 2.x
+    deprecationWarning: Git Repository CR is deprecated and not supported in Function
+      v1alpha2.
     name: v1alpha1
     schema:
       openAPIV3Schema:
