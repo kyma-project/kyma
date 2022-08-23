@@ -1,5 +1,5 @@
 ---
-title: Expose a workload with multiple services
+title: Expose multiple services on the same host
 ---
 
 This tutorial shows how to expose a workload with multiple services that share the same host on different paths.
@@ -21,14 +21,15 @@ Follow the instruction to expose your unsecured instance of the HttpBin service 
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
-2. Expose the instance of the HttpBin service and the instance of the sample Function by creating an API Rule CR in your Namespace. If you don't want to use the Kyma domain but your custom domain, replace the following Kyma Gateway: kyma-system/kyma-gateway by your custom domain. Run:
+2. Expose the instance of the HttpBin service and the instance of the sample Function by creating an API Rule CR in your Namespace. If you don't want to use Kyma default gateway (kyma-system/kyma-gateway), replace it with your custom gateway. Run:
 
 ```yaml
+cat <<EOF | kubectl apply -f -
 apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: multiple-service
-  namespace: default
+  namespace: $NAMESPACE
   labels:
     app: multiple-service
     example: multiple-service
@@ -50,13 +51,14 @@ spec:
       service:
         name: function
         port: 8
+EOF
 ```
 
 
 3. Call the endpoints by sending `GET` requests to the HttpBin service and the sample function:
 
    ```bash
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/ip  # Send a GET request to the HttpBin
+   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/headers  # Send a GET request to the HttpBin
    curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  # Send a GET request to the Function
 
    ```
@@ -76,14 +78,15 @@ Follow the instruction to expose your unsecured instance of the HttpBin service 
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com
    ```
 
-2. Expose the instance of the HttpBin service and the instance of the sample Function by creating an API Rule CR in your Namespace. If you don't want to use the Kyma domain but your custom domain, replace the following Kyma Gateway: kyma-system/kyma-gateway by your custom domain. In the following example, the services definition at the **spec.rules** level will overwrite the service definition at the **spec.service** level. Run:
+2. Expose the instance of the HttpBin service and the instance of the sample Function by creating an API Rule CR in your Namespace. If you don't want to use Kyma default gateway (kyma-system/kyma-gateway), replace it with your custom gateway. In the following example, the services definition at the **spec.rules** level overwrites the service definition at the **spec.service** level. Run:
 
 ```yaml
+cat <<EOF | kubectl apply -f -
 apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: multiple-service
-  namespace: default
+  namespace: $NAMESPACE
   labels:
     app: multiple-service
     example: multiple-service
@@ -105,12 +108,13 @@ spec:
       service:
         name: function
         port: 80
+EOF
 ```
 
 3. Call the endpoints by sending `GET` requests to the HttpBin service and the sample function:
 
    ```bash
-   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/ip  # Send a GET request to the HttpBin
+   curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/headers  # Send a GET request to the HttpBin
    curl -ik -X GET https://multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function  # Send a GET request to the Function
 
    ```
