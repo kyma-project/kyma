@@ -20,7 +20,7 @@
     "op": "add",
     "path": "/spec/template/metadata/annotations",
     "value": {
-      "traffic.sidecar.istio.io/excludeOutboundPorts": "8080"
+      "traffic.sidecar.istio.io/excludeInboundPorts": "8080"
     }
   }
 ]

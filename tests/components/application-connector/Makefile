@@ -78,7 +78,7 @@ patch-for-validator-test:
 unpatch-after-validator-test:
 	kubectl rollout undo deployment/central-application-connectivity-validator
 
-test-connectivity-validator: patch-for-validator-test connectivity-validator-create-resources
+test-validator: patch-for-validator-test connectivity-validator-create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
@@ -97,6 +97,8 @@ test-connectivity-validator-debug: patch-for-validator-test connectivity-validat
 
 connectivity-validator-create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled
+
 	helm template resources/charts/application-connectivity-validator-test \
 		--set namespace=$(NAMESPACE) \
     | kubectl apply -f -
