@@ -49,8 +49,8 @@ func createRecordModifierFilter(pipeline *telemetryv1alpha1.LogPipeline) string 
 }
 
 func createLuaDedotFilter(logPipeline *telemetryv1alpha1.LogPipeline) string {
-	httpOut := logPipeline.Spec.Output.HTTP
-	if !httpOut.Host.IsDefined() || !httpOut.Dedot {
+	output := logPipeline.Spec.Output
+	if !output.HTTPDefined() || !output.HTTP.Dedot {
 		return ""
 	}
 
@@ -112,8 +112,7 @@ func validateCustomSections(pipeline *telemetryv1alpha1.LogPipeline) error {
 }
 
 func validateOutput(pipeline *telemetryv1alpha1.LogPipeline) error {
-	output := pipeline.Spec.Output
-	if len(output.Custom) == 0 && !output.HTTP.Host.IsDefined() && !output.Loki.URL.IsDefined() {
+	if !pipeline.Spec.Output.AnyDefined() {
 		return fmt.Errorf("output plugin not defined")
 	}
 	return nil

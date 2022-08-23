@@ -98,6 +98,40 @@ type Output struct {
 	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
 }
 
+func (o *Output) CustomDefined() bool {
+	return o.Custom != ""
+}
+
+func (o *Output) HTTPDefined() bool {
+	return o.HTTP != nil && o.HTTP.Host.IsDefined()
+}
+
+func (o *Output) LokiDefined() bool {
+	return o.Loki != nil && o.Loki.URL.IsDefined()
+}
+
+func (o *Output) AnyDefined() bool {
+	return o.pluginsDefined() > 0
+}
+
+func (o *Output) SingleDefined() bool {
+	return o.pluginsDefined() == 1
+}
+
+func (o *Output) pluginsDefined() int {
+	plugins := 0
+	if o.CustomDefined() {
+		plugins++
+	}
+	if o.HTTPDefined() {
+		plugins++
+	}
+	if o.LokiDefined() {
+		plugins++
+	}
+	return plugins
+}
+
 // FileMount provides file content to be consumed by a LogPipeline configuration
 type FileMount struct {
 	Name    string `json:"name,omitempty"`

@@ -83,21 +83,10 @@ func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipelin
 }
 
 func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
-	outputPluginCount := 0
-	if len(output.Custom) != 0 {
-		outputPluginCount++
-	}
-	if output.HTTP.Host.IsDefined() {
-		outputPluginCount++
-	}
-	if output.Loki.URL.IsDefined() {
-		outputPluginCount++
-	}
-
-	if outputPluginCount == 0 {
+	if !output.AnyDefined() {
 		return fmt.Errorf("no output is defined, you must define one output")
 	}
-	if outputPluginCount > 1 {
+	if !output.SingleDefined() {
 		return fmt.Errorf("multiple output plugins are defined, you must define only one output")
 	}
 	return nil

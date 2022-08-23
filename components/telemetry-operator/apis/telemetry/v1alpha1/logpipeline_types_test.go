@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -94,6 +95,63 @@ func TestSetCondition(t *testing.T) {
 			if !reflect.DeepEqual(test.status, test.expectedStatus) {
 				t.Errorf("%s: expected status: %v, got: %v", test.name, test.expectedStatus, test.status)
 			}
+		})
+	}
+}
+
+func TestOutput(t *testing.T) {
+	tests := []struct {
+		name           string
+		given          Output
+		expectedCustom bool
+		expectedHTTP   bool
+		expectedLoki   bool
+		expectedAny    bool
+		expectedSingle bool
+	}{
+		{
+			name:           "custom",
+			given:          Output{Custom: "name: null"},
+			expectedCustom: true,
+			expectedAny:    true,
+			expectedSingle: true,
+		},
+		{
+			name:           "http",
+			given:          Output{HTTP: &HTTPOutput{Host: ValueType{Value: "localhost"}}},
+			expectedHTTP:   true,
+			expectedAny:    true,
+			expectedSingle: true,
+		},
+		{
+			name:           "loki",
+			given:          Output{Loki: &LokiOutput{URL: ValueType{Value: "localhost"}}},
+			expectedLoki:   true,
+			expectedAny:    true,
+			expectedSingle: true,
+		},
+		{
+			name:           "invalid: none defined",
+			given:          Output{},
+			expectedAny:    false,
+			expectedSingle: false,
+		},
+		{
+			name:           "invalid: multiple defined",
+			given:          Output{Custom: "name: null", Loki: &LokiOutput{URL: ValueType{Value: "localhost"}}},
+			expectedCustom: true,
+			expectedLoki:   true,
+			expectedAny:    true,
+			expectedSingle: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			require.Equal(t, test.expectedCustom, test.given.CustomDefined())
+			require.Equal(t, test.expectedHTTP, test.given.HTTPDefined())
+			require.Equal(t, test.expectedLoki, test.given.LokiDefined())
+			require.Equal(t, test.expectedAny, test.given.AnyDefined())
 		})
 	}
 }
