@@ -39,6 +39,8 @@ test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resource
 create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled
+
 	helm template resources/charts/gateway-test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
@@ -76,7 +78,6 @@ test-compass-runtime-agent: test-compass-runtime-agent-debug clean-compass-runti
 test-compass-runtime-agent-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace $(NAMESPACE) istio-injection=enabled
 
 	helm template resources/charts/compass-runtime-agent-test \
     	--set namespace=$(NAMESPACE) \
