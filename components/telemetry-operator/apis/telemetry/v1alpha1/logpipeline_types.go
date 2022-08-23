@@ -93,9 +93,9 @@ type TLSConfig struct {
 
 // Output describes a Fluent Bit output configuration section
 type Output struct {
-	Custom string     `json:"custom,omitempty"`
-	HTTP   HTTPOutput `json:"http,omitempty"`
-	Loki   LokiOutput `json:"grafana-loki,omitempty"`
+	Custom string      `json:"custom,omitempty"`
+	HTTP   *HTTPOutput `json:"http,omitempty"`
+	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration

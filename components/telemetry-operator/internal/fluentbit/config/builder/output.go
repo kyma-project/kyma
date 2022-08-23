@@ -16,11 +16,11 @@ func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config Pipelin
 	}
 
 	if output.HTTP.Host.IsDefined() {
-		return generateHTTPOutput(&output.HTTP, config.FsBufferLimit, pipeline.Name)
+		return generateHTTPOutput(output.HTTP, config.FsBufferLimit, pipeline.Name)
 	}
 
 	if output.Loki.URL.IsDefined() {
-		return generateLokiOutput(&output.Loki, config.FsBufferLimit, pipeline.Name)
+		return generateLokiOutput(output.Loki, config.FsBufferLimit, pipeline.Name)
 	}
 
 	return ""

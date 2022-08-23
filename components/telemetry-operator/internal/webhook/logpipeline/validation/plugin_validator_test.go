@@ -212,7 +212,7 @@ func TestContainsMultipleOutputPlugins(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
 				Custom: `Name	http`,
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
 					},
@@ -284,14 +284,14 @@ func TestValidLokiURL(t *testing.T) {
 }
 
 func TestValidateHTTPOutput(t *testing.T) {
-	output := telemetryv1alpha1.HTTPOutput{
+	output := &telemetryv1alpha1.HTTPOutput{
 		Host: telemetryv1alpha1.ValueType{
 			Value: "localhost",
 		},
 	}
 	require.NoError(t, validateHTTPOutput(output))
 
-	output = telemetryv1alpha1.HTTPOutput{
+	output = &telemetryv1alpha1.HTTPOutput{
 		Host: telemetryv1alpha1.ValueType{
 			Value: "localhost",
 		},
@@ -299,7 +299,7 @@ func TestValidateHTTPOutput(t *testing.T) {
 	}
 	require.NoError(t, validateHTTPOutput(output))
 
-	output = telemetryv1alpha1.HTTPOutput{
+	output = &telemetryv1alpha1.HTTPOutput{
 		Host: telemetryv1alpha1.ValueType{
 			Value: "http://localhost",
 		},
@@ -309,7 +309,7 @@ func TestValidateHTTPOutput(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid hostname")
 
-	output = telemetryv1alpha1.HTTPOutput{
+	output = &telemetryv1alpha1.HTTPOutput{
 		Host: telemetryv1alpha1.ValueType{
 			Value: "localhost",
 		},
@@ -319,7 +319,7 @@ func TestValidateHTTPOutput(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "uri has to start with /")
 
-	output = telemetryv1alpha1.HTTPOutput{
+	output = &telemetryv1alpha1.HTTPOutput{
 		URI: "/my-path",
 	}
 	err = validateHTTPOutput(output)

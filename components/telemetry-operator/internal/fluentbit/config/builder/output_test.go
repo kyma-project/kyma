@@ -49,7 +49,7 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
@@ -92,7 +92,7 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
@@ -139,7 +139,7 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				Loki: telemetryv1alpha1.LokiOutput{
+				Loki: &telemetryv1alpha1.LokiOutput{
 					URL: telemetryv1alpha1.ValueType{
 						Value: "http:loki:3100",
 					},
