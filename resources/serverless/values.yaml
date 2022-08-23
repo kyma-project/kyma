@@ -58,11 +58,10 @@ tests:
 global:
   domainName: "kyma.example.com"
   commonLabels:
-    app: '{{ template "name" . }}'
-    version: "{{ .Values.global.images.function_controller.version }}"
-    app.kubernetes.io/name: '{{ template "name" . }}'
-    app.kubernetes.io/component: '{{ template "fullname" . }}-controller'
+    app: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "{{ .Release.Name }}"
     app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/component: '{{ template "fullname" . }}-controller'
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
   dockerServicePort: 5000
   ingress:
