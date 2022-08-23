@@ -98,10 +98,10 @@ type ResourceRequirements struct {
 
 type ScaleConfig struct {
 	// +kubebuilder:validation:Minimum:=1
-	MinReplicas *int32 `json:"minReplicas,omitempty"`
+	MinReplicas *int32 `json:"minReplicas"`
 
 	// +kubebuilder:validation:Minimum:=1
-	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+	MaxReplicas *int32 `json:"maxReplicas"`
 }
 
 type ResourceConfiguration struct {

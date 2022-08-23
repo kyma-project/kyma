@@ -15,7 +15,7 @@ describe('Provision SKR instance', function() {
 
   let skr;
   let options = undefined;
-  let shootInfo = undefined;
+  let isSKRProvisioned = false;
 
   before('Gather default options', async function() {
     options = gatherOptions(); // with default values
@@ -26,7 +26,7 @@ describe('Provision SKR instance', function() {
     console.log(`SKR Instance ID: ${options.instanceID}`);
     skr = await getOrProvisionSKR(options, false, provisioningTimeout);
     options = skr.options;
-    shootInfo = skr.shoot;
+    isSKRProvisioned = true;
   });
 
   after('Print Shoot Info', async function() {
@@ -37,9 +37,6 @@ describe('Provision SKR instance', function() {
     if (options && options.instanceID) {
       console.log(`SPINNAKER_PROPERTY_INSTANCE_ID=${options.instanceID}`);
     }
-
-    if (shootInfo) {
-      console.log(`SPINNAKER_PROPERTY_PROVISIONED=true`);
-    }
+    console.log(`SPINNAKER_PROPERTY_PROVISIONED=${isSKRProvisioned}`);
   });
 });

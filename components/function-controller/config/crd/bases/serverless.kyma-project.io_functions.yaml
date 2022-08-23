@@ -36,7 +36,7 @@ spec:
       name: Age
       type: date
     deprecated: true
-    deprecationWarning: use v1alpha2 instead
+    deprecationWarning: Function v1alpha1 is deprecated. Use v1alpha2 instead
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -543,6 +543,9 @@ spec:
                     format: int32
                     minimum: 1
                     type: integer
+                required:
+                - maxReplicas
+                - minReplicas
                 type: object
               source:
                 properties:
