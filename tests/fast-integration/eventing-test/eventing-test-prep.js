@@ -1,5 +1,4 @@
 const axios = require('axios');
-const {expect} = require('chai');
 const https = require('https');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
@@ -10,6 +9,7 @@ const {
   scenarioName,
   testNamespace,
   mockNamespace,
+  kymaVersion,
   isSKR,
   testCompassFlow,
   skrInstanceId,
@@ -21,7 +21,6 @@ const {
   director,
   shootName,
   cleanupTestingResources,
-  updateShootName,
 } = require('./utils');
 const {eventMeshSecretFilePath} = require('./common/common');
 const {
@@ -34,7 +33,6 @@ const {
   error,
   debug,
   createEventingBackendK8sSecret,
-  isK8sClientInitialized,
 } = require('../utils');
 const {
   addScenarioInCompass,
@@ -50,10 +48,33 @@ describe('Eventing tests preparation', function() {
   it('Print test initial configs', async function() {
     debug(`Mock namespace: ${mockNamespace}`);
     debug(`Test namespace: ${testNamespace}`);
+    debug(`Kyma version: ${kymaVersion}`);
     debug(`Is SKR cluster: ${isSKR}`);
     debug(`SKR instance Id: ${skrInstanceId}`);
     debug(`SKR shoot name: ${shootName}`);
     debug(`Test Compass flow enabled: ${testCompassFlow}`);
+  });
+
+  it('Prepare SKR Kubeconfig if needed', async function() {
+    // Skip this step if it is not a SKR cluster
+    if (!isSKR) {
+      this.skip();
+    }
+
+    if (!skrInstanceId) {
+      info(`Skipping fetching SKR kubeconfig because skrInstanceId is not set.`);
+      this.skip();
+    }
+
+    // 'skr-test/helpers' initializes KEB clients on import, that is why it is imported only if needed
+    const {getSKRConfig} = require('../skr-test/helpers');
+    const {initK8sConfig} = require('../skr-test/helpers');
+
+    debug(`Fetching SKR config for Instance Id: ${skrInstanceId}`);
+    const shoot = await getSKRConfig(skrInstanceId);
+
+    debug('Initiating SKR K8s config...');
+    await initK8sConfig(shoot);
   });
 
   it('Prepare EventMesh secret', async function() {
@@ -72,34 +93,6 @@ describe('Eventing tests preparation', function() {
     setEventMeshSourceNamespace(eventMeshInfo['namespace']);
   });
 
-  it('Prepare SKR Kubeconfig if needed', async function() {
-    // Skip this step if it is not a SKR cluster
-    if (!isSKR) {
-      this.skip();
-    }
-
-    if (isK8sClientInitialized()) {
-      info(`Skipping fetching SKR kubeconfig because k8s client is already initialized.`);
-      this.skip();
-    }
-
-    // check if skrInstanceId is provided
-    expect(skrInstanceId).to.not.be.empty;
-
-    // 'skr-test/helpers' initializes KEB clients on import, that is why it is imported only if needed
-    const {getSKRConfig} = require('../skr-test/helpers');
-    const {initK8sConfig} = require('../skr-test/helpers');
-
-    debug(`Fetching SKR config for Instance Id: ${skrInstanceId}`);
-    const shoot = await getSKRConfig(skrInstanceId);
-
-    debug('Initiating SKR K8s config...');
-    await initK8sConfig(shoot);
-
-    debug(`Setting shoot name to: ${shoot.name}`);
-    updateShootName(shoot.name);
-  });
-
   it('Prepare assets without Compass flow', async function() {
     // Skip this step if compass flow is enabled
     if (testCompassFlow) {
@@ -107,7 +100,7 @@ describe('Eventing tests preparation', function() {
     }
 
     // Deploy Commerce mock application, function and subscriptions for tests
-    await prepareAssetsForOSSTests();
+    await prepareAssetsWithoutCompassFlow();
   });
 
   it('Prepare assets with Compass flow', async function() {
@@ -117,7 +110,7 @@ describe('Eventing tests preparation', function() {
     }
 
     // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
-    await prepareAssetsForSKRTests();
+    await prepareAssetsWithCompassFlow();
   });
 
   afterEach(async function() {
@@ -128,8 +121,8 @@ describe('Eventing tests preparation', function() {
   });
 
   // // **** Helper functions ****
-  // prepareAssetsForOSSTests - Sets up CommerceMost for the OSS
-  async function prepareAssetsForOSSTests() {
+  // prepareAssetsWithoutCompassFlow - Sets up test assets without compass flow
+  async function prepareAssetsWithoutCompassFlow() {
     debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');
     await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
       error(err); // first error is logged
@@ -137,8 +130,8 @@ describe('Eventing tests preparation', function() {
     });
   }
 
-  // prepareAssetsForSKRTests - Sets up CommerceMost for the SKR
-  async function prepareAssetsForSKRTests() {
+  // prepareAssetsWithCompassFlow - Sets up test assets with compass flow
+  async function prepareAssetsWithCompassFlow() {
     debug('Preparing CommerceMock/In-cluster test fixtures with compass flow on SKR');
 
     const skrInfo = await gardener.getShoot(shootName);
@@ -155,7 +148,9 @@ describe('Eventing tests preparation', function() {
     if (compassScenarioAlreadyExist) {
       debug(`Compass scenario with the name ${scenarioName} already exist, do not register it again`);
     } else {
-      await setupCompassScenario();
+      debug('Assigning SKR to scenario in Compass');
+      // Create a new scenario (systems/formations) in compass for this test
+      await addScenarioInCompass(director, scenarioName);
     }
 
     // check if assigning the runtime to the scenario is needed
@@ -174,12 +169,5 @@ describe('Eventing tests preparation', function() {
         testNamespace,
         compassScenarioAlreadyExist,
     );
-  }
-
-  // setupCompassScenario adds a compass scenario
-  async function setupCompassScenario() {
-    debug('Assigning SKR to scenario in Compass');
-    // Create a new scenario (systems/formations) in compass for this test
-    await addScenarioInCompass(director, scenarioName);
   }
 });

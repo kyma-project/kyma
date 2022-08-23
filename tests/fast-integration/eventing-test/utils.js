@@ -8,13 +8,13 @@ const {
   getEnvOrThrow,
   deleteEventingBackendK8sSecret,
   getShootNameFromK8sServerUrl,
-  isK8sClientInitialized,
   listPods,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {eventMeshSecretFilePath} = require('./common/common');
+const kymaVersion = process.env.KYMA_VERSION || '';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
@@ -42,18 +42,11 @@ let director = null;
 let shootName = null;
 if (isSKR) {
   gardener = new GardenerClient(GardenerConfig.fromEnv()); // create gardener client
-
-  if (isK8sClientInitialized) {
-    shootName = getShootNameFromK8sServerUrl();
-  }
+  shootName = getShootNameFromK8sServerUrl();
 
   if (testCompassFlow) {
     director = new DirectorClient(DirectorConfig.fromEnv()); // director client for Compass
   }
-}
-
-function updateShootName(name) {
-  shootName = name;
 }
 
 // cleans up all the test resources including the compass scenario
@@ -148,6 +141,7 @@ module.exports = {
   scenarioName,
   testNamespace,
   mockNamespace,
+  kymaVersion,
   isSKR,
   skrInstanceId,
   testCompassFlow,
@@ -166,5 +160,4 @@ module.exports = {
   skipAtLeastOnceDeliveryTest,
   isJetStreamEnabled,
   subscriptionNames,
-  updateShootName,
 };
