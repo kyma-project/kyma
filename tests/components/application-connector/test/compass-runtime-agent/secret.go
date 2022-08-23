@@ -9,10 +9,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
-	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -47,12 +43,7 @@ func newSecretsInterface(namespace string) (v1.SecretInterface, error) {
 	if err != nil {
 		logrus.Warnf("Failed to read in cluster config: %s", err.Error())
 		logrus.Info("Trying to initialize with local config")
-		home := homedir.HomeDir()
-		k8sConfPath := filepath.Join(home, ".kube", "config")
-		k8sConfig, err = clientcmd.BuildConfigFromFlags("", k8sConfPath)
-		if err != nil {
-			return nil, errors.Errorf("failed to read k8s in-cluster configuration, %s", err.Error())
-		}
+		return nil, errors.Wrap(err, "Failed to read in cluster config")
 	}
 
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
@@ -99,7 +90,7 @@ func (c *client) GetSecret() (secretData, error) {
 }
 
 func SecretDataCompare(actual, expected string, t *testing.T) bool {
-	expectedSecretRepo, _ := initalizeSecretInterface(os.Getenv("NAMESPACE"))
+	expectedSecretRepo, _ := initalizeSecretInterface("test") //TODO hardcoded, tried os.Getenv() didn't work
 	expectedSecretClient := NewClient(expectedSecretRepo, expected)
 
 	expectedSecret, err := expectedSecretClient.GetSecret()
