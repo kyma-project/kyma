@@ -56,7 +56,7 @@ func (s *Helper) FetchSecret(ctx context.Context, fromType telemetryv1alpha1.Val
 	secretKey := fromType.SecretKey
 	var referencedSecret corev1.Secret
 	if err := s.client.Get(ctx, types.NamespacedName{Name: secretKey.Name, Namespace: secretKey.Namespace}, &referencedSecret); err != nil {
-		log.Error(err, "Failed reading secret '%s' from namespace '%s'", secretKey.Name, secretKey.Namespace)
+		log.Error(err, fmt.Sprintf("Failed reading secret '%s' from namespace '%s'", secretKey.Name, secretKey.Namespace))
 		return nil, err
 	}
 	if _, ok := referencedSecret.Data[secretKey.Key]; !ok {

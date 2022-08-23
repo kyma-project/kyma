@@ -83,3 +83,20 @@ func (sb *SectionBuilder) Build() string {
 	sb.builder.WriteByte('\n')
 	return sb.builder.String()
 }
+
+func parseMultiline(section string) []config.Parameter {
+	var result []config.Parameter
+	for _, line := range strings.Split(section, "\n") {
+		line = strings.TrimSpace(line)
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			continue
+		}
+		key, value, found := strings.Cut(line, " ")
+		if !found {
+			continue
+		}
+		param := config.Parameter{Key: strings.ToLower(strings.TrimSpace(key)), Value: strings.TrimSpace(value)}
+		result = append(result, param)
+	}
+	return result
+}

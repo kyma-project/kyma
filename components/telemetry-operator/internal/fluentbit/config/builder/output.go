@@ -5,8 +5,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 )
@@ -95,23 +93,6 @@ func generateLokiOutput(lokiOutput *telemetryv1alpha1.LokiOutput, fsBufferLimit 
 		sb.AddConfigParam("removeKeys", str)
 	}
 	return sb.Build()
-}
-
-func parseMultiline(section string) []config.Parameter {
-	var result []config.Parameter
-	for _, line := range strings.Split(section, "\n") {
-		line = strings.TrimSpace(line)
-		if len(line) == 0 || strings.HasPrefix(line, "#") {
-			continue
-		}
-		key, value, found := strings.Cut(line, " ")
-		if !found {
-			continue
-		}
-		param := config.Parameter{Key: strings.ToLower(strings.TrimSpace(key)), Value: strings.TrimSpace(value)}
-		result = append(result, param)
-	}
-	return result
 }
 
 func concatenateLabels(labels map[string]string) string {
