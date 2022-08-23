@@ -30,7 +30,10 @@ spec:
         {{ include "tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 8 }}
+        app: {{ template "webhook.fullname" . }}
+        app.kubernetes.io/name: {{ template "webhook.fullname" . }}
+        app.kubernetes.io/instance: "{{ .Release.Name }}"
+      role: webhook
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       volumes:

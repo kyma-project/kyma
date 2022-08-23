@@ -8,10 +8,11 @@ image:
   pullPolicy: IfNotPresent
 
 commonLabels:
-  app: '{{ template "webhook.fullname" . }}'
-  app.kubernetes.io/name: '{{ template "webhook.fullname" . }}'
+  app: "{{ .Release.Name }}"
+  app.kubernetes.io/name: "{{ .Release.Name }}"
   app.kubernetes.io/instance: "{{ .Release.Name }}"
-  role: webhook
+  app.kubernetes.io/component: '{{ template "webhook.fullname" . }}'
+  app.kubernetes.io/version: "{{ .Values.global.images.function_webhook.version }}"
 
 deployment:
   replicas: 1
