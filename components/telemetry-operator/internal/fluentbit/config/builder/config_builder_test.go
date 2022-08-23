@@ -142,3 +142,18 @@ func TestMergeSectionsConfig(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }
+
+func TestMergeSectionsConfigWithMissingOutput(t *testing.T) {
+	logPipeline := &telemetryv1alpha1.LogPipeline{}
+	logPipeline.Name = "foo"
+	pipelineConfig := PipelineConfig{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+
+	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	require.Error(t, err)
+	require.Empty(t, actual)
+}

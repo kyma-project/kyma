@@ -19,7 +19,12 @@ type PipelineConfig struct {
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeSectionsConfig(pipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
-	err := validateCustomSections(pipeline)
+	err := validateOutput(pipeline)
+	if err != nil {
+		return "", err
+	}
+
+	err = validateCustomSections(pipeline)
 	if err != nil {
 		return "", err
 	}
@@ -102,6 +107,14 @@ func validateCustomSections(pipeline *telemetryv1alpha1.LogPipeline) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func validateOutput(pipeline *telemetryv1alpha1.LogPipeline) error {
+	output := pipeline.Spec.Output
+	if len(output.Custom) == 0 && !output.HTTP.Host.IsDefined() && !output.Loki.URL.IsDefined() {
+		return fmt.Errorf("output plugin not defined")
 	}
 	return nil
 }
