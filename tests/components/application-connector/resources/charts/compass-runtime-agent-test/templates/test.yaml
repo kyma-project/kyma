@@ -11,5 +11,5 @@ spec:
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.compassTest) }}
           imagePullPolicy: Always
       restartPolicy: Never
-      serviceAccountName: test-command
+      serviceAccountName: {{ .Values.serviceAccountName }}
   backoffLimit: 0
