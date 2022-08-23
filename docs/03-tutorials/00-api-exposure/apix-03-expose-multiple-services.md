@@ -50,7 +50,7 @@ spec:
         - handler: noop
       service:
         name: function
-        port: 8
+        port: 80
 EOF
 ```
 
