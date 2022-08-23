@@ -1,0 +1,48 @@
+## Kyma TLS Gateway
+{{- if  and (.Values.global.mtlsGateway.tlsCrt) (.Values.global.mtlsGateway.tlsKey) -}}
+---
+# User-provided TLS always take precedence
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.certificates.kymaMtls.name }}
+  namespace: {{ .Values.certificates.kymaMtls.namespace }}
+type: Opaque
+data:
+  tls.crt: {{ .Values.global.mtlsGateway.tlsCrt }}
+  tls.key: {{ .Values.global.mtlsGateway.tlsKey }}
+{{- else if not (.Values.global.domainName) -}}
+---
+# No user-provided TLS data and no domain name. Fallback to default static certificate
+# for mtls.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.certificates.kymaMtls.name }}
+  namespace: {{ .Values.certificates.kymaMtls.namespace }}
+type: Opaque
+data:
+  tls.crt: {{ .Values.certificates.kymaMtls.default.tlsCrt }}
+  tls.key: {{ .Values.certificates.kymaMtls.default.tlsKey }}
+{{- else -}}
+---
+# Domain is given, but not TLS data. Generate the `Certificate` object
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: kyma-mtls-cert
+  namespace: {{ .Values.certificates.kymaMtls.namespace }}
+spec:
+  commonName: "*.mtls.{{ .Values.global.domainName }}"
+  secretName: {{ .Values.certificates.kymaMtls.name }}
+{{- end -}}
+---
+# Create cacert secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.certificates.kymaMtls.name }}-cacert
+  namespace: {{ .Values.certificates.kymaMtls.namespace }}
+type: Opaque
+data:
+  cacert: {{ .Values.global.mtlsGateway.cacertBundle | default .Values.certificates.kymaMtls.cacertBundle }}

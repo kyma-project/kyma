@@ -12,3 +12,6 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+    mtlsGateway:
+      name: kyma-mtls-gateway
+      namespace: kyma-system
