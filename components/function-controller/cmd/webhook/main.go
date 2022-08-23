@@ -116,12 +116,12 @@ func main() {
 		os.Exit(5)
 	}
 
-	validation := &ctrlwebhook.Admission{
+	validating := &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingHook(validationConfigv1alpha1, validationConfigv1alpha2, mgr.GetClient()),
 	}
-	whs.Register(resources.FunctionValidationWebhookPath, validation)
-	if err := validation.InjectLogger(logrZap.WithName("validation-webhook")); err != nil {
-		log.Error(err, "failed to inject log into validation webhook")
+	whs.Register(resources.FunctionValidationWebhookPath, validating)
+	if err := validating.InjectLogger(logrZap.WithName("validating-webhook")); err != nil {
+		log.Error(err, "failed to inject log into validating webhook")
 		os.Exit(5)
 	}
 
