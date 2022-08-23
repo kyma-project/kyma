@@ -1,13 +1,12 @@
-package fluentbit
+package config
 
 import (
 	"fmt"
 	"strings"
 )
 
-func ParseSection(section string) (map[string]string, error) {
-	result := make(map[string]string)
-
+func ParseCustomSection(section string) (ParameterList, error) {
+	var params ParameterList
 	for _, line := range strings.Split(section, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 || strings.HasPrefix(line, "#") {
@@ -18,7 +17,10 @@ func ParseSection(section string) (map[string]string, error) {
 		if !found {
 			return nil, fmt.Errorf("invalid line: %s", line)
 		}
-		result[strings.ToLower(strings.TrimSpace(key))] = strings.TrimSpace(value)
+		params.Add(Parameter{
+			Key:   strings.ToLower(strings.TrimSpace(key)),
+			Value: strings.TrimSpace(value),
+		})
 	}
-	return result, nil
+	return params, nil
 }

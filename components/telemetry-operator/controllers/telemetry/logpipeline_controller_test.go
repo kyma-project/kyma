@@ -41,46 +41,46 @@ var _ = Describe("LogPipeline controller", func() {
 		interval              = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
-    Emitter_Name          log-pipeline
-    Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $log "^.*$" log-pipeline.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          log-pipeline
+    emitter_storage.type  filesystem
+    rule                  $log "^.*$" log-pipeline.$TAG true
 
 [FILTER]
-    name                  record_modifier
-    match                 log-pipeline.*
-    Record                cluster_identifier ${KUBERNETES_SERVICE_HOST}
+    name   record_modifier
+    match  log-pipeline.*
+    record cluster_identifier ${KUBERNETES_SERVICE_HOST}
 
 [FILTER]
+    name  grep
     match log-pipeline.*
-    name grep
     regex $kubernetes['labels']['app'] my-deployment
 
 [FILTER]
-    name                  nest
-    match                 log-pipeline.*
-    operation             lift
-    nested_under          kubernetes
-    add_prefix            __k8s__
+    name         nest
+    match        log-pipeline.*
+    add_prefix   __k8s__
+    nested_under kubernetes
+    operation    lift
 
 [FILTER]
-    name                  record_modifier
-    match                 log-pipeline.*
-    remove_key            __k8s__annotations
+    name       record_modifier
+    match      log-pipeline.*
+    remove_key __k8s__annotations
 
 [FILTER]
-    name                  nest
-    match                 log-pipeline.*
-    operation             nest
-    wildcard              __k8s__*
-    nest_under            kubernetes
-    remove_prefix         __k8s__
+    name          nest
+    match         log-pipeline.*
+    nest_under    kubernetes
+    operation     nest
+    remove_prefix __k8s__
+    wildcard      __k8s__*
 
 [OUTPUT]
-    match log-pipeline.*
-    name stdout
+    name                     stdout
+    match                    log-pipeline.*
     storage.total_limit_size 1G`
 
 	var expectedSecret = make(map[string][]byte)

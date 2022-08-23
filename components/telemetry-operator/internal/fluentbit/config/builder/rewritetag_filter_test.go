@@ -1,4 +1,4 @@
-package fluentbit
+package builder
 
 import (
 	"testing"
@@ -30,15 +30,15 @@ func TestCreateRewriteTagFilterIncludeNamespaces(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
 
 `
-	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
+	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
 
@@ -62,15 +62,15 @@ func TestCreateRewriteTagFilterExcludeNamespaces(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
+	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
 
@@ -94,16 +94,16 @@ func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
-    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
+	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
 
@@ -127,16 +127,16 @@ func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
-    Rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
+	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
 
@@ -162,15 +162,15 @@ func TestCreateRewriteTagFilterExcludeNamespacesAndExcludeContainers(t *testing.
 	}
 
 	expected := `[FILTER]
-    Name                  rewrite_tag
-    Match                 kube.*
-    Emitter_Name          logpipeline1
-    Emitter_Storage.type  filesystem
-    Emitter_Mem_Buf_Limit 10M
-    Rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
-    Rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1
+    emitter_storage.type  filesystem
+    rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
 `
-	actual := CreateRewriteTagFilter(pipelineConfig, logPipeline)
+	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }

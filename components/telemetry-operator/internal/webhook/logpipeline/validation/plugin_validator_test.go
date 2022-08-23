@@ -12,10 +12,9 @@ import (
 
 func TestValidateEmpty(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{Spec: telemetryv1alpha1.LogPipelineSpec{}}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	require.Equal(t, "error validating output plugin: no output is defined, you must define one output", err.Error())
@@ -35,10 +34,9 @@ func TestValidateForbiddenFilters(t *testing.T) {
 			},
 		},
 	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{"lua"}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "plugin 'lua' is not supported. ")
@@ -56,10 +54,9 @@ func TestValidateFiltersContainMatchCondition(t *testing.T) {
 			},
 		},
 	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are forbidden")
@@ -74,10 +71,9 @@ func TestValidateForbiddenOutputs(t *testing.T) {
 			},
 		},
 	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{"loki", "http"})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "plugin 'loki' is not supported. ")
@@ -93,10 +89,9 @@ func TestValidateOutputContainsMatchCondition(t *testing.T) {
 			},
 		},
 	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "plugin 'es' contains match condition. Match conditions are forbidden")
@@ -111,10 +106,9 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 			},
 		},
 	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{"loki", "http"})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "configuration section does not have name attribute")
@@ -136,10 +130,9 @@ func TestValidateOutputsAndFiltersContainMatchCondition(t *testing.T) {
 			},
 		},
 	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "plugin 'grep' contains match condition. Match conditions are forbidden")
@@ -155,10 +148,9 @@ func TestValidatePipelineCreation(t *testing.T) {
 		},
 	}
 	logPipeline.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.NoError(t, err)
 }
@@ -175,10 +167,9 @@ func TestDeniedFilterPlugins(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	logPipelines := &telemetryv1alpha1.LogPipelineList{}
 
 	sut := NewPluginValidator([]string{"lua", "multiline"}, []string{})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "error validating filter plugins: plugin 'lua' is not supported. ")
@@ -195,10 +186,9 @@ func TestDeniedOutputPlugins(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	logPipelines := &telemetryv1alpha1.LogPipelineList{}
 
 	sut := NewPluginValidator([]string{}, []string{"lua", "multiline"})
-	err := sut.Validate(logPipeline, logPipelines)
+	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "error validating output plugin: plugin 'lua' is not supported. ")
@@ -209,10 +199,9 @@ func TestContainsNoOutputPlugins(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{},
 		}}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	result := sut.Validate(logPipeline, logPipelines)
+	result := sut.Validate(logPipeline)
 
 	require.Error(t, result)
 	require.Contains(t, result.Error(), "no output is defined, you must define one output")
@@ -230,10 +219,9 @@ func TestContainsMultipleOutputPlugins(t *testing.T) {
 				},
 			},
 		}}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{*logPipeline}}
 
 	sut := NewPluginValidator([]string{}, []string{})
-	result := sut.Validate(logPipeline, logPipelines)
+	result := sut.Validate(logPipeline)
 
 	require.Error(t, result)
 	require.Contains(t, result.Error(), "multiple output plugins are defined, you must define only one output")
