@@ -38,20 +38,20 @@ name                  nest
 match                 %s.*
 operation             lift
 nested_under          kubernetes
-add_prefix            __k8s__
+add_prefix            __kyma__
 `
 	dropKubernetesKeyTemplate string = `
 name                  record_modifier
 match                 %s.*
-remove_key            __k8s__%s
+remove_key            __kyma__%s
 `
 	nestKubernetesKeyTemplate string = `
 name                  nest
 match                 %s.*
 operation             nest
-wildcard              __k8s__*
+wildcard              __kyma__*
 nest_under            kubernetes
-remove_prefix         __k8s__
+remove_prefix         __kyma__
 `
 )
 

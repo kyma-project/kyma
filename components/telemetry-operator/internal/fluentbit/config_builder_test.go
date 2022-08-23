@@ -79,25 +79,25 @@ func TestGenerateApplicationFilterDropAll(t *testing.T) {
     match                 test-logpipeline.*
     operation             lift
     nested_under          kubernetes
-    add_prefix            __k8s__
+    add_prefix            __kyma__
 
 [FILTER]
     name                  record_modifier
     match                 test-logpipeline.*
-    remove_key            __k8s__annotations
+    remove_key            __kyma__annotations
 
 [FILTER]
     name                  record_modifier
     match                 test-logpipeline.*
-    remove_key            __k8s__labels
+    remove_key            __kyma__labels
 
 [FILTER]
     name                  nest
     match                 test-logpipeline.*
     operation             nest
-    wildcard              __k8s__*
+    wildcard              __kyma__*
     nest_under            kubernetes
-    remove_prefix         __k8s__
+    remove_prefix         __kyma__
 
 `
 
