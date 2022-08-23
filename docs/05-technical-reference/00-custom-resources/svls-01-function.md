@@ -113,7 +113,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
 | **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
-| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
+| **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
 | **spec.source**                               |      Yes       | Defines the Function's source code or Git repository. Only one source configuration is allowed. |
 | **spec.source.inline**                        |       No       | Defines Function as the inline Function. |
