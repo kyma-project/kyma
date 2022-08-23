@@ -30,7 +30,7 @@ func TestValidatorSuite(t *testing.T) {
 
 func (vs *ValidatorSuite) TestGoodCert() {
 	cli := httpd.NewCli(vs.T())
-	url := validatorURL("event-test", "events")
+	url := validatorURL("event-test", "v2/events")
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
@@ -44,7 +44,7 @@ func (vs *ValidatorSuite) TestGoodCert() {
 
 func (vs *ValidatorSuite) TestBadCert() {
 	cli := httpd.NewCli(vs.T())
-	url := validatorURL("event-test", "events")
+	url := validatorURL("event-test", "v2/events")
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	vs.Nil(err)
