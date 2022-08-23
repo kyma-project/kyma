@@ -115,7 +115,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.labels**                          |       No       | Specifies the Function's Pod labels.    |
 | **spec.runtime**                         |      Yes       | Specifies the runtime of the Function. The available values are `nodejs14`, `nodejs16`, and `python39`. |
 | **spec.runtimeImageOverride**                 |       No       | Specifies the runtimes image which must be used instead of the default one. |
-| **spec.source**                               |      Yes       | Contains the function specification. Only one specification is allowed. |
+| **spec.source**                               |      Yes       | Contains the Function's specification. Only one specification is allowed. |
 | **spec.source.inline**                        |       No       | Defines Function as the inline Function. |
 | **spec.source.inline.dependencies**           |       No       | Specifies the Function's dependencies. |
 | **spec.source.inline.source**                 |      Yes       | Provides the Function's full source code. |
