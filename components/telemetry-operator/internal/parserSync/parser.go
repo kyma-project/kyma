@@ -26,10 +26,6 @@ type LogParserSyncer struct {
 	DaemonSetConfig FluentBitDaemonSetConfig
 	Utils           *kubernetes.Utils
 }
-type Result struct {
-	ConfigurationChanged bool
-	LogParserChanged     bool
-}
 
 func NewLogParserSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
@@ -42,14 +38,14 @@ func NewLogParserSyncer(client client.Client,
 }
 
 // SyncParsersConfigMap synchronizes LogParser with ConfigMap of DaemonSetUtils parsers.
-func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (Result, error) {
+func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
-	var result Result
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
-		return result, err
+		return false, err
 	}
 
+	changed := false
 	var logParsers telemetryv1alpha1.LogParserList
 
 	if logParser.DeletionTimestamp != nil {
@@ -58,7 +54,7 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 
 			err = s.List(ctx, &logParsers)
 			if err != nil {
-				return result, err
+				return false, err
 			}
 
 			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
@@ -70,13 +66,12 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 				cm.Data = data
 			}
 			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
-			result.ConfigurationChanged = true
-			result.LogParserChanged = true
+			changed = true
 		}
 	} else {
 		err = s.List(ctx, &logParsers)
 		if err != nil {
-			return result, err
+			return false, err
 		}
 
 		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
@@ -84,28 +79,26 @@ func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *t
 			data := make(map[string]string)
 			data[parsersConfigMapKey] = fluentBitParsersConfig
 			cm.Data = data
-			result.ConfigurationChanged = true
+			changed = true
 		} else {
 			if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
 				cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
-				result.ConfigurationChanged = true
+				changed = true
 			}
 		}
 		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			result.LogParserChanged = true
+			changed = true
 		}
 	}
 
-	if !result.LogParserChanged && !result.ConfigurationChanged {
-		return result, nil
+	if !changed {
+		return false, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		result.LogParserChanged = false
-		result.ConfigurationChanged = false
-		return result, err
+		return false, err
 	}
 
-	return result, nil
+	return changed, nil
 }
