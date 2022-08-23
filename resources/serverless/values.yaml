@@ -61,9 +61,9 @@ global:
     app: '{{ template "name" . }}'
     version: "{{ .Values.global.images.function_controller.version }}"
     app.kubernetes.io/name: '{{ template "name" . }}'
+    app.kubernetes.io/component: '{{ template "fullname" . }}-controller'
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
-    helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   ingress:
     domainName:
