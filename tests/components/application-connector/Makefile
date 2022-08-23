@@ -76,7 +76,7 @@ test-compass-runtime-agent: test-compass-runtime-agent-debug clean-compass-runti
 test-compass-runtime-agent-debug:
 	@echo $(GOPATH)/bin/go-junit-report --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace $(NAMESPACE) istio-injection=true
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled
 
 	helm template resources/charts/compass-runtime-agent-test \
     	--set namespace=$(NAMESPACE) \
