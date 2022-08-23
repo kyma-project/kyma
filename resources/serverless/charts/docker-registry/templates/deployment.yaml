@@ -5,10 +5,12 @@ kind: Deployment
 metadata:
   name: {{ template "docker-registry.fullname" . }}
   labels:
-    app: {{ template "docker-registry.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: "{{ .Release.Name }}"
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"
+    app.kubernetes.io/component: '{{ template "docker-registry.name" . }}'
+    app.kubernetes.io/version: "{{ .Values.global.images.registry.version }}"
+
 spec:
   selector:
     matchLabels:
