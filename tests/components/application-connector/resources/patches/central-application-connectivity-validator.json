@@ -8,7 +8,7 @@
       "--externalAPIPort=8081",
       "--eventingPathPrefixV1=/%%APP_NAME%%/v1/events",
       "--eventingPathPrefixV2=/%%APP_NAME%%/v2/events",
-      "--eventingPublisherHost=httpbin.org",
+      "--eventingPublisherHost=httpbin.test.svc.cluster.local",
       "--eventingDestinationPath=/anything/publish",
       "--eventingPathPrefixEvents=/anything/%%APP_NAME%%/events",
       "--appNamePlaceholder=%%APP_NAME%%",
