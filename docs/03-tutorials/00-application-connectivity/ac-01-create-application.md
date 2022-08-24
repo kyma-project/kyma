@@ -53,10 +53,20 @@ metadata:
   selfLink: /apis/applicationconnector.kyma-project.io/v1alpha1/applications/test1
   uid: f8ca5595-ee5d-11e8-acb2-000d3a443243
 spec:
-  accessLabel: {APP_NAME}
   description: {APP_DESCRIPTION}
   labels:
-    region: "us"
     kind: "production"
-  services: []
+    region: "us"
+```
+
+If there are registered services connected to your Application in Kyma, the response also shows them: 
+
+```yaml
+...
+spec:
+  description: {APP_DESCRIPTION}
+  labels:
+    kind: "production"
+    region: "us"
+  services: {LIST_OF_REGISTERED_SERVICES}
 ```
