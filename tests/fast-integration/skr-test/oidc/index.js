@@ -35,7 +35,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]); // default user id
     });
 
-   /*it('Update SKR service instance with OIDC config', async function() {
+   it('Update SKR service instance with OIDC config', async function() {
       this.timeout(updateTimeout);
       const customParams = {
         oidc: options.oidc1,
@@ -50,7 +50,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
           null,
           false);
       shoot = skr.shoot;
-    });*/
+    });
 
     it('Should get Runtime Status after updating OIDC config', async function() {
       try {
@@ -104,11 +104,11 @@ function oidcE2ETest(options, getShootInfoFunc) {
       await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId[0]);
     });
 
-    /*it('Update SKR service instance with initial OIDC config and admins', async function() {
+    it('Update SKR service instance with initial OIDC config and admins', async function() {
       this.timeout(updateTimeout);
       const customParams = {
         oidc: givenOidcConfig,
-        administrators: options.kebUserId,
+        administrators: options.kebUserId[0],
       };
       console.log("SHOOT-before", shoot);
       const skr = await updateSKR(keb,
@@ -124,7 +124,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       shoot = skr.shoot;
 
       console.log("SHOOT-after", shoot);
-    });*/
+    });
 
     it('Should get Runtime Status after updating OIDC config and admins', async function() {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
