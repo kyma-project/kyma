@@ -4,6 +4,8 @@ title: Expose multiple services on the same host
 
 This tutorial shows how to expose a workload with multiple services that share the same host on different paths.
 
+You can either define a service at the root level, which is applied to all paths except the ones you've explicitly set service for at the rules level, or you can just define different services on each path separately without the need to define a root service.
+
 The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
 ## Prerequisites
