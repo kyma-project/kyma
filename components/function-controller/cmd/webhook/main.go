@@ -27,8 +27,8 @@ type config struct {
 	WebhookServiceName string `envconfig:"default=serverless-webhook"`
 	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
 	WebhookPort        int    `envconfig:"default=8443"`
-	LogFormat          string `envconfig:"default=json"`
-	LogLevel           string `envconfig:"default=info"`
+	LogFormat          string `envconfig:"default=info"`
+	LogLevel           string `envconfig:"default=debug"`
 }
 
 var (
@@ -107,30 +107,15 @@ func main() {
 			scheme,
 			log.Named("converting-webhook")),
 	)
-	defaulting := &ctrlwebhook.Admission{
+	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(defaultingConfigv1alpha1, defaultingConfigv1alpha2, mgr.GetClient()),
-	}
-	whs.Register(resources.FunctionDefaultingWebhookPath, defaulting)
-	if err := defaulting.InjectLogger(logrZap.WithName("defaulting-webhook")); err != nil {
-		log.Error(err, "failed to inject log into defaulting webhook")
-		os.Exit(5)
-	}
+	})
 
-	validating := &ctrlwebhook.Admission{
+	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewValidatingHook(validationConfigv1alpha1, validationConfigv1alpha2, mgr.GetClient()),
-	}
-	whs.Register(resources.FunctionValidationWebhookPath, validating)
-	if err := validating.InjectLogger(logrZap.WithName("validating-webhook")); err != nil {
-		log.Error(err, "failed to inject log into validating webhook")
-		os.Exit(5)
-	}
+	})
 
-	registryWebhook := &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()}
-	whs.Register(resources.RegistryConfigDefaultingWebhookPath, registryWebhook)
-	if err := registryWebhook.InjectLogger(logrZap.WithName("registry-webhook")); err != nil {
-		log.Error(err, "failed to inject log into registry webhook")
-		os.Exit(5)
-	}
+	whs.Register(resources.RegistryConfigDefaultingWebhookPath, &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()})
 
 	log.Info("setting up webhook resources controller")
 	// apply and monitor configuration
