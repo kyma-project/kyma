@@ -99,9 +99,9 @@ spec:
               {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
             - name: KUBERNETES_MIN_VERSION # TODO: Delete this env after all CI pipelines are using k8s >1.17.0
               value: "1.16.0"
-            - name: APP_LOG_LEVEL
+            - name: LOG_LEVEL
               value: {{ .Values.container.envs.logLevel.value }}
-            - name: APP_LOG_FORMAT
+            - name: LOG_FORMAT
               value: {{ .Values.container.envs.logFormat.value }}
     {{- if .Values.global.highPriorityClassName }}
       priorityClassName: {{ .Values.global.highPriorityClassName }}

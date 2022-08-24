@@ -27,7 +27,7 @@ type config struct {
 	WebhookServiceName string `envconfig:"default=serverless-webhook"`
 	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
 	WebhookPort        int    `envconfig:"default=8443"`
-	LogFormat          string `envconfig:"default=info"`
+	LogFormat          string `envconfig:"default=text"`
 	LogLevel           string `envconfig:"default=debug"`
 }
 
