@@ -80,7 +80,7 @@ nats:
 
   # Adds a hash of the ConfigMap as a pod annotation
   # This will cause the StatefulSet to roll when the ConfigMap is updated
-  configChecksumAnnotation: false
+  configChecksumAnnotation: true
 
   # securityContext for the nats container
   securityContext:
@@ -193,6 +193,100 @@ nats:
         - ReadWriteOnce
       annotations:
       # key: "value"
+
+# Authentication setup
+auth:
+  enabled: false
+
+  # basic:
+  #   noAuthUser:
+  #   # List of users that can connect with basic auth,
+  #   # that belong to the global account.
+  #   users:
+
+  #   defaultPermissions:
+  #     publish: ["SANDBOX.*"]
+  #     subscribe: ["SANDBOX.>"]
+
+  #   # List of accounts with users that can connect
+  #   # using basic auth.
+  #   accounts:
+
+  # Reference to the Operator JWT.
+  # operatorjwt:
+  #   configMap:
+  #     name: operator-jwt
+  #     key: KO.jwt
+
+  # Token authentication
+  # token:
+
+  # NKey authentication
+  # nkeys:
+  #   users:
+
+  # Public key of the System Account
+  # systemAccount:
+
+  resolver:
+    # Disables the resolver by default
+    type: none
+
+    ##########################################
+    #                                        #
+    # Embedded NATS Account Server Resolver  #
+    #                                        #
+    ##########################################
+    # type: full
+
+    # If the resolver type is 'full', delete when enabled will rename the jwt.
+    allowDelete: false
+
+    # Interval at which a nats-server with a nats based account resolver will compare
+    # it's state with one random nats based account resolver in the cluster and if needed,
+    # exchange jwt and converge on the same set of jwt.
+    interval: 2m
+
+    # Operator JWT
+    operator:
+
+    # System Account Public NKEY
+    systemAccount:
+
+    # resolverPreload:
+    #   <ACCOUNT>: <JWT>
+
+    # Directory in which the account JWTs will be stored.
+    store:
+      dir: "/accounts/jwt"
+
+      # Size of the account JWT storage.
+      size: 1Gi
+
+      # StorageClass of JWT storage claim.
+      # storageClassName: ""
+
+    ##############################
+    #                            #
+    # Memory resolver settings   #
+    #                            #
+    ##############################
+    # type: memory
+    #
+    # Use a configmap reference which will be mounted
+    # into the container.
+    #
+    # configMap:
+    #   name: nats-accounts
+    #   key: resolver.conf
+
+    ##########################
+    #                        #
+    #  URL resolver settings #
+    #                        #
+    ##########################
+    # type: URL
+    # url: "http://nats-account-server:9090/jwt/v1/accounts/"
 
 nameOverride: ""
 
