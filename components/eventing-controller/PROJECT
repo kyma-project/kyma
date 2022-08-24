@@ -13,6 +13,9 @@ resources:
   kind: Subscription
   path: github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1
   version: v1alpha1
+  webhooks:
+    conversion: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true

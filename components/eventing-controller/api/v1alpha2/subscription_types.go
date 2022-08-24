@@ -40,12 +40,6 @@ type SubscriptionSpec struct {
 	Config map[string]string `json:"config,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
-//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-//+kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
-
 // SubscriptionStatus defines the observed state of Subscription
 // +kubebuilder:subresource:status
 type SubscriptionStatus struct {
@@ -85,6 +79,11 @@ type SubscriptionStatus struct {
 }
 
 //+kubebuilder:storageversion
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
 
 // Subscription is the Schema for the subscriptions API
 type Subscription struct {
