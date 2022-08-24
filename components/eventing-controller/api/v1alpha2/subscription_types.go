@@ -2,7 +2,6 @@ package v1alpha2
 
 import (
 	"encoding/json"
-	v1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -25,7 +24,7 @@ type SubscriptionSpec struct {
 
 	// ProtocolSettings defines the CE protocol setting specification implementation
 	// +optional
-	ProtocolSettings *v1alpha1.ProtocolSettings `json:"protocolsettings,omitempty"`
+	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
 	// Sink defines endpoint of the subscriber
 	Sink string `json:"sink"`
@@ -38,15 +37,21 @@ type SubscriptionSpec struct {
 
 	// Config defines the configurations that can be applied to the eventing backend when creating this subscription
 	// +optional
-	Config map[string]interface{} `json:"config,omitempty"`
+	Config map[string]string `json:"config,omitempty"`
 }
+
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+//+kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
 
 // SubscriptionStatus defines the observed state of Subscription
 // +kubebuilder:subresource:status
 type SubscriptionStatus struct {
 	// Conditions defines the status conditions
 	// +optional
-	Conditions []v1alpha1.Condition `json:"conditions,omitempty"`
+	Conditions []Condition `json:"conditions,omitempty"`
 
 	// Ready defines the overall readiness status of a subscription
 	Ready bool `json:"ready"`
@@ -76,14 +81,10 @@ type SubscriptionStatus struct {
 
 	// EmsSubscriptionStatus defines the status of Subscription in BEB
 	// +optional
-	EmsSubscriptionStatus *v1alpha1.EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.ready"
-//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-//+kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
+//+kubebuilder:storageversion
 
 // Subscription is the Schema for the subscriptions API
 type Subscription struct {
