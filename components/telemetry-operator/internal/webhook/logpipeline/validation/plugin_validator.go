@@ -6,15 +6,16 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
+
 	"github.com/pkg/errors"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
 type PluginValidator interface {
-	Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error
+	Validate(logPipeline *telemetryv1alpha1.LogPipeline) error
 	ContainsCustomPlugin(logPipeline *telemetryv1alpha1.LogPipeline) bool
 }
 
@@ -44,7 +45,7 @@ func (pv *pluginValidator) ContainsCustomPlugin(logPipeline *telemetryv1alpha1.L
 // Validate returns an error if validation fails
 // because of using denied plugins or errors in match conditions
 // for filters or outputs.
-func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
 	err := pv.validateFilters(logPipeline)
 	if err != nil {
 		return errors.Wrap(err, "error validating filter plugins")
@@ -58,7 +59,7 @@ func (pv *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, 
 
 func (pv *pluginValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline) error {
 	for _, filterPlugin := range pipeline.Spec.Filters {
-		if err := validateCustomOutput(filterPlugin.Custom, pv.deniedFilterPlugins); err != nil {
+		if err := validateCustom(filterPlugin.Custom, pv.deniedFilterPlugins); err != nil {
 			return err
 		}
 	}
@@ -69,7 +70,7 @@ func (pv *pluginValidator) validateOutput(pipeline *telemetryv1alpha1.LogPipelin
 	if err := checkSingleOutputPlugin(pipeline.Spec.Output); err != nil {
 		return err
 	}
-	if err := validateCustomOutput(pipeline.Spec.Output.Custom, pv.deniedOutputPlugins); err != nil {
+	if err := validateCustom(pipeline.Spec.Output.Custom, pv.deniedOutputPlugins); err != nil {
 		return err
 	}
 	if err := validateHTTPOutput(pipeline.Spec.Output.HTTP); err != nil {
@@ -102,28 +103,30 @@ func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
 	return nil
 }
 
-func validateCustomOutput(content string, denied []string) error {
+func validateCustom(content string, denied []string) error {
 	if content == "" {
 		return nil
 	}
 
-	customSection, err := fluentbit.ParseSection(content)
-	if err != nil {
-		return err
-	}
-	name, err := getCustomName(customSection)
+	customSection, err := config.ParseCustomSection(content)
 	if err != nil {
 		return err
 	}
 
+	if !customSection.ContainsKey("name") {
+		return fmt.Errorf("configuration section does not have name attribute")
+	}
+
+	pluginName := customSection.GetByKey("name").Value
+
 	for _, deniedPlugin := range denied {
-		if strings.EqualFold(name, deniedPlugin) {
-			return fmt.Errorf("plugin '%s' is not supported. ", name)
+		if strings.EqualFold(pluginName, deniedPlugin) {
+			return fmt.Errorf("plugin '%s' is not supported. ", pluginName)
 		}
 	}
 
-	if hasMatchCondition(customSection) {
-		return fmt.Errorf("plugin '%s' contains match condition. Match conditions are forbidden", name)
+	if customSection.ContainsKey("match") {
+		return fmt.Errorf("plugin '%s' contains match condition. Match conditions are forbidden", pluginName)
 	}
 
 	return nil
@@ -172,18 +175,4 @@ func validHostname(host string) bool {
 	host = strings.Trim(host, " ")
 	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
 	return re.MatchString(host)
-}
-
-func getCustomName(custom map[string]string) (string, error) {
-	if name, hasKey := custom["name"]; hasKey {
-		return name, nil
-	}
-	return "", fmt.Errorf("configuration section does not have name attribute")
-}
-
-func hasMatchCondition(section map[string]string) bool {
-	if _, hasKey := section["match"]; hasKey {
-		return true
-	}
-	return false
 }

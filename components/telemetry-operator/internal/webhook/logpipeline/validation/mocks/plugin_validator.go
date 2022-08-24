@@ -26,13 +26,13 @@ func (_m *PluginValidator) ContainsCustomPlugin(logPipeline *v1alpha1.LogPipelin
 	return r0
 }
 
-// Validate provides a mock function with given fields: logPipeline, logPipelines
-func (_m *PluginValidator) Validate(logPipeline *v1alpha1.LogPipeline, logPipelines *v1alpha1.LogPipelineList) error {
-	ret := _m.Called(logPipeline, logPipelines)
+// Validate provides a mock function with given fields: logPipeline
+func (_m *PluginValidator) Validate(logPipeline *v1alpha1.LogPipeline) error {
+	ret := _m.Called(logPipeline)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*v1alpha1.LogPipeline, *v1alpha1.LogPipelineList) error); ok {
-		r0 = rf(logPipeline, logPipelines)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.LogPipeline) error); ok {
+		r0 = rf(logPipeline)
 	} else {
 		r0 = ret.Error(0)
 	}

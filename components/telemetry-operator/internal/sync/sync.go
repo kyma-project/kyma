@@ -3,10 +3,13 @@ package sync
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,7 +32,7 @@ type FluentBitDaemonSetConfig struct {
 type LogPipelineSyncer struct {
 	client.Client
 	DaemonSetConfig         FluentBitDaemonSetConfig
-	PipelineConfig          fluentbit.PipelineConfig
+	PipelineConfig          builder.PipelineConfig
 	EnableUnsupportedPlugin bool
 	UnsupportedPluginsTotal int
 	SecretHelper            *secret.Helper
@@ -38,7 +41,7 @@ type LogPipelineSyncer struct {
 
 func NewLogPipelineSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
-	pipelineConfig fluentbit.PipelineConfig,
+	pipelineConfig builder.PipelineConfig,
 ) *LogPipelineSyncer {
 	var lps LogPipelineSyncer
 	lps.Client = client
@@ -96,7 +99,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 	} else {
-		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.PipelineConfig)
+		fluentBitConfig, err := builder.MergeSectionsConfig(logPipeline, s.PipelineConfig)
 		if err != nil {
 			return false, err
 		}
@@ -211,22 +214,23 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 				}
 			}
 		}
-		if l.Spec.Output.HTTP.Host.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.Host.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.Host.ValueFrom.SecretKey, l.Name), newSecret.Data)
+		httpOutput := l.Spec.Output.HTTP
+		if httpOutput.Host.ValueFrom.IsSecretRef() {
+			err := s.SecretHelper.CopySecretData(ctx, httpOutput.Host.ValueFrom, envvar.GenerateName(l.Name, httpOutput.Host.ValueFrom.SecretKey), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
 				return false, err
 			}
 		}
-		if l.Spec.Output.HTTP.User.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.User.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.User.ValueFrom.SecretKey, l.Name), newSecret.Data)
+		if httpOutput.User.ValueFrom.IsSecretRef() {
+			err := s.SecretHelper.CopySecretData(ctx, httpOutput.User.ValueFrom, envvar.GenerateName(l.Name, httpOutput.User.ValueFrom.SecretKey), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http user")
 				return false, err
 			}
 		}
-		if l.Spec.Output.HTTP.Password.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, l.Spec.Output.HTTP.Password.ValueFrom, secret.GenerateVariableName(l.Spec.Output.HTTP.Password.ValueFrom.SecretKey, l.Name), newSecret.Data)
+		if httpOutput.Password.ValueFrom.IsSecretRef() {
+			err := s.SecretHelper.CopySecretData(ctx, httpOutput.Password.ValueFrom, envvar.GenerateName(l.Name, httpOutput.User.ValueFrom.SecretKey), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http password")
 				return false, err
