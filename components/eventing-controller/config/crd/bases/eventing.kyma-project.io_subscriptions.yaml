@@ -257,7 +257,17 @@ spec:
     storage: false
     subresources:
       status: {}
-  - name: v1alpha2
+  - additionalPrinterColumns:
+    - jsonPath: .status.ready
+      name: Ready
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .status.cleanEventTypes
+      name: Clean Event Types
+      type: string
+    name: v1alpha2
     schema:
       openAPIV3Schema:
         description: Subscription is the Schema for the subscriptions API
@@ -433,6 +443,8 @@ spec:
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""
