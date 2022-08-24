@@ -10,7 +10,7 @@ When you're finished working with the monitoring example, remove the example dep
 
 ## Steps
 
-1. Remove the deployed ServiceMonitor CRD from the `testing-monitoring` Namespace.
+1. Remove the deployed ServiceMonitor resource from the `testing-monitoring` Namespace.
 
     ```bash
     kubectl delete servicemonitor -l example=monitoring-custom-metrics -n testing-monitoring
