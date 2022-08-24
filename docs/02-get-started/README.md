@@ -15,7 +15,7 @@ All the steps are performed in the `default` Namespace.
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
 - Minimum Docker resources: 4 CPUs and 8 GB RAM 
   > **NOTE:** Learn how to adjust these Docker values on [Mac](https://docs.docker.com/desktop/settings/mac/#resources), [Windows](https://docs.docker.com/desktop/settings/windows/#resources), or [Linux](https://docs.docker.com/desktop/settings/linux/#resources).
-- (Optional*) [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for [triggering workloads with events](./04-trigger-workload-with-event.md)
+- (Optional) [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for [triggering workloads with events](./04-trigger-workload-with-event.md)
    ```bash
    go install github.com/cloudevents/conformance/cmd/cloudevents@latest
    ```
