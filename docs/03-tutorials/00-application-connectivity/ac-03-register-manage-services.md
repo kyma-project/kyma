@@ -6,31 +6,39 @@ This guide shows you how to register a service of your external solution in Kyma
 
 >**NOTE:** Learn how to [register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks](ac-04-register-secured-api.md).
 
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
-
 ## Prerequisites
 
-Before you start, expose the following as environment variables:
-- Your [Application](./ac-01-create-application.md#prerequisites) name
-- Username and password to access the external system
-- Name of the Secret containing the service credentials
-- Name of your service
-- URL to your service
-- Unique ID identifying your service within the Application CR
-- Relative path in your service
+1. Before you start, expose the following as environment variables:
+   - Your [Application](./ac-01-create-application.md#prerequisites) name
+   - Username and password to access the external system
+   - Name of the Secret containing the service credentials
+   - Name of your service
+   - URL to your service
+   - Unique ID identifying your service within the Application CR
+   - Relative path in your service
+   - Namespace in which to create a test Pod
 
-```bash
-export APP_NAME=test-app
-export USER_NAME=test-user
-export PASSWORD=test-password
-export SECRET_NAME=test-secret
-export SERVICE_DISPLAY_NAME=test-basic-auth
-export TARGET_URL=https://httpbin.org/
-export TARGET_UUID=f03aafcc-85ad-4665-a46a-bf455f5fa0b3
-export TARGET_PATH=basic-auth/$USER_NAME/$PASSWORD
-```
-  
-> **NOTE:** Replace the example values above with your actual values. 
+   ```bash
+   export APP_NAME=test-app
+   export USER_NAME=test-user
+   export PASSWORD=test-password
+   export SECRET_NAME=test-secret
+   export SERVICE_DISPLAY_NAME=test-basic-auth
+   export TARGET_URL=https://httpbin.org/
+   export TARGET_UUID=f03aafcc-85ad-4665-a46a-bf455f5fa0b3
+   export TARGET_PATH=basic-auth/$USER_NAME/$PASSWORD
+   export NAMESPACE=default
+   ```
+     
+   > **NOTE:** Replace the example values above with your actual values. 
+
+2. Enable Istio sidecar injection in the Namespace:
+   ```bash
+   kubectl label $NAMESPACE default istio-injection=enabled
+   ```
+
+   >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+
 
 ## Register a service
 
@@ -93,6 +101,7 @@ To check that the service was registered correctly, create a test Pod, and make 
       labels:
         run: $POD_NAME
       name: $POD_NAME
+      namespace: $NAMESPACE
     spec:
       containers:
       - image: busybox
@@ -109,13 +118,13 @@ To check that the service was registered correctly, create a test Pod, and make 
 4. Wait for the Pod to be in state `Running`. To check that the Pod is ready, run this command and wait for the response:
 
     ```bash
-    kubectl wait --for=condition=Ready pod $POD_NAME
+    kubectl wait --for=condition=Ready pod $POD_NAME -n $NAMESPACE
     ```
 
 5. To make a call to Application Gateway from within the Pod, run: 
 
     ```bash
-    kubectl exec $POD_NAME -c $POD_NAME -- sh -c "wget -O- '$GATEWAY_URL'"
+    kubectl exec $POD_NAME -c $POD_NAME -n $NAMESPACE -- sh -c "wget -O- '$GATEWAY_URL'"
     ```
 
    A successful response from the service means that it was registered correctly.
