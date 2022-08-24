@@ -1,0 +1,6 @@
+apiVersion: eventing.kyma-project.io/v1alpha2
+kind: Subscription
+metadata:
+  name: subscription-sample
+spec:
+  # TODO(user): Add fields here
