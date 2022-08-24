@@ -44,13 +44,13 @@ cat <<EOF | kubectl apply -f -
 EOF
 ```
 
-If the resources were created successfully, the command returns this message:
+The Function was created successfully if the command returns this message:
 
 ```bash
 function.serverless.kyma-project.io/lastorder created
 ```
 
-To check the Function status, run: 
+Wait a few seconds for the Function to have status `RUNNING`. To check the Function status, run: 
 
 ```bash
 kubectl get functions -n default lastorder
@@ -148,7 +148,7 @@ The operation was successful if the returned status says `true`.
 
 We created the `lastorder` Function and subscribed to the `order.received.v1` event by creating a Subscription CR. Now it's time to publish your event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost. 
 
-1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run: 
+1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. In your terminal, run: 
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
