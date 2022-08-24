@@ -102,7 +102,7 @@ spec:
             - name: APP_LOG_LEVEL
               value: {{ .Values.container.envs.logLevel.value }}
             - name: APP_LOG_FORMAT
-              value: {{ .Values.container.envs.logFormat }}
+              value: {{ .Values.container.envs.logFormat.value }}
     {{- if .Values.global.highPriorityClassName }}
       priorityClassName: {{ .Values.global.highPriorityClassName }}
     {{- end }}
