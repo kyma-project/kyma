@@ -87,7 +87,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
   
 4. Click **Create**.
 
-The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
+The operation was successful if you can see `1/1` Pods running in the Deployment's view.
   </details>
 </div>
 
