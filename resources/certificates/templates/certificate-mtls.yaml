@@ -1,5 +1,4 @@
-## Kyma TLS Gateway
-{{- if  and (.Values.global.mtlsGateway.tlsCrt) (.Values.global.mtlsGateway.tlsKey) -}}
+{{- if  and (.Values.global.mtlsGateway) (.Values.global.mtlsGateway.tlsCrt) (.Values.global.mtlsGateway.tlsKey) -}}
 ---
 # User-provided TLS always take precedence
 apiVersion: v1
@@ -35,7 +34,9 @@ metadata:
 spec:
   commonName: "*.mtls.{{ .Values.global.domainName }}"
   secretName: {{ .Values.certificates.kymaMtls.name }}
-{{- end -}}
+{{- end }}
+
+
 ---
 # Create cacert secret
 apiVersion: v1
@@ -45,4 +46,8 @@ metadata:
   namespace: {{ .Values.certificates.kymaMtls.namespace }}
 type: Opaque
 data:
-  cacert: {{ .Values.global.mtlsGateway.cacertBundle | default .Values.certificates.kymaMtls.cacertBundle }}
+{{ if and (.Values.global.mtlsGateway) (.Values.global.mtlsGateway.cacertBundle) }}
+  cacert: {{ .Values.global.mtlsGateway.cacertBundle }}
+{{ else }}
+  cacert: {{ .Values.certificates.kymaMtls.default.cacertBundle }}
+{{ end }}
