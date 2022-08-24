@@ -74,7 +74,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
     });
 
-    /*it('Update SKR service instance with new admins', async function() {
+    it('Update SKR service instance with new admins', async function() {
       this.timeout(updateTimeout);
       const customParams = {
         administrators: options.administrators1,
@@ -90,7 +90,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
           false);
 
       shoot = skr.shoot;
-    });*/
+    });
 
     it('Should get Runtime Status after updating admins', async function() {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
