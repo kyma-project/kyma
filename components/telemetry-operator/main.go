@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
 	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
@@ -40,7 +42,6 @@ import (
 	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -166,7 +167,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := fluentbit.PipelineConfig{
+	pipelineConfig := builder.PipelineConfig{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,

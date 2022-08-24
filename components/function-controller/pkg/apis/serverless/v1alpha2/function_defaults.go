@@ -65,6 +65,10 @@ func (fn *Function) Default(config *DefaultingConfig) {
 }
 
 func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
+	if spec.Replicas != nil {
+		return
+	}
+
 	defaultingConfig := config.Function.Replicas
 	replicasPreset := mergeReplicasPreset(fn, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
 

@@ -52,6 +52,7 @@ type validationFunction func(*ValidationConfig) error
 func (fn *Function) getBasicValidations() []validationFunction {
 	return []validationFunction{
 		fn.validateObjectMeta,
+		fn.Spec.validateRuntime,
 		fn.Spec.validateEnv,
 		fn.Spec.validateLabels,
 		fn.Spec.validateReplicas,
@@ -160,6 +161,15 @@ func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 	default:
 		return ErrInvalidGitRepositoryAuthType
 	}
+}
+
+func (spec *FunctionSpec) validateRuntime(_ *ValidationConfig) error {
+	runtimeName := spec.Runtime
+	switch runtimeName {
+	case Python39, NodeJs12, NodeJs14, NodeJs16:
+		return nil
+	}
+	return fmt.Errorf("spec.runtime contains unsupported value")
 }
 
 func (spec *FunctionSpec) validateEnv(vc *ValidationConfig) error {
@@ -274,14 +284,21 @@ func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU re
 }
 
 func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
-	if spec.ScaleConfig == nil {
-		return errors.New("spec.scaleConfig can't be nil")
+	minValue := vc.Function.Replicas.MinValue
+	var maxReplicas *int32
+	var minReplicas *int32
+	if spec.ScaleConfig != nil {
+		maxReplicas = spec.ScaleConfig.MaxReplicas
+		minReplicas = spec.ScaleConfig.MinReplicas
 	}
 
-	minValue := vc.Function.Replicas.MinValue
-	maxReplicas := spec.ScaleConfig.MaxReplicas
-	minReplicas := spec.ScaleConfig.MinReplicas
 	allErrs := []string{}
+	if spec.Replicas != nil && spec.ScaleConfig != nil {
+		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are use at the same time")
+	}
+	if spec.Replicas == nil && spec.ScaleConfig == nil {
+		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are empty at the same time")
+	}
 	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
 		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than spec.minReplicas(%d)",
 			*maxReplicas, *minReplicas))
@@ -318,7 +335,7 @@ func (spec *FunctionSpec) validateRepository(_ *ValidationConfig) error {
 }
 
 func urlIsSSH(repoURL string) bool {
-	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)(/)?`)
+	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(/)?`)
 	if err != nil {
 		panic(err)
 	}

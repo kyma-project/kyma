@@ -31,16 +31,16 @@ To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: httpbin
      namespace: $NAMESPACE
    spec:
+     host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS   
      service:
        name: httpbin
        port: 8000
-       host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS   
      gateway: $GATEWAY
      rules:
        - accessStrategies:
@@ -82,16 +82,16 @@ To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: gateway.kyma-project.io/v1alpha1
+   apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
      name: function
      namespace: $NAMESPACE
    spec:
+     host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS   
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS   
      gateway: $GATEWAY
      rules:
        - accessStrategies:

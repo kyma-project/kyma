@@ -24,19 +24,15 @@ func (v *inputValidator) Validate(logPipelineInput *telemetryv1alpha1.Input) err
 	}
 
 	var containers = logPipelineInput.Application.Containers
-	var excludeContainers = logPipelineInput.Application.ExcludeContainers
-	if containers != nil && excludeContainers != nil {
-		if len(containers) > 0 && len(excludeContainers) > 0 {
-			return errors.New("invalid log pipeline definition: can not define both 'input.application.containers' and 'input.application.excludeContainers'")
-		}
+	if len(containers.Include) > 0 && len(containers.Exclude) > 0 {
+		return errors.New("invalid log pipeline definition: can not define both 'input.application.containers.include' and 'input.application.containers.exclude'")
 	}
 
 	var namespaces = logPipelineInput.Application.Namespaces
-	var excludeNamespaces = logPipelineInput.Application.ExcludeNamespaces
-	if namespaces != nil && excludeNamespaces != nil {
-		if len(namespaces) > 0 && len(excludeNamespaces) > 0 {
-			return errors.New("invalid log pipeline definition: can not define both 'input.application.namespaces' and 'input.application.excludeNamespaces'")
-		}
+	if (len(namespaces.Include) > 0 && len(namespaces.Exclude) > 0) ||
+		(len(namespaces.Include) > 0 && namespaces.System) ||
+		(len(namespaces.Exclude) > 0 && namespaces.System) {
+		return errors.New("invalid log pipeline definition: can only define one of 'input.application.namespaces' selectors: 'include', 'exclude', 'system'")
 	}
 
 	return nil

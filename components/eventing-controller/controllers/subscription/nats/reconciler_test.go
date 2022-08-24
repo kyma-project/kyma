@@ -105,10 +105,12 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					reconcilertesting.OrderCreatedEventType: {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+					},
 				},
 			},
 		},
@@ -268,10 +270,12 @@ func TestCreateSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					reconcilertesting.OrderCreatedEventType: {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+					},
 				},
 			},
 		},
@@ -283,7 +287,11 @@ func TestCreateSubscription(t *testing.T) {
 			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.want.K8sSubscription...)
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.want.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription.Name, tc.want.NatsSubscription...)
+
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.want.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, eventType, matchers...)
+			}
 			testDeletion(ens, subscription)
 		})
 	}
@@ -433,10 +441,12 @@ func TestChangeSubscription(t *testing.T) {
 						},
 					),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(utils.NewCleanEventType("")),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					utils.NewCleanEventType(""): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeSubscriptionWithSubject(utils.NewCleanEventType("")),
+					},
 				},
 			},
 		},
@@ -511,16 +521,22 @@ func TestChangeSubscription(t *testing.T) {
 
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantBefore.K8sSubscription...)
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantBefore.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription.Name, tc.wantBefore.NatsSubscription...)
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, eventType, matchers...)
+			}
 
 			// when
 			tc.changeSubscription(subscription)
-			utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, subscription)
+			g.Expect(ens.K8sClient.Update(ens.Ctx, subscription)).ShouldNot(gomega.HaveOccurred())
 
 			// then
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantAfter.K8sSubscription...)
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantAfter.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription.Name, tc.wantAfter.NatsSubscription...)
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, eventType, matchers...)
+			}
 			testDeletion(ens, subscription)
 		})
 	}

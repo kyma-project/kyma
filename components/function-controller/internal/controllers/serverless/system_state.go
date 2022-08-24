@@ -369,11 +369,6 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
-	minReplicas := DefaultDeploymentReplicas
-	if s.instance.Spec.ScaleConfig != nil && s.instance.Spec.ScaleConfig.MinReplicas != nil {
-		minReplicas = *s.instance.Spec.ScaleConfig.MinReplicas
-	}
-
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -381,7 +376,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &minReplicas,
+			Replicas: s.getReplicas(DefaultDeploymentReplicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
@@ -479,6 +474,17 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 		},
 	}
+}
+
+func (s *systemState) getReplicas(defaultVal int32) *int32 {
+	if s.instance.Spec.ScaleConfig != nil {
+		return s.instance.Spec.ScaleConfig.MinReplicas
+	}
+	if s.instance.Spec.Replicas != nil {
+		return s.instance.Spec.Replicas
+	}
+
+	return &defaultVal
 }
 
 //TODO do not negate
@@ -613,7 +619,7 @@ func (s *systemState) gitFnSrcChanged(commit string) bool {
 	return s.instance.Status.Commit == "" ||
 		commit != s.instance.Status.Commit ||
 		s.instance.Spec.Source.GitRepository.Reference != s.instance.Status.Reference ||
-		serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime) != s.instance.Status.Runtime ||
+		s.instance.Spec.Runtime != s.instance.Status.Runtime ||
 		s.instance.Spec.Source.GitRepository.BaseDir != s.instance.Status.BaseDir ||
 		getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady) == corev1.ConditionFalse
 

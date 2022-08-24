@@ -4,12 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
+
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -27,7 +29,7 @@ var (
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
-	pipelineConfig = fluentbit.PipelineConfig{
+	pipelineConfig = builder.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -183,6 +185,6 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)
 	require.NoError(t, err)
-	targetSecretKey := secret.GenerateVariableName(secretKeyRef, "my-pipeline")
+	targetSecretKey := envvar.GenerateName("my-pipeline", secretKeyRef)
 	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
 }

@@ -35,7 +35,7 @@ type DryRunner interface {
 	RunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
 }
 
-//+kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
 	parserValidator validation.ParserValidator
