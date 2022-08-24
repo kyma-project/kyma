@@ -42,8 +42,6 @@ func (c *oauthClient) GetAuthorizationToken() (Token, error) {
 		return Token{}, err
 	}
 
-	log.Infof("Credentials: clinetID: '%s', clinetSecret: '%s'", credentials.clientID, credentials.clientSecret)
-
 	return c.getAuthorizationToken(credentials)
 }
 
@@ -83,7 +81,6 @@ func (c *oauthClient) getAuthorizationToken(credentials credentials) (Token, err
 	if err != nil {
 		return Token{}, errors.Wrap(err, "Failed to execute http call")
 	}
-	//defer util.Close(response.Body)
 
 	defer response.Body.Close()
 
@@ -99,8 +96,6 @@ func (c *oauthClient) getAuthorizationToken(credentials credentials) (Token, err
 	if err != nil {
 		return Token{}, fmt.Errorf("Failed to read token response body from '%s': %s", credentials.tokensEndpoint, err.Error())
 	}
-
-	log.Info(string(body))
 
 	tokenResponse := Token{}
 

@@ -38,12 +38,18 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	directorClient, err := gs.newDirectorClient(gs.testConfig.DirectorURL, gs.testConfig.OauthCredentialsNamespace, gs.testConfig.OauthCredentialsSecretName, gs.testConfig.SkipDirectorCertVerification, cfg)
 	gs.Require().Nil(err)
 
-	gs.T().Log("Attempt to register application in compass")
-	appID, err := directorClient.RegisterApplication("oko", "auto-testing", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
-
+	gs.T().Log("Attempt to unregister application in compass")
+	//appID, err := directorClient.RegisterApplication("oko", "auto-testing", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
+	err = directorClient.UnregisterApplication("218a1089-fb05-47a2-b1a9-4d09d854eeab", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
 	gs.Require().Nil(err)
 
-	gs.T().Logf("Registered applicationID is %s", appID)
+	//gs.T().Logf("Unregistered applicationID is %s", appID)
+
+	// Checmy pokryc wsyztkie typy autoryzacji czyli miec jedna apkę która będzie miala wszystkie typy autoryzacji
+	// Mozemy po prostu zahardkodować pelna mutację albo kilka mutacji
+	//
+	// jakie będą scenariusze?
+	//
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {

@@ -15,39 +15,11 @@ const (
 	TenantHeader        = "Tenant"
 )
 
-/*
-Process of pairing application with compass JS
-
-async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
-  const appID = await registerOrReturnApplication(client, appName, scenarioName);
-  debug(`Application ID in Compass ${appID}`);
-
-  const pairingData = await client.requestOneTimeTokenForApplication(appID);
-  const pairingToken = toBase64(JSON.stringify(pairingData));
-  const pairingBody = {
-    token: pairingToken,
-    baseUrl: mockHost,
-    insecure: true,
-  };
-
-  debug(`Connecting ${mockHost}`);
-  await connectCommerceMock(mockHost, pairingBody);
-
-  debug('Commerce mock connected to Compass');
-}
-*/
-
 //go:generate mockery --name=DirectorClient
 type DirectorClient interface {
 	RegisterApplication(appName, scenario, tenant string) (string, error)
 	UnregisterApplication(id string, tenant string) error
 	//RequestOneTimeTokenForApplication() error
-
-	// Checmy pokryc wsyztkie typy autoryzacji czyli miec jedna apkę która będzie miala wszystkie typy autoryzacji
-	// Mozemy po prostu zahardkodować pelna mutację albo kilka mutacji
-	//
-	// jakie będą scenariusze?
-
 }
 
 type directorClient struct {
@@ -141,11 +113,6 @@ func (cc *directorClient) UnregisterApplication(appID, tenant string) error {
 
 	return nil
 }
-
-//func (cc *directorClient) RequestOneTimeTokenForApplication() error {
-//	// To be implemented
-//	return nil
-//}
 
 func (cc *directorClient) executeDirectorGraphQLCall(directorQuery string, tenant string, response interface{}) error {
 	if cc.token.EmptyOrExpired() {
