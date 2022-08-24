@@ -156,22 +156,6 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
 <div tabs name="Publish an event" group="trigger-workload">
   <details open>
-  <summary label="CloudEvents Conformance Tool">
-  CloudEvents Conformance Tool
-  </summary>
-
-   ```bash
-   cloudevents send http://localhost:3000/publish \
-      --type sap.kyma.custom.myapp.order.received.v1 \
-      --id 759815c3-b142-48f2-bf18-c6502dc0998f \
-      --source myapp \
-      --datacontenttype application/json \
-      --data "{\"orderCode\":\"3211213\"}" \
-      --yaml
-   ```
-
-  </details>
-  <details>
   <summary label="curl">
   curl
   </summary>
@@ -187,6 +171,22 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
         -d "{\"orderCode\":\"3211213\"}" \
         http://localhost:3000/publish
    ```
+  </details>
+  <details>
+  <summary label="CloudEvents Conformance Tool">
+  CloudEvents Conformance Tool
+  </summary>
+
+   ```bash
+   cloudevents send http://localhost:3000/publish \
+      --type sap.kyma.custom.myapp.order.received.v1 \
+      --id 759815c3-b142-48f2-bf18-c6502dc0998f \
+      --source myapp \
+      --datacontenttype application/json \
+      --data "{\"orderCode\":\"3211213\"}" \
+      --yaml
+   ```
+
   </details>
 </div>
 
