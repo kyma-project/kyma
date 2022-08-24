@@ -9,10 +9,12 @@ This guide shows how to call a registered external service from Kyma using a sim
 - A [registered external service](./ac-03-register-manage-services.md)
 - Your [service display name exported](./ac-03-register-manage-services.md#prerequisites) as an environment variable
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
-- Your desired Namespace and cluster domain exported as environment variables
+- Your desired Namespace, cluster domain, and the name for your Function exported as environment variables
   ```bash
   export NAMESPACE=default
   export CLUSTER_DOMAIN=local.kyma.dev
+  export FUNCTION_NAME=my-function
+  export APIRULE_NAME=$FUNCTION_NAME-ar
   ```
 - [Istio sidecar injection](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md) enabled in your Namespace
   ```bash
@@ -38,10 +40,10 @@ This guide shows how to call a registered external service from Kyma using a sim
    apiVersion: serverless.kyma-project.io/v1alpha1
    kind: Function
    metadata:
-     name: my-function
+     name: $FUNCTION_NAME
      namespace: $NAMESPACE
      labels:
-       app: my-function
+       app: $APP_NAME
    spec:
      deps: |-
        {
@@ -86,13 +88,13 @@ This guide shows how to call a registered external service from Kyma using a sim
    apiVersion: gateway.kyma-project.io/v1beta1
    kind: APIRule
    metadata:
-     name: my-function
+     name: $APIRULE_NAME
      namespace: $NAMESPACE
      labels:
-       function: my-function
+       function: $FUNCTION_NAME
    spec:
      gateway: kyma-system/kyma-gateway
-     host: my-function.$CLUSTER_DOMAIN
+     host: $APIRULE_NAME.$CLUSTER_DOMAIN
      rules:
      - path: /.*
        accessStrategies:
@@ -101,7 +103,7 @@ This guide shows how to call a registered external service from Kyma using a sim
        methods:
        - GET
      service:
-       name: my-function
+       name: $FUNCTION_NAME
        port: 80
    EOF
    ```
@@ -109,7 +111,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 4. To verify that everything was set up correctly, you can now call the Function through HTTPS:
 
       ```bash
-      curl https://my-function.$CLUSTER_DOMAIN/
+      curl https://$APIRULE_NAME.$CLUSTER_DOMAIN/
       ```
 
    >**NOTE:** If you get `no healthy upstream` as a response, wait for a few moments for the Function to get ready and call it again.
