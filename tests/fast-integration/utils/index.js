@@ -21,10 +21,13 @@ function initializeK8sClient(opts) {
   opts = opts || {};
   try {
     if (opts.kubeconfigPath) {
+      console.log("initFromKubeConfigPath");
       kc.loadFromFile(opts.kubeconfigPath);
     } else if (opts.kubeconfig) {
+      console.log("initFromKubecofing");
       kc.loadFromString(opts.kubeconfig);
     } else {
+      console.log("initDefault");
       kc.loadFromDefault();
     }
 
@@ -1010,6 +1013,7 @@ async function findKymaAdminBindingForUser(targetUser) {
 
 async function ensureKymaAdminBindingExistsForUser(targetUser) {
   const binding = await findKymaAdminBindingForUser(targetUser);
+  console.log(`binding: ${binding}`);
   expect(binding).not.to.be.undefined;
   expect(binding.users).to.include(targetUser);
 }
