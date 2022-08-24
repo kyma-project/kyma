@@ -84,6 +84,8 @@ func (s *Secret) LogResource() error {
 		return errors.Wrap(err, "while getting Secret")
 	}
 
+	redactSecretData(secret)
+
 	out, err := helpers.PrettyMarshall(secret)
 	if err != nil {
 		return err
@@ -91,4 +93,10 @@ func (s *Secret) LogResource() error {
 
 	s.log.Infof("Secret: %s", out)
 	return nil
+}
+
+func redactSecretData(secret *corev1.Secret) {
+	for k := range secret.Data {
+		secret.Data[k] = []byte("REDACTED")
+	}
 }
