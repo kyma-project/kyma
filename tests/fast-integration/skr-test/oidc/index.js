@@ -111,7 +111,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
         administrators: options.kebUserId,
       };
       console.log("SHOOT-before", shoot);
-      const skr = await updateSKR(keb,
+      /*const skr = await updateSKR(keb,
           kcp,
           gardener,
           options.instanceID,
@@ -121,7 +121,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
           null,
           false);
 
-      shoot = skr.shoot;
+      shoot = skr.shoot;*/
 
       console.log("SHOOT-after", shoot);
     });
