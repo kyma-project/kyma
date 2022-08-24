@@ -51,6 +51,15 @@ func (sb *SectionBuilder) AddIfNotEmpty(key string, value string) *SectionBuilde
 	return sb
 }
 
+func (sb *SectionBuilder) AddIfNotEmptyOrDefault(key string, value string, defaultValue string) *SectionBuilder {
+	if value == "" {
+		sb.AddConfigParam(key, defaultValue)
+	} else {
+		sb.AddConfigParam(key, value)
+	}
+	return sb
+}
+
 func (sb *SectionBuilder) Build() string {
 	sort.Slice(sb.params, func(i, j int) bool {
 		if sb.params[i].Key != sb.params[j].Key {
