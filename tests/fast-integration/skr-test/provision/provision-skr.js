@@ -10,6 +10,7 @@ const {
   gardener,
   keb,
   initK8sConfig,
+  getSKRRuntimeStatus,
 } = require('../helpers');
 
 const {provisionSKR}= require('../../kyma-environment-broker');
@@ -72,8 +73,16 @@ async function provisionSKRInstance(options, timeout) {
   }
 }
 
+async function getSKRKymaVersion(instanceID) {
+  const runtimeStatus = await getSKRRuntimeStatus(instanceID);
+  if (runtimeStatus && runtimeStatus.data) {
+    return runtimeStatus.data[0].kymaVersion;
+  }
+  return '';
+}
 
 module.exports = {
   getOrProvisionSKR,
+  getSKRKymaVersion,
 };
 
