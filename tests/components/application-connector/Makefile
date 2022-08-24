@@ -76,7 +76,7 @@ patch-for-validator-test:
 	kubectl rollout status deploy central-application-connectivity-validator -n kyma-system --timeout=1m
 
 unpatch-after-validator-test:
-	kubectl rollout undo deployment/central-application-connectivity-validator
+	kubectl rollout undo deployment/central-application-connectivity-validator -n kyma-system
 
 test-validator: patch-for-validator-test connectivity-validator-create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test; then \
