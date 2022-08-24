@@ -17,7 +17,7 @@ func createKubernetesMetadataFilter(pipeline *telemetryv1alpha1.LogPipeline) str
 		AddConfigParam("match", fmt.Sprintf("%s.*", pipeline.Name)).
 		AddConfigParam("operation", "lift").
 		AddConfigParam("nested_under", "kubernetes").
-		AddConfigParam("add_prefix", "__k8s__").
+		AddConfigParam("add_prefix", "__kyma__").
 		Build()
 
 	var dropAnnotationsFilter string
@@ -34,9 +34,9 @@ func createKubernetesMetadataFilter(pipeline *telemetryv1alpha1.LogPipeline) str
 		AddConfigParam("name", "nest").
 		AddConfigParam("match", fmt.Sprintf("%s.*", pipeline.Name)).
 		AddConfigParam("operation", "nest").
-		AddConfigParam("wildcard", "__k8s__*").
+		AddConfigParam("wildcard", "__kyma__*").
 		AddConfigParam("nest_under", "kubernetes").
-		AddConfigParam("remove_prefix", "__k8s__").
+		AddConfigParam("remove_prefix", "__kyma__").
 		Build()
 
 	return fmt.Sprintf("%s%s%s%s", liftFilter, dropAnnotationsFilter, dropLabelsFilter, nestFilter)
@@ -46,7 +46,7 @@ func createDropAnnotations(pipelineName string) string {
 	return NewFilterSectionBuilder().
 		AddConfigParam("name", "record_modifier").
 		AddConfigParam("match", fmt.Sprintf("%s.*", pipelineName)).
-		AddConfigParam("remove_key", "__k8s__annotations").
+		AddConfigParam("remove_key", "__kyma__annotations").
 		Build()
 }
 
@@ -54,6 +54,6 @@ func createDropLabels(pipelineName string) string {
 	return NewFilterSectionBuilder().
 		AddConfigParam("name", "record_modifier").
 		AddConfigParam("match", fmt.Sprintf("%s.*", pipelineName)).
-		AddConfigParam("remove_key", "__k8s__labels").
+		AddConfigParam("remove_key", "__kyma__labels").
 		Build()
 }

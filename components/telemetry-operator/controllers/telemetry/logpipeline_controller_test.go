@@ -61,22 +61,22 @@ var _ = Describe("LogPipeline controller", func() {
 [FILTER]
     name         nest
     match        log-pipeline.*
-    add_prefix   __k8s__
+    add_prefix   __kyma__
     nested_under kubernetes
     operation    lift
 
 [FILTER]
     name       record_modifier
     match      log-pipeline.*
-    remove_key __k8s__annotations
+    remove_key __kyma__annotations
 
 [FILTER]
     name          nest
     match         log-pipeline.*
     nest_under    kubernetes
     operation     nest
-    remove_prefix __k8s__
-    wildcard      __k8s__*
+    remove_prefix __kyma__
+    wildcard      __kyma__*
 
 [OUTPUT]
     name                     stdout

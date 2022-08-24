@@ -26,27 +26,27 @@ func TestCreateKubernetesMetadataFilterDropAll(t *testing.T) {
 	expected := `[FILTER]
     name         nest
     match        test-logpipeline.*
-    add_prefix   __k8s__
+    add_prefix   __kyma__
     nested_under kubernetes
     operation    lift
 
 [FILTER]
     name       record_modifier
     match      test-logpipeline.*
-    remove_key __k8s__annotations
+    remove_key __kyma__annotations
 
 [FILTER]
     name       record_modifier
     match      test-logpipeline.*
-    remove_key __k8s__labels
+    remove_key __kyma__labels
 
 [FILTER]
     name          nest
     match         test-logpipeline.*
     nest_under    kubernetes
     operation     nest
-    remove_prefix __k8s__
-    wildcard      __k8s__*
+    remove_prefix __kyma__
+    wildcard      __kyma__*
 
 `
 	logPipeline := &telemetryv1alpha1.LogPipeline{
