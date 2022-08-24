@@ -80,7 +80,7 @@ spec:
                                 type: array
                                 items:
                                   type: string                              
-                                  pattern: ^(https://|file://).*$  
+                                  pattern: ^(https://|file://).*$
                           handler:
                             description: Name is the name of a handler
                             type: string
@@ -255,8 +255,8 @@ spec:
                               trusted_issuers:
                                 type: array
                                 items:
-                                  type: string                              
-                                  pattern: ^(https://|file://).*$ 
+                                  type: string
+                                  pattern: ^(https://|file://).*$
                           handler:
                             description: Name is the name of a handler
                             type: string

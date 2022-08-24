@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -88,6 +89,11 @@ func main() {
 
 	if err := bebSubMgr.Init(mgr); err != nil {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+	}
+
+	if err = (&v1alpha1.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLogger.Fatalw("Failed to create webhook", "error", err)
+		os.Exit(1)
 	}
 
 	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
