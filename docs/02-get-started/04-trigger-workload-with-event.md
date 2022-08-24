@@ -5,18 +5,6 @@ title: Trigger a workload with an event
 We already know how to create and expose a workload ([Function](02-deploy-expose-function.md) and [microservice](03-deploy-expose-microservice.md)). 
 Now it's time to actually use an event to trigger a workload.
 
-## Prerequisites
-
-1. Provision a [Kyma Cluster](01-quick-install.md).
-2. (Optional) Deploy [Kyma Dashboard](../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
-   ```bash
-   kyma dashboard
-   ```
-3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
-   ```bash
-   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
-   ```
-
 ## Create a Function
 
 First, create a sample Function that prints out the received event to console:
@@ -105,9 +93,8 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
-3. Provide the following parameters:
+1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
+2. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
    - **Application name**: `myapp`
    - **Event name**: `order.received`
@@ -115,8 +102,8 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 
    - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
 
-4. Click **Create**.
-5. Wait a few seconds for the Subscription to have status `READY`.
+3. Click **Create**.
+4. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -229,8 +216,8 @@ To verify that the event was properly delivered, check the logs of the Function:
 Run: 
 
 ```bash
-kubectl logs -f -n default \
-  $(kubectl get pod \
+kubectl logs -n default \
+  $(kubectl get pod -n default \
     --field-selector=status.phase==Running \
     -l serverless.kyma-project.io/function-name=lastorder \
     -o jsonpath="{.items[0].metadata.name}")

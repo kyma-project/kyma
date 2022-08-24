@@ -77,12 +77,11 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 
 1. From the left navigation, go to **Deployments**.
 2. Click on **Create Deployment +**.
-3. Choose the **Advanced** view and provide the following parameters:
+3. Provide the following parameters:
     - **Name**: `orders-service`
-    - **Labels**: add labels `app` and `example` and set their values to `orders-service`
     - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
   
-    _Optionally_, to save resources, modify these parameters:
+    _Optionally_, to save resources, go to the **Advanced** view and modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`
@@ -212,9 +211,8 @@ EOF
   Kyma Dashboard
   </summary>
 
-1. Using the left navigation, go to **Discovery and Network** > **Services** and select your Service.
-2. In your Services's view, click on **Create API Rule +**.
-3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
+1. In your Services's view, click on **Create API Rule +**.
+2. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
   </details>
