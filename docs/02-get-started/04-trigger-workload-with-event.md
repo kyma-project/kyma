@@ -5,23 +5,9 @@ title: Trigger a workload with an event
 We already know how to create and expose a workload ([Function](02-deploy-expose-function.md) and [microservice](03-deploy-expose-microservice.md)). 
 Now it's time to actually use an event to trigger a workload.
 
-## Prerequisites
-
-1. Provision a [Kyma Cluster](01-quick-install.md).
-2. (Optional) Deploy [Kyma Dashboard](../01-overview/main-areas/ui/ui-01-gui.md) on the Kyma cluster using the following command. Alternatively, you can also use `kubectl` CLI.
-   ```bash
-   kyma dashboard
-   ```
-3. (Optional) Install [CloudEvents Conformance Tool](https://github.com/cloudevents/conformance) for publishing events. Alternatively, you can also use `curl` to publish events.
-   ```bash
-   go install github.com/cloudevents/conformance/cmd/cloudevents@latest
-   ```
-
 ## Create a Function
 
 First, create a sample Function that prints out the received event to console:
-
->**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 <div tabs name="Deploy a Function" group="trigger-workload">
   <details open>
@@ -49,8 +35,8 @@ First, create a sample Function that prints out the received event to console:
   <summary label="kubectl">
   kubectl
   </summary>
-  
-  Run:
+
+Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -77,13 +63,13 @@ cat <<EOF | kubectl apply -f -
 EOF
 ```
 
-If the resources were created successfully, the command returns this message:
+The Function was created successfully if the command returns this message:
 
 ```bash
 function.serverless.kyma-project.io/lastorder created
 ```
 
-To check the Function status, run: 
+Wait a few seconds for the Function to have status `RUNNING`. To check the Function status, run:
 
 ```bash
 kubectl get functions -n default lastorder
@@ -105,9 +91,8 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   Kyma Dashboard
   </summary>
 
-1. In Kyma Dashboard, go to the view of your Function `lastorder`.
-2. Go to **Configuration** > **Create Subscription+**.
-3. Provide the following parameters:
+1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
+2. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
    - **Application name**: `myapp`
    - **Event name**: `order.received`
@@ -115,8 +100,8 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 
    - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
 
-4. Click **Create**.
-5. Wait a few seconds for the Subscription to have status `READY`.
+3. Click **Create**.
+4. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -124,7 +109,7 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
   kubectl
   </summary>
 
-Run: 
+Run:
 ```bash
 cat <<EOF | kubectl apply -f -
    apiVersion: eventing.kyma-project.io/v1alpha1
@@ -161,7 +146,7 @@ The operation was successful if the returned status says `true`.
 
 We created the `lastorder` Function and subscribed to the `order.received.v1` event by creating a Subscription CR. Now it's time to publish your event and trigger the Function. In this example, we'll port-forward the Kyma Eventing Service to localhost. 
 
-1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. Run: 
+1. Port-forward the Kyma Eventing Service to localhost. We will use port `3000`. In your terminal, run: 
    ```bash
    kubectl -n kyma-system port-forward service/eventing-event-publisher-proxy 3000:80
    ```
@@ -169,22 +154,6 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
 <div tabs name="Publish an event" group="trigger-workload">
   <details open>
-  <summary label="CloudEvents Conformance Tool">
-  CloudEvents Conformance Tool
-  </summary>
-
-   ```bash
-   cloudevents send http://localhost:3000/publish \
-      --type sap.kyma.custom.myapp.order.received.v1 \
-      --id 759815c3-b142-48f2-bf18-c6502dc0998f \
-      --source myapp \
-      --datacontenttype application/json \
-      --data "{\"orderCode\":\"3211213\"}" \
-      --yaml
-   ```
-
-  </details>
-  <details>
   <summary label="curl">
   curl
   </summary>
@@ -200,6 +169,22 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
         -d "{\"orderCode\":\"3211213\"}" \
         http://localhost:3000/publish
    ```
+  </details>
+  <details>
+  <summary label="CloudEvents Conformance Tool">
+  CloudEvents Conformance Tool
+  </summary>
+
+   ```bash
+   cloudevents send http://localhost:3000/publish \
+      --type sap.kyma.custom.myapp.order.received.v1 \
+      --id 759815c3-b142-48f2-bf18-c6502dc0998f \
+      --source myapp \
+      --datacontenttype application/json \
+      --data "{\"orderCode\":\"3211213\"}" \
+      --yaml
+   ```
+
   </details>
 </div>
 
@@ -221,7 +206,7 @@ To verify that the event was properly delivered, check the logs of the Function:
    Received event: { orderCode: '3211213' }
    ```
 
-</details>
+  </details>
   <details>
   <summary label="kubectl">
   kubectl
@@ -229,8 +214,8 @@ To verify that the event was properly delivered, check the logs of the Function:
 Run: 
 
 ```bash
-kubectl logs -f -n default \
-  $(kubectl get pod \
+kubectl logs -n default \
+  $(kubectl get pod -n default \
     --field-selector=status.phase==Running \
     -l serverless.kyma-project.io/function-name=lastorder \
     -o jsonpath="{.items[0].metadata.name}")
