@@ -276,7 +276,7 @@ auth:
     # into the container.
     #
     configMap:
-      name: sys-password
+      name: eventing-nats-accounts
       key: accounts.json
 
     ##########################
