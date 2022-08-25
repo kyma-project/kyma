@@ -97,7 +97,7 @@ test-connectivity-validator-debug: patch-for-validator-test connectivity-validat
 
 connectivity-validator-create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace $(NAMESPACE) istio-injection=enabled
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
 
 	helm template resources/charts/application-connectivity-validator-test \
 		--set namespace=$(NAMESPACE) \
