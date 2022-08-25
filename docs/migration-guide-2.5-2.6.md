@@ -21,4 +21,4 @@ If you are using override values to configure Fluent Bit, we recommend that you 
 
 3. After setting up your configuration in the Telemetry component, you don't need the old override values anymore, so you can delete the obsolete Fluent Bit resources.
 
-4. Delete the affected logging resources when you upgrade from Kyma 2.5 to 2.6: Either run the script [2.5-2.6-cleanup-logging-fluent-bit.sh](./assets/2.5-2.6-cleanup-logging-fluent-bit.sh) or run the commands from the script manually.
+4. Delete the affected logging resources: Either run the script [2.5-2.6-cleanup-logging-fluent-bit.sh](./assets/2.5-2.6-cleanup-logging-fluent-bit.sh) or run the commands from the script manually.
