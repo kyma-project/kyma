@@ -2,7 +2,7 @@
 
 ## Overview
 
-The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more LogPipeline and LogParser Custom Resources. The controller ensures that all Fluent Bit Pods run the current configuration by deleting Pods after the configuration has changed. See all [CRD attributes](apis/telemetry/v1alpha1/logpipeline_types.go) and some [examples](config/samples).
+The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more LogPipeline and LogParser custom resources. The controller ensures that all Fluent Bit Pods run the current configuration by deleting Pods after the configuration has changed. See all [CRD attributes](apis/telemetry/v1alpha1/logpipeline_types.go) and some [examples](config/samples).
 
 For now, creating Fluent Bit Pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
 
