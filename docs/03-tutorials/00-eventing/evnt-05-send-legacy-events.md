@@ -10,12 +10,12 @@ Kyma Eventing also supports sending and receiving of legacy events. In this tuto
 
 >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
-1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
-2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) in the Getting Started guide.
+1. Follow the [Prerequisites steps](./) for the Eventing tutorials.
+2. [Create a Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function).
 
 ## Create a Subscription
 
-Next, to subscribe to events, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of the type `order.received.v1`.
+To subscribe to events, we need a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to subscribe to events of the type `order.received.v1`.
 
 <div tabs name="Create a Subscription" group="trigger-workload">
   <details open>
