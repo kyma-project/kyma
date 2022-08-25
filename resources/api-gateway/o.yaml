@@ -1,0 +1,345 @@
+---
+# Source: api-gateway/templates/psp.yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: api-gateway
+  labels:
+    release: api-gateway
+    helm.sh/chart: api-gateway-1.0.0
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: api-gateway
+spec:
+  allowPrivilegeEscalation: false
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+---
+# Source: api-gateway/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-gateway-account
+  namespace:  kyma-system
+---
+# Source: api-gateway/templates/rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-gateway-certificates-account
+  namespace:  kyma-system
+---
+# Source: api-gateway/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-gateway-role
+rules:
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apirules", "apirules/status"]
+    verbs: ["*"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: ["oathkeeper.ory.sh"]
+    resources: ["rules"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames: 
+      - api-gateway
+---
+# Source: api-gateway/templates/rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-gateway-certificates-role
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create", "get", "patch", "list", "watch", "update"]
+---
+# Source: api-gateway/templates/rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-gateway-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: api-gateway-account # Service account assigned to the controller pod.
+    namespace:  kyma-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: api-gateway-role
+---
+# Source: api-gateway/templates/rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-gateway-certificates-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: api-gateway-certificates-account # Service account assigned to the controller pod.
+    namespace:  kyma-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: api-gateway-certificates-role
+---
+# Source: api-gateway/templates/monitoring.yaml
+# Dedicated Service for metrics endpoint
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-metrics
+  labels:
+    app.kubernetes.io/name: api-gateway
+    helm.sh/chart: api-gateway-1.0.0
+    app.kubernetes.io/instance: api-gateway
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ports:
+    - name: tcp-metrics
+      port: 8080
+  selector:
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/instance: api-gateway
+---
+# Source: api-gateway/templates/webhook-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-webhook-service
+  namespace: kyma-system
+spec:
+  ports:
+    - port: 443
+      name: https-convert
+      protocol: TCP
+      targetPort: 9443
+  selector:
+    app.kubernetes.io/name: api-gateway
+    helm.sh/chart: api-gateway-1.0.0
+    app.kubernetes.io/instance: api-gateway
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: api-gateway/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    kyma-project.io/component: controller
+    app.kubernetes.io/name: api-gateway
+    helm.sh/chart: api-gateway-1.0.0
+    app.kubernetes.io/instance: api-gateway
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+      app.kubernetes.io/name: api-gateway
+      app.kubernetes.io/instance: api-gateway
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+        kyma-project.io/component: controller
+        app.kubernetes.io/name: api-gateway
+        helm.sh/chart: api-gateway-1.0.0
+        app.kubernetes.io/instance: api-gateway
+        app.kubernetes.io/managed-by: Helm
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: api-gateway-webhook-server-cert
+      containers:
+        - name: api-gateway
+          image: "eu.gcr.io/kyma-project/api-gateway-controller:296e6704"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - mountPath: /tmp/k8s-webhook-server/serving-certs
+            name: cert
+            readOnly: true
+          command:
+            - /manager
+          args:
+            - --metrics-addr=0.0.0.0:8080
+            - --health-probe-addr=0.0.0.0:8081
+            - --oathkeeper-svc-address=ory-oathkeeper-proxy.kyma-system.svc.cluster.local
+            - --oathkeeper-svc-port=4455
+            - --jwks-uri=http://dex-service.kyma-system.svc.cluster.local:5556/keys
+            - --service-blocklist=kubernetes.default,istio-citadel.istio-system,istio-galley.istio-system,istio-ingressgateway.istio-system,istio-pilot.istio-system,istio-policy.istio-system,istio-sidecar-injector.istio-system,istio-telemetry.istio-system,apiserver-proxy.kyma-system,apiserver-proxy-ssl.kyma-system
+            - --generated-objects-labels=
+            - --default-domain-name=kyma.example.com
+            - --cors-allow-origins=regex:.*
+            - --cors-allow-methods=GET, POST, PUT, DELETE, PATCH
+            - --cors-allow-headers=Authorization, Content-Type, *
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 10m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          ports:
+          - containerPort: 8080
+            name: metrics
+          - containerPort: 8081
+            name: health
+          livenessProbe:
+            httpGet:
+              port: health
+              path: "/healthz"
+          readinessProbe:
+            httpGet:
+              port: health
+              path: "/readyz"
+      serviceAccountName: api-gateway-account
+      nodeSelector:
+---
+# Source: api-gateway/templates/webhook-certificates.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: api-gateway-init
+  labels:
+    app: api-gateway-init
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: init-certificates
+        image: "eu.gcr.io/kyma-project/api-gateway-webhook-certificates:296e6704"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SERVICE_NAME
+          value: api-gateway-webhook-service
+        - name: SECRET_NAMESPACE
+          value: kyma-system
+        - name: SECRET_NAME
+          value: api-gateway-webhook-server-cert
+      serviceAccountName: api-gateway-certificates-account
+---
+# Source: api-gateway/templates/webhook-certificates.yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: api-gateway-certifates-cronjob
+  labels:
+    app: api-gateway-certifates-cronjob
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  # Run cronjob two times per week on Sunday and on Thursday
+  schedule: "0 0 * * 0,4"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: init-certificates
+            image: "eu.gcr.io/kyma-project/api-gateway-webhook-certificates:296e6704"
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: SERVICE_NAME
+              value: api-gateway-webhook-service
+            - name: SECRET_NAMESPACE
+              value: kyma-system
+            - name: SECRET_NAME
+              value: api-gateway-webhook-server-cert
+          serviceAccountName: api-gateway-certificates-account
+---
+# Source: api-gateway/templates/monitoring.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: api-gateway-metrics
+spec:
+  host: api-gateway-metrics.kyma-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+---
+# Source: api-gateway/templates/monitoring.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: monitoring
+    app.kubernetes.io/name: api-gateway
+    helm.sh/chart: api-gateway-1.0.0
+    app.kubernetes.io/instance: api-gateway
+    app.kubernetes.io/managed-by: Helm
+  name: api-gateway
+spec:
+  endpoints:
+  - port: tcp-metrics
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|workqueue_queue_duration_seconds_sum|workqueue_queue_duration_seconds_count|workqueue_work_duration_seconds_sum|workqueue_work_duration_seconds_count|controller_runtime_reconcile_errors_total)$
+      action: keep
+    - sourceLabels: [__name__,le]
+      regex: 'rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)' # drop buckets to reduce metric footprint
+      action: drop
+    - sourceLabels: [__name__,url]
+      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|gateway.kyma-project.io).+)$ # allow metrics from core, apps and api gateway API group
+      action: keep
+  namespaceSelector:
+    matchNames:
+      - "kyma-system"
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+      helm.sh/chart: api-gateway-1.0.0
+      app.kubernetes.io/instance: api-gateway
+      app.kubernetes.io/managed-by: Helm
