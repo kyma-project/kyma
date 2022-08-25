@@ -126,20 +126,29 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 	h.receive(ctx, event)
-	statusCode, dispatchTime, respBody := h.send(ctx, event)
+	statusCode, dispatchTime, err := h.send(ctx, event)
+	var errMessage string
+	if err != nil {
+		errMessage = err.Error()
+	}
 
 	// Change response as per old error codes
-	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
+	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, errMessage)
 
-	h.namedLogger().With(
+	loggerWithEventInfo := h.namedLogger().With(
 		"id", event.ID(),
 		"source", event.Source(),
 		"before", eventTypeOriginal,
 		"after", event.Type(),
 		"statusCode", statusCode,
 		"duration", dispatchTime,
-		"responseBody", string(respBody),
-	).Info("Event dispatched")
+	)
+
+	if err == nil {
+		loggerWithEventInfo.Info("Event was successfully sent to EventingBackend")
+	} else {
+		loggerWithEventInfo.Error("Failed to send the event to EventingBackend")
+	}
 }
 
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
@@ -181,18 +190,26 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	// Add tracing context to cloud events
 	tracing.AddTracingContextToCEExtensions(request.Header, event)
 
-	statusCode, dispatchTime, respBody := h.send(ctx, event)
-	h.writeResponse(writer, statusCode, respBody)
+	statusCode, dispatchTime, err := h.send(ctx, event)
+	var errMessage string
+	if err != nil {
+		errMessage = err.Error()
+	}
+	h.writeResponse(writer, statusCode, []byte(errMessage))
 
-	h.namedLogger().With(
+	loggerWithEventInfo := h.namedLogger().With(
 		"id", event.ID(),
 		"source", event.Source(),
 		"before", eventTypeOriginal,
 		"after", eventTypeClean,
 		"statusCode", statusCode,
 		"duration", dispatchTime,
-		"responseBody", string(respBody),
-	).Info("Event dispatched")
+	)
+	if err == nil {
+		loggerWithEventInfo.Info("Event was successfully sent to EventingBackend")
+	} else {
+		loggerWithEventInfo.Error("Failed to send the event to EventingBackend")
+	}
 }
 
 // writeResponse writes the HTTP response given the status code and response body.
@@ -218,7 +235,7 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 }
 
 // send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
-func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
+func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, error) {
 	start := time.Now()
 	s := *h.Sender
 	resp, err := s.Send(ctx, event)
@@ -226,11 +243,11 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 	dispatchTime := time.Since(start)
 	if err != nil {
 		h.collector.RecordError()
-		return resp, dispatchTime, []byte(err.Error())
+		return resp, dispatchTime, err
 	}
 	h.collector.RecordLatency(dispatchTime, resp, s.URL())
 	h.collector.RecordRequests(resp, s.URL())
-	return resp, dispatchTime, []byte{}
+	return resp, dispatchTime, nil
 }
 
 func (h *Handler) namedLogger() *zap.SugaredLogger {

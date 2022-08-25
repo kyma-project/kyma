@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	natsserver "github.com/nats-io/nats-server/v2/server"
 	"go.uber.org/zap"
 
 	"github.com/cloudevents/sdk-go/v2/event"
@@ -18,9 +18,12 @@ import (
 )
 
 const (
-	natsBackend           = "nats"
-	jestreamHandlerName   = "jetstream-handler"
-	noSpaceLeftErrMessage = "no space left on device"
+	natsBackend         = "nats"
+	jestreamHandlerName = "jetstream-handler"
+	// jetstreamThreshold represents the number of bytes which is approximately equal to 930MiB
+	// 930MiB is the approximate threshold when the JetStream storage of 1GiB gets full and JetStream gets disabled.
+	jetstreamThreshold             = 976000000
+	jetStreamStorageFullErrMessage = "JetStream is disabled due to full storage"
 )
 
 // compile time check
@@ -73,13 +76,29 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 		return http.StatusUnprocessableEntity, err
 	}
 
+	// check if JetStream is enabled and propagate the errors in case it's disabled
+	if _, accountInfoErr := jsCtx.AccountInfo(); accountInfoErr != nil {
+		s.namedLogger().Errorw("Cannot send event to backend", "accountInfoErr", accountInfoErr)
+		// if the error matches: "JetStream system temporarily unavailable"
+		if accountInfoErr.Error() == natsserver.ApiErrors[natsserver.JSClusterNotAvailErr].Description {
+			// check how full the JetStream storage is
+			streamInfo, err := jsCtx.StreamInfo(s.envCfg.JSStreamName)
+			if err != nil {
+				return http.StatusInternalServerError, errors.New("cannot get stream info")
+			}
+			// if the use of JetStream storage surpassed the threshold and JetStream got disabled
+			// this means, that JetStream got disabled due to full storage.
+			if streamInfo.State.Bytes > jetstreamThreshold {
+				return http.StatusInsufficientStorage, errors.New(jetStreamStorageFullErrMessage)
+			}
+		}
+		return http.StatusInternalServerError, accountInfoErr
+	}
+
 	// send the event
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
-		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
-			return http.StatusInsufficientStorage, err
-		}
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusNoContent, nil
