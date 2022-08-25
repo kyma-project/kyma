@@ -249,6 +249,16 @@ type LogPipeline struct {
 	Status LogPipelineStatus `json:"status,omitempty"`
 }
 
+// ContainsCustomPlugin returns true if the pipeline contains any custom filters or outputs
+func (l *LogPipeline) ContainsCustomPlugin() bool {
+	for _, filter := range l.Spec.Filters {
+		if filter.Custom != "" {
+			return true
+		}
+	}
+	return l.Spec.Output.CustomDefined()
+}
+
 // +kubebuilder:object:root=true
 // LogPipelineList contains a list of LogPipeline
 type LogPipelineList struct {

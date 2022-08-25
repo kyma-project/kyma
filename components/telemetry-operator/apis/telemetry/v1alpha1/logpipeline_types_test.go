@@ -155,3 +155,39 @@ func TestOutput(t *testing.T) {
 		})
 	}
 }
+
+func TestContainsCustomPluginWithCustomFilter(t *testing.T) {
+	logPipeline := &LogPipeline{
+		Spec: LogPipelineSpec{
+			Filters: []Filter{
+				{Custom: `
+    Name    some-filter`,
+				},
+			},
+		},
+	}
+
+	result := logPipeline.ContainsCustomPlugin()
+	require.True(t, result)
+}
+
+func TestContainsCustomPluginWithCustomOutput(t *testing.T) {
+	logPipeline := &LogPipeline{
+		Spec: LogPipelineSpec{
+			Output: Output{
+				Custom: `
+    Name    some-output`,
+			},
+		},
+	}
+
+	result := logPipeline.ContainsCustomPlugin()
+	require.True(t, result)
+}
+
+func TestContainsCustomPluginWithoutAny(t *testing.T) {
+	logPipeline := &LogPipeline{Spec: LogPipelineSpec{}}
+
+	result := logPipeline.ContainsCustomPlugin()
+	require.False(t, result)
+}
