@@ -14,18 +14,6 @@ data:
     # PID file shared with configuration reloader.
     pid_file: "/var/run/nats/nats.pid"
 
-    auth:
-      enabled: true
-
-      systemAccount: sa
-
-      basic:
-        accounts:
-          sa:
-            users:
-              - user: sa
-                pass: sa
-
     ###############
     #             #
     # Monitoring  #
@@ -176,8 +164,8 @@ data:
     ##################
     {{- if .Values.auth.resolver }}
       {{- if eq .Values.auth.resolver.type "memory" }}
-        resolver: MEMORY
-        include "accounts/{{ .Values.auth.resolver.configMap.key }}"
+    resolver: MEMORY
+    include "accounts/{{ .Values.auth.resolver.configMap.key }}"
       {{- end }}
       {{- if eq .Values.auth.resolver.type "full" }}
         {{- if .Values.auth.resolver.configMap }}
