@@ -124,8 +124,6 @@ function oidcE2ETest(options, getShootInfoFunc) {
       shoot = skr.shoot;
 
       console.log("SHOOT-after", shoot);
-
-      initK8sConfig(shoot);
     });
 
     it('Should get Runtime Status after updating OIDC config and admins', async function() {
