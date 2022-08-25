@@ -108,7 +108,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       this.timeout(updateTimeout);
       const customParams = {
         oidc: givenOidcConfig,
-        administrators: options.kebUserId[0],
+        administrators: options.kebUserId,
       };
       console.log("SHOOT-before", shoot);
       const skr = await updateSKR(keb,
