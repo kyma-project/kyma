@@ -10,8 +10,8 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/httpd"
 )
 
-const v1Events = "http://central-application-connectivity-validator.kyma-system:8080/event-test/v1/events"
-const v2Events = "http://central-application-connectivity-validator.kyma-system:8080/event-test/v2/events"
+const v1Events = "http://central-application-connectivity-validator.kyma-system:8080/event-test-standalone/v1/events"
+const v2Events = "http://central-application-connectivity-validator.kyma-system:8080/event-test-standalone/v2/events"
 
 type ValidatorSuite struct {
 	suite.Suite
