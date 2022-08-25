@@ -1,7 +1,8 @@
 const {
   gatherOptions,
 } = require('./index');
-const {getOrProvisionSKR} = require('./provision/provision-skr');
+const {getOrProvisionSKR, getSKRKymaVersion} = require('./provision/provision-skr');
+const {expect} = require('chai');
 
 const provisioningTimeout = 1000 * 60 * 30; // 30m
 let globalTimeout = 1000 * 60 * 70; // 70m
@@ -16,6 +17,7 @@ describe('Provision SKR instance', function() {
   let skr;
   let options = undefined;
   let isSKRProvisioned = false;
+  let kymaVersion = '';
 
   before('Gather default options', async function() {
     options = gatherOptions(); // with default values
@@ -29,6 +31,11 @@ describe('Provision SKR instance', function() {
     isSKRProvisioned = true;
   });
 
+  it('should fetch SKR kyma version', async function() {
+    kymaVersion = await getSKRKymaVersion(options.instanceID);
+    expect(kymaVersion).to.not.be.empty;
+  });
+
   after('Print Shoot Info', async function() {
     // Print data out for spinnaker.
     // It is used in spinnaker to pass data to next stages.
@@ -38,5 +45,6 @@ describe('Provision SKR instance', function() {
       console.log(`SPINNAKER_PROPERTY_INSTANCE_ID=${options.instanceID}`);
     }
     console.log(`SPINNAKER_PROPERTY_PROVISIONED=${isSKRProvisioned}`);
+    console.log(`SPINNAKER_PROPERTY_KYMA_VERSION=${kymaVersion}`);
   });
 });

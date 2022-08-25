@@ -9,8 +9,8 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
 
 >**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
-1. Follow the [prerequisites steps](../../02-get-started/04-trigger-workload-with-event.md#prerequisites) in the Getting Started guide.
-2. Create a Function by following the [instructions](../../02-get-started/04-trigger-workload-with-event.md#create-a-function) in the Getting Started guide.
+1. Follow the [Prerequisites steps](./) for the Eventing tutorials.
+2. [Create a Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function).
 3. For this tutorial, instead of the default code sample, replace the Function source with the following code. To simulate prolonged event processing, the Function waits for 5 seconds before returning the response.
 
    <div tabs name="Deploy a Function" group="create-workload">
@@ -70,7 +70,7 @@ The "in-flight messages" config defines the number of events that Kyma Eventing 
 
 ## Create a Subscription with Max-In-Flight config
 
-Next, create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. Subscribe for events of the type: `order.received.v1` and set the `maxInFlightMessages` to `5`, so that Kyma Eventing forwards maximum 5 events in parallel to the sink without waiting for a response.
+Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. Subscribe for events of the type: `order.received.v1` and set the `maxInFlightMessages` to `5`, so that Kyma Eventing forwards maximum 5 events in parallel to the sink without waiting for a response.
 
 <div tabs name="Create a Subscription" group="create-subscription">
   <details open>

@@ -45,6 +45,7 @@ const {
   slowTime,
   mockNamespace,
   isSKR,
+  testCompassFlow,
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
@@ -82,7 +83,7 @@ describe('Eventing tests', function() {
   });
 
   // eventingTestSuite - Runs Eventing tests
-  function eventingTestSuite(backend, isSKR) {
+  function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
     it('lastorder function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace, mockNamespace);
     });
@@ -91,7 +92,7 @@ describe('Eventing tests', function() {
       await checkInClusterEventDelivery(testNamespace);
     });
 
-    if (isSKR) {
+    if (isSKR && testCompassFlow) {
       eventingE2ETestSuiteWithCommerceMock(backend);
     }
 
@@ -224,7 +225,7 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
     // Running Eventing end-to-end tests
-    eventingTestSuite(natsBackend, isSKR);
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
 
@@ -253,7 +254,7 @@ describe('Eventing tests', function() {
       }
     });
     // Running Eventing end-to-end tests
-    eventingTestSuite(bebBackend, isSKR);
+    eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
     it('Run Eventing Monitoring tests', async function() {
       await eventingMonitoringTest(bebBackend, isSKR, isJetStreamEnabled());
@@ -272,7 +273,7 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
     // Running Eventing end-to-end tests
-    eventingTestSuite(natsBackend, isSKR);
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
 

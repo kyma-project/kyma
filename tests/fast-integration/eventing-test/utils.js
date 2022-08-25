@@ -14,9 +14,12 @@ const {
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {eventMeshSecretFilePath} = require('./common/common');
+const kymaVersion = process.env.KYMA_VERSION || '';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
+const skrInstanceId = process.env.INSTANCE_ID || '';
+const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
-const suffix = getSuffix(isSKR);
+const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
 const scenarioName = `test-${suffix}`;
 const testNamespace = `test-${suffix}`;
@@ -39,13 +42,16 @@ let director = null;
 let shootName = null;
 if (isSKR) {
   gardener = new GardenerClient(GardenerConfig.fromEnv()); // create gardener client
-  director = new DirectorClient(DirectorConfig.fromEnv()); // director client for Compass
   shootName = getShootNameFromK8sServerUrl();
+
+  if (testCompassFlow) {
+    director = new DirectorClient(DirectorConfig.fromEnv()); // director client for Compass
+  }
 }
 
 // cleans up all the test resources including the compass scenario
 async function cleanupTestingResources() {
-  if (isSKR) {
+  if (isSKR && testCompassFlow) {
     debug('Cleaning compass resources');
     // Get shoot info from gardener to get compassID for this shoot
     const skrInfo = await gardener.getShoot(shootName);
@@ -68,9 +74,9 @@ async function cleanupTestingResources() {
 }
 
 // gets the suffix depending on kyma type
-function getSuffix(isSKR) {
+function getSuffix(isSKR, testCompassFlow) {
   let suffix;
-  if (isSKR) {
+  if (isSKR && testCompassFlow) {
     suffix = getEnvOrThrow('TEST_SUFFIX');
   } else {
     suffix = 'evnt';
@@ -135,7 +141,10 @@ module.exports = {
   scenarioName,
   testNamespace,
   mockNamespace,
+  kymaVersion,
   isSKR,
+  skrInstanceId,
+  testCompassFlow,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   timeoutTime,
