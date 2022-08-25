@@ -11,6 +11,27 @@ First, let's create a Deployment that provides the microservice definition and l
 
 <div tabs name="Create a microservice Deployment" group="deploy-expose-microservice">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. From the left navigation, go to **Deployments**.
+2. Click on **Create Deployment +**.
+3. Provide the following parameters:
+    - **Name**: `orders-service`
+    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
+  
+    _Optionally_, to save resources, go to the **Advanced** view and modify these parameters:
+    - **Memory requests**: `10Mi`
+    - **Memory limits**: `32Mi`
+    - **CPU requests (m)**: `16m`
+    - **CPU limits (m)**: `20m`  
+  
+4. Click **Create**.
+
+The operation was successful if you can see `1/1` Pods running in the Deployment's view.
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
@@ -68,27 +89,6 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 > **NOTE:** You might need to wait a few seconds for the replica to be ready and return the status.
 
   </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. From the left navigation, go to **Deployments**.
-2. Click on **Create Deployment +**.
-3. Provide the following parameters:
-    - **Name**: `orders-service`
-    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`  
-  
-    _Optionally_, to save resources, go to the **Advanced** view and modify these parameters:
-    - **Memory requests**: `10Mi`
-    - **Memory limits**: `32Mi`
-    - **CPU requests (m)**: `16m`
-    - **CPU limits (m)**: `20m`  
-  
-4. Click **Create**.
-
-The operation was successful if you can see `1/1` Pods running in the Deployment's view.
-  </details>
 </div>
 
 ### Create the Service
@@ -97,6 +97,31 @@ Now that we have the Deployment, let's deploy the Kubernetes [Service](https://k
 
 <div tabs name="Create a Service" group="deploy-expose-microservice">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. From the left navigation, go to **Discovery and Network > Services**.
+2. Click on **Create Service +**.
+3. In the **Create Service** view, paste the following values to your YAML file:  
+
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: orders-service
+   spec:
+     selector:
+       app: orders-service
+     ports:
+       - protocol: TCP
+         port: 80
+         targetPort: 8080
+    ```
+
+4. Click **Create**. 
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
@@ -135,31 +160,6 @@ kubectl get service orders-service -o=jsonpath="{.metadata.uid}"
 The operation was successful if the command returns the **uid** of your Service.
 
   </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. From the left navigation, go to **Discovery and Network > Services**.
-2. Click on **Create Service +**.
-3. In the **Create Service** view, paste the following values to your YAML file:  
-
-   ```yaml
-   apiVersion: v1
-   kind: Service
-   metadata:
-     name: orders-service
-   spec:
-     selector:
-       app: orders-service
-     ports:
-       - protocol: TCP
-         port: 80
-         targetPort: 8080
-    ```
-
-4. Click **Create**. 
-  </details>
 </div>
 
 ## Expose the microservice
@@ -172,6 +172,16 @@ To expose our microservice, we must create an [APIRule](../05-technical-referenc
 
 <div tabs name="Expose the microservice" group="deploy-expose-microservice">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In your Services's view, click on **Create API Rule +**.
+2. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
+
+> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
@@ -204,16 +214,6 @@ EOF
 ```
 
   </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. In your Services's view, click on **Create API Rule +**.
-2. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
-
-> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
-  </details>
 </div>
 
 ### Verify the microservice exposure
@@ -222,6 +222,19 @@ Now let's check that the microservice has been exposed successfully.
 
 <div tabs name="Verify microservice exposure" group="deploy-expose-microservice">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. From your Services's view, get the APIRule's **Host**.
+
+   > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
+
+2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
+
+The operation was successful if the page shows the (possibly empty `[]`) list of orders.
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
@@ -234,18 +247,5 @@ curl https://orders-service.$CLUSTER_DOMAIN/orders
 
 The operation was successful if the command returns the (possibly empty `[]`) list of orders.
 
-  </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. From your Services's view, get the APIRule's **Host**.
-
-   > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
-
-2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
-
-The operation was successful if the page shows the (possibly empty `[]`) list of orders.
   </details>
 </div>

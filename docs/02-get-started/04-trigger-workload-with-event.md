@@ -11,11 +11,32 @@ First, create a sample Function that prints out the received event to console:
 
 <div tabs name="Deploy a Function" group="trigger-workload">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. Go to **Namespaces** and select the default Namespace.
+2. Go to **Workloads** > **Functions** and click **Create Function +**.
+3. Name the Function `lastorder` and click **Create**.
+4. In the inline editor for the Function, replace its source with the following code:
+    ```js
+    module.exports = {
+      main: async function (event, context) {
+        console.log("Received event:", event.data);
+        return;
+      } 
+    }
+    ```
+5. Save your changes.
+6. Wait a few seconds for the Function to have status `RUNNING`.
+
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
-  
-  Run:
+
+Run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -48,34 +69,13 @@ The Function was created successfully if the command returns this message:
 function.serverless.kyma-project.io/lastorder created
 ```
 
-Wait a few seconds for the Function to have status `RUNNING`. To check the Function status, run: 
+Wait a few seconds for the Function to have status `RUNNING`. To check the Function status, run:
 
 ```bash
 kubectl get functions -n default lastorder
 ```
 
 > **NOTE:** You might need to wait a few seconds for the Function to be ready.
-
-  </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. Go to **Namespaces** and select the default Namespace.
-2. Go to **Workloads** > **Functions** and click **Create Function +**.
-3. Name the Function `lastorder` and click **Create**.
-4. In the inline editor for the Function, replace its source with the following code:
-    ```js
-    module.exports = {
-      main: async function (event, context) {
-        console.log("Received event:", event.data);
-        return;
-      } 
-    }
-    ```
-5. Save your changes.
-6. Wait a few seconds for the Function to have status `RUNNING`.
 
   </details>
 </div>
@@ -87,11 +87,29 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 
 <div tabs name="Create a Subscription" group="trigger-workload">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
+2. Provide the following parameters:
+   - **Subscription name**: `lastorder-sub`
+   - **Application name**: `myapp`
+   - **Event name**: `order.received`
+   - **Event version**: `v1`
+
+   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
+
+3. Click **Create**.
+4. Wait a few seconds for the Subscription to have status `READY`.
+
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
 
-Run: 
+Run:
 ```bash
 cat <<EOF | kubectl apply -f -
    apiVersion: eventing.kyma-project.io/v1alpha1
@@ -120,24 +138,6 @@ kubectl get subscriptions lastorder-sub -o=jsonpath="{.status.ready}"
 ```
 
 The operation was successful if the returned status says `true`.
-
-  </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
-2. Provide the following parameters:
-   - **Subscription name**: `lastorder-sub`
-   - **Application name**: `myapp`
-   - **Event name**: `order.received`
-   - **Event version**: `v1`
-
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
-
-3. Click **Create**.
-4. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
 </div>
@@ -194,6 +194,20 @@ To verify that the event was properly delivered, check the logs of the Function:
 
 <div tabs name="Verify the event delivery" group="trigger-workload">
   <details open>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In Kyma Dashboard, return to the view of your `lastorder` Function.
+2. Go to **Code** and find the **Replicas of the Function** section.
+3. Click on **View Logs**.
+4. You see the received event in the logs:
+   ```
+   Received event: { orderCode: '3211213' }
+   ```
+
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
@@ -211,20 +225,6 @@ You see the received event in the logs:
 ```
 Received event: { orderCode: '3211213' }
 ```
-
-  </details>
-  <details>
-  <summary label="Kyma Dashboard">
-  Kyma Dashboard
-  </summary>
-
-1. In Kyma Dashboard, return to the view of your `lastorder` Function.
-2. Go to **Code** and find the **Replicas of the Function** section.
-3. Click on **View Logs**.
-4. You see the received event in the logs:
-   ```
-   Received event: { orderCode: '3211213' }
-   ```
 
   </details>
 </div>
