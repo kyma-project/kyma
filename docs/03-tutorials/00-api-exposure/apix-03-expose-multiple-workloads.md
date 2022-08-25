@@ -5,7 +5,7 @@ title: Expose multiple workloads on the same host
 This tutorial shows how to expose multiple services that share the same host on different paths.
 
 You can either define a service at the root level, which is applied to all paths except the ones you've explicitly set service for at the rules level, or you can just define different services on each path separately without the need to define a root service.
-   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md).
+   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-04-expose-and-secure-workload-oauth2.md) or [JWT](./apix-05-expose-and-secure-workload-jwt.md).
 
 The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
