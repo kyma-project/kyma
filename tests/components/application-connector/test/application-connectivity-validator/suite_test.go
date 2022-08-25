@@ -10,6 +10,9 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/httpd"
 )
 
+const v1Events = "http://central-application-connectivity-validator.kyma-system:8080/even-test/v1/events"
+const v2Events = "http://central-application-connectivity-validator.kyma-system:8080/even-test/v2/events"
+
 type ValidatorSuite struct {
 	suite.Suite
 }
@@ -30,30 +33,37 @@ func TestValidatorSuite(t *testing.T) {
 
 func (vs *ValidatorSuite) TestGoodCert() {
 	cli := httpd.NewCli(vs.T())
-	url := validatorURL("event-test", "v2/events")
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	vs.Nil(err)
+	endpoints := []string{v1Events, v2Events}
+	for _, url := range endpoints {
+		vs.Run(fmt.Sprintf("Send request to %s URL", url), func() {
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			vs.Nil(err)
 
-	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=event-test"))
+			req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=event-test"))
 
-	res, _, err := cli.Do(req)
-	vs.Require().Nil(err)
-	vs.Equal(http.StatusOK, res.StatusCode)
+			res, _, err := cli.Do(req)
+			vs.Require().Nil(err)
+			vs.Equal(http.StatusOK, res.StatusCode)
+		})
+	}
 }
 
 func (vs *ValidatorSuite) TestBadCert() {
 	cli := httpd.NewCli(vs.T())
-	url := validatorURL("event-test", "v2/events")
+	endpoints := []string{v1Events, v2Events}
+	for _, url := range endpoints {
+		vs.Run(fmt.Sprintf("Send request to %s URL", url), func() {
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			vs.Nil(err)
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	vs.Nil(err)
+			req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=nonexistant"))
 
-	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=nonexistant"))
-
-	res, _, err := cli.Do(req)
-	vs.Require().Nil(err)
-	vs.Equal(http.StatusForbidden, res.StatusCode)
+			res, _, err := cli.Do(req)
+			vs.Require().Nil(err)
+			vs.Equal(http.StatusForbidden, res.StatusCode)
+		})
+	}
 }
 
 func certFields(subject string) string {
