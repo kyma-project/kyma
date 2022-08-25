@@ -91,11 +91,16 @@ type TLSConfig struct {
 	SkipCertificateValidation bool `json:"skipCertificateValidation,omitempty"`
 }
 
-// Output describes a Fluent Bit output configuration section
+// Output describes a Fluent Bit output configuration section. It is a discriminated union, so a single output plugin must be defined (custom, http, loki, etc.).
 type Output struct {
-	Custom string      `json:"custom,omitempty"`
-	HTTP   *HTTPOutput `json:"http,omitempty"`
-	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
+	// Raw Fluent Bit output specified in the Fluent Bit configuration syntax.
+	Custom string `json:"custom,omitempty"`
+
+	// HTTP Fluent Bit output plugin.
+	HTTP *HTTPOutput `json:"http,omitempty"`
+
+	// Unofficial Loki Fluent Bit output plugin from Grafana Labs.
+	Loki *LokiOutput `json:"grafana-loki,omitempty"`
 }
 
 func (o *Output) CustomDefined() bool {

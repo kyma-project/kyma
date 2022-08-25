@@ -107,12 +107,17 @@ spec:
                     type: object
                 type: object
               output:
-                description: Output describes a Fluent Bit output configuration section
+                description: Output describes a Fluent Bit output configuration section.
+                  It is a discriminated union, so a single output plugin must be defined
+                  (custom, http, loki, etc.).
                 properties:
                   custom:
+                    description: Raw Fluent Bit output specified in the Fluent Bit
+                      configuration syntax.
                     type: string
                   grafana-loki:
-                    description: LokiOutput describes a Fluent Bit Loki output configuration
+                    description: Unofficial Loki Fluent Bit output plugin from Grafana
+                      Labs.
                     properties:
                       labels:
                         additionalProperties:
@@ -141,7 +146,7 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    description: HTTP Fluent Bit output plugin.
                     properties:
                       compress:
                         type: string
@@ -212,6 +217,10 @@ spec:
                             type: object
                         type: object
                     type: object
+                required:
+                - custom
+                - grafana-loki
+                - http
                 type: object
               variables:
                 items:
