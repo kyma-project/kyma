@@ -19,6 +19,10 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"sigs.k8s.io/controller-runtime/pkg/handler" // Required for Watching
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
@@ -36,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/source" // Required for Watching
 )
 
 var (
@@ -76,9 +81,51 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &telemetryv1alpha1.LogPipeline{}, "spec.output.http.host.valueFrom.secretKeyRef.name", func(rawObj client.Object) []string {
+		// Extract the secret name from the logpipeline Spec, if one is provided
+		logPipeline := rawObj.(*telemetryv1alpha1.LogPipeline)
+		fmt.Printf("logpipe: %s\n", logPipeline.Name)
+		if logPipeline.Spec.Output.HTTP.Host.ValueFrom.SecretKey.Name == "" {
+			fmt.Println("returning nil!!")
+			return nil
+		}
+		fmt.Printf("Appending!! :%s \n", logPipeline.Spec.Output.HTTP.Host.ValueFrom.SecretKey.Name)
+		return []string{logPipeline.Spec.Output.HTTP.Host.ValueFrom.SecretKey.Name}
+	}); err != nil {
+		return err
+	}
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
+		Watches(
+			&source.Kind{Type: &corev1.Secret{}},
+			handler.EnqueueRequestsFromMapFunc(r.findPipelinesForSecret),
+		).
 		Complete(r)
+}
+
+func (r *LogPipelineReconciler) findPipelinesForSecret(secret client.Object) []reconcile.Request {
+	var logPipelines telemetryv1alpha1.LogPipelineList
+	fmt.Printf("secretname: %s", secret.GetName())
+	listOps := &client.ListOptions{
+		FieldSelector: fields.OneTermEqualSelector("spec.output.http.host.valueFrom.secretKeyRef.name", secret.GetName()),
+	}
+	err := r.List(context.TODO(), &logPipelines, listOps)
+	if err != nil {
+		return []reconcile.Request{}
+	}
+	fmt.Printf("len of logpipelines: %d\n", len(logPipelines.Items))
+	fmt.Println("I am invoked!!!")
+	requests := make([]reconcile.Request, len(logPipelines.Items))
+	for i, item := range logPipelines.Items {
+		requests[i] = reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      item.GetName(),
+				Namespace: item.GetNamespace(),
+			},
+		}
+	}
+	fmt.Printf("reconcile req: %+v\n", requests)
+	return requests
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
@@ -96,6 +143,7 @@ func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 
+	log.Info("RECONCILING!!")
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
 		log.Info("Ignoring deleted LogPipeline")
