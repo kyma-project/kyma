@@ -74,3 +74,7 @@ func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 
 	return nil
 }
+
+func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error {
+	return nil
+}
