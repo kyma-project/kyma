@@ -40,7 +40,7 @@ func (vs *ValidatorSuite) TestGoodCert() {
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			vs.Nil(err)
 
-			req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=event-test"))
+			req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=event-test-standalone"))
 
 			res, _, err := cli.Do(req)
 			vs.Require().Nil(err)
