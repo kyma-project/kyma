@@ -18,7 +18,7 @@ nats:
   # stacks, memory heap sizes, etc.
   profiling:
     enabled: false
-    port: 600
+    port: 6000
 
   # Toggle using health check probes to better detect failures.
   healthcheck:
