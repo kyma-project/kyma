@@ -12,9 +12,9 @@ To eliminate potential security risks when using Functions, bear in mind these f
 
 - All administrators and regular users who have access to a specific Namespace in a cluster can also access:
 
-    - Source code of all Functions within this Namespace
-    - Internal Docker registry that contains Function images
-    - Secrets allowing the build Job to pull and push images from and to the Docker registry (in non-system Namespaces)
+  - Source code of all Functions within this Namespace
+  - Internal Docker registry that contains Function images
+  - Secrets allowing the build Job to pull and push images from and to the Docker registry (in non-system Namespaces)
 
 Serverless Functions are adapted to run in a non-privileged mode. If you [enable Pod Security Policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/) in your cluster, Functions will have the following security measures set in place:
 
