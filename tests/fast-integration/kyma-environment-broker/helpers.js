@@ -126,7 +126,10 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
   let kubeconfigContent;
   try {
     kubeconfigContent = await keb.downloadKubeconfig(instanceID);
-  } catch (err) {}
+  } catch (err) {
+    console.log("ensureValidOIDCConfigInCustomerFacingKubeconfig");
+    console.log(err);
+  }
 
   const issuerMatchPattern = '\\b' + oidcConfig.issuerURL + '\\b';
   const clientIDMatchPattern = '\\b' + oidcConfig.clientID + '\\b';
