@@ -214,11 +214,10 @@ To verify that the event was properly delivered, check the logs of the Function:
 Run: 
 
 ```bash
-kubectl logs -n default \
-  $(kubectl get pod -n default \
-    --field-selector=status.phase==Running \
-    -l serverless.kyma-project.io/function-name=lastorder \
-    -o jsonpath="{.items[0].metadata.name}")
+kubectl logs \
+  -n default \
+  -l serverless.kyma-project.io/function-name=lastorder,serverless.kyma-project.io/resource=deployment \
+  -c function
 ```
 
 You see the received event in the logs:
