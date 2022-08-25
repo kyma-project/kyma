@@ -82,7 +82,7 @@ func main() {
 		"/targetkind-validating",
 		&k8sWebhook.Admission{Handler: targetKindValidate.NewValidationHandler(log.WithField("webhook", "targetkind-validating"))})
 
-	targetKindWorker := worker.NewTargetKindWorker(targetKindStorage, dc)
+	targetKindWorker := worker.NewTargetKindWorker(targetKindStorage)
 
 	err = syncer.NewExecutor(cli, logger).TargetKinds(targetKindWorker)
 	fatalOnError(err, "while syncing TargetKinds")

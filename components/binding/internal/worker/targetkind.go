@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/client-go/dynamic"
 )
 
 type TargetKindStorage interface {
@@ -18,14 +17,12 @@ type TargetKindStorage interface {
 }
 
 type TargetKindWorker struct {
-	storage       TargetKindStorage
-	dynamicClient dynamic.Interface
+	storage TargetKindStorage
 }
 
-func NewTargetKindWorker(storage TargetKindStorage, dynamicClient dynamic.Interface) *TargetKindWorker {
+func NewTargetKindWorker(storage TargetKindStorage) *TargetKindWorker {
 	return &TargetKindWorker{
-		storage:       storage,
-		dynamicClient: dynamicClient,
+		storage: storage,
 	}
 }
 
