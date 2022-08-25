@@ -214,7 +214,10 @@ To verify that the event was properly delivered, check the logs of the Function:
 Run: 
 
 ```bash
-kubectl logs -n default -l serverless.kyma-project.io/function-name=lastorder,serverless.kyma-project.io/resource=deployment -c function
+kubectl logs \
+  -n default \
+  -l serverless.kyma-project.io/function-name=lastorder,serverless.kyma-project.io/resource=deployment \
+  -c function
 ```
 
 You see the received event in the logs:
