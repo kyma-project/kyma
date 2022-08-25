@@ -107,7 +107,6 @@ function oidcE2ETest(options, getShootInfoFunc) {
     it('Update SKR service instance with initial OIDC config and admins', async function() {
       this.timeout(updateTimeout);
       const customParams = {
-        oidc: givenOidcConfig,
         administrators: options.kebUserId,
       };
       console.log("SHOOT-before", shoot);
@@ -142,7 +141,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
 
     it('Assure only initial cluster admins are configured', async function() {
       console.log(`kebUserId: ${options.kebUserId[0]}`)
-      //await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);
     });
