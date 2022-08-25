@@ -107,6 +107,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     it('Update SKR service instance with initial OIDC config and admins', async function() {
       this.timeout(updateTimeout);
       const customParams = {
+        oidc: givenOidcConfig,
         administrators: options.kebUserId,
       };
       console.log("SHOOT-before", shoot);
