@@ -120,7 +120,7 @@ describe('Telemetry Operator tests', function() {
     try {
       await k8sApply(unknownPluginLogPipelineCR, telemetryNamespace);
       await k8sDelete(unknownPluginLogPipelineCR, telemetryNamespace);
-      assert.fail('Should not be able to apply invalid LogPipeline');
+      assert.fail('Should not be able to apply LogPipeline with unknown plugin');
     } catch (e) {
       assert.equal(e.statusCode, 403);
       expect(e.body.message).to.have.string('denied the request');
