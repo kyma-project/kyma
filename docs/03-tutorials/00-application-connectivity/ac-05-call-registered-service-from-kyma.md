@@ -9,7 +9,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 - A [registered external service](./ac-03-register-manage-services.md)
 - Your [service display name exported](./ac-03-register-manage-services.md#prerequisites) as an environment variable
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
-- Your desired Namespace, cluster domain, and the name for your Function exported as environment variables
+- Your desired Namespace, cluster domain, and the names for your Function and APIRule exported as environment variables
   ```bash
   export NAMESPACE=default
   export CLUSTER_DOMAIN=local.kyma.dev
