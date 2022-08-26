@@ -15,7 +15,7 @@ spec:
         - name: wait-for-services
           image: opsfleet/depends-on
           args:
-            - "-service=httpbin"
+            - "-service=echoserver"
       containers:
         - name: application-connectivity-validator-test
           image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.validatorTest) }}

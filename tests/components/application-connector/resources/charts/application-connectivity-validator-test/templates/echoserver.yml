@@ -2,27 +2,27 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: httpbin
-  name: httpbin
+    app: echosever
+  name: echoserver
   namespace: test
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: httpbin
+      app: echoserver
   template:
     metadata:
       labels:
-        app: httpbin
+        app: echoserver
     spec:
       containers:
-        - image: docker.io/kennethreitz/httpbin
-          name: httpbin
+        - image: ealen/echo-server
+          name: echoserver
           ports:
             - containerPort: 80
           livenessProbe:
             httpGet:
-              path: /anything
+              path: /
               port: 80
             initialDelaySeconds: 3
             periodSeconds: 3
@@ -30,11 +30,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: httpbin
+  name: echoserver
   namespace: test
 spec:
   selector:
-    app: httpbin
+    app: echoserver
   ports:
     - name: "http"
       protocol: TCP
