@@ -61,7 +61,7 @@ func (v *filterValidator) validateCustomFilter(content string) error {
 
 	for _, deniedPlugin := range v.deniedFilterPlugins {
 		if strings.EqualFold(pluginName, deniedPlugin) {
-			return fmt.Errorf("plugin '%s' is not supported. ", pluginName)
+			return fmt.Errorf("plugin '%s' is forbidden. ", pluginName)
 		}
 	}
 

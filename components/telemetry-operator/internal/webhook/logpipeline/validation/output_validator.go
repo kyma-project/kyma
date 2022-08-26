@@ -127,7 +127,7 @@ func (v *outputValidator) validateCustomOutput(content string) error {
 
 	for _, deniedPlugin := range v.deniedOutputPlugins {
 		if strings.EqualFold(pluginName, deniedPlugin) {
-			return fmt.Errorf("plugin '%s' is not supported. ", pluginName)
+			return fmt.Errorf("plugin '%s' is forbidden. ", pluginName)
 		}
 	}
 
