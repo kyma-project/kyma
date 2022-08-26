@@ -56,7 +56,7 @@ func TestDeniedOutputPlugins(t *testing.T) {
 	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "plugin 'lua' is not supported. ")
+	require.Contains(t, err.Error(), "plugin 'lua' is forbidden. ")
 }
 
 func TestValidateCustomOutput(t *testing.T) {

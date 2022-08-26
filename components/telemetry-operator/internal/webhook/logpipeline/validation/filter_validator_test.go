@@ -77,5 +77,5 @@ func TestDeniedFilterPlugins(t *testing.T) {
 	err := sut.Validate(logPipeline)
 
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "error validating filter plugins: plugin 'lua' is not supported. ")
+	require.Contains(t, err.Error(), "plugin 'lua' is forbidden. ")
 }

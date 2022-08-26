@@ -137,7 +137,7 @@ describe('Telemetry Operator tests', function() {
     } catch (e) {
       assert.equal(e.statusCode, 403);
       expect(e.body.message).to.have.string('denied the request');
-      const errMsg = 'plugin \'kubernetes\' is not supported';
+      const errMsg = 'plugin \'kubernetes\' is forbidden';
       expect(e.body.message).to.have.string(errMsg);
     }
   });
