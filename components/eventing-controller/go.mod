@@ -21,7 +21,7 @@ require (
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/atomic v1.10.0
-	go.uber.org/zap v1.22.0
+	go.uber.org/zap v1.23.0
 	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
 	k8s.io/api v0.24.4
