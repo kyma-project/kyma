@@ -11,15 +11,15 @@ import (
 
 func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config PipelineConfig) string {
 	output := &pipeline.Spec.Output
-	if output.CustomDefined() {
+	if output.IsCustomDefined() {
 		return generateCustomOutput(output, config.FsBufferLimit, pipeline.Name)
 	}
 
-	if output.HTTPDefined() {
+	if output.IsHTTPDefined() {
 		return generateHTTPOutput(output.HTTP, config.FsBufferLimit, pipeline.Name)
 	}
 
-	if output.LokiDefined() {
+	if output.IsLokiDefined() {
 		return generateLokiOutput(output.Loki, config.FsBufferLimit, pipeline.Name)
 	}
 

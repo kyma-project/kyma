@@ -31,7 +31,7 @@ func (s *Helper) ValidateSecretsExist(ctx context.Context, logpipeline *telemetr
 	}
 
 	output := logpipeline.Spec.Output
-	if !output.HTTPDefined() {
+	if !output.IsHTTPDefined() {
 		return true
 	}
 

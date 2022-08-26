@@ -148,10 +148,10 @@ func TestOutput(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			require.Equal(t, test.expectedCustom, test.given.CustomDefined())
-			require.Equal(t, test.expectedHTTP, test.given.HTTPDefined())
-			require.Equal(t, test.expectedLoki, test.given.LokiDefined())
-			require.Equal(t, test.expectedAny, test.given.AnyDefined())
+			require.Equal(t, test.expectedCustom, test.given.IsCustomDefined())
+			require.Equal(t, test.expectedHTTP, test.given.IsHTTPDefined())
+			require.Equal(t, test.expectedLoki, test.given.IsLokiDefined())
+			require.Equal(t, test.expectedAny, test.given.IsAnyDefined())
 		})
 	}
 }

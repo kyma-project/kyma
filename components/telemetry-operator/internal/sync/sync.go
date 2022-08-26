@@ -215,7 +215,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 			}
 		}
 		output := l.Spec.Output
-		if !output.HTTPDefined() {
+		if !output.IsHTTPDefined() {
 			continue
 		}
 

@@ -103,35 +103,35 @@ type Output struct {
 	Loki *LokiOutput `json:"grafana-loki,omitempty"`
 }
 
-func (o *Output) CustomDefined() bool {
+func (o *Output) IsCustomDefined() bool {
 	return o.Custom != ""
 }
 
-func (o *Output) HTTPDefined() bool {
+func (o *Output) IsHTTPDefined() bool {
 	return o.HTTP != nil && o.HTTP.Host.IsDefined()
 }
 
-func (o *Output) LokiDefined() bool {
+func (o *Output) IsLokiDefined() bool {
 	return o.Loki != nil && o.Loki.URL.IsDefined()
 }
 
-func (o *Output) AnyDefined() bool {
-	return o.pluginsDefined() > 0
+func (o *Output) IsAnyDefined() bool {
+	return o.pluginCount() > 0
 }
 
-func (o *Output) SingleDefined() bool {
-	return o.pluginsDefined() == 1
+func (o *Output) IsSingleDefined() bool {
+	return o.pluginCount() == 1
 }
 
-func (o *Output) pluginsDefined() int {
+func (o *Output) pluginCount() int {
 	plugins := 0
-	if o.CustomDefined() {
+	if o.IsCustomDefined() {
 		plugins++
 	}
-	if o.HTTPDefined() {
+	if o.IsHTTPDefined() {
 		plugins++
 	}
-	if o.LokiDefined() {
+	if o.IsLokiDefined() {
 		plugins++
 	}
 	return plugins
@@ -261,7 +261,7 @@ func (l *LogPipeline) ContainsCustomPlugin() bool {
 			return true
 		}
 	}
-	return l.Spec.Output.CustomDefined()
+	return l.Spec.Output.IsCustomDefined()
 }
 
 // +kubebuilder:object:root=true

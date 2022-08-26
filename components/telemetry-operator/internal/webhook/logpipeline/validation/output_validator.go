@@ -33,19 +33,19 @@ func (v *outputValidator) Validate(pipeline *telemetryv1alpha1.LogPipeline) erro
 		return err
 	}
 
-	if output.HTTPDefined() {
+	if output.IsHTTPDefined() {
 		if err := validateHTTPOutput(output.HTTP); err != nil {
 			return err
 		}
 	}
 
-	if output.LokiDefined() {
+	if output.IsLokiDefined() {
 		if err := validateLokiOutput(output.Loki); err != nil {
 			return err
 		}
 	}
 
-	if output.CustomDefined() {
+	if output.IsCustomDefined() {
 		if err := validateCustomOutput(pipeline.Spec.Output.Custom, v.deniedOutputPlugins); err != nil {
 			return err
 		}
@@ -55,10 +55,10 @@ func (v *outputValidator) Validate(pipeline *telemetryv1alpha1.LogPipeline) erro
 }
 
 func checkSingleOutputPlugin(output telemetryv1alpha1.Output) error {
-	if !output.AnyDefined() {
+	if !output.IsAnyDefined() {
 		return fmt.Errorf("no output is defined, you must define one output")
 	}
-	if !output.SingleDefined() {
+	if !output.IsSingleDefined() {
 		return fmt.Errorf("multiple output plugins are defined, you must define only one output")
 	}
 	return nil
