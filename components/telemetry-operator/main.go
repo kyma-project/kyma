@@ -23,35 +23,35 @@ import (
 	"strings"
 	"time"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controllers/logparser"
 	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controllers/logpipeline"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/dryrun"
 	logparserwebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logparser"
 	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logparser/validation"
 	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline"
 	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/validation"
 
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
-
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-logr/zapr"
-	"k8s.io/apimachinery/pkg/types"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+
 	//+kubebuilder:scaffold:imports
 )
 
