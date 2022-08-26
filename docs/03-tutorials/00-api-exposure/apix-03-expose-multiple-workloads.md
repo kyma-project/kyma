@@ -2,7 +2,7 @@
 title: Expose multiple workloads on the same host
 ---
 
-This tutorial shows how to expose multiple services that share the same host on different paths.
+This tutorial shows how to expose multiple workloads that share the same host on different paths.
 
 You can either define a service at the root level, which is applied to all paths except the ones you've explicitly set service for at the rules level, or you can just define different services on each path separately without the need to define a root service.
    > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-04-expose-and-secure-workload-oauth2.md) or [JWT](./apix-05-expose-and-secure-workload-jwt.md).
@@ -15,14 +15,14 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 ## Root level service definition and multiple services definition on different paths
 
-Follow the instruction to expose your instance of the HttpBin service and your sample Function on different paths with a service defined at the root level - HttpBin in the following example. 
+Follow the instructions to expose your instance of the HttpBin service and your sample Function on different paths with a service defined at the root level - HttpBin in the following example. 
   >**NOTE:** The services definition at the **spec.rules** level have higher precedence than the service definition at the **spec.service** level.
 
 
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
    ```
 
 2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. If you don't want to use Kyma's default gateway, replace `kyma-system/kyma-gateway` with your custom gateway.
@@ -75,7 +75,7 @@ Follow the instruction to expose your instance of the HttpBin service and your s
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com.
    ```
 
 2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. If you don't want to use Kyma's default gateway, replace `kyma-system/kyma-gateway` with your custom gateway. Run:
