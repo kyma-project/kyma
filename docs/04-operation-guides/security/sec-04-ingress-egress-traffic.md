@@ -4,8 +4,7 @@ title: Ingress and Egress traffic
 
 ## Ingress
 
-Kyma uses the [Istio Ingress Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/) to handle all incoming traffic, manage TLS termination, and handle mTLS communication between the cluster and external services. By default, the [`kyma-gateway`](https://github.com/kyma-project/kyma/blob/main/resources/certificates/templates/gateway.yaml) configuration defines the points of entry to expose all applications using the supplied domain and certificates.
-Applications are exposed using the [API Gateway](../../01-overview/main-areas/api-exposure/apix-01-api-gateway.md) controller.
+Kyma uses the [Istio Ingress Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/) to handle all incoming traffic, manage TLS termination, and handle mTLS communication between the cluster and external services. By default, the [`kyma-gateway`](https://github.com/kyma-project/kyma/blob/main/resources/certificates/templates/certificate.yaml) configuration defines the points of entry to expose all applications using the supplied domain and certificates. You can aslo use [`kyma-mtls-gateway`](https://github.com/kyma-project/kyma/blob/main/resources/certificates/templates/mtls-certificate.yaml) that supports client certificates authentication. Applications are exposed using the [API Gateway](../../01-overview/main-areas/api-exposure/apix-01-api-gateway.md) controller.
 
 The configuration specifies the following parameters and their values:
 
