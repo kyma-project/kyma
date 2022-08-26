@@ -11,13 +11,14 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
@@ -97,7 +98,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "my-pipeline"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
 						ValueFrom: telemetryv1alpha1.ValueFromType{
 							SecretKey: secretKeyRef,

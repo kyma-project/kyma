@@ -21,13 +21,14 @@ import (
 	"fmt"
 	"net/http"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	validation2 "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/validation"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/validation"
 )
 
 //go:generate mockery --name DryRunner --filename dryrun.go
@@ -42,22 +43,31 @@ const (
 // +kubebuilder:webhooks:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
-	inputValidator        validation2.InputValidator
-	variablesValidator    validation2.VariablesValidator
-	pluginValidator       validation2.PluginValidator
-	maxPipelinesValidator validation2.MaxPipelinesValidator
-	outputValidator       validation2.OutputValidator
-	fileValidator         validation2.FilesValidator
+	inputValidator        validation.InputValidator
+	variablesValidator    validation.VariablesValidator
+	filterValidator       validation.FilterValidator
+	maxPipelinesValidator validation.MaxPipelinesValidator
+	outputValidator       validation.OutputValidator
+	fileValidator         validation.FilesValidator
 	decoder               *admission.Decoder
 	dryRunner             DryRunner
 }
 
-func NewValidatingWebhookHandler(client client.Client, inputValidator validation2.InputValidator, variablesValidator validation2.VariablesValidator, pluginValidator validation2.PluginValidator, maxPipelinesValidator validation2.MaxPipelinesValidator, outputValidator validation2.OutputValidator, fileValidator validation2.FilesValidator, dryRunner DryRunner) *ValidatingWebhookHandler {
+func NewValidatingWebhookHandler(
+	client client.Client,
+	inputValidator validation.InputValidator,
+	variablesValidator validation.VariablesValidator,
+	filterValidator validation.FilterValidator,
+	maxPipelinesValidator validation.MaxPipelinesValidator,
+	outputValidator validation.OutputValidator,
+	fileValidator validation.FilesValidator,
+	dryRunner DryRunner,
+) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
 		Client:                client,
 		inputValidator:        inputValidator,
 		variablesValidator:    variablesValidator,
-		pluginValidator:       pluginValidator,
+		filterValidator:       filterValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
 		outputValidator:       outputValidator,
 		fileValidator:         fileValidator,
@@ -89,7 +99,7 @@ func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Req
 	}
 	var warnMsg []string
 
-	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
+	if logPipeline.ContainsCustomPlugin() {
 		helpText := "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/"
 		msg := fmt.Sprintf("Logpipeline '%s' uses unsupported custom filters or outputs. We recommend changing the pipeline to use supported filters or output. See the documentation: %s", logPipeline.Name, helpText)
 		warnMsg = append(warnMsg, msg)
@@ -130,7 +140,7 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, logP
 		return err
 	}
 
-	if err := v.pluginValidator.Validate(logPipeline); err != nil {
+	if err := v.filterValidator.Validate(logPipeline); err != nil {
 		log.Error(err, "Failed to validate plugins")
 		return err
 	}

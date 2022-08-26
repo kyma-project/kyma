@@ -5,11 +5,12 @@ import (
 	"context"
 	"fmt"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 type secretHelper struct {
@@ -29,20 +30,25 @@ func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipe
 			return false
 		}
 	}
-	if logpipeline.Spec.Output.HTTP.Host.ValueFrom.IsSecretRef() {
-		_, err := s.get(ctx, logpipeline.Spec.Output.HTTP.Host.ValueFrom)
+
+	output := logpipeline.Spec.Output
+	if !output.IsHTTPDefined() {
+		return true
+	}
+	if output.HTTP.Host.ValueFrom.IsSecretRef() {
+		_, err := s.get(ctx, output.HTTP.Host.ValueFrom)
 		if err != nil {
 			return false
 		}
 	}
-	if logpipeline.Spec.Output.HTTP.User.ValueFrom.IsSecretRef() {
-		_, err := s.get(ctx, logpipeline.Spec.Output.HTTP.User.ValueFrom)
+	if output.HTTP.User.ValueFrom.IsSecretRef() {
+		_, err := s.get(ctx, output.HTTP.User.ValueFrom)
 		if err != nil {
 			return false
 		}
 	}
-	if logpipeline.Spec.Output.HTTP.Password.ValueFrom.IsSecretRef() {
-		_, err := s.get(ctx, logpipeline.Spec.Output.HTTP.Password.ValueFrom)
+	if output.HTTP.Password.ValueFrom.IsSecretRef() {
+		_, err := s.get(ctx, output.HTTP.Password.ValueFrom)
 		if err != nil {
 			return false
 		}
