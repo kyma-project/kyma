@@ -112,4 +112,9 @@ func main() {
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLogger.Fatalw("Failed to start controller manager", "error", err)
 	}
+
+	// unsubscribe on NATS before shutdown
+	if err := natsSubMgr.UnsubscribeAll(); err != nil {
+		log.Fatalf("Failed to unsubscribe on NATS Server, err: %v", err)
+	}
 }

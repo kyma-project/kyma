@@ -70,6 +70,11 @@ func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, met
 	}
 }
 
+func (sm *SubscriptionManager) UnsubscribeAll() error {
+	sm.backend.UnsubscribeOnNats()
+	return nil
+}
+
 // Init initialize the JetStream subscription manager.
 func (sm *SubscriptionManager) Init(mgr manager.Manager) error {
 	if len(sm.envCfg.URL) == 0 {

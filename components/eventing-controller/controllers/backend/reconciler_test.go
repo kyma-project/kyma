@@ -855,6 +855,9 @@ func (t *SubMgrMock) Stop(runCleanup bool) error {
 	}
 	return t.stopErr
 }
+func (t *SubMgrMock) UnsubscribeAll() error {
+	return nil
+}
 
 func (t *SubMgrMock) resetState() {
 	t.startErr = nil
