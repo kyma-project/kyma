@@ -30,6 +30,8 @@ const dropLabelsLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/loki-k8s-metadata-filter-drop-labels-logpipeline.yaml');
 const keepLabelsLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/loki-k8s-metadata-filter-keep-labels-logpipeline.yaml');
+const kubernetesCustomFilterLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/kubernetes-custom-filter-logpipeline.yaml');
 const parserLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/regex-logparser.yaml');
 
 // CR names
@@ -126,7 +128,20 @@ describe('Telemetry Operator tests', function() {
     }
   });
 
-  it('Should push the logs to the loki output', async () => {
+  it('Webhook should reject a pipeline with denied custom filter', async () => {
+    try {
+      await k8sApply(kubernetesCustomFilterLogPipelineCR, telemetryNamespace);
+      await k8sDelete(kubernetesCustomFilterLogPipelineCR, telemetryNamespace);
+      assert.fail('Should not be able to apply LogPipeline with kubernetes custom filter');
+    } catch (e) {
+      assert.equal(e.statusCode, 403);
+      expect(e.body.message).to.have.string('denied the request');
+      const errMsg = 'plugin \'kubernetes\' is not supported';
+      expect(e.body.message).to.have.string(errMsg);
+    }
+  });
+
+  it('Should push the logs to the Loki output', async () => {
     const labels = '{namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
