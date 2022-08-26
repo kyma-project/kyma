@@ -97,6 +97,21 @@ func (vs *ValidatorSuite) TestBadCert() {
 	}
 }
 
+func (vs *ValidatorSuite) TestInvalidPathPrefix() {
+	const v3vents = "http://central-application-connectivity-validator.kyma-system:8080/event-test-compass/v3/events"
+
+	cli := httpd.NewCli(vs.T())
+
+	req, err := http.NewRequest(http.MethodGet, v3vents, nil)
+	vs.Nil(err)
+
+	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=clientId1"))
+
+	res, _, err := cli.Do(req)
+	vs.Require().Nil(err)
+	vs.Equal(http.StatusNotFound, res.StatusCode)
+}
+
 func certFields(subject string) string {
 	return fmt.Sprintf("Subject=%q", subject)
 }
