@@ -3,24 +3,11 @@ package compass_runtime_agent
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"reflect"
-	"testing"
 )
 
 const actualSecretNamespace string = "kyma-integration"
 
-type SecretComparer interface {
-	Do(actual, expected string) bool
-}
-
-type Secret struct {
-	t *testing.T
-}
-
-func (s Secret) Do(actual, expected string) bool {
-	return SecretDataCompare(actual, expected, s.t)
-}
-
-func Compare(applicationCRD *v1alpha1.Application, applicationCRD_expected *v1alpha1.Application, comparer SecretComparer) bool {
+func Compare(applicationCRD *v1alpha1.Application, applicationCRD_expected *v1alpha1.Application, comparer SecretClient) bool {
 
 	specEqual := compareSpec(applicationCRD.Spec, applicationCRD_expected.Spec, comparer)
 	nameAndNamespaceEqual := applicationCRD.Name == applicationCRD_expected.Name && applicationCRD.Namespace == applicationCRD_expected.Namespace
@@ -60,7 +47,7 @@ func compareAuthentication(actual, expected v1alpha1.Authentication) bool {
 	return reflect.DeepEqual(actual.ClientIds, expected.ClientIds)
 }
 
-func compareServices(actual, expected []v1alpha1.Service, comparer SecretComparer) bool {
+func compareServices(actual, expected []v1alpha1.Service, comparer SecretClient) bool {
 
 	if len(actual) != len(expected) {
 		return false
@@ -82,7 +69,7 @@ func compareServices(actual, expected []v1alpha1.Service, comparer SecretCompare
 	return true
 }
 
-func compareEntries(actual, expected []v1alpha1.Entry, comparer SecretComparer) bool {
+func compareEntries(actual, expected []v1alpha1.Entry, comparer SecretClient) bool {
 
 	if len(actual) != len(expected) {
 		return false
@@ -107,7 +94,7 @@ func compareEntries(actual, expected []v1alpha1.Entry, comparer SecretComparer) 
 }
 
 //TODO compare whole credentials data, not only .yaml name
-func compareCredentials(actual, expected v1alpha1.Credentials, comparer SecretComparer) bool {
+func compareCredentials(actual, expected v1alpha1.Credentials, comparer SecretClient) bool {
 
 	if actual == (v1alpha1.Credentials{}) && expected != (v1alpha1.Credentials{}) || expected == (v1alpha1.Credentials{}) && actual != (v1alpha1.Credentials{}) {
 		return false
@@ -119,7 +106,7 @@ func compareCredentials(actual, expected v1alpha1.Credentials, comparer SecretCo
 		return false
 	}
 
-	dataEqual := comparer.Do(actual.SecretName, "oauth-test-expected")
+	dataEqual := comparer.Compare(actual.SecretName, "oauth-test-expected")
 	secretNameEqual := actual.SecretName == expected.SecretName
 	authenticationUrlEqual := actual.AuthenticationUrl == expected.AuthenticationUrl
 	csrfInfoEqual := compareCSRF(actual.CSRFInfo, expected.CSRFInfo)
@@ -135,7 +122,7 @@ func compareCSRF(actual, expected *v1alpha1.CSRFInfo) bool {
 	return actual.TokenEndpointURL == expected.TokenEndpointURL
 }
 
-func compareSpec(actual, expected v1alpha1.ApplicationSpec, comparer SecretComparer) bool {
+func compareSpec(actual, expected v1alpha1.ApplicationSpec, comparer SecretClient) bool {
 
 	descriptionEqual := actual.Description == expected.Description
 	skipInstallationEqual := actual.SkipInstallation == expected.SkipInstallation

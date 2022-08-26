@@ -2,7 +2,6 @@ package compass_runtime_agent
 
 import (
 	"context"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,6 +12,8 @@ import (
 	"testing"
 )
 
+var secretRepos map[string]v1.SecretInterface
+
 type secretData struct {
 	password     string
 	username     string
@@ -22,19 +23,21 @@ type secretData struct {
 	clientSecret string
 }
 
-type Client interface {
-	GetSecret() (secretData, error)
+type SecretClient interface {
+	Compare(actual, expected string) bool
+	Get() (secretData, error)
 }
 
-type client struct {
-	secretsClient v1.SecretInterface
-	secretName    string
+type Secret struct {
+	t          *testing.T
+	secret     v1.SecretInterface
+	secretName string
 }
 
-func NewClient(secrets v1.SecretInterface, secretName string) Client {
-	return &client{
-		secretsClient: secrets,
-		secretName:    secretName,
+func NewClient(secret v1.SecretInterface, secretName string) SecretClient {
+	return &Secret{
+		secret:     secret,
+		secretName: secretName,
 	}
 }
 
@@ -54,16 +57,8 @@ func newSecretsInterface(namespace string) (v1.SecretInterface, error) {
 	return coreClientset.CoreV1().Secrets(namespace), nil
 }
 
-func initalizeSecretInterface(namespace string) (v1.SecretInterface, error) {
-	secretsRepo, err := newSecretsInterface(namespace)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to create secrets interface")
-	}
-	return secretsRepo, nil
-}
-
-func (c *client) getCredentials() (secretData, error) {
-	secret, err := c.secretsClient.Get(context.Background(), c.secretName, metav1.GetOptions{})
+func (s Secret) Get() (secretData, error) {
+	secret, err := s.secret.Get(context.Background(), s.secretName, metav1.GetOptions{})
 
 	if err != nil {
 		return secretData{}, errors.Wrap(err, "Failed to get secret from cluster")
@@ -79,38 +74,34 @@ func (c *client) getCredentials() (secretData, error) {
 	}, nil
 }
 
-func (c *client) GetSecret() (secretData, error) {
+func (s Secret) Compare(actual, expected string) bool {
 
-	secret, err := c.getCredentials()
-	if err != nil {
-		return secretData{}, errors.Wrap(err, "Failed to save the secret from cluster")
+	if len(secretRepos) != 2 {
+		secretRepos = make(map[string]v1.SecretInterface)
+
+		expectedSecretRepo, _ := newSecretsInterface("test") //TODO hardcoded, tried os.Getenv() didn't work
+		actualSecretRepo, _ := newSecretsInterface(actualSecretNamespace)
+		secretRepos["expectedSecretRepo"] = expectedSecretRepo
+		secretRepos["actualSecretRepo"] = actualSecretRepo
+
 	}
 
-	return secret, nil
-}
+	secretExpectedClient := NewClient(secretRepos["expectedSecretRepo"], expected)
+	secretActualClient := NewClient(secretRepos["actualSecretRepo"], actual)
 
-func SecretDataCompare(actual, expected string, t *testing.T) bool {
-	expectedSecretRepo, _ := initalizeSecretInterface("test") //TODO hardcoded, tried os.Getenv() didn't work
-	expectedSecretClient := NewClient(expectedSecretRepo, expected)
-
-	expectedSecret, err := expectedSecretClient.GetSecret()
+	actualSecret, err := secretActualClient.Get()
 	if err != nil {
-		t.Log(err, "Failed to get expected secret from cluster")
-		errors.Wrap(err, "Failed to get expected secret from cluster")
-		return false
-	}
-
-	actualSecretRepo, _ := initalizeSecretInterface(actualSecretNamespace)
-	actualSecretClient := NewClient(actualSecretRepo, actual)
-
-	actualSecret, err := actualSecretClient.GetSecret()
-	if err != nil {
-		t.Log(err, "Failed to get actual secret from cluster")
+		s.t.Log(err, "Failed to get actual secret from cluster")
 		errors.Wrap(err, "Failed to get actual secret from cluster")
 		return false
 	}
 
-	fmt.Println(actualSecret)
+	expectedSecret, err := secretExpectedClient.Get()
+	if err != nil {
+		s.t.Log(err, "Failed to get expected secret from cluster")
+		errors.Wrap(err, "Failed to get expected secret from cluster")
+		return false
+	}
 
 	return reflect.DeepEqual(actualSecret, expectedSecret)
 }

@@ -2,9 +2,9 @@ serviceAccountName: "test-compass-runtime-agent"
 namespace: "test"
 
 containerRegistry:
-  path: "eu.gcr.io/kyma-project"
+  path: "mvshao"
 
 images:
   compassTest:
     name: "compass-runtime-agent-test"
-    version: "PR-15101"
+    version: "test"
