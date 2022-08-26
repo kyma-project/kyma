@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	natsserver "github.com/nats-io/nats-server/v2/server"
 	"net/http"
+
+	natsserver "github.com/nats-io/nats-server/v2/server"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
