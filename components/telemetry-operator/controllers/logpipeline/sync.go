@@ -208,7 +208,7 @@ func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alp
 			}
 		}
 		if httpOutput.Password.ValueFrom.IsSecretRef() {
-			err := s.secretHelper.CopySecretData(ctx, httpOutput.Password.ValueFrom, envvar.GenerateName(l.Name, httpOutput.User.ValueFrom.SecretKey), newSecret.Data)
+			err := s.secretHelper.CopySecretData(ctx, httpOutput.Password.ValueFrom, envvar.GenerateName(l.Name, httpOutput.Password.ValueFrom.SecretKey), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http password")
 				return false, err
