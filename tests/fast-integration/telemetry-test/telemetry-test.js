@@ -25,7 +25,8 @@ const mockserverDeployment = loadResourceFromFile('./resources/deployments/mocks
 
 // Load Telemetry CR's
 const httpLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/http-logpipeline.yaml');
-const invalidLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/invalid-logpipeline.yaml');
+const unknownPluginLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/unknown-plugin-logpipeline.yaml');
 const dropLabelsLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/loki-k8s-metadata-filter-drop-labels-logpipeline.yaml');
 const keepLabelsLogPipelineCR = loadResourceFromFile(
@@ -115,10 +116,10 @@ describe('Telemetry Operator tests', function() {
     await waitForLogPipelineStatusCondition('loki', 'Running', 180000);
   });
 
-  it('Should reject the invalid LogPipeline', async () => {
+  it('Webhook should reject a LogPipeline with unknown plugin', async () => {
     try {
-      await k8sApply(invalidLogPipelineCR, telemetryNamespace);
-      await k8sDelete(invalidLogPipelineCR, telemetryNamespace);
+      await k8sApply(unknownPluginLogPipelineCR, telemetryNamespace);
+      await k8sDelete(unknownPluginLogPipelineCR, telemetryNamespace);
       assert.fail('Should not be able to apply invalid LogPipeline');
     } catch (e) {
       assert.equal(e.statusCode, 403);
@@ -128,7 +129,7 @@ describe('Telemetry Operator tests', function() {
     }
   });
 
-  it('Webhook should reject a pipeline with denied custom filter', async () => {
+  it('Webhook should reject a LogPipeline with denied custom filter', async () => {
     try {
       await k8sApply(kubernetesCustomFilterLogPipelineCR, telemetryNamespace);
       await k8sDelete(kubernetesCustomFilterLogPipelineCR, telemetryNamespace);
