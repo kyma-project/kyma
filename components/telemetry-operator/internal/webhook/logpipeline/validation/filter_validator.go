@@ -26,9 +26,6 @@ func NewFilterValidator(deniedFilterPlugins ...string) FilterValidator {
 	}
 }
 
-// Validate returns an error if validation fails
-// because of using denied plugins or errors in match conditions
-// for filters or outputs.
 func (v *filterValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
 	err := v.validateFilters(logPipeline)
 	if err != nil {
@@ -39,14 +36,14 @@ func (v *filterValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) e
 
 func (v *filterValidator) validateFilters(pipeline *telemetryv1alpha1.LogPipeline) error {
 	for _, filterPlugin := range pipeline.Spec.Filters {
-		if err := validateCustomFilter(filterPlugin.Custom, v.deniedFilterPlugins); err != nil {
+		if err := v.validateCustomFilter(filterPlugin.Custom); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateCustomFilter(content string, denied []string) error {
+func (v *filterValidator) validateCustomFilter(content string) error {
 	if content == "" {
 		return nil
 	}
@@ -62,7 +59,7 @@ func validateCustomFilter(content string, denied []string) error {
 
 	pluginName := section.GetByKey("name").Value
 
-	for _, deniedPlugin := range denied {
+	for _, deniedPlugin := range v.deniedFilterPlugins {
 		if strings.EqualFold(pluginName, deniedPlugin) {
 			return fmt.Errorf("plugin '%s' is not supported. ", pluginName)
 		}

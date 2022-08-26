@@ -46,7 +46,7 @@ func (v *outputValidator) Validate(pipeline *telemetryv1alpha1.LogPipeline) erro
 	}
 
 	if output.IsCustomDefined() {
-		if err := validateCustomOutput(pipeline.Spec.Output.Custom, v.deniedOutputPlugins); err != nil {
+		if err := v.validateCustomOutput(pipeline.Spec.Output.Custom); err != nil {
 			return err
 		}
 	}
@@ -109,7 +109,7 @@ func validHostname(host string) bool {
 	return re.MatchString(host)
 }
 
-func validateCustomOutput(content string, denied []string) error {
+func (v *outputValidator) validateCustomOutput(content string) error {
 	if content == "" {
 		return nil
 	}
@@ -125,7 +125,7 @@ func validateCustomOutput(content string, denied []string) error {
 
 	pluginName := section.GetByKey("name").Value
 
-	for _, deniedPlugin := range denied {
+	for _, deniedPlugin := range v.deniedOutputPlugins {
 		if strings.EqualFold(pluginName, deniedPlugin) {
 			return fmt.Errorf("plugin '%s' is not supported. ", pluginName)
 		}
