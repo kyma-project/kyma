@@ -138,7 +138,7 @@ func TestMergeSectionsConfig(t *testing.T) {
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	actual, err := BuildFluentBitConfig(logPipeline, pipelineConfig)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }
@@ -153,7 +153,7 @@ func TestMergeSectionsConfigWithMissingOutput(t *testing.T) {
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	actual, err := BuildFluentBitConfig(logPipeline, pipelineConfig)
 	require.Error(t, err)
 	require.Empty(t, actual)
 }

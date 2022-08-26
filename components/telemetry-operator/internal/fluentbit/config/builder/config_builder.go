@@ -2,7 +2,6 @@ package builder
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
@@ -17,8 +16,8 @@ type PipelineConfig struct {
 	FsBufferLimit     string
 }
 
-// MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(pipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
+// BuildFluentBitConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
+func BuildFluentBitConfig(pipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
 	err := validateOutput(pipeline)
 	if err != nil {
 		return "", err
@@ -60,37 +59,6 @@ func createLuaDedotFilter(logPipeline *telemetryv1alpha1.LogPipeline) string {
 		AddConfigParam("script", "/fluent-bit/scripts/filter-script.lua").
 		AddConfigParam("call", "kubernetes_map_keys").
 		Build()
-}
-
-// MergeParsersConfig merges Fluent Bit parsers to a single Fluent Bit configuration.
-func MergeParsersConfig(logParsers *telemetryv1alpha1.LogParserList) string {
-	sort.Slice(logParsers.Items, func(i, j int) bool {
-		return logParsers.Items[i].Name < logParsers.Items[j].Name
-	})
-
-	var sb strings.Builder
-	for _, logParser := range logParsers.Items {
-		if logParser.DeletionTimestamp == nil {
-			name := fmt.Sprintf("Name %s", logParser.Name)
-			parser := fmt.Sprintf("%s\n%s", logParser.Spec.Parser, name)
-			sb.WriteString(buildConfigSection("[PARSER]", parser))
-		}
-	}
-	return sb.String()
-}
-
-func buildConfigSection(header string, content string) string {
-	var sb strings.Builder
-	sb.WriteString(header)
-	sb.WriteByte('\n')
-	for _, line := range strings.Split(content, "\n") {
-		if len(strings.TrimSpace(line)) > 0 { // Skip empty lines to do not break rendering in yaml output
-			sb.WriteString("    " + strings.TrimSpace(line) + "\n") // 4 indentations
-		}
-	}
-	sb.WriteByte('\n')
-
-	return sb.String()
 }
 
 func validateCustomSections(pipeline *telemetryv1alpha1.LogPipeline) error {
