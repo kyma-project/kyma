@@ -33,6 +33,11 @@ func TestExtractError(t *testing.T) {
 			expectedError: "could not configure property 'Mem_Buf_Limit' on input plugin with section name 'tail'",
 		},
 		{
+			name:          "No parser name",
+			output:        "[2022/05/24 15:56:05] [error] [parser] no parser 'name' found in file 'custom_parsers.conf'",
+			expectedError: "no parser 'name' found",
+		},
+		{
 			name:          "Invalid indentation level",
 			output:        "[2022/05/24 15:59:59] [error] [config] error in dynamic-parsers/parsers.conf:3: invalid indentation level\n",
 			expectedError: "invalid indentation level",
