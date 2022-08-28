@@ -9,11 +9,4 @@ spec:
       clientIds: ["clientId1", "clientId2"]
   description: Test app-con-validator
   skipVerify: true
-  services:
-    - displayName: httpbin
-      name: httpbin
-      providerDisplayName: Kenneth Reitz
-      description: HTTPBin service
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: Events
+

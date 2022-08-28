@@ -12,6 +12,8 @@ import (
 
 const v1EventsFormat = "http://central-application-connectivity-validator.kyma-system:8080/%s/v1/events"
 const v2EventsFormat = "http://central-application-connectivity-validator.kyma-system:8080/%s/v2/events"
+const standaloneAppName = "event-test-standalone"
+const compassAppName = "event-test-compass"
 
 type ValidatorSuite struct {
 	suite.Suite
@@ -38,10 +40,10 @@ func (vs *ValidatorSuite) TestGoodCert() {
 		appName        string
 		expectedHeader string
 	}{{
-		appName:        "event-test-standalone",
-		expectedHeader: "event-test-standalone",
+		appName:        standaloneAppName,
+		expectedHeader: standaloneAppName,
 	}, {
-		appName:        "event-test-compass",
+		appName:        compassAppName,
 		expectedHeader: "clientId1",
 	}} {
 		v1Events := fmt.Sprintf(v1EventsFormat, testCase.appName)
@@ -66,7 +68,7 @@ func (vs *ValidatorSuite) TestGoodCert() {
 func (vs *ValidatorSuite) TestBadCert() {
 	cli := httpd.NewCli(vs.T())
 
-	appNames := []string{"event-test-standalone", "event-test-compass"}
+	appNames := []string{standaloneAppName, compassAppName}
 
 	for _, appName := range appNames {
 		v1Events := fmt.Sprintf(v1EventsFormat, appName)

@@ -12,7 +12,7 @@ TEST_TIMEOUT = "3m"
 .PHONY: release test image clean
 .PHONY: test-gateway test-gateway-debug clean-gateway-test publish-gateway-test image-gateway-test publish-mock-app image-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 .PHONY: test-compass-runtime-agent test-compass-runtime-agent-debug clean-compass-runtime-agent-test image-compass-runtime-agent-test publish-compass-runtime-agent-test
-.PHONY: patch-for-validator-test unpatch-after-validator-test test-connectivity-validator test-connectivity-validator-debug connectivity-validator-create-resources clean-connectivity-validator-test publish-connectivity-validator-test
+.PHONY: patch-for-validator-test unpatch-after-validator-test test-validator test-connectivity-validator-debug connectivity-validator-create-resources clean-connectivity-validator-test publish-connectivity-validator-test
 
 release: publish-gateway-test publish-mock-app publish-connectivity-validator-test publish-compass-runtime-agent-test
 test: test-gateway test-validator test-compass-runtime-agent
@@ -40,8 +40,8 @@ gateway-create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test \
-		--set namespace=$(NAMESPACE) \
-		--set mockServiceName=$(MOCK_SERVICE_NAME) \
+	--set namespace=$(NAMESPACE) \
+	--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
 
 clean-gateway-test:
@@ -120,8 +120,8 @@ test-compass-runtime-agent-debug:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 
 	helm template resources/charts/compass-runtime-agent-test \
-		--set namespace=$(NAMESPACE) \
-		--set mockServiceName=$(MOCK_SERVICE_NAME) \
+	--set namespace=$(NAMESPACE) \
+	--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
 
 	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/compass-runtime-agent-test
