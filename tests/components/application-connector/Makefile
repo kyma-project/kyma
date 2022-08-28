@@ -40,8 +40,8 @@ gateway-create-resources:
 	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	helm template resources/charts/gateway-test \
-	--set namespace=$(NAMESPACE) \
-	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+    --set namespace=$(NAMESPACE) \
+    --set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
 
 clean-gateway-test:
