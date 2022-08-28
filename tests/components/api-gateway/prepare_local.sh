@@ -101,6 +101,23 @@ EOF
   rm "$PWD/ory-hydra-login-consent.yaml"
 }
 
+function update_mtls_gateway_cacert_secret() {
+client_root_ca_crt_file='assets/kyma-root-ca.crt'
+#client_crt_file='assets/testmtls.kyma-example.com.crt'
+#client_key_file='assets/testmtls.kyma-example.com.key'
+clientRootCAEncoded=$(cat $client_root_ca_crt_file| base64)
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kyma-mtls-gateway-certs-cacert
+  namespace: istio-system
+type: Opaque
+data:
+  cacert: ${clientRootCAEncoded}
+EOF
+}
+
 check_required_envs
 deploy_login_consent_app
 configure_ory_hydra

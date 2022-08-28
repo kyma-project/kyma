@@ -35,8 +35,6 @@ spec:
   commonName: "*.mtls.{{ .Values.global.domainName }}"
   secretName: {{ .Values.certificates.kymaMtls.name }}
 {{- end }}
-
-
 ---
 # Create cacert secret
 apiVersion: v1

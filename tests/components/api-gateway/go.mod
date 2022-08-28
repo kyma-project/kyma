@@ -6,8 +6,6 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/kyma-project/kyma/common v0.0.0-20220701102146-c96b0380518c
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.0 // indirect
-	github.com/tdewolff/minify/v2 v2.11.11 // indirect
 	github.com/vrischmann/envconfig v1.3.0
 	gitlab.com/rodrigoodhin/gocure v0.0.0-20220301084845-20a07464f4f0
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129
@@ -44,9 +42,11 @@ require (
 	github.com/hashicorp/go-memdb v1.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/spf13/cobra v1.1.1 // indirect
 	github.com/tdewolff/parse/v2 v2.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect

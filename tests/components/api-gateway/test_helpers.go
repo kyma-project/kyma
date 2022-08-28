@@ -58,6 +58,7 @@ const (
 	cucumberFileName               = "cucumber-report.json"
 	anyToken                       = "any"
 	authorizationHeaderName        = "Authorization"
+	mtlsGatewayUsecuredApiruleFile = "mtls-gateway-unsecured-apirule.yaml"
 )
 
 var (
@@ -87,6 +88,7 @@ type Config struct {
 	ReqDelay         uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
 	Domain           string        `envconfig:"TEST_DOMAIN"`
 	GatewayName      string        `envconfig:"TEST_GATEWAY_NAME,default=kyma-gateway"`
+	GatewaymTLSName  string        `envconfig:"TEST_GATEWAY_MTLS_NAME,default=kyma-mtls-gateway"`
 	GatewayNamespace string        `envconfig:"TEST_GATEWAY_NAMESPACE,default=kyma-system"`
 	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` // Don't forget the unit!
 	IsMinikubeEnv    bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
