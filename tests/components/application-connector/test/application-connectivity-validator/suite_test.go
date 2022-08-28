@@ -121,7 +121,7 @@ func (vs *ValidatorSuite) TestInvalidPathPrefix() {
 	req, err := http.NewRequest(http.MethodGet, v3vents, nil)
 	vs.Nil(err)
 
-	req.Header.Add("X-Forwarded-Client-Cert", certFields("CN=clientId1"))
+	req.Header.Add("X-Forwarded-Client-Cert", certFields("clientId1"))
 
 	res, _, err := cli.Do(req)
 	vs.Require().Nil(err)
