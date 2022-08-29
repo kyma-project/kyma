@@ -93,9 +93,43 @@ type TLSConfig struct {
 
 // Output describes a Fluent Bit output configuration section
 type Output struct {
-	Custom string     `json:"custom,omitempty"`
-	HTTP   HTTPOutput `json:"http,omitempty"`
-	Loki   LokiOutput `json:"grafana-loki,omitempty"`
+	Custom string      `json:"custom,omitempty"`
+	HTTP   *HTTPOutput `json:"http,omitempty"`
+	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
+}
+
+func (o *Output) IsCustomDefined() bool {
+	return o.Custom != ""
+}
+
+func (o *Output) IsHTTPDefined() bool {
+	return o.HTTP != nil && o.HTTP.Host.IsDefined()
+}
+
+func (o *Output) IsLokiDefined() bool {
+	return o.Loki != nil && o.Loki.URL.IsDefined()
+}
+
+func (o *Output) IsAnyDefined() bool {
+	return o.pluginCount() > 0
+}
+
+func (o *Output) IsSingleDefined() bool {
+	return o.pluginCount() == 1
+}
+
+func (o *Output) pluginCount() int {
+	plugins := 0
+	if o.IsCustomDefined() {
+		plugins++
+	}
+	if o.IsHTTPDefined() {
+		plugins++
+	}
+	if o.IsLokiDefined() {
+		plugins++
+	}
+	return plugins
 }
 
 // FileMount provides file content to be consumed by a LogPipeline configuration
@@ -213,6 +247,16 @@ type LogPipeline struct {
 
 	Spec   LogPipelineSpec   `json:"spec,omitempty"`
 	Status LogPipelineStatus `json:"status,omitempty"`
+}
+
+// ContainsCustomPlugin returns true if the pipeline contains any custom filters or outputs
+func (l *LogPipeline) ContainsCustomPlugin() bool {
+	for _, filter := range l.Spec.Filters {
+		if filter.Custom != "" {
+			return true
+		}
+	}
+	return l.Spec.Output.IsCustomDefined()
 }
 
 // +kubebuilder:object:root=true

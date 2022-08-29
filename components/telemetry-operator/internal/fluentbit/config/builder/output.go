@@ -11,16 +11,16 @@ import (
 
 func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config PipelineConfig) string {
 	output := &pipeline.Spec.Output
-	if len(output.Custom) > 0 {
+	if output.IsCustomDefined() {
 		return generateCustomOutput(output, config.FsBufferLimit, pipeline.Name)
 	}
 
-	if output.HTTP.Host.IsDefined() {
-		return generateHTTPOutput(&output.HTTP, config.FsBufferLimit, pipeline.Name)
+	if output.IsHTTPDefined() {
+		return generateHTTPOutput(output.HTTP, config.FsBufferLimit, pipeline.Name)
 	}
 
-	if output.Loki.URL.IsDefined() {
-		return generateLokiOutput(&output.Loki, config.FsBufferLimit, pipeline.Name)
+	if output.IsLokiDefined() {
+		return generateLokiOutput(output.Loki, config.FsBufferLimit, pipeline.Name)
 	}
 
 	return ""
@@ -40,11 +40,14 @@ func generateCustomOutput(output *telemetryv1alpha1.Output, fsBufferLimit string
 func generateHTTPOutput(httpOutput *telemetryv1alpha1.HTTPOutput, fsBufferLimit string, name string) string {
 	sb := NewOutputSectionBuilder()
 	sb.AddConfigParam("name", "http")
-	sb.AddConfigParam("port", "443")
 	sb.AddConfigParam("allow_duplicated_headers", "true")
-	sb.AddConfigParam("format", "json")
 	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
 	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
+	sb.AddIfNotEmpty("uri", httpOutput.URI)
+	sb.AddIfNotEmpty("compress", httpOutput.Compress)
+	sb.AddIfNotEmptyOrDefault("port", httpOutput.Port, "443")
+	sb.AddIfNotEmptyOrDefault("format", httpOutput.Format, "json")
+
 	if httpOutput.Host.IsDefined() {
 		value := resolveValue(httpOutput.Host, name)
 		sb.AddConfigParam("host", value)
@@ -57,20 +60,17 @@ func generateHTTPOutput(httpOutput *telemetryv1alpha1.HTTPOutput, fsBufferLimit 
 		value := resolveValue(httpOutput.User, name)
 		sb.AddConfigParam("http_user", value)
 	}
-	sb.AddIfNotEmpty("port", httpOutput.Port)
-	sb.AddIfNotEmpty("uri", httpOutput.URI)
-	sb.AddIfNotEmpty("format", httpOutput.Format)
-	sb.AddIfNotEmpty("compress", httpOutput.Compress)
+	tlsEnabled := "on"
 	if httpOutput.TLSConfig.Disabled {
-		sb.AddConfigParam("tls", "off")
-	} else {
-		sb.AddConfigParam("tls", "on")
+		tlsEnabled = "off"
 	}
+	sb.AddConfigParam("tls", tlsEnabled)
+	tlsVerify := "on"
 	if httpOutput.TLSConfig.SkipCertificateValidation {
-		sb.AddConfigParam("tls.verify", "off")
-	} else {
-		sb.AddConfigParam("tls.verify", "on")
+		tlsVerify = "off"
 	}
+	sb.AddConfigParam("tls.verify", tlsVerify)
+
 	return sb.Build()
 }
 

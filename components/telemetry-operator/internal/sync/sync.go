@@ -214,7 +214,12 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 				}
 			}
 		}
-		httpOutput := l.Spec.Output.HTTP
+		output := l.Spec.Output
+		if !output.IsHTTPDefined() {
+			continue
+		}
+
+		httpOutput := output.HTTP
 		if httpOutput.Host.ValueFrom.IsSecretRef() {
 			err := s.SecretHelper.CopySecretData(ctx, httpOutput.Host.ValueFrom, envvar.GenerateName(l.Name, httpOutput.Host.ValueFrom.SecretKey), newSecret.Data)
 			if err != nil {
@@ -230,7 +235,7 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 			}
 		}
 		if httpOutput.Password.ValueFrom.IsSecretRef() {
-			err := s.SecretHelper.CopySecretData(ctx, httpOutput.Password.ValueFrom, envvar.GenerateName(l.Name, httpOutput.User.ValueFrom.SecretKey), newSecret.Data)
+			err := s.SecretHelper.CopySecretData(ctx, httpOutput.Password.ValueFrom, envvar.GenerateName(l.Name, httpOutput.Password.ValueFrom.SecretKey), newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http password")
 				return false, err

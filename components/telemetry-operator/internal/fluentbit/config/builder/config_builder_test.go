@@ -34,10 +34,13 @@ func TestCreateLuaDedotFilterWithDefinedHostAndDedotSet(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "foo"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
-					Host: telemetryv1alpha1.ValueType{
-						Value: "localhost"}}}}}
+					Host:  telemetryv1alpha1.ValueType{Value: "localhost"},
+				},
+			},
+		},
+	}
 
 	actual := createLuaDedotFilter(logPipeline)
 	require.Equal(t, expected, actual)
@@ -47,8 +50,10 @@ func TestCreateLuaDedotFilterWithUndefinedHost(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
-					Dedot: true}}}}
+				HTTP: &telemetryv1alpha1.HTTPOutput{Dedot: true},
+			},
+		},
+	}
 
 	actual := createLuaDedotFilter(logPipeline)
 	require.Equal(t, "", actual)
@@ -58,10 +63,13 @@ func TestCreateLuaDedotFilterWithDedotFalse(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: false,
-					Host: telemetryv1alpha1.ValueType{
-						Value: "localhost"}}}}}
+					Host:  telemetryv1alpha1.ValueType{Value: "localhost"},
+				},
+			},
+		},
+	}
 
 	actual := createLuaDedotFilter(logPipeline)
 	require.Equal(t, "", actual)
@@ -121,7 +129,7 @@ func TestMergeSectionsConfig(t *testing.T) {
 				},
 			},
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",

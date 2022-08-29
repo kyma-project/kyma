@@ -74,7 +74,6 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	}
 
 	// send the event
-	s.namedLogger().Infof("Sending event:%v to backend, stream name:%s", event, s.envCfg.JSStreamName)
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
