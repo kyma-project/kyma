@@ -4,7 +4,7 @@ import (
 	"context"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -26,10 +26,6 @@ type LogParserSyncer struct {
 	DaemonSetConfig FluentBitDaemonSetConfig
 	Utils           *kubernetes.Utils
 }
-type Result struct {
-	ConfigurationChanged bool
-	LogParserChanged     bool
-}
 
 func NewLogParserSyncer(client client.Client,
 	daemonSetConfig FluentBitDaemonSetConfig,
@@ -42,70 +38,56 @@ func NewLogParserSyncer(client client.Client,
 }
 
 // SyncParsersConfigMap synchronizes LogParser with ConfigMap of DaemonSetUtils parsers.
-func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (Result, error) {
+func (s *LogParserSyncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
-	var result Result
 	cm, err := s.Utils.GetOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
-		return result, err
+		return false, err
 	}
 
+	changed := false
 	var logParsers telemetryv1alpha1.LogParserList
 
-	if logParser.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
-			log.Info("Deleting fluent bit parsers config")
-
-			err = s.List(ctx, &logParsers)
-			if err != nil {
-				return result, err
-			}
-
-			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
-			if fluentBitParsersConfig == "" {
-				cm.Data = nil
-			} else {
-				data := make(map[string]string)
-				data[parsersConfigMapKey] = fluentBitParsersConfig
-				cm.Data = data
-			}
-			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
-			result.ConfigurationChanged = true
-			result.LogParserChanged = true
-		}
-	} else {
-		err = s.List(ctx, &logParsers)
-		if err != nil {
-			return result, err
-		}
-
-		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logParsers)
-		if cm.Data == nil {
-			data := make(map[string]string)
-			data[parsersConfigMapKey] = fluentBitParsersConfig
-			cm.Data = data
-			result.ConfigurationChanged = true
-		} else {
-			if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
-				cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
-				result.ConfigurationChanged = true
-			}
-		}
+	if logParser.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
 			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			result.LogParserChanged = true
+			changed = true
+		}
+	} else {
+		if controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
+			log.Info("Removing finalizer")
+			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
+			changed = true
 		}
 	}
 
-	if !result.LogParserChanged && !result.ConfigurationChanged {
-		return result, nil
+	err = s.List(ctx, &logParsers)
+	if err != nil {
+		return false, err
 	}
-	if err = s.Update(ctx, &cm); err != nil {
-		result.LogParserChanged = false
-		result.ConfigurationChanged = false
-		return result, err
+	fluentBitParsersConfig := builder.MergeParsersConfig(&logParsers)
+	if fluentBitParsersConfig == "" {
+		cm.Data = nil
+		changed = true
+	} else if cm.Data == nil {
+		data := make(map[string]string)
+		data[parsersConfigMapKey] = fluentBitParsersConfig
+		cm.Data = data
+		changed = true
+	} else {
+		if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
+			cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
+			changed = true
+		}
 	}
 
-	return result, nil
+	if !changed {
+		return false, nil
+	}
+	if err = s.Update(ctx, &cm); err != nil {
+		return false, err
+	}
+
+	return changed, nil
 }

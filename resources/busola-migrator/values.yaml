@@ -4,7 +4,7 @@ global:
   images:
     busola_migrator:
       name: "busola-migrator"
-      version: "34e2b631"
+      version: "f94d14f3"
   domainName: kyma.example.com
   ingress:
     domainName: ""

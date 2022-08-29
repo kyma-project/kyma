@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config-map
-data:
-  APP_CONFIG: "Binding configuration"

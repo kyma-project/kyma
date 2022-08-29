@@ -92,8 +92,9 @@
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/tests/components/istio @strekm @dariusztutaj @cnvergence @barchw
+/tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # performance tests
 /tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh

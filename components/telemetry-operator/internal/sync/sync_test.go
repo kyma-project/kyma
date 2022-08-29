@@ -4,12 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/secret"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
+
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -27,7 +29,7 @@ var (
 		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
 		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
 	}
-	pipelineConfig = fluentbit.PipelineConfig{
+	pipelineConfig = builder.PipelineConfig{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -96,11 +98,10 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
-	res, err := sut.syncSectionsConfigMap(context.Background(), &lp)
+	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
 
-	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, result)
+	require.Equal(t, result, false)
 }
 
 func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
@@ -110,11 +111,10 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
-	res, err := sut.syncFilesConfigMap(context.Background(), &lp)
+	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
 
-	var result Result
 	require.Error(t, err)
-	require.Equal(t, res, result)
+	require.Equal(t, result, false)
 }
 
 func TestUnsupportedTotal(t *testing.T) {
@@ -165,7 +165,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "my-pipeline"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
 						ValueFrom: telemetryv1alpha1.ValueFromType{
 							SecretKey: secretKeyRef,
@@ -180,11 +180,11 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	lps := NewLogPipelineSyncer(mockClient, daemonSetConfig, pipelineConfig)
 	restartRequired, err := lps.syncVariables(context.Background())
 	require.NoError(t, err)
-	require.True(t, restartRequired.ConfigurationChanged)
+	require.True(t, restartRequired)
 
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}, &envSecret)
 	require.NoError(t, err)
-	targetSecretKey := secret.GenerateVariableName(secretKeyRef, "my-pipeline")
+	targetSecretKey := envvar.GenerateName("my-pipeline", secretKeyRef)
 	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
 }

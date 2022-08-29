@@ -98,6 +98,11 @@ function gatherOptions(...opts) {
   return options;
 }
 
+async function getSKRRuntimeStatus(instanceID) {
+  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  return JSON.parse(runtimeStatus);
+}
+
 // gets the skr config by its instance id
 async function getSKRConfig(instanceID) {
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
@@ -165,6 +170,7 @@ module.exports = {
   kcp,
   gardener,
   getSKRConfig,
+  getSKRRuntimeStatus,
   gatherOptions,
   withInstanceID,
   withAppName,

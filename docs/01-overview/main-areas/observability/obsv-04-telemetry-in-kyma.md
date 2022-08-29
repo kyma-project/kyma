@@ -77,7 +77,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
     - **http**, which pushes the data to the specified http destination.
-    - **grafana-loki**, which pushes the data to the Grafana Loki service.
+    - **grafana-loki**, which pushes the data to the Kyma-internal Loki instance. Note: This output might not be compatible with latest Loki versions. For that, use the `custom` output with name `loki` instead.
     - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
 
     See the following example of the **custom** output:
@@ -95,6 +95,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           Tls                on
           tls.verify         on
     ```
+> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 2. To create the instance, apply the resource file in your cluster.
     ```bash
@@ -111,8 +112,9 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 ### Step 2: Create an input
 
 If you need selection mechanisms for application logs on Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
-If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default.
+If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. For example, you can define the Namespaces to include in input collection, exclude Namespaces from input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](#parameters).
 
+The following example collects input from all Namespaces excluding `kyma-system` and only from `istio-proxy` containers:
 ```yaml
 kind: LogPipeline
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -121,16 +123,19 @@ metadata:
 spec:
   input:
     application:
-      namespaces: []
-      excludeNamespaces: []
-      containers: []
-      excludeContainers: []
-      includeSystemNamespaces: false
+      namespaces:
+        exclude:
+          - kyma-system
+      containers:
+        include:
+          - istio-proxy
   output:
     ...
 ```
 
-The following example collects input from all Namespaces including system Namespaces, but excludes the Fluent Bit container:
+It might happen that Fluent Bit prints an error per processed log line, which is then collected and re-processed.
+To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. The following example collects input from all Namespaces including system Namespaces, but excludes the Fluent Bit container:
+
 ```yaml
 spec:
   input:
@@ -140,8 +145,6 @@ spec:
         - fluent-bit
 ```
 
-It might happen that Fluent Bit prints an error per processed log line that is then collected and re-processed.
-To avoid problems with such recursive logs, it is recommended that you exclude the logs of the Fluent Bit container. 
 
 ### Step 3: Add filters
 
@@ -169,6 +172,7 @@ spec:
   output:
     ...
 ```
+> **NOTE:** Usage of a `custom` filter will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
  The telemetry operator supports different types of [Fluent Bit filter](https://docs.fluentbit.io/manual/concepts/data-pipeline/filter). The example uses the [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) and the [record_modifier](https://docs.fluentbit.io/manual/pipeline/filters/record-modifier) filter.
 
@@ -258,6 +262,7 @@ spec:
   filters:
     ...
 ```
+> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 ### Step 5: Rotate the Secret
 
@@ -308,6 +313,7 @@ spec:
   output:
     ...
 ```
+> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 Instead of defining a filter, you can [annotate](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes#kubernetes-annotations) your workload in the following way. Here, the parser is activated only for the annotated workload.
 
@@ -332,23 +338,25 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 |---|---|---|
 | input | object | Definition where to collect logs, including selector mechanisms. |
 | input.application | object | Input type for application logs collection. |
-| input.application.namespaces | []string | List of Namespaces from which logs are collected (mutually exclusive with `exludeNamespaces`). |
-| input.application.excludeNamespaces | []string | List of Namespaces to exclude during log collection from all Namespaces (mutually exclusive with `namespaces`) |
-| input.application.containers | []string | List of containers to collect from (mutually exclusive with `excludeContainers`) |
-| input.application.excludeContainers | []string | List of containers to exclude (mutually exclusive with `containers`) |
-| input.application.includeSystemNamespaces | boolean | If you specify neither `namespaces` nor `excludeNamespaces`, you can set `includeSystemNamespaces` to include all system Namespaces without listing them manually. Defaults to `false`. |
+| input.application.namespaces | object | Provides selectors for Namespaces. Selectors are mutually exclusive. |
+| input.application.namespaces.include | []string | List of Namespaces from which logs are collected. |
+| input.application.namespaces.exclude | []string | List of Namespaces to exclude during log collection from all Namespaces. |
+| input.application.namespaces.system | boolean | Set to `true` if collecting from all Namespaces should include system Namespaces as well. |
+| input.application.containers | []string | Provides selectors for containers. Selectors are mutually exclusive. |
+| input.application.containers.include | []string | List of containers to collect from. |
+| input.application.containers.exclude | []string | List of containers to exclude. |
 | input.application.keepAnnotations | boolean | Indicates whether to keep all Kubernetes annotations. Default is `false`. |
 | input.application.dropLabels | boolean | Indicates whether to drop all Kubernetes labels. Default is `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
 | filters[].custom | string | Filter definition in the Fluent Bit syntax.|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
-| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/latest/clients/fluentbit/). |
+| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/). Note: This output might not be compatible with latest Loki versions. For that, use the `custom` output with name `loki` instead.|
 | output.grafana-loki.url | object | Grafana Loki URL. |
 | output.grafana-loki.url.value | string | URL value. |
 | output.grafana-loki.url.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
 | output.grafana-loki.labels | map[string]string | Labels to set for each log record. |
 | output.grafana-loki.removeKeys | []string | Attributes to be removed from a log record. |
-| output.http | object | [Fluent Bit http output](https://docs.fluentbit.io/manual/pipeline/outputs/http). |
+| output.http | object | Maps to a [Fluent Bit http output](https://docs.fluentbit.io/manual/pipeline/outputs/http). |
 | output.http.compress | string | Payload compression mechanism. |
 | output.http.dedot | boolean | If `true`, replaces dots with underscores ("dedotting") in the log field names `kubernetes.annotations` and `kubernetes.labels`. Default is `false`. |
 | output.http.format | string | Data format to be used in the HTTP request body. Default is `json`. |
@@ -385,6 +393,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | conditions[].lastTransitionTime | []object | An array of conditions describing the status of the pipeline.
 | conditions[].reason | []object | An array of conditions describing the status of the pipeline.
 | conditions[].type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
+| unsupportedMode | bool | Is active when the LogPipeline uses a `custom` output or filter; see [unsupported mode](#unsupported-mode).
 
 ### LogParser.spec attribute
 
@@ -521,6 +530,10 @@ As per LogPipeline definition, a dedicated [rewrite_tag](https://docs.fluentbit.
 
 Currently there are the following limitations for LogPipelines that are served by Fluent Bit:
 
+### Unsupported Mode
+
+If you use a `custom` filter or output, you directly access the API of the underlying Fluent Bit configuration. Because Kyma cannot test every feature provided by Fluent Bit, a LogPipeline using custom filters or outputs runs in `unsupported mode`. Also, Kyma cannot guarantee full compatibility over subsequent releases.
+
 ### Fluent Bit plugins
 
 You cannot enable the following plugins, because they potentially harm the stability:
@@ -529,7 +542,10 @@ You cannot enable the following plugins, because they potentially harm the stabi
 - Kubernetes Filter
 - Rewrite_Tag Filter
 
-In addition, the prefix `__k8s__` is reserved by the LogPipeline and should not be used in any Filter definition.
+### Reserved log attributes
+The log attribute named `kubernetes` is a special attribute that's enriched by the `kubernetes` filter. When you use that attribute as part of your structured log payload, the metadata enriched by the filter are overwritten by the payload data. Filters that rely on the original metadata might no longer work as expected.
+
+Furthermore, the prefix `__kyma__` is used internally by the telemetry operator. When you use the attribute prefix in your log data, the data might be overwritten.
 
 ### Buffer limits
 

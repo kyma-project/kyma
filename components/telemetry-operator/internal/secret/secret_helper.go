@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,20 +29,26 @@ func (s *Helper) ValidateSecretsExist(ctx context.Context, logpipeline *telemetr
 			return false
 		}
 	}
-	if logpipeline.Spec.Output.HTTP.Host.ValueFrom.IsSecretRef() {
-		_, err := s.FetchSecret(ctx, logpipeline.Spec.Output.HTTP.Host.ValueFrom)
+
+	output := logpipeline.Spec.Output
+	if !output.IsHTTPDefined() {
+		return true
+	}
+
+	if output.HTTP.Host.ValueFrom.IsSecretRef() {
+		_, err := s.FetchSecret(ctx, output.HTTP.Host.ValueFrom)
 		if err != nil {
 			return false
 		}
 	}
-	if logpipeline.Spec.Output.HTTP.User.ValueFrom.IsSecretRef() {
-		_, err := s.FetchSecret(ctx, logpipeline.Spec.Output.HTTP.User.ValueFrom)
+	if output.HTTP.User.ValueFrom.IsSecretRef() {
+		_, err := s.FetchSecret(ctx, output.HTTP.User.ValueFrom)
 		if err != nil {
 			return false
 		}
 	}
-	if logpipeline.Spec.Output.HTTP.Password.ValueFrom.IsSecretRef() {
-		_, err := s.FetchSecret(ctx, logpipeline.Spec.Output.HTTP.Password.ValueFrom)
+	if output.HTTP.Password.ValueFrom.IsSecretRef() {
+		_, err := s.FetchSecret(ctx, output.HTTP.Password.ValueFrom)
 		if err != nil {
 			return false
 		}
@@ -57,7 +62,7 @@ func (s *Helper) FetchSecret(ctx context.Context, fromType telemetryv1alpha1.Val
 	secretKey := fromType.SecretKey
 	var referencedSecret corev1.Secret
 	if err := s.client.Get(ctx, types.NamespacedName{Name: secretKey.Name, Namespace: secretKey.Namespace}, &referencedSecret); err != nil {
-		log.Error(err, "Failed reading secret '%s' from namespace '%s'", secretKey.Name, secretKey.Namespace)
+		log.Error(err, fmt.Sprintf("Failed reading secret '%s' from namespace '%s'", secretKey.Name, secretKey.Namespace))
 		return nil, err
 	}
 	if _, ok := referencedSecret.Data[secretKey.Key]; !ok {
@@ -106,14 +111,4 @@ func FetchSecretData(referencedSecret corev1.Secret, valFrom telemetryv1alpha1.V
 		return data, nil
 	}
 	return data, fmt.Errorf("the key '%s' cannot be found in the given secret '%s'", valFrom.SecretKey.Key, referencedSecret.Name)
-}
-
-// GenerateVariableName generates env variable name for a given secret reference by concatenating pipeline name, namespace, secret name and secret key.
-// Dots and dashes are replaced by underscores to be compliant with env variable name requirements.
-func GenerateVariableName(secretRef telemetryv1alpha1.SecretKeyRef, pipelineName string) string {
-	result := fmt.Sprintf("%s_%s_%s_%s", pipelineName, secretRef.Namespace, secretRef.Name, secretRef.Key)
-	result = strings.ToUpper(result)
-	result = strings.Replace(result, ".", "_", -1)
-	result = strings.Replace(result, "-", "_", -1)
-	return result
 }

@@ -44,7 +44,7 @@ type ValidatingWebhookHandler struct {
 	client.Client
 	inputValidator        validation.InputValidator
 	variablesValidator    validation.VariablesValidator
-	pluginValidator       validation.PluginValidator
+	filterValidator       validation.FilterValidator
 	maxPipelinesValidator validation.MaxPipelinesValidator
 	outputValidator       validation.OutputValidator
 	fileValidator         validation.FilesValidator
@@ -52,12 +52,12 @@ type ValidatingWebhookHandler struct {
 	dryRunner             DryRunner
 }
 
-func NewValidatingWebhookHandler(client client.Client, inputValidator validation.InputValidator, variablesValidator validation.VariablesValidator, pluginValidator validation.PluginValidator, maxPipelinesValidator validation.MaxPipelinesValidator, outputValidator validation.OutputValidator, fileValidator validation.FilesValidator, dryRunner DryRunner) *ValidatingWebhookHandler {
+func NewValidatingWebhookHandler(client client.Client, inputValidator validation.InputValidator, variablesValidator validation.VariablesValidator, filterValidator validation.FilterValidator, maxPipelinesValidator validation.MaxPipelinesValidator, outputValidator validation.OutputValidator, fileValidator validation.FilesValidator, dryRunner DryRunner) *ValidatingWebhookHandler {
 	return &ValidatingWebhookHandler{
 		Client:                client,
 		inputValidator:        inputValidator,
 		variablesValidator:    variablesValidator,
-		pluginValidator:       pluginValidator,
+		filterValidator:       filterValidator,
 		maxPipelinesValidator: maxPipelinesValidator,
 		outputValidator:       outputValidator,
 		fileValidator:         fileValidator,
@@ -89,7 +89,7 @@ func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Req
 	}
 	var warnMsg []string
 
-	if v.pluginValidator.ContainsCustomPlugin(logPipeline) {
+	if logPipeline.ContainsCustomPlugin() {
 		helpText := "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/"
 		msg := fmt.Sprintf("Logpipeline '%s' uses unsupported custom filters or outputs. We recommend changing the pipeline to use supported filters or output. See the documentation: %s", logPipeline.Name, helpText)
 		warnMsg = append(warnMsg, msg)
@@ -130,7 +130,7 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, logP
 		return err
 	}
 
-	if err := v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
+	if err := v.filterValidator.Validate(logPipeline); err != nil {
 		log.Error(err, "Failed to validate plugins")
 		return err
 	}

@@ -9,9 +9,9 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-incubator/api-gateway v0.0.0-20220819045934-795b1f97ab8f
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220818120541-277787e6c2ec
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220818120541-277787e6c2ec
+	github.com/kyma-incubator/api-gateway v0.0.0-20220819093753-296e6704d413
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220826051949-4ed4d5883dce
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220826051949-4ed4d5883dce
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.8.4
 	github.com/nats-io/nats.go v1.16.0
@@ -21,8 +21,8 @@ require (
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/atomic v1.10.0
-	go.uber.org/zap v1.22.0
-	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7
+	go.uber.org/zap v1.23.0
+	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
 	k8s.io/api v0.24.4
 	k8s.io/apimachinery v0.24.4
