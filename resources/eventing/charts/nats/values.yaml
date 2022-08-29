@@ -277,7 +277,7 @@ auth:
     #
     configMap:
       name: eventing-nats-accounts
-      key: accounts.json
+      key: accountsJson
 
     ##########################
     #                        #
