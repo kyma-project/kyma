@@ -5,8 +5,9 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func TestCreateRecordModifierFilter(t *testing.T) {
@@ -139,14 +140,14 @@ func TestMergeSectionsConfig(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{
+	defaults := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := BuildFluentBitConfig(logPipeline, pipelineConfig)
+	actual, err := BuildFluentBitConfig(logPipeline, defaults)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }
@@ -154,14 +155,14 @@ func TestMergeSectionsConfig(t *testing.T) {
 func TestMergeSectionsConfigWithMissingOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{
+	defaults := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := BuildFluentBitConfig(logPipeline, pipelineConfig)
+	actual, err := BuildFluentBitConfig(logPipeline, defaults)
 	require.Error(t, err)
 	require.Empty(t, actual)
 }

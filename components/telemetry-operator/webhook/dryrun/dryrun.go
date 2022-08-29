@@ -12,9 +12,10 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
 	"github.com/google/uuid"
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func dryRunArgs() []string {
@@ -25,16 +26,16 @@ type Config struct {
 	FluentBitBinPath       string
 	FluentBitPluginDir     string
 	FluentBitConfigMapName types.NamespacedName
-	PipelineConfig         builder.PipelineConfig
+	PipelineDefaults       builder.PipelineDefaults
 }
 
 type DryRunner struct {
 	fileWriter    fileWriter
 	commandRunner commandRunner
-	config        *Config
+	config        Config
 }
 
-func NewDryRunner(c client.Client, config *Config) *DryRunner {
+func NewDryRunner(c client.Client, config Config) *DryRunner {
 	return &DryRunner{
 		fileWriter:    &fileWriterImpl{client: c, config: config},
 		commandRunner: &commandRunnerImpl{},

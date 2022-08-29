@@ -28,25 +28,32 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 )
+
+type Config struct {
+	ParsersConfigMap types.NamespacedName
+	DaemonSet        types.NamespacedName
+}
 
 // Reconciler reconciles a LogParser object
 type Reconciler struct {
 	client.Client
-	syncer                   *syncer
-	fluentBitDaemonSetHelper *fluentbit.DaemonSetHelper
+	config          Config
+	syncer          *syncer
+	daemonSetHelper *kubernetes.DaemonSetHelper
 }
 
 func NewReconciler(
 	client client.Client,
-	fluentBitK8sResources fluentbit.KubernetesResources,
+	config Config,
 	restartsTotal prometheus.Counter) *Reconciler {
 	var r Reconciler
 
 	r.Client = client
-	r.fluentBitDaemonSetHelper = fluentbit.NewDaemonSetHelper(client, fluentBitK8sResources.DaemonSet, restartsTotal)
-	r.syncer = newSyncer(client, fluentBitK8sResources)
+	r.config = config
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, restartsTotal)
+	r.syncer = newSyncer(client, config)
 
 	return &r
 }
@@ -86,7 +93,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
 
-		if err = r.fluentBitDaemonSetHelper.Restart(ctx); err != nil {
+		if err = r.daemonSetHelper.Restart(ctx, r.config.DaemonSet); err != nil {
 			log.Error(err, "Failed to restart Fluent Bit DaemonSet")
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
@@ -102,7 +109,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
 		var ready bool
-		ready, err = r.fluentBitDaemonSetHelper.IsReady(ctx)
+		ready, err = r.daemonSetHelper.IsReady(ctx, r.config.DaemonSet)
 		if err != nil {
 			log.Error(err, "Failed to check Fluent Bit readiness")
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err

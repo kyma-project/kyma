@@ -26,7 +26,6 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
 	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
@@ -163,18 +162,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := builder.PipelineConfig{
+	pipelineDefaults := builder.PipelineDefaults{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,
 		FsBufferLimit:     fluentBitFsBufferLimit,
 	}
 
-	fluentBitK8sResources := fluentbit.KubernetesResources{
-		DaemonSet: types.NamespacedName{
-			Namespace: fluentBitNs,
-			Name:      fluentBitDaemonSet,
-		},
+	daemonSet := types.NamespacedName{
+		Namespace: fluentBitNs,
+		Name:      fluentBitDaemonSet,
+	}
+	logpipelineConfig := logpipelinecontroller.Config{
 		SectionsConfigMap: types.NamespacedName{
 			Name:      fluentBitSectionsConfigMap,
 			Namespace: fluentBitNs,
@@ -188,17 +187,23 @@ func main() {
 			Name:      fluentBitEnvSecret,
 			Namespace: fluentBitNs,
 		},
+		DaemonSet:        daemonSet,
+		PipelineDefaults: pipelineDefaults,
+	}
+
+	logparserConfig := logparsercontroller.Config{
 		ParsersConfigMap: types.NamespacedName{
 			Name:      fluentBitParsersConfigMap,
 			Namespace: fluentBitNs,
 		},
+		DaemonSet: daemonSet,
 	}
 
-	dryRunConfig := &dryrun.Config{
+	dryRunConfig := dryrun.Config{
 		FluentBitBinPath:       fluentBitPath,
 		FluentBitPluginDir:     fluentBitPluginDirectory,
 		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
-		PipelineConfig:         pipelineConfig,
+		PipelineDefaults:       pipelineDefaults,
 	}
 
 	logPipelineValidationHandler := logpipelinewebhook.NewValidatingWebhookHandler(
@@ -225,8 +230,7 @@ func main() {
 
 	logPipelineReconciler := logpipelinecontroller.NewReconciler(
 		mgr.GetClient(),
-		fluentBitK8sResources,
-		pipelineConfig,
+		logpipelineConfig,
 		restartsTotal)
 	if err = logPipelineReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
@@ -235,10 +239,10 @@ func main() {
 
 	logParserReconciler := logparsercontroller.NewReconciler(
 		mgr.GetClient(),
-		fluentBitK8sResources,
+		logparserConfig,
 		restartsTotal)
 	if err = logParserReconciler.SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+		setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
 		os.Exit(1)
 	}
 

@@ -3,7 +3,6 @@ package logpipeline
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
@@ -23,8 +22,7 @@ const (
 
 type syncer struct {
 	client.Client
-	fluentBitK8sResources   fluentbit.KubernetesResources
-	pipelineConfig          builder.PipelineConfig
+	config                  Config
 	enableUnsupportedPlugin bool
 	unsupportedPluginsTotal int
 	secretHelper            *secretHelper
@@ -33,13 +31,11 @@ type syncer struct {
 
 func newSyncer(
 	client client.Client,
-	fluentBitK8sResources fluentbit.KubernetesResources,
-	pipelineConfig builder.PipelineConfig,
+	config Config,
 ) *syncer {
 	var s syncer
 	s.Client = client
-	s.fluentBitK8sResources = fluentBitK8sResources
-	s.pipelineConfig = pipelineConfig
+	s.config = config
 	s.secretHelper = newSecretHelper(client)
 	s.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
 	return &s
@@ -77,10 +73,10 @@ func (s *syncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.Log
 	return sectionsChanged || filesChanged || variablesChanged, nil
 }
 
-// Synchronize LogPipeline with ConfigMap of fluentBitDaemonSetHelper sections (Input, Filter and Output).
+// Synchronize LogPipeline with ConfigMap of daemonSetHelper sections (Input, Filter and Output).
 func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.fluentBitK8sResources.SectionsConfigMap)
+	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.SectionsConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -95,7 +91,7 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 			changed = true
 		}
 	} else {
-		fluentBitConfig, err := builder.BuildFluentBitConfig(logPipeline, s.pipelineConfig)
+		fluentBitConfig, err := builder.BuildFluentBitConfig(logPipeline, s.config.PipelineDefaults)
 		if err != nil {
 			return false, err
 		}
@@ -128,7 +124,7 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.fluentBitK8sResources.FilesConfigMap)
+	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.FilesConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -172,7 +168,7 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 // syncVariables copies referenced secrets to global Fluent Bit environment secret.
 func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
 	log := logf.FromContext(ctx)
-	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.fluentBitK8sResources.EnvSecret)
+	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.config.EnvSecret)
 	if err != nil {
 		return false, err
 	}

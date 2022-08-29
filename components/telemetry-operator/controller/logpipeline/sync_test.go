@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes/mocks"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
@@ -25,7 +24,7 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
+	sut := newSyncer(mockClient, testConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
@@ -38,7 +37,7 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
+	sut := newSyncer(mockClient, testConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
@@ -67,7 +66,7 @@ Alias  bar`
 	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{l1, l2}}
 
 	mockClient := &mocks.Client{}
-	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
+	sut := newSyncer(mockClient, testConfig)
 	sut.syncUnsupportedPluginsTotal(logPipelines)
 	require.Equal(t, 2, sut.unsupportedPluginsTotal)
 }
@@ -113,7 +112,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	}
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret).Build()
 
-	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
+	sut := newSyncer(mockClient, testConfig)
 	restartRequired, err := sut.syncVariables(context.Background(), &logPipelines)
 	require.NoError(t, err)
 	require.True(t, restartRequired)

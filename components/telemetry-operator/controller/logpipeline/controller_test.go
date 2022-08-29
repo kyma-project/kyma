@@ -31,7 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 )
 
 var _ = Describe("LogPipeline controller", func() {
@@ -99,7 +98,7 @@ var _ = Describe("LogPipeline controller", func() {
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "my-secret",
-					Namespace: controller.TestFluentBitK8sResources.DaemonSet.Namespace,
+					Namespace: testConfig.DaemonSet.Namespace,
 				},
 				StringData: map[string]string{
 					"key": "value",
@@ -121,8 +120,8 @@ var _ = Describe("LogPipeline controller", func() {
 					Kind:       "DaemonSet",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      controller.TestFluentBitK8sResources.DaemonSet.Name,
-					Namespace: controller.TestFluentBitK8sResources.DaemonSet.Namespace,
+					Name:      testConfig.DaemonSet.Name,
+					Namespace: testConfig.DaemonSet.Namespace,
 				},
 				Spec: appsv1.DaemonSetSpec{
 					Selector: &metav1.LabelSelector{
@@ -148,8 +147,8 @@ var _ = Describe("LogPipeline controller", func() {
 					Kind:       "Pod",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      controller.TestFluentBitK8sResources.DaemonSet.Name + "-123",
-					Namespace: controller.TestFluentBitK8sResources.DaemonSet.Namespace,
+					Name:      testConfig.DaemonSet.Name + "-123",
+					Namespace: testConfig.DaemonSet.Namespace,
 					Labels:    podLabels,
 				},
 				Spec: corev1.PodSpec{
@@ -166,7 +165,7 @@ var _ = Describe("LogPipeline controller", func() {
 			}
 			secretRef := telemetryv1alpha1.SecretKeyRef{
 				Name:      "my-secret",
-				Namespace: controller.TestFluentBitK8sResources.DaemonSet.Namespace,
+				Namespace: testConfig.DaemonSet.Namespace,
 				Key:       "key",
 			}
 			variableRefs := telemetryv1alpha1.VariableReference{
@@ -179,7 +178,7 @@ var _ = Describe("LogPipeline controller", func() {
 
 			logPipeline := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
-					APIVersion: "common.kyma-project.io/v1alpha1",
+					APIVersion: "telemetry.kyma-project.io/v1alpha1",
 					Kind:       "LogPipeline",
 				},
 				ObjectMeta: metav1.ObjectMeta{
@@ -201,8 +200,8 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() string {
 				cmFileName := LogPipelineName + ".conf"
 				configMapLookupKey := types.NamespacedName{
-					Name:      controller.TestFluentBitK8sResources.SectionsConfigMap.Name,
-					Namespace: controller.TestFluentBitK8sResources.SectionsConfigMap.Namespace,
+					Name:      testConfig.SectionsConfigMap.Name,
+					Namespace: testConfig.SectionsConfigMap.Namespace,
 				}
 				var fluentBitCm corev1.ConfigMap
 				err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitCm)
@@ -216,8 +215,8 @@ var _ = Describe("LogPipeline controller", func() {
 			// File content should be copied to ConfigMap
 			Eventually(func() string {
 				filesConfigMapLookupKey := types.NamespacedName{
-					Name:      controller.TestFluentBitK8sResources.FilesConfigMap.Name,
-					Namespace: controller.TestFluentBitK8sResources.FilesConfigMap.Namespace,
+					Name:      testConfig.FilesConfigMap.Name,
+					Namespace: testConfig.FilesConfigMap.Namespace,
 				}
 				var filesCm corev1.ConfigMap
 				err := k8sClient.Get(ctx, filesConfigMapLookupKey, &filesCm)
@@ -230,8 +229,8 @@ var _ = Describe("LogPipeline controller", func() {
 			// Secret reference should be copied to environment Secret
 			Eventually(func() string {
 				envSecretLookupKey := types.NamespacedName{
-					Name:      controller.TestFluentBitK8sResources.EnvSecret.Name,
-					Namespace: controller.TestFluentBitK8sResources.EnvSecret.Namespace,
+					Name:      testConfig.EnvSecret.Name,
+					Namespace: testConfig.EnvSecret.Namespace,
 				}
 				var envSecret corev1.Secret
 				err := k8sClient.Get(ctx, envSecretLookupKey, &envSecret)
@@ -245,7 +244,7 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() []string {
 				loggingConfigLookupKey := types.NamespacedName{
 					Name:      LogPipelineName,
-					Namespace: controller.TestFluentBitK8sResources.DaemonSet.Namespace,
+					Namespace: testConfig.DaemonSet.Namespace,
 				}
 				var updatedLogPipeline telemetryv1alpha1.LogPipeline
 				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLogPipeline)
@@ -261,8 +260,8 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() int {
 				var fluentBitDaemonSet appsv1.DaemonSet
 				err := k8sClient.Get(ctx, types.NamespacedName{
-					Name:      controller.TestFluentBitK8sResources.DaemonSet.Name,
-					Namespace: controller.TestFluentBitK8sResources.DaemonSet.Namespace,
+					Name:      testConfig.DaemonSet.Name,
+					Namespace: testConfig.DaemonSet.Namespace,
 				}, &fluentBitDaemonSet)
 				if err != nil {
 					return 0

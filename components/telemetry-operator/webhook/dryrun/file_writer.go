@@ -7,10 +7,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 //go:generate mockery --name fileWriter --filename file_writer.go
@@ -21,7 +22,7 @@ type fileWriter interface {
 
 type fileWriterImpl struct {
 	client client.Client
-	config *Config
+	config Config
 }
 
 func (f *fileWriterImpl) prepareParserDryRun(ctx context.Context, workDir string, parser *telemetryv1alpha1.LogParser) (func(), error) {
@@ -94,7 +95,7 @@ func (f *fileWriterImpl) writeSections(pipeline *telemetryv1alpha1.LogPipeline, 
 		return err
 	}
 
-	sectionsConfig, err := builder.BuildFluentBitConfig(pipeline, f.config.PipelineConfig)
+	sectionsConfig, err := builder.BuildFluentBitConfig(pipeline, f.config.PipelineDefaults)
 	if err != nil {
 		return err
 	}

@@ -8,7 +8,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 )
@@ -20,14 +19,14 @@ const (
 
 type syncer struct {
 	client.Client
-	fluentBitK8sResources fluentbit.KubernetesResources
-	k8sGetterOrCreator    *kubernetes.GetterOrCreator
+	config             Config
+	k8sGetterOrCreator *kubernetes.GetterOrCreator
 }
 
-func newSyncer(client client.Client, fluentBitK8sResources fluentbit.KubernetesResources) *syncer {
+func newSyncer(client client.Client, config Config) *syncer {
 	var s syncer
 	s.Client = client
-	s.fluentBitK8sResources = fluentBitK8sResources
+	s.config = config
 	s.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
 	return &s
 }
@@ -35,7 +34,7 @@ func newSyncer(client client.Client, fluentBitK8sResources fluentbit.KubernetesR
 // SyncParsersConfigMap synchronizes the Fluent Bit parsers ConfigMap for all LogParsers.
 func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.fluentBitK8sResources.ParsersConfigMap)
+	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.ParsersConfigMap)
 	if err != nil {
 		return false, err
 	}

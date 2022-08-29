@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -15,6 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func mustLoadManifest[T runtime.Object](scheme *runtime.Scheme, filepath string) T {
@@ -44,9 +45,9 @@ func TestPreparePipelineDryRun(t *testing.T) {
 
 	sut := fileWriterImpl{
 		client: client,
-		config: &Config{
+		config: Config{
 			FluentBitConfigMapName: types.NamespacedName{Name: fluentBitCm.Name},
-			PipelineConfig: builder.PipelineConfig{
+			PipelineDefaults: builder.PipelineDefaults{
 				FsBufferLimit:     "1G",
 				MemoryBufferLimit: "10M",
 				StorageType:       "filesystem",

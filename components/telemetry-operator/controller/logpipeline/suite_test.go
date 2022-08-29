@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -37,7 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -49,6 +50,21 @@ var (
 	testEnv   *envtest.Environment
 	ctx       context.Context
 	cancel    context.CancelFunc
+)
+
+var (
+	testConfig = Config{
+		DaemonSet:         types.NamespacedName{Name: "test-telemetry-fluent-bit", Namespace: "default"},
+		SectionsConfigMap: types.NamespacedName{Name: "test-telemetry-fluent-bit-sections", Namespace: "default"},
+		FilesConfigMap:    types.NamespacedName{Name: "test-telemetry-fluent-bit-files", Namespace: "default"},
+		EnvSecret:         types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"},
+		PipelineDefaults: builder.PipelineDefaults{
+			InputTag:          "kube",
+			MemoryBufferLimit: "10M",
+			StorageType:       "filesystem",
+			FsBufferLimit:     "1G",
+		},
+	}
 )
 
 func TestAPIs(t *testing.T) {
@@ -101,8 +117,7 @@ var _ = BeforeSuite(func() {
 
 	reconciler := NewReconciler(
 		mgr.GetClient(),
-		controller.TestFluentBitK8sResources,
-		controller.TestPipelineConfig,
+		testConfig,
 		restartsTotal,
 	)
 	err = reconciler.SetupWithManager(mgr)

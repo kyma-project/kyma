@@ -9,7 +9,7 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
-type PipelineConfig struct {
+type PipelineDefaults struct {
 	InputTag          string
 	MemoryBufferLimit string
 	StorageType       string
@@ -17,7 +17,7 @@ type PipelineConfig struct {
 }
 
 // BuildFluentBitConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func BuildFluentBitConfig(pipeline *telemetryv1alpha1.LogPipeline, pipelineConfig PipelineConfig) (string, error) {
+func BuildFluentBitConfig(pipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) (string, error) {
 	err := validateOutput(pipeline)
 	if err != nil {
 		return "", err
@@ -29,12 +29,12 @@ func BuildFluentBitConfig(pipeline *telemetryv1alpha1.LogPipeline, pipelineConfi
 	}
 
 	var sb strings.Builder
-	sb.WriteString(createRewriteTagFilterSection(pipeline, pipelineConfig))
+	sb.WriteString(createRewriteTagFilterSection(pipeline, defaults))
 	sb.WriteString(createRecordModifierFilter(pipeline))
 	sb.WriteString(createCustomFilters(pipeline))
 	sb.WriteString(createKubernetesMetadataFilter(pipeline))
 	sb.WriteString(createLuaDedotFilter(pipeline))
-	sb.WriteString(createOutputSection(pipeline, pipelineConfig))
+	sb.WriteString(createOutputSection(pipeline, defaults))
 
 	return sb.String(), nil
 }
