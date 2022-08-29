@@ -163,14 +163,14 @@ var _ = Describe("LogPipeline controller", func() {
 				Name:    "myFile",
 				Content: "file-content",
 			}
-			secretRef := telemetryv1alpha1.SecretKeyRef{
+			secretRef := telemetryv1alpha1.SecretRef{
 				Name:      "my-secret",
 				Namespace: testConfig.DaemonSet.Namespace,
 				Key:       "key",
 			}
 			variableRefs := telemetryv1alpha1.VariableReference{
 				Name:      "myKey",
-				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: secretRef},
+				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretRef: &secretRef},
 			}
 			filter := telemetryv1alpha1.Filter{
 				Custom: FluentBitFilterConfig,

@@ -9,7 +9,7 @@ import (
 
 func TestGenerateVariableName(t *testing.T) {
 	expected := "PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY_123"
-	secretRef := telemetryv1alpha1.SecretKeyRef{
+	secretRef := telemetryv1alpha1.SecretRef{
 		Name:      "test-name",
 		Key:       "TEST_KEY_123",
 		Namespace: "test-namespace",
@@ -20,7 +20,7 @@ func TestGenerateVariableName(t *testing.T) {
 
 func TestGenerateVariableNameFromLowercase(t *testing.T) {
 	expected := "PIPELINE_TEST_NAMESPACE_TEST_NAME_TEST_KEY_123"
-	secretRef := telemetryv1alpha1.SecretKeyRef{
+	secretRef := telemetryv1alpha1.SecretRef{
 		Name:      "test-name",
 		Key:       "test-key.123",
 		Namespace: "test-namespace",

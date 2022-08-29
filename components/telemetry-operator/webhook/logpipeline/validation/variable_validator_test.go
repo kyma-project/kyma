@@ -16,20 +16,22 @@ func TestValidateSecretRefs(t *testing.T) {
 			Variables: []telemetryv1alpha1.VariableReference{
 				{
 					Name: "foo1",
-					ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "fooN",
-						Namespace: "fooNs",
-						Key:       "foo",
-					},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretRef: &telemetryv1alpha1.SecretRef{
+							Name:      "fooN",
+							Namespace: "fooNs",
+							Key:       "foo",
+						},
 					},
 				},
 				{
 					Name: "foo2",
-					ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "fooN",
-						Namespace: "fooNs",
-						Key:       "foo",
-					}},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretRef: &telemetryv1alpha1.SecretRef{
+							Name:      "fooN",
+							Namespace: "fooNs",
+							Key:       "foo",
+						}},
 				},
 			},
 		},
@@ -46,11 +48,12 @@ func TestValidateSecretRefs(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Variables: []telemetryv1alpha1.VariableReference{{
 				Name: "foo2",
-				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: telemetryv1alpha1.SecretKeyRef{
-					Name:      "fooN",
-					Namespace: "fooNs",
-					Key:       "foo",
-				}},
+				ValueFrom: telemetryv1alpha1.ValueFromSource{
+					SecretRef: &telemetryv1alpha1.SecretRef{
+						Name:      "fooN",
+						Namespace: "fooNs",
+						Key:       "foo",
+					}},
 			}},
 		},
 	}
@@ -67,20 +70,22 @@ func TestVariableValidator(t *testing.T) {
 			Variables: []telemetryv1alpha1.VariableReference{
 				{
 					Name: "foo1",
-					ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "fooN",
-						Namespace: "fooNs",
-						Key:       "foo",
-					},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretRef: &telemetryv1alpha1.SecretRef{
+							Name:      "fooN",
+							Namespace: "fooNs",
+							Key:       "foo",
+						},
 					},
 				},
 				{
 					Name: "foo2",
-					ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "",
-						Namespace: "",
-						Key:       "",
-					}},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretRef: &telemetryv1alpha1.SecretRef{
+							Name:      "",
+							Namespace: "",
+							Key:       "",
+						}},
 				},
 			},
 		},
