@@ -19,11 +19,12 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	"time"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"sigs.k8s.io/controller-runtime/pkg/handler" // Required for Watching
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"time"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 
@@ -48,8 +49,8 @@ var (
 )
 
 const (
-	httpOutputSecretKeyRef = "spec.output.http"
-	varSecretKeyRef        = "spec.variables"
+	httpOutputSecretPathRef = "spec.output.http"
+	varSecretPathRef        = "spec.variables"
 )
 
 // LogPipelineReconciler reconciles a LogPipeline object
@@ -103,7 +104,7 @@ func secretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	return secretPreset
 }
 
-func fetchFirstHttpSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
+func firstHttpSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	httpOutput := logPipeline.Spec.Output.HTTP
 	if httpOutput.Host.ValueFrom.SecretKey.Name != "" {
 		return httpOutput.Host.ValueFrom.SecretKey.Name
@@ -127,13 +128,13 @@ func indexSecrets(fieldName string, mgr ctrl.Manager) error {
 		}
 
 		var retStr []string
-		if fieldName == httpOutputSecretKeyRef {
-			secretName := fetchFirstHttpSecret(logPipeline)
+		if fieldName == httpOutputSecretPathRef {
+			secretName := firstHttpSecret(logPipeline)
 			if secretName == "" {
 				return nil
 			}
 			retStr = append(retStr, secretName)
-		} else if fieldName == varSecretKeyRef {
+		} else if fieldName == varSecretPathRef {
 			for _, v := range logPipeline.Spec.Variables {
 				if v.ValueFrom.SecretKey.Name == "" {
 					return nil
@@ -148,10 +149,10 @@ func indexSecrets(fieldName string, mgr ctrl.Manager) error {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := indexSecrets(httpOutputSecretKeyRef, mgr); err != nil {
+	if err := indexSecrets(httpOutputSecretPathRef, mgr); err != nil {
 		return err
 	}
-	if err := indexSecrets(varSecretKeyRef, mgr); err != nil {
+	if err := indexSecrets(varSecretPathRef, mgr); err != nil {
 		return err
 	}
 
@@ -167,7 +168,7 @@ func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *LogPipelineReconciler) fetchLogPipelineToReconcile(secret client.Object) *telemetryv1alpha1.LogPipelineList {
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	listOps := &client.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(varSecretKeyRef, secret.GetName()),
+		FieldSelector: fields.OneTermEqualSelector(varSecretPathRef, secret.GetName()),
 	}
 	err := r.List(context.TODO(), &logPipelines, listOps)
 	if err != nil {
@@ -175,7 +176,7 @@ func (r *LogPipelineReconciler) fetchLogPipelineToReconcile(secret client.Object
 	}
 	if len(logPipelines.Items) == 0 {
 		listOps = &client.ListOptions{
-			FieldSelector: fields.OneTermEqualSelector(httpOutputSecretKeyRef, secret.GetName()),
+			FieldSelector: fields.OneTermEqualSelector(httpOutputSecretPathRef, secret.GetName()),
 		}
 	}
 	err = r.List(context.TODO(), &logPipelines, listOps)
