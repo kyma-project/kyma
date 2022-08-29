@@ -145,12 +145,16 @@ type VariableReference struct {
 }
 
 type ValueType struct {
-	Value     string        `json:"value,omitempty"`
-	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+	Value     string         `json:"value,omitempty"`
+	ValueFrom *ValueFromType `json:"valueFrom,omitempty"`
 }
 
 func (v *ValueType) IsDefined() bool {
-	return v.Value != "" || v.ValueFrom.IsSecretRef()
+	if v.Value != "" {
+		return true
+	}
+
+	return v.ValueFrom != nil && v.ValueFrom.IsSecretRef()
 }
 
 func (v *ValueFromType) IsSecretRef() bool {
