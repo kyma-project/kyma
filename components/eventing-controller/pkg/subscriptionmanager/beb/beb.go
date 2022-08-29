@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
@@ -121,7 +123,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	)
 	c.backend = bebReconciler.Backend
 	if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
-		return fmt.Errorf("setup BEB subscription controller failed: %v", err)
+		return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
 	}
 	return nil
 }
@@ -173,9 +175,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 	var bebBackend *handlers.BEB
 	var ok bool
 	if bebBackend, ok = backend.(*handlers.BEB); !ok {
-		err := errors.New("convert backend handler to BEB handler failed")
-		logger.Errorw("No BEB backend exists", "error", err)
-		return err
+		return xerrors.Errorf("no BEB backend exists: convert backend handler to BEB handler failed")
 	}
 
 	// Fetch all subscriptions.

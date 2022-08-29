@@ -600,7 +600,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				LastTransitionTime: currentTime,
 				Status:             corev1.ConditionFalse,
 				Reason:             eventingv1alpha1.ConditionReasonWebhookCallStatus,
-				Message:            `parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`,
+				Message:            `failed to parse LastFailedDelivery: parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`,
 			},
 		},
 		{
@@ -835,7 +835,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 				return subscription
 			}(),
 			wantResult: true,
-			wantError:  errors.New(`parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
+			wantError:  errors.New(`failed to parse LastFailedDelivery: parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
 		},
 		{
 			name: "should return error if LastFailedDelivery is valid but LastSuccessfulDelivery is invalid",
@@ -850,7 +850,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 				return subscription
 			}(),
 			wantResult: true,
-			wantError:  errors.New(`parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
+			wantError:  errors.New(`failed to parse LastSuccessfulDelivery: parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
 		},
 		{
 			name: "should return true if last delivery of event was failed",
