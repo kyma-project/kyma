@@ -3,14 +3,15 @@ package builder
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateRewriteTagFilterIncludeNamespaces(t *testing.T) {
-	pipelineConfig := PipelineConfig{
+	pipelineConfig := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -43,7 +44,7 @@ func TestCreateRewriteTagFilterIncludeNamespaces(t *testing.T) {
 }
 
 func TestCreateRewriteTagFilterExcludeNamespaces(t *testing.T) {
-	pipelineConfig := PipelineConfig{
+	pipelineConfig := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -75,7 +76,7 @@ func TestCreateRewriteTagFilterExcludeNamespaces(t *testing.T) {
 }
 
 func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
-	pipelineConfig := PipelineConfig{
+	pipelineConfig := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -108,7 +109,7 @@ func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
 }
 
 func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
-	pipelineConfig := PipelineConfig{
+	pipelineConfig := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
@@ -141,7 +142,7 @@ func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
 }
 
 func TestCreateRewriteTagFilterExcludeNamespacesAndExcludeContainers(t *testing.T) {
-	pipelineConfig := PipelineConfig{
+	pipelineConfig := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
