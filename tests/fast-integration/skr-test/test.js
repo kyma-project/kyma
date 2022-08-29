@@ -33,10 +33,8 @@ describe('SKR test', function() {
   // Run the OIDC tests
   oidcE2ETest(options, getShootInfoFunc);
 
-  //oidcE2ETest(options, getShootInfoFunc);
-
-  /*after('Cleanup the resources', async function() {
+  after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
     await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, false);
-  });*/
+  });
 });

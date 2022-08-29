@@ -7,12 +7,12 @@ const {
 const {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
-  getKymaAdminBindings,
-  findKymaAdminBindingForUser
+  sleep
 } = require('../../utils');
 const {keb, kcp, gardener} = require('../helpers');
 
 const updateTimeout = 1000 * 60 * 20; // 20m
+const sleepTimeAfterUpdate = 180000 // 3m
 
 function oidcE2ETest(options, getShootInfoFunc) {
   describe('OIDC Test', function() {
@@ -78,9 +78,11 @@ function oidcE2ETest(options, getShootInfoFunc) {
 
     it('Update SKR service instance with new admins', async function() {
       this.timeout(updateTimeout);
+      
       const customParams = {
         administrators: options.administrators1,
       };
+
       const skr = await updateSKR(keb,
           kcp,
           gardener,
@@ -113,6 +115,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
         oidc: givenOidcConfig,
         administrators: options.kebUserId,
       };
+
       console.log("SHOOT-before", shoot);
       const skr = await updateSKR(keb,
           kcp,
@@ -125,23 +128,9 @@ function oidcE2ETest(options, getShootInfoFunc) {
           false);
 
       shoot = skr.shoot;
-
       console.log("SHOOT-after", shoot);
 
-      const sleep = ms => new Promise(r => setTimeout(r, ms));
-      const user = options.kebUserId[0];
-      for (let i = 0; i < 10; i++) {
-        await sleep(30000);
-        console.log(`Checking admin for ${user}. Try: ${i + 1}`);
-        const res = await findKymaAdminBindingForUser(user);
-        console.log(res);
-        if (res !== undefined) {
-          console.log(`Found admin for ${user}`);
-          break;
-        }
-        console.log(`not found admin for ${user}`);
-      }
-
+      sleep(sleepTimeAfterUpdate)
     });
 
     it('Should get Runtime Status after updating OIDC config and admins', async function() {
@@ -159,7 +148,6 @@ function oidcE2ETest(options, getShootInfoFunc) {
     });
 
     it('Assure only initial cluster admins are configured', async function() {
-      console.log(`kebUserId: ${options.kebUserId[0]}`)
       await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);

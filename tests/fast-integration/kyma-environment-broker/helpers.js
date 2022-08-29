@@ -127,7 +127,6 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
   try {
     kubeconfigContent = await keb.downloadKubeconfig(instanceID);
   } catch (err) {
-    console.log("ensureValidOIDCConfigInCustomerFacingKubeconfig");
     console.log(err);
   }
 

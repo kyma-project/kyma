@@ -21,13 +21,10 @@ function initializeK8sClient(opts) {
   opts = opts || {};
   try {
     if (opts.kubeconfigPath) {
-      console.log("initFromKubeConfigPath");
       kc.loadFromFile(opts.kubeconfigPath);
     } else if (opts.kubeconfig) {
-      console.log("initFromKubecofing");
       kc.loadFromString(opts.kubeconfig);
     } else {
-      console.log("initDefault");
       kc.loadFromDefault();
     }
 
@@ -985,10 +982,6 @@ async function getContainerRestartsForAllNamespaces() {
       }));
 }
 
-async function listRoles() {
-  return await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
-}
-
 async function getKymaAdminBindings() {
   const {body} = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
   const adminRoleBindings = body.items;
@@ -1010,9 +1003,6 @@ async function getKymaAdminBindings() {
 
 async function findKymaAdminBindingForUser(targetUser) {
   const kymaAdminBindings = await getKymaAdminBindings();
-  console.log(`bind`);
-  console.log(kymaAdminBindings);
-  
   return kymaAdminBindings.find(
       (binding) => binding.users.indexOf(targetUser) >= 0,
   );
@@ -1020,7 +1010,6 @@ async function findKymaAdminBindingForUser(targetUser) {
 
 async function ensureKymaAdminBindingExistsForUser(targetUser) {
   const binding = await findKymaAdminBindingForUser(targetUser);
-  console.log(`binding: ${binding}`);
   expect(binding).not.to.be.undefined;
   expect(binding.users).to.include(targetUser);
 }
@@ -1695,6 +1684,4 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
-  getKymaAdminBindings,
- findKymaAdminBindingForUser
 };

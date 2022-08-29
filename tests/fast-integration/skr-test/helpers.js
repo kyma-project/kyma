@@ -159,6 +159,8 @@ async function initK8sConfig(shoot) {
   await initializeK8sClient({kubeconfig: shoot.kubeconfig});
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 module.exports = {
   keb,
   kcp,
@@ -178,4 +180,5 @@ module.exports = {
   saveKubeconfig,
   log,
   initK8sConfig,
+  sleep
 };
