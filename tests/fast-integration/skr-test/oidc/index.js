@@ -109,7 +109,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       this.timeout(updateTimeout);
 
       console.log("roles before update");
-      const res = await listRoles();
+      let res = await listRoles();
       console.log(res);
 
       const customParams = {
