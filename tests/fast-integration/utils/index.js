@@ -1695,5 +1695,6 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
-  getKymaAdminBindings
+  getKymaAdminBindings,
+ findKymaAdminBindingForUser
 };
