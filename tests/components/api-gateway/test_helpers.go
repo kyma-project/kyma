@@ -224,8 +224,9 @@ func CreateScenario(templateFileName string, namePrefix string) (*Scenario, erro
 		TestID           string
 		Domain           string
 		GatewayName      string
+		GatewaymTLSName  string
 		GatewayNamespace string
-	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName, GatewaymTLSName: conf.GatewaymTLSName,
 		GatewayNamespace: conf.GatewayNamespace})
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())

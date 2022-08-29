@@ -3,6 +3,7 @@ package api_gateway
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"io/fs"
@@ -56,9 +57,24 @@ func TestMain(m *testing.M) {
 		}
 	} else {
 		log.Printf("Fallback to default http client")
+		cert, err := os.ReadFile("assets/kyma-root-ca.crt")
+		if err != nil {
+			log.Fatalf("could not open certificate file: %v", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(cert)
+
+		certificate, err := tls.LoadX509KeyPair("assets/testmtls.kyma-example.com.crt", "assets/testmtls.kyma-example.com.key")
+		if err != nil {
+			log.Fatalf("could not load certificate: %v")
+		}
 		httpClient = &http.Client{
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+					RootCAs:            caCertPool,
+					Certificates:       []tls.Certificate{certificate},
+				},
 			},
 			Timeout: conf.ClientTimeout,
 		}
@@ -97,7 +113,7 @@ func TestMain(m *testing.M) {
 
 	helper = helpers.NewHelper(httpClient, commonRetryOpts)
 
-	client, err  := client.GetDynamicClient()
+	client, err := client.GetDynamicClient()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -209,4 +225,5 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx.ScenarioContext())
 	InitializeScenarioOAuth2JWTOnePath(ctx.ScenarioContext())
 	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
+	InitializeScenariomTLSGateway(ctx.ScenarioContext())
 }

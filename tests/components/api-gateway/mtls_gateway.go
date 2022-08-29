@@ -12,26 +12,26 @@ type mtlsGatewayScenario struct {
 }
 
 func InitializeScenariomTLSGateway(ctx *godog.ScenarioContext) {
-	mainScenario, err := CreateScenario(noAccessStrategyApiruleFile, "mtlsgateway")
+	mainScenario, err := CreateScenario(mtlsGatewayUsecuredApiruleFile, "mtlsgateway")
 	if err != nil {
 		t.Fatalf("could not initialize unsecure endpoint scenario err=%s", err)
 	}
 
 	scenario := mtlsGatewayScenario{mainScenario}
 
-	ctx.Step(`^mTLSGateway: There is an unsecured endpoint on "([^"]*)" gateway$`, scenario.thereIsAnUnsecuredEndpoint)
-	ctx.Step(`^mTLSGateway: Calling the endpoint with any token should result in status between (\d+) and (\d+) on "([^"]*)" gateway$`, scenario.callingTheEndpointWithAnyTokenShouldResultInStatusbetween)
-	ctx.Step(`^mTLSGateway: Calling the endpoint without a token should result in status between (\d+) and (\d+) on "([^"]*)" gateway$`, scenario.callingTheEndpointWithoutTokenShouldResultInStatusbetween)
+	ctx.Step(`^mTLSGateway: There is an unsecured endpoint$`, scenario.thereIsAnUnsecuredEndpointOnGateway)
+	ctx.Step(`^mTLSGateway: Calling the endpoint with any token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithAnyTokenShouldResultInStatusbetween)
+	ctx.Step(`^mTLSGateway: Calling the endpoint without a token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutTokenShouldResultInStatusbetween)
 }
 
-func (u *mtlsGatewayScenario) thereIsAnUnsecuredEndpoint(gateway string) error {
+func (u *mtlsGatewayScenario) thereIsAnUnsecuredEndpointOnGateway() error {
 	return helper.APIRuleWithRetries(batch.CreateResources, batch.UpdateResources, k8sClient, u.apiResource)
 }
 
-func (u *mtlsGatewayScenario) callingTheEndpointWithAnyTokenShouldResultInStatusbetween(arg1, arg2 int, gateway string) error {
+func (u *mtlsGatewayScenario) callingTheEndpointWithAnyTokenShouldResultInStatusbetween(arg1, arg2 int) error {
 	return helper.CallEndpointWithHeadersWithRetries(anyToken, authorizationHeaderName, u.url, &helpers.StatusPredicate{LowerStatusBound: arg1, UpperStatusBound: arg2})
 }
 
-func (u *mtlsGatewayScenario) callingTheEndpointWithoutTokenShouldResultInStatusbetween(arg1, arg2 int, gateway string) error {
+func (u *mtlsGatewayScenario) callingTheEndpointWithoutTokenShouldResultInStatusbetween(arg1, arg2 int) error {
 	return helper.CallEndpointWithRetries(u.url, &helpers.StatusPredicate{LowerStatusBound: arg1, UpperStatusBound: arg2})
 }
