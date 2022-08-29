@@ -290,7 +290,7 @@ Pipelines run the tests using the `test-validator` target from the `Makefile`.
 2. Install the minimal set of components required to run Application Connectivity Validator **for Kyma SKR (Compass mode)**:
 
     ```bash
-    kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml 
+    kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true
     ```
 
    >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).

@@ -12,12 +12,12 @@ TEST_TIMEOUT = "3m"
 .PHONY: release test image clean
 .PHONY: test-gateway test-gateway-debug clean-gateway-test publish-gateway-test image-gateway-test publish-mock-app image-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
 .PHONY: test-compass-runtime-agent test-compass-runtime-agent-debug clean-compass-runtime-agent-test image-compass-runtime-agent-test publish-compass-runtime-agent-test
-.PHONY: patch-for-validator-test unpatch-after-validator-test test-validator test-connectivity-validator-debug connectivity-validator-create-resources clean-connectivity-validator-test publish-connectivity-validator-test
+.PHONY: patch-for-validator-test unpatch-after-validator-test test-validator test-validator-debug validator-create-resources clean-validator-test publish-validator-test
 
-release: publish-gateway-test publish-mock-app publish-connectivity-validator-test publish-compass-runtime-agent-test
+release: publish-gateway-test publish-mock-app publish-validator-test publish-compass-runtime-agent-test
 test: test-gateway test-validator test-compass-runtime-agent
-image: image-gateway-test image-connectivity-validator-test image-compass-runtime-agent-test
-clean: clean-gateway-test clean-connectivity-validator-test clean-compass-runtime-agent-test
+image: image-gateway-test image-validator-test image-compass-runtime-agent-test
+clean: clean-gateway-test clean-validator-test clean-compass-runtime-agent-test
 
 test-gateway: disable-sidecar-for-mtls-test generate-certs gateway-create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
@@ -78,24 +78,24 @@ patch-for-validator-test:
 unpatch-after-validator-test:
 	kubectl rollout undo deployment/central-application-connectivity-validator -n kyma-system
 
-test-validator: patch-for-validator-test connectivity-validator-create-resources
+test-validator: patch-for-validator-test validator-create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
-	$(MAKE) clean-connectivity-validator-test; \
+	$(MAKE) clean-validator-test; \
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
-	$(MAKE) clean-connectivity-validator-test; \
+	$(MAKE) clean-validator-test; \
 	exit 1; \
 	fi
 
-test-connectivity-validator-debug: patch-for-validator-test connectivity-validator-create-resources
+test-validator-debug: patch-for-validator-test validator-create-resources
 	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-connectivity-validator-test; \
 	echo "Results:"; \
 	./scripts/check-pod-logs.sh application-connectivity-validator-test; \
 
-connectivity-validator-create-resources:
+validator-create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
 
@@ -103,14 +103,14 @@ connectivity-validator-create-resources:
 		--set namespace=$(NAMESPACE) \
     | kubectl apply -f -
 
-clean-connectivity-validator-test: unpatch-after-validator-test
+clean-validator-test: unpatch-after-validator-test
 	helm template resources/charts/application-connectivity-validator-test | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
 
-publish-connectivity-validator-test: image-connectivity-validator-test
+publish-validator-test: image-validator-test
 	docker push $(VALIDATOR_TEST_IMAGE)
 
-image-connectivity-validator-test:
+image-validator-test:
 	docker build -t $(VALIDATOR_TEST_IMAGE) -f Dockerfile.connectivity-validator .
 
 test-compass-runtime-agent: test-compass-runtime-agent-debug clean-compass-runtime-agent-test
