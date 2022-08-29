@@ -48,7 +48,7 @@ type Source struct {
 type InlineSource struct {
 	Source string `json:"source"`
 	//+optional
-	Dependencies string `json:"dependencies"`
+	Dependencies *string `json:"dependencies,omitempty"`
 }
 
 type GitRepositorySource struct {
@@ -100,7 +100,7 @@ type ResourceRequirements struct {
 	// +optional
 	Profile string `json:"profile,omitempty"`
 	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type ScaleConfig struct {
@@ -113,9 +113,9 @@ type ScaleConfig struct {
 
 type ResourceConfiguration struct {
 	// +optional
-	Build ResourceRequirements `json:"build"`
+	Build *ResourceRequirements `json:"build,omitempty"`
 	// +optional
-	Function ResourceRequirements `json:"function"`
+	Function *ResourceRequirements `json:"function,omitempty"`
 }
 
 const (
@@ -132,15 +132,15 @@ type FunctionSpec struct {
 	CustomRuntimeConfiguration *ConfigMapRef `json:"customRuntimeConfiguration,omitempty"`
 
 	// +optional
-	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
+	RuntimeImageOverride *string `json:"runtimeImageOverride,omitempty"`
 
 	Source Source `json:"source"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
-	Env []v1.EnvVar `json:"env,omitempty"`
+	Env *[]v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
-	ResourceConfiguration ResourceConfiguration `json:"resourceConfiguration,omitempty"`
+	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
 	// +optional
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
@@ -149,7 +149,7 @@ type FunctionSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
-	Template Template `json:"template,omitempty"`
+	Template *Template `json:"template,omitempty"`
 }
 
 //TODO: Status related things needs to be developed.
