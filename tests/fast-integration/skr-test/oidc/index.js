@@ -131,7 +131,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       const sleep = ms => new Promise(r => setTimeout(r, ms));
       const user = options.kebUserId[0];
       for (let i = 0; i < 10; i++) {
-        sleep(30000);
+        await sleep(30000);
         console.log(`Checking admin for ${user}. Try: ${i + 1}`);
         const res = await findKymaAdminBindingForUser(user);
         console.log(res);
