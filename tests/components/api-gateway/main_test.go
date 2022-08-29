@@ -66,7 +66,7 @@ func TestMain(m *testing.M) {
 
 		certificate, err := tls.LoadX509KeyPair("assets/testmtls.kyma-example.com.crt", "assets/testmtls.kyma-example.com.key")
 		if err != nil {
-			log.Fatalf("could not load certificate: %v")
+			log.Fatalf("could not load certificate: %v", err)
 		}
 		httpClient = &http.Client{
 			Transport: &http.Transport{

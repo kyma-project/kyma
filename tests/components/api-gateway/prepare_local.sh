@@ -121,3 +121,4 @@ EOF
 check_required_envs
 deploy_login_consent_app
 configure_ory_hydra
+update_mtls_gateway_cacert_secret

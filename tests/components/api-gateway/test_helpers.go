@@ -232,6 +232,9 @@ func CreateScenario(templateFileName string, namePrefix string) (*Scenario, erro
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
 	}
 
+	if namePrefix == "mtlsgateway" {
+		return &Scenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.mtls.%s", testID, conf.Domain), apiResource: accessRule}, nil
+	}
 	return &Scenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), apiResource: accessRule}, nil
 }
 

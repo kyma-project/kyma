@@ -5,7 +5,7 @@ metadata:
   namespace: "{{.Namespace}}"
 spec:
   service:
-    host: "httpbin-{{.TestID}}.{{.Domain}}"
+    host: "httpbin-{{.TestID}}.mtls.{{.Domain}}"
     name: httpbin-{{.TestID}}
     port: 8000
   gateway: "{{.GatewayNamespace}}/{{.GatewaymTLSName}}"
