@@ -9,21 +9,21 @@ import (
 
 const (
 	// Errors name of the errors metric
-	Errors = "event_publish_to_messaging_server_errors_total"
+	Errors = "eventing_epp_errors_total"
 	// Latency name of the latency metric
-	Latency = "event_publish_to_messaging_server_latency"
+	Latency = "eventing_epp_messaging_server_latency_duration_nanoseconds"
 	// EventTypePublishedMetricKey name of the eventType metric
-	EventTypePublishedMetricKey = "event_type_published"
+	EventTypePublishedMetricKey = "eventing_epp_event_type_published_total"
 	//EventRequests name if the eventRequests metric
-	EventRequests = "event_requests"
+	EventRequests = "eventing_epp_requests_total"
 	// errorsHelp help for the errors metric
-	errorsHelp = "The total number of errors while sending Events to the messaging server"
+	errorsHelp = "The total number of errors while sending events to the messaging server"
 	// latencyHelp help for the latency metric
-	latencyHelp = "The duration of sending Events to the messaging server"
-	// EventTypePublishedMetricHelp help for the eventType metric
-	EventTypePublishedMetricHelp = "The total number of events published for a given eventType"
-	// EventRequestsHelp help for event requests metric
-	EventRequestsHelp = "The total number of event requests"
+	latencyHelp = "The duration of sending events to the messaging server in nanoseconds"
+	// eventTypePublishedMetricHelp help for the eventType metric
+	eventTypePublishedMetricHelp = "The total number of events published for a given eventType"
+	// eventRequestsHelp help for event requests metric
+	eventRequestsHelp = "The total number of event requests"
 	//responseCode is the name of the status code labels used by multiple metrics
 	responseCode = "response_code"
 	//destSvc is the name of the destination service label used by multiple metrics
@@ -62,14 +62,14 @@ func NewCollector() *Collector {
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventTypePublishedMetricKey,
-				Help: EventTypePublishedMetricHelp,
+				Help: eventTypePublishedMetricHelp,
 			},
 			[]string{eventType, eventSource, responseCode},
 		),
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventRequests,
-				Help: EventRequestsHelp,
+				Help: eventRequestsHelp,
 			},
 			[]string{responseCode, destSvc},
 		),
@@ -107,7 +107,7 @@ func (c *Collector) RecordEventType(eventType, eventSource string, statusCode in
 	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
 }
 
-// RecordRequests records the eventRequests metric
+// RecordRequests records a eventRequests metric
 func (c *Collector) RecordRequests(statusCode int, destSvc string) {
 	c.requests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }

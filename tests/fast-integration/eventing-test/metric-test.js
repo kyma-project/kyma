@@ -45,10 +45,10 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  delivery_per_subscription: {
+  eventing_ec_delivery_per_subscription_total: {
     title: 'Delivery per Subscription',
     query: `
-         sum (delivery_per_subscription{response_code=~"[245].*"}) 
+         sum (eventing_ec_delivery_per_subscription_total{response_code=~"[245].*"}) 
           by (namespace, subscription_name,event_type,sink,response_code)`,
     backends: ['nats'],
     assert: function(result) {
@@ -62,7 +62,7 @@ const dashboards = {
   },
   latency_eventPublisherToMessagingServer: {
     title: 'Latency of Event Publisher -> Messaging Server',
-    query: 'histogram_quantile(0.99999, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
+    query: 'histogram_quantile(0.99999, sum(rate(eventing_epp_messaging_server_latency_duration_nanoseconds_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
     backends: ['nats', 'beb'],
     assert: function(result) {
       const foundMetric = result.find((res) =>
