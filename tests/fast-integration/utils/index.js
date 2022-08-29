@@ -985,6 +985,10 @@ async function getContainerRestartsForAllNamespaces() {
       }));
 }
 
+async function listRoles() {
+  return await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+}
+
 async function getKymaAdminBindings() {
   const {body} = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
   const adminRoleBindings = body.items;
@@ -1691,4 +1695,5 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
+  listRoles
 };

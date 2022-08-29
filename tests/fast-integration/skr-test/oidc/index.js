@@ -7,6 +7,7 @@ const {
 const {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
+  listRoles
 } = require('../../utils');
 const {keb, kcp, gardener} = require('../helpers');
 
@@ -108,7 +109,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
       this.timeout(updateTimeout);
 
       console.log("roles before update");
-      const res = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+      const res = await listRoles();
       console.log(res);
 
       const customParams = {
@@ -130,7 +131,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
 
       console.log("SHOOT-after", shoot);
       console.log("roles after update");
-      res = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+      res = await listRoles();
       console.log(res);
     });
 
