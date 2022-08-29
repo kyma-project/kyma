@@ -45,7 +45,7 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  eventing_ec_delivery_per_subscription_total: {
+  delivery_per_subscription: {
     title: 'Delivery per Subscription',
     query: `
          sum (eventing_ec_delivery_per_subscription_total{response_code=~"[245].*"}) 
