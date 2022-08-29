@@ -39,19 +39,19 @@ func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipe
 	if !output.IsHTTPDefined() {
 		return true
 	}
-	if output.HTTP.Host.IsDefined() && output.HTTP.Host.ValueFrom.IsSecretRef() {
+	if output.HTTP.Host.ValueFrom != nil && output.HTTP.Host.ValueFrom.IsSecretRef() {
 		_, err := s.get(ctx, *output.HTTP.Host.ValueFrom.SecretRef)
 		if err != nil {
 			return false
 		}
 	}
-	if output.HTTP.User.IsDefined() && output.HTTP.User.ValueFrom.IsSecretRef() {
+	if output.HTTP.User.ValueFrom != nil && output.HTTP.User.ValueFrom.IsSecretRef() {
 		_, err := s.get(ctx, *output.HTTP.User.ValueFrom.SecretRef)
 		if err != nil {
 			return false
 		}
 	}
-	if output.HTTP.Password.IsDefined() && output.HTTP.Password.ValueFrom.IsSecretRef() {
+	if output.HTTP.Password.ValueFrom != nil && output.HTTP.Password.ValueFrom.IsSecretRef() {
 		_, err := s.get(ctx, *output.HTTP.Password.ValueFrom.SecretRef)
 		if err != nil {
 			return false
