@@ -59,6 +59,7 @@ const (
 	anyToken                       = "any"
 	authorizationHeaderName        = "Authorization"
 	mtlsGatewayUsecuredApiruleFile = "mtls-gateway-unsecured-apirule.yaml"
+	mtlsGatewayClientRootCaFile    = "mtls-gateway-cacert-client.yaml"
 )
 
 var (
@@ -233,6 +234,10 @@ func CreateScenario(templateFileName string, namePrefix string) (*Scenario, erro
 	}
 
 	if namePrefix == "mtlsgateway" {
+		updateGatewayCacert(mtlsGatewayClientRootCaFile)
+		if err != nil {
+			return nil, err
+		}
 		return &Scenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.mtls.%s", testID, conf.Domain), apiResource: accessRule}, nil
 	}
 	return &Scenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), apiResource: accessRule}, nil
@@ -335,4 +340,17 @@ func getPodListReport() string {
 	json.Unmarshal(toMarshal, &p)
 	toPrint, _ := json.Marshal(p)
 	return string(pretty.Pretty(toPrint))
+}
+
+func updateGatewayCacert(clientRootCaFileName string) error {
+	mtlsCertResource, err := manifestprocessor.ParseFromFile(clientRootCaFileName, manifestsDirectory, resourceSeparator)
+	if err != nil {
+		return fmt.Errorf("failed to process mTLS manifest file %s, details %s", clientRootCaFileName, err.Error())
+	}
+
+	_, err = batch.CreateResources(k8sClient, mtlsCertResource...)
+	if err != nil {
+		return fmt.Errorf("failed to create mTLS cert from %s, details %s", clientRootCaFileName, err.Error())
+	}
+	return nil
 }
