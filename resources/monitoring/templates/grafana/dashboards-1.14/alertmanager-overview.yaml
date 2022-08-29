@@ -58,6 +58,7 @@ data:
                         "dashLength": 10,
                         "dashes": false,
                         "datasource": "$datasource",
+                        "description": "current set of alerts stored in the Alertmanager",
                         "fill": 1,
                         "fillGradient": 0,
                         "gridPos": {
@@ -151,6 +152,7 @@ data:
                         "dashLength": 10,
                         "dashes": false,
                         "datasource": "$datasource",
+                        "description": "rate of successful and invalid alerts received by the Alertmanager",
                         "fill": 1,
                         "fillGradient": 0,
                         "gridPos": {
@@ -264,6 +266,7 @@ data:
                         "dashLength": 10,
                         "dashes": false,
                         "datasource": "$datasource",
+                        "description": "rate of successful and invalid notifications sent by the Alertmanager",
                         "fill": 1,
                         "fillGradient": 0,
                         "gridPos": {
@@ -363,6 +366,7 @@ data:
                         "dashLength": 10,
                         "dashes": false,
                         "datasource": "$datasource",
+                        "description": "latency of notifications sent by the Alertmanager",
                         "fill": 1,
                         "fillGradient": 0,
                         "gridPos": {
