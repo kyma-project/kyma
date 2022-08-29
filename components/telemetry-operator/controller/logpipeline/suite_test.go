@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -38,6 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -99,11 +99,11 @@ var _ = BeforeSuite(func() {
 	})
 	metrics.Registry.MustRegister(restartsTotal)
 
-	reconciler := NewLogPipelineReconciler(
+	reconciler := NewReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
-		controllers.TestFluentBitK8sResources,
-		controllers.TestPipelineConfig,
+		controller.TestFluentBitK8sResources,
+		controller.TestPipelineConfig,
 		restartsTotal,
 	)
 	err = reconciler.SetupWithManager(mgr)

@@ -24,10 +24,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/mocks"
-	mocks2 "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/validation/mocks"
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/mocks"
+	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation/mocks"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,15 +39,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 const (
-	FluentBitConfigMapName     = "telemetry-fluent-bit"
-	FluentBitFileConfigMapName = "telemetry-fluent-bit-files"
-	ControllerNamespace        = "default"
+	fluentBitConfigMapName     = "telemetry-fluent-bit"
+	fluentBitFileConfigMapName = "telemetry-fluent-bit-files"
+	controllerNamespace        = "default"
 )
 
 var (
@@ -54,12 +56,12 @@ var (
 	testEnv                   *envtest.Environment
 	ctx                       context.Context
 	cancel                    context.CancelFunc
-	inputValidatorMock        *mocks2.InputValidator
-	variableValidatorMock     *mocks2.VariablesValidator
-	pluginValidatorMock       *mocks2.PluginValidator
-	maxPipelinesValidatorMock *mocks2.MaxPipelinesValidator
-	outputValidatorMock       *mocks2.OutputValidator
-	fileValidatorMock         *mocks2.FilesValidator
+	inputValidatorMock        *validationmocks.InputValidator
+	variableValidatorMock     *validationmocks.VariablesValidator
+	pluginValidatorMock       *validationmocks.PluginValidator
+	maxPipelinesValidatorMock *validationmocks.MaxPipelinesValidator
+	outputValidatorMock       *validationmocks.OutputValidator
+	fileValidatorMock         *validationmocks.FilesValidator
 	dryRunnerMock             *mocks.DryRunner
 )
 
@@ -98,7 +100,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
-	// start logPipeline webhooks server using Manager
+	// start logPipeline webhook server using Manager
 	webhookInstallOptions := &testEnv.WebhookInstallOptions
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
@@ -111,13 +113,13 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
-	inputValidatorMock = &mocks2.InputValidator{}
-	variableValidatorMock = &mocks2.VariablesValidator{}
+	inputValidatorMock = &validationmocks.InputValidator{}
+	variableValidatorMock = &validationmocks.VariablesValidator{}
 	dryRunnerMock = &mocks.DryRunner{}
-	pluginValidatorMock = &mocks2.PluginValidator{}
-	maxPipelinesValidatorMock = &mocks2.MaxPipelinesValidator{}
-	outputValidatorMock = &mocks2.OutputValidator{}
-	fileValidatorMock = &mocks2.FilesValidator{}
+	pluginValidatorMock = &validationmocks.PluginValidator{}
+	maxPipelinesValidatorMock = &validationmocks.MaxPipelinesValidator{}
+	outputValidatorMock = &validationmocks.OutputValidator{}
+	fileValidatorMock = &validationmocks.FilesValidator{}
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_triggered_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
@@ -126,12 +128,12 @@ var _ = BeforeSuite(func() {
 
 	logPipelineValidator := NewValidatingWebhookHandler(mgr.GetClient(), inputValidatorMock, variableValidatorMock, pluginValidatorMock, maxPipelinesValidatorMock, outputValidatorMock, fileValidatorMock, dryRunnerMock)
 
-	By("registering LogPipeline webhooks")
+	By("registering LogPipeline webhook")
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
-	//+kubebuilder:scaffold:webhooks
+	//+kubebuilder:scaffold:webhook
 
 	go func() {
 		defer GinkgoRecover()
@@ -139,7 +141,7 @@ var _ = BeforeSuite(func() {
 		Expect(err).NotTo(HaveOccurred())
 	}()
 
-	// wait for the webhooks server to get ready
+	// wait for the webhook server to get ready
 	dialer := &net.Dialer{Timeout: time.Second}
 	addrPort := fmt.Sprintf("%s:%d", webhookInstallOptions.LocalServingHost, webhookInstallOptions.LocalServingPort)
 	Eventually(func() error {

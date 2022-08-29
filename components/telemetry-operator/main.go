@@ -24,16 +24,16 @@ import (
 	"time"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controllers/logparser"
-	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controllers/logpipeline"
+	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
+	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
-	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/dryrun"
-	logparserwebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logparser"
-	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logparser/validation"
-	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline"
-	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
+	logparserwebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser"
+	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser/validation"
+	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
+	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -223,9 +223,8 @@ func main() {
 		"/validate-logparser",
 		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 
-	logPipelineReconciler := logpipelinecontroller.NewLogPipelineReconciler(
+	logPipelineReconciler := logpipelinecontroller.NewReconciler(
 		mgr.GetClient(),
-		mgr.GetScheme(),
 		fluentBitK8sResources,
 		pipelineConfig,
 		restartsTotal)
@@ -234,9 +233,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	logParserReconciler := logparsercontroller.NewLogParserReconciler(
+	logParserReconciler := logparsercontroller.NewReconciler(
 		mgr.GetClient(),
-		mgr.GetScheme(),
 		fluentBitK8sResources,
 		restartsTotal)
 	if err = logParserReconciler.SetupWithManager(mgr); err != nil {

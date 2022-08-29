@@ -68,7 +68,7 @@ func (s *secretHelper) CopySecretData(ctx context.Context, valueFrom telemetryv1
 	// Check if any secret has been changed
 	fetchedSecretData, err := GetSecretData(*referencedSecret, valueFrom, targetKey)
 	if err != nil {
-		log.Error(err, "unable to fetch secret data")
+		log.Error(err, "unable to get secret data")
 		return err
 	}
 	for k, v := range fetchedSecretData {

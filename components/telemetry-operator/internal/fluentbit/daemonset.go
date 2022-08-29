@@ -18,7 +18,7 @@ type DaemonSetHelper struct {
 	restartsTotal prometheus.Counter
 }
 
-func NewFluentBitDaemonSetHelper(client client.Client, daemonSet types.NamespacedName, restartsTotal prometheus.Counter) *DaemonSetHelper {
+func NewDaemonSetHelper(client client.Client, daemonSet types.NamespacedName, restartsTotal prometheus.Counter) *DaemonSetHelper {
 	return &DaemonSetHelper{
 		client:        client,
 		daemonSet:     daemonSet,
@@ -32,7 +32,7 @@ func (f *DaemonSetHelper) Restart(ctx context.Context) error {
 
 	var ds appsv1.DaemonSet
 	if err := f.client.Get(ctx, f.daemonSet, &ds); err != nil {
-		log.Error(err, "Failed to get Fluent Bit DaemonSetHelper")
+		log.Error(err, "Failed to get Fluent Bit DaemonSet")
 		return err
 	}
 

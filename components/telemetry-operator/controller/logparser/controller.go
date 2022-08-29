@@ -20,38 +20,35 @@ import (
 	"context"
 	"fmt"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/prometheus/client_golang/prometheus"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 // Reconciler reconciles a LogParser object
 type Reconciler struct {
 	client.Client
-	Scheme                   *runtime.Scheme
 	syncer                   *syncer
 	fluentBitDaemonSetHelper *fluentbit.DaemonSetHelper
 }
 
-func NewLogParserReconciler(
+func NewReconciler(
 	client client.Client,
-	scheme *runtime.Scheme,
 	fluentBitK8sResources fluentbit.KubernetesResources,
 	restartsTotal prometheus.Counter) *Reconciler {
-	var lpr Reconciler
+	var r Reconciler
 
-	lpr.Client = client
-	lpr.Scheme = scheme
-	lpr.fluentBitDaemonSetHelper = fluentbit.NewFluentBitDaemonSetHelper(client, fluentBitK8sResources.DaemonSet, restartsTotal)
-	lpr.syncer = newLogParserSyncer(client, fluentBitK8sResources)
+	r.Client = client
+	r.fluentBitDaemonSetHelper = fluentbit.NewDaemonSetHelper(client, fluentBitK8sResources.DaemonSet, restartsTotal)
+	r.syncer = newSyncer(client, fluentBitK8sResources)
 
-	return &lpr
+	return &r
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -78,20 +75,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	var changed, err = r.syncer.SyncParsersConfigMap(ctx, &logParser)
 	if err != nil {
-		return ctrl.Result{Requeue: controllers.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
 	if changed {
-		log.V(1).Info("Fluent Bit parser configuration was updated. Restarting the DaemonSetHelper")
+		log.V(1).Info("Fluent Bit parser configuration was updated. Restarting the DaemonSet")
 
 		if err = r.Update(ctx, &logParser); err != nil {
-			log.Error(err, "Failed updating log parser")
-			return ctrl.Result{Requeue: controllers.ShouldRetryOn(err)}, err
+			log.Error(err, "Failed to update LogParser")
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
 
 		if err = r.fluentBitDaemonSetHelper.Restart(ctx); err != nil {
-			log.Error(err, "Failed restarting fluent bit daemon set")
-			return ctrl.Result{Requeue: controllers.ShouldRetryOn(err)}, err
+			log.Error(err, "Failed to restart Fluent Bit DaemonSet")
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
 
 		condition := telemetryv1alpha1.NewLogParserCondition(
@@ -99,7 +96,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.LogParserPending,
 		)
 		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
-			return ctrl.Result{Requeue: controllers.ShouldRetryOn(err)}, err
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
 	}
 
@@ -107,12 +104,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		var ready bool
 		ready, err = r.fluentBitDaemonSetHelper.IsReady(ctx)
 		if err != nil {
-			log.Error(err, "Failed to check fluent bit readiness")
-			return ctrl.Result{RequeueAfter: controllers.RequeueTime}, err
+			log.Error(err, "Failed to check Fluent Bit readiness")
+			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
 		if !ready {
 			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
-			return ctrl.Result{RequeueAfter: controllers.RequeueTime}, nil
+			return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
 		}
 		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
 
@@ -122,7 +119,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		)
 
 		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
-			return ctrl.Result{RequeueAfter: controllers.RequeueTime}, err
+			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
 	}
 
@@ -134,7 +131,7 @@ func (r *Reconciler) updateLogParserStatus(ctx context.Context, name types.Names
 
 	var logParser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, name, &logParser); err != nil {
-		log.Error(err, "Failed getting log parser")
+		log.Error(err, "Failed to get LogParser")
 		return err
 	}
 
@@ -156,7 +153,7 @@ func (r *Reconciler) updateLogParserStatus(ctx context.Context, name types.Names
 	logParser.Status.SetCondition(*condition)
 
 	if err := r.Status().Update(ctx, &logParser); err != nil {
-		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
+		log.Error(err, fmt.Sprintf("Failed to update LogParser status to %s", condition.Type))
 		return err
 	}
 	return nil

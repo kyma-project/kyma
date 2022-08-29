@@ -20,14 +20,15 @@ import (
 	"context"
 	"net/http"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logparser/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
 )
 
 //go:generate mockery --name DryRunner --filename dryrun.go
@@ -35,7 +36,7 @@ type DryRunner interface {
 	RunParser(ctx context.Context, parser *telemetryv1alpha1.LogParser) error
 }
 
-// +kubebuilder:webhooks:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-logparser,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logparsers,verbs=create;update,versions=v1alpha1,name=vlogparser.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
 	parserValidator validation.ParserValidator

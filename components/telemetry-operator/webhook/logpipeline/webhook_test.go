@@ -1,7 +1,6 @@
 package logpipeline
 
 import (
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -11,18 +10,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 var testLogPipeline = types.NamespacedName{
 	Name:      "log-pipeline",
-	Namespace: ControllerNamespace,
+	Namespace: controllerNamespace,
 }
 
 func createResources() error {
 	cmFluentBit := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      FluentBitConfigMapName,
-			Namespace: ControllerNamespace,
+			Name:      fluentBitConfigMapName,
+			Namespace: controllerNamespace,
 		},
 		Data: map[string]string{
 			"fluent-bit.conf": `@INCLUDE dynamic/*.conf
@@ -49,8 +50,8 @@ func createResources() error {
 	}
 	cmFile := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      FluentBitFileConfigMapName,
-			Namespace: ControllerNamespace,
+			Name:      fluentBitFileConfigMapName,
+			Namespace: controllerNamespace,
 		},
 		Data: map[string]string{
 			"labelmap.json": `
@@ -99,7 +100,7 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 	return logPipeline
 }
 
-var _ = Describe("LogPipeline webhooks", func() {
+var _ = Describe("LogPipeline webhook", func() {
 	Context("When creating LogPipeline", func() {
 		AfterEach(func() {
 			logPipeline := getLogPipeline()

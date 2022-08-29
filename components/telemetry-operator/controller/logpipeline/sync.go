@@ -9,10 +9,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 const (
@@ -30,18 +31,18 @@ type syncer struct {
 	k8sGetterOrCreator      *kubernetes.GetterOrCreator
 }
 
-func newLogPipelineSyncer(
+func newSyncer(
 	client client.Client,
 	fluentBitK8sResources fluentbit.KubernetesResources,
 	pipelineConfig builder.PipelineConfig,
 ) *syncer {
-	var lps syncer
-	lps.Client = client
-	lps.fluentBitK8sResources = fluentBitK8sResources
-	lps.pipelineConfig = pipelineConfig
-	lps.secretHelper = newSecretHelper(client)
-	lps.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
-	return &lps
+	var s syncer
+	s.Client = client
+	s.fluentBitK8sResources = fluentBitK8sResources
+	s.pipelineConfig = pipelineConfig
+	s.secretHelper = newSecretHelper(client)
+	s.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
+	return &s
 }
 
 func (s *syncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {

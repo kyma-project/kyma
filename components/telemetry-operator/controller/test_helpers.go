@@ -1,9 +1,10 @@
-package controllers
+package controller
 
 import (
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 var (

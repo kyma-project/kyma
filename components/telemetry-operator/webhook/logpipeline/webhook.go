@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/webhooks/logpipeline/validation"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
 )
 
 //go:generate mockery --name DryRunner --filename dryrun.go
@@ -40,7 +40,7 @@ const (
 	StatusReasonConfigurationError = "InvalidConfiguration"
 )
 
-// +kubebuilder:webhooks:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type ValidatingWebhookHandler struct {
 	client.Client
 	inputValidator        validation.InputValidator

@@ -3,13 +3,14 @@ package logparser
 import (
 	"context"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
@@ -23,12 +24,12 @@ type syncer struct {
 	k8sGetterOrCreator    *kubernetes.GetterOrCreator
 }
 
-func newLogParserSyncer(client client.Client, fluentBitK8sResources fluentbit.KubernetesResources) *syncer {
-	var lps syncer
-	lps.Client = client
-	lps.fluentBitK8sResources = fluentBitK8sResources
-	lps.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
-	return &lps
+func newSyncer(client client.Client, fluentBitK8sResources fluentbit.KubernetesResources) *syncer {
+	var s syncer
+	s.Client = client
+	s.fluentBitK8sResources = fluentBitK8sResources
+	s.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
+	return &s
 }
 
 // SyncParsersConfigMap synchronizes the Fluent Bit parsers ConfigMap for all LogParsers.

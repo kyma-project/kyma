@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes/mocks"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
@@ -25,7 +25,7 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := newLogPipelineSyncer(mockClient, controllers.TestFluentBitK8sResources, controllers.TestPipelineConfig)
+	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
@@ -38,7 +38,7 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := newLogPipelineSyncer(mockClient, controllers.TestFluentBitK8sResources, controllers.TestPipelineConfig)
+	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
@@ -67,7 +67,7 @@ Alias  bar`
 	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{l1, l2}}
 
 	mockClient := &mocks.Client{}
-	sut := newLogPipelineSyncer(mockClient, controllers.TestFluentBitK8sResources, controllers.TestPipelineConfig)
+	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
 	sut.syncUnsupportedPluginsTotal(logPipelines)
 	require.Equal(t, 2, sut.unsupportedPluginsTotal)
 }
@@ -113,7 +113,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	}
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret).Build()
 
-	sut := newLogPipelineSyncer(mockClient, controllers.TestFluentBitK8sResources, controllers.TestPipelineConfig)
+	sut := newSyncer(mockClient, controller.TestFluentBitK8sResources, controller.TestPipelineConfig)
 	restartRequired, err := sut.syncVariables(context.Background(), &logPipelines)
 	require.NoError(t, err)
 	require.True(t, restartRequired)
