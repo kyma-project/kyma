@@ -101,27 +101,32 @@ containers:
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
   {{- if .Values.extraContainers }}
-    {{- range .Values.extraContainers }}
-      - name: {{ .name }}
-        image: {{ .image }}
-        resources:
-          {{ .resources }}
-      {{- if .ports }}
-        ports:
-        {{- range $mapkey, $map := .ports }} 
-          - name: {{ $map.name }}
-            containerPort: {{ $map.containerPort }}
-            protocol: {{ $map.protocol }}
-        {{- end }}
-      {{- end }}
-      {{- if .volumeMounts }}
-        volumeMounts:
-        {{- range $mapkey, $map := .volumeMounts }} 
-          - name: {{ $map.name }}
-            protocol: {{ $map.mountPath }}
-        {{- end }}
+  {{- range .Values.extraContainers }}
+  - name: {{ .name }}
+    image: {{ .image }}
+    resources:
+    {{- range $mapkey, $map := .resources }} 
+      {{ $mapkey }}:
+      {{- range $key, $val := $map }} 
+        {{ $key }}: {{ $val }}
       {{- end }}
     {{- end }}
+  {{- if .ports }}
+    ports:
+    {{- range $mapkey, $map := .ports }} 
+      - name: {{ $map.name }}
+        containerPort: {{ $map.containerPort }}
+        protocol: {{ $map.protocol }}
+    {{- end }}
+  {{- end }}
+  {{- if .volumeMounts }}
+    volumeMounts:
+    {{- range $mapkey, $map := .volumeMounts }} 
+      - name: {{ $map.name }}
+        mountPath: {{ $map.mountPath }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
   {{- end }}
 volumes:
   - name: config
