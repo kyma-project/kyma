@@ -7,7 +7,8 @@ const {
 const {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
-  getKymaAdminBindings
+  getKymaAdminBindings,
+  findKymaAdminBindingForUser
 } = require('../../utils');
 const {keb, kcp, gardener} = require('../helpers');
 
@@ -108,10 +109,6 @@ function oidcE2ETest(options, getShootInfoFunc) {
     it('Update SKR service instance with initial OIDC config and admins', async function() {
       this.timeout(updateTimeout);
 
-      console.log("roles before update");
-      let res = await getKymaAdminBindings();
-      console.log(res);
-
       const customParams = {
         oidc: givenOidcConfig,
         administrators: options.kebUserId,
@@ -130,9 +127,21 @@ function oidcE2ETest(options, getShootInfoFunc) {
       shoot = skr.shoot;
 
       console.log("SHOOT-after", shoot);
-      console.log("roles after update");
-      res = await getKymaAdminBindings();
-      console.log(res);
+
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      const user = options.kebUserId[0];
+      for (let i = 0; i < 10; i++) {
+        sleep(30000);
+        console.log(`Checking admin for ${user}. Try: ${i + 1}`);
+        const res = await findKymaAdminBindingForUser(user);
+        console.log(res);
+        if (res !== undefined) {
+          console.log(`Found admin for ${user}`);
+          break;
+        }
+        console.log(`not found admin for ${user}`);
+      }
+
     });
 
     it('Should get Runtime Status after updating OIDC config and admins', async function() {
