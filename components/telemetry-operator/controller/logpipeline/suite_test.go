@@ -101,7 +101,6 @@ var _ = BeforeSuite(func() {
 
 	reconciler := NewReconciler(
 		mgr.GetClient(),
-		mgr.GetScheme(),
 		controller.TestFluentBitK8sResources,
 		controller.TestPipelineConfig,
 		restartsTotal,
