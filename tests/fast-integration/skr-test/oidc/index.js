@@ -106,6 +106,11 @@ function oidcE2ETest(options, getShootInfoFunc) {
 
     it('Update SKR service instance with initial OIDC config and admins', async function() {
       this.timeout(updateTimeout);
+
+      console.log("roles before update");
+      const res = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+      console.log(res);
+
       const customParams = {
         oidc: givenOidcConfig,
         administrators: options.kebUserId,
@@ -124,6 +129,9 @@ function oidcE2ETest(options, getShootInfoFunc) {
       shoot = skr.shoot;
 
       console.log("SHOOT-after", shoot);
+      console.log("roles after update");
+      res = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+      console.log(res);
     });
 
     it('Should get Runtime Status after updating OIDC config and admins', async function() {
