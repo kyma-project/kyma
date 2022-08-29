@@ -106,13 +106,21 @@ containers:
         image: {{ .image }}
         resources:
           {{ .resources }}
+      {{- if .ports }}
         ports:
-        {{- range $key, $val := .ports }}
-          {{ $val }}
+        {{- range $mapkey, $map := .ports }} 
+          - name: {{ $map.name }}
+            containerPort: {{ $map.containerPort }}
+            protocol: {{ $map.protocol }}
         {{- end }}
-        {{- range $key, $val := .volumeMounts }}
-          {{ $val }}
+      {{- end }}
+      {{- if .volumeMounts }}
+        volumeMounts:
+        {{- range $mapkey, $map := .volumeMounts }} 
+          - name: {{ $map.name }}
+            protocol: {{ $map.mountPath }}
         {{- end }}
+      {{- end }}
     {{- end }}
   {{- end }}
 volumes:
