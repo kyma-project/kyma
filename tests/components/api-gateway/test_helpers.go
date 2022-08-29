@@ -347,10 +347,9 @@ func updateGatewayCacert(clientRootCaFileName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to process mTLS manifest file %s, details %s", clientRootCaFileName, err.Error())
 	}
-
-	_, err = batch.CreateResources(k8sClient, mtlsCertResource...)
+	_, err = batch.UpdateResources(k8sClient, mtlsCertResource...)
 	if err != nil {
-		return fmt.Errorf("failed to create mTLS cert from %s, details %s", clientRootCaFileName, err.Error())
+		return fmt.Errorf("failed to update mTLS cert from %s, details %s", clientRootCaFileName, err.Error())
 	}
 	return nil
 }
