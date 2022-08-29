@@ -95,7 +95,7 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 					Host:  telemetryv1alpha1.ValueType{Value: "localhost"},
 					User:  telemetryv1alpha1.ValueType{Value: "user"},
 					Password: telemetryv1alpha1.ValueType{
-						ValueFrom: &telemetryv1alpha1.ValueFromType{
+						ValueFrom: &telemetryv1alpha1.ValueFromSource{
 							SecretKey: telemetryv1alpha1.SecretKeyRef{
 								Name:      "secret",
 								Key:       "key",
@@ -162,7 +162,7 @@ func TestResolveValueWithValue(t *testing.T) {
 
 func TestResolveValueWithSecretKeyRef(t *testing.T) {
 	value := telemetryv1alpha1.ValueType{
-		ValueFrom: &telemetryv1alpha1.ValueFromType{
+		ValueFrom: &telemetryv1alpha1.ValueFromSource{
 			SecretKey: telemetryv1alpha1.SecretKeyRef{
 				Name:      "test-name",
 				Key:       "test-key",

@@ -57,7 +57,7 @@ func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipe
 	return true
 }
 
-func (s *secretHelper) CopySecretData(ctx context.Context, valueFrom telemetryv1alpha1.ValueFromType, targetKey string, secretData map[string][]byte) error {
+func (s *secretHelper) CopySecretData(ctx context.Context, valueFrom telemetryv1alpha1.ValueFromSource, targetKey string, secretData map[string][]byte) error {
 	log := logf.FromContext(ctx)
 	var referencedSecret *corev1.Secret
 	referencedSecret, err := s.get(ctx, valueFrom)
@@ -77,7 +77,7 @@ func (s *secretHelper) CopySecretData(ctx context.Context, valueFrom telemetryv1
 	return nil
 }
 
-func (s *secretHelper) get(ctx context.Context, fromType telemetryv1alpha1.ValueFromType) (*corev1.Secret, error) {
+func (s *secretHelper) get(ctx context.Context, fromType telemetryv1alpha1.ValueFromSource) (*corev1.Secret, error) {
 	log := logf.FromContext(ctx)
 
 	secretKey := fromType.SecretKey
@@ -105,7 +105,7 @@ func SecretHasChanged(oldSecret, newSecret map[string][]byte) bool {
 	return false
 }
 
-func GetSecretData(secret corev1.Secret, valFrom telemetryv1alpha1.ValueFromType, targetKey string) (map[string][]byte, error) {
+func GetSecretData(secret corev1.Secret, valFrom telemetryv1alpha1.ValueFromSource, targetKey string) (map[string][]byte, error) {
 	data := make(map[string][]byte)
 	if v, found := secret.Data[valFrom.SecretKey.Key]; found {
 		data[targetKey] = v

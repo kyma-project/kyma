@@ -170,7 +170,7 @@ var _ = Describe("LogPipeline controller", func() {
 			}
 			variableRefs := telemetryv1alpha1.VariableReference{
 				Name:      "myKey",
-				ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: secretRef},
+				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKey: secretRef},
 			}
 			filter := telemetryv1alpha1.Filter{
 				Custom: FluentBitFilterConfig,

@@ -140,13 +140,13 @@ type FileMount struct {
 
 // VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
 type VariableReference struct {
-	Name      string        `json:"name,omitempty"`
-	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+	Name      string          `json:"name,omitempty"`
+	ValueFrom ValueFromSource `json:"valueFrom,omitempty"`
 }
 
 type ValueType struct {
-	Value     string         `json:"value,omitempty"`
-	ValueFrom *ValueFromType `json:"valueFrom,omitempty"`
+	Value     string           `json:"value,omitempty"`
+	ValueFrom *ValueFromSource `json:"valueFrom,omitempty"`
 }
 
 func (v *ValueType) IsDefined() bool {
@@ -157,12 +157,12 @@ func (v *ValueType) IsDefined() bool {
 	return v.ValueFrom != nil && v.ValueFrom.IsSecretRef()
 }
 
-func (v *ValueFromType) IsSecretRef() bool {
-	return v.SecretKey.Name != "" && v.SecretKey.Key != ""
+type ValueFromSource struct {
+	SecretKey *SecretKeyRef `json:"secretKeyRef,omitempty"`
 }
 
-type ValueFromType struct {
-	SecretKey SecretKeyRef `json:"secretKeyRef,omitempty"`
+func (v *ValueFromSource) IsSecretRef() bool {
+	return v.SecretKey != nil && v.SecretKey.Name != "" && v.SecretKey.Key != ""
 }
 
 type SecretKeyRef struct {
