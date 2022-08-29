@@ -47,6 +47,11 @@ var (
 	requeueTime = 10 * time.Second
 )
 
+const (
+	httpOutputSecretKeyRef = "spec.output.http"
+	varSecretKeyRef        = "spec.variables"
+)
+
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
@@ -79,52 +84,117 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	return &lpr
 }
 
-// SetupWithManager sets up the controller with the Manager.
-func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &telemetryv1alpha1.LogPipeline{}, "spec.output.http.host.valueFrom.secretKeyRef.name", func(rawObj client.Object) []string {
-		// Extract the secret name from the logpipeline Spec, if one is provided
+func secretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
+	secretPreset := false
+	if len(logPipeline.Spec.Variables) > 0 {
+		for _, v := range logPipeline.Spec.Variables {
+			if v.ValueFrom.IsSecretRef() {
+				secretPreset = true
+				break
+			}
+		}
+	}
+	if logPipeline.Spec.Output.HTTP.Host.IsDefined() {
+		httpOutput := logPipeline.Spec.Output.HTTP
+		if httpOutput.User.ValueFrom.IsSecretRef() || httpOutput.Password.ValueFrom.IsSecretRef() || httpOutput.Host.ValueFrom.IsSecretRef() {
+			secretPreset = true
+		}
+	}
+	return secretPreset
+}
+
+func fetchFirstHttpSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
+	httpOutput := logPipeline.Spec.Output.HTTP
+	if httpOutput.Host.ValueFrom.SecretKey.Name != "" {
+		return httpOutput.Host.ValueFrom.SecretKey.Name
+	}
+	if httpOutput.User.ValueFrom.SecretKey.Name != "" {
+		return httpOutput.Host.ValueFrom.SecretKey.Name
+	}
+	if httpOutput.Password.ValueFrom.SecretKey.Name != "" {
+		return httpOutput.Host.ValueFrom.SecretKey.Name
+	}
+	return ""
+}
+
+func indexSecrets(fieldName string, mgr ctrl.Manager) error {
+	return mgr.GetFieldIndexer().IndexField(context.Background(), &telemetryv1alpha1.LogPipeline{}, fieldName, func(rawObj client.Object) []string {
+		// Extract the secret name from the logPipeline Spec, if one is provided
 		logPipeline := rawObj.(*telemetryv1alpha1.LogPipeline)
-		fmt.Printf("logpipe: %s\n", logPipeline.Name)
-		if logPipeline.Spec.Output.HTTP.Host.ValueFrom.SecretKey.Name == "" {
-			fmt.Println("returning nil!!")
+		// verify if the secret is being used in variables or httpOutput
+		if !secretsArePresent(logPipeline) {
 			return nil
 		}
-		fmt.Printf("Appending!! :%s \n", logPipeline.Spec.Output.HTTP.Host.ValueFrom.SecretKey.Name)
-		return []string{logPipeline.Spec.Output.HTTP.Host.ValueFrom.SecretKey.Name}
-	}); err != nil {
+
+		var retStr []string
+		if fieldName == httpOutputSecretKeyRef {
+			secretName := fetchFirstHttpSecret(logPipeline)
+			if secretName == "" {
+				return nil
+			}
+			retStr = append(retStr, secretName)
+		} else if fieldName == varSecretKeyRef {
+			for _, v := range logPipeline.Spec.Variables {
+				if v.ValueFrom.SecretKey.Name == "" {
+					return nil
+				}
+				retStr = append(retStr, v.ValueFrom.SecretKey.Name)
+			}
+		}
+
+		return retStr
+	})
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	if err := indexSecrets(httpOutputSecretKeyRef, mgr); err != nil {
 		return err
 	}
+	if err := indexSecrets(varSecretKeyRef, mgr); err != nil {
+		return err
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.findPipelinesForSecret),
+			handler.EnqueueRequestsFromMapFunc(r.reconcilePipelineWithSecret),
 		).
 		Complete(r)
 }
 
-func (r *LogPipelineReconciler) findPipelinesForSecret(secret client.Object) []reconcile.Request {
+func (r *LogPipelineReconciler) fetchLogPipelineToReconcile(secret client.Object) *telemetryv1alpha1.LogPipelineList {
 	var logPipelines telemetryv1alpha1.LogPipelineList
-	fmt.Printf("secretname: %s", secret.GetName())
 	listOps := &client.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector("spec.output.http.host.valueFrom.secretKeyRef.name", secret.GetName()),
+		FieldSelector: fields.OneTermEqualSelector(varSecretKeyRef, secret.GetName()),
 	}
 	err := r.List(context.TODO(), &logPipelines, listOps)
 	if err != nil {
-		return []reconcile.Request{}
+		return nil
 	}
-	fmt.Printf("len of logpipelines: %d\n", len(logPipelines.Items))
-	fmt.Println("I am invoked!!!")
+	if len(logPipelines.Items) == 0 {
+		listOps = &client.ListOptions{
+			FieldSelector: fields.OneTermEqualSelector(httpOutputSecretKeyRef, secret.GetName()),
+		}
+	}
+	err = r.List(context.TODO(), &logPipelines, listOps)
+	if err != nil {
+		return nil
+	}
+	return &logPipelines
+}
+
+func (r *LogPipelineReconciler) reconcilePipelineWithSecret(secret client.Object) []reconcile.Request {
+	logPipelines := r.fetchLogPipelineToReconcile(secret)
 	requests := make([]reconcile.Request, len(logPipelines.Items))
 	for i, item := range logPipelines.Items {
 		requests[i] = reconcile.Request{
 			NamespacedName: types.NamespacedName{
-				Name:      item.GetName(),
-				Namespace: item.GetNamespace(),
+				Name: item.GetName(),
 			},
 		}
 	}
-	fmt.Printf("reconcile req: %+v\n", requests)
 	return requests
 }
 
