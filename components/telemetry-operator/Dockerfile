@@ -12,8 +12,9 @@ RUN go mod download
 # Copy the go source
 COPY main.go main.go
 COPY apis/ apis/
-COPY controllers/ controllers/
+COPY controller/ controller/
 COPY internal/ internal/
+COPY webhook/ webhook/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go

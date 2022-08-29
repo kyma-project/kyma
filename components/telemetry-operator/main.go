@@ -23,38 +23,33 @@ import (
 	"strings"
 	"time"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
+	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
-	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
-	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
-
-	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
+	logparserwebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser"
+	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser/validation"
+	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
+	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
 
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-logr/zapr"
-	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -167,51 +162,51 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := builder.PipelineConfig{
+	pipelineDefaults := builder.PipelineDefaults{
 		InputTag:          fluentBitInputTag,
 		MemoryBufferLimit: fluentBitMemoryBufferLimit,
 		StorageType:       fluentBitStorageType,
 		FsBufferLimit:     fluentBitFsBufferLimit,
 	}
 
-	daemonSetConfig := sync.FluentBitDaemonSetConfig{
-		FluentBitDaemonSetName: types.NamespacedName{
-			Namespace: fluentBitNs,
-			Name:      fluentBitDaemonSet,
-		},
-		FluentBitSectionsConfigMap: types.NamespacedName{
+	daemonSet := types.NamespacedName{
+		Namespace: fluentBitNs,
+		Name:      fluentBitDaemonSet,
+	}
+	logpipelineConfig := logpipelinecontroller.Config{
+		SectionsConfigMap: types.NamespacedName{
 			Name:      fluentBitSectionsConfigMap,
 			Namespace: fluentBitNs,
 		},
 
-		FluentBitFilesConfigMap: types.NamespacedName{
+		FilesConfigMap: types.NamespacedName{
 			Name:      fluentBitFilesConfigMap,
 			Namespace: fluentBitNs,
 		},
-		FluentBitEnvSecret: types.NamespacedName{
+		EnvSecret: types.NamespacedName{
 			Name:      fluentBitEnvSecret,
 			Namespace: fluentBitNs,
 		},
+		DaemonSet:        daemonSet,
+		PipelineDefaults: pipelineDefaults,
 	}
-	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
-		FluentBitDaemonSetName: types.NamespacedName{
-			Namespace: fluentBitNs,
-			Name:      fluentBitDaemonSet,
-		},
-		FluentBitParsersConfigMap: types.NamespacedName{
+
+	logparserConfig := logparsercontroller.Config{
+		ParsersConfigMap: types.NamespacedName{
 			Name:      fluentBitParsersConfigMap,
 			Namespace: fluentBitNs,
 		},
+		DaemonSet: daemonSet,
 	}
 
-	dryRunConfig := &dryrun.Config{
+	dryRunConfig := dryrun.Config{
 		FluentBitBinPath:       fluentBitPath,
 		FluentBitPluginDir:     fluentBitPluginDirectory,
 		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
-		PipelineConfig:         pipelineConfig,
+		PipelineDefaults:       pipelineDefaults,
 	}
 
-	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(
+	logPipelineValidationHandler := logpipelinewebhook.NewValidatingWebhookHandler(
 		mgr.GetClient(),
 		logpipelinevalidation.NewInputValidator(),
 		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
@@ -220,38 +215,37 @@ func main() {
 		logpipelinevalidation.NewOutputValidator(parsePlugins(deniedOutputPlugins)...),
 		logpipelinevalidation.NewFilesValidator(),
 		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
+
+	logParserValidationHandler := logparserwebhook.NewValidatingWebhookHandler(
+		mgr.GetClient(),
+		logparservalidation.NewParserValidator(),
+		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
+
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
 		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
+	mgr.GetWebhookServer().Register(
+		"/validate-logparser",
+		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 
-	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
+	logPipelineReconciler := logpipelinecontroller.NewReconciler(
 		mgr.GetClient(),
-		mgr.GetScheme(),
-		daemonSetConfig,
-		pipelineConfig,
+		logpipelineConfig,
 		restartsTotal)
-	if err = reconciler.SetupWithManager(mgr); err != nil {
+	if err = logPipelineReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
-	parserReconciler := telemetrycontrollers.NewLogParserReconciler(
+	logParserReconciler := logparsercontroller.NewReconciler(
 		mgr.GetClient(),
-		mgr.GetScheme(),
-		parserDaemonSetConfig,
+		logparserConfig,
 		restartsTotal)
-	if err = parserReconciler.SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+	if err = logParserReconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
 		os.Exit(1)
 	}
 
-	logParserValidationHandler := logparser.NewValidatingWebhookHandler(
-		mgr.GetClient(),
-		logparservalidation.NewParserValidator(),
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
-	mgr.GetWebhookServer().Register(
-		"/validate-logparser",
-		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
