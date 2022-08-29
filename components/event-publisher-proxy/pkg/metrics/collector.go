@@ -21,9 +21,9 @@ const (
 	// latencyHelp help for the latency metric
 	latencyHelp = "The duration of sending events to the messaging server in nanoseconds"
 	// eventTypePublishedMetricHelp help for the eventType metric
-	EventTypePublishedMetricHelp = "The total number of events published for a given eventType"
+	eventTypePublishedMetricHelp = "The total number of events published for a given eventType"
 	// eventRequestsHelp help for event requests metric
-	EventRequestsHelp = "The total number of event requests"
+	eventRequestsHelp = "The total number of event requests"
 	//responseCode is the name of the status code labels used by multiple metrics
 	responseCode = "response_code"
 	//destSvc is the name of the destination service label used by multiple metrics
@@ -62,14 +62,14 @@ func NewCollector() *Collector {
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventTypePublishedMetricKey,
-				Help: EventTypePublishedMetricHelp,
+				Help: eventTypePublishedMetricHelp,
 			},
 			[]string{eventType, eventSource, responseCode},
 		),
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventRequests,
-				Help: EventRequestsHelp,
+				Help: eventRequestsHelp,
 			},
 			[]string{responseCode, destSvc},
 		),
