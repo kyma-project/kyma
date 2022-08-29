@@ -101,7 +101,19 @@ containers:
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
   {{- if .Values.extraContainers }}
-    {{- toYaml .Values.extraContainers | nindent 2 }}
+    {{- range .Values.extraContainers }}
+      - name: {{ .name }}
+        image: {{ .image }}
+        resources:
+          {{ .resources }}
+        ports:
+        {{- range $key, $val := .ports }}
+          {{ $val }}
+        {{- end }}
+        {{- range $key, $val := .volumeMounts }}
+          {{ $val }}
+        {{- end }}
+    {{- end }}
   {{- end }}
 volumes:
   - name: config
