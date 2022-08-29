@@ -269,8 +269,9 @@ metricsPort: 2020
 
 extraPorts:
   - name: http-metrics
-    port: 2021
+    containerPort: 2021
     protocol: TCP
+    port: 2021
 
 
 extraVolumes:
