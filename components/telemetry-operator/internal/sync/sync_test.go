@@ -165,7 +165,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "my-pipeline"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
 						ValueFrom: telemetryv1alpha1.ValueFromType{
 							SecretKey: secretKeyRef,

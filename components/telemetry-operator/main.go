@@ -215,11 +215,9 @@ func main() {
 		mgr.GetClient(),
 		logpipelinevalidation.NewInputValidator(),
 		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
-		logpipelinevalidation.NewPluginValidator(
-			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
-			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
+		logpipelinevalidation.NewFilterValidator(parsePlugins(deniedFilterPlugins)...),
 		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
-		logpipelinevalidation.NewOutputValidator(),
+		logpipelinevalidation.NewOutputValidator(parsePlugins(deniedOutputPlugins)...),
 		logpipelinevalidation.NewFilesValidator(),
 		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
 	mgr.GetWebhookServer().Register(
@@ -303,4 +301,8 @@ func validateFlags() error {
 		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
 	return nil
+}
+
+func parsePlugins(s string) []string {
+	return strings.SplitN(strings.ReplaceAll(s, " ", ""), ",", len(s))
 }

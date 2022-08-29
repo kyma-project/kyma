@@ -70,7 +70,7 @@ The operation was successful if the statuses for **CONFIGURED**, **BUILT**, and 
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md).
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-oauth2.md) or [JWT](../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md).
 
 First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
