@@ -16,7 +16,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 ## Root level service definition and multiple services definition on different paths
 
 Follow the instructions to expose your instance of the HttpBin service and your sample Function on different paths with a service defined at the root level - HttpBin in the following example. 
-  >**NOTE:** The services definition at the **spec.rules** level have higher precedence than the service definition at the **spec.service** level.
+  >**NOTE:** The service definitions at the **spec.rules** level have higher precedence than the service definition at the **spec.service** level.
 
 
 1. Export the following value as an environment variable:
@@ -75,7 +75,7 @@ Follow the instruction to expose your instance of the HttpBin service and your s
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
    ```
 
 2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. If you don't want to use Kyma's default gateway, replace `kyma-system/kyma-gateway` with your custom gateway. Run:
