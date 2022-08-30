@@ -147,5 +147,5 @@ Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to d
 Once you have your workload deployed, you can continue by choosing one of the following tutorials:
 
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
-- [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)
+- [Expose and secure a workload with OAuth2](./apix-04-expose-and-secure-workload-oauth2.md)
 - [Expose and secure a workload with Istio](./apix-05-expose-and-secure-workload-istio.md)
