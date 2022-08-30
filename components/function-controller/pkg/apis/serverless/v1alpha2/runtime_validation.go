@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ValidateDependencies(runtime Runtime, dependencies *string) error {
+func ValidateDependencies(runtime Runtime, dependencies string) error {
 	switch runtime {
 	case NodeJs12, NodeJs14, NodeJs16:
 		return validateNodeJSDependencies(dependencies)
@@ -16,8 +16,8 @@ func ValidateDependencies(runtime Runtime, dependencies *string) error {
 	return fmt.Errorf("cannot find runtime: %s", runtime)
 }
 
-func validateNodeJSDependencies(dependencies *string) error {
-	if deps := strings.TrimSpace(*dependencies); deps != "" && (deps[0] != '{' || deps[len(deps)-1] != '}') {
+func validateNodeJSDependencies(dependencies string) error {
+	if deps := strings.TrimSpace(dependencies); deps != "" && (deps[0] != '{' || deps[len(deps)-1] != '}') {
 		return errors.New("deps should start with '{' and end with '}'")
 	}
 	return nil
