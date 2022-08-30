@@ -2,8 +2,15 @@ package v1alpha1
 
 import (
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
+
+func (r *Subscription) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewWebhookManagedBy(mgr).
+		For(r).
+		Complete()
+}
 
 // ConvertTo converts this Subscription to the Hub version (v2).
 func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
@@ -71,6 +78,15 @@ func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 		LastFailedDelivery:       src.Status.EmsSubscriptionStatus.LastFailedDelivery,
 		LastFailedDeliveryReason: src.Status.EmsSubscriptionStatus.LastFailedDeliveryReason,
 	}
+
+	return nil
+}
+
+func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error {
+	src := srcRaw.(*v1alpha2.Subscription)
+
+	// ObjectMeta
+	dst.ObjectMeta = src.ObjectMeta
 
 	return nil
 }
