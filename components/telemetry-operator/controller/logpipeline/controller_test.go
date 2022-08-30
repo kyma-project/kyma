@@ -168,7 +168,7 @@ var _ = Describe("LogPipeline controller", func() {
 				Namespace: testConfig.DaemonSet.Namespace,
 				Key:       "key",
 			}
-			variableRefs := telemetryv1alpha1.VariableReference{
+			variableRefs := telemetryv1alpha1.VariableRef{
 				Name:      "myKey",
 				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKeyRef: &secretKeyRef},
 			}
@@ -191,7 +191,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Filters:   []telemetryv1alpha1.Filter{filter},
 					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:     []telemetryv1alpha1.FileMount{file},
-					Variables: []telemetryv1alpha1.VariableReference{variableRefs},
+					Variables: []telemetryv1alpha1.VariableRef{variableRefs},
 				},
 			}
 			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())

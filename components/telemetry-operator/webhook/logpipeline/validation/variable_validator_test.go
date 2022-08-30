@@ -13,7 +13,7 @@ import (
 func TestValidateSecretKeyRefs(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Variables: []telemetryv1alpha1.VariableReference{
+			Variables: []telemetryv1alpha1.VariableRef{
 				{
 					Name: "foo1",
 					ValueFrom: telemetryv1alpha1.ValueFromSource{
@@ -46,7 +46,7 @@ func TestValidateSecretKeyRefs(t *testing.T) {
 			Name: "pipe2",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Variables: []telemetryv1alpha1.VariableReference{{
+			Variables: []telemetryv1alpha1.VariableRef{{
 				Name: "foo2",
 				ValueFrom: telemetryv1alpha1.ValueFromSource{
 					SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
@@ -67,7 +67,7 @@ func TestValidateSecretKeyRefs(t *testing.T) {
 func TestVariableValidator(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Variables: []telemetryv1alpha1.VariableReference{
+			Variables: []telemetryv1alpha1.VariableRef{
 				{
 					Name: "foo1",
 					ValueFrom: telemetryv1alpha1.ValueFromSource{

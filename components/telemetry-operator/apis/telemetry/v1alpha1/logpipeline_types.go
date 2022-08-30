@@ -28,11 +28,11 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Input     Input               `json:"input,omitempty"`
-	Filters   []Filter            `json:"filters,omitempty"`
-	Output    Output              `json:"output,omitempty"`
-	Files     []FileMount         `json:"files,omitempty"`
-	Variables []VariableReference `json:"variables,omitempty"`
+	Input     Input         `json:"input,omitempty"`
+	Filters   []Filter      `json:"filters,omitempty"`
+	Output    Output        `json:"output,omitempty"`
+	Files     []FileMount   `json:"files,omitempty"`
+	Variables []VariableRef `json:"variables,omitempty"`
 }
 
 // Input describes a Fluent Bit input configuration section
@@ -138,8 +138,8 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
-type VariableReference struct {
+// VariableRef references a Kubernetes secret that should be provided as environment variable to Fluent Bit
+type VariableRef struct {
 	Name      string          `json:"name,omitempty"`
 	ValueFrom ValueFromSource `json:"valueFrom,omitempty"`
 }
