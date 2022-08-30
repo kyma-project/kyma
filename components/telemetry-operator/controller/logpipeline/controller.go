@@ -89,7 +89,7 @@ func NewReconciler(
 func httpSecretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	if logPipeline.Spec.Output.IsHTTPDefined() {
 		httpOutput := logPipeline.Spec.Output.HTTP
-		return httpOutput.User.ValueFrom.IsSecretRef() || httpOutput.Password.ValueFrom.IsSecretRef() || httpOutput.Host.ValueFrom.IsSecretRef()
+		return httpOutput.User.ValueFrom.IsSecretKeyRef() || httpOutput.Password.ValueFrom.IsSecretKeyRef() || httpOutput.Host.ValueFrom.IsSecretKeyRef()
 	}
 	return false
 }
@@ -97,7 +97,7 @@ func httpSecretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 func variablesSecretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	if len(logPipeline.Spec.Variables) > 0 {
 		for _, v := range logPipeline.Spec.Variables {
-			if v.ValueFrom.IsSecretRef() {
+			if v.ValueFrom.IsSecretKeyRef() {
 				return true
 			}
 		}
@@ -107,14 +107,14 @@ func variablesSecretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool
 
 func firstHTTPSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	httpOutput := logPipeline.Spec.Output.HTTP
-	if httpOutput.Host.ValueFrom.SecretKey.Name != "" {
-		return httpOutput.Host.ValueFrom.SecretKey.Name
+	if httpOutput.Host.ValueFrom.SecretKeyRef.Name != "" {
+		return httpOutput.Host.ValueFrom.SecretKeyRef.Name
 	}
-	if httpOutput.User.ValueFrom.SecretKey.Name != "" {
-		return httpOutput.Host.ValueFrom.SecretKey.Name
+	if httpOutput.User.ValueFrom.SecretKeyRef.Name != "" {
+		return httpOutput.Host.ValueFrom.SecretKeyRef.Name
 	}
-	if httpOutput.Password.ValueFrom.SecretKey.Name != "" {
-		return httpOutput.Host.ValueFrom.SecretKey.Name
+	if httpOutput.Password.ValueFrom.SecretKeyRef.Name != "" {
+		return httpOutput.Host.ValueFrom.SecretKeyRef.Name
 	}
 	return ""
 }
@@ -134,10 +134,10 @@ func indexSecrets(fieldName string, mgr ctrl.Manager) error {
 			retStr = append(retStr, secretName)
 		} else if fieldName == variables && variablesSecretsArePresent(logPipeline) {
 			for _, v := range logPipeline.Spec.Variables {
-				if v.ValueFrom.SecretKey.Name == "" {
+				if v.ValueFrom.SecretKeyRef.Name == "" {
 					return nil
 				}
-				retStr = append(retStr, v.ValueFrom.SecretKey.Name)
+				retStr = append(retStr, v.ValueFrom.SecretKeyRef.Name)
 			}
 		}
 
@@ -209,7 +209,6 @@ func (r *Reconciler) reconcilePipelineWithSecret(secret client.Object) []reconci
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 
-	log.Info("RECONCILING!!")
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
 		log.Info("Ignoring deleted LogPipeline")
