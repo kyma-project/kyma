@@ -2,6 +2,7 @@ package jetstream
 
 import (
 	"context"
+	"golang.org/x/xerrors"
 	"testing"
 	"time"
 
@@ -115,7 +116,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, happyCleaner, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  backendDeleteErr,
+			wantReconcileError:  xerrors.Errorf("failed to delete JetStream subscription: %v", backendDeleteErr),
 		},
 		{
 			name:              "Return error and default Result{} when validator returns error",
@@ -139,7 +140,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, unhappyCleaner, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  cleanerErr,
+			wantReconcileError:  xerrors.Errorf("failed to get clean subjects: %v", cleanerErr),
 		},
 	}
 
@@ -153,7 +154,11 @@ func TestReconciler_Reconcile(t *testing.T) {
 			}}
 			res, err := reconciler.Reconcile(context.Background(), r)
 			req.Equal(res, tc.wantReconcileResult)
-			req.Equal(err, tc.wantReconcileError)
+			if tc.wantReconcileError == nil {
+				req.Equal(err, nil)
+			} else {
+				req.Equal(err.Error(), tc.wantReconcileError.Error())
+			}
 		})
 	}
 }
