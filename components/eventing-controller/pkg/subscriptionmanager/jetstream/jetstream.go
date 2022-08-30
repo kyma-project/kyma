@@ -18,6 +18,7 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
@@ -42,6 +43,9 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := eventingv1alpha2.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil
