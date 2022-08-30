@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
@@ -177,41 +176,10 @@ func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alp
 	newSecret.Data = make(map[string][]byte)
 
 	for _, l := range logPipelines.Items {
-		if l.DeletionTimestamp != nil {
-			continue
-		}
-		for _, variable := range l.Spec.Variables {
-			if variable.ValueFrom.IsSecretKeyRef() {
-				if err := s.secretHelper.CopySecretData(ctx, *variable.ValueFrom.SecretKeyRef, variable.Name, newSecret.Data); err != nil {
-					log.Error(err, "unable to find secret for environment variable")
-					return false, err
-				}
-			}
-		}
-		output := l.Spec.Output
-		if !output.IsHTTPDefined() {
-			continue
-		}
-
-		httpOutput := output.HTTP
-		if httpOutput.Host.ValueFrom != nil && httpOutput.Host.ValueFrom.IsSecretKeyRef() {
-			err := s.secretHelper.CopySecretData(ctx, *httpOutput.Host.ValueFrom.SecretKeyRef, envvar.GenerateName(l.Name, *httpOutput.Host.ValueFrom.SecretKeyRef), newSecret.Data)
+		for _, field := range listSecretRefFields(&l) {
+			err := s.secretHelper.CopySecretData(ctx, *&field.secretKeyRef, field.targetSecretKey, newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
-				return false, err
-			}
-		}
-		if httpOutput.User.ValueFrom != nil && httpOutput.User.ValueFrom.IsSecretKeyRef() {
-			err := s.secretHelper.CopySecretData(ctx, *httpOutput.User.ValueFrom.SecretKeyRef, envvar.GenerateName(l.Name, *httpOutput.User.ValueFrom.SecretKeyRef), newSecret.Data)
-			if err != nil {
-				log.Error(err, "unable to find secret for http user")
-				return false, err
-			}
-		}
-		if httpOutput.Password.ValueFrom != nil && httpOutput.Password.ValueFrom.IsSecretKeyRef() {
-			err := s.secretHelper.CopySecretData(ctx, *httpOutput.Password.ValueFrom.SecretKeyRef, envvar.GenerateName(l.Name, *httpOutput.Password.ValueFrom.SecretKeyRef), newSecret.Data)
-			if err != nil {
-				log.Error(err, "unable to find secret for http password")
 				return false, err
 			}
 		}

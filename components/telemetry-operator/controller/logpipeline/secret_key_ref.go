@@ -2,11 +2,12 @@ package logpipeline
 
 import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 )
 
 type fieldDescriptor struct {
-	jsonPath     string
-	secretKeyRef telemetryv1alpha1.SecretKeyRef
+	targetSecretKey string
+	secretKeyRef    telemetryv1alpha1.SecretKeyRef
 }
 
 func listSecretRefFields(pipeline *telemetryv1alpha1.LogPipeline) []fieldDescriptor {
@@ -18,35 +19,29 @@ func listSecretRefFields(pipeline *telemetryv1alpha1.LogPipeline) []fieldDescrip
 		}
 
 		result = append(result, fieldDescriptor{
-			jsonPath:     "spec.variables.name",
-			secretKeyRef: *v.ValueFrom.SecretKeyRef,
+			targetSecretKey: v.Name,
+			secretKeyRef:    *v.ValueFrom.SecretKeyRef,
 		})
 	}
 
 	output := pipeline.Spec.Output
-	if !output.IsHTTPDefined() {
-		return result
-	}
-	if output.HTTP.Host.ValueFrom != nil && output.HTTP.Host.ValueFrom.IsSecretKeyRef() {
-		result = append(result, fieldDescriptor{
-			jsonPath:     "spec.output.http.host",
-			secretKeyRef: *output.HTTP.Host.ValueFrom.SecretKeyRef,
-		})
-	}
-	if output.HTTP.User.ValueFrom != nil && output.HTTP.User.ValueFrom.IsSecretKeyRef() {
-		result = append(result, fieldDescriptor{
-			jsonPath:     "spec.output.http.user",
-			secretKeyRef: *output.HTTP.User.ValueFrom.SecretKeyRef,
-		})
-	}
-	if output.HTTP.Password.ValueFrom != nil && output.HTTP.Password.ValueFrom.IsSecretKeyRef() {
-		result = append(result, fieldDescriptor{
-			jsonPath:     "spec.output.http.password",
-			secretKeyRef: *output.HTTP.Password.ValueFrom.SecretKeyRef,
+	result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.HTTP.Host)
+	result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.HTTP.User)
+	result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.HTTP.Password)
+	result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.Loki.URL)
+
+	return result
+}
+
+func appendOutputFieldIfHasSecret(fields []fieldDescriptor, pipelineName string, valueType telemetryv1alpha1.ValueType) []fieldDescriptor {
+	if valueType.Value == "" && valueType.ValueFrom != nil && valueType.ValueFrom.IsSecretKeyRef() {
+		fields = append(fields, fieldDescriptor{
+			targetSecretKey: envvar.GenerateName(pipelineName, *valueType.ValueFrom.SecretKeyRef),
+			secretKeyRef:    *valueType.ValueFrom.SecretKeyRef,
 		})
 	}
 
-	return result
+	return fields
 }
 
 func hasSecretReference(pipeline *telemetryv1alpha1.LogPipeline, secretName, secretNamespace string) bool {

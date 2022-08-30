@@ -23,36 +23,10 @@ func newSecretHelper(client client.Client) *secretHelper {
 	}
 }
 
-func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipeline *telemetryv1alpha1.LogPipeline) bool {
-	for _, v := range logpipeline.Spec.Variables {
-		if !v.ValueFrom.IsSecretKeyRef() {
-			return false
-		}
-
-		_, err := s.get(ctx, *v.ValueFrom.SecretKeyRef)
-		if err != nil {
-			return false
-		}
-	}
-
-	output := logpipeline.Spec.Output
-	if !output.IsHTTPDefined() {
-		return true
-	}
-	if output.HTTP.Host.ValueFrom != nil && output.HTTP.Host.ValueFrom.IsSecretKeyRef() {
-		_, err := s.get(ctx, *output.HTTP.Host.ValueFrom.SecretKeyRef)
-		if err != nil {
-			return false
-		}
-	}
-	if output.HTTP.User.ValueFrom != nil && output.HTTP.User.ValueFrom.IsSecretKeyRef() {
-		_, err := s.get(ctx, *output.HTTP.User.ValueFrom.SecretKeyRef)
-		if err != nil {
-			return false
-		}
-	}
-	if output.HTTP.Password.ValueFrom != nil && output.HTTP.Password.ValueFrom.IsSecretKeyRef() {
-		_, err := s.get(ctx, *output.HTTP.Password.ValueFrom.SecretKeyRef)
+func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) bool {
+	secretRefFields := listSecretRefFields(pipeline)
+	for _, field := range secretRefFields {
+		_, err := s.get(ctx, field.secretKeyRef)
 		if err != nil {
 			return false
 		}
