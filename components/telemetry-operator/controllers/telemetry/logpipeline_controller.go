@@ -86,11 +86,11 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 }
 
 func secretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
-	secretPreset := false
+	secretPresent := false
 	if len(logPipeline.Spec.Variables) > 0 {
 		for _, v := range logPipeline.Spec.Variables {
 			if v.ValueFrom.IsSecretRef() {
-				secretPreset = true
+				secretPresent = true
 				break
 			}
 		}
@@ -98,10 +98,10 @@ func secretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	if logPipeline.Spec.Output.HTTP.Host.IsDefined() {
 		httpOutput := logPipeline.Spec.Output.HTTP
 		if httpOutput.User.ValueFrom.IsSecretRef() || httpOutput.Password.ValueFrom.IsSecretRef() || httpOutput.Host.ValueFrom.IsSecretRef() {
-			secretPreset = true
+			secretPresent = true
 		}
 	}
-	return secretPreset
+	return secretPresent
 }
 
 func firstHttpSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
