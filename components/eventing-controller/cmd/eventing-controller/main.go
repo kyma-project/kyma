@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"log"
 	"os"
 
