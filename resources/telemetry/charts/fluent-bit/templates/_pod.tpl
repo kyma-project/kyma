@@ -101,9 +101,10 @@ containers:
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
   {{- if .Values.extraContainers }}
+  {{- $gl := .Values.global}}
   {{- range .Values.extraContainers }}
   - name: {{ .name }}
-    image: {{ .image }}
+    image: "{{ include "imageurl" (dict "reg" $gl.containerRegistry "img" $gl.images.directory_size_exporter) }}"
     resources:
     {{- range $mapkey, $map := .resources }} 
       {{ $mapkey }}:
