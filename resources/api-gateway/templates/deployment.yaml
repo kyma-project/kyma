@@ -45,7 +45,6 @@ spec:
             - --health-probe-addr=0.0.0.0:{{ .Values.config.ports.healthProbe }}
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
-            - --jwks-uri={{ .Values.config.jwksURI }}
             - --service-blocklist={{ include "api-gateway.serviceBlockList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
             {{- if .Values.config.enableDomainAllowList }}

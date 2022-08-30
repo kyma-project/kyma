@@ -47,13 +47,13 @@ func (v *variablesValidator) Validate(context context.Context, logPipeline *tele
 	return nil
 }
 
-func validateMandatoryFieldsAreEmpty(vr telemetryv1alpha1.VariableReference) bool {
-	secretKey := vr.ValueFrom.SecretKey
+func validateMandatoryFieldsAreEmpty(vr telemetryv1alpha1.VariableRef) bool {
+	secretKey := vr.ValueFrom.SecretKeyRef
 	return len(vr.Name) == 0 || len(secretKey.Key) == 0 || len(secretKey.Namespace) == 0 || len(secretKey.Name) == 0
 
 }
 
-func findConflictingVariables(logPipeLine *telemetryv1alpha1.LogPipeline, vr telemetryv1alpha1.VariableReference, existingPipelineName string) error {
+func findConflictingVariables(logPipeLine *telemetryv1alpha1.LogPipeline, vr telemetryv1alpha1.VariableRef, existingPipelineName string) error {
 	for _, v := range logPipeLine.Spec.Variables {
 		if v.Name == vr.Name {
 			return fmt.Errorf("Variable name must be globally unique. Variable '%s' is used in pipeline '%s'", v.Name, existingPipelineName)

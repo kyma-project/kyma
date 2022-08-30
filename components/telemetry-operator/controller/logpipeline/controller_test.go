@@ -163,14 +163,14 @@ var _ = Describe("LogPipeline controller", func() {
 				Name:    "myFile",
 				Content: "file-content",
 			}
-			secretRef := telemetryv1alpha1.SecretKeyRef{
+			secretKeyRef := telemetryv1alpha1.SecretKeyRef{
 				Name:      "my-secret",
 				Namespace: testConfig.DaemonSet.Namespace,
 				Key:       "key",
 			}
-			variableRefs := telemetryv1alpha1.VariableReference{
+			variableRefs := telemetryv1alpha1.VariableRef{
 				Name:      "myKey",
-				ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: secretRef},
+				ValueFrom: telemetryv1alpha1.ValueFromSource{SecretKeyRef: &secretKeyRef},
 			}
 			filter := telemetryv1alpha1.Filter{
 				Custom: FluentBitFilterConfig,
@@ -191,7 +191,7 @@ var _ = Describe("LogPipeline controller", func() {
 					Filters:   []telemetryv1alpha1.Filter{filter},
 					Output:    telemetryv1alpha1.Output{Custom: FluentBitOutputConfig},
 					Files:     []telemetryv1alpha1.FileMount{file},
-					Variables: []telemetryv1alpha1.VariableReference{variableRefs},
+					Variables: []telemetryv1alpha1.VariableRef{variableRefs},
 				},
 			}
 			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())
