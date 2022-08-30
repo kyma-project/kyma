@@ -58,7 +58,7 @@ spec:
 {{- end }}
       # Common volumes for the containers.
       volumes:
-      ### user secret ###
+      ### the secret that holds account data ###
       {{- if and .Values.auth.enabled .Values.auth.resolver }}
       - name: resolver-volume
         secret:
@@ -205,13 +205,14 @@ spec:
         {{- end }}
         {{- end }}
         volumeMounts:
-          ### user secret ###
+        ### the secret that holds account data ###
           {{- if and .Values.auth.enabled .Values.auth.resolver }}
           {{- if eq .Values.auth.resolver.type "memory" }}
           - name: resolver-volume
             mountPath: /etc/nats-config/accounts
           {{- end }}
           {{- end }}
+
           - name: config-volume
             mountPath: /etc/nats-config
           - name: pid
