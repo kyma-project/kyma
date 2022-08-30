@@ -99,8 +99,8 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 			Output: telemetryv1alpha1.Output{
 				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
-						ValueFrom: telemetryv1alpha1.ValueFromType{
-							SecretKey: secretKeyRef,
+						ValueFrom: &telemetryv1alpha1.ValueFromSource{
+							SecretKeyRef: &secretKeyRef,
 						},
 					},
 				},
