@@ -214,8 +214,8 @@ spec:
                 type: object
               variables:
                 items:
-                  description: VariableReference references a Kubernetes secret that
-                    should be provided as environment variable to Fluent Bit
+                  description: VariableRef references a Kubernetes secret that should
+                    be provided as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string
