@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ValidateDependencies(runtime Runtime, dependencies string) error {
+func ValidateDependencies(runtime Runtime, dependencies *string) error {
 	switch runtime {
 	case NodeJs12, NodeJs14, NodeJs16:
 		return validateNodeJSDependencies(dependencies)

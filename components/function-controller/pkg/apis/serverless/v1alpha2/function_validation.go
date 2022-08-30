@@ -221,7 +221,7 @@ func (spec *FunctionSpec) validateSources(vc *ValidationConfig) error {
 	return errors.Errorf("spec.source should contains only 1 configuration of function")
 }
 
-func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) error {
+func validateResources(resources *corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) error {
 	limits := resources.Limits
 	requests := resources.Requests
 	allErrs := []string{}
@@ -236,7 +236,7 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 	return returnAllErrs("invalid function resources", allErrs)
 }
 
-func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+func validateRequests(resources *corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
 	limits := resources.Limits
 	requests := resources.Requests
 	allErrs := []string{}
@@ -266,7 +266,7 @@ func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU r
 	return allErrs
 }
 
-func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+func validateLimites(resources *corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
 	limits := resources.Limits
 	allErrs := []string{}
 

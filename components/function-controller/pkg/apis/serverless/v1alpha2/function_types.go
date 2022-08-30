@@ -137,7 +137,7 @@ type FunctionSpec struct {
 	Source Source `json:"source"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
-	Env *[]v1.EnvVar `json:"env,omitempty"`
+	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
 	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
