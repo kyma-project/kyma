@@ -10,14 +10,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestValidateSecretRefs(t *testing.T) {
+func TestValidateSecretKeyRefs(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Variables: []telemetryv1alpha1.VariableReference{
 				{
 					Name: "foo1",
 					ValueFrom: telemetryv1alpha1.ValueFromSource{
-						SecretRef: &telemetryv1alpha1.SecretRef{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 							Name:      "fooN",
 							Namespace: "fooNs",
 							Key:       "foo",
@@ -27,7 +27,7 @@ func TestValidateSecretRefs(t *testing.T) {
 				{
 					Name: "foo2",
 					ValueFrom: telemetryv1alpha1.ValueFromSource{
-						SecretRef: &telemetryv1alpha1.SecretRef{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 							Name:      "fooN",
 							Namespace: "fooNs",
 							Key:       "foo",
@@ -49,7 +49,7 @@ func TestValidateSecretRefs(t *testing.T) {
 			Variables: []telemetryv1alpha1.VariableReference{{
 				Name: "foo2",
 				ValueFrom: telemetryv1alpha1.ValueFromSource{
-					SecretRef: &telemetryv1alpha1.SecretRef{
+					SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 						Name:      "fooN",
 						Namespace: "fooNs",
 						Key:       "foo",
@@ -71,7 +71,7 @@ func TestVariableValidator(t *testing.T) {
 				{
 					Name: "foo1",
 					ValueFrom: telemetryv1alpha1.ValueFromSource{
-						SecretRef: &telemetryv1alpha1.SecretRef{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 							Name:      "fooN",
 							Namespace: "fooNs",
 							Key:       "foo",
@@ -81,7 +81,7 @@ func TestVariableValidator(t *testing.T) {
 				{
 					Name: "foo2",
 					ValueFrom: telemetryv1alpha1.ValueFromSource{
-						SecretRef: &telemetryv1alpha1.SecretRef{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 							Name:      "",
 							Namespace: "",
 							Key:       "",

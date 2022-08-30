@@ -88,7 +88,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	}
 	require.NoError(t, err)
 
-	secretRef := telemetryv1alpha1.SecretRef{
+	secretKeyRef := telemetryv1alpha1.SecretKeyRef{
 		Name:      "referenced-secret",
 		Key:       "host",
 		Namespace: "default",
@@ -100,7 +100,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
 						ValueFrom: &telemetryv1alpha1.ValueFromSource{
-							SecretRef: &secretRef,
+							SecretKeyRef: &secretKeyRef,
 						},
 					},
 				},
@@ -120,6 +120,6 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	var envSecret corev1.Secret
 	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"}, &envSecret)
 	require.NoError(t, err)
-	targetSecretKey := envvar.GenerateName("my-pipeline", secretRef)
+	targetSecretKey := envvar.GenerateName("my-pipeline", secretKeyRef)
 	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
 }

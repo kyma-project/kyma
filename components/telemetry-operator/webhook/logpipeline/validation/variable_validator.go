@@ -48,7 +48,7 @@ func (v *variablesValidator) Validate(context context.Context, logPipeline *tele
 }
 
 func validateMandatoryFieldsAreEmpty(vr telemetryv1alpha1.VariableReference) bool {
-	secretKey := vr.ValueFrom.SecretRef
+	secretKey := vr.ValueFrom.SecretKeyRef
 	return len(vr.Name) == 0 || len(secretKey.Key) == 0 || len(secretKey.Namespace) == 0 || len(secretKey.Name) == 0
 
 }

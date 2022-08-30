@@ -25,11 +25,11 @@ func newSecretHelper(client client.Client) *secretHelper {
 
 func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipeline *telemetryv1alpha1.LogPipeline) bool {
 	for _, v := range logpipeline.Spec.Variables {
-		if !v.ValueFrom.IsSecretRef() {
+		if !v.ValueFrom.IsSecretKeyRef() {
 			return false
 		}
 
-		_, err := s.get(ctx, *v.ValueFrom.SecretRef)
+		_, err := s.get(ctx, *v.ValueFrom.SecretKeyRef)
 		if err != nil {
 			return false
 		}
@@ -39,20 +39,20 @@ func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipe
 	if !output.IsHTTPDefined() {
 		return true
 	}
-	if output.HTTP.Host.ValueFrom != nil && output.HTTP.Host.ValueFrom.IsSecretRef() {
-		_, err := s.get(ctx, *output.HTTP.Host.ValueFrom.SecretRef)
+	if output.HTTP.Host.ValueFrom != nil && output.HTTP.Host.ValueFrom.IsSecretKeyRef() {
+		_, err := s.get(ctx, *output.HTTP.Host.ValueFrom.SecretKeyRef)
 		if err != nil {
 			return false
 		}
 	}
-	if output.HTTP.User.ValueFrom != nil && output.HTTP.User.ValueFrom.IsSecretRef() {
-		_, err := s.get(ctx, *output.HTTP.User.ValueFrom.SecretRef)
+	if output.HTTP.User.ValueFrom != nil && output.HTTP.User.ValueFrom.IsSecretKeyRef() {
+		_, err := s.get(ctx, *output.HTTP.User.ValueFrom.SecretKeyRef)
 		if err != nil {
 			return false
 		}
 	}
-	if output.HTTP.Password.ValueFrom != nil && output.HTTP.Password.ValueFrom.IsSecretRef() {
-		_, err := s.get(ctx, *output.HTTP.Password.ValueFrom.SecretRef)
+	if output.HTTP.Password.ValueFrom != nil && output.HTTP.Password.ValueFrom.IsSecretKeyRef() {
+		_, err := s.get(ctx, *output.HTTP.Password.ValueFrom.SecretKeyRef)
 		if err != nil {
 			return false
 		}
@@ -61,7 +61,7 @@ func (s *secretHelper) ValidatePipelineSecretsExist(ctx context.Context, logpipe
 	return true
 }
 
-func (s *secretHelper) CopySecretData(ctx context.Context, from telemetryv1alpha1.SecretRef, targetKey string, secretData map[string][]byte) error {
+func (s *secretHelper) CopySecretData(ctx context.Context, from telemetryv1alpha1.SecretKeyRef, targetKey string, secretData map[string][]byte) error {
 	log := logf.FromContext(ctx)
 	var referencedSecret *corev1.Secret
 	referencedSecret, err := s.get(ctx, from)
@@ -81,7 +81,7 @@ func (s *secretHelper) CopySecretData(ctx context.Context, from telemetryv1alpha
 	return nil
 }
 
-func (s *secretHelper) get(ctx context.Context, from telemetryv1alpha1.SecretRef) (*corev1.Secret, error) {
+func (s *secretHelper) get(ctx context.Context, from telemetryv1alpha1.SecretKeyRef) (*corev1.Secret, error) {
 	log := logf.FromContext(ctx)
 
 	var secret corev1.Secret
@@ -108,7 +108,7 @@ func SecretHasChanged(oldSecret, newSecret map[string][]byte) bool {
 	return false
 }
 
-func GetSecretData(secret corev1.Secret, from telemetryv1alpha1.SecretRef, targetKey string) (map[string][]byte, error) {
+func GetSecretData(secret corev1.Secret, from telemetryv1alpha1.SecretKeyRef, targetKey string) (map[string][]byte, error) {
 	data := make(map[string][]byte)
 	if v, found := secret.Data[from.Key]; found {
 		data[targetKey] = v

@@ -154,18 +154,18 @@ func (v *ValueType) IsDefined() bool {
 		return true
 	}
 
-	return v.ValueFrom != nil && v.ValueFrom.IsSecretRef()
+	return v.ValueFrom != nil && v.ValueFrom.IsSecretKeyRef()
 }
 
 type ValueFromSource struct {
-	SecretRef *SecretRef `json:"secretKeyRef,omitempty"`
+	SecretKeyRef *SecretKeyRef `json:"secretKeyRef,omitempty"`
 }
 
-func (v *ValueFromSource) IsSecretRef() bool {
-	return v.SecretRef != nil && v.SecretRef.Name != "" && v.SecretRef.Key != ""
+func (v *ValueFromSource) IsSecretKeyRef() bool {
+	return v.SecretKeyRef != nil && v.SecretKeyRef.Name != "" && v.SecretKeyRef.Key != ""
 }
 
-type SecretRef struct {
+type SecretKeyRef struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 	Key       string `json:"key,omitempty"`
