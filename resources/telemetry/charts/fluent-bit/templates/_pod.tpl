@@ -104,7 +104,7 @@ containers:
   {{- $gl := .Values.global}}
   {{- range .Values.extraContainers }}
   - name: {{ .name }}
-    image: "{{ include "imageurl" (dict "reg" $gl.containerRegistry "img" $gl.images.directory_size_exporter) }}"
+    image: {{ .image }}
     resources:
     {{- range $mapkey, $map := .resources }} 
       {{ $mapkey }}:
