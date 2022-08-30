@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	corev1 "k8s.io/api/core/v1"
@@ -50,8 +51,8 @@ type Config struct {
 }
 
 const (
-	httpOutputSecretPathRef = "spec.output.http"
-	varSecretPathRef        = "spec.variables"
+	httpOutput = "spec.output.http"
+	variables  = "spec.variables"
 )
 
 // Reconciler reconciles a LogPipeline object
@@ -85,26 +86,26 @@ func NewReconciler(
 	return &r
 }
 
-func secretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
-	secretPresent := false
+func httpSecretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
+	if logPipeline.Spec.Output.IsHTTPDefined() {
+		httpOutput := logPipeline.Spec.Output.HTTP
+		return httpOutput.User.ValueFrom.IsSecretRef() || httpOutput.Password.ValueFrom.IsSecretRef() || httpOutput.Host.ValueFrom.IsSecretRef()
+	}
+	return false
+}
+
+func variablesSecretsArePresent(logPipeline *telemetryv1alpha1.LogPipeline) bool {
 	if len(logPipeline.Spec.Variables) > 0 {
 		for _, v := range logPipeline.Spec.Variables {
 			if v.ValueFrom.IsSecretRef() {
-				secretPresent = true
-				break
+				return true
 			}
 		}
 	}
-	if logPipeline.Spec.Output.HTTP.Host.IsDefined() {
-		httpOutput := logPipeline.Spec.Output.HTTP
-		if httpOutput.User.ValueFrom.IsSecretRef() || httpOutput.Password.ValueFrom.IsSecretRef() || httpOutput.Host.ValueFrom.IsSecretRef() {
-			secretPresent = true
-		}
-	}
-	return secretPresent
+	return false
 }
 
-func firstHttpSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
+func firstHTTPSecret(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	httpOutput := logPipeline.Spec.Output.HTTP
 	if httpOutput.Host.ValueFrom.SecretKey.Name != "" {
 		return httpOutput.Host.ValueFrom.SecretKey.Name
@@ -123,18 +124,15 @@ func indexSecrets(fieldName string, mgr ctrl.Manager) error {
 		// Extract the secret name from the logPipeline Spec, if one is provided
 		logPipeline := rawObj.(*telemetryv1alpha1.LogPipeline)
 		// verify if the secret is being used in variables or httpOutput
-		if !secretsArePresent(logPipeline) {
-			return nil
-		}
 
 		var retStr []string
-		if fieldName == httpOutputSecretPathRef {
-			secretName := firstHttpSecret(logPipeline)
+		if fieldName == httpOutput && httpSecretsArePresent(logPipeline) {
+			secretName := firstHTTPSecret(logPipeline)
 			if secretName == "" {
 				return nil
 			}
 			retStr = append(retStr, secretName)
-		} else if fieldName == varSecretPathRef {
+		} else if fieldName == variables && variablesSecretsArePresent(logPipeline) {
 			for _, v := range logPipeline.Spec.Variables {
 				if v.ValueFrom.SecretKey.Name == "" {
 					return nil
@@ -149,10 +147,10 @@ func indexSecrets(fieldName string, mgr ctrl.Manager) error {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := indexSecrets(httpOutputSecretPathRef, mgr); err != nil {
+	if err := indexSecrets(httpOutput, mgr); err != nil {
 		return err
 	}
-	if err := indexSecrets(varSecretPathRef, mgr); err != nil {
+	if err := indexSecrets(variables, mgr); err != nil {
 		return err
 	}
 
@@ -168,7 +166,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) fetchLogPipelineToReconcile(secret client.Object) *telemetryv1alpha1.LogPipelineList {
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	listOps := &client.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(varSecretPathRef, secret.GetName()),
+		FieldSelector: fields.OneTermEqualSelector(variables, secret.GetName()),
 	}
 	err := r.List(context.TODO(), &logPipelines, listOps)
 	if err != nil {
@@ -176,7 +174,7 @@ func (r *Reconciler) fetchLogPipelineToReconcile(secret client.Object) *telemetr
 	}
 	if len(logPipelines.Items) == 0 {
 		listOps = &client.ListOptions{
-			FieldSelector: fields.OneTermEqualSelector(httpOutputSecretPathRef, secret.GetName()),
+			FieldSelector: fields.OneTermEqualSelector(httpOutput, secret.GetName()),
 		}
 	}
 	err = r.List(context.TODO(), &logPipelines, listOps)
