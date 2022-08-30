@@ -29,13 +29,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webhook-service
-  namespace: system
+  name: eventing-webhook-service
+  labels: {{- include "controller.labels" . | nindent 4 }}
 spec:
+  selector: {{- include "controller.selectorLabels" . | nindent 4 }}
   ports:
-    - port: 443
+    - name:  {{ .Values.global.ports.namePrefix }}convert
+      port: 443
       protocol: TCP
       targetPort: 9443
-  selector:
-    control-plane: controller-manager
-

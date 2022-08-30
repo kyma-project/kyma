@@ -7,6 +7,8 @@ import (
 	"time"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -41,6 +43,9 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := eventingv1alpha2.AddToScheme(scheme); err != nil {
 		return err
 	}
 	if err := apigatewayv1beta1.AddToScheme(scheme); err != nil {

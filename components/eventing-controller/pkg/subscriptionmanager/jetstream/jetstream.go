@@ -12,11 +12,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
+
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
@@ -39,6 +41,9 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := eventingv1alpha2.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil

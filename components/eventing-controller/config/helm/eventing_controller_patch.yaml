@@ -20,3 +20,32 @@ spec:
               value: $WEBHOOK_TOKEN_ENDPOINT
             - name: PUBLISHER_IMAGE
               value: $KO_DOCKER_REPO/event-publisher-proxy
+          ports:
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: eventing-webhook-server-cert
+#---
+## This patch add annotation to admission webhook config and
+## the variables $(CERTIFICATE_NAMESPACE) and $(CERTIFICATE_NAME) will be substituted by kustomize.
+#apiVersion: admissionregistration.k8s.io/v1
+#kind: MutatingWebhookConfiguration
+#metadata:
+#  name: mutating-webhook-configuration
+#  annotations:
+#    cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
+#---
+#apiVersion: admissionregistration.k8s.io/v1
+#kind: ValidatingWebhookConfiguration
+#metadata:
+#  name: validating-webhook-configuration
+#  annotations:
+#    cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
