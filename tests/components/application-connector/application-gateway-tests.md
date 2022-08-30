@@ -25,7 +25,7 @@ The tests consist of:
 - [Mock application](./tools/external-api-mock-app/) which simulates the remote endpoints
 
 Additionally, the following resources are created on the cluster:
-- [Service Account](./resources/charts/gateway-test/templates/service-account.yml#L2) used by the tests to read the Application CRs
+- [Service Account](./resources/charts/gateway-test/templates/service-account.yml) used by the tests to read the Application CRs
 - [Secrets](./resources/charts/gateway-test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
 
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
@@ -46,7 +46,7 @@ To test mTLS-related authentication methods, you need:
 - Server certificate, key, and the CA certificate for the mock application
 - Client certificate and key stored in a Secret accessed by Application Gateway
 
-All certificates are generated using the `generate-certs` target from the `Makefile`.
+All certificates are generated using the **generate-certs** target from the `Makefile`.
 The target is executed before the tests are run, and it invokes [`generate-self-signed-certs.sh`](./scripts/generate-self-signed-certs.sh), which creates the CA root, server, and client certificates and keys.
 
 > **NOTE:** Since self-signed certificates are used, Application CRs have the **skipVerify: true** property set to `true` to force Application Gateway to skip certificate verification.
@@ -84,7 +84,7 @@ The server key, server certificate, and the CA root certificate for port `8091` 
 
 ## Building
 
-Pipelines build the mock application and the Gateway test using the `release` target from the `Makefile`.
+Pipelines build the mock application and the Gateway test using the **release** target from the `Makefile`.
 
 To build **and push** the Docker images of the tests and the mock application, run:
 
@@ -100,7 +100,7 @@ This will build the following images:
 
 Tests can be run on any Kyma cluster with Application Gateway.
 
-Pipelines run the tests using the `test-gateway` target from the `Makefile`.
+Pipelines run the tests using the **test-gateway** target from the `Makefile`.
 
 ### Deploy a Kyma cluster locally
 

@@ -22,7 +22,7 @@ The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Ap
 
 ## Building
 
-Pipelines build the Application Connectivity Validator test using the `release` target from the `Makefile`.
+Pipelines build the Application Connectivity Validator test using the **release** target from the `Makefile`.
 
 To build **and push** the Docker images of the tests, run:
 
@@ -37,7 +37,7 @@ This will build the following images:
 
 Tests can be run on any Kyma cluster with Application Connectivity Validator.
 
-Pipelines run the tests using the `test-validator` target from the `Makefile`.
+Pipelines run the tests using the **test-validator** target from the `Makefile`.
 
 ### Deploy a Kyma cluster locally
 
