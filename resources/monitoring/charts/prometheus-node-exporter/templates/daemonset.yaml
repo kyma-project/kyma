@@ -1,3 +1,8 @@
+{{- /*
+  Customization: 
+    * use imageurl
+    * priorityClassName global
+*/ -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -41,10 +46,10 @@ spec:
           args:
             - --path.procfs=/host/proc
             - --path.sysfs=/host/sys
-            {{- if .Values.hostRootFsMount }}
+            {{- if .Values.hostRootFsMount.enabled }}
             - --path.rootfs=/host/root
             {{- end }}
-            - --web.listen-address=$(HOST_IP):{{ .Values.service.port }}
+            - --web.listen-address=[$(HOST_IP)]:{{ .Values.service.port }}
 {{- if .Values.extraArgs }}
 {{ toYaml .Values.extraArgs | indent 12 }}
 {{- end }}
@@ -61,18 +66,44 @@ spec:
                 apiVersion: v1
                 fieldPath: status.hostIP
             {{- end }}
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
           ports:
             - name: {{ .Values.service.portName }}
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             httpGet:
+              httpHeaders:
+              {{- range $_, $header := .Values.livenessProbe.httpGet.httpHeaders }}
+              - name: {{ $header.name }}
+                value: {{ $header.value }}
+              {{- end }}
               path: /
               port: {{ .Values.service.port }}
+              scheme: {{ upper .Values.livenessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
           readinessProbe:
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
             httpGet:
+              httpHeaders:
+              {{- range $_, $header := .Values.readinessProbe.httpGet.httpHeaders }}
+              - name: {{ $header.name }}
+                value: {{ $header.value }}
+              {{- end }}
               path: /
               port: {{ .Values.service.port }}
+              scheme: {{ upper .Values.readinessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
@@ -82,10 +113,12 @@ spec:
             - name: sys
               mountPath: /host/sys
               readOnly: true
-            {{- if .Values.hostRootFsMount }}
+            {{- if .Values.hostRootFsMount.enabled }}
             - name: root
               mountPath: /host/root
-              mountPropagation: HostToContainer
+              {{- with .Values.hostRootFsMount.mountPropagation }}
+              mountPropagation: {{ . }}
+              {{- end }}
               readOnly: true
             {{- end }}
             {{- if .Values.extraHostVolumeMounts }}
@@ -128,6 +161,10 @@ spec:
             {{- end }}
           {{- end }}
 {{- end }}
+{{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
       hostPID: {{ .Values.hostPID }}
 {{- if .Values.affinity }}
@@ -153,7 +190,7 @@ spec:
         - name: sys
           hostPath:
             path: /sys
-        {{- if .Values.hostRootFsMount }}
+        {{- if .Values.hostRootFsMount.enabled }}
         - name: root
           hostPath:
             path: /
