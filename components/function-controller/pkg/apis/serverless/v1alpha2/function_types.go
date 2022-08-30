@@ -48,7 +48,7 @@ type Source struct {
 type InlineSource struct {
 	Source string `json:"source"`
 	//+optional
-	Dependencies *string `json:"dependencies,omitempty"`
+	Dependencies string `json:"dependencies,omitempty"`
 }
 
 type GitRepositorySource struct {

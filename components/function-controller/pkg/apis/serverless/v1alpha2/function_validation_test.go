@@ -50,9 +50,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MaxReplicas: pointer.Int32(1),
 					},
 					Runtime: NodeJs12,
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
 								corev1.ResourceCPU:    resource.MustParse("100m"),
 								corev1.ResourceMemory: resource.MustParse("128Mi"),
 							},
@@ -62,8 +62,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -100,7 +100,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Value: "test",
 						},
 					},
-					Template: Template{
+					Template: &Template{
 						Labels: map[string]string{
 							"shoul-be-ok": "test",
 							"test":        "test",
@@ -110,9 +110,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MinReplicas: pointer.Int32(1),
 						MaxReplicas: pointer.Int32(1),
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -123,8 +123,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -257,7 +257,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					Template: Template{
+					Template: &Template{
 						Labels: map[string]string{
 							"shoul-be-ok":      "test",
 							"should BE not OK": "test",
@@ -328,9 +328,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("50m"),
 									corev1.ResourceMemory: resource.MustParse("64Mi"),
@@ -364,9 +364,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -377,8 +377,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("50m"),
 									corev1.ResourceMemory: resource.MustParse("64Mi"),
@@ -414,9 +414,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("9m"),
 									corev1.ResourceMemory: resource.MustParse("10Mi"),
@@ -427,8 +427,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("9m"),
 									corev1.ResourceMemory: resource.MustParse("10Mi"),
@@ -469,9 +469,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -482,8 +482,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("400m"),
 									corev1.ResourceMemory: resource.MustParse("400Mi"),
@@ -513,9 +513,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							URL: "testme",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -526,8 +526,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("200m"),
 									corev1.ResourceMemory: resource.MustParse("200Mi"),
@@ -567,9 +567,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						MaxReplicas: pointer.Int32(1),
 					},
 					Runtime: NodeJs14,
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
 								corev1.ResourceCPU:    resource.MustParse("100m"),
 								corev1.ResourceMemory: resource.MustParse("128Mi"),
 							},
@@ -579,8 +579,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
