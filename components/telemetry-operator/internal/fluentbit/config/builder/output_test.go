@@ -3,8 +3,9 @@ package builder
 import (
 	"testing"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
@@ -23,7 +24,7 @@ func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -62,7 +63,7 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -107,7 +108,7 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -143,7 +144,7 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	}
 
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
