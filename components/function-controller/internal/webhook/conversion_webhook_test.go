@@ -139,9 +139,9 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -152,8 +152,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 								},
 							},
 						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -191,9 +191,9 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -204,8 +204,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 								},
 							},
 						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),

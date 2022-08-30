@@ -176,20 +176,20 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 		}
 	}
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
-	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
+	out.Spec.RuntimeImageOverride = &in.Spec.RuntimeImageOverride
 
 	//TODO: out.Profile
 	//TODO out.CustomRuntimeCOnfiguration
 
-	out.Spec.ResourceConfiguration = serverlessv1alpha2.ResourceConfiguration{
-		Build: serverlessv1alpha2.ResourceRequirements{
-			Resources: in.Spec.BuildResources,
+	out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{
+		Build: &serverlessv1alpha2.ResourceRequirements{
+			Resources: &in.Spec.BuildResources,
 		},
-		Function: serverlessv1alpha2.ResourceRequirements{
-			Resources: in.Spec.Resources,
+		Function: &serverlessv1alpha2.ResourceRequirements{
+			Resources: &in.Spec.Resources,
 		},
 	}
-	out.Spec.Template = serverlessv1alpha2.Template{
+	out.Spec.Template = &serverlessv1alpha2.Template{
 		Labels: in.Spec.Labels,
 	}
 	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
@@ -282,14 +282,14 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
 	out.Spec.Env = in.Spec.Env
 	out.Spec.Runtime = serverlessv1alpha1.Runtime(in.Spec.Runtime)
-	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
+	out.Spec.RuntimeImageOverride = *in.Spec.RuntimeImageOverride
 	if in.Spec.ScaleConfig != nil {
 		out.Spec.MaxReplicas = in.Spec.ScaleConfig.MaxReplicas
 		out.Spec.MinReplicas = in.Spec.ScaleConfig.MinReplicas
 	}
 
-	out.Spec.BuildResources = in.Spec.ResourceConfiguration.Build.Resources
-	out.Spec.Resources = in.Spec.ResourceConfiguration.Function.Resources
+	out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
+	out.Spec.Resources = *in.Spec.ResourceConfiguration.Function.Resources
 
 	out.Spec.Labels = in.Spec.Template.Labels
 
