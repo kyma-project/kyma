@@ -130,8 +130,8 @@ func shouldSkipBuildResourcesDefault(fn *Function) bool {
 	return false
 }
 
-func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {
-	copiedRes := res.DeepCopy()
+func defaultResources(res **corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) *corev1.ResourceRequirements {
+	copiedRes := (*res).DeepCopy()
 
 	if copiedRes.Requests == nil {
 		copiedRes.Requests = corev1.ResourceList{}
@@ -173,7 +173,7 @@ func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCP
 		copiedRes.Limits[corev1.ResourceCPU] = newResource
 	}
 
-	return *copiedRes
+	return copiedRes
 }
 
 func mergeReplicasPreset(fn *Function, presets map[string]ReplicasPreset, defaultPreset string) ReplicasPreset {
