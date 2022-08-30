@@ -140,7 +140,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if s.instance.Spec.RuntimeImageOverride != "" {
+	if *s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
@@ -218,7 +218,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       *s.instance.Spec.ResourceConfiguration.Build.Resources,
 							VolumeMounts:    s.getGitBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -241,7 +241,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if s.instance.Spec.RuntimeImageOverride != "" {
+	if *s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 	labels := s.functionLabels()
@@ -309,7 +309,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       *s.instance.Spec.ResourceConfiguration.Build.Resources,
 							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -403,7 +403,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 							Name:      functionContainerName,
 							Image:     imageName,
 							Env:       envs,
-							Resources: s.instance.Spec.ResourceConfiguration.Function.Resources,
+							Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name: volumeName,
 								/* needed in order to have python functions working:
