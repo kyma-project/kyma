@@ -19,8 +19,6 @@ package logpipeline
 import (
 	"context"
 	"fmt"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
@@ -31,6 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 type Config struct {
@@ -57,9 +56,6 @@ func NewReconciler(
 ) *Reconciler {
 	var r Reconciler
 
-	metrics.Registry.MustRegister(r.unsupportedTotal)
-	commonmetrics.RegisterMetrics()
-
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
@@ -68,6 +64,9 @@ func NewReconciler(
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
 	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
+
+	metrics.Registry.MustRegister(r.unsupportedTotal)
+	commonmetrics.RegisterMetrics()
 
 	return &r
 }

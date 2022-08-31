@@ -47,12 +47,12 @@ type Reconciler struct {
 func NewReconciler(client client.Client, config Config) *Reconciler {
 	var r Reconciler
 
-	commonmetrics.RegisterMetrics()
-
 	r.Client = client
 	r.config = config
 	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
+
+	commonmetrics.RegisterMetrics()
 
 	return &r
 }
