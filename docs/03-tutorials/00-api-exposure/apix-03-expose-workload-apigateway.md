@@ -4,11 +4,11 @@ title: Expose a workload
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.
 
-The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
+The tutorial may be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
 ## Expose and access your workload
 

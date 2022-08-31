@@ -2,7 +2,7 @@
 title: Get a JSON Web Token (JWT)
 ---
 
-This tutorial shows how to get a JSON Web Token (JWT), which can be used to access secured endpoints created in the tutorials [Expose and secure a workload with Istio](./apix-05-expose-and-secure-workload-istio.md) and [Expose and secure a workload with JWT](./apix-05-expose-and-secure-workload-jwt.md).
+This tutorial shows how to get a JSON Web Token (JWT), which can be used to access secured endpoints created in the tutorials [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md) and [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
 ## Prerequisites
 
@@ -52,5 +52,5 @@ You have created your access token.
 
 You can use your access token in the following tutorials:
 
-- [Expose and secure a workload with Istio](./apix-05-expose-and-secure-workload-istio.md)
-- [Expose and secure a workload with JWT](./apix-05-expose-and-secure-workload-jwt.md)
+- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
+- [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)

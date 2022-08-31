@@ -8,8 +8,8 @@ You can use it as a follow-up to the [Use a custom domain to expose a workload](
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create them, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
-To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create them, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
+To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
 
 ## Expose, secure, and access your workload
 

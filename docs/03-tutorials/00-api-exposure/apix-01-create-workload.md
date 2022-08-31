@@ -50,9 +50,9 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
 
 Once you have your workload deployed, you can continue by choosing one of the following tutorials:
 
-- [Set up a custom domain for a workload](./apix-01-setup-custom-domain-for-workload.md)
-- [Expose a workload](./apix-02-expose-workload-apigateway.md)
-- [Expose multiple workloads on the same host](./apix-03-expose-multiple-workloads.md)
-- [Expose and secure a workload with OAuth2](./apix-04-expose-and-secure-workload-oauth2.md)
-- [Expose and secure a workload with Istio](./apix-05-expose-and-secure-workload-istio.md)
-- [Expose and secure a workload with JWT](./apix-05-expose-and-secure-workload-jwt.md)
+- [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md)
+- [Expose a workload](./apix-03-expose-workload-apigateway.md)
+- [Expose multiple workloads on the same host](./apix-04-expose-multiple-workloads.md)
+- [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
+- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
+- [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)
