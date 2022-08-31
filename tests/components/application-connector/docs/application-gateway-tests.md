@@ -1,37 +1,37 @@
 # Application Gateway
+
 **Table of Contents**
 
-* [Application Gateway](#application-gateway)
-    * [Design and architecture](#design-and-architecture)
-    * [Mock application](#mock-application)
-        * [Certificates](#certificates)
-        * [API exposed on port 8080](#api-exposed-on-port-8080)
-        * [API exposed on port 8090](#api-exposed-on-port-8090)
-        * [API exposed on port 8091](#api-exposed-on-port-8091)
-    * [Building](#building)
-    * [Running](#running)
-        * [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
-        * [Run the tests](#run-the-tests)
-    * [Debugging](#debugging)
-        * [Running locally](#running-locally)
-        * [Running without cleanup](#running-without-cleanup)
+- [Design and architecture](#design-and-architecture)
+- [Mock application](#mock-application)
+  - [Certificates](#certificates)
+  - [API exposed on port 8080](#api-exposed-on-port-8080)
+  - [API exposed on port 8090](#api-exposed-on-port-8090)
+  - [API exposed on port 8091](#api-exposed-on-port-8091)
+- [Building](#building)
+- [Running](#running)
+  - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
+  - [Run the tests](#run-the-tests)
+- [Debugging](#debugging)
+  - [Running locally](#running-locally)
+  - [Running without cleanup](#running-without-cleanup)
       
 ## Design and architecture
 
 The tests consist of:
-- [Application CRs](./resources/charts/gateway-test/templates/applications/) describing the test cases
-- [Secrets](./resources/charts/gateway-test/templates/applications/credentials) referenced by the Application CRs
-- [Test runners](./test/application-gateway/) with various checks for the subsets of cases, grouped by the Application CRs
-- [Mock application](./tools/external-api-mock-app/) which simulates the remote endpoints
+- [Application CRs](../resources/charts/gateway-test/templates/applications/) describing the test cases
+- [Secrets](../resources/charts/gateway-test/templates/applications/credentials) referenced by the Application CRs
+- [Test runners](../test/application-gateway/) with various checks for the subsets of cases, grouped by the Application CRs
+- [Mock application](../tools/external-api-mock-app/) which simulates the remote endpoints
 
 Additionally, the following resources are created on the cluster:
-- [Service Account](./resources/charts/gateway-test/templates/service-account.yml) used by the tests to read the Application CRs
-- [Secrets](./resources/charts/gateway-test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
+- [Service Account](../resources/charts/gateway-test/templates/service-account.yml) used by the tests to read the Application CRs
+- [Secrets](../resources/charts/gateway-test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
 
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
 The test Job and the mock application deployment are in the `test` Namespace.
 
-![Application Gateway tests architecture](./assets/app-gateway-tests-architecture.svg)
+![Application Gateway tests architecture](assets/app-gateway-tests-architecture.svg)
 
 ## Mock application
 
@@ -47,30 +47,30 @@ To test mTLS-related authentication methods, you need:
 - Client certificate and key stored in a Secret accessed by Application Gateway
 
 All certificates are generated using the **generate-certs** target from the `Makefile`.
-The target is executed before the tests are run, and it invokes [`generate-self-signed-certs.sh`](./scripts/generate-self-signed-certs.sh), which creates the CA root, server, and client certificates and keys.
+The target is executed before the tests are run, and it invokes [`generate-self-signed-certs.sh`](../scripts/generate-self-signed-certs.sh), which creates the CA root, server, and client certificates and keys.
 
 > **NOTE:** Since self-signed certificates are used, Application CRs have the **skipVerify: true** property set to `true` to force Application Gateway to skip certificate verification.
 
 ### API exposed on port `8080`
 
 To get tokens for the `OAuth` and `CSRF` protected endpoints, we have the following API:
-![8080 token API](./assets/api-tokens.png)
+![8080 token API](assets/api-tokens.png)
 
 To test authentication methods, we have the following API:
-![8080 authorisation methods API](./assets/api-auth-methods.png)
+![8080 authorisation methods API](assets/api-auth-methods.png)
 
-The credentials used for authentication, such as `user` and `password`, are [hardcoded](./tools/external-api-mock-app/config.go).
+The credentials used for authentication, such as `user` and `password`, are [hardcoded](../tools/external-api-mock-app/config.go).
 
 ### API exposed on port `8090`
 
 To get tokens for the `OAuth` protected endpoints, we have the following API:
-![8090 token API](./assets/api-tokens-mtls.png)
+![8090 token API](assets/api-tokens-mtls.png)
 
 To test authentication methods, we have the following API:
-![8090 authorisation methods API](./assets/api-auth-methods-mtls.png)
+![8090 authorisation methods API](assets/api-auth-methods-mtls.png)
 
-The credentials used for authentication, such as `clientID`, are [hardcoded](./tools/external-api-mock-app/config.go).
-The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](./resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml).
+The credentials used for authentication, such as `clientID`, are [hardcoded](../tools/external-api-mock-app/config.go).
+The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](../resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml).
 
 > **NOTE:** Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
@@ -78,7 +78,7 @@ The server key, server certificate, and the CA root certificate for port `8090` 
 
 This API is identical to the one exposed on port `8090`.
 The HTTPS server on port `8091` uses an expired server certificate.
-The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](./resources/charts/gateway-test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml).
+The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](../resources/charts/gateway-test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml).
 
 > **NOTE:** Port `8091` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
@@ -155,7 +155,7 @@ By default, the tests clean up after themselves, removing all the previously cre
 
 To run the mock application locally, follow these steps:
 
-1. Change all the **targetUrl** values in the [Application CRs](./resources/charts/gateway-test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
+1. Change all the **targetUrl** values in the [Application CRs](../resources/charts/gateway-test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
 2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
 3. Deploy all the resources on the cluster.
    > **NOTE:** You can omit the test Job and the Central Gateway, but it's easier to just let them fail.
@@ -179,7 +179,7 @@ To run the mock application locally, follow these steps:
    Local
    </summary>
 
-   Change the hardcoded application port in [`config.go`](./tools/external-api-mock-app/config.go), and run:
+   Change the hardcoded application port in [`config.go`](../tools/external-api-mock-app/config.go), and run:
    ```shell
    go build ./tools/external-api-mock-app/
    ```
