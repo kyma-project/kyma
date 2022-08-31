@@ -1,5 +1,5 @@
 ---
-title: Use a custom domain to expose a workload
+title: Set up a custom domain for a workload
 ---
 
 This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
@@ -149,3 +149,40 @@ Once you have your workload deployed, you can continue by choosing one of the fo
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
 - [Expose and secure a workload with OAuth2](./apix-04-expose-and-secure-workload-oauth2.md)
 - [Expose and secure a workload with Istio](./apix-05-expose-and-secure-workload-istio.md)
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------
+3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
+
+   ```bash
+   cat <<EOF | kubectl apply -f -
+   apiVersion: networking.istio.io/v1alpha3
+   kind: Gateway
+   metadata:
+     name: httpbin-gateway
+     namespace: $NAMESPACE
+   spec:
+     selector:
+       istio: ingressgateway # Use Istio Ingress Gateway as default
+     servers:
+       - port:
+           number: 443
+           name: https
+           protocol: HTTPS
+         tls:
+           mode: SIMPLE
+           credentialName: $TLS_SECRET
+         hosts:
+           - "$WILDCARD"
+   EOF
+   ```

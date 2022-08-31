@@ -4,8 +4,6 @@ title: Create a workload
 
 The tutorial comes with a sample HttpBin service deployment and a sample Function.
 
-You can use it as a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
-
 ## Steps
 
 Follow these steps to deploy an instance of the HttpBin service or a sample Function.
@@ -47,35 +45,12 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
   </details>
 </div>
 
-3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
-
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: networking.istio.io/v1alpha3
-   kind: Gateway
-   metadata:
-     name: httpbin-gateway
-     namespace: $NAMESPACE
-   spec:
-     selector:
-       istio: ingressgateway # Use Istio Ingress Gateway as default
-     servers:
-       - port:
-           number: 443
-           name: https
-           protocol: HTTPS
-         tls:
-           mode: SIMPLE
-           credentialName: $TLS_SECRET
-         hosts:
-           - "$WILDCARD"
-   EOF
-   ```
 
 ## Next steps
 
 Once you have your workload deployed, you can continue by choosing one of the following tutorials:
 
+- [Set up a custom domain for a workload](./apix-01-setup-custom-domain-for-workload.md)
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
 - [Expose multiple workloads on the same host](./apix-03-expose-multiple-workloads.md)
 - [Expose and secure a workload with OAuth2](./apix-04-expose-and-secure-workload-oauth2.md)
