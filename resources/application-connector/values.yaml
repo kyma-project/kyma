@@ -35,7 +35,7 @@ global:
       version: "PR-15287"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "PR-15186"
+      version: "PR-15257"
     busybox:
       name: "busybox"
       version: "1.34.1"
