@@ -1,4 +1,4 @@
-package handlers
+package jetstream
 
 import (
 	"fmt"

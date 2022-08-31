@@ -21,6 +21,8 @@ import (
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"github.com/stretchr/testify/require"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
@@ -36,7 +38,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 const (
@@ -126,7 +127,7 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 	client := oauth.NewClient(ctx, mock.cfg)
 	defer client.CloseIdleConnections()
 
-	msgReceiver := receiver.NewHTTPMessageReceiver(mock.cfg.Port)
+	msgReceiver := receiver.NewHTTPMessageReceiver("localhost", mock.cfg.Port)
 	msgSender := sender.NewBebMessageSender(mock.cfg.EmsPublishURL, client)
 	msgHandlerOpts := &options.Options{MaxRequestSize: int64(requestSize)}
 	msgHandler := beb.NewHandler(

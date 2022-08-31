@@ -20,8 +20,9 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	nats3 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -35,7 +36,7 @@ var Finalizer = eventingv1alpha1.GroupVersion.Group
 type Reconciler struct {
 	client.Client
 	ctx                 context.Context
-	Backend             handlers.JetStreamBackend
+	Backend             jetstream.JetStreamBackend
 	recorder            record.EventRecorder
 	logger              *logger.Logger
 	eventTypeCleaner    eventtype.Cleaner
@@ -44,7 +45,7 @@ type Reconciler struct {
 	customEventsChannel chan event.GenericEvent
 }
 
-func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers.JetStreamBackend, logger *logger.Logger,
+func NewReconciler(ctx context.Context, client client.Client, jsHandler jetstream.JetStreamBackend, logger *logger.Logger,
 	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
@@ -239,7 +240,7 @@ func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.S
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription.
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
 	statusChanged := false
-	cleanedSubjects, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	cleanedSubjects, err := nats3.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("Failed to get clean subjects", "error", err)
 		subscription.Status.InitializeCleanEventTypes()

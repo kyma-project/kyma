@@ -6,7 +6,9 @@ import (
 	"strings"
 	"time"
 
+	beb2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
@@ -29,7 +31,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -59,7 +60,7 @@ type SubscriptionManager struct {
 	metricsAddr  string
 	resyncPeriod time.Duration
 	mgr          manager.Manager
-	backend      handlers.BEBBackend
+	backend      beb2.BEBBackend
 	logger       *logger.Logger
 }
 
@@ -99,11 +100,11 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := handlers.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), beb2.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
-		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
-	bebHandler := handlers.NewBEB(oauth2credential, nameMapper, c.logger)
+		"maxNameLength", beb2.MaxBEBSubscriptionNameLength)
+	bebHandler := beb2.NewBEB(oauth2credential, nameMapper, c.logger)
 
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
@@ -144,11 +145,11 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
-	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	subs, err := utils.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
 		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
 	}
@@ -157,8 +158,8 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 		if !sub.Status.Ready {
 			continue
 		}
-		desiredSub := handlers.SetStatusAsNotReady(sub)
-		if err = handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		desiredSub := utils.SetStatusAsNotReady(sub)
+		if err = utils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			logger.Errorw("Failed to update BEB subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}
 	}
@@ -166,24 +167,24 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 }
 
 // cleanup removes all created BEB artifacts.
-func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend beb2.BEBBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var bebBackend *handlers.BEB
+	var bebBackend *beb2.BEB
 	var ok bool
-	if bebBackend, ok = backend.(*handlers.BEB); !ok {
+	if bebBackend, ok = backend.(*beb2.BEB); !ok {
 		err := errors.New("convert backend handler to BEB handler failed")
 		logger.Errorw("No BEB backend exists", "error", err)
 		return err
 	}
 
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
-	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	subs, err := utils.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
 		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
 	}
@@ -193,7 +194,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 	for _, v := range subs.Items {
 		sub := v
 		if apiRule := sub.Status.APIRuleName; apiRule != "" {
-			if err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
+			if err := dynamicClient.Resource(utils.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
 				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {
 				isCleanupSuccessful = false
 				logger.Errorw("Failed to delete APIRule", "namespace", sub.Namespace, "name", apiRule, "error", err)
@@ -201,8 +202,8 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 		}
 
 		// Clean statuses.
-		desiredSub := handlers.ResetStatusToDefaults(sub)
-		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		desiredSub := utils.ResetStatusToDefaults(sub)
+		if err := utils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			logger.Errorw("Failed to update BEB subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}
@@ -220,7 +221,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 	return nil
 }
 
-func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlers.OAuth2ClientCredentials, error) {
+func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*beb2.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
 	id, ok := val.([]byte)
 	if !ok {
@@ -231,7 +232,7 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlers.OA
 	if !ok {
 		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
 	}
-	return &handlers.OAuth2ClientCredentials{
+	return &beb2.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 	}, nil

@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
@@ -27,7 +29,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -54,7 +55,7 @@ type SubscriptionManager struct {
 	metricsAddr      string
 	metricsCollector *pkgmetrics.Collector
 	mgr              manager.Manager
-	backend          handlers.NatsBackend
+	backend          core.NatsBackend
 	logger           *logger.Logger
 }
 
@@ -88,7 +89,7 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-nats")
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
+	natsHandler := core.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
@@ -119,26 +120,26 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all NATS artifacts.
-func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend core.NatsBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var ok bool
 
-	var natsBackend *handlers.Nats
-	if natsBackend, ok = backend.(*handlers.Nats); !ok {
+	var natsBackend *core.Nats
+	if natsBackend, ok = backend.(*core.Nats); !ok {
 		err := errors.New("convert backend handler to NATS handler failed")
 		logger.Errorw("No NATS backend exists", "error", err)
 		return err
 	}
 
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
 
-	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	subs, err := utils.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
 		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
 	}
@@ -150,8 +151,8 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
 		log := logger.With("key", subKey.String())
 
-		desiredSub := handlers.ResetStatusToDefaults(sub)
-		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		desiredSub := utils.ResetStatusToDefaults(sub)
+		if err := utils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			log.Errorw("Failed to update NATS subscription status", "error", err)
 		}

@@ -17,6 +17,8 @@ import (
 	natsio "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/require"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
@@ -31,7 +33,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 // NatsHandlerMock represents a mock for the nats.Handler.
@@ -80,7 +81,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 	}
 	mock.natsServer = testingutils.StartNatsServer(mock.jetstreamMode)
 
-	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
+	msgReceiver := receiver.NewHTTPMessageReceiver("localhost", mock.natsConfig.Port)
 
 	connection, err := testingutils.ConnectToNatsServer(mock.GetNatsURL())
 	require.NoError(t, err)

@@ -1,4 +1,4 @@
-package handlers
+package beb
 
 import (
 	"errors"
@@ -17,6 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	utils2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -63,7 +64,7 @@ type OAuth2ClientCredentials struct {
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *BEB {
+func NewBEB(credentials *OAuth2ClientCredentials, mapper utils2.NameMapper, logger *logger.Logger) *BEB {
 	return &BEB{
 		OAth2credentials: credentials,
 		logger:           logger,
@@ -77,7 +78,7 @@ type BEB struct {
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
 	OAth2credentials *OAuth2ClientCredentials
-	SubNameMapper    NameMapper
+	SubNameMapper    utils2.NameMapper
 	logger           *logger.Logger
 }
 
@@ -124,13 +125,13 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
+	sEv2, err := utils2.GetInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription internal view", ErrorLogKey, err)
 		return false, err
 	}
 
-	newEv2Hash, err := getHash(sEv2)
+	newEv2Hash, err := utils2.GetHash(sEv2)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription hash", ErrorLogKey, err)
 		return false, err
@@ -167,8 +168,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			}
 		}
 		// get the internal view for the EMS subscription
-		sEms := getInternalView4Ems(bebSubscription)
-		newEmsHash, err := getHash(sEms)
+		sEms := utils2.GetInternalView4Ems(bebSubscription)
+		newEmsHash, err := utils2.GetHash(sEms)
 		if err != nil {
 			log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 			return false, err
@@ -227,11 +228,11 @@ func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	// get the new hash
-	sEMS := getInternalView4Ems(bebSubscription)
+	sEMS := utils2.GetInternalView4Ems(bebSubscription)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription internal view", ErrorLogKey, err)
 	}
-	newEmsHash, err := getHash(sEMS)
+	newEmsHash, err := utils2.GetHash(sEMS)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 		return nil, 0, err

@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	utils2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 
@@ -36,7 +38,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -48,12 +49,12 @@ type Reconciler struct {
 	client.Client
 	logger            *logger.Logger
 	recorder          record.EventRecorder
-	Backend           handlers.BEBBackend
+	Backend           beb.BEBBackend
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
-	oauth2credentials *handlers.OAuth2ClientCredentials
+	oauth2credentials *beb.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
-	nameMapper    handlers.NameMapper
+	nameMapper    utils2.NameMapper
 	sinkValidator sink.Validator
 }
 
@@ -72,8 +73,8 @@ const (
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
-	cfg env.Config, cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials,
-	mapper handlers.NameMapper, validator sink.Validator) *Reconciler {
+	cfg env.Config, cleaner eventtype.Cleaner, bebBackend beb.BEBBackend, credential *beb.OAuth2ClientCredentials,
+	mapper utils2.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
 		panic(err)
@@ -403,7 +404,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 		reusableAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
 	}
 
-	// Get all subscriptions valid for the cluster-local subscriber
+	// GetFreePort all subscriptions valid for the cluster-local subscriber
 	subscriptions, err := r.getSubscriptionsForASvc(ctx, svcNs, svcName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fetch subscriptions failed for subscriber namespace:%s name:%s", svcNs, svcName)
@@ -584,7 +585,7 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 
 func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) *apigatewayv1alpha1.APIRule {
 
-	randomSuffix := handlers.GetRandString(suffixLength)
+	randomSuffix := utils2.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 
 	apiRule := object.NewAPIRule(svcNs, apiRuleNamePrefix,

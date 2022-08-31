@@ -187,7 +187,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context, backendStatus *ev
 		backendStatus.SetSubscriptionControllerReadyCondition(true, eventingv1alpha1.ConditionReasonSubscriptionControllerReady, "")
 	}
 	// CreateOrUpdate status of the CR
-	// Get publisher proxy ready status
+	// GetFreePort publisher proxy ready status
 	err = r.syncBackendStatus(ctx, backendStatus, publisher)
 	return ctrl.Result{}, err
 }

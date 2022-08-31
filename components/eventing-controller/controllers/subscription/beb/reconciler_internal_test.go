@@ -24,10 +24,11 @@ import (
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	utils2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -433,7 +434,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 	r := Reconciler{
-		nameMapper: handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength),
+		nameMapper: utils2.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 	}
 
 	for _, tc := range testCases {
@@ -536,7 +537,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength),
+		nameMapper: utils2.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 		logger:     logger,
 	}
 
@@ -916,8 +917,8 @@ type testEnvironment struct {
 	logger      *eventinglogger.Logger
 	recorder    *record.FakeRecorder
 	cfg         env.Config
-	credentials *handlers.OAuth2ClientCredentials
-	mapper      handlers.NameMapper
+	credentials *beb.OAuth2ClientCredentials
+	mapper      utils2.NameMapper
 	cleaner     eventtype.Cleaner
 }
 
@@ -931,8 +932,8 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 		t.Fatalf("initialize logger failed: %v", err)
 	}
 	emptyConfig := env.Config{}
-	credentials := &handlers.OAuth2ClientCredentials{}
-	nameMapper := handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
+	credentials := &beb.OAuth2ClientCredentials{}
+	nameMapper := utils2.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength)
 	cleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
 
 	return &testEnvironment{

@@ -42,10 +42,10 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	beb2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	beb2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -683,7 +683,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Reusing APIRule from Subscription 2")
 			getSubscription(ctx, readySubscription1).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
 
-			By("Get the reused APIRule (from subscription 2)")
+			By("GetFreePort the reused APIRule (from subscription 2)")
 			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(ctx, apiRuleNew).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
@@ -1369,7 +1369,7 @@ var (
 	k8sClient  client.Client
 	testEnv    *envtest.Environment
 	beb        *reconcilertesting.BEBMock
-	nameMapper handlers.NameMapper
+	nameMapper utils.NameMapper
 	mock       *reconcilertesting.BEBMock
 )
 
@@ -1462,7 +1462,7 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
-	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, beb2.MaxBEBSubscriptionNameLength)
+	nameMapper = utils.NewBEBSubscriptionNameMapper(domain, beb2.MaxBEBSubscriptionNameLength)
 	bebHandler := beb2.NewBEB(credentials, nameMapper, defaultLogger)
 
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")

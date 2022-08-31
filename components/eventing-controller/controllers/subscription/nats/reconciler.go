@@ -22,8 +22,9 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	nats2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -32,7 +33,7 @@ import (
 type Reconciler struct {
 	client.Client
 	ctx              context.Context
-	Backend          handlers.NatsBackend
+	Backend          core.NatsBackend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	subsConfig       env.DefaultSubscriptionConfig
@@ -52,7 +53,7 @@ const (
 	reconcilerName        = "nats-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, natsHandler handlers.NatsBackend, cleaner eventtype.Cleaner,
+func NewReconciler(ctx context.Context, client client.Client, natsHandler core.NatsBackend, cleaner eventtype.Cleaner,
 	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
@@ -236,7 +237,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
 	statusChanged := false
-	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	cleanEventTypes, err := nats2.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("Failed to get clean subject", "error", err)
 		subscription.Status.InitializeCleanEventTypes()
@@ -347,7 +348,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 }
 
 func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
-	natsHandler, _ := r.Backend.(*handlers.Nats)
+	natsHandler, _ := r.Backend.(*core.Nats)
 	invalidSubs := natsHandler.GetInvalidSubscriptions()
 	for _, v := range *invalidSubs {
 		r.namedLogger().Debugw("Found invalid subscription", "namespace", v.Namespace, "name", v.Name)

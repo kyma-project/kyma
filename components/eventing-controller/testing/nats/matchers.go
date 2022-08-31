@@ -1,10 +1,11 @@
 package nats
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/jetstream"
 )
 
 func BeValidSubscription() gomegatypes.GomegaMatcher {
@@ -25,7 +26,7 @@ func BeJetStreamSubscriptionWithSubject(subject string) gomegatypes.GomegaMatche
 		if err != nil {
 			return false
 		}
-		js := handlers.JetStream{}
+		js := jetstream.JetStream{}
 		return info.Config.FilterSubject == js.GetJetstreamSubject(subject)
 	}, gomega.BeTrue())
 }

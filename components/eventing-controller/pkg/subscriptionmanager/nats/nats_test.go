@@ -7,12 +7,15 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	nats2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 
 	"github.com/onsi/gomega"
 
@@ -22,13 +25,12 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 type natsSubMgrMock struct {
 	Client  dynamic.Interface
-	Backend handlers.NatsBackend
+	Backend core.NatsBackend
 }
 
 func (c *natsSubMgrMock) Init(_ manager.Manager) error {
@@ -72,7 +74,7 @@ func TestCleanup(t *testing.T) {
 		EventTypePrefix: controllertesting.EventTypePrefix,
 	}
 	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := handlers.NewNats(envConf, subsConfig, metrics.NewCollector(), defaultLogger)
+	natsBackend := core.NewNats(envConf, subsConfig, metrics.NewCollector(), defaultLogger)
 	natsSubMgr.Backend = natsBackend
 	err = natsSubMgr.Backend.Initialize(nil)
 	g.Expect(err).To(gomega.BeNil())
@@ -93,7 +95,7 @@ func TestCleanup(t *testing.T) {
 	cleaner := func(et string) (string, error) {
 		return et, nil
 	}
-	testSub.Status.CleanEventTypes, _ = handlers.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
+	testSub.Status.CleanEventTypes, _ = nats2.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
 
 	// Create NATS subscription
 	err = natsSubMgr.Backend.SyncSubscription(testSub)
@@ -105,7 +107,7 @@ func TestCleanup(t *testing.T) {
 		t.Fatalf("subscriber did not receive the event: %v", err)
 	}
 	// Send an event
-	err = handlers.SendEventToNATS(natsBackend, data)
+	err = core.SendEventToNATS(natsBackend, data)
 	if err != nil {
 		t.Fatalf("publish event failed: %v", err)
 	}
@@ -130,7 +132,7 @@ func TestCleanup(t *testing.T) {
 
 	// Test NATS subscriptions are gone
 	// Send again an event and check subscriber, check subscriber should fail after 5 retries
-	err = handlers.SendEventToNATS(natsBackend, data)
+	err = core.SendEventToNATS(natsBackend, data)
 	if err != nil {
 		t.Fatalf("publish event failed: %v", err)
 	}

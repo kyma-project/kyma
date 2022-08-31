@@ -2,7 +2,9 @@ package receiver
 
 import (
 	"context"
+	"net"
 	"net/http"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -21,7 +23,7 @@ var _ http.Handler = (*testHandler)(nil)
 
 func TestNewHttpMessageReceiver(t *testing.T) {
 	port := testingutils.GeneratePortOrDie()
-	r := NewHTTPMessageReceiver(port)
+	r := NewHTTPMessageReceiver("", port)
 	if r == nil {
 		t.Fatalf("Could not create HTTPMessageReceiver")
 	}
@@ -79,5 +81,14 @@ func TestStartListener(t *testing.T) {
 }
 
 func fixtureReceiver() *HTTPMessageReceiver {
-	return NewHTTPMessageReceiver(0)
+	name, err := os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+
+	addrs, err := net.LookupHost(name)
+	if err != nil {
+		panic(err)
+	}
+	return NewHTTPMessageReceiver(addrs[0], 0)
 }
