@@ -19,8 +19,8 @@ package logparser
 import (
 	"context"
 	"fmt"
+	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 
-	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,15 +44,14 @@ type Reconciler struct {
 	daemonSetHelper *kubernetes.DaemonSetHelper
 }
 
-func NewReconciler(
-	client client.Client,
-	config Config,
-	restartsTotal prometheus.Counter) *Reconciler {
+func NewReconciler(client client.Client, config Config) *Reconciler {
 	var r Reconciler
+
+	commonmetrics.RegisterMetrics()
 
 	r.Client = client
 	r.config = config
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, restartsTotal)
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
 
 	return &r

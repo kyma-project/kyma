@@ -35,8 +35,6 @@ import (
 	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
 	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
 
-	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/go-logr/zapr"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -49,7 +47,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 	//+kubebuilder:scaffold:imports
 )
@@ -159,18 +156,12 @@ func main() {
 	mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
 	mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
 
-	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_triggered_restarts_total",
-		Help: "Number of triggered Fluent Bit restarts",
-	})
-	metrics.Registry.MustRegister(restartsTotal)
-
-	if err = createLogPipelineReconciler(mgr.GetClient(), restartsTotal).SetupWithManager(mgr); err != nil {
+	if err = createLogPipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
-	if err = createLogParserReconciler(mgr.GetClient(), restartsTotal).SetupWithManager(mgr); err != nil {
+	if err = createLogParserReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
 		os.Exit(1)
 	}
@@ -226,7 +217,7 @@ func validateFlags() error {
 	return nil
 }
 
-func createLogPipelineReconciler(client client.Client, restartsTotal prometheus.Counter) *logpipelinecontroller.Reconciler {
+func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Reconciler {
 	config := logpipelinecontroller.Config{
 		SectionsConfigMap: types.NamespacedName{Name: fluentBitSectionsConfigMap, Namespace: fluentBitNs},
 		FilesConfigMap:    types.NamespacedName{Name: fluentBitFilesConfigMap, Namespace: fluentBitNs},
@@ -234,15 +225,15 @@ func createLogPipelineReconciler(client client.Client, restartsTotal prometheus.
 		DaemonSet:         types.NamespacedName{Namespace: fluentBitNs, Name: fluentBitDaemonSet},
 		PipelineDefaults:  createPipelineDefaults(),
 	}
-	return logpipelinecontroller.NewReconciler(client, config, restartsTotal)
+	return logpipelinecontroller.NewReconciler(client, config)
 }
 
-func createLogParserReconciler(client client.Client, restartsTotal prometheus.Counter) *logparsercontroller.Reconciler {
+func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {
 	config := logparsercontroller.Config{
 		ParsersConfigMap: types.NamespacedName{Name: fluentBitParsersConfigMap, Namespace: fluentBitNs},
 		DaemonSet:        types.NamespacedName{Namespace: fluentBitNs, Name: fluentBitDaemonSet},
 	}
-	return logparsercontroller.NewReconciler(client, config, restartsTotal)
+	return logparsercontroller.NewReconciler(client, config)
 }
 
 func createLogPipelineValidator(client client.Client) *logpipelinewebhook.ValidatingWebhookHandler {

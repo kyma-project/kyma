@@ -19,20 +19,18 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
+	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-
 	"github.com/prometheus/client_golang/prometheus"
-
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 type Config struct {
@@ -56,9 +54,11 @@ type Reconciler struct {
 func NewReconciler(
 	client client.Client,
 	config Config,
-	restartsTotal prometheus.Counter,
 ) *Reconciler {
 	var r Reconciler
+
+	metrics.Registry.MustRegister(r.unsupportedTotal)
+	commonmetrics.RegisterMetrics()
 
 	r.Client = client
 	r.config = config
@@ -67,9 +67,7 @@ func NewReconciler(
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, restartsTotal)
-
-	metrics.Registry.MustRegister(r.unsupportedTotal)
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
 
 	return &r
 }
