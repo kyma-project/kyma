@@ -12,6 +12,8 @@ spec:
   template:
     metadata:
       labels: {{- include "controller.selectorLabels" . | nindent 8 }}
+      annotations:
+        traffic.sidecar.istio.io/excludeInboundPorts: "9443"
     spec:
       serviceAccountName: {{ include "controller.fullname" . }}
       terminationGracePeriodSeconds: 10
