@@ -26,19 +26,19 @@ func lookupSecretRefFields(pipeline *telemetryv1alpha1.LogPipeline) []fieldDescr
 
 	output := pipeline.Spec.Output
 	if output.IsHTTPDefined() {
-		result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.HTTP.Host)
-		result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.HTTP.User)
-		result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.HTTP.Password)
+		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, output.HTTP.Host)
+		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, output.HTTP.User)
+		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, output.HTTP.Password)
 	}
 
 	if output.IsLokiDefined() {
-		result = appendOutputFieldIfHasSecret(result, pipeline.Name, output.Loki.URL)
+		result = appendOutputFieldIfHasSecretRef(result, pipeline.Name, output.Loki.URL)
 	}
 
 	return result
 }
 
-func appendOutputFieldIfHasSecret(fields []fieldDescriptor, pipelineName string, valueType telemetryv1alpha1.ValueType) []fieldDescriptor {
+func appendOutputFieldIfHasSecretRef(fields []fieldDescriptor, pipelineName string, valueType telemetryv1alpha1.ValueType) []fieldDescriptor {
 	if valueType.Value == "" && valueType.ValueFrom != nil && valueType.ValueFrom.IsSecretKeyRef() {
 		fields = append(fields, fieldDescriptor{
 			targetSecretKey: envvar.GenerateName(pipelineName, *valueType.ValueFrom.SecretKeyRef),
