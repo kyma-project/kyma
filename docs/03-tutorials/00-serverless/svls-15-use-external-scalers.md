@@ -66,7 +66,7 @@ Follow these steps:
 
   </details>
   <details>
-  <summary label="keda">
+  <summary label="keda-cpu">
   Keda CPU
   </summary>
 
@@ -135,8 +135,8 @@ Follow these steps:
 
   </details>
   <details>
-  <summary label="keda">
-  Keda CPU
+  <summary label="keda-prometheus">
+  Keda Prometheus
   </summary>
 
 1. Install [Keda](https://keda.sh/docs/2.8/deploy/) if it is not present on your cluster.
@@ -164,7 +164,7 @@ Follow these steps:
     EOF
     ```
 
-3. Create the ScaledObject resource:
+3. Create the ScaledObject resource based on, exposed by the Istio, the `istio_requests_total` metric:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -186,8 +186,22 @@ Follow these steps:
           metricName: istio_requests_total
           query: sum(rate(istio_requests_total{destination_service_namespace="default", destination_service_name="scaled-function"}[2m]))
           threshold: '6.5'
-          activationThreshold: '0'
     EOF
+    ```
+
+    >**NOTE:** in this tutorial we use the `prometheus` trigger because of its simple configuration. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
+  
+4. After a few seconds ScaledObject should be up to date and contain information about actual replicas:
+
+    ```bash
+    kubectl get scaledobject scaled-function
+    ```
+
+    You should get a result similar to this example:
+
+    ```bash
+    NAME              SCALETARGETKIND                                SCALETARGETNAME   MIN   MAX   TRIGGERS     AUTHENTICATION   READY   ACTIVE   FALLBACK   AGE
+    scaled-function   serverless.kyma-project.io/v1alpha2.Function   scaled-function   5     10    prometheus                    True    True     Unknown      4m15s
     ```
 
 </details>
