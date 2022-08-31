@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
@@ -176,43 +175,11 @@ func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alp
 	newSecret := oldSecret
 	newSecret.Data = make(map[string][]byte)
 
-	for _, l := range logPipelines.Items {
-		if l.DeletionTimestamp != nil {
-			continue
-		}
-		for _, varRef := range l.Spec.Variables {
-			if varRef.ValueFrom.IsSecretRef() {
-				err := s.secretHelper.CopySecretData(ctx, varRef.ValueFrom, varRef.Name, newSecret.Data)
-				if err != nil {
-					log.Error(err, "unable to find secret for environment variable")
-					return false, err
-				}
-			}
-		}
-		output := l.Spec.Output
-		if !output.IsHTTPDefined() {
-			continue
-		}
-
-		httpOutput := output.HTTP
-		if httpOutput.Host.ValueFrom.IsSecretRef() {
-			err := s.secretHelper.CopySecretData(ctx, httpOutput.Host.ValueFrom, envvar.GenerateName(l.Name, httpOutput.Host.ValueFrom.SecretKey), newSecret.Data)
+	for i := range logPipelines.Items {
+		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
+			err := s.secretHelper.CopySecretData(ctx, *&field.secretKeyRef, field.targetSecretKey, newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
-				return false, err
-			}
-		}
-		if httpOutput.User.ValueFrom.IsSecretRef() {
-			err := s.secretHelper.CopySecretData(ctx, httpOutput.User.ValueFrom, envvar.GenerateName(l.Name, httpOutput.User.ValueFrom.SecretKey), newSecret.Data)
-			if err != nil {
-				log.Error(err, "unable to find secret for http user")
-				return false, err
-			}
-		}
-		if httpOutput.Password.ValueFrom.IsSecretRef() {
-			err := s.secretHelper.CopySecretData(ctx, httpOutput.Password.ValueFrom, envvar.GenerateName(l.Name, httpOutput.Password.ValueFrom.SecretKey), newSecret.Data)
-			if err != nil {
-				log.Error(err, "unable to find secret for http password")
 				return false, err
 			}
 		}

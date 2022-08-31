@@ -28,11 +28,11 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Input     Input               `json:"input,omitempty"`
-	Filters   []Filter            `json:"filters,omitempty"`
-	Output    Output              `json:"output,omitempty"`
-	Files     []FileMount         `json:"files,omitempty"`
-	Variables []VariableReference `json:"variables,omitempty"`
+	Input     Input         `json:"input,omitempty"`
+	Filters   []Filter      `json:"filters,omitempty"`
+	Output    Output        `json:"output,omitempty"`
+	Files     []FileMount   `json:"files,omitempty"`
+	Variables []VariableRef `json:"variables,omitempty"`
 }
 
 // Input describes a Fluent Bit input configuration section
@@ -138,27 +138,31 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
-type VariableReference struct {
-	Name      string        `json:"name,omitempty"`
-	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+// VariableRef references a Kubernetes secret that should be provided as environment variable to Fluent Bit
+type VariableRef struct {
+	Name      string          `json:"name,omitempty"`
+	ValueFrom ValueFromSource `json:"valueFrom,omitempty"`
 }
 
 type ValueType struct {
-	Value     string        `json:"value,omitempty"`
-	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+	Value     string           `json:"value,omitempty"`
+	ValueFrom *ValueFromSource `json:"valueFrom,omitempty"`
 }
 
 func (v *ValueType) IsDefined() bool {
-	return v.Value != "" || v.ValueFrom.IsSecretRef()
+	if v.Value != "" {
+		return true
+	}
+
+	return v.ValueFrom != nil && v.ValueFrom.IsSecretKeyRef()
 }
 
-func (v *ValueFromType) IsSecretRef() bool {
-	return v.SecretKey.Name != "" && v.SecretKey.Key != ""
+type ValueFromSource struct {
+	SecretKeyRef *SecretKeyRef `json:"secretKeyRef,omitempty"`
 }
 
-type ValueFromType struct {
-	SecretKey SecretKeyRef `json:"secretKeyRef,omitempty"`
+func (v *ValueFromSource) IsSecretKeyRef() bool {
+	return v.SecretKeyRef != nil && v.SecretKeyRef.Name != "" && v.SecretKeyRef.Key != ""
 }
 
 type SecretKeyRef struct {

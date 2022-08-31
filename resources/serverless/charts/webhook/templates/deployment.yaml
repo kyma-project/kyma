@@ -73,7 +73,7 @@ spec:
               cpu: {{ .Values.deployment.resources.limits.cpu }}
               memory: {{ .Values.deployment.resources.limits.memory }}
           securityContext:
-            privileged:  {{ .Values.container.privileged }}
+            privileged: {{ .Values.container.privileged }}
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
             runAsUser: {{ .Values.container.runAsUser }}
           ports:
@@ -99,6 +99,10 @@ spec:
               {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
             - name: KUBERNETES_MIN_VERSION # TODO: Delete this env after all CI pipelines are using k8s >1.17.0
               value: "1.16.0"
+            - name: LOG_LEVEL
+              value: {{ .Values.container.envs.logLevel.value }}
+            - name: LOG_FORMAT
+              value: {{ .Values.container.envs.logFormat.value }}
     {{- if .Values.global.highPriorityClassName }}
       priorityClassName: {{ .Values.global.highPriorityClassName }}
     {{- end }}

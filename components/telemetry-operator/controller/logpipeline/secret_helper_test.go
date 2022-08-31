@@ -31,7 +31,7 @@ func TestValidateSecretExists(t *testing.T) {
 	mockClient := fake.NewClientBuilder().WithScheme(s).Build()
 	helper := newSecretHelper(mockClient)
 
-	secretKeyRef := telemetryv1alpha1.SecretKeyRef{
+	secretKeyRef := &telemetryv1alpha1.SecretKeyRef{
 		Name:      "referenced-secret",
 		Key:       "host",
 		Namespace: "default",
@@ -42,8 +42,8 @@ func TestValidateSecretExists(t *testing.T) {
 			Output: telemetryv1alpha1.Output{
 				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Host: telemetryv1alpha1.ValueType{
-						ValueFrom: telemetryv1alpha1.ValueFromType{
-							SecretKey: secretKeyRef,
+						ValueFrom: &telemetryv1alpha1.ValueFromSource{
+							SecretKeyRef: secretKeyRef,
 						},
 					},
 				},
