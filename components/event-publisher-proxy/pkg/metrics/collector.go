@@ -17,7 +17,7 @@ const (
 	//EventRequests name if the eventRequests metric
 	EventRequests = "event_requests"
 	// errorsHelp help for the errors metric
-	errorsHelp = "The total number of errors while sending Events to the messaging server"
+	ErrorsHelp = "The total number of errors while sending Events to the messaging server"
 	// latencyHelp help for the latency metric
 	latencyHelp = "The duration of sending Events to the messaging server"
 	// EventTypePublishedMetricHelp help for the eventType metric
@@ -48,7 +48,7 @@ func NewCollector() *Collector {
 		errors: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: Errors,
-				Help: errorsHelp,
+				Help: ErrorsHelp,
 			},
 			[]string{},
 		),
