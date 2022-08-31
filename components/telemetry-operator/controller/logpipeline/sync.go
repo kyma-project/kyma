@@ -175,8 +175,8 @@ func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alp
 	newSecret := oldSecret
 	newSecret.Data = make(map[string][]byte)
 
-	for _, l := range logPipelines.Items {
-		for _, field := range lookupSecretRefFields(&l) {
+	for i := range logPipelines.Items {
+		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
 			err := s.secretHelper.CopySecretData(ctx, *&field.secretKeyRef, field.targetSecretKey, newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
