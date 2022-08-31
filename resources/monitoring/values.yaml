@@ -112,12 +112,12 @@ global:
   images:
     prometheus_operator:
       name: "prometheus-operator"
-      version: "v0.56.3"
+      version: "v0.58.0"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     prometheus_config_reloader:
       name: "prometheus-config-reloader"
-      version: "v0.56.3"
+      version: "v0.58.0"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     configmap_reload:
@@ -132,12 +132,12 @@ global:
       sha: ""
     prometheus:
       name: "prometheus"
-      version: "v2.35.0"
+      version: "v2.36.2"
       directory: "external/quay.io/prometheus"
       sha: ""
     pushgateway:
       name: "pushgateway"
-      version: v1.4.2
+      version: v1.4.3
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"
@@ -145,7 +145,7 @@ global:
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: v2.3.0
+      version: v2.5.0
       directory: "external/k8s.gcr.io/kube-state-metrics"
     grafana:
       name: "grafana"

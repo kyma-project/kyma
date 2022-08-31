@@ -4,7 +4,6 @@
     - sidecar has containerSecurityContext
     - images are referenced from global values
 */ -}}
-
 {{- if .Values.server.enabled -}}
 {{- if not .Values.server.statefulSet.enabled -}}
 apiVersion: {{ template "prometheus.deployment.apiVersion" . }}
@@ -63,6 +62,8 @@ spec:
         - name: {{ template "prometheus.name" . }}-{{ .Values.server.name }}-{{ .Values.configmapReload.prometheus.name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.configmap_reload) }}"
           imagePullPolicy: "{{ .Values.configmapReload.prometheus.image.pullPolicy }}"
+          securityContext:
+            {{- toYaml .Values.configmapReload.prometheus.containerSecurityContext | nindent 12 }}
           args:
             - --volume-dir=/etc/config
             - --webhook-url=http://127.0.0.1:9090{{ .Values.server.prefixURL }}/-/reload
@@ -78,10 +79,6 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.configmapReload.prometheus.resources | indent 12 }}
-          {{- if .Values.configmapReload.prometheus.containerSecurityContext }}
-          securityContext:
-{{ toYaml .Values.configmapReload.prometheus.containerSecurityContext | indent 12 }}
-          {{- end }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
@@ -93,9 +90,12 @@ spec:
               readOnly: {{ .readOnly }}
           {{- end }}
         {{- end }}
+
         - name: {{ template "prometheus.name" . }}-{{ .Values.server.name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus) }}"
           imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
+          securityContext:
+            {{- toYaml .Values.server.containerSecurityContext | nindent 12 }}
           {{- if .Values.server.env }}
           env:
 {{ toYaml .Values.server.env | indent 12}}
@@ -139,12 +139,9 @@ spec:
               path: {{ .Values.server.prefixURL }}/-/ready
               port: 9090
               scheme: {{ .Values.server.probeScheme }}
-              {{- if .Values.server.probeHeaders }}
+              {{- with .Values.server.probeHeaders }}
               httpHeaders:
-              {{- range .Values.server.probeHeaders}}
-              - name: {{ .name }}
-                value: {{ .value }}
-              {{- end }}
+{{- toYaml . | nindent 14 }}
               {{- end }}
             {{- else }}
             tcpSocket:
@@ -161,12 +158,9 @@ spec:
               path: {{ .Values.server.prefixURL }}/-/healthy
               port: 9090
               scheme: {{ .Values.server.probeScheme }}
-              {{- if .Values.server.probeHeaders }}
+              {{- with .Values.server.probeHeaders }}
               httpHeaders:
-              {{- range .Values.server.probeHeaders}}
-              - name: {{ .name }}
-                value: {{ .value }}
-              {{- end }}
+{{- toYaml . | nindent 14 }}
               {{- end }}
             {{- else }}
             tcpSocket:
