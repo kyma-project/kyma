@@ -411,7 +411,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, fakeClient, te.backend, unhappyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  xerrors.Errorf("failed to sync subscription initial status: %v", xerrors.Errorf("failed to get subscription clean subjects: %v", cleanerErr)),
+			wantReconcileError:  xerrors.Errorf("failed to sync subscription initial status: %v", xerrors.Errorf("failed to get clean subjects: %v", cleanerErr)),
 		},
 	}
 

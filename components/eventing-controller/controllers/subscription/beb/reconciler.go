@@ -352,7 +352,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
-		return nil, recerrors.NewSkippable(xerrors.Errorf("failed to parse sink URI: %v", err))
+		return nil, recerrors.NewSkippable(xerrors.Errorf("failed to parse sink URL: %v", err))
 	}
 
 	apiRule, err := r.createOrUpdateAPIRule(ctx, subscription, *sURL, logger)
