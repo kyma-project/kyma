@@ -58,7 +58,7 @@ type SubscriptionManager struct {
 	metricsAddr      string
 	metricsCollector *pkgmetrics.Collector
 	mgr              manager.Manager
-	backend          jetstream2.JetStreamBackend
+	backend          jetstream2.Backend
 	logger           *logger.Logger
 }
 
@@ -124,7 +124,7 @@ func (sm *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all JetStream artifacts.
-func cleanup(backend jetstream2.JetStreamBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend jetstream2.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

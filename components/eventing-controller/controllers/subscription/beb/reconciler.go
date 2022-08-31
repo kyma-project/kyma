@@ -49,7 +49,7 @@ type Reconciler struct {
 	client.Client
 	logger            *logger.Logger
 	recorder          record.EventRecorder
-	Backend           beb.BEBBackend
+	Backend           beb.Backend
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *beb.OAuth2ClientCredentials
@@ -73,7 +73,7 @@ const (
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
-	cfg env.Config, cleaner eventtype.Cleaner, bebBackend beb.BEBBackend, credential *beb.OAuth2ClientCredentials,
+	cfg env.Config, cleaner eventtype.Cleaner, bebBackend beb.Backend, credential *beb.OAuth2ClientCredentials,
 	mapper utils2.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)

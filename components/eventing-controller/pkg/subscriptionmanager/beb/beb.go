@@ -60,7 +60,7 @@ type SubscriptionManager struct {
 	metricsAddr  string
 	resyncPeriod time.Duration
 	mgr          manager.Manager
-	backend      beb2.BEBBackend
+	backend      beb2.Backend
 	logger       *logger.Logger
 }
 
@@ -167,7 +167,7 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 }
 
 // cleanup removes all created BEB artifacts.
-func cleanup(backend beb2.BEBBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend beb2.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

@@ -27,7 +27,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
-var _ JetStreamBackend = &JetStream{}
+var _ Backend = &JetStream{}
 
 const (
 	jsHandlerName          = "jetstream-handler"
@@ -38,7 +38,7 @@ const (
 	separator              = "/"
 )
 
-type JetStreamBackend interface {
+type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(connCloseHandler nats2.ConnClosedHandler) error
 

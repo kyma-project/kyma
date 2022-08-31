@@ -36,7 +36,7 @@ var Finalizer = eventingv1alpha1.GroupVersion.Group
 type Reconciler struct {
 	client.Client
 	ctx                 context.Context
-	Backend             jetstream.JetStreamBackend
+	Backend             jetstream.Backend
 	recorder            record.EventRecorder
 	logger              *logger.Logger
 	eventTypeCleaner    eventtype.Cleaner
@@ -45,7 +45,7 @@ type Reconciler struct {
 	customEventsChannel chan event.GenericEvent
 }
 
-func NewReconciler(ctx context.Context, client client.Client, jsHandler jetstream.JetStreamBackend, logger *logger.Logger,
+func NewReconciler(ctx context.Context, client client.Client, jsHandler jetstream.Backend, logger *logger.Logger,
 	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,

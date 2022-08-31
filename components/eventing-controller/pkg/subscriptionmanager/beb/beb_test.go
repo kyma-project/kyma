@@ -32,7 +32,7 @@ const (
 
 type bebSubMgrMock struct {
 	Client  dynamic.Interface
-	Backend beb.BEBBackend
+	Backend beb.Backend
 }
 
 func (c *bebSubMgrMock) Init(_ manager.Manager) error {

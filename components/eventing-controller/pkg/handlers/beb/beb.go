@@ -45,9 +45,9 @@ func (e *HTTPStatusError) Is(target error) bool {
 }
 
 // compile time check
-var _ BEBBackend = &BEB{}
+var _ Backend = &BEB{}
 
-type BEBBackend interface {
+type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(cfg env.Config) error
 
@@ -82,7 +82,7 @@ type BEB struct {
 	logger           *logger.Logger
 }
 
-type BEBResponse struct {
+type Response struct {
 	StatusCode int
 	Error      error
 }
