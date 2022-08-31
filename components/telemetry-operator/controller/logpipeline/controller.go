@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"

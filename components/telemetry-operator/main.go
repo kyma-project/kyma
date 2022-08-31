@@ -20,9 +20,10 @@ import (
 	"errors"
 	"flag"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"

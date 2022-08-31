@@ -19,6 +19,7 @@ package logparser
 import (
 	"context"
 	"fmt"
+
 	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 
 	"k8s.io/apimachinery/pkg/types"
