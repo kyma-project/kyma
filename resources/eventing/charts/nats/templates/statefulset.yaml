@@ -62,7 +62,7 @@ spec:
       {{- if and .Values.auth.enabled .Values.auth.resolver }}
       - name: resolver-volume
         secret:
-          secretName: {{ .Values.auth.resolver.configMap.name }}
+          secretName: {{ .Values.auth.resolver.secret.name }}
       {{- end }}
 
       - name: config-volume

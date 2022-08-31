@@ -204,7 +204,7 @@ auth:
     #                            #
     ##############################
     type: memory
-    configMap:
+    secret:
       name: eventing-nats-secret
       key: accountsJson
 
