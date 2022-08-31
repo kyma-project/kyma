@@ -159,7 +159,6 @@ func main() {
 	mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
 	mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
 
-	//TODO (skhalash): move metric creation/registration inside the reconcilers
 	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_fluentbit_triggered_restarts_total",
 		Help: "Number of triggered Fluent Bit restarts",
