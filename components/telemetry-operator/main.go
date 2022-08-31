@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	"time"
 
@@ -123,6 +124,10 @@ func main() {
 	flag.IntVar(&maxPipelines, "max-pipelines", 5, "Maximum number of LogPipelines to be created. If 0, no limit is applied.")
 
 	flag.Parse()
+	if err := validateFlags(); err != nil {
+		setupLog.Error(err, "Invalid flag provided")
+		os.Exit(1)
+	}
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
@@ -135,17 +140,6 @@ func main() {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
-
-	if err := validateFlags(); err != nil {
-		setupLog.Error(err, "Invalid flag provided")
-		os.Exit(1)
-	}
-
-	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_triggered_restarts_total",
-		Help: "Number of triggered Fluent Bit restarts",
-	})
-	metrics.Registry.MustRegister(restartsTotal)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
@@ -162,86 +156,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineDefaults := builder.PipelineDefaults{
-		InputTag:          fluentBitInputTag,
-		MemoryBufferLimit: fluentBitMemoryBufferLimit,
-		StorageType:       fluentBitStorageType,
-		FsBufferLimit:     fluentBitFsBufferLimit,
-	}
+	mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
+	mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
 
-	daemonSet := types.NamespacedName{
-		Namespace: fluentBitNs,
-		Name:      fluentBitDaemonSet,
-	}
-	logpipelineConfig := logpipelinecontroller.Config{
-		SectionsConfigMap: types.NamespacedName{
-			Name:      fluentBitSectionsConfigMap,
-			Namespace: fluentBitNs,
-		},
+	//TODO (skhalash): move metric creation/registration inside the reconcilers
+	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_fluentbit_triggered_restarts_total",
+		Help: "Number of triggered Fluent Bit restarts",
+	})
+	metrics.Registry.MustRegister(restartsTotal)
 
-		FilesConfigMap: types.NamespacedName{
-			Name:      fluentBitFilesConfigMap,
-			Namespace: fluentBitNs,
-		},
-		EnvSecret: types.NamespacedName{
-			Name:      fluentBitEnvSecret,
-			Namespace: fluentBitNs,
-		},
-		DaemonSet:        daemonSet,
-		PipelineDefaults: pipelineDefaults,
-	}
-
-	logparserConfig := logparsercontroller.Config{
-		ParsersConfigMap: types.NamespacedName{
-			Name:      fluentBitParsersConfigMap,
-			Namespace: fluentBitNs,
-		},
-		DaemonSet: daemonSet,
-	}
-
-	dryRunConfig := dryrun.Config{
-		FluentBitBinPath:       fluentBitPath,
-		FluentBitPluginDir:     fluentBitPluginDirectory,
-		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
-		PipelineDefaults:       pipelineDefaults,
-	}
-
-	logPipelineValidationHandler := logpipelinewebhook.NewValidatingWebhookHandler(
-		mgr.GetClient(),
-		logpipelinevalidation.NewInputValidator(),
-		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
-		logpipelinevalidation.NewFilterValidator(parsePlugins(deniedFilterPlugins)...),
-		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
-		logpipelinevalidation.NewOutputValidator(parsePlugins(deniedOutputPlugins)...),
-		logpipelinevalidation.NewFilesValidator(),
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
-
-	logParserValidationHandler := logparserwebhook.NewValidatingWebhookHandler(
-		mgr.GetClient(),
-		logparservalidation.NewParserValidator(),
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
-
-	mgr.GetWebhookServer().Register(
-		"/validate-logpipeline",
-		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
-	mgr.GetWebhookServer().Register(
-		"/validate-logparser",
-		&k8sWebhook.Admission{Handler: logParserValidationHandler})
-
-	logPipelineReconciler := logpipelinecontroller.NewReconciler(
-		mgr.GetClient(),
-		logpipelineConfig,
-		restartsTotal)
-	if err = logPipelineReconciler.SetupWithManager(mgr); err != nil {
+	if err = createLogPipelineReconciler(mgr.GetClient(), restartsTotal).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
-	logParserReconciler := logparsercontroller.NewReconciler(
-		mgr.GetClient(),
-		logparserConfig,
-		restartsTotal)
-	if err = logParserReconciler.SetupWithManager(mgr); err != nil {
+	if err = createLogParserReconciler(mgr.GetClient(), restartsTotal).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
 		os.Exit(1)
 	}
@@ -295,6 +225,62 @@ func validateFlags() error {
 		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
 	return nil
+}
+
+func createLogPipelineReconciler(client client.Client, restartsTotal prometheus.Counter) *logpipelinecontroller.Reconciler {
+	config := logpipelinecontroller.Config{
+		SectionsConfigMap: types.NamespacedName{Name: fluentBitSectionsConfigMap, Namespace: fluentBitNs},
+		FilesConfigMap:    types.NamespacedName{Name: fluentBitFilesConfigMap, Namespace: fluentBitNs},
+		EnvSecret:         types.NamespacedName{Name: fluentBitEnvSecret, Namespace: fluentBitNs},
+		DaemonSet:         types.NamespacedName{Namespace: fluentBitNs, Name: fluentBitDaemonSet},
+		PipelineDefaults:  createPipelineDefaults(),
+	}
+	return logpipelinecontroller.NewReconciler(client, config, restartsTotal)
+}
+
+func createLogParserReconciler(client client.Client, restartsTotal prometheus.Counter) *logparsercontroller.Reconciler {
+	config := logparsercontroller.Config{
+		ParsersConfigMap: types.NamespacedName{Name: fluentBitParsersConfigMap, Namespace: fluentBitNs},
+		DaemonSet:        types.NamespacedName{Namespace: fluentBitNs, Name: fluentBitDaemonSet},
+	}
+	return logparsercontroller.NewReconciler(client, config, restartsTotal)
+}
+
+func createLogPipelineValidator(client client.Client) *logpipelinewebhook.ValidatingWebhookHandler {
+	return logpipelinewebhook.NewValidatingWebhookHandler(
+		client,
+		logpipelinevalidation.NewInputValidator(),
+		logpipelinevalidation.NewVariablesValidator(client),
+		logpipelinevalidation.NewFilterValidator(parsePlugins(deniedFilterPlugins)...),
+		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
+		logpipelinevalidation.NewOutputValidator(parsePlugins(deniedOutputPlugins)...),
+		logpipelinevalidation.NewFilesValidator(),
+		dryrun.NewDryRunner(client, createDryRunConfig()))
+}
+
+func createLogParserValidator(client client.Client) *logparserwebhook.ValidatingWebhookHandler {
+	return logparserwebhook.NewValidatingWebhookHandler(
+		client,
+		logparservalidation.NewParserValidator(),
+		dryrun.NewDryRunner(client, createDryRunConfig()))
+}
+
+func createDryRunConfig() dryrun.Config {
+	return dryrun.Config{
+		FluentBitBinPath:       fluentBitPath,
+		FluentBitPluginDir:     fluentBitPluginDirectory,
+		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
+		PipelineDefaults:       createPipelineDefaults(),
+	}
+}
+
+func createPipelineDefaults() builder.PipelineDefaults {
+	return builder.PipelineDefaults{
+		InputTag:          fluentBitInputTag,
+		MemoryBufferLimit: fluentBitMemoryBufferLimit,
+		StorageType:       fluentBitStorageType,
+		FsBufferLimit:     fluentBitFsBufferLimit,
+	}
 }
 
 func parsePlugins(s string) []string {
