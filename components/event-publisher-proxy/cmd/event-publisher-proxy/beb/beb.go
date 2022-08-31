@@ -64,7 +64,7 @@ func (c *Commander) Start() error {
 	c.namedLogger().Infow("Starting Event Publisher", "configuration", c.envCfg.String(), "startup arguments", c.opts)
 
 	// configure message receiver
-	messageReceiver := receiver.NewHTTPMessageReceiver("", c.envCfg.Port)
+	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// assure uniqueness
 	var ctx context.Context

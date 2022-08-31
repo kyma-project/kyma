@@ -25,18 +25,17 @@ type HTTPMessageReceiver struct {
 	handler  http.Handler
 	server   *http.Server
 	listener net.Listener
-	host     string
 }
 
 // NewHTTPMessageReceiver returns a new NewHTTPMessageReceiver instance with the given port.
-func NewHTTPMessageReceiver(host string, port int) *HTTPMessageReceiver {
-	return &HTTPMessageReceiver{host: host, port: port}
+func NewHTTPMessageReceiver(port int) *HTTPMessageReceiver {
+	return &HTTPMessageReceiver{port: port}
 }
 
 // StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal.
 func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Handler, logger *kymalogger.Logger) error {
 	var err error
-	if recv.listener, err = net.Listen("tcp", fmt.Sprintf("%v:%d", recv.host, recv.port)); err != nil {
+	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
 		return err
 	}
 

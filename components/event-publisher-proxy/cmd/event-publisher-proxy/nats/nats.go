@@ -71,7 +71,7 @@ func (c *Commander) Start() error {
 	ctx, c.cancel = context.WithCancel(signals.NewContext())
 
 	// configure message receiver
-	messageReceiver := receiver.NewHTTPMessageReceiver("", c.envCfg.Port)
+	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
 	connection, err := pkgnats.Connect(c.envCfg.URL,
