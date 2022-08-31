@@ -177,14 +177,14 @@ Follow these steps:
         apiVersion:    serverless.kyma-project.io/v1alpha2
         kind:          Function
         name:          scaled-function
-      minReplicaCount:  5
-      maxReplicaCount:  10
+      minReplicaCount:  1  # You can go with 0 ( scaling to zero ) in case your function is fed from messaging queue that would buffer unhandled requests or if you are fine with function downtime at cold start periods
+      maxReplicaCount:  5
       triggers:
       - type: prometheus
         metadata:
           serverAddress: http://prometheus-operated.kyma-system.svc.cluster.local:9090
           metricName: istio_requests_total
-          query: sum(rate(istio_requests_total{destination_service_namespace="default", destination_service_name="scaled-function"}[2m]))
+          query: round(sum(irate(istio_requests_total{reporter=~"source",destination_service=~"scaled-function.default.svc.cluster.local"}[2m])), 0.001)
           threshold: '6.5'
     EOF
     ```
