@@ -201,7 +201,7 @@ Follow these steps:
 
     ```bash
     NAME              SCALETARGETKIND                                SCALETARGETNAME   MIN   MAX   TRIGGERS     AUTHENTICATION   READY   ACTIVE   FALLBACK   AGE
-    scaled-function   serverless.kyma-project.io/v1alpha2.Function   scaled-function   5     10    prometheus                    True    True     Unknown      4m15s
+    scaled-function   serverless.kyma-project.io/v1alpha2.Function   scaled-function   1     5     prometheus                    True    True     Unknown      4m15s
     ```
 
 </details>
