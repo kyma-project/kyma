@@ -20,7 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/prometheus/client_golang/prometheus"
+	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
+
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,16 +45,15 @@ type Reconciler struct {
 	daemonSetHelper *kubernetes.DaemonSetHelper
 }
 
-func NewReconciler(
-	client client.Client,
-	config Config,
-	restartsTotal prometheus.Counter) *Reconciler {
+func NewReconciler(client client.Client, config Config) *Reconciler {
 	var r Reconciler
 
 	r.Client = client
 	r.config = config
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, restartsTotal)
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
+
+	controllermetrics.RegisterMetrics()
 
 	return &r
 }
