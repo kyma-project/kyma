@@ -1013,7 +1013,8 @@ async function ensureKymaAdminBindingExistsForUser(targetUser, retryOptions = nu
   if (retryOptions != null) {
     for (let i = 0; i < retryOptions.numberOfTries; i++) {
       sleep(retryOptions.sleep);
-      if (await findKymaAdminBindingForUser(targetUser) !== undefined) {
+      binding = await findKymaAdminBindingForUser(targetUser)
+      if ( binding !== undefined) {
         info(`Found admin binding for ${targetUser}`);
         break;
       }
