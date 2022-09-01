@@ -404,7 +404,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 		reusableAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
 	}
 
-	// GetFreePort all subscriptions valid for the cluster-local subscriber
+	// Get all subscriptions valid for the cluster-local subscriber
 	subscriptions, err := r.getSubscriptionsForASvc(ctx, svcNs, svcName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fetch subscriptions failed for subscriber namespace:%s name:%s", svcNs, svcName)
