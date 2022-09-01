@@ -1,0 +1,18 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: loki-keep-annotations-drop-labels
+spec:
+  input:
+    application:
+      namespaces:
+        system: true
+      keepAnnotations: true
+      dropLabels: true
+  output:
+    grafana-loki:
+      url:
+        value: "http://logging-loki:3100/loki/api/v1/push"
+      labels:
+        "job": "keep-annotations-drop-labels-telemetry-fluent-bit"
+      removeKeys: ["stream"]

@@ -101,9 +101,11 @@ func (d DefaultedFunctionCheck) Run() error {
 	}
 
 	spec := fn.Spec
-	if spec.MinReplicas == nil {
+	if spec.ScaleConfig == nil {
+		return errors.New("scaleConfig equal nil")
+	} else if spec.ScaleConfig.MinReplicas == nil {
 		return errors.New("minReplicas equal nil")
-	} else if spec.MaxReplicas == nil {
+	} else if spec.ScaleConfig.MaxReplicas == nil {
 		return errors.New("maxReplicas equal nil")
 	} else if spec.ResourceConfiguration.Function.Resources.Requests.Memory().IsZero() || spec.ResourceConfiguration.Function.Resources.Requests.Cpu().IsZero() {
 		return errors.New("requests equal zero")

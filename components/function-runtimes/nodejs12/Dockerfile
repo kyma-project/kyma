@@ -26,7 +26,8 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.15.4
+# image base on alpine:3.16.2
+FROM alpine@sha256:bc41182d7ef5ffc53a40b044e725193bc10142a1243f395ee852a8d9730fc2ad
 
 ENV NODE_VERSION 12.22.12
 

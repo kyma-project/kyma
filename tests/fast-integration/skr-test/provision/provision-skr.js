@@ -10,6 +10,7 @@ const {
   gardener,
   keb,
   initK8sConfig,
+  getSKRRuntimeStatus,
 } = require('../helpers');
 
 const {provisionSKR}= require('../../kyma-environment-broker');
@@ -20,6 +21,7 @@ async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout)
   if (skipProvisioning) {
     console.log('Gather information from externally provisioned SKR and prepare resources');
     const instanceID = getEnvOrThrow('INSTANCE_ID');
+    console.log(`SKR Instance Id: ${instanceID}`);
     let suffix = process.env.TEST_SUFFIX;
     if (suffix === undefined) {
       suffix = genRandom(4);
@@ -71,8 +73,16 @@ async function provisionSKRInstance(options, timeout) {
   }
 }
 
+async function getSKRKymaVersion(instanceID) {
+  const runtimeStatus = await getSKRRuntimeStatus(instanceID);
+  if (runtimeStatus && runtimeStatus.data) {
+    return runtimeStatus.data[0].kymaVersion;
+  }
+  return '';
+}
 
 module.exports = {
   getOrProvisionSKR,
+  getSKRKymaVersion,
 };
 

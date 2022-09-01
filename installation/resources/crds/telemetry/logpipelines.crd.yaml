@@ -1,10 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.0
+    controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
   name: logpipelines.telemetry.kyma-project.io
 spec:
@@ -73,23 +72,37 @@ spec:
                       handles application logs
                     properties:
                       containers:
-                        items:
-                          type: string
-                        type: array
-                      excludeContainers:
-                        items:
-                          type: string
-                        type: array
-                      excludeNamespaces:
-                        items:
-                          type: string
-                        type: array
-                      includeSystemNamespaces:
+                        properties:
+                          exclude:
+                            items:
+                              type: string
+                            type: array
+                          include:
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      dropLabels:
+                        description: DropLabels indicates whether to drop all Kubernetes
+                          labels. The default is false.
+                        type: boolean
+                      keepAnnotations:
+                        description: KeepAnnotations indicates whether to keep all
+                          Kubernetes annotations. The default is false.
                         type: boolean
                       namespaces:
-                        items:
-                          type: string
-                        type: array
+                        properties:
+                          exclude:
+                            items:
+                              type: string
+                            type: array
+                          include:
+                            items:
+                              type: string
+                            type: array
+                          system:
+                            type: boolean
+                        type: object
                     type: object
                 type: object
               output:
@@ -201,8 +214,8 @@ spec:
                 type: object
               variables:
                 items:
-                  description: VariableReference references a Kubernetes secret that
-                    should be provided as environment variable to Fluent Bit
+                  description: VariableRef references a Kubernetes secret that should
+                    be provided as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string
@@ -246,9 +259,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

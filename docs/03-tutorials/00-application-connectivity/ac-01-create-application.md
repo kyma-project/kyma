@@ -12,6 +12,8 @@ Before you start, export the name of your application as an environment variable
 export APP_NAME={YOUR_APP_NAME}
 ```
 
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+
 ## Create an Application
 
 To create a new Application, run this command:
@@ -53,10 +55,20 @@ metadata:
   selfLink: /apis/applicationconnector.kyma-project.io/v1alpha1/applications/test1
   uid: f8ca5595-ee5d-11e8-acb2-000d3a443243
 spec:
-  accessLabel: {APP_NAME}
   description: {APP_DESCRIPTION}
   labels:
-    region: "us"
     kind: "production"
-  services: []
+    region: "us"
+```
+
+If there are registered services connected to your Application in Kyma, the response also shows them: 
+
+```yaml
+...
+spec:
+  description: {APP_DESCRIPTION}
+  labels:
+    kind: "production"
+    region: "us"
+  services: {LIST_OF_REGISTERED_SERVICES}
 ```

@@ -19,6 +19,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
    kubectl create ns $NAMESPACE
+   kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
 2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
@@ -146,5 +147,5 @@ Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to d
 Once you have your workload deployed, you can continue by choosing one of the following tutorials:
 
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
-- [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)
+- [Expose and secure a workload with OAuth2](./apix-04-expose-and-secure-workload-oauth2.md)
 - [Expose and secure a workload with Istio](./apix-05-expose-and-secure-workload-istio.md)

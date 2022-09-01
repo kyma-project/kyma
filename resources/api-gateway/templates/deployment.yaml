@@ -25,10 +25,19 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: {{ include "api-gateway.fullname" . }}-webhook-server-cert
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_controller) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - mountPath: /tmp/k8s-webhook-server/serving-certs
+            name: cert
+            readOnly: true
           command:
             - /manager
           args:
@@ -36,7 +45,6 @@ spec:
             - --health-probe-addr=0.0.0.0:{{ .Values.config.ports.healthProbe }}
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
-            - --jwks-uri={{ .Values.config.jwksURI }}
             - --service-blocklist={{ include "api-gateway.serviceBlockList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
             {{- if .Values.config.enableDomainAllowList }}

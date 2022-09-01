@@ -23,37 +23,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/dryrun"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser"
-	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logparser/validation"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline"
-	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook/logpipeline/validation"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/parserSync"
-
-	telemetrycontrollers "github.com/kyma-project/kyma/components/telemetry-operator/controllers/telemetry"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	"github.com/prometheus/client_golang/prometheus"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
+	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
+	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
+	logparserwebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser"
+	logparservalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logparser/validation"
+	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
+	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
 
 	"github.com/go-logr/zapr"
-	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -127,6 +122,10 @@ func main() {
 	flag.IntVar(&maxPipelines, "max-pipelines", 5, "Maximum number of LogPipelines to be created. If 0, no limit is applied.")
 
 	flag.Parse()
+	if err := validateFlags(); err != nil {
+		setupLog.Error(err, "Invalid flag provided")
+		os.Exit(1)
+	}
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
@@ -139,17 +138,6 @@ func main() {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
-
-	if err := validateFlags(); err != nil {
-		setupLog.Error(err, "Invalid flag provided")
-		os.Exit(1)
-	}
-
-	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_triggered_restarts_total",
-		Help: "Number of triggered Fluent Bit restarts",
-	})
-	metrics.Registry.MustRegister(restartsTotal)
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
@@ -166,93 +154,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	pipelineConfig := fluentbit.PipelineConfig{
-		InputTag:          fluentBitInputTag,
-		MemoryBufferLimit: fluentBitMemoryBufferLimit,
-		StorageType:       fluentBitStorageType,
-		FsBufferLimit:     fluentBitFsBufferLimit,
-	}
+	mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
+	mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
 
-	daemonSetConfig := sync.FluentBitDaemonSetConfig{
-		FluentBitDaemonSetName: types.NamespacedName{
-			Namespace: fluentBitNs,
-			Name:      fluentBitDaemonSet,
-		},
-		FluentBitSectionsConfigMap: types.NamespacedName{
-			Name:      fluentBitSectionsConfigMap,
-			Namespace: fluentBitNs,
-		},
-
-		FluentBitFilesConfigMap: types.NamespacedName{
-			Name:      fluentBitFilesConfigMap,
-			Namespace: fluentBitNs,
-		},
-		FluentBitEnvSecret: types.NamespacedName{
-			Name:      fluentBitEnvSecret,
-			Namespace: fluentBitNs,
-		},
-	}
-	parserDaemonSetConfig := parserSync.FluentBitDaemonSetConfig{
-		FluentBitDaemonSetName: types.NamespacedName{
-			Namespace: fluentBitNs,
-			Name:      fluentBitDaemonSet,
-		},
-		FluentBitParsersConfigMap: types.NamespacedName{
-			Name:      fluentBitParsersConfigMap,
-			Namespace: fluentBitNs,
-		},
-	}
-
-	dryRunConfig := &dryrun.Config{
-		FluentBitBinPath:       fluentBitPath,
-		FluentBitPluginDir:     fluentBitPluginDirectory,
-		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
-		PipelineConfig:         pipelineConfig,
-	}
-
-	logPipelineValidationHandler := logpipeline.NewValidatingWebhookHandler(
-		mgr.GetClient(),
-		logpipelinevalidation.NewInputValidator(),
-		logpipelinevalidation.NewVariablesValidator(mgr.GetClient()),
-		logpipelinevalidation.NewPluginValidator(
-			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
-			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
-		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
-		logpipelinevalidation.NewOutputValidator(),
-		logpipelinevalidation.NewFilesValidator(),
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
-	mgr.GetWebhookServer().Register(
-		"/validate-logpipeline",
-		&k8sWebhook.Admission{Handler: logPipelineValidationHandler})
-
-	reconciler := telemetrycontrollers.NewLogPipelineReconciler(
-		mgr.GetClient(),
-		mgr.GetScheme(),
-		daemonSetConfig,
-		pipelineConfig,
-		restartsTotal)
-	if err = reconciler.SetupWithManager(mgr); err != nil {
+	if err = createLogPipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 
-	parserReconciler := telemetrycontrollers.NewLogParserReconciler(
-		mgr.GetClient(),
-		mgr.GetScheme(),
-		parserDaemonSetConfig,
-		restartsTotal)
-	if err = parserReconciler.SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "LogParser")
+	if err = createLogParserReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
 		os.Exit(1)
 	}
 
-	logParserValidationHandler := logparser.NewValidatingWebhookHandler(
-		mgr.GetClient(),
-		logparservalidation.NewParserValidator(),
-		dryrun.NewDryRunner(mgr.GetClient(), dryRunConfig))
-	mgr.GetWebhookServer().Register(
-		"/validate-logparser",
-		&k8sWebhook.Admission{Handler: logParserValidationHandler})
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -302,4 +216,64 @@ func validateFlags() error {
 		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
 	return nil
+}
+
+func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Reconciler {
+	config := logpipelinecontroller.Config{
+		SectionsConfigMap: types.NamespacedName{Name: fluentBitSectionsConfigMap, Namespace: fluentBitNs},
+		FilesConfigMap:    types.NamespacedName{Name: fluentBitFilesConfigMap, Namespace: fluentBitNs},
+		EnvSecret:         types.NamespacedName{Name: fluentBitEnvSecret, Namespace: fluentBitNs},
+		DaemonSet:         types.NamespacedName{Namespace: fluentBitNs, Name: fluentBitDaemonSet},
+		PipelineDefaults:  createPipelineDefaults(),
+	}
+	return logpipelinecontroller.NewReconciler(client, config)
+}
+
+func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {
+	config := logparsercontroller.Config{
+		ParsersConfigMap: types.NamespacedName{Name: fluentBitParsersConfigMap, Namespace: fluentBitNs},
+		DaemonSet:        types.NamespacedName{Namespace: fluentBitNs, Name: fluentBitDaemonSet},
+	}
+	return logparsercontroller.NewReconciler(client, config)
+}
+
+func createLogPipelineValidator(client client.Client) *logpipelinewebhook.ValidatingWebhookHandler {
+	return logpipelinewebhook.NewValidatingWebhookHandler(
+		client,
+		logpipelinevalidation.NewInputValidator(),
+		logpipelinevalidation.NewVariablesValidator(client),
+		logpipelinevalidation.NewFilterValidator(parsePlugins(deniedFilterPlugins)...),
+		logpipelinevalidation.NewMaxPipelinesValidator(maxPipelines),
+		logpipelinevalidation.NewOutputValidator(parsePlugins(deniedOutputPlugins)...),
+		logpipelinevalidation.NewFilesValidator(),
+		dryrun.NewDryRunner(client, createDryRunConfig()))
+}
+
+func createLogParserValidator(client client.Client) *logparserwebhook.ValidatingWebhookHandler {
+	return logparserwebhook.NewValidatingWebhookHandler(
+		client,
+		logparservalidation.NewParserValidator(),
+		dryrun.NewDryRunner(client, createDryRunConfig()))
+}
+
+func createDryRunConfig() dryrun.Config {
+	return dryrun.Config{
+		FluentBitBinPath:       fluentBitPath,
+		FluentBitPluginDir:     fluentBitPluginDirectory,
+		FluentBitConfigMapName: types.NamespacedName{Name: fluentBitConfigMap, Namespace: fluentBitNs},
+		PipelineDefaults:       createPipelineDefaults(),
+	}
+}
+
+func createPipelineDefaults() builder.PipelineDefaults {
+	return builder.PipelineDefaults{
+		InputTag:          fluentBitInputTag,
+		MemoryBufferLimit: fluentBitMemoryBufferLimit,
+		StorageType:       fluentBitStorageType,
+		FsBufferLimit:     fluentBitFsBufferLimit,
+	}
+}
+
+func parsePlugins(s string) []string {
+	return strings.SplitN(strings.ReplaceAll(s, " ", ""), ",", len(s))
 }

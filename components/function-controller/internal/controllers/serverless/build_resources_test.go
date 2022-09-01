@@ -129,12 +129,12 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 	}
 
 	nilCase1 := newFixFunction("ns", "name", 2, 2)
-	nilCase1.Spec.MinReplicas = nil
-	nilCase1.Spec.MaxReplicas = nil
+	nilCase1.Spec.ScaleConfig.MinReplicas = nil
+	nilCase1.Spec.ScaleConfig.MaxReplicas = nil
 	nilCase2 := newFixFunction("ns", "name", 2, 2)
-	nilCase2.Spec.MinReplicas = nil
+	nilCase2.Spec.ScaleConfig.MinReplicas = nil
 	nilCase3 := newFixFunction("ns", "name", 2, 2)
-	nilCase3.Spec.MaxReplicas = nil
+	nilCase3.Spec.ScaleConfig.MaxReplicas = nil
 
 	tests := []struct {
 		name  string
