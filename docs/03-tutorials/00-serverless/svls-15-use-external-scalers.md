@@ -118,9 +118,9 @@ Follow these steps:
     EOF
     ```
 
-    >**NOTE:** in this tutorial we use the `cpu` trigger because of its simple configuration. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
+    >**NOTE:** This tutorial uses the `cpu` trigger because of its simple configuration. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
 
-4. After a few seconds ScaledObject should be up to date and contain information about actual replicas:
+4. After a few seconds ScaledObject should be up to date and contain information about the actual replicas:
 
     ```bash
     kubectl get scaledobject scaled-function
