@@ -50,7 +50,7 @@ func NewReconciler(client client.Client, config Config) *Reconciler {
 
 	r.Client = client
 	r.config = config
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
 
 	controllermetrics.RegisterMetrics()
