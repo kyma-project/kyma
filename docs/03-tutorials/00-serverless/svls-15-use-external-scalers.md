@@ -164,7 +164,7 @@ Follow these steps:
     EOF
     ```
 
-3. Create the ScaledObject resource based on, exposed by the Istio, the `istio_requests_total` metric:
+3. Create the ScaledObject resource based on the `istio_requests_total` metric, exposed by the Istio:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -189,9 +189,9 @@ Follow these steps:
     EOF
     ```
 
-    >**NOTE:** in this tutorial we use the `prometheus` trigger because of its simple configuration. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
+    >**NOTE:** This tutorial uses the `prometheus` trigger because of its simple configuration. If you want to use another trigger check the official [list of supported triggers](https://keda.sh/docs/2.8/scalers/).
   
-4. After a few seconds ScaledObject should be up to date and contain information about actual replicas:
+4. After a few seconds ScaledObject should be up to date and contain information about the actual replicas:
 
     ```bash
     kubectl get scaledobject scaled-function
