@@ -84,6 +84,7 @@ func TestGetRuntimeConfig(t *testing.T) {
 			config := runtime.GetRuntimeConfig(testData.runtime)
 
 			// then
+			// `RuntimeEnvs` may be in a different order, so I convert them to a map before comparing them
 			configEnvMap := make(map[string]corev1.EnvVar)
 			for _, ev := range config.RuntimeEnvs {
 				configEnvMap[ev.Name] = ev
@@ -94,6 +95,7 @@ func TestGetRuntimeConfig(t *testing.T) {
 			}
 			g.Expect(configEnvMap).To(gomega.BeEquivalentTo(wantEnvMap))
 
+			// `RuntimeEnvs` were compared before, and now I want to compare the rest of `config`
 			config.RuntimeEnvs = nil
 			testData.want.RuntimeEnvs = nil
 			g.Expect(config).To(gomega.BeEquivalentTo(testData.want))
