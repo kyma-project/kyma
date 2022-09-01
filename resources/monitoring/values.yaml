@@ -167,11 +167,6 @@ global:
       version: "7.3.0-4256edd8"
       directory: "tpi"
       sha: ""
-    thanos:
-      name: "thanos"
-      repository: quay.io/thanos/thanos
-      tag: v0.27.0
-      sha: ""
 
   istio:
     tls:
