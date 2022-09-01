@@ -1,3 +1,7 @@
+{{- /*
+  Customizations:
+    - image is referenced from global values
+*/ -}}
 {{- if .Values.thanosRuler.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ThanosRuler
@@ -13,18 +17,7 @@ metadata:
 {{- end }}
 spec:
 {{- if .Values.thanosRuler.thanosRulerSpec.image }}
-  {{- if and .Values.thanosRuler.thanosRulerSpec.image.tag .Values.thanosRuler.thanosRulerSpec.image.sha }}
-  image: "{{ .Values.thanosRuler.thanosRulerSpec.image.repository }}:{{ .Values.thanosRuler.thanosRulerSpec.image.tag }}@sha256:{{ .Values.thanosRuler.thanosRulerSpec.image.sha }}"
-  {{- else if .Values.thanosRuler.thanosRulerSpec.image.sha }}
-  image: "{{ .Values.thanosRuler.thanosRulerSpec.image.repository }}@sha256:{{ .Values.thanosRuler.thanosRulerSpec.image.sha }}"
-  {{- else if .Values.thanosRuler.thanosRulerSpec.image.tag }}
-  image: "{{ .Values.thanosRuler.thanosRulerSpec.image.repository }}:{{ .Values.thanosRuler.thanosRulerSpec.image.tag }}"
-  {{- else }}
-  image: "{{ .Values.thanosRuler.thanosRulerSpec.image.repository }}"
-  {{- end }}
-  {{- if .Values.thanosRuler.thanosRulerSpec.image.sha }}
-  sha: {{ .Values.thanosRuler.thanosRulerSpec.image.sha }}
-  {{- end }}
+  image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.thanos) }}"
 {{- end }}
   replicas: {{ .Values.thanosRuler.thanosRulerSpec.replicas }}
   listenLocal: {{ .Values.thanosRuler.thanosRulerSpec.listenLocal }}
