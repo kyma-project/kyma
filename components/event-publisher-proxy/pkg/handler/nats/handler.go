@@ -126,15 +126,8 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 	h.receive(ctx, event)
+
 	statusCode, dispatchTime, err := h.send(ctx, event)
-	var errMessage string
-	if err != nil {
-		errMessage = err.Error()
-	}
-
-	// Change response as per old error codes
-	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, errMessage)
-
 	loggerWithEventInfo := h.namedLogger().With(
 		"id", event.ID(),
 		"source", event.Source(),
@@ -144,11 +137,16 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		"duration", dispatchTime,
 	)
 
-	if err == nil {
-		loggerWithEventInfo.Info("Event was successfully sent to EventingBackend")
-	} else {
+	var errMessage string
+	if err != nil {
+		errMessage = err.Error()
 		loggerWithEventInfo.Error("Failed to send the event to EventingBackend")
+	} else {
+		loggerWithEventInfo.Info("Event was successfully sent to EventingBackend")
 	}
+
+	// Change response as per old error codes
+	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, errMessage)
 }
 
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
@@ -191,12 +189,6 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	tracing.AddTracingContextToCEExtensions(request.Header, event)
 
 	statusCode, dispatchTime, err := h.send(ctx, event)
-	var errMessage string
-	if err != nil {
-		errMessage = err.Error()
-	}
-	h.writeResponse(writer, statusCode, []byte(errMessage))
-
 	loggerWithEventInfo := h.namedLogger().With(
 		"id", event.ID(),
 		"source", event.Source(),
@@ -205,11 +197,15 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		"statusCode", statusCode,
 		"duration", dispatchTime,
 	)
-	if err == nil {
-		loggerWithEventInfo.Info("Event was successfully sent to EventingBackend")
-	} else {
+	var errMessage string
+	if err != nil {
+		errMessage = err.Error()
 		loggerWithEventInfo.Error("Failed to send the event to EventingBackend")
+	} else {
+		loggerWithEventInfo.Info("Event was successfully sent to EventingBackend")
 	}
+
+	h.writeResponse(writer, statusCode, []byte(errMessage))
 }
 
 // writeResponse writes the HTTP response given the status code and response body.
