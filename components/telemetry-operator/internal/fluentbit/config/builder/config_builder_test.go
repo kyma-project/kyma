@@ -5,8 +5,9 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func TestCreateRecordModifierFilter(t *testing.T) {
@@ -34,10 +35,13 @@ func TestCreateLuaDedotFilterWithDefinedHostAndDedotSet(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "foo"},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
-					Host: telemetryv1alpha1.ValueType{
-						Value: "localhost"}}}}}
+					Host:  telemetryv1alpha1.ValueType{Value: "localhost"},
+				},
+			},
+		},
+	}
 
 	actual := createLuaDedotFilter(logPipeline)
 	require.Equal(t, expected, actual)
@@ -47,8 +51,10 @@ func TestCreateLuaDedotFilterWithUndefinedHost(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
-					Dedot: true}}}}
+				HTTP: &telemetryv1alpha1.HTTPOutput{Dedot: true},
+			},
+		},
+	}
 
 	actual := createLuaDedotFilter(logPipeline)
 	require.Equal(t, "", actual)
@@ -58,10 +64,13 @@ func TestCreateLuaDedotFilterWithDedotFalse(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: false,
-					Host: telemetryv1alpha1.ValueType{
-						Value: "localhost"}}}}}
+					Host:  telemetryv1alpha1.ValueType{Value: "localhost"},
+				},
+			},
+		},
+	}
 
 	actual := createLuaDedotFilter(logPipeline)
 	require.Equal(t, "", actual)
@@ -121,7 +130,7 @@ func TestMergeSectionsConfig(t *testing.T) {
 				},
 			},
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
 					Host: telemetryv1alpha1.ValueType{
 						Value: "localhost",
@@ -131,14 +140,14 @@ func TestMergeSectionsConfig(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{
+	defaults := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	actual, err := BuildFluentBitConfig(logPipeline, defaults)
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }
@@ -146,14 +155,14 @@ func TestMergeSectionsConfig(t *testing.T) {
 func TestMergeSectionsConfigWithMissingOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{
+	defaults := PipelineDefaults{
 		InputTag:          "kube",
 		MemoryBufferLimit: "10M",
 		StorageType:       "filesystem",
 		FsBufferLimit:     "1G",
 	}
 
-	actual, err := MergeSectionsConfig(logPipeline, pipelineConfig)
+	actual, err := BuildFluentBitConfig(logPipeline, defaults)
 	require.Error(t, err)
 	require.Empty(t, actual)
 }

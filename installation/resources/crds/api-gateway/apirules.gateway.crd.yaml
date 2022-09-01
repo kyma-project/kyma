@@ -25,6 +25,7 @@ spec:
       conversionReviewVersions:
         - v1beta1
         - v1alpha1
+  preserveUnknownFields: false
   versions:
   - deprecated: true
     deprecationWarning: v1alpha1 is deprecated as of Kyma 2.5.X

@@ -11,7 +11,7 @@ import (
 )
 
 func InitializeScenarioIstioInstalled(ctx *godog.ScenarioContext) {
-	installedCase := istioInstallledCase{}
+	installedCase := istioInstalledCase{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		err := installedCase.getIstioPods()
 		return ctx, err
@@ -24,10 +24,11 @@ func InitializeScenarioIstioInstalled(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
 	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
+	ctx.Step(`^"([^"]*)" has "([^"]*)" set to cpu - "([^"]*)" and memory - "([^"]*)"$`, installedCase.componentHasResourcesSetToCpuAndMemory)
 	InitializeScenarioTargetNamespaceSidecar(ctx)
 }
 
-func (i *istioInstallledCase) getIstioPods() error {
+func (i *istioInstalledCase) getIstioPods() error {
 	istiodPods, err := listPodsIstioNamespace(metav1.ListOptions{
 		LabelSelector: "istio=pilot",
 	})
@@ -46,7 +47,7 @@ func (i *istioInstallledCase) getIstioPods() error {
 	return nil
 }
 
-func (i *istioInstallledCase) aRunningKymaClusterWithProfile(profile string) error {
+func (i *istioInstalledCase) aRunningKymaClusterWithProfile(profile string) error {
 	p, ok := os.LookupEnv(deployedKymaProfileVar)
 	if !ok {
 		return fmt.Errorf("KYMA_PROFILE env variable is not set")
@@ -57,7 +58,7 @@ func (i *istioInstallledCase) aRunningKymaClusterWithProfile(profile string) err
 	return nil
 }
 
-func (i *istioInstallledCase) hPAIsNotDeployed() error {
+func (i *istioInstalledCase) hPAIsNotDeployed() error {
 	list, err := k8sClient.AutoscalingV1().HorizontalPodAutoscalers(istioNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -68,7 +69,7 @@ func (i *istioInstallledCase) hPAIsNotDeployed() error {
 	return nil
 }
 
-func (i *istioInstallledCase) hPAIsDeployed() error {
+func (i *istioInstalledCase) hPAIsDeployed() error {
 	list, err := k8sClient.AutoscalingV1().HorizontalPodAutoscalers(istioNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -79,14 +80,14 @@ func (i *istioInstallledCase) hPAIsDeployed() error {
 	return nil
 }
 
-func (i *istioInstallledCase) istioComponentIsInstalled() error {
+func (i *istioInstalledCase) istioComponentIsInstalled() error {
 	if i.pilotPods == nil && i.ingressGwPods == nil {
 		return fmt.Errorf("istio is not installed")
 	}
 	return nil
 }
 
-func (i *istioInstallledCase) istioPodsAreAvailable() error {
+func (i *istioInstalledCase) istioPodsAreAvailable() error {
 	var minReadySeconds = 1
 	pods := append(i.pilotPods.Items, i.ingressGwPods.Items...)
 	for _, pod := range pods {
@@ -98,16 +99,37 @@ func (i *istioInstallledCase) istioPodsAreAvailable() error {
 	return nil
 }
 
-func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
+func (i *istioInstalledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
 	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
 		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d\n Pod list: %v", len(i.ingressGwPods.Items), numberOfPodsRequired, getPodListReport(i.ingressGwPods))
 	}
 	return nil
 }
 
-func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
+func (i *istioInstalledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
 	if len(i.pilotPods.Items) != numberOfPodsRequired {
 		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d\n Pod list: %v", len(i.pilotPods.Items), numberOfPodsRequired, getPodListReport(i.pilotPods))
 	}
+	return nil
+}
+
+func (i *istioInstalledCase) componentHasResourcesSetToCpuAndMemory(component, resourceType, cpu, memory string) error {
+	operator, err := getIstioOperatorFromCluster()
+	if err != nil {
+		return err
+	}
+	resources, err := getResourcesForComponent(operator, component, resourceType)
+	if err != nil {
+		return err
+	}
+
+	if resources.Cpu != cpu {
+		return fmt.Errorf("cpu %s for component %s wasn't expected; expected=%s got=%s", resourceType, component, cpu, resources.Cpu)
+	}
+
+	if resources.Memory != memory {
+		return fmt.Errorf("memory %s for component %s wasn't expected; expected=%s got=%s", resourceType, component, memory, resources.Memory)
+	}
+
 	return nil
 }

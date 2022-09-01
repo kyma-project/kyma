@@ -9,7 +9,10 @@ const {
   scenarioName,
   testNamespace,
   mockNamespace,
+  kymaVersion,
   isSKR,
+  testCompassFlow,
+  skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   timeoutTime,
@@ -38,47 +41,98 @@ const {
   isRuntimeAssignedToScenario,
 } = require('../compass');
 
-
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
-  it('Prepare the test assets', async function() {
-    // runs once before the first test in this block
-    debug('Running with mockNamespace =', mockNamespace);
+  it('Print test initial configs', async function() {
+    debug(`Mock namespace: ${mockNamespace}`);
+    debug(`Test namespace: ${testNamespace}`);
+    debug(`Kyma version: ${kymaVersion}`);
+    debug(`Is SKR cluster: ${isSKR}`);
+    debug(`SKR instance Id: ${skrInstanceId}`);
+    debug(`SKR shoot name: ${shootName}`);
+    debug(`Test Compass flow enabled: ${testCompassFlow}`);
+  });
 
+  it('Prepare SKR Kubeconfig if needed', async function() {
+    // Skip this step if it is not a SKR cluster
+    if (!isSKR) {
+      this.skip();
+    }
+
+    if (!skrInstanceId) {
+      info(`Skipping fetching SKR kubeconfig because skrInstanceId is not set.`);
+      this.skip();
+    }
+
+    // 'skr-test/helpers' initializes KEB clients on import, that is why it is imported only if needed
+    const {getSKRConfig} = require('../skr-test/helpers');
+    const {initK8sConfig} = require('../skr-test/helpers');
+
+    debug(`Fetching SKR config for Instance Id: ${skrInstanceId}`);
+    const shoot = await getSKRConfig(skrInstanceId);
+
+    debug('Initiating SKR K8s config...');
+    await initK8sConfig(shoot);
+  });
+
+  it('Prepare EventMesh secret', async function() {
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
-    // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
-    if (eventMeshSecretFilePath) {
-      debug('Creating Event Mesh secret');
-      const eventMeshInfo = await createEventingBackendK8sSecret(
-          eventMeshSecretFilePath,
-          backendK8sSecretName,
-          backendK8sSecretNamespace,
-      );
-      setEventMeshSourceNamespace(eventMeshInfo['namespace']);
+    // else skip this step and use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
+    if (!eventMeshSecretFilePath) {
+      this.skip();
+    }
+
+    debug('Creating Event Mesh secret');
+    const eventMeshInfo = await createEventingBackendK8sSecret(
+        eventMeshSecretFilePath,
+        backendK8sSecretName,
+        backendK8sSecretNamespace,
+    );
+    setEventMeshSourceNamespace(eventMeshInfo['namespace']);
+  });
+
+  it('Prepare assets without Compass flow', async function() {
+    // Skip this step if compass flow is enabled
+    if (testCompassFlow) {
+      this.skip();
     }
 
     // Deploy Commerce mock application, function and subscriptions for tests
-    if (isSKR) {
-      await prepareAssetsForSKRTests();
-    } else {
-      await prepareAssetsForOSSTests();
+    await prepareAssetsWithoutCompassFlow();
+  });
+
+  it('Prepare assets with Compass flow', async function() {
+    // Skip this step if compass flow is disabled
+    if (!testCompassFlow) {
+      this.skip();
+    }
+
+    // Deploy Commerce mock application, function and subscriptions for tests (includes compass flow)
+    await prepareAssetsWithCompassFlow();
+  });
+
+  afterEach(async function() {
+    // if the test preparation failed, perform the cleanup
+    if (this.currentTest.state === 'failed') {
+      await cleanupTestingResources();
     }
   });
 
-  // prepareAssetsForOSSTests - Sets up CommerceMost for the OSS
-  async function prepareAssetsForOSSTests() {
-    debug('Preparing CommerceMock test fixture on Kyma OSS');
+  // // **** Helper functions ****
+  // prepareAssetsWithoutCompassFlow - Sets up test assets without compass flow
+  async function prepareAssetsWithoutCompassFlow() {
+    debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');
     await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
       error(err); // first error is logged
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
     });
   }
 
-  // prepareAssetsForSKRTests - Sets up CommerceMost for the SKR
-  async function prepareAssetsForSKRTests() {
-    info('Preparing for tests on SKR');
+  // prepareAssetsWithCompassFlow - Sets up test assets with compass flow
+  async function prepareAssetsWithCompassFlow() {
+    debug('Preparing CommerceMock/In-cluster test fixtures with compass flow on SKR');
 
     const skrInfo = await gardener.getShoot(shootName);
 
@@ -94,7 +148,9 @@ describe('Eventing tests preparation', function() {
     if (compassScenarioAlreadyExist) {
       debug(`Compass scenario with the name ${scenarioName} already exist, do not register it again`);
     } else {
-      await setupCompassScenario();
+      debug('Assigning SKR to scenario in Compass');
+      // Create a new scenario (systems/formations) in compass for this test
+      await addScenarioInCompass(director, scenarioName);
     }
 
     // check if assigning the runtime to the scenario is needed
@@ -114,21 +170,4 @@ describe('Eventing tests preparation', function() {
         compassScenarioAlreadyExist,
     );
   }
-
-  // setupCompassScenario adds a compass scenario
-  async function setupCompassScenario() {
-    // Get shoot info from gardener to get compassID for this shoot
-    debug(`Fetching SKR info for shoot: ${shootName}`);
-
-    debug('Assigning SKR to scenario in Compass');
-    // Create a new scenario (systems/formations) in compass for this test
-    await addScenarioInCompass(director, scenarioName);
-  }
-
-  afterEach(async function() {
-    // if the test preparation failed, perform the cleanup
-    if (this.currentTest.state === 'failed') {
-      await cleanupTestingResources();
-    }
-  });
 });
