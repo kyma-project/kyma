@@ -222,7 +222,7 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 	start := time.Now()
 	s := *h.Sender
 	resp, err := s.Send(ctx, event)
-	h.collector.RecordEventType(event.Type(), event.Source())
+	h.collector.RecordEventType(event.Type(), event.Source(), resp)
 	dispatchTime := time.Since(start)
 	if err != nil {
 		h.collector.RecordError()

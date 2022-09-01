@@ -126,8 +126,20 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, rep
 			currentFunction.Status.Commit = commit
 		}
 
-		currentFunction.Status.Runtime = serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime)
+		currentFunction.Status.Runtime = s.instance.Spec.Runtime
 		currentFunction.Status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
+
+		// set scale sub-resource
+		selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})
+		if err != nil {
+			r.log.Warnf("failed to get selector for labelSelector: %w", err)
+			return nil
+		}
+		currentFunction.Status.PodSelector = selector.String()
+
+		if len(s.deployments.Items) > 0 {
+			currentFunction.Status.Replicas = s.deployments.Items[0].Status.Replicas
+		}
 
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
 

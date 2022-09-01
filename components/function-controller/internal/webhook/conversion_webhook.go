@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/pkg/errors"
@@ -16,7 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
@@ -25,7 +25,7 @@ type ConvertingWebhook struct {
 	scheme  *runtime.Scheme
 	client  ctrlclient.Client
 	decoder *conversion.Decoder
-	log     logr.Logger
+	log     *zap.SugaredLogger
 }
 
 const (
@@ -34,10 +34,9 @@ const (
 
 var _ http.Handler = &ConvertingWebhook{}
 
-func NewConvertingWebhook(client ctrlclient.Client, scheme *runtime.Scheme) *ConvertingWebhook {
+func NewConvertingWebhook(client ctrlclient.Client, scheme *runtime.Scheme, log *zap.SugaredLogger) *ConvertingWebhook {
 	//TODO: change signature of method scheme -> decoder
 	decoder, _ := conversion.NewDecoder(scheme)
-	log := controllerruntime.Log.WithName("Converting webhook")
 	return &ConvertingWebhook{
 		client:  client,
 		scheme:  scheme,
@@ -169,8 +168,12 @@ func applyV1Alpha1ToV1Alpha2Annotations(in *serverlessv1alpha1.Function, out *se
 
 func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
 	out.Spec.Env = in.Spec.Env
-	out.Spec.MaxReplicas = in.Spec.MaxReplicas
-	out.Spec.MinReplicas = in.Spec.MinReplicas
+	if in.Spec.MinReplicas != nil || in.Spec.MaxReplicas != nil {
+		out.Spec.ScaleConfig = &serverlessv1alpha2.ScaleConfig{
+			MinReplicas: in.Spec.MinReplicas,
+			MaxReplicas: in.Spec.MaxReplicas,
+		}
+	}
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
@@ -240,7 +243,7 @@ func (w *ConvertingWebhook) convertGitRepositoryV1Alpha1ToV1Alpha2(in *serverles
 func (w *ConvertingWebhook) convertStatusV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.FunctionStatus, out *serverlessv1alpha2.FunctionStatus) {
 	out.Repository = serverlessv1alpha2.Repository(in.Repository)
 	out.Commit = in.Commit
-	out.Runtime = serverlessv1alpha2.RuntimeExtended(in.Runtime)
+	out.Runtime = serverlessv1alpha2.Runtime(in.Runtime)
 	out.RuntimeImageOverride = in.RuntimeImageOverride
 
 	out.Conditions = []serverlessv1alpha2.Condition{}
@@ -277,10 +280,12 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 
 func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
 	out.Spec.Env = in.Spec.Env
-	out.Spec.MaxReplicas = in.Spec.MaxReplicas
-	out.Spec.MinReplicas = in.Spec.MinReplicas
 	out.Spec.Runtime = serverlessv1alpha1.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
+	if in.Spec.ScaleConfig != nil {
+		out.Spec.MaxReplicas = in.Spec.ScaleConfig.MaxReplicas
+		out.Spec.MinReplicas = in.Spec.ScaleConfig.MinReplicas
+	}
 
 	out.Spec.BuildResources = in.Spec.ResourceConfiguration.Build.Resources
 	out.Spec.Resources = in.Spec.ResourceConfiguration.Function.Resources
@@ -299,14 +304,10 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	out.Spec.Type = serverlessv1alpha1.SourceTypeGit
 
 	// check repo name in the annotations,
+	// if not exists it means that the function was created as v1alpha2
 	repoName := ""
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
-	}
-
-	if repoName == "" {
-		// TODO: Improve logging interface
-		w.log.Error(fmt.Errorf("Unable to find GitRepository annotation for function: "), fmt.Sprintf("%s/%s", in.Namespace, in.Name))
 	}
 
 	out.Spec.Source = repoName

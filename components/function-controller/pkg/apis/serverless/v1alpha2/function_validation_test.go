@@ -45,9 +45,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
@@ -104,8 +106,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							"test":        "test",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{
@@ -135,6 +139,25 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.BeNil(),
+		},
+		"Should return error on unexpected runtime name": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: "unknown-runtime-name",
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.runtime",
+				),
+			),
 		},
 		"Should return error when more than one source is filled": {
 			givenFunc: Function{
@@ -259,8 +282,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(-1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(-1),
+					},
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -280,8 +305,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
-					MaxReplicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
+						MaxReplicas: pointer.Int32(1),
+					},
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -377,9 +404,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					MinReplicas: pointer.Int32(0),
-					MaxReplicas: pointer.Int32(0),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(0),
+						MaxReplicas: pointer.Int32(0),
+					},
+					Runtime: NodeJs12,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
@@ -466,9 +495,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -508,15 +539,61 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 				},
 			},
 			specifiedExpectedError: gomega.And(
 				gomega.ContainSubstring("spec.source.gitRepository.reference"),
 				gomega.ContainSubstring("spec.source.gitRepository.baseDir"),
 			),
+			expectedError: gomega.HaveOccurred(),
+		},
+		"Should return error because replicas field is use together with scaleConfig": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Replicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs14,
+					ResourceConfiguration: ResourceConfiguration{
+						Function: ResourceRequirements{
+							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
+								corev1.ResourceCPU:    resource.MustParse("100m"),
+								corev1.ResourceMemory: resource.MustParse("128Mi"),
+							},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+						Build: ResourceRequirements{
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+					},
+				},
+			},
 			expectedError: gomega.HaveOccurred(),
 		},
 	} {
@@ -586,6 +663,16 @@ func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
 				Source: Source{
 					GitRepository: &GitRepositorySource{
 						URL: "git@github.com:kyma-project/kyma.git",
+					},
+				},
+			},
+		},
+		{
+			name: "Valid ssh without .git extension",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "git@github.com:kyma-project/kyma",
 					},
 				},
 			},

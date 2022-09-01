@@ -25,9 +25,12 @@ To troubleshoot Eventing-related issues:
 - [Basic Eventing Troubleshooting](../../../04-operation-guides/troubleshooting/eventing/evnt-01-eventing-troubleshooting.md)
 - [NATS JetStream Troubleshooting](../../../04-operation-guides/troubleshooting/eventing/evnt-02-jetstream-troubleshooting.md)
 - [Event Type Collision](../../../04-operation-guides/troubleshooting/eventing/evnt-03-type-collision.md)
+- [Eventing Backend Storage Full](../../../04-operation-guides/troubleshooting/eventing/evnt-04-free-jetstream-storage.md)
 
 For other technical resources, check out these links on the Kyma GitHub repository:
 
 - [Eventing Helm chart](https://github.com/kyma-project/kyma/tree/main/resources/eventing)
 - [Event Publishing Proxy](https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy)
 - [Eventing Controller](https://github.com/kyma-project/kyma/tree/main/components/eventing-controller)
+- [Grafana Dashboards for Eventing](../../../04-operation-guides/operations/evnt-01-eventing-dashboards.md)
+- [Eventing Metrics](../../../04-operation-guides/operations/evnt-02-eventing-metrics.md)

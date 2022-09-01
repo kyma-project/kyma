@@ -12,6 +12,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+var one int32 = 1
+var two int32 = 2
+
 func ValidV1Alpha2Function(t *testing.T) string {
 	f := serverlessv1alpha2.Function{
 		TypeMeta: metav1.TypeMeta{
@@ -53,6 +56,10 @@ func ValidV1Alpha2Function(t *testing.T) string {
 				Inline: &serverlessv1alpha2.InlineSource{
 					Source: `def main(event, context):\n  return \"hello world\"\n`,
 				}},
+			ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: &one,
+				MaxReplicas: &two,
+			},
 			Runtime: serverlessv1alpha2.Python39,
 		}}
 
