@@ -20,7 +20,6 @@ type Config struct {
 }
 
 func GetRuntimeConfig(runtime serverlessv1alpha2.Runtime) Config {
-	runtime = setDefaultRuntime(runtime)
 	config := Config{
 		Runtime:                 runtime,
 		DockerfileConfigMapName: fmt.Sprintf("dockerfile-%s", runtime),
@@ -60,16 +59,6 @@ func fillConfigFileNames(runtime serverlessv1alpha2.Runtime, config *Config) {
 		config.FunctionFile = "handler.py"
 		return
 	}
-}
-
-func setDefaultRuntime(runtime serverlessv1alpha2.Runtime) serverlessv1alpha2.Runtime {
-	switch runtime {
-	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16, serverlessv1alpha2.Python39:
-		return runtime
-	default:
-		return serverlessv1alpha2.NodeJs12
-	}
-
 }
 
 func GetRuntime(r serverlessv1alpha2.Runtime) Runtime {

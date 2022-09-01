@@ -63,18 +63,6 @@ func TestGetRuntimeConfig(t *testing.T) {
 				RuntimeEnvs: []corev1.EnvVar{
 					{Name: "FUNC_RUNTIME", Value: "nodejs16"}},
 			},
-		},
-		"default": {
-			name:    "nodejs12",
-			runtime: "default",
-			want: runtime.Config{
-				Runtime:                 serverlessv1alpha2.NodeJs12,
-				DependencyFile:          "package.json",
-				FunctionFile:            "handler.js",
-				DockerfileConfigMapName: "dockerfile-nodejs12",
-				RuntimeEnvs: []corev1.EnvVar{{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-					{Name: "FUNC_RUNTIME", Value: "nodejs12"}},
-			},
 		}} {
 		t.Run(testName, func(t *testing.T) {
 			//given
