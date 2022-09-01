@@ -22,7 +22,7 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
-	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
+	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/prometheus/client_golang/prometheus"
@@ -64,10 +64,10 @@ func NewReconciler(
 		Name: "telemetry_plugins_unsupported_total",
 		Help: "Number of custom filters or outputs to indicate unsupported mode.",
 	})
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 
 	metrics.Registry.MustRegister(r.unsupportedTotal)
-	commonmetrics.RegisterMetrics()
+	controllermetrics.RegisterMetrics()
 
 	return &r
 }

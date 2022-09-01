@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	commonmetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
+	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -53,7 +53,7 @@ func NewReconciler(client client.Client, config Config) *Reconciler {
 	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, commonmetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
 
-	commonmetrics.RegisterMetrics()
+	controllermetrics.RegisterMetrics()
 
 	return &r
 }
