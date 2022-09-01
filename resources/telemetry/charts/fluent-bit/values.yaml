@@ -246,9 +246,9 @@ envFrom:
       name: telemetry-fluent-bit-env
       optional: true
 
-extraContainers: 
+extraContainers: |
   - name: exporter
-    image: directory_size_exporter
+    image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
     resources:
       limits:
         cpu: 100m

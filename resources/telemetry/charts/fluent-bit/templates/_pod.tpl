@@ -100,36 +100,13 @@ containers:
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
-  {{- if .Values.extraContainers }}
-  {{- $gl := .Values.global}}
-  {{- range .Values.extraContainers }}
-  {{- $name := .image}}
-  {{- $namelist := index $gl.images $name}}
-  - name: {{ .name }}
-    image: "{{ include "imageurl" (dict "reg" $gl.containerRegistry "img" $namelist ) }}"
-    resources:
-    {{- range $mapkey, $map := .resources }} 
-      {{ $mapkey }}:
-      {{- range $key, $val := $map }} 
-        {{ $key }}: {{ $val }}
-      {{- end }}
-    {{- end }}
-  {{- if .ports }}
-    ports:
-    {{- range $mapkey, $map := .ports }} 
-      - name: {{ $map.name }}
-        containerPort: {{ $map.containerPort }}
-        protocol: {{ $map.protocol }}
-    {{- end }}
-  {{- end }}
-  {{- if .volumeMounts }}
-    volumeMounts:
-    {{- range $mapkey, $map := .volumeMounts }} 
-      - name: {{ $map.name }}
-        mountPath: {{ $map.mountPath }}
-    {{- end }}
-  {{- end }}
-  {{- end }}
+  {{- with .Values.extraContainers }}
+extraContainers:
+  {{- if kindIs "string" . }}
+    {{- tpl . $ | nindent 2 }}
+  {{- else }}
+    {{-  toYaml . | nindent 2 }}
+  {{- end -}}
   {{- end }}
 volumes:
   - name: config
