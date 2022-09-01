@@ -248,7 +248,7 @@ envFrom:
 
 extraContainers: 
   - name: exporter
-    image: "eu.gcr.io/kyma-project/directory-size-exporter:212d37f7"
+    image: directory_size_exporter
     resources:
       limits:
         cpu: 100m

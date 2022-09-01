@@ -103,8 +103,10 @@ containers:
   {{- if .Values.extraContainers }}
   {{- $gl := .Values.global}}
   {{- range .Values.extraContainers }}
+  {{- $name := .image}}
+  {{- $namelist := index $gl.images $name}}
   - name: {{ .name }}
-    image: {{ .image }}
+    image: "{{ include "imageurl" (dict "reg" $gl.containerRegistry "img" $namelist ) }}"
     resources:
     {{- range $mapkey, $map := .resources }} 
       {{ $mapkey }}:
