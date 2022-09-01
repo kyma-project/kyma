@@ -5,7 +5,7 @@
 {{/* Expand the name of the chart. This is suffixed with -alertmanager, which means subtract 13 from longest 63 available */}}
 {{- define "kube-prometheus-stack.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 50 | trimSuffix "-" -}}
-{{- end -}}
+{{- end }}
 
 {{/*
 Create a default fully qualified app name.
@@ -30,38 +30,38 @@ The longest name that gets created adds and extra 37 characters, so truncation s
 {{/* Fullname suffixed with operator */}}
 {{- define "kube-prometheus-stack.operator.fullname" -}}
 {{- printf "%s-operator" (include "kube-prometheus-stack.fullname" .) -}}
-{{- end -}}
+{{- end }}
 
 {{/* Prometheus custom resource instance name */}}
 {{- define "kube-prometheus-stack.prometheus.crname" -}}
-{{- if .Values.cleanPrometheusOperatorObjectNames -}}
-{{- include "kube-prometheus-stack.fullname" . -}}
-{{- else -}}
-{{- print (include "kube-prometheus-stack.fullname" .) "-prometheus" -}}
-{{- end -}}
-{{- end -}}
+{{- if .Values.cleanPrometheusOperatorObjectNames }}
+{{- include "kube-prometheus-stack.fullname" . }}
+{{- else }}
+{{- print (include "kube-prometheus-stack.fullname" .) "-prometheus" }}
+{{- end }}
+{{- end }}
 
 {{/* Alertmanager custom resource instance name */}}
 {{- define "kube-prometheus-stack.alertmanager.crname" -}}
-{{- if .Values.cleanPrometheusOperatorObjectNames -}}
-{{- include "kube-prometheus-stack.fullname" . -}}
-{{- else -}}
+{{- if .Values.cleanPrometheusOperatorObjectNames }}
+{{- include "kube-prometheus-stack.fullname" . }}
+{{- else }}
 {{- print (include "kube-prometheus-stack.fullname" .) "-alertmanager" -}}
-{{- end -}}
-{{- end -}}
+{{- end }}
+{{- end }}
 
 {{/* Fullname suffixed with thanos-ruler */}}
 {{- define "kube-prometheus-stack.thanosRuler.fullname" -}}
 {{- printf "%s-thanos-ruler" (include "kube-prometheus-stack.fullname" .) -}}
-{{- end -}}
+{{- end }}
 
 {{/* Create chart name and version as used by the chart label. */}}
 {{- define "kube-prometheus-stack.chartref" -}}
 {{- replace "+" "_" .Chart.Version | printf "%s-%s" .Chart.Name -}}
-{{- end -}}
+{{- end }}
 
 {{/* Generate basic labels */}}
-{{- define "kube-prometheus-stack.labels" -}}
+{{- define "kube-prometheus-stack.labels" }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: "{{ replace "+" "_" .Chart.Version }}"
@@ -69,10 +69,10 @@ app.kubernetes.io/part-of: {{ template "kube-prometheus-stack.name" . }}
 chart: {{ template "kube-prometheus-stack.chartref" . }}
 release: {{ $.Release.Name | quote }}
 heritage: {{ $.Release.Service | quote }}
-{{- if .Values.commonLabels -}}
+{{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
-{{- end -}}
-{{- end -}}
+{{- end }}
+{{- end }}
 
 {{/* Create the name of kube-prometheus-stack service account to use */}}
 {{- define "kube-prometheus-stack.operator.serviceAccountName" -}}
@@ -188,7 +188,7 @@ Use the prometheus-node-exporter namespace override for multi-namespace deployme
   {{- else -}}
     {{- print "policy/v1beta1" -}}
   {{- end -}}
-{{- end -}}
+  {{- end -}}
 
 {{/* Get value based on current Kubernetes version */}}
 {{- define "kube-prometheus-stack.kubeVersionDefaultValue" -}}
@@ -204,7 +204,7 @@ Use the prometheus-node-exporter namespace override for multi-namespace deployme
       {{- print $old -}}
     {{- end -}}
   {{- else -}}
-    {{- print $default -}}
+    {{- print $default }}
   {{- end -}}
 {{- end -}}
 
@@ -242,15 +242,14 @@ global:
   - pullSecret2
 */}}
 {{- define "kube-prometheus-stack.imagePullSecrets" -}}
-{{- range .Values.global.imagePullSecrets -}}
-  {{- if eq (typeOf .) "map[string]interface {}" -}}
+{{- range .Values.global.imagePullSecrets }}
+  {{- if eq (typeOf .) "map[string]interface {}" }}
 - {{ toYaml . | trim }}
-  {{- else -}}
+  {{- else }}
 - name: {{ . }}
-  {{- end -}}
+  {{- end }}
+{{- end }}
 {{- end -}}
-{{- end -}}
-
 {{/* Create URL for container images */}}
 {{- define "imageurl" -}}
   {{- $registry := default $.reg.path $.img.containerRegistryPath -}}
