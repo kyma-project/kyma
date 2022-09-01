@@ -1008,8 +1008,20 @@ async function findKymaAdminBindingForUser(targetUser) {
   );
 }
 
-async function ensureKymaAdminBindingExistsForUser(targetUser) {
-  const binding = await findKymaAdminBindingForUser(targetUser);
+async function ensureKymaAdminBindingExistsForUser(targetUser, retryOptions = null) {
+  let binding;
+  if (retryOptions != null) {
+    for (let i = 0; i < retryOptions.numberOfTries; i++) {
+      sleep(retryOptions.sleep);
+      if (await findKymaAdminBindingForUser(targetUser) !== undefined) {
+        info(`Found admin binding for ${targetUser}`);
+        break;
+      }
+    }
+  } else {
+    binding = await findKymaAdminBindingForUser(targetUser);
+  }
+
   expect(binding).not.to.be.undefined;
   expect(binding.users).to.include(targetUser);
 }

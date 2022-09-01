@@ -6,13 +6,11 @@ const {
 } = require('../../kyma-environment-broker');
 const {
   ensureKymaAdminBindingExistsForUser,
-  ensureKymaAdminBindingDoesNotExistsForUser,
-  sleep
+  ensureKymaAdminBindingDoesNotExistsForUser
 } = require('../../utils');
 const {keb, kcp, gardener} = require('../helpers');
 
 const updateTimeout = 1000 * 60 * 20; // 20m
-const sleepTimeAfterUpdate = 180000 // 3m
 
 function oidcE2ETest(options, getShootInfoFunc) {
   describe('OIDC Test', function() {
@@ -148,7 +146,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     });
 
     it('Assure only initial cluster admins are configured', async function() {
-      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0]);
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId[0], { numberOfTries: 10, sleep: 180000 });
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);
     });
