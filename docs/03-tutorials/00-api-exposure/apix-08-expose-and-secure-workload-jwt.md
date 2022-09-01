@@ -23,7 +23,7 @@ To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
    export GATEWAY=$NAMESPACE/httpbin-gateway #If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
@@ -74,7 +74,7 @@ To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
    export GATEWAY=$NAMESPACE/httpbin-gateway #If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 

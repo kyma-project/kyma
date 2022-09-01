@@ -3,6 +3,7 @@ title: Set up a custom domain for a workload
 ---
 
 This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
+  >**NOTE:** Feel free to skip this tutorial if you use a Kyma domain instead of your custom domain.
 
 ## Prerequisites
 
@@ -10,19 +11,13 @@ To follow this tutorial, use Kyma 2.0 or higher.
 
 If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
 
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create those workloads, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
+
 ## Steps
 
 Follow these steps to set up your custom domain and prepare a certificate required to expose a workload.
 
-1. Create a Namespace and export it as an environment variable. Run:
-
-   ```bash
-   export NAMESPACE={NAMESPACE_NAME}
-   kubectl create ns $NAMESPACE
-   kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
-   ```
-
-2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
+1. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
 
   See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Then run:
 
@@ -30,7 +25,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
   ```
 
-3. Create a DNSProvider and a DNSEntry custom resource (CR).
+2. Create a DNSProvider and a DNSEntry custom resource (CR).
 
    - Export the following values as environment variables and run the command provided.
   
@@ -39,7 +34,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    ```bash
    export SPEC_TYPE={PROVIDER_TYPE}
    export SECRET={SECRET_NAME}
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # The domain that you own, e.g. mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # The domain that you own, for example, mydomain.com
    ```
 
     ```bash
@@ -64,7 +59,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    - Export the following values as environment variables and run the command provided:
 
    ```bash
-   export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
    ```
 
@@ -78,14 +72,14 @@ Follow these steps to set up your custom domain and prepare a certificate requir
       annotations:
         dns.gardener.cloud/class: garden
     spec:
-      dnsName: "$WILDCARD"
+      dnsName: "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
       ttl: 600
       targets:
         - $IP
     EOF
     ```
 
-4. Create an Issuer CR.
+3. Create an Issuer CR.
 
   Export the following values as environment variables and run the command provided.
 
@@ -111,17 +105,17 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        domains:
          include:
            - $DOMAIN_TO_EXPOSE_WORKLOADS
-           - "$WILDCARD"
+           - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
    EOF
    ```
 
-5. Create a Certificate CR.
+4. Create a Certificate CR.
 
   Export the following values as environment variables and run the command provided.
 
    ```bash
-   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, e.g. httpbin-tls-credentials
-   export ISSUER={ISSUER_NAME} # The name of the Issuer CR, e.g.letsencrypt-staging.
+   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, for example, httpbin-tls-credentials
+   export ISSUER={ISSUER_NAME} # The name of the Issuer CR, for example,letsencrypt-staging.
    ```
 
    ```bash
@@ -140,29 +134,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    EOF
    ```
 
-## Next steps
-
-Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
-
-Once you have your workload deployed, you can continue by choosing one of the following tutorials:
-
-- [Expose a workload](./apix-03-expose-workload-apigateway.md)
-- [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
-- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------------------------------------------------------
-3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
+5. Create a Gateway CR. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -183,6 +155,18 @@ Once you have your workload deployed, you can continue by choosing one of the fo
            mode: SIMPLE
            credentialName: $TLS_SECRET
          hosts:
-           - "$WILDCARD"
+           - "*.$DOMAIN_TO_EXPOSE_WORKLOADS"
    EOF
    ```
+
+## Next steps
+
+Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
+
+Once you have your workload deployed, you can continue by choosing one of the following tutorials:
+
+- [Expose a workload](./apix-03-expose-workload-apigateway.md)
+- [Expose multiple workloads on the same host](./apix-04-expose-multiple-workloads.md)
+- [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
+- [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
+- [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)

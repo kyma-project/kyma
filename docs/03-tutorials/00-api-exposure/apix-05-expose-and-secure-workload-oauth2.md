@@ -115,7 +115,7 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
    ```
 
 2. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
@@ -163,7 +163,7 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
    ```
 
 2. Expose the Function and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
