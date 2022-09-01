@@ -16,7 +16,7 @@ spec:
         app: echoserver
     spec:
       containers:
-        - image: ealen/echo-server
+        - image: ealen/echo-server:dd6a18681044
           name: echoserver
           ports:
             - containerPort: 80
