@@ -358,7 +358,6 @@ config:
         HTTP_Port {{ .Values.metricsPort }}
         Health_Check On
         storage.path /data/log/flb-storage/
-        storage.metrics on
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |
