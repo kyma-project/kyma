@@ -119,7 +119,7 @@ func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alph
 }
 
 func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha2.Function) map[string]string {
-	if instance.Labels == nil {
+	if instance.Spec.Template == nil {
 		return r.deploymentSelectorLabels(instance)
 	}
 	return r.mergeLabels(instance.Spec.Template.Labels, r.deploymentSelectorLabels(instance))
