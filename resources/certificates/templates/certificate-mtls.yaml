@@ -1,4 +1,5 @@
-{{- if  and (.Values.global.mtlsGateway) (.Values.global.mtlsGateway.tlsCrt) (.Values.global.mtlsGateway.tlsKey) -}}
+{{- if and (.Values.global.mtlsGateway) (.Values.global.mtlsGateway.enabled) -}}
+{{- if  and (.Values.global.mtlsGateway.tlsCrt) (.Values.global.mtlsGateway.tlsKey) -}}
 ---
 # User-provided TLS always take precedence
 apiVersion: v1
@@ -10,7 +11,7 @@ type: Opaque
 data:
   tls.crt: {{ .Values.global.mtlsGateway.tlsCrt }}
   tls.key: {{ .Values.global.mtlsGateway.tlsKey }}
-{{- else if not (.Values.global.domainName) -}}
+{{- else if not (.Values.global.domainName) }}
 ---
 # No user-provided TLS data and no domain name. Fallback to default static certificate
 # for mtls.
@@ -23,7 +24,7 @@ type: Opaque
 data:
   tls.crt: {{ .Values.certificates.kymaMtls.default.tlsCrt }}
   tls.key: {{ .Values.certificates.kymaMtls.default.tlsKey }}
-{{- else -}}
+{{ else }}
 ---
 # Domain is given, but not TLS data. Generate the `Certificate` object
 apiVersion: cert.gardener.cloud/v1alpha1
@@ -34,7 +35,8 @@ metadata:
 spec:
   commonName: "*.mtls.{{ .Values.global.domainName }}"
   secretName: {{ .Values.certificates.kymaMtls.name }}
-{{- end }}
+{{ end }}
+{{ if .Values.global.mtlsGateway.clientCacertBundle }}
 ---
 # Create cacert secret
 apiVersion: v1
@@ -44,8 +46,6 @@ metadata:
   namespace: {{ .Values.certificates.kymaMtls.namespace }}
 type: Opaque
 data:
-{{ if and (.Values.global.mtlsGateway) (.Values.global.mtlsGateway.cacertBundle) }}
-  cacert: {{ .Values.global.mtlsGateway.cacertBundle }}
-{{ else }}
-  cacert: {{ .Values.certificates.kymaMtls.default.cacertBundle }}
+  cacert: {{ .Values.global.mtlsGateway.clientCacertBundle }}
 {{ end }}
+{{- end -}}
