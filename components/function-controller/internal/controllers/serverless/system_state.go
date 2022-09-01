@@ -241,7 +241,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if *s.instance.Spec.RuntimeImageOverride != "" {
+	if s.instance.Spec.RuntimeImageOverride != nil {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", *s.instance.Spec.RuntimeImageOverride))
 	}
 	labels := s.functionLabels()
