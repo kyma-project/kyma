@@ -9,7 +9,7 @@ import (
 
 const (
 	// deliveryMetricKey name of the delivery per subscription metric
-	deliveryMetricKey = "delivery_per_subscription"
+	deliveryMetricKey = "eventing_ec_delivery_per_subscription_total"
 
 	// deliveryMetricHelp help text for the delivery per subscription metric
 	deliveryMetricHelp = "Number of dispatched events per subscription"
@@ -59,7 +59,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.eventTypes.Collect(ch)
 }
 
-// RecordDeliveryPerSubscription records the delivery_per_subscription metric
+// RecordDeliveryPerSubscription records the eventing_ec_delivery_per_subscription_totalS metric
 func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
 	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }

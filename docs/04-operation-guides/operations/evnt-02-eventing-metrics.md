@@ -18,7 +18,7 @@ Kyma Eventing provides several Grafana Dashboard with various [metrics](./evnt-0
 | Metric    |  Description |
 |-------------|:--------------|
 | **event_type_subscribed** | All the eventTypes subscribed using the Subscription CRD. |
-| **delivery_per_subscription** | Number of dispatched events per subscription with information regarding the status code and its sink. |
+| **eventing_ec_delivery_per_subscription_total** | Number of dispatched events per subscription with information regarding the status code and its sink. |
 
 ### Metrics Emitted by NATS Exporter:
 

@@ -48,7 +48,7 @@ const dashboards = {
   delivery_per_subscription: {
     title: 'Delivery per Subscription',
     query: `
-         sum (delivery_per_subscription{response_code=~"[245].*"}) 
+         sum (eventing_ec_delivery_per_subscription_total{response_code=~"[245].*"}) 
           by (namespace, subscription_name,event_type,sink,response_code)`,
     backends: ['nats'],
     assert: function(result) {

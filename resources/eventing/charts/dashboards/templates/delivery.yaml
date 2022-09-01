@@ -189,14 +189,14 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(delivery_per_subscription{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(eventing_ec_delivery_per_subscription_total{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
                 "interval": "",
                 "legendFormat": "{{event_type}} 5xx (subscriptionName={{subscription_name}}, sink={{sink}})",
                 "refId": "A"
               },
               {
                 "exemplar": true,
-                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(delivery_per_subscription{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(eventing_ec_delivery_per_subscription_total{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 4xx (subscriptionName={{subscription_name}}, sink={{sink}})",
@@ -400,7 +400,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(delivery_per_subscription{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(eventing_ec_delivery_per_subscription_total{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 2xx (subscriptionName={{subscription_name}}, sink={{sink}})",
