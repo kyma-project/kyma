@@ -22,14 +22,14 @@ func Test_getCallBack(t *testing.T) {
 	// given
 
 	const (
-		subKeyPrefix     = "subKeyPrefix"
-		sinkURL          = "http://localhorst:4444"
-		subscriptionName = "subscriptionName"
+		givenSubKeyPrefix     = "givenSubKeyPrefix"
+		givenSinkURL          = "http://localhorst:4444"
+		givenSubscriptionName = "givenSubscriptionName"
 	)
 	sinks := sync.Map{}
 
 	// store a sink for the given subscription
-	sinks.Store(subKeyPrefix, sinkURL)
+	sinks.Store(givenSubKeyPrefix, givenSinkURL)
 
 	defaultLogger := fixtLogger(t)
 	metricsCollector := metrics.NewCollector()
@@ -40,7 +40,7 @@ func Test_getCallBack(t *testing.T) {
 	m.On("Ack").Return(nil)
 
 	// provide the underlying NATS message
-	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), subscriptionName)
+	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), givenSubscriptionName)
 	m.On("Msg").Return(natsMessage)
 
 	// mock the part where the cloud event is sent to the sink urlk part
@@ -48,11 +48,8 @@ func Test_getCallBack(t *testing.T) {
 	//       mockery --name "Client" --srcpkg github.com/cloudevents/sdk-go/v2/client
 	cloudEventSender := mocks.Client{}
 	cloudEventSender.On("Send", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-		// Ensure the sink URL is correctly set in the context.
 		ctx := args.Get(0).(context.Context)
-		sink := cloudevents.TargetFromContext(ctx)
-		assert.NotNil(t, sink, "Error while ensuring the sink is not nil")
-		assert.Equal(t, sink.String(), sinkURL, "Error while matching the sink URLs.")
+		ensureSinkURL(ctx, t, givenSinkURL)
 
 		// Ensure the passed event is correct.
 		event := args.Get(1).(cloudevents.Event)
