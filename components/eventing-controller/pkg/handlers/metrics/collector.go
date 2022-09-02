@@ -39,7 +39,7 @@ type Collector struct {
 var _ CollectorInterface = &Collector{}
 
 // NewCollector a new instance of Collector
-func NewCollector() CollectorInterface {
+func NewCollector() *Collector {
 	return &Collector{
 		deliveryPerSubscription: prometheus.NewCounterVec(
 			prometheus.CounterOpts{

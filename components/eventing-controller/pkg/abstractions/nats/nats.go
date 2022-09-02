@@ -20,7 +20,7 @@ type Msg struct {
 
 type AckOpt = nats.AckOpt
 
-func NewMsg(msg *nats.Msg) Messager {
+func NewMsg(msg *nats.Msg) *Msg {
 	return &Msg{
 		msg: msg,
 	}
