@@ -83,7 +83,7 @@ service:
 serviceMonitor:
   enabled: true
   serviceMonitorPorts:
-    - port: http-storage-metrics
+    - port: http-buff-metr
       path: /metrics
       scheme: https
       tlsConfig:
@@ -256,7 +256,7 @@ extraContainers: |
       requests:
         memory: 5Mi
     ports:
-      - name: http-storage-metrics
+      - name: http-buff-metr
         containerPort: 2021
         protocol: TCP
     volumeMounts:
@@ -268,7 +268,7 @@ flush: 1
 metricsPort: 2020
 
 extraPorts:
-  - name: http-storage-metrics
+  - name: http-buff-metr
     containerPort: 2021
     protocol: TCP
     port: 2021
