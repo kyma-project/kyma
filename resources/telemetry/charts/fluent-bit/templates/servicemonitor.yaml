@@ -45,6 +45,18 @@ spec:
         certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
         keyFile: /etc/prometheus/secrets/istio.default/key.pem
         insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+    {{- if .Values.serviceMonitor.serviceMonitorPorts }}
+    {{- range .Values.serviceMonitor.serviceMonitorPorts }}
+    - port: {{ .port }}
+      path: {{ .path }}
+      scheme: {{ .scheme }}
+      tlsConfig:
+        caFile: {{ .tlsConfig.caFile }}
+        certFile: {{ .tlsConfig.certFile }}
+        keyFile: {{ .tlsConfig.keyFile }}
+        insecureSkipVerify: {{ .tlsConfig.insecureSkipVerify }}
+    {{- end }}
+    {{- end }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
