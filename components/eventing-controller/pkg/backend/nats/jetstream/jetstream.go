@@ -414,7 +414,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			continue
 		}
 
-		consumerInfo, err := js.jsCtx.ConsumerInfo(js.config.JSStreamName, jsSubKey.ConsumerName())
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
 		if err != nil && err != nats.ErrConsumerNotFound {
 			log.Errorw("Failed to get consumer info", "error", err)
 			continue
