@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-nodejs-12
+  name: dockerfile-nodejs12
   namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
@@ -25,7 +25,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-nodejs-14
+  name: dockerfile-nodejs14
   namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
@@ -49,7 +49,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-nodejs-16
+  name: dockerfile-nodejs16
   namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
@@ -76,7 +76,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-python-39
+  name: dockerfile-python39
   namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
