@@ -273,7 +273,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	// CreateOrUpdate status of the CR
 	err = r.syncBackendStatus(ctx, backendStatus, publisherDeploy)
 	if err != nil {
-		return ctrl.Result{}, xerrors.Errorf("failed to create/update EventingBackend status: %v", err)
+		return ctrl.Result{}, xerrors.Errorf("failed to create/update %s EventingBackend status: %v", r.backendType, err)
 	}
 
 	return ctrl.Result{}, nil
@@ -387,7 +387,7 @@ func (r *Reconciler) updateStatusAndEmitEvent(ctx context.Context, currentBacken
 	desiredBackend.Status = *newBackendStatus
 
 	if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-		return xerrors.Errorf("failed to update EventingBackend status: %v", err)
+		return xerrors.Errorf("failed to update %s EventingBackend status: %v", r.backendType, err)
 	}
 
 	// emit event
