@@ -101,7 +101,6 @@ containers:
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
   {{- with .Values.extraContainers }}
-extraContainers:
   {{- if kindIs "string" . }}
     {{- tpl . $ | nindent 2 }}
   {{- else }}
