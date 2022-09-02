@@ -414,7 +414,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			continue
 		}
 
-		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.config.JSStreamName, jsSubKey.ConsumerName())
 		if err != nil && err != nats.ErrConsumerNotFound {
 			log.Errorw("Failed to get consumer info", "error", err)
 			continue
@@ -422,7 +422,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 
 		// create the consumer in case it doesn't exist
 		if consumerInfo == nil {
-			consumerInfo, err = js.jsCtx.AddConsumer(
+			_, err = js.jsCtx.AddConsumer(
 				js.Config.JSStreamName,
 				js.getConsumerConfig(subscription, jsSubKey, jsSubject),
 			)
@@ -433,17 +433,12 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			log.Debug("Created consumer on JetStream")
 		}
 
-		if consumerInfo.PushBound {
-			continue
-		}
-
 		// subscribe to the given subject using the existing consumer
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
-
 		if err != nil {
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
 		}
