@@ -99,6 +99,6 @@ describe('SKR nightly', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
+
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  commerceMockTest(options);
 });
