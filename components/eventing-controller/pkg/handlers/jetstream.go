@@ -11,6 +11,8 @@ import (
 	"time"
 
 	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	// TODO(nils): can we find a better import name ?
+	absnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/abstractions/nats"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
@@ -163,7 +165,8 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	// async callback for maxInflight messages
 	callback := js.getCallback(subKeyPrefix, subscription.Name)
 	asyncCallback := func(m *nats.Msg) {
-		go callback(m)
+		absMsg := absnats.NewMsg(m)
+		go callback(absMsg)
 	}
 
 	js.bindConsumersForInvalidNATSSubscriptions(subscription, asyncCallback, log)
@@ -435,8 +438,8 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 	return defaultOpts
 }
 
-func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
-	return func(msg *nats.Msg) {
+func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) absnats.MsgHandler {
+	return func(msg absnats.Messager) {
 		// fetch sink info from storage
 		sinkValue, ok := js.sinks.Load(subKeyPrefix)
 		if !ok {
@@ -449,7 +452,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := convertMsgToCE(msg)
+		ce, err := convertAbsMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return

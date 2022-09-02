@@ -33,7 +33,11 @@ func Test_getCallBack(t *testing.T) {
 	defaultLogger := fixtLogger(t)
 	metricsCollector := metrics.NewCollector()
 	cloudEvent := fixtCloudEvent(t)
+	m := mocks.Messager{}
+	m.On("Ack").Return(nil)
 	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), subscriptionName)
+	m.On("Msg").Return(natsMessage)
+	// natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), subscriptionName)
 	// TODO: how to ack the message ?
 	// require.NoError(t, natsMessage.Ack(), "Error while acking the NATS message")
 
@@ -65,7 +69,7 @@ func Test_getCallBack(t *testing.T) {
 
 	// when
 	natsMsgHandler := handler.getCallback(subKeyPrefix, subscriptionName)
-	natsMsgHandler(natsMessage)
+	natsMsgHandler(&m)
 
 	// then
 	// expect that the event was sent

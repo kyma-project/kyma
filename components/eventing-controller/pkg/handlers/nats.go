@@ -11,6 +11,8 @@ import (
 
 	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
 
+	// TODO(nils): can we find a better import name ?
+	absnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/abstractions/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"k8s.io/apimachinery/pkg/types"
@@ -345,6 +347,19 @@ func (n *Nats) namedLogger() *zap.SugaredLogger {
 func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	event := cev2event.New(cev2event.CloudEventsVersionV1)
 	err := json.Unmarshal(msg.Data, &event)
+	if err != nil {
+		return nil, err
+	}
+	if err := event.Validate(); err != nil {
+		return nil, err
+	}
+	return &event, nil
+}
+
+// NOTE: Duplicating this method so that I don't need to change the nats handler as well (for now)
+func convertAbsMsgToCE(absMsg absnats.Messager) (*cev2event.Event, error) {
+	event := cev2event.New(cev2event.CloudEventsVersionV1)
+	err := json.Unmarshal(absMsg.Msg().Data, &event)
 	if err != nil {
 		return nil, err
 	}
