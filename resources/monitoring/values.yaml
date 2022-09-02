@@ -252,50 +252,29 @@ alertmanager:
   ##
   config: |-
    {{- $isSlackEnabled := and .Values.global.alertTools.credentials.slack .Values.global.alertTools.credentials.slack.channel .Values.global.alertTools.credentials.slack.apiurl -}}
-    global:
-      resolve_timeout: 5m
-    inhibit_rules:
-      - source_matchers:
-          - 'severity = critical'
-        target_matchers:
-          - 'severity =~ warning|info'
-        equal:
-          - 'namespace'
-          - 'alertname'
-      - source_matchers:
-          - 'severity = warning'
-        target_matchers:
-          - 'severity = info'
-        equal:
-          - 'namespace'
-          - 'alertname'
-      - source_matchers:
-          - 'alertname = InfoInhibitor'
-        target_matchers:
-          - 'severity = info'
-        equal:
-          - 'namespace'
-    route:
-      group_by: ['job']
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 12h
-      receiver: 'null'
-      routes:
-      - receiver: 'null'
-        matchers:
-          - alertname =~ "InfoInhibitor|Watchdog"
-    {{- if $isSlackEnabled }}
+   global:
+     resolve_timeout: 5m
+   route:
+     group_by: ['job']
+     group_wait: 30s
+     group_interval: 5m
+     repeat_interval: 12h
+     receiver: 'null'
+     routes:
+     - match:
+         alertname: Watchdog
+       receiver: 'null'
+     {{- if $isSlackEnabled }}
      - continue: true
        match_re:
         {{- toYaml .Values.global.alertTools.credentials.slack.matchExpression | nindent 6 }}
        routes:
         {{- toYaml .Values.global.alertTools.credentials.slack.routes | nindent 6 }}
        receiver: "slack"
-    {{- end }}
-    receivers:
-    - name: 'null'
-    {{- if $isSlackEnabled }}
+     {{- end }}
+   receivers:
+   - name: 'null'
+   {{- if $isSlackEnabled }}
    - name: "slack"
      slack_configs:
      - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
@@ -309,9 +288,9 @@ alertmanager:
        title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.domainName }})'
        title_link: 'https://console.{{ .Values.global.domainName }}'
        text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
-    {{- end }}
-    templates:
-    - '/etc/alertmanager/config/*.tmpl'
+   {{- end }}
+   templates:
+   - '/etc/alertmanager/config/*.tmpl'
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,
