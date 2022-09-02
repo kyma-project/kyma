@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"sync"
 	"testing"
@@ -22,7 +23,7 @@ func Test_getCallBack(t *testing.T) {
 
 	const (
 		subKeyPrefix     = "subKeyPrefix"
-		sinkURL          = "some url"
+		sinkURL          = "http://localhorst:4444"
 		subscriptionName = "subscriptionName"
 	)
 	sinks := sync.Map{}
@@ -34,25 +35,24 @@ func Test_getCallBack(t *testing.T) {
 	metricsCollector := metrics.NewCollector()
 	cloudEvent := fixtCloudEvent(t)
 	m := mocks.Messager{}
+
+	// simulate that acking the message returns no error
 	m.On("Ack").Return(nil)
+
+	// provide the underlying NATS message
 	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), subscriptionName)
 	m.On("Msg").Return(natsMessage)
-	// natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), subscriptionName)
-	// TODO: how to ack the message ?
-	// require.NoError(t, natsMessage.Ack(), "Error while acking the NATS message")
 
 	// mock the part where the cloud event is sent to the sink urlk part
 	// NOTE: the mock was created using
 	//       mockery --name "Client" --srcpkg github.com/cloudevents/sdk-go/v2/client
 	cloudEventSender := mocks.Client{}
 	cloudEventSender.On("Send", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
-		// TODO(nils): ensure that the context has the correct url
-		// Unfortunately the context key is not available for us to be used :/
-		//
 		// Ensure the sink URL is correctly set in the context.
-		// ctx := args.Get(0).(context.Context)
-		// sink := ctx.Value(cloudevents.ContextWithTarget).(string)
-		// assert.Equal(t, sink, sinkURL, "Error while matching the sink URLs.")
+		ctx := args.Get(0).(context.Context)
+		sink := cloudevents.TargetFromContext(ctx)
+		assert.NotNil(t, sink, "Error while ensuring the sink is not nil")
+		assert.Equal(t, sink.String(), sinkURL, "Error while matching the sink URLs.")
 
 		// Ensure the passed event is correct.
 		event := args.Get(1).(cloudevents.Event)
@@ -74,6 +74,9 @@ func Test_getCallBack(t *testing.T) {
 	// then
 	// expect that the event was sent
 	cloudEventSender.AssertExpectations(t)
+
+	// ensure the nats msg was acked
+	// ensure the metric was set
 }
 
 func fixtLogger(t *testing.T) *logger.Logger {
