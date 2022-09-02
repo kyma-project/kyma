@@ -433,10 +433,6 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			log.Debug("Created consumer on JetStream")
 		}
 
-		if consumerInfo.PushBound {
-			continue
-		}
-		log.Debug(consumerInfo)
 		// subscribe to the given subject using the existing consumer
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
