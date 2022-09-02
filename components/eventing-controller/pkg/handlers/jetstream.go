@@ -413,40 +413,37 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		if _, ok := js.subscriptions[jsSubKey]; ok {
 			continue
 		}
-		options := js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)
-		log.Debug(options)
-		//consumerInfo, err := js.jsCtx.ConsumerInfo(js.config.JSStreamName, jsSubKey.ConsumerName())
-		//if err != nil && err != nats.ErrConsumerNotFound {
-		//	log.Errorw("Failed to get consumer info", "error", err)
-		//	continue
-		//}
-		//
-		//// create the consumer in case it doesn't exist
-		//if consumerInfo == nil {
-		//	consumerInfo, err = js.jsCtx.AddConsumer(
-		//		js.config.JSStreamName,
-		//		js.getConsumerConfig(subscription, jsSubKey, jsSubject),
-		//	)
-		//	if err != nil {
-		//		log.Errorw("Failed to create a consumer", "error", err)
-		//		continue
-		//	}
-		//	log.Debug("Created consumer on JetStream")
-		//}
-		//
-		//if consumerInfo.PushBound {
-		//	continue
-		//}
 
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get consumer info", "error", err)
+			continue
+		}
+
+		// create the consumer in case it doesn't exist
+		if consumerInfo == nil {
+			consumerInfo, err = js.jsCtx.AddConsumer(
+				js.config.JSStreamName,
+				js.getConsumerConfig(subscription, jsSubKey, jsSubject),
+			)
+			if err != nil {
+				log.Errorw("Failed to create a consumer", "error", err)
+				continue
+			}
+			log.Debug("Created consumer on JetStream")
+		}
+
+		if consumerInfo.PushBound {
+			continue
+		}
+		log.Debug(consumerInfo)
 		// subscribe to the given subject using the existing consumer
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
-		consumerInfo, err := js.jsCtx.ConsumerInfo(js.config.JSStreamName, jsSubKey.ConsumerName())
 
-		log.Debug(consumerInfo)
 		if err != nil {
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
 		}
@@ -472,7 +469,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
-		//nats.Bind(js.config.JSStreamName, consumer.ConsumerName()),
+		nats.Bind(js.config.JSStreamName, consumer.ConsumerName()),
 	}
 	return defaultOpts
 }
@@ -480,6 +477,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 func (js *JetStream) getConsumerConfig(subscription *eventingv1alpha1.Subscription, jsSubKey SubscriptionSubjectIdentifier, jsSubject string) *nats.ConsumerConfig {
 	return &nats.ConsumerConfig{
 		Durable:        jsSubKey.ConsumerName(),
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.config.JSConsumerDeliverPolicy),
 		Description:    jsSubKey.namespacedSubjectName,
 		FlowControl:    true,
 		MaxAckPending:  subscription.Status.Config.MaxInFlightMessages,
