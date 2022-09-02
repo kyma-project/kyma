@@ -34,14 +34,14 @@ func Test_getCallBack(t *testing.T) {
 	defaultLogger := fixtLogger(t)
 	metricsCollector := metrics.NewCollector()
 	cloudEvent := fixtCloudEvent(t)
-	m := mocks.Messager{}
+	messager := mocks.Messager{}
 
 	// simulate that acking the message returns no error
-	m.On("Ack").Return(nil)
+	messager.On("Ack").Return(nil)
 
 	// provide the underlying NATS message
 	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), givenSubscriptionName)
-	m.On("Msg").Return(natsMessage)
+	messager.On("Msg").Return(natsMessage)
 
 	// mock the part where the cloud event is sent to the sink urlk part
 	// NOTE: the mock was created using
@@ -55,6 +55,7 @@ func Test_getCallBack(t *testing.T) {
 		event := args.Get(1).(cloudevents.Event)
 		assert.Equal(t, event.ID(), cloudEvent.ID(), "Error while matching the event IDs")
 	})
+
 	// create the object under test
 	handler := JetStream{
 		// TODO: change to pointer
@@ -65,15 +66,24 @@ func Test_getCallBack(t *testing.T) {
 	}
 
 	// when
-	natsMsgHandler := handler.getCallback(subKeyPrefix, subscriptionName)
-	natsMsgHandler(&m)
+	natsMsgHandler := handler.getCallback(givenSubKeyPrefix, givenSubscriptionName)
+	natsMsgHandler(&messager)
 
 	// then
 	// expect that the event was sent
 	cloudEventSender.AssertExpectations(t)
 
 	// ensure the nats msg was acked
+	messager.AssertCalled(t, "Ack")
+
 	// ensure the metric was set
+}
+
+// ensureSinkURL ensures that givenSinkURL is set as target URL in ctx.
+func ensureSinkURL(ctx context.Context, t *testing.T, givenSinkURL string) {
+	actualSink := cloudevents.TargetFromContext(ctx)
+	assert.NotNil(t, actualSink, "Error while ensuring the sink is not nil")
+	assert.Equal(t, actualSink.String(), givenSinkURL, "Error while matching the sink URLs.")
 }
 
 func fixtLogger(t *testing.T) *logger.Logger {
