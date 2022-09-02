@@ -59,7 +59,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    - Export the following values as environment variables and run the command provided:
 
    ```bash
-   export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
+   export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # Assuming only one LoadBalancer with external IP
    ```
 
     ```bash
@@ -115,7 +115,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    ```bash
    export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, for example, httpbin-tls-credentials
-   export ISSUER={ISSUER_NAME} # The name of the Issuer CR, for example,letsencrypt-staging.
+   export ISSUER={ISSUER_NAME} # The name of the Issuer CR, for example,letsencrypt-staging
    ```
 
    ```bash
@@ -133,6 +133,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        namespace: default
    EOF
    ```
+   >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate kyma-gateway-certs -n istio-system `
 
 5. Create a Gateway CR. Run:
 

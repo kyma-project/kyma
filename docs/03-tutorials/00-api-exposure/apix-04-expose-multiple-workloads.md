@@ -23,9 +23,12 @@ Follow the instructions to expose your instance of the HttpBin service and your 
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
+   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
 
-2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. If you don't want to use Kyma's default gateway, replace `kyma-system/kyma-gateway` with your custom gateway.
+
+2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace.
 In the following example, the services definition at the **spec.rules** level overwrites the service definition at the **spec.service** level. Run:
 
    ```yaml
@@ -40,7 +43,7 @@ In the following example, the services definition at the **spec.rules** level ov
        example: multiple-service
    spec:
      host: multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS
-     gateway: kyma-system/kyma-gateway
+     gateway: $GATEWAY
      service:
        name: httpbin
        port: 8000
@@ -76,9 +79,12 @@ Follow the instruction to expose your instance of the HttpBin service and your s
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
+   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
 
-2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. If you don't want to use Kyma's default gateway, replace `kyma-system/kyma-gateway` with your custom gateway. Run:
+
+2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. Run:
 
    ```yaml
    cat <<EOF | kubectl apply -f -
@@ -92,7 +98,7 @@ Follow the instruction to expose your instance of the HttpBin service and your s
        example: multiple-service
    spec:
      host: multiple-service-example.$DOMAIN_TO_EXPOSE_WORKLOADS
-     gateway: kyma-system/kyma-gateway
+     gateway: $GATEWAY
      rules:
        - path: /headers
          methods: ["GET"]

@@ -25,9 +25,11 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export GATEWAY=$NAMESPACE/httpbin-gateway
    ```
+   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
 
-2. Expose the instance of the HttpBin service by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the instance of the HttpBin service by creating an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -41,7 +43,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      service:
        name: httpbin
        port: 8000
-     gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
+     gateway: $GATEWAY
      rules:
        - path: /.*
          methods: ["GET"]
@@ -85,9 +87,12 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
+   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
 
-2. Expose the sample Function by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+
+2. Expose the sample Function by creating an APIRule CR in your Namespace. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -97,7 +102,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      name: function
      namespace: $NAMESPACE
    spec:
-     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     gateway: $GATEWAY 
      host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: function
