@@ -11,7 +11,7 @@ To follow this tutorial, use Kyma 2.0 or higher.
 
 If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create those workloads, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create those workloads, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
 ## Steps
 
