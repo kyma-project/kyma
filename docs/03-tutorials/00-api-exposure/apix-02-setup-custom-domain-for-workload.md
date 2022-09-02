@@ -162,10 +162,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 ## Next steps
 
-Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
-
-Once you have your workload deployed, you can continue by choosing one of the following tutorials:
-
 - [Expose a workload](./apix-03-expose-workload-apigateway.md)
 - [Expose multiple workloads on the same host](./apix-04-expose-multiple-workloads.md)
 - [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
