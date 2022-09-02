@@ -99,10 +99,10 @@ type JetStream struct {
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
 	connClosedHandler ConnClosedHandler
 	logger            *logger.Logger
-	metricsCollector  *pkgmetrics.Collector
+	metricsCollector  pkgmetrics.CollectorInterface
 }
 
-func NewJetStream(config env.NatsConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, metricsCollector pkgmetrics.CollectorInterface, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		config:           config,
 		logger:           logger,

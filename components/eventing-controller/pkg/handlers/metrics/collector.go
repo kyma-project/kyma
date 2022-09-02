@@ -21,14 +21,25 @@ const (
 	eventTypeSubscribedMetricHelp = "All the eventTypes subscribed using the Subscription CRD"
 )
 
+// TODO(nils): what is a better name for the interface ?
+
+type CollectorInterface interface {
+	prometheus.Collector
+	RegisterMetrics()
+	RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int)
+	RecordEventTypes(subscriptionName, subscriptionNamespace, eventType, consumer string)
+}
+
 // Collector implements the prometheus.Collector interface
 type Collector struct {
 	deliveryPerSubscription *prometheus.CounterVec
 	eventTypes              *prometheus.CounterVec
 }
 
+var _ CollectorInterface = &Collector{}
+
 // NewCollector a new instance of Collector
-func NewCollector() *Collector {
+func NewCollector() CollectorInterface {
 	return &Collector{
 		deliveryPerSubscription: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -59,11 +70,6 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.eventTypes.Collect(ch)
 }
 
-// RecordDeliveryPerSubscription records the delivery_per_subscription metric
-func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
-	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
-}
-
 // RegisterMetrics registers the metrics
 func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.deliveryPerSubscription)
@@ -73,4 +79,9 @@ func (c *Collector) RegisterMetrics() {
 // RecordEventTypes records the event_type_subscribed metric
 func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, eventType, consumer string) {
 	c.eventTypes.WithLabelValues(subscriptionName, subscriptionNamespace, eventType, consumer).Inc()
+}
+
+// RecordDeliveryPerSubscription records the delivery_per_subscription metric
+func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
+	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }

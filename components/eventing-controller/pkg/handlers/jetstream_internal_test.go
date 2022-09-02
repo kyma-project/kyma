@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"sync"
 	"testing"
 
@@ -10,7 +11,6 @@ import (
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/mocks"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
 	testing2 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -32,15 +32,14 @@ func Test_getCallBack(t *testing.T) {
 	sinks.Store(givenSubKeyPrefix, givenSinkURL)
 
 	defaultLogger := fixtLogger(t)
-	metricsCollector := metrics.NewCollector()
-	cloudEvent := fixtCloudEvent(t)
+	givenCloudEvent := fixtCloudEvent(t)
 	messager := mocks.Messager{}
 
 	// simulate that acking the message returns no error
 	messager.On("Ack").Return(nil)
 
 	// provide the underlying NATS message
-	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, cloudEvent), givenSubscriptionName)
+	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, givenCloudEvent), givenSubscriptionName)
 	messager.On("Msg").Return(natsMessage)
 
 	// mock the part where the cloud event is sent to the sink urlk part
@@ -53,8 +52,11 @@ func Test_getCallBack(t *testing.T) {
 
 		// Ensure the passed event is correct.
 		event := args.Get(1).(cloudevents.Event)
-		assert.Equal(t, event.ID(), cloudEvent.ID(), "Error while matching the event IDs")
+		assert.Equal(t, event.ID(), givenCloudEvent.ID(), "Error while matching the event IDs")
 	})
+
+	metricsCollector := mocks.CollectorInterface{}
+	metricsCollector.On("RecordDeliveryPerSubscription", givenSubscriptionName, givenCloudEvent.Type(), givenSinkURL, http.StatusOK).Return()
 
 	// create the object under test
 	handler := JetStream{
@@ -62,7 +64,7 @@ func Test_getCallBack(t *testing.T) {
 		sinks:            sinks,
 		client:           &cloudEventSender,
 		logger:           defaultLogger,
-		metricsCollector: metricsCollector,
+		metricsCollector: &metricsCollector,
 	}
 
 	// when
@@ -74,9 +76,10 @@ func Test_getCallBack(t *testing.T) {
 	cloudEventSender.AssertExpectations(t)
 
 	// ensure the nats msg was acked
-	messager.AssertCalled(t, "Ack")
+	messager.AssertExpectations(t)
 
 	// ensure the metric was set
+	metricsCollector.AssertExpectations(t)
 }
 
 // ensureSinkURL ensures that givenSinkURL is set as target URL in ctx.

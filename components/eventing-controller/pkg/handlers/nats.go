@@ -63,10 +63,10 @@ type Nats struct {
 	subscriptions     map[string]*nats.Subscription
 	sinks             sync.Map
 	connClosedHandler ConnClosedHandler
-	metricsCollector  *pkgmetrics.Collector
+	metricsCollector  pkgmetrics.CollectorInterface
 }
 
-func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *Nats {
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, metricsCollector pkgmetrics.CollectorInterface, logger *logger.Logger) *Nats {
 	return &Nats{
 		config:            config,
 		defaultSubsConfig: subsConfig,

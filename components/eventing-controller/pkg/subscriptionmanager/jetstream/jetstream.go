@@ -52,14 +52,14 @@ type SubscriptionManager struct {
 	envCfg           env.NatsConfig
 	restCfg          *rest.Config
 	metricsAddr      string
-	metricsCollector *pkgmetrics.Collector
+	metricsCollector pkgmetrics.CollectorInterface
 	mgr              manager.Manager
 	backend          handlers.JetStreamBackend
 	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector pkgmetrics.CollectorInterface, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:           natsConfig,
 		restCfg:          restCfg,
