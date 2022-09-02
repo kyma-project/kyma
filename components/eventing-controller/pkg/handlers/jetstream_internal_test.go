@@ -30,9 +30,13 @@ func Test_getCallBack(t *testing.T) {
 	var (
 		defaultLogger   = fixtLogger(t)
 		givenCloudEvent = fixtCloudEvent(t)
-		messager        = mocks.Messager{}
 		sinks           = sync.Map{}
 		natsMessage     = fixtNatsMessage(fixtCloudEventJson(t, givenCloudEvent), givenSubscriptionName)
+
+		// mocks
+		messager         = mocks.Messager{}
+		cloudEventSender = mocks.Client{}
+		metricsCollector = mocks.CollectorInterface{}
 	)
 
 	// store a sink for the given subscription
@@ -47,7 +51,6 @@ func Test_getCallBack(t *testing.T) {
 	// mock the part where the cloud event is sent to the sink urlk part
 	// NOTE: the mock was created using
 	//       mockery --name "Client" --srcpkg github.com/cloudevents/sdk-go/v2/client
-	cloudEventSender := mocks.Client{}
 	cloudEventSender.On("Send", mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 		ctx := args.Get(0).(context.Context)
 		ensureSinkURL(ctx, t, givenSinkURL)
@@ -57,7 +60,6 @@ func Test_getCallBack(t *testing.T) {
 		assert.Equal(t, event.ID(), givenCloudEvent.ID(), "Error while matching the event IDs")
 	})
 
-	metricsCollector := mocks.CollectorInterface{}
 	metricsCollector.On("RecordDeliveryPerSubscription", givenSubscriptionName, givenCloudEvent.Type(), givenSinkURL, http.StatusOK).Return()
 
 	// create the object under test
