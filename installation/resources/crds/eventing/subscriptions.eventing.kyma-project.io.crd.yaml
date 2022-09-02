@@ -1,13 +1,21 @@
-
----
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    cert-manager.io/inject-ca-from: kyma-system/eventing-serving-cert
     controller-gen.kubebuilder.io/version: v0.4.1
-  creationTimestamp: null
   name: subscriptions.eventing.kyma-project.io
 spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: eventing-webhook-service
+          namespace: system
+          path: /convert
+      conversionReviewVersions:
+      - v1
   group: eventing.kyma-project.io
   names:
     kind: Subscription

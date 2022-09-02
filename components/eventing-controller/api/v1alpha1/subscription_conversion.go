@@ -1,8 +1,10 @@
 package v1alpha1
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
+	"strconv"
 )
 
 // ConvertTo converts this Subscription to the Hub version (v2).
@@ -41,7 +43,7 @@ func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 
 	if src.Spec.Config != nil {
 		dst.Spec.Config = map[string]string{
-			"maxInFlightMessages": string(src.Spec.Config.MaxInFlightMessages),
+			"maxInFlightMessages": fmt.Sprint(src.Spec.Config.MaxInFlightMessages),
 		}
 	}
 
@@ -106,6 +108,14 @@ func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error {
 	dst.Spec.Sink = src.Spec.Sink
 	dst.Spec.ID = src.Spec.ID
 	dst.Spec.Protocol = src.Spec.Protocol
+	if src.Spec.Config != nil {
+		config := src.Spec.Config
+		intVal, err := strconv.Atoi(config["maxInFlightMessages"])
+		if err == nil {
+			dst.Spec.Config = &SubscriptionConfig{}
+			dst.Spec.Config.MaxInFlightMessages = intVal
+		}
+	}
 
 	var conditions []Condition
 	for _, condition := range src.Status.Conditions {
