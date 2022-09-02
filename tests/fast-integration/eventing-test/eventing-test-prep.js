@@ -32,7 +32,7 @@ const {
   info,
   error,
   debug,
-  createEventingBackendK8sSecret,
+  createEventingBackendK8sSecret, printAllSubscriptions, printEventingControllerLogs, printEventingPublisherProxyLogs,
 } = require('../utils');
 const {
   addScenarioInCompass,
@@ -116,6 +116,9 @@ describe('Eventing tests preparation', function() {
   afterEach(async function() {
     // if the test preparation failed, perform the cleanup
     if (this.currentTest.state === 'failed') {
+      await printAllSubscriptions(testNamespace);
+      await printEventingControllerLogs();
+      await printEventingPublisherProxyLogs();
       await cleanupTestingResources();
     }
   });
