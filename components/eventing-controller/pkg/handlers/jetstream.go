@@ -439,7 +439,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 }
 
 func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) absnats.MsgHandler {
-	return func(msg absnats.Messager) {
+	return func(messager absnats.Messager) {
 		// fetch sink info from storage
 		sinkValue, ok := js.sinks.Load(subKeyPrefix)
 		if !ok {
@@ -452,7 +452,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) absnats.
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := convertAbsMsgToCE(msg)
+		ce, err := convertAbsMsgToCE(messager)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return
@@ -474,13 +474,13 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) absnats.
 		if !cev2protocol.IsACK(result) {
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
 			ceLogger.Errorw("Failed to dispatch the CloudEvent")
-			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
+			// Do not NAK the messager so that the server waits for AckWait and then redeliver the messager.
 			return
 		}
 
 		// event was successfully dispatched, check if acknowledged by the NATS server
 		// if not, the message is redelivered.
-		if err := msg.Ack(); err != nil {
+		if err := messager.Ack(); err != nil {
 			ceLogger.Errorw("Failed to ACK an event on JetStream")
 		}
 
