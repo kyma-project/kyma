@@ -26,20 +26,22 @@ func Test_getCallBack(t *testing.T) {
 		givenSinkURL          = "http://localhorst:4444"
 		givenSubscriptionName = "givenSubscriptionName"
 	)
-	sinks := sync.Map{}
+
+	var (
+		defaultLogger   = fixtLogger(t)
+		givenCloudEvent = fixtCloudEvent(t)
+		messager        = mocks.Messager{}
+		sinks           = sync.Map{}
+		natsMessage     = fixtNatsMessage(fixtCloudEventJson(t, givenCloudEvent), givenSubscriptionName)
+	)
 
 	// store a sink for the given subscription
 	sinks.Store(givenSubKeyPrefix, givenSinkURL)
-
-	defaultLogger := fixtLogger(t)
-	givenCloudEvent := fixtCloudEvent(t)
-	messager := mocks.Messager{}
 
 	// simulate that acking the message returns no error
 	messager.On("Ack").Return(nil)
 
 	// provide the underlying NATS message
-	natsMessage := fixtNatsMessage(fixtCloudEventJson(t, givenCloudEvent), givenSubscriptionName)
 	messager.On("Msg").Return(natsMessage)
 
 	// mock the part where the cloud event is sent to the sink urlk part
