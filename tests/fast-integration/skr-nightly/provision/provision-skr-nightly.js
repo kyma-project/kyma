@@ -21,7 +21,7 @@ const {
   gardener,
   keb,
   director,
-  oidcE2ETest
+  oidcE2ETest,
 } = require('../../skr-test');
 
 // Mocha root hook
