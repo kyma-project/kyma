@@ -22,10 +22,6 @@ import (
 	"testing"
 
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
-
-	"github.com/prometheus/client_golang/prometheus"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -109,17 +105,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_triggered_restarts_total",
-		Help: "Number of triggered Fluent Bit restarts",
-	})
-	metrics.Registry.MustRegister(restartsTotal)
-
-	reconciler := NewReconciler(
-		mgr.GetClient(),
-		testConfig,
-		restartsTotal,
-	)
+	reconciler := NewReconciler(mgr.GetClient(), testConfig)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 
