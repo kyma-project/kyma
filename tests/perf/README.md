@@ -143,7 +143,7 @@ See an example that deploys a test component on a Kyma cluster to execute a load
 1. Deploy an example test service:
 
 ```bash
-./echoserver/examples/setup.sh
+./prerequisites/examples/setup.sh
 ```
 
 2. After deploying the test service, start the load test locally, with an environment variable that represents the domain name of the Kyma test cluster:
