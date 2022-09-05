@@ -119,7 +119,7 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	expected := `[OUTPUT]
     name                     grafana-loki
     match                    foo.*
-    alias                    foo
+    alias                    foo-grafana-loki
     labelmappath             /fluent-bit/etc/loki-labelmap.json
     labels                   {cluster-id="123", job="telemetry-fluent-bit"}
     lineformat               json
