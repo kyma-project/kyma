@@ -19,6 +19,7 @@ type ApplicationReader interface {
 }
 
 func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
+
 	// Created in chart
 	expectedAppName := "app1"
 	compassAppName := expectedAppName + random.RandomString(10)
