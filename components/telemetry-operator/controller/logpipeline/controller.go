@@ -19,10 +19,14 @@ package logpipeline
 import (
 	"context"
 	"fmt"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/strings/slices"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -50,6 +54,7 @@ type Reconciler struct {
 	syncer           *syncer
 	unsupportedTotal prometheus.Gauge
 	daemonSetHelper  *kubernetes.DaemonSetHelper
+	secrets          []string
 }
 
 // NewReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
@@ -74,11 +79,90 @@ func NewReconciler(
 	return &r
 }
 
+func (r *Reconciler) getDesiredSecrets() []string {
+	return r.secrets
+}
+
+func (r *Reconciler) checkSecrets() predicate.Predicate {
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			desiredSecrets := r.getDesiredSecrets()
+			_, ok := e.ObjectNew.(*corev1.Secret)
+			if !ok {
+				return true
+			}
+
+			// Ignore updates to CR status in which case metadata.Generation does not change
+			if slices.Contains(desiredSecrets, e.ObjectNew.GetName()) {
+				fmt.Printf("Update event ALLOW: %s", e.ObjectNew.GetName())
+				return true
+			} else {
+				//fmt.Printf("Update event DENY: %s", e.ObjectNew.GetName())
+				return false
+			}
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			_, ok := e.Object.(*corev1.Secret)
+			if !ok {
+				return true
+			}
+			// Evaluates to false if the object has been confirmed deleted.
+			if slices.Contains(r.secrets, e.Object.GetName()) {
+				fmt.Printf("Delete event ALLOW: %s", e.Object.GetName())
+				return true
+			} else {
+				//fmt.Printf("Delete event DENY: %s", e.Object.GetName())
+				return false
+			}
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			// Evaluates to false if the object has been confirmed deleted.
+			_, ok := e.Object.(*corev1.Secret)
+			if !ok {
+				return true
+			}
+			if slices.Contains(r.secrets, e.Object.GetName()) {
+				fmt.Printf("Create event ALLOW: %s", e.Object.GetName())
+				return true
+			} else {
+				//fmt.Printf("Create event DENY: %s", e.Object.GetName())
+				return false
+			}
+		},
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
+		//WithEventFilter(r.checkSecrets()).
+		//Watches(
+		//	&source.Kind{Type: &corev1.Secret{}},
+		//	handler.EnqueueRequestsFromMapFunc(r.prepareReconciliationsForSecret),
+		//).
 		Complete(r)
+}
+func (r *Reconciler) prepareReconciliationsForSecret(secret client.Object) []reconcile.Request {
+	fmt.Printf("secret Name: %s\n", secret.GetName())
+
+	if slices.Contains(r.secrets, secret.GetName()) {
+		fmt.Printf("It contains: %s\n", secret.GetName())
+	} else {
+		fmt.Printf("not present: %s\n", secret.GetName())
+
+	}
+
+	//pipelines := r.findLogPipelinesForSecret(secret)
+	requests := make([]reconcile.Request, 0)
+	//for i := range pipelines.Items {
+	//	requests[i] = reconcile.Request{
+	//		NamespacedName: types.NamespacedName{
+	//			Name: pipelines.Items[i].GetName(),
+	//		},
+	//	}
+	//}
+	return requests
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
@@ -93,13 +177,14 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 
+	log.Info("RECON")
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
 		log.Info("Ignoring deleted LogPipeline")
 		// Ignore not-found errors since we can get them on deleted requests
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	r.secrets = []string{"mysecret"}
 	secretsOK := r.syncer.secretHelper.ValidatePipelineSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(

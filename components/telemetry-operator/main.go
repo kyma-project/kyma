@@ -17,9 +17,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
+	"fmt"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	"time"
 
@@ -147,6 +152,13 @@ func main() {
 	})
 	metrics.Registry.MustRegister(restartsTotal)
 
+	if err != nil {
+		setupLog.Error(err, "Failed to set watch")
+		os.Exit(1)
+	}
+
+	go watcher()
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
@@ -156,6 +168,14 @@ func main() {
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
 		CertDir:                certDir,
+		//NewCache: cache.BuilderWithOptions(cache.Options{
+		//	Scheme: scheme,
+		//	SelectorsByObject: cache.SelectorsByObject{
+		//		&corev1.Secret{}: {
+		//			Field: fields.SelectorFromSet(fields.Set{}),
+		//		},
+		//	},
+		//}),
 	})
 	if err != nil {
 		setupLog.Error(err, "Failed to start manager")
@@ -299,4 +319,32 @@ func validateFlags() error {
 
 func parsePlugins(s string) []string {
 	return strings.SplitN(strings.ReplaceAll(s, " ", ""), ",", len(s))
+}
+
+func watcher() {
+	cl, err := client.NewWithWatch(ctrl.GetConfigOrDie(), client.Options{Scheme: scheme})
+	if err != nil {
+		setupLog.Error(err, "Failed to set up health check")
+		os.Exit(1)
+	}
+	sec1 := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "mysecret",
+			Namespace: "cls",
+		},
+	}
+	secretList := &corev1.SecretList{}
+	secretList.Items = append(secretList.Items, sec1)
+	fmt.Printf("secretlist: %+v\n", secretList)
+	w, err := cl.Watch(context.TODO(), secretList)
+	for {
+		event, ok := <-w.ResultChan()
+		if ok {
+			metaObject, ok := event.Object.(metav1.Object)
+			if ok {
+				fmt.Printf("watching secret name:%s\n", metaObject.GetName())
+			}
+		}
+	}
+
 }
