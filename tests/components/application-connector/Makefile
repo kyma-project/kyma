@@ -101,13 +101,13 @@ validator-create-resources:
 
 	helm template resources/charts/application-connectivity-validator-test/charts/echoserver \
 		--set global.namespace=$(NAMESPACE) \
-    | kubectl apply -f -
+	| kubectl apply -f -
 	kubectl rollout status deployment echoserver -n test --timeout=90s
 
 	helm template resources/charts/application-connectivity-validator-test/charts/test \
     		--set namespace=$(NAMESPACE) \
     		--values resources/charts/application-connectivity-validator-test/values.yaml \
-    | kubectl apply -f -
+	| kubectl apply -f -
 
 clean-validator-test: unpatch-after-validator-test
 	helm template resources/charts/application-connectivity-validator-test --set namespace=$(NAMESPACE) | kubectl delete -f -
