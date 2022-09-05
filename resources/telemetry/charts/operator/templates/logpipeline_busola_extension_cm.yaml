@@ -1,0 +1,443 @@
+{{ if .Values.dashboardExtension.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: logpipelines.telemetry.kyma-project.io
+    busola.io/extension: resource
+    busola.io/extension-version: "0.5"
+  name: logpipelines.telemetry.kyma-project.io
+data:
+  details: |-
+    {
+      "header": [
+         {
+          "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
+           "placeholder": "custom",
+          "type": "string",
+          "name": "Type",
+          "isSelected": true,
+          "widget": "Text"
+        },
+        {
+          "name": "Unsupported-Mode",
+          "source": "status.unsupportedMode",
+          "widget": "Badge",
+          "highlights": {
+            "positive": ["false"],
+            "negative": ["true"]
+          }
+        },
+        {
+          "source": "status.conditions[-1].type",
+          "name": "Status",
+          "widget": "Badge"
+        }
+      ],
+      "body":
+        [
+          {
+            "widget": "Panel",
+            "name": "Applications",
+            "children":
+              [
+                {
+                  "widget": "Panel",
+                  "name": "Namespaces",
+                  "children":
+                    [
+                      {
+                        "name": "Include",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.namespaces.include",
+                        "separator": ", "
+                      },
+                      {
+                        "name": "Exclude",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.namespaces.exclude",
+                        "separator": ", "
+                      },
+                      {
+                        "name": "System Namespaces",
+                        "source": "spec.input.application.namespaces.system"
+                      }
+                  ]
+                },
+                {
+                  "widget": "Panel",
+                  "name": "Containers",
+                  "children":
+                    [
+                      {
+                        "name": "Include",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.containers.include",
+                        "separator": ", "
+                      },
+                      {
+                        "name": "Exclude",
+                        "widget": "JoinedArray",
+                        "source": "spec.input.application.containers.exclude",
+                        "separator": ", "
+                      }
+                    ]
+                }
+              ]
+          },
+          {
+            "widget": "Panel",
+            "name": "Output",
+            "children":
+              [
+                {
+                  "name": "Type",
+                  "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})"
+                }
+              ]
+          }
+        ]
+    }
+  form: |
+    [
+      {
+        "path": "spec.input",
+        "widget": "FormGroup",
+        "simple": true,
+        "children":
+          [
+            {
+              "name": "Include Namespaces",
+              "widget": "SimpleList",
+              "path": "application.namespaces.include",
+              "children":
+                [
+                  {
+                    "path": "[]",
+                    "widget": "Resource",
+                    "resource":
+                      { "scope": "cluster", "kind": "Namespace", "version": "v1" },
+                  },
+                ]
+            },
+            {
+              "name": "Exclude Namespaces",
+              "widget": "SimpleList",
+              "path": "application.namespaces.exclude",
+              "children":
+                [
+                  {
+                    "path": "[]",
+                    "widget": "Resource",
+                    "resource":
+                      { "scope": "cluster", "kind": "Namespace", "version": "v1" }
+                  }
+                ]
+            },
+            {
+              "name": "Include System Namespaces",
+              "path": "application.namespaces.system"
+            },
+            {
+              "name": "Include Containers",
+              "widget": "SimpleList",
+              "path": "application.containers.include"
+            },
+            {
+              "name": "Exclude Containers",
+              "widget": "SimpleList",
+              "path": "application.containers.exclude"
+            }
+          ]
+      },
+      {
+        "name": "Filters",
+        "widget": "SimpleList",
+        "path": "spec.filters",
+        "children":
+          [
+            {
+              "widget": "FormGroup",
+              "path": "[]",
+              "children":
+                [
+                  {
+                    "widget": "CodeEditor",
+                    "path": "custom"
+                  }
+                ]
+            }
+          ]
+      },
+      {
+        "path": "spec.output",
+        "widget": "FormGroup",
+        "path": "spec.output",
+        "simple": true,
+        "children":
+          [
+            {
+              "name": "Custom",
+              "path": "custom",
+              "widget": "CodeEditor"
+            },
+            {
+              "name": "HTTP",
+              "path": "http",
+              "widget": "FormGroup",
+              "children":
+                [
+                  {
+                    "name": "Host",
+                    "path": "host",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "FormGroup",
+                          "children":
+                            [
+                              {
+                                "name": "Namespace",
+                                "path": "namespace",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Name",
+                                "path": "name",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Key",
+                                "path": "key",
+                                "widget": "Text"
+                              },
+                            ]
+                        }
+                      ]
+                  },
+                  {
+                    "name": "User",
+                    "path": "user",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "FormGroup",
+                          "children":
+                            [
+                              {
+                                "name": "Namespace",
+                                "path": "namespace",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Name",
+                                "path": "name",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Key",
+                                "path": "key",
+                                "widget": "Text"
+                              },
+                            ]
+                        }
+                      ]
+                  },
+                  {
+                    "name": "Password",
+                    "path": "password",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "FormGroup",
+                          "children":
+                            [
+                              {
+                                "name": "Namespace",
+                                "path": "namespace",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Name",
+                                "path": "name",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Key",
+                                "path": "key",
+                                "widget": "Text"
+                              },
+                            ]
+                        }
+                      ]
+                  },
+                  {
+                    "name": "TLS",
+                    "widget": "FormGroup",
+                    "path": "tls",
+                    "children":
+                      [
+                        {
+                          "name": "Disabled",
+                          "path": "disabled"
+                        },
+                        {
+                          "name": "Skip Certificate Validation",
+                          "path": "skipCertificateValidation"
+                        }
+                      ]
+                  },
+                  {
+                    "name": "URI",
+                    "path": "uri",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Port",
+                    "path": "port",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Compress",
+                    "path": "compress",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Format",
+                    "path": "format",
+                    "widget": "Text"
+                  },
+                  {
+                    "name": "Dedot",
+                    "path": "dedot"
+                  },
+                ]
+            },
+            {
+              "name": "Grafana Loki",
+              "path": "grafana-loki",
+              "widget": "FormGroup",
+              "children":
+                [
+                  {
+                    "name": "URL",
+                    "path": "url",
+                    "widget": "FormGroup",
+                    "children":
+                      [
+                        {
+                          "name": "Value",
+                          "path": "value",
+                          "widget": "Text"
+                        },
+                        {
+                          "name": "Secret Reference",
+                          "path": "valueFrom.secretKeyRef",
+                          "widget": "FormGroup",
+                          "children":
+                            [
+                              {
+                                "name": "Namespace",
+                                "path": "namespace",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Name",
+                                "path": "name",
+                                "widget": "Text"
+                              },
+                              {
+                                "name": "Key",
+                                "path": "key",
+                                "widget": "Text"
+                              },
+                            ]
+                        }
+                      ]
+                  },
+                  {
+                    "name": "Labels",
+                    "path": "labels",
+                    "widget": "KeyValuePair"
+                  },
+                  {
+                    "name": "Remove Keys",
+                    "path": "removeKeys",
+                    "widget": "SimpleList"
+                  }
+                ]
+            },
+          ]
+      }
+    ]
+  general: |-
+    {
+      "resource": {
+        "kind": "LogPipeline",
+        "group": "telemetry.kyma-project.io",
+        "version": "v1alpha1"
+      },
+      "name": "Log Pipelines",
+      "category": "Observability",
+      "urlPath": "logpipelines",
+      "scope": "cluster",
+      "description": "Configure log selection, filters, and outputs",
+    }
+  list: |-
+    [
+       {
+        "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
+         "placeholder": "custom",
+        "type": "string",
+        "name": "Type",
+        "isSelected": true,
+        "widget": "Text"
+      },
+      {
+        "name": "Unsupported-Mode",
+        "source": "status.unsupportedMode",
+        "widget": "Badge",
+        "highlights": {
+          "positive": ["false"],
+          "negative": ["true"]
+        }
+      },
+      {
+        "source": "status.conditions[-1].type",
+        "name": "Status",
+        "widget": "Badge"
+      }
+    ]
+  translations: |-
+    {
+      "en": {
+        "metadata.annotations": "Annotations",
+        "metadata.labels": "Labels",
+        "metadata.creationTimestamp": "Created at"
+      }
+    }
+{{ end }}
