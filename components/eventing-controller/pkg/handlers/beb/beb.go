@@ -41,7 +41,7 @@ func (e *HTTPStatusError) Is(target error) bool {
 	if !ok {
 		return false
 	}
-	return (e.StatusCode == t.StatusCode)
+	return e.StatusCode == t.StatusCode
 }
 
 // compile time check

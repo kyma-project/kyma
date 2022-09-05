@@ -1514,18 +1514,18 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	ensureSubscriptionCreated(ctx, givenSubscription)
 
 	By("Given subscription with none empty APIRule name")
-	subscription := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
+	sub := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
 	// wait for APIRule to be set in Subscription
-	getSubscription(ctx, subscription).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
-	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: subscription.Namespace}}
+	getSubscription(ctx, sub).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.APIRuleName, Namespace: sub.Namespace}}
 	getAPIRule(ctx, apiRule).Should(reconcilertesting.HaveNotEmptyAPIRule())
 	reconcilertesting.MarkReady(apiRule)
 	updateAPIRuleStatus(ctx, apiRule).ShouldNot(HaveOccurred())
 
 	By("Given subscription is ready")
-	getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionReady())
+	getSubscription(ctx, sub).Should(reconcilertesting.HaveSubscriptionReady())
 
-	return subscription, apiRule
+	return sub, apiRule
 }
 
 // countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
@@ -1541,10 +1541,10 @@ func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete
 					countGet++
 				}
 			case http.MethodPost:
-				if subscription, ok := payload.(bebtypes.Subscription); ok {
-					if len(subscription.Events) > 0 {
-						for _, event := range subscription.Events {
-							if event.Type == reconcilertesting.OrderCreatedEventType && subscription.Name == subscriptionName {
+				if sub, ok := payload.(bebtypes.Subscription); ok {
+					if len(sub.Events) > 0 {
+						for _, event := range sub.Events {
+							if event.Type == reconcilertesting.OrderCreatedEventType && sub.Name == subscriptionName {
 								countPost++
 							}
 						}

@@ -165,7 +165,7 @@ func startBEBMock() *controllertesting.BEBMock {
 	// TODO(k15r): FIX THIS HACK
 	// this is a very evil hack for the time being, until we refactored the config properly
 	// it sets the URLs to relative paths, that can easily be used in the mux.
-	beb := controllertesting.NewBEBMock()
-	beb.Start()
-	return beb
+	b := controllertesting.NewBEBMock()
+	b.Start()
+	return b
 }

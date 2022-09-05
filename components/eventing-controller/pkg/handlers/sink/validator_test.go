@@ -6,15 +6,16 @@ import (
 	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestSinkValidator(t *testing.T) {

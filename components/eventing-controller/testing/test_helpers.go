@@ -600,12 +600,12 @@ func DefaultReadyCondition() eventingv1alpha1.Condition {
 
 // ToSubscription converts an unstructured subscription into a typed one
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
-	subscription := new(eventingv1alpha1.Subscription)
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
+	sub := new(eventingv1alpha1.Subscription)
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, sub)
 	if err != nil {
 		return nil, err
 	}
-	return subscription, nil
+	return sub, nil
 }
 
 // ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule

@@ -56,24 +56,24 @@ func TestUnavailableNATSServer(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 	defer utils.StopTestEnv(ens.TestEnsemble)
 
-	subscription := utils.CreateSubscription(ens.TestEnsemble,
+	sub := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, utils.NewUncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{utils.NewCleanEventType("")}),
 	)
 
 	ens.NatsServer.Shutdown()
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
 	ens.NatsServer = startJetStream(natsPort)
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, reconcilertesting.HaveSubscriptionReady())
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.Cancel)
 }
@@ -292,24 +292,24 @@ func TestCreateSubscription(t *testing.T) {
 			ens.G = gomega.NewGomegaWithT(t)
 
 			t.Log("creating the k8s subscription")
-			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 			t.Log("testing the k8s subscription")
-			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.want.K8sSubscription...)
+			utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.want.K8sSubscription...)
 
 			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.want.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.want.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
 			}
 
 			t.Log("testing the deletion of the subscription")
-			testSubscriptionDeletion(ens, subscription)
+			testSubscriptionDeletion(ens, sub)
 
 			t.Log("testing the deletion of the NATS subscription(s)")
-			for _, filter := range subscription.Spec.Filter.Filters {
-				ensureNATSSubscriptionIsDeleted(ens, subscription, filter.EventType.Value)
+			for _, filter := range sub.Spec.Filter.Filters {
+				ensureNATSSubscriptionIsDeleted(ens, sub, filter.EventType.Value)
 			}
 		})
 	}
@@ -597,44 +597,44 @@ func TestChangeSubscription(t *testing.T) {
 
 			// given
 			t.Log("creating the k8s subscription")
-			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantBefore.K8sSubscription...)
+			utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
 
 			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantBefore.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
 			}
 
 			// when
 			t.Log("change and update the subscription")
-			utils.EventuallyUpdateSubscriptionOnK8s(ctx, ens.TestEnsemble, subscription, func(sub *eventingv1alpha1.Subscription) error {
+			utils.EventuallyUpdateSubscriptionOnK8s(ctx, ens.TestEnsemble, sub, func(sub *eventingv1alpha1.Subscription) error {
 				tc.changeSubscription(sub)
-				return ens.K8sClient.Update(ens.Ctx, subscription)
+				return ens.K8sClient.Update(ens.Ctx, sub)
 			})
 
 			// then
 			t.Log("testing the k8s subscription")
-			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantAfter.K8sSubscription...)
+			utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
 
 			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantAfter.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
 			}
 
 			t.Log("testing the deletion of the subscription")
-			testSubscriptionDeletion(ens, subscription)
+			testSubscriptionDeletion(ens, sub)
 
 			t.Log("testing the deletion of the NATS subscription(s)")
-			for _, filter := range subscription.Spec.Filter.Filters {
-				ensureNATSSubscriptionIsDeleted(ens, subscription, filter.EventType.Value)
+			for _, filter := range sub.Spec.Filter.Filters {
+				ensureNATSSubscriptionIsDeleted(ens, sub, filter.EventType.Value)
 			}
 		})
 	}
@@ -652,13 +652,13 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	// when
-	subscription := utils.CreateSubscription(ens.TestEnsemble,
+	sub := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
 		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
 	// then
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
@@ -671,10 +671,10 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
 	}
 
-	testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
+	testSubscriptionOnNATS(ens, sub, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
 
-	testSubscriptionDeletion(ens, subscription)
-	ensureNATSSubscriptionIsDeleted(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
+	testSubscriptionDeletion(ens, sub)
+	ensureNATSSubscriptionIsDeleted(ens, sub, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
 
 	t.Cleanup(ens.Cancel)
 }

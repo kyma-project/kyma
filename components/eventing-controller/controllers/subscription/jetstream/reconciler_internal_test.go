@@ -193,26 +193,26 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
-			subscription := controllertesting.NewSubscription(subscriptionName, namespaceName,
+			sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithFinalizers(testCase.givenFinalizers),
 			)
-			err := r.Client.Create(testEnvironment.Context, subscription)
+			err := r.Client.Create(testEnvironment.Context, sub)
 			require.NoError(t, err)
 
-			mockedBackend.On("DeleteSubscription", subscription).Return(nil)
+			mockedBackend.On("DeleteSubscription", sub).Return(nil)
 
 			// when
-			err = r.handleSubscriptionDeletion(ctx, subscription, r.namedLogger())
+			err = r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
 			require.NoError(t, err)
 
 			// then
 			if testCase.wantDeleteCall {
-				mockedBackend.AssertCalled(t, "DeleteSubscription", subscription)
+				mockedBackend.AssertCalled(t, "DeleteSubscription", sub)
 			} else {
-				mockedBackend.AssertNotCalled(t, "DeleteSubscription", subscription)
+				mockedBackend.AssertNotCalled(t, "DeleteSubscription", sub)
 			}
 
-			ensureFinalizerMatch(t, subscription, testCase.wantFinalizers)
+			ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
 
 			// check the changes were made on the kubernetes server
 			fetchedSub, err := fetchTestSubscription(ctx, r)
@@ -220,7 +220,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			ensureFinalizerMatch(t, &fetchedSub, testCase.wantFinalizers)
 
 			// clean up
-			err = r.Client.Delete(ctx, subscription)
+			err = r.Client.Delete(ctx, sub)
 			require.NoError(t, err)
 		})
 	}

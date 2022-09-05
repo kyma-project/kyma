@@ -102,46 +102,46 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// copy the subscription object, so we don't modify the source object
-	subscription := currentSubscription.DeepCopy()
+	sub := currentSubscription.DeepCopy()
 
 	// bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
+	log := utils.LoggerWithSubscription(r.namedLogger(), sub)
 	log.Debugw("Received new reconcile request")
 
 	// instantiate a return object
 	result := ctrl.Result{}
 
 	// handle deletion of the subscription
-	if isInDeletion(subscription) {
-		return r.handleDeleteSubscription(ctx, subscription, log)
+	if isInDeletion(sub) {
+		return r.handleDeleteSubscription(ctx, sub, log)
 	}
 
 	// sync the initial Subscription status
-	r.syncInitialStatus(subscription)
+	r.syncInitialStatus(sub)
 
 	// sync Finalizers, ensure the finalizer is set
-	if err := r.syncFinalizer(subscription, log); err != nil {
-		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
+	if err := r.syncFinalizer(sub, log); err != nil {
+		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
 			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
 		}
 		return ctrl.Result{}, errors.Wrap(err, "sync finalizer failed")
 	}
 
 	// sync APIRule for the desired subscription
-	apiRule, err := r.syncAPIRule(ctx, subscription, log)
+	apiRule, err := r.syncAPIRule(ctx, sub, log)
 	// sync the condition: ConditionAPIRuleStatus
-	subscription.Status.SetConditionAPIRuleStatus(err)
+	sub.Status.SetConditionAPIRuleStatus(err)
 	if !recerrors.IsSkippable(err) {
-		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
+		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
 			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
 		}
 		return ctrl.Result{}, err
 	}
 
 	// sync the BEB Subscription with the Subscription CR
-	ready, err := r.syncBEBSubscription(subscription, apiRule, log)
+	ready, err := r.syncBEBSubscription(sub, apiRule, log)
 	if err != nil {
-		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
+		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
 			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
 		}
 		return ctrl.Result{}, err
@@ -153,7 +153,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the subscription if modified
-	if err := r.updateSubscription(ctx, subscription, log); err != nil {
+	if err := r.updateSubscription(ctx, sub, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
