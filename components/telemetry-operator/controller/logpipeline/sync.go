@@ -40,7 +40,7 @@ func newSyncer(
 	return &s
 }
 
-func (s *syncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *syncer) syncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 
 	sectionsChanged, err := s.syncSectionsConfigMap(ctx, logPipeline)
@@ -204,7 +204,7 @@ func (s *syncer) syncUnsupportedPluginsTotal(logPipelines *telemetryv1alpha1.Log
 		if !l.DeletionTimestamp.IsZero() {
 			continue
 		}
-		if IsUnsupported(l) {
+		if isUnsupported(l) {
 			unsupportedPluginsTotal++
 		}
 	}
@@ -212,7 +212,7 @@ func (s *syncer) syncUnsupportedPluginsTotal(logPipelines *telemetryv1alpha1.Log
 	s.unsupportedPluginsTotal = unsupportedPluginsTotal
 }
 
-func IsUnsupported(pipeline telemetryv1alpha1.LogPipeline) bool {
+func isUnsupported(pipeline telemetryv1alpha1.LogPipeline) bool {
 	if pipeline.Spec.Output.Custom != "" {
 		return true
 	}
