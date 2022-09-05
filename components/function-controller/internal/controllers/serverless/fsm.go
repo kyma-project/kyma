@@ -93,9 +93,8 @@ var (
 
 // TODO create issue to refactor this
 // this function is a terminator
-func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, repo *serverlessv1alpha2.Repository, commit string) stateFn {
+func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, repo *serverlessv1alpha2.Repository, commit string) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
-
 		condition.LastTransitionTime = metav1.Now()
 		currentFunction := &serverlessv1alpha2.Function{}
 
@@ -142,7 +141,6 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, rep
 		}
 
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
-
 			if err := r.client.Status().Update(ctx, currentFunction); err != nil {
 				r.log.Warnf("while updating function status: %s", err)
 			}
@@ -160,8 +158,8 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, rep
 	}
 }
 
-func buildStateFnUpdateStateFnFunctionCondition(cdt serverlessv1alpha2.Condition) stateFn {
-	return buildStateFnGenericUpdateStatus(cdt, nil, "")
+func buildStatusUpdateStateFnWithCondition(condition serverlessv1alpha2.Condition) stateFn {
+	return buildGenericStatusUpdateStateFn(condition, nil, "")
 }
 
 func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) stateFn {
@@ -210,7 +208,7 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 			Reason:             serverlessv1alpha2.ConditionReasonSourceUpdateFailed,
 			Message:            errMsg,
 		}
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 
 	srcChanged := s.gitFnSrcChanged(revision)
@@ -232,7 +230,7 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		BaseDir:   s.instance.Spec.Source.GitRepository.BaseDir,
 	}
 
-	return buildStateFnGenericUpdateStatus(condition, &repository, revision)
+	return buildGenericStatusUpdateStateFn(condition, &repository, revision)
 }
 
 func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) stateFn {
