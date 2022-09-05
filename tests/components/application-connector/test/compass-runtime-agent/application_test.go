@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-func TestApplicationCrdCompare(t *testing.T) {
+func (gs *CompassRuntimeAgentSuite) TestApplicationCrdCompare(t *testing.T) {
 
 	services := make([]v1alpha1.Service, 0, 0)
 	entries := make([]v1alpha1.Entry, 0, 0)
 
-	comparer := Secret{t: t}
+	comparer := Secret{}
 
 	credentials := v1alpha1.Credentials{
 		Type:              "OAuth",
@@ -145,7 +145,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 
 		for _, test := range testCases {
 			t.Run(test.testMessage, func(t *testing.T) {
-				assert.Equal(t, test.result, Compare(test.application, applicationCRD, comparer))
+				assert.Equal(t, test.result, Compare(test.application, applicationCRD, comparer, gs.cli))
 			})
 		}
 	}

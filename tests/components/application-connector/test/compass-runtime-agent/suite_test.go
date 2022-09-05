@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"testing"
 
-	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/stretchr/testify/suite"
+	cli "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
-	cli *cli.Clientset
+	cli cli.Interface
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {

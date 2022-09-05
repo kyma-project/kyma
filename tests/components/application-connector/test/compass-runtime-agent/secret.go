@@ -3,16 +3,10 @@ package compass_runtime_agent
 import (
 	"context"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	restclient "k8s.io/client-go/rest"
-	"reflect"
-	"testing"
 )
-
-var secretRepos map[string]v1.SecretInterface
 
 type secretData struct {
 	password     string
@@ -23,13 +17,13 @@ type secretData struct {
 	clientSecret string
 }
 
+//go:generate mockery --name=SecretClient
 type SecretClient interface {
-	Compare(actual, expected string) bool
-	Get() (secretData, error)
+	Compare(actual, expected string, cli kubernetes.Interface) bool
+	GetSecretData() (secretData, error)
 }
 
 type Secret struct {
-	t          *testing.T
 	secret     v1.SecretInterface
 	secretName string
 }
@@ -41,23 +35,7 @@ func NewClient(secret v1.SecretInterface, secretName string) SecretClient {
 	}
 }
 
-func newSecretsInterface(namespace string) (v1.SecretInterface, error) {
-	k8sConfig, err := restclient.InClusterConfig()
-	if err != nil {
-		logrus.Warnf("Failed to read in cluster config: %s", err.Error())
-		logrus.Info("Trying to initialize with local config")
-		return nil, errors.Wrap(err, "Failed to read in cluster config")
-	}
-
-	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, errors.Errorf("failed to create k8s core client, %s", err.Error())
-	}
-
-	return coreClientset.CoreV1().Secrets(namespace), nil
-}
-
-func (s Secret) Get() (secretData, error) {
+func (s Secret) GetSecretData() (secretData, error) {
 	secret, err := s.secret.Get(context.Background(), s.secretName, metav1.GetOptions{})
 
 	if err != nil {
@@ -74,34 +52,35 @@ func (s Secret) Get() (secretData, error) {
 	}, nil
 }
 
-func (s Secret) Compare(actual, expected string) bool {
+func (s Secret) Compare(actual, expected string, cli kubernetes.Interface) bool {
 
-	if len(secretRepos) != 2 {
-		secretRepos = make(map[string]v1.SecretInterface)
+	expectedSecretRepo := cli.CoreV1().Secrets("test")
+	actualSecretRepo := cli.CoreV1().Secrets(actualSecretNamespace)
 
-		expectedSecretRepo, _ := newSecretsInterface("test") //TODO hardcoded, tried os.Getenv() didn't work
-		actualSecretRepo, _ := newSecretsInterface(actualSecretNamespace)
-		secretRepos["expectedSecretRepo"] = expectedSecretRepo
-		secretRepos["actualSecretRepo"] = actualSecretRepo
+	secretExpectedClient := NewClient(expectedSecretRepo, expected)
+	secretActualClient := NewClient(actualSecretRepo, actual)
 
-	}
-
-	secretExpectedClient := NewClient(secretRepos["expectedSecretRepo"], expected)
-	secretActualClient := NewClient(secretRepos["actualSecretRepo"], actual)
-
-	actualSecret, err := secretActualClient.Get()
+	actualSecret, err := secretActualClient.GetSecretData()
 	if err != nil {
-		s.t.Log(err, "Failed to get actual secret from cluster")
+		//s.t.Log(err, "Failed to get actual secret from cluster")
 		errors.Wrap(err, "Failed to get actual secret from cluster")
 		return false
 	}
 
-	expectedSecret, err := secretExpectedClient.Get()
+	expectedSecret, err := secretExpectedClient.GetSecretData()
 	if err != nil {
-		s.t.Log(err, "Failed to get expected secret from cluster")
+		//s.t.Log(err, "Failed to get expected secret from cluster")
 		errors.Wrap(err, "Failed to get expected secret from cluster")
 		return false
 	}
 
-	return reflect.DeepEqual(actualSecret, expectedSecret)
+	secretsEqual := actualSecret == expectedSecret
+
+	if !secretsEqual {
+		//s.t.Log("Secrets aren't equal")
+		errors.New("Secrets aren't equal")
+		return false
+	}
+
+	return secretsEqual
 }
