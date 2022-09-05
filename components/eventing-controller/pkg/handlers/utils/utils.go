@@ -23,6 +23,7 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
@@ -285,8 +286,8 @@ func toUnstructuredSub(sub *eventingv1alpha1.Subscription) (*unstructured.Unstru
 
 func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
-		Version:  eventingv1alpha1.GroupVersion.Version,
-		Group:    eventingv1alpha1.GroupVersion.Group,
+		Version:  subscription.GroupVersion.Version,
+		Group:    subscription.GroupVersion.Group,
 		Resource: "subscriptions",
 	}
 }

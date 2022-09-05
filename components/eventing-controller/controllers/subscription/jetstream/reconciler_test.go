@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	jetstream2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -105,7 +106,7 @@ func TestCreateSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveSubscriptionFinalizer(jetstream2.Finalizer),
+					reconcilertesting.HaveSubscriptionFinalizer(subscription.Finalizer),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					reconcilertesting.OrderCreatedEventType: {
@@ -815,7 +816,8 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 
 // getSubscriptionFromJetStream returns a NATS subscription for a given subscription and subject.
 // NOTE: We need to give the controller enough time to react on the changes. Otherwise, the returned NATS subscription could have the wrong state.
-//       For this reason Eventually is used here.
+//
+//	For this reason Eventually is used here.
 func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	beb2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
+	handlersbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 
@@ -59,9 +59,9 @@ type SubscriptionManager struct {
 	restCfg      *rest.Config
 	metricsAddr  string
 	resyncPeriod time.Duration
-	mgr          manager.Manager
-	backend      beb2.Backend
-	logger       *logger.Logger
+	mgr     manager.Manager
+	backend handlersbeb.Backend
+	logger  *logger.Logger
 }
 
 // NewSubscriptionManager creates the SubscriptionManager for BEB and initializes it as far as it
@@ -100,11 +100,11 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), beb2.MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlersbeb.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
-		"maxNameLength", beb2.MaxBEBSubscriptionNameLength)
-	bebHandler := beb2.NewBEB(oauth2credential, nameMapper, c.logger)
+		"maxNameLength", handlersbeb.MaxBEBSubscriptionNameLength)
+	bebHandler := handlersbeb.NewBEB(oauth2credential, nameMapper, c.logger)
 
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
@@ -167,13 +167,13 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 }
 
 // cleanup removes all created BEB artifacts.
-func cleanup(backend beb2.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend handlersbeb.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var bebBackend *beb2.BEB
+	var bebBackend *handlersbeb.BEB
 	var ok bool
-	if bebBackend, ok = backend.(*beb2.BEB); !ok {
+	if bebBackend, ok = backend.(*handlersbeb.BEB); !ok {
 		err := errors.New("convert backend handler to BEB handler failed")
 		logger.Errorw("No BEB backend exists", "error", err)
 		return err
@@ -221,7 +221,7 @@ func cleanup(backend beb2.Backend, dynamicClient dynamic.Interface, logger *zap.
 	return nil
 }
 
-func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*beb2.OAuth2ClientCredentials, error) {
+func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlersbeb.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
 	id, ok := val.([]byte)
 	if !ok {
@@ -232,7 +232,7 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*beb2.OAuth2
 	if !ok {
 		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
 	}
-	return &beb2.OAuth2ClientCredentials{
+	return &handlersbeb.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 	}, nil

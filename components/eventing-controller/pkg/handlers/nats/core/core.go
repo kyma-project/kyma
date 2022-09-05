@@ -34,13 +34,11 @@ const (
 	natsHandlerName = "nats-handler"
 )
 
-type ConnClosedHandler func(conn *nats.Conn)
-
 type NatsBackend interface {
 	// Initialize connects and initializes the NATS backend.
 	// connCloseHandler can be used to register a handler that gets called when connection
 	// to the NATS server is closed and retry attempts are exceeded.
-	Initialize(connCloseHandler ConnClosedHandler) error
+	Initialize(connCloseHandler ecnats.ConnClosedHandler) error
 
 	// SyncSubscription synchronizes the Kyma Subscription on the NATS backend.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -57,7 +55,7 @@ type Nats struct {
 	connection        *nats.Conn
 	subscriptions     map[string]*nats.Subscription
 	sinks             sync.Map
-	connClosedHandler ConnClosedHandler
+	connClosedHandler ecnats.ConnClosedHandler
 	metricsCollector  *pkgmetrics.Collector
 }
 
@@ -72,7 +70,7 @@ func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, me
 }
 
 // Initialize creates a connection to NATS.
-func (n *Nats) Initialize(connCloseHandler ConnClosedHandler) (err error) {
+func (n *Nats) Initialize(connCloseHandler ecnats.ConnClosedHandler) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
 		natsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),

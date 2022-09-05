@@ -5,25 +5,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/mock"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/record"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/require"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/record"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 const (
@@ -44,13 +45,13 @@ func TestReconciler_Reconcile(t *testing.T) {
 	defaultSubConfig := env.DefaultSubscriptionConfig{}
 	// A subscription with the correct Finalizer, ready for reconciliation with the backend.
 	testSub := controllertesting.NewSubscription("sub1", "test",
-		controllertesting.WithFinalizers([]string{Finalizer}),
+		controllertesting.WithFinalizers([]string{subscription.Finalizer}),
 		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
 	)
 	// A subscription marked for deletion.
 	testSubUnderDeletion := controllertesting.NewSubscription("sub2", "test",
 		controllertesting.WithNonZeroDeletionTimestamp(),
-		controllertesting.WithFinalizers([]string{Finalizer}),
+		controllertesting.WithFinalizers([]string{subscription.Finalizer}),
 		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
 	)
 
@@ -176,7 +177,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		},
 		{
 			name:            "With eventing finalizer the NATS subscription should be deleted and the finalizer should be cleared",
-			givenFinalizers: []string{Finalizer},
+			givenFinalizers: []string{subscription.Finalizer},
 			wantDeleteCall:  true,
 			wantFinalizers:  []string{},
 		},

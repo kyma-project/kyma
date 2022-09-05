@@ -28,7 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	nats2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
+	natscore "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
@@ -42,7 +42,7 @@ const (
 
 type natsTestEnsemble struct {
 	reconciler  *natsreconciler.Reconciler
-	natsBackend *nats2.Nats
+	natsBackend *natscore.Nats
 	*utils.TestEnsemble
 }
 
@@ -666,7 +666,7 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	natsHandler := nats2.NewNats(envConf, ens.DefaultSubscriptionConfig, metricsCollector, defaultLogger)
+	natsHandler := natscore.NewNats(envConf, ens.DefaultSubscriptionConfig, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
@@ -686,7 +686,7 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	ens.natsBackend = ens.reconciler.Backend.(*nats2.Nats)
+	ens.natsBackend = ens.reconciler.Backend.(*natscore.Nats)
 
 	go func() {
 		err = k8sManager.Start(ctx)

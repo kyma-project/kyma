@@ -20,10 +20,11 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	nats2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
+	handlersnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -44,7 +45,7 @@ type Reconciler struct {
 }
 
 var (
-	Finalizer = eventingv1alpha1.GroupVersion.Group
+	Finalizer = subscription.GroupVersion.Group
 )
 
 const (
@@ -237,7 +238,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
 	statusChanged := false
-	cleanEventTypes, err := nats2.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	cleanEventTypes, err := handlersnats.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("Failed to get clean subject", "error", err)
 		subscription.Status.InitializeCleanEventTypes()

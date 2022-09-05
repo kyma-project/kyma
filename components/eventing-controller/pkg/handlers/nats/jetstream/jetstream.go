@@ -10,15 +10,14 @@ import (
 	"sync"
 	"time"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	ecnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
-	nats2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
-
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	ecnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -40,7 +39,7 @@ const (
 
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
-	Initialize(connCloseHandler nats2.ConnClosedHandler) error
+	Initialize(connCloseHandler ecnats.ConnClosedHandler) error
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of Jetstream.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -97,7 +96,7 @@ type JetStream struct {
 	subscriptions map[SubscriptionSubjectIdentifier]*nats.Subscription
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
-	connClosedHandler nats2.ConnClosedHandler
+	connClosedHandler ecnats.ConnClosedHandler
 	logger            *logger.Logger
 	metricsCollector  *pkgmetrics.Collector
 }
@@ -130,7 +129,7 @@ func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
 	return nil
 }
 
-func (js *JetStream) Initialize(connCloseHandler nats2.ConnClosedHandler) error {
+func (js *JetStream) Initialize(connCloseHandler ecnats.ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
@@ -242,7 +241,7 @@ func (js *JetStream) handleReconnect(_ *nats.Conn) {
 	}
 }
 
-func (js *JetStream) initNATSConn(connCloseHandler nats2.ConnClosedHandler) error {
+func (js *JetStream) initNATSConn(connCloseHandler ecnats.ConnClosedHandler) error {
 	if js.conn == nil || js.conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),

@@ -9,15 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-	utils2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,15 +24,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	handlerutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -54,12 +51,12 @@ type Reconciler struct {
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *beb.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
-	nameMapper    utils2.NameMapper
+	nameMapper    handlerutils.NameMapper
 	sinkValidator sink.Validator
 }
 
 var (
-	Finalizer = eventingv1alpha1.GroupVersion.Group
+	Finalizer = subscription.GroupVersion.Group
 )
 
 const (
@@ -74,7 +71,7 @@ const (
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
 	cfg env.Config, cleaner eventtype.Cleaner, bebBackend beb.Backend, credential *beb.OAuth2ClientCredentials,
-	mapper utils2.NameMapper, validator sink.Validator) *Reconciler {
+	mapper handlerutils.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
 		panic(err)
@@ -585,7 +582,7 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 
 func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) *apigatewayv1alpha1.APIRule {
 
-	randomSuffix := utils2.GetRandString(suffixLength)
+	randomSuffix := handlerutils.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 
 	apiRule := object.NewAPIRule(svcNs, apiRuleNamePrefix,

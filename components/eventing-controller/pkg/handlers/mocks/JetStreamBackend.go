@@ -3,9 +3,9 @@
 package mocks
 
 import (
-	handlers "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
-
 	"github.com/stretchr/testify/mock"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
@@ -46,11 +46,11 @@ func (_m *JetStreamBackend) GetJetStreamSubjects(subjects []string) []string {
 }
 
 // Initialize provides a mock function with given fields: connCloseHandler
-func (_m *JetStreamBackend) Initialize(connCloseHandler handlers.ConnClosedHandler) error {
+func (_m *JetStreamBackend) Initialize(connCloseHandler nats.ConnClosedHandler) error {
 	ret := _m.Called(connCloseHandler)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(handlers.ConnClosedHandler) error); ok {
+	if rf, ok := ret.Get(0).(func(nats.ConnClosedHandler) error); ok {
 		r0 = rf(connCloseHandler)
 	} else {
 		r0 = ret.Error(0)

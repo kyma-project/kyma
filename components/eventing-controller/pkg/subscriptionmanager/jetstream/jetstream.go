@@ -4,35 +4,27 @@ import (
 	"context"
 	"fmt"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	jetstream2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/jetstream"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
-
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
-	"k8s.io/client-go/dynamic"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-
 	"k8s.io/client-go/rest"
-
-	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -58,7 +50,7 @@ type SubscriptionManager struct {
 	metricsAddr      string
 	metricsCollector *pkgmetrics.Collector
 	mgr              manager.Manager
-	backend          jetstream2.Backend
+	backend          natsjetstream.Backend
 	logger           *logger.Logger
 }
 
@@ -89,7 +81,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	client := sm.mgr.GetClient()
 	recorder := sm.mgr.GetEventRecorderFor("eventing-controller-jetstream")
-	jetStreamHandler := jetstream2.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
+	jetStreamHandler := natsjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
@@ -124,13 +116,13 @@ func (sm *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all JetStream artifacts.
-func cleanup(backend jetstream2.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend natsjetstream.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var ok bool
-	var jsBackend *jetstream2.JetStream
-	if jsBackend, ok = backend.(*jetstream2.JetStream); !ok {
+	var jsBackend *natsjetstream.JetStream
+	if jsBackend, ok = backend.(*natsjetstream.JetStream); !ok {
 		err := errors.New("converting backend handler to JetStream handler failed")
 		return err
 	}
