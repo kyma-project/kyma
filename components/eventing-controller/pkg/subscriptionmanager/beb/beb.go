@@ -6,15 +6,9 @@ import (
 	"strings"
 	"time"
 
-	handlersbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,13 +18,15 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	handlersbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -59,9 +55,9 @@ type SubscriptionManager struct {
 	restCfg      *rest.Config
 	metricsAddr  string
 	resyncPeriod time.Duration
-	mgr     manager.Manager
-	backend handlersbeb.Backend
-	logger  *logger.Logger
+	mgr          manager.Manager
+	backend      handlersbeb.Backend
+	logger       *logger.Logger
 }
 
 // NewSubscriptionManager creates the SubscriptionManager for BEB and initializes it as far as it
