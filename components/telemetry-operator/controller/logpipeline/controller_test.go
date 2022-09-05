@@ -207,14 +207,16 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") || strings.Contains(line, "telemetry_plugins_unsupported_total") {
+					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") ||
+						strings.Contains(line, "telemetry_all_logpipelines") ||
+						strings.Contains(line, "telemetry_unsupported_logpipelines") {
 						return true
 					}
 				}
 				return false
 			}, timeout, interval).Should(Equal(true))
 
-			// Unsupported total metric should be updated
+			// All log pipeline gauge should be updated
 			Eventually(func() float64 {
 				resp, err := http.Get("http://localhost:8080/metrics")
 				if err != nil {
@@ -226,7 +228,22 @@ var _ = Describe("LogPipeline controller", func() {
 					return 0
 				}
 
-				return *mf["telemetry_plugins_unsupported_total"].Metric[0].Gauge.Value
+				return *mf["telemetry_all_logpipelines"].Metric[0].Gauge.Value
+			}, timeout, interval).Should(Equal(1.0))
+
+			// Unsupported log pipeline gauge should be updated
+			Eventually(func() float64 {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return 0
+				}
+				var parser expfmt.TextParser
+				mf, err := parser.TextToMetricFamilies(resp.Body)
+				if err != nil {
+					return 0
+				}
+
+				return *mf["telemetry_unsupported_logpipelines"].Metric[0].Gauge.Value
 			}, timeout, interval).Should(Equal(1.0))
 
 			// Fluent Bit config section should be copied to ConfigMap

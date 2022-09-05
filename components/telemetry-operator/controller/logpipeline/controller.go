@@ -44,10 +44,11 @@ type Config struct {
 // Reconciler reconciles a LogPipeline object
 type Reconciler struct {
 	client.Client
-	config           Config
-	syncer           *syncer
-	unsupportedTotal prometheus.Gauge
-	daemonSetHelper  *kubernetes.DaemonSetHelper
+	config                  Config
+	syncer                  *syncer
+	daemonSetHelper         *kubernetes.DaemonSetHelper
+	allLogPipelines         prometheus.Gauge
+	unsupportedLogPipelines prometheus.Gauge
 }
 
 // NewReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
@@ -60,13 +61,17 @@ func NewReconciler(
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
-	r.unsupportedTotal = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "telemetry_plugins_unsupported_total",
-		Help: "Number of custom filters or outputs to indicate unsupported mode.",
+	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "telemetry_all_logpipelines",
+		Help: "Number of log pipelines.",
+	})
+	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "telemetry_unsupported_logpipelines",
+		Help: "Number of log pipelines with custom filters or outputs.",
 	})
 	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 
-	metrics.Registry.MustRegister(r.unsupportedTotal)
+	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	controllermetrics.RegisterMetrics()
 
 	return &r
@@ -104,8 +109,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := usesUnsupportedPlugin(logPipeline)
-		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
+		pipelineUnsupported := usesUnsupportedPlugin(&logPipeline)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 		}
 
@@ -142,7 +147,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := usesUnsupportedPlugin(logPipeline)
+		pipeLineUnsupported := usesUnsupportedPlugin(&logPipeline)
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
@@ -167,9 +172,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipeLineUnsupported := usesUnsupportedPlugin(logPipeline)
+		pipelineUnsupported := usesUnsupportedPlugin(&logPipeline)
 
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
 	}
@@ -212,7 +217,8 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 }
 
 func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineList) {
-	r.unsupportedTotal.Set(float64(countUnsupportedPluginUsages(allPipelines)))
+	r.allLogPipelines.Set(float64(len(allPipelines.Items)))
+	r.unsupportedLogPipelines.Set(float64(countUnsupportedPluginUsages(allPipelines)))
 }
 
 // syncUnsupportedPluginsTotal checks if any LogPipeline defines a unsupported Filter or Output.
@@ -222,7 +228,7 @@ func countUnsupportedPluginUsages(logPipelines *telemetryv1alpha1.LogPipelineLis
 		if !l.DeletionTimestamp.IsZero() {
 			continue
 		}
-		if usesUnsupportedPlugin(l) {
+		if usesUnsupportedPlugin(&l) {
 			count++
 		}
 	}
@@ -230,7 +236,7 @@ func countUnsupportedPluginUsages(logPipelines *telemetryv1alpha1.LogPipelineLis
 	return count
 }
 
-func usesUnsupportedPlugin(pipeline telemetryv1alpha1.LogPipeline) bool {
+func usesUnsupportedPlugin(pipeline *telemetryv1alpha1.LogPipeline) bool {
 	if pipeline.Spec.Output.Custom != "" {
 		return true
 	}
