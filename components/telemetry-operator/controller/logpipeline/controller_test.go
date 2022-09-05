@@ -25,6 +25,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/prometheus/common/expfmt"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -196,6 +197,38 @@ var _ = Describe("LogPipeline controller", func() {
 			}
 			Expect(k8sClient.Create(ctx, logPipeline)).Should(Succeed())
 
+			// Custom metrics should be exported
+			Eventually(func() bool {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return false
+				}
+				defer resp.Body.Close()
+				scanner := bufio.NewScanner(resp.Body)
+				for scanner.Scan() {
+					line := scanner.Text()
+					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") || strings.Contains(line, "telemetry_plugins_unsupported_total") {
+						return true
+					}
+				}
+				return false
+			}, timeout, interval).Should(Equal(true))
+
+			// Unsupported total metric should be updated
+			Eventually(func() float64 {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return 0
+				}
+				var parser expfmt.TextParser
+				mf, err := parser.TextToMetricFamilies(resp.Body)
+				if err != nil {
+					return 0
+				}
+
+				return *mf["telemetry_plugins_unsupported_total"].Metric[0].Gauge.Value
+			}, timeout, interval).Should(Equal(1.0))
+
 			// Fluent Bit config section should be copied to ConfigMap
 			Eventually(func() string {
 				cmFileName := LogPipelineName + ".conf"
@@ -268,39 +301,6 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return int(fluentBitDaemonSet.Generation)
 			}, timeout, interval).Should(Equal(2))
-
-			// Custom metrics should be exported
-			Eventually(func() bool {
-				resp, err := http.Get("http://localhost:8080/metrics")
-				if err != nil {
-					return false
-				}
-				defer resp.Body.Close()
-				scanner := bufio.NewScanner(resp.Body)
-				for scanner.Scan() {
-					line := scanner.Text()
-					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") {
-						return true
-					}
-				}
-				return false
-			}, timeout, interval).Should(Equal(true))
-
-			Eventually(func() bool {
-				resp, err := http.Get("http://localhost:8080/metrics")
-				if err != nil {
-					return false
-				}
-				defer resp.Body.Close()
-				scanner := bufio.NewScanner(resp.Body)
-				for scanner.Scan() {
-					line := scanner.Text()
-					if strings.Contains(line, "telemetry_plugins_unsupported_total") {
-						return true
-					}
-				}
-				return false
-			}, timeout, interval).Should(Equal(true))
 		})
 	})
 })

@@ -104,7 +104,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := isUnsupported(logPipeline)
+		pipeLineUnsupported := usesUnsupportedPlugin(logPipeline)
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 		}
@@ -112,12 +112,18 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
 	}
 
-	changed, err := r.syncer.syncAll(ctx, &logPipeline)
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(ctx, &allPipelines); err != nil {
+		log.Error(err, "Failed to get all log pipelines")
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+	}
+
+	changed, err := r.syncer.syncAll(ctx, &logPipeline, &allPipelines)
 	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	r.unsupportedTotal.Set(float64(r.syncer.unsupportedPluginsTotal))
+	r.updateMetrics(&allPipelines)
 
 	if changed {
 		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
@@ -136,7 +142,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := isUnsupported(logPipeline)
+		pipeLineUnsupported := usesUnsupportedPlugin(logPipeline)
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
@@ -161,7 +167,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipeLineUnsupported := isUnsupported(logPipeline)
+		pipeLineUnsupported := usesUnsupportedPlugin(logPipeline)
 
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
@@ -203,4 +209,35 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 		return err
 	}
 	return nil
+}
+
+func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineList) {
+	r.unsupportedTotal.Set(float64(countUnsupportedPluginUsages(allPipelines)))
+}
+
+// syncUnsupportedPluginsTotal checks if any LogPipeline defines a unsupported Filter or Output.
+func countUnsupportedPluginUsages(logPipelines *telemetryv1alpha1.LogPipelineList) int {
+	count := 0
+	for _, l := range logPipelines.Items {
+		if !l.DeletionTimestamp.IsZero() {
+			continue
+		}
+		if usesUnsupportedPlugin(l) {
+			count++
+		}
+	}
+
+	return count
+}
+
+func usesUnsupportedPlugin(pipeline telemetryv1alpha1.LogPipeline) bool {
+	if pipeline.Spec.Output.Custom != "" {
+		return true
+	}
+	for _, f := range pipeline.Spec.Filters {
+		if f.Custom != "" {
+			return true
+		}
+	}
+	return false
 }
