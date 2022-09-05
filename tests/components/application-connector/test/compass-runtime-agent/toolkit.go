@@ -8,19 +8,19 @@ import (
 )
 
 type RetryableExecuteFunc func() error
-type ConditionMet func() error
+type ConditionMet func() bool
 
 type ExecuteAndWaitForCondition struct {
-	retryableFunc    RetryableExecuteFunc
-	conditionMetFunc ConditionMet
-	tick             time.Duration
-	timeout          time.Duration
+	retryableExecuteFunc RetryableExecuteFunc
+	conditionMetFunc     ConditionMet
+	tick                 time.Duration
+	timeout              time.Duration
 }
 
 func (e ExecuteAndWaitForCondition) Do() error {
 
 	err := retry.Do(func() error {
-		return e.retryableFunc()
+		return e.retryableExecuteFunc()
 	})
 
 	if err != nil {
@@ -35,10 +35,13 @@ func (e ExecuteAndWaitForCondition) Do() error {
 		select {
 		case <-ticker.C:
 			{
-				if e.conditionMetFunc() == nil {
+				res := e.conditionMetFunc()
+
+				if res {
 					ticker.Stop()
 					return nil
 				}
+
 			}
 		case <-ctx.Done():
 			{

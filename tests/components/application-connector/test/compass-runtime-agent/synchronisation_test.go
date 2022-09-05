@@ -2,14 +2,19 @@ package compass_runtime_agent
 
 import (
 	"context"
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
 
+const checkAppExistsPeriod = 30 * time.Second
+const appCreationTimeout = 2 * time.Minute
+
 type DirectorClient interface {
-	CreateApplication(name string) error
+	CreateApplication(name string) (string, error)
+	DeleteApplication(id string) error
 }
 
 type AppComparator interface {
@@ -30,28 +35,45 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	compassAppName := expectedAppName + RandomString(10)
 	directorClient := NewDirectorClient()
 
+	// Create Application in Director and wait until it gets created
 	applicationInterface := gs.cli.ApplicationconnectorV1alpha1().Applications()
-	err := createAppAndWaitForSync(directorClient, applicationInterface, compassAppName, expectedAppName)
+	runtimeID, err := gs.createAppAndWaitForSync(directorClient, applicationInterface, compassAppName, expectedAppName)
 	gs.Require().NoError(err)
 
+	// Compare Application created by Compass Runtime Agent with expected result
 	err = gs.appComparator.Compare(gs.Require(), compassAppName, expectedAppName)
+	gs.Require().NoError(err)
+
+	// Clean up
+	err = directorClient.DeleteApplication(runtimeID)
 	gs.Require().NoError(err)
 }
 
-func createAppAndWaitForSync(directorClient DirectorClient, appReader ApplicationReader, compassAppName, expectedAppName string) error {
-	exec := func() error {
-		return directorClient.CreateApplication(compassAppName)
-	}
+func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(directorClient DirectorClient, appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
 
-	verify := func() error {
-		_, err := appReader.Get(context.Background(), expectedAppName, v1.GetOptions{})
+	var runtimeID string
+
+	exec := func() error {
+		id, err := directorClient.CreateApplication(compassAppName)
+		if err != nil {
+			runtimeID = id
+		}
 		return err
 	}
 
-	return ExecuteAndWaitForCondition{
+	verify := func() bool {
+		_, err := appReader.Get(context.Background(), expectedAppName, v1.GetOptions{})
+		if err != nil {
+			gs.T().Log(fmt.Sprintf("Failed to get app: %v", err))
+		}
+
+		return err != nil
+	}
+
+	return runtimeID, ExecuteAndWaitForCondition{
 		exec,
 		verify,
-		10 * time.Second,
-		1 * time.Minute,
+		checkAppExistsPeriod,
+		appCreationTimeout,
 	}.Do()
 }
