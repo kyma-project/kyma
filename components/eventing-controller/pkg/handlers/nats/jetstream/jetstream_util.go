@@ -7,23 +7,23 @@ import (
 )
 
 const (
-	JetStreamStorageTypeMemory = "memory"
-	JetStreamStorageTypeFile   = "file"
+	StorageTypeMemory = "memory"
+	StorageTypeFile   = "file"
 
-	JetStreamRetentionPolicyLimits   = "limits"
-	JetStreamRetentionPolicyInterest = "interest"
+	RetentionPolicyLimits   = "limits"
+	RetentionPolicyInterest = "interest"
 
-	JetStreamConsumerDeliverPolicyAll            = "all"
-	JetStreamConsumerDeliverPolicyLast           = "last"
-	JetStreamConsumerDeliverPolicyLastPerSubject = "last_per_subject"
-	JetStreamConsumerDeliverPolicyNew            = "new"
+	ConsumerDeliverPolicyAll            = "all"
+	ConsumerDeliverPolicyLast           = "last"
+	ConsumerDeliverPolicyLastPerSubject = "last_per_subject"
+	ConsumerDeliverPolicyNew            = "new"
 )
 
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
-	case JetStreamStorageTypeMemory:
+	case StorageTypeMemory:
 		return nats.MemoryStorage, nil
-	case JetStreamStorageTypeFile:
+	case StorageTypeFile:
 		return nats.FileStorage, nil
 	}
 	return nats.MemoryStorage, fmt.Errorf("invalid stream storage type %q", s)
@@ -31,9 +31,9 @@ func toJetStreamStorageType(s string) (nats.StorageType, error) {
 
 func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
 	switch s {
-	case JetStreamRetentionPolicyLimits:
+	case RetentionPolicyLimits:
 		return nats.LimitsPolicy, nil
-	case JetStreamRetentionPolicyInterest:
+	case RetentionPolicyInterest:
 		return nats.InterestPolicy, nil
 	}
 	return nats.LimitsPolicy, fmt.Errorf("invalid stream retention policy %q", s)
@@ -44,13 +44,13 @@ func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
 // Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
 func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.SubOpt {
 	switch deliverPolicy {
-	case JetStreamConsumerDeliverPolicyAll:
+	case ConsumerDeliverPolicyAll:
 		return nats.DeliverAll()
-	case JetStreamConsumerDeliverPolicyLast:
+	case ConsumerDeliverPolicyLast:
 		return nats.DeliverLast()
-	case JetStreamConsumerDeliverPolicyLastPerSubject:
+	case ConsumerDeliverPolicyLastPerSubject:
 		return nats.DeliverLastPerSubject()
-	case JetStreamConsumerDeliverPolicyNew:
+	case ConsumerDeliverPolicyNew:
 		return nats.DeliverNew()
 	}
 	return nats.DeliverNew()

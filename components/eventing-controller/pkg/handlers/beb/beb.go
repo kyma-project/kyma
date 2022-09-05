@@ -24,7 +24,7 @@ import (
 const (
 	bebHandlerName               = "beb-handler"
 	MaxBEBSubscriptionNameLength = 50
-	BEBSubscriptionNameLogKey    = "bebSubscriptionName"
+	SubscriptionNameLogKey       = "bebSubscriptionName"
 	ErrorLogKey                  = "error"
 )
 
@@ -155,10 +155,10 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("Failed to get BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
+			log.Errorw("Failed to get BEB subscription", SubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
 			httpStatusNotFoundError := HTTPStatusError{StatusCode: http.StatusNotFound}
 			if errors.Is(err, httpStatusNotFoundError) {
-				log.Infow("Recreating BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name)
+				log.Infow("Recreating BEB subscription", SubscriptionNameLogKey, sEv2.Name)
 				bebSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
 				if err != nil {
 					return false, err
@@ -201,7 +201,7 @@ func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) er
 }
 
 func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
-	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
+	log = log.With(SubscriptionNameLogKey, subscription.Name)
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		log.Errorw("Failed to delete BEB subscription", ErrorLogKey, err)
@@ -248,7 +248,7 @@ func (b *BEB) createAndGetSubscription(subscription *types.Subscription, cleaner
 		return nil, err
 	}
 
-	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
+	log = log.With(SubscriptionNameLogKey, subscription.Name)
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
 		log.Errorw("Failed to create BEB subscription", ErrorLogKey, err)

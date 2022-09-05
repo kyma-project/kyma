@@ -55,10 +55,6 @@ type Reconciler struct {
 	sinkValidator sink.Validator
 }
 
-var (
-	Finalizer = subscription.GroupVersion.Group
-)
-
 const (
 	suffixLength                = 10
 	externalHostPrefix          = "web"
@@ -165,10 +161,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // updateSubscription updates the subscription changes to k8s
-func (r *Reconciler) updateSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
+func (r *Reconciler) updateSubscription(ctx context.Context, sub *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	namespacedName := &k8stypes.NamespacedName{
-		Name:      subscription.Name,
-		Namespace: subscription.Namespace,
+		Name:      sub.Name,
+		Namespace: sub.Namespace,
 	}
 
 	// fetch the latest subscription object, to avoid k8s conflict errors
@@ -179,8 +175,8 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 
 	// copy new changes to the latest object
 	newSubscription := latestSubscription.DeepCopy()
-	newSubscription.Status = subscription.Status
-	newSubscription.ObjectMeta.Finalizers = subscription.ObjectMeta.Finalizers
+	newSubscription.Status = sub.Status
+	newSubscription.ObjectMeta.Finalizers = sub.ObjectMeta.Finalizers
 
 	// emit the condition events if needed
 	r.emitConditionEvents(latestSubscription, newSubscription, logger)
@@ -193,7 +189,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 	// update the subscription object in k8s
 	if !reflect.DeepEqual(latestSubscription.ObjectMeta.Finalizers, newSubscription.ObjectMeta.Finalizers) {
 		if err := r.Update(ctx, newSubscription); err != nil {
-			return errors.Wrapf(err, "remove finalizer failed name: %s", Finalizer)
+			return errors.Wrapf(err, "remove finalizer failed name: %s", subscription.Finalizer)
 		}
 		logger.Debugw("Updated subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
 	}
@@ -783,31 +779,31 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 	return nil
 }
 
-func (r *Reconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
-	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+func (r *Reconciler) addFinalizer(sub *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
+	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, subscription.Finalizer)
 	logger.Debug("Added finalizer to subscription")
 	return nil
 }
 
-func (r *Reconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription) {
+func (r *Reconciler) removeFinalizer(sub *eventingv1alpha1.Subscription) {
 	var finalizers []string
 
 	// Build finalizer list without the one the controller owns
-	for _, finalizer := range subscription.ObjectMeta.Finalizers {
-		if finalizer == Finalizer {
+	for _, finalizer := range sub.ObjectMeta.Finalizers {
+		if finalizer == subscription.Finalizer {
 			continue
 		}
 		finalizers = append(finalizers, finalizer)
 	}
 
-	subscription.ObjectMeta.Finalizers = finalizers
+	sub.ObjectMeta.Finalizers = finalizers
 }
 
 // isFinalizerSet checks if a finalizer is set on the Subscription which belongs to this controller
-func (r *Reconciler) isFinalizerSet(subscription *eventingv1alpha1.Subscription) bool {
+func (r *Reconciler) isFinalizerSet(sub *eventingv1alpha1.Subscription) bool {
 	// Check if finalizer is already set
-	for _, finalizer := range subscription.ObjectMeta.Finalizers {
-		if finalizer == Finalizer {
+	for _, finalizer := range sub.ObjectMeta.Finalizers {
+		if finalizer == subscription.Finalizer {
 			return true
 		}
 	}

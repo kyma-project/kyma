@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -48,7 +49,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 	// A subscription with the correct Finalizer, conditions and status ready for reconciliation with the backend.
 	testSub := reconcilertesting.NewSubscription("sub1", "test",
 		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
-		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFinalizers([]string{subscription.Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
 		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
@@ -56,14 +57,14 @@ func TestReconciler_Reconcile(t *testing.T) {
 	// A subscription marked for deletion.
 	testSubUnderDeletion := reconcilertesting.NewSubscription("sub2", "test",
 		reconcilertesting.WithNonZeroDeletionTimestamp(),
-		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFinalizers([]string{subscription.Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 	)
 
 	// A subscription with the correct Finalizer, conditions and status Paused for reconciliation with the backend.
 	testSubPaused := reconcilertesting.NewSubscription("sub3", "test",
 		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
-		reconcilertesting.WithFinalizers([]string{Finalizer}),
+		reconcilertesting.WithFinalizers([]string{subscription.Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
 		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusPaused)),
@@ -231,10 +232,10 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "Updating a condition marks the status as changed",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace",
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace",
 					reconcilertesting.WithNotCleanFilter())
-				subscription.Status.InitializeConditions()
-				return subscription
+				s.Status.InitializeConditions()
+				return s
 			}(),
 			giveCondition: func() eventingv1alpha1.Condition {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
@@ -245,14 +246,14 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "All conditions true means status is ready",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace",
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace",
 					reconcilertesting.WithNotCleanFilter(),
 					reconcilertesting.WithWebhookAuthForBEB())
-				subscription.Status.InitializeConditions()
-				subscription.Status.Ready = false
+				s.Status.InitializeConditions()
+				s.Status.Ready = false
 
 				// mark all conditions as true
-				subscription.Status.Conditions = []eventingv1alpha1.Condition{
+				s.Status.Conditions = []eventingv1alpha1.Condition{
 					{
 						Type:               eventingv1alpha1.ConditionSubscribed,
 						LastTransitionTime: metav1.Now(),
@@ -264,7 +265,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 						Status:             corev1.ConditionTrue,
 					},
 				}
-				return subscription
+				return s
 			}(),
 			giveCondition: func() eventingv1alpha1.Condition {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
@@ -279,12 +280,12 @@ func Test_replaceStatusCondition(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			subscription := tt.giveSubscription
+			s := tt.giveSubscription
 			condition := tt.giveCondition
-			statusChanged := r.replaceStatusCondition(subscription, condition)
+			statusChanged := r.replaceStatusCondition(s, condition)
 			g.Expect(statusChanged).To(BeEquivalentTo(tt.wantStatusChanged))
-			g.Expect(subscription.Status.Conditions).To(ContainElement(condition))
-			g.Expect(subscription.Status.Ready).To(BeEquivalentTo(tt.wantReady))
+			g.Expect(s.Status.Conditions).To(ContainElement(condition))
+			g.Expect(s.Status.Ready).To(BeEquivalentTo(tt.wantReady))
 		})
 	}
 }
@@ -645,12 +646,12 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 		{
 			name: "should replace condition with status true if lastDelivery was okay",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
-				subscription.Status.InitializeConditions()
-				subscription.Status.Ready = false
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				s.Status.InitializeConditions()
+				s.Status.Ready = false
 
 				// mark ConditionWebhookCallStatus conditions as false
-				subscription.Status.Conditions = []eventingv1alpha1.Condition{
+				s.Status.Conditions = []eventingv1alpha1.Condition{
 					{
 						Type:               eventingv1alpha1.ConditionSubscribed,
 						LastTransitionTime: currentTime,
@@ -664,12 +665,12 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				}
 				// set EmsSubscriptionStatus
 				// LastSuccessfulDelivery is latest
-				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return subscription
+				return s
 			}(),
 			givenIsSubscribed: true,
 			wantCondition: eventingv1alpha1.Condition{
@@ -826,14 +827,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return error if LastFailedDelivery is invalid",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "",
 					LastFailedDelivery:       "invalid",
 					LastFailedDeliveryReason: "",
 				}
-				return subscription
+				return s
 			}(),
 			wantResult: true,
 			wantError:  errors.New(`parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
@@ -841,14 +842,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return error if LastFailedDelivery is valid but LastSuccessfulDelivery is invalid",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "invalid",
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return subscription
+				return s
 			}(),
 			wantResult: true,
 			wantError:  errors.New(`parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
@@ -856,14 +857,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return true if last delivery of event was failed",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return subscription
+				return s
 			}(),
 			wantResult: true,
 			wantError:  nil,
@@ -871,14 +872,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return false if last delivery of event was success",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return subscription
+				return s
 			}(),
 			wantResult: false,
 			wantError:  nil,

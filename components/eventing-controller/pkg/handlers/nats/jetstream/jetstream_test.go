@@ -1045,22 +1045,22 @@ func TestJetStream_ServerRestart(t *testing.T) {
 		{
 			name:               "with reconnects disabled and memory storage for streams",
 			givenMaxReconnects: 0,
-			givenStorageType:   JetStreamStorageTypeMemory,
+			givenStorageType:   StorageTypeMemory,
 		},
 		{
 			name:               "with reconnects enabled and memory storage for streams",
 			givenMaxReconnects: defaultMaxReconnects,
-			givenStorageType:   JetStreamStorageTypeMemory,
+			givenStorageType:   StorageTypeMemory,
 		},
 		{
 			name:               "with reconnects disabled and file storage for streams",
 			givenMaxReconnects: 0,
-			givenStorageType:   JetStreamStorageTypeFile,
+			givenStorageType:   StorageTypeFile,
 		},
 		{
 			name:               "with reconnects enabled and file storage for streams",
 			givenMaxReconnects: defaultMaxReconnects,
-			givenStorageType:   JetStreamStorageTypeFile,
+			givenStorageType:   StorageTypeFile,
 		},
 	}
 
@@ -1118,7 +1118,7 @@ func TestJetStream_ServerRestart(t *testing.T) {
 			}
 
 			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-			if tc.givenStorageType == JetStreamStorageTypeMemory && tc.givenMaxReconnects == 0 {
+			if tc.givenStorageType == StorageTypeMemory && tc.givenMaxReconnects == 0 {
 				// for memory storage with reconnects disabled
 				require.True(t, errors.Is(err, nats.ErrStreamNotFound))
 			} else {
@@ -1160,7 +1160,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 	defer testEnvironment.jsClient.natsConn.Close()
 	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
-	jsBackend.Config.JSStreamStorageType = JetStreamStorageTypeFile
+	jsBackend.Config.JSStreamStorageType = StorageTypeFile
 	jsBackend.Config.MaxReconnects = 0
 	initErr := jsBackend.Initialize(nil)
 	require.NoError(t, initErr)
@@ -1244,8 +1244,8 @@ func defaultNatsConfig(url string) env.NatsConfig {
 		MaxReconnects:           defaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
 		JSStreamName:            defaultStreamName,
-		JSStreamStorageType:     JetStreamStorageTypeMemory,
-		JSStreamRetentionPolicy: JetStreamRetentionPolicyInterest,
+		JSStreamStorageType:     StorageTypeMemory,
+		JSStreamRetentionPolicy: RetentionPolicyInterest,
 	}
 }
 
