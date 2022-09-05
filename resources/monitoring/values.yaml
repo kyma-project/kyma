@@ -1026,7 +1026,7 @@ kubeApiServer:
     metricRelabelings:
       # Drop excessively noisy apiserver buckets.
       - action: drop
-        regex: apiserver_request_duration_seconds_bucket;(0.15|0.2|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2|3|3.5|4|4.5|6|7|8|9|15|25|40|50)
+        regex: 'apiserver_request_duration_seconds_bucket;(0.05|0.15|0.2|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2|2.5|3|3.5|4|4.5|6|7|8|9|10|15|20|25|40|50|60)' # only keep 0.1, 0.5, 1, 5, 30 and +Inf buckets
         sourceLabels:
           - __name__
           - le
@@ -1094,40 +1094,10 @@ kubelet:
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
     ##
     cAdvisorMetricRelabelings:
-      # Drop less useful container CPU metrics.
+      # Only keep useful container CPU metrics.
       - sourceLabels: [__name__]
-        action: drop
-        regex: 'container_cpu_(cfs_throttled_seconds_total|load_average_10s|system_seconds_total|user_seconds_total)'
-      # Drop less useful container / always zero filesystem metrics.
-      - sourceLabels: [__name__]
-        action: drop
-        regex: 'container_fs_(io_current|io_time_seconds_total|io_time_weighted_seconds_total|reads_merged_total|sector_reads_total|sector_writes_total|writes_merged_total)'
-      # Drop less useful / always zero container memory metrics.
-      - sourceLabels: [__name__]
-        action: drop
-        regex: 'container_memory_(mapped_file|swap)'
-      # Drop less useful container process metrics.
-      - sourceLabels: [__name__]
-        action: drop
-        regex: 'container_(file_descriptors|tasks_state|threads_max)'
-      # Drop container spec metrics that overlap with kube-state-metrics.
-      - sourceLabels: [__name__]
-        action: drop
-        regex: 'container_spec.*'
-      # Drop cgroup metrics with no pod.
-      - sourceLabels: [id, pod]
-        action: drop
-        regex: '.+;'
-    # - sourceLabels: [__name__, image]
-    #   separator: ;
-    #   regex: container_([a-z_]+);
-    #   replacement: $1
-    #   action: drop
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|cpu_load_average_10s)
-    #   replacement: $1
-    #   action: drop
+        regex: ^(container_cpu_cfs_periods_total|container_cpu_cfs_throttled_periods_total|container_cpu_cfs_throttled_seconds_total|container_cpu_usage_seconds_total|container_fs_reads_bytes_total|container_fs_usage_bytes|container_fs_writes_bytes_total|container_memory_cache|container_memory_failcnt|container_memory_rss|container_memory_swap|container_memory_usage_bytes|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_receive_packets_dropped_total|container_network_receive_packets_total|container_network_transmit_bytes_total|container_network_transmit_packets_dropped_total|container_network_transmit_packets_total)$
+        action: keep
 
     ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
