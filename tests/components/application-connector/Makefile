@@ -99,12 +99,18 @@ validator-create-resources:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
 
-	helm template resources/charts/application-connectivity-validator-test \
-		--set namespace=$(NAMESPACE) \
+	helm template resources/charts/application-connectivity-validator-test/charts/echoserver \
+		--set global.namespace=$(NAMESPACE) \
+    | kubectl apply -f -
+	kubectl rollout status deployment echoserver -n test --timeout=90s
+
+	helm template resources/charts/application-connectivity-validator-test/charts/test \
+    		--set namespace=$(NAMESPACE) \
+    		--values resources/charts/application-connectivity-validator-test/values.yaml \
     | kubectl apply -f -
 
 clean-validator-test: unpatch-after-validator-test
-	helm template resources/charts/application-connectivity-validator-test | kubectl delete -f -
+	helm template resources/charts/application-connectivity-validator-test --set namespace=$(NAMESPACE) | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
 
 publish-validator-test: image-validator-test

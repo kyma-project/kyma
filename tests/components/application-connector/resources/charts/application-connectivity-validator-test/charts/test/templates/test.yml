@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: application-connectivity-validator-test
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   backoffLimit: 0
   template:
@@ -10,14 +10,8 @@ spec:
       annotations:
         traffic.sidecar.istio.io/excludeOutboundPorts: "8080"
     spec:
-      serviceAccountName: connectivity-validator-test
-      initContainers:
-        - name: wait-for-services
-          image: opsfleet/depends-on
-          args:
-            - "-service=echoserver"
       containers:
         - name: application-connectivity-validator-test
-          image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.validatorTest) }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.validatorTest) }}
           imagePullPolicy: Always
       restartPolicy: Never

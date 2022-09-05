@@ -4,7 +4,7 @@ metadata:
   labels:
     app: echosever
   name: echoserver
-  namespace: test
+  namespace: {{ .Values.global.namespace }}
 spec:
   replicas: 1
   selector:
@@ -16,7 +16,7 @@ spec:
         app: echoserver
     spec:
       containers:
-        - image: ealen/echo-server:dd6a18681044
+        - image: ealen/echo-server:0.7.0
           name: echoserver
           ports:
             - containerPort: 80
@@ -31,7 +31,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: echoserver
-  namespace: test
+  namespace: {{ .Values.global.namespace }}
 spec:
   selector:
     app: echoserver
