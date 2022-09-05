@@ -11,7 +11,8 @@ import (
 
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
-	cli *cli.Clientset
+	cli           *cli.Clientset
+	appComparator AppComparator
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {
@@ -20,6 +21,7 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 
 	gs.cli, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
+
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {

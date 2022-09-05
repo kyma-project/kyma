@@ -10,25 +10,32 @@ import (
 type RetryableExecuteFunc func() error
 type ConditionMet func() error
 
-func ExecuteAndWaitForCondition(retryableFunc RetryableExecuteFunc, conditionMetFunc ConditionMet, tick time.Duration, timeout time.Duration) error {
+type ExecuteAndWaitForCondition struct {
+	retryableFunc    RetryableExecuteFunc
+	conditionMetFunc ConditionMet
+	tick             time.Duration
+	timeout          time.Duration
+}
+
+func (e ExecuteAndWaitForCondition) Do() error {
 
 	err := retry.Do(func() error {
-		return retryableFunc()
+		return e.retryableFunc()
 	})
 
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), e.timeout)
 	defer cancel()
 
-	ticker := time.NewTicker(tick)
+	ticker := time.NewTicker(e.tick)
 
 	for {
 		select {
 		case <-ticker.C:
 			{
-				if conditionMetFunc() == nil {
+				if e.conditionMetFunc() == nil {
 					ticker.Stop()
 					return nil
 				}
