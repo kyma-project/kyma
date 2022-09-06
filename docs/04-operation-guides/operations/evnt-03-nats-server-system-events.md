@@ -7,7 +7,7 @@ Accessing certain resources in NATS requires [`system_account` privileges](https
 
 ## Prerequisites
 
-None.
+Kyma version `2.7` or later.
 
 ## Procedure
 
