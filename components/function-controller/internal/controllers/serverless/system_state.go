@@ -251,6 +251,13 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 	if s.instance.Spec.RuntimeImageOverride != nil {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", *s.instance.Spec.RuntimeImageOverride))
 	}
+
+	var resourceRequirements corev1.ResourceRequirements
+	if s.instance.Spec.ResourceConfiguration != nil &&
+		s.instance.Spec.ResourceConfiguration.Build != nil &&
+		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
+		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
+	}
 	labels := s.functionLabels()
 
 	return batchv1.Job{
@@ -316,7 +323,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       *s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       resourceRequirements,
 							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
