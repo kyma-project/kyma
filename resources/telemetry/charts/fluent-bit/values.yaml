@@ -83,7 +83,7 @@ service:
 serviceMonitor:
   enabled: true
   serviceMonitorPorts:
-    - port: http-buff-metr
+    - port: http-metrics
       path: /metrics
       scheme: https
       tlsConfig:
@@ -259,7 +259,7 @@ extraContainers: |
       - --storage-path=/data/flb-storage/
       - --metric-name=telemetry_fsbuffer_usage_bytes
     ports:
-      - name: http-buff-metr
+      - name: http-metrics
         containerPort: 2021
         protocol: TCP
     volumeMounts:
@@ -271,7 +271,7 @@ flush: 1
 metricsPort: 2020
 
 extraPorts:
-  - name: http-buff-metr
+  - name: http-metrics
     containerPort: 2021
     protocol: TCP
     port: 2021
