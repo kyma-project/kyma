@@ -109,7 +109,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipelineUnsupported := usesUnsupportedPlugin(&logPipeline)
+		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 		}
@@ -147,8 +147,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := usesUnsupportedPlugin(&logPipeline)
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
+		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
 
@@ -172,7 +172,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipelineUnsupported := usesUnsupportedPlugin(&logPipeline)
+		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
 
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
@@ -228,22 +228,10 @@ func countUnsupportedPluginUsages(pipelines *telemetryv1alpha1.LogPipelineList) 
 		if !pipelines.Items[i].DeletionTimestamp.IsZero() {
 			continue
 		}
-		if usesUnsupportedPlugin(&pipelines.Items[i]) {
+		if pipelines.Items[i].ContainsCustomPlugin() {
 			count++
 		}
 	}
 
 	return count
-}
-
-func usesUnsupportedPlugin(pipeline *telemetryv1alpha1.LogPipeline) bool {
-	if pipeline.Spec.Output.Custom != "" {
-		return true
-	}
-	for _, f := range pipeline.Spec.Filters {
-		if f.Custom != "" {
-			return true
-		}
-	}
-	return false
 }
