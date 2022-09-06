@@ -318,6 +318,21 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return int(fluentBitDaemonSet.Generation)
 			}, timeout, interval).Should(Equal(2))
+
+			// All log pipeline gauge should be updated after deletion
+			Eventually(func() float64 {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return 0
+				}
+				var parser expfmt.TextParser
+				mf, err := parser.TextToMetricFamilies(resp.Body)
+				if err != nil {
+					return 0
+				}
+
+				return *mf["telemetry_all_logpipelines"].Metric[0].Gauge.Value
+			}, timeout, interval).Should(Equal(0.0))
 		})
 	})
 })

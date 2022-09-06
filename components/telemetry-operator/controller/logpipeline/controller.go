@@ -217,21 +217,26 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 }
 
 func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineList) {
-	r.allLogPipelines.Set(float64(len(allPipelines.Items)))
-	r.unsupportedLogPipelines.Set(float64(countUnsupportedPluginUsages(allPipelines)))
+	r.allLogPipelines.Set(float64(count(allPipelines, isNotMarkedForDeletion)))
+	r.unsupportedLogPipelines.Set(float64(count(allPipelines, isUnsupported)))
 }
 
-// syncUnsupportedPluginsTotal checks if any LogPipeline defines a unsupported Filter or Output.
-func countUnsupportedPluginUsages(pipelines *telemetryv1alpha1.LogPipelineList) int {
+type keepFunc func(*telemetryv1alpha1.LogPipeline) bool
+
+func count(pipelines *telemetryv1alpha1.LogPipelineList, keep keepFunc) int {
 	count := 0
 	for i := range pipelines.Items {
-		if !pipelines.Items[i].DeletionTimestamp.IsZero() {
-			continue
-		}
-		if pipelines.Items[i].ContainsCustomPlugin() {
+		if keep(&pipelines.Items[i]) {
 			count++
 		}
 	}
-
 	return count
+}
+
+func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
+	return pipeline.DeletionTimestamp.IsZero()
+}
+
+func isUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
+	return isNotMarkedForDeletion(pipeline) && pipeline.ContainsCustomPlugin()
 }
