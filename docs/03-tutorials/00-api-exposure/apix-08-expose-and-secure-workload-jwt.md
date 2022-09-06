@@ -26,7 +26,7 @@ To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
+   >**NOTE:** `DOMAIN_NAME` is the domain you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
@@ -78,7 +78,7 @@ To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
+   >**NOTE:** `DOMAIN_NAME` is the domain you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
 
