@@ -222,13 +222,13 @@ func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineLi
 }
 
 // syncUnsupportedPluginsTotal checks if any LogPipeline defines a unsupported Filter or Output.
-func countUnsupportedPluginUsages(logPipelines *telemetryv1alpha1.LogPipelineList) int {
+func countUnsupportedPluginUsages(pipelines *telemetryv1alpha1.LogPipelineList) int {
 	count := 0
-	for _, l := range logPipelines.Items {
-		if !l.DeletionTimestamp.IsZero() {
+	for i := range pipelines.Items {
+		if !pipelines.Items[i].DeletionTimestamp.IsZero() {
 			continue
 		}
-		if usesUnsupportedPlugin(&l) {
+		if usesUnsupportedPlugin(&pipelines.Items[i]) {
 			count++
 		}
 	}
