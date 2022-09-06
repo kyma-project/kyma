@@ -255,6 +255,9 @@ extraContainers: |
         memory: 50Mi
       requests:
         memory: 5Mi
+    args:
+      - storage-name=/data/flb-storage/
+      - --metric-name=telemetry_fsbuffer_usage_bytes
     ports:
       - name: http-buff-metr
         containerPort: 2021

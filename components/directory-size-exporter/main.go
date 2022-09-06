@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"net/http"
 
@@ -10,29 +11,38 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+var (
+	storagePath string
+	metricName  string
+)
+
 func main() {
 	var logFormat string
 	var logLevel string
-
-	var storagePath string
-	var dirsSizeMetricName string
 	var port string
 	var interval int
 
 	flag.StringVar(&logFormat, "log-format", "text", "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal)")
 
-	flag.StringVar(&storagePath, "storage-path", "/data/log/flb-storage/", "Path to the data folder we observe")
-	flag.StringVar(&dirsSizeMetricName, "metric-name", "telemetry_fsbuffer_usage_bytes", "Buffer size prometheus metric name")
-	flag.StringVar(&port, "port", "2021", "Application port")
-	flag.IntVar(&interval, "interval", 30, "Interval with which we reord our metrics")
+	flag.StringVar(&storagePath, "storage-path", "", "Path to the observed data folder")
+	flag.StringVar(&metricName, "metric-name", "", "Metric name used for exporting the folder size")
+	flag.StringVar(&port, "port", "2021", "Port for exposing the metrics")
+	flag.IntVar(&interval, "interval", 30, "Interval to calculate the metric ")
+
+	flag.Parse()
+
+	flag.Parse()
+	if err := validateFlags(); err != nil {
+		panic(err)
+	}
 
 	exporterLogger, err := logger.New(logger.Format(logFormat), logger.Level(logLevel))
 	if err != nil {
 		panic(err)
 	}
 
-	exp := exporter.NewExporter(storagePath, dirsSizeMetricName, exporterLogger)
+	exp := exporter.NewExporter(storagePath, metricName, exporterLogger)
 	exporterLogger.WithContext().Info("Exporter is initialized")
 
 	exp.RecordMetrics(interval)
@@ -44,4 +54,14 @@ func main() {
 		panic(err)
 	}
 	exporterLogger.WithContext().Info("Listening on port '" + port + "'")
+}
+
+func validateFlags() error {
+	if storagePath == "" {
+		return errors.New("--storage-path flag is required")
+	}
+	if metricName == "" {
+		return errors.New("--metric-name flag is required")
+	}
+	return nil
 }

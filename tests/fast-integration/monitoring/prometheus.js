@@ -133,6 +133,17 @@ async function assertMetricsExist() {
         {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}],
     },
 
+    {
+      'telemetry-fluent-bit': [
+        {'telemetry_fsbuffer_usage_bytes': [[]]},
+        {'fluentbit_input_bytes_total ': [['pod']]}],
+    },
+
+    {
+      'telemetry-operator-metrics': [
+        {'telemetry_fluentbit_triggered_restarts_total': [[]]},]
+    },
+
   ];
 
   for (let index = 0; index < metricsList.length; index++) {
