@@ -1,4 +1,4 @@
-package compass_runtime_agent
+package executor
 
 import (
 	"context"
@@ -11,31 +11,31 @@ type RetryableExecuteFunc func() error
 type ConditionMet func() bool
 
 type ExecuteAndWaitForCondition struct {
-	retryableExecuteFunc RetryableExecuteFunc
-	conditionMetFunc     ConditionMet
-	tick                 time.Duration
-	timeout              time.Duration
+	RetryableExecuteFunc RetryableExecuteFunc
+	ConditionMetFunc     ConditionMet
+	Tick                 time.Duration
+	Timeout              time.Duration
 }
 
 func (e ExecuteAndWaitForCondition) Do() error {
 
 	err := retry.Do(func() error {
-		return e.retryableExecuteFunc()
+		return e.RetryableExecuteFunc()
 	})
 
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), e.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), e.Timeout)
 	defer cancel()
 
-	ticker := time.NewTicker(e.tick)
+	ticker := time.NewTicker(e.Tick)
 
 	for {
 		select {
 		case <-ticker.C:
 			{
-				res := e.conditionMetFunc()
+				res := e.ConditionMetFunc()
 
 				if res {
 					ticker.Stop()

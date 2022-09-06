@@ -1,4 +1,4 @@
-package compass_runtime_agent
+package executor
 
 import (
 	"github.com/pkg/errors"
@@ -11,14 +11,14 @@ func TestToolkit(t *testing.T) {
 	t.Run("Should return no error when verify function returns true", func(t *testing.T) {
 		// given
 		executeAndWait := ExecuteAndWaitForCondition{
-			retryableExecuteFunc: func() error {
+			RetryableExecuteFunc: func() error {
 				return nil
 			},
-			conditionMetFunc: func() bool {
+			ConditionMetFunc: func() bool {
 				return true
 			},
-			tick:    10 * time.Second,
-			timeout: 1 * time.Minute,
+			Tick:    10 * time.Second,
+			Timeout: 1 * time.Minute,
 		}
 
 		// when
@@ -34,7 +34,7 @@ func TestToolkit(t *testing.T) {
 
 		executeAndWait := ExecuteAndWaitForCondition{
 
-			retryableExecuteFunc: func() error {
+			RetryableExecuteFunc: func() error {
 				if counter < 3 {
 					counter++
 					return errors.New("failed")
@@ -42,11 +42,11 @@ func TestToolkit(t *testing.T) {
 
 				return nil
 			},
-			conditionMetFunc: func() bool {
+			ConditionMetFunc: func() bool {
 				return true
 			},
-			tick:    10 * time.Second,
-			timeout: 1 * time.Minute,
+			Tick:    10 * time.Second,
+			Timeout: 1 * time.Minute,
 		}
 
 		// when
@@ -61,14 +61,14 @@ func TestToolkit(t *testing.T) {
 		// given
 		executeAndWait := ExecuteAndWaitForCondition{
 
-			retryableExecuteFunc: func() error {
+			RetryableExecuteFunc: func() error {
 				return errors.New("call failed")
 			},
-			conditionMetFunc: func() bool {
+			ConditionMetFunc: func() bool {
 				return true
 			},
-			tick:    10 * time.Second,
-			timeout: 1 * time.Minute,
+			Tick:    10 * time.Second,
+			Timeout: 1 * time.Minute,
 		}
 
 		// when
@@ -82,14 +82,14 @@ func TestToolkit(t *testing.T) {
 		// given
 		executeAndWait := ExecuteAndWaitForCondition{
 
-			retryableExecuteFunc: func() error {
+			RetryableExecuteFunc: func() error {
 				return nil
 			},
-			conditionMetFunc: func() bool {
+			ConditionMetFunc: func() bool {
 				return false
 			},
-			tick:    10 * time.Second,
-			timeout: 1 * time.Minute,
+			Tick:    10 * time.Second,
+			Timeout: 1 * time.Minute,
 		}
 
 		// when

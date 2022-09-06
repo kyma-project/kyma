@@ -4,57 +4,45 @@ import (
 	"context"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/stretchr/testify/require"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/executor"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
 
+// TODO: those values needs to be carefully picked to be in line with Compass Runtime Agent's configuration
 const checkAppExistsPeriod = 30 * time.Second
 const appCreationTimeout = 2 * time.Minute
-
-type DirectorClient interface {
-	CreateApplication(name string) (string, error)
-	DeleteApplication(id string) error
-}
-
-type AppComparator interface {
-	Compare(assertions *require.Assertions, actualApp, expectedApp string) error
-}
 
 type ApplicationReader interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
 
-func NewDirectorClient() DirectorClient {
-	return nil
-}
-
 func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	// Created in chart
 	expectedAppName := "app1"
-	compassAppName := expectedAppName + RandomString(10)
-	directorClient := NewDirectorClient()
+	compassAppName := expectedAppName + random.RandomString(10)
 
 	// Create Application in Director and wait until it gets created
 	applicationInterface := gs.cli.ApplicationconnectorV1alpha1().Applications()
-	runtimeID, err := gs.createAppAndWaitForSync(directorClient, applicationInterface, compassAppName, expectedAppName)
+	runtimeID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, expectedAppName)
 	gs.Require().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-	err = gs.appComparator.Compare(gs.Require(), compassAppName, expectedAppName)
+	err = gs.appComparator.Compare(compassAppName, expectedAppName)
 	gs.Require().NoError(err)
 
 	// Clean up
-	err = directorClient.DeleteApplication(runtimeID)
+	err = gs.directorClient.UnregisterApplication(runtimeID)
 	gs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(directorClient DirectorClient, appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
+func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
 
 	var runtimeID string
 
 	exec := func() error {
-		id, err := directorClient.CreateApplication(compassAppName)
+		id, err := gs.directorClient.RegisterApplication(compassAppName)
 		if err != nil {
 			runtimeID = id
 		}
@@ -70,10 +58,10 @@ func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(directorClient Direc
 		return err != nil
 	}
 
-	return runtimeID, ExecuteAndWaitForCondition{
-		exec,
-		verify,
-		checkAppExistsPeriod,
-		appCreationTimeout,
+	return runtimeID, executor.ExecuteAndWaitForCondition{
+		RetryableExecuteFunc: exec,
+		ConditionMetFunc:     verify,
+		Tick:                 checkAppExistsPeriod,
+		Timeout:              appCreationTimeout,
 	}.Do()
 }

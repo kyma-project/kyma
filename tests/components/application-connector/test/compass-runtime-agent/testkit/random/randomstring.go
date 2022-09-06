@@ -1,4 +1,4 @@
-package compass_runtime_agent
+package random
 
 import (
 	"math/rand"
