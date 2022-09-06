@@ -6,7 +6,6 @@ This tutorial shows how to expose and secure a workload using Istio built-in sec
 
 ## Prerequisites
 
-- You are using Kyma 2.0 or higher. 
 - You have got a JSON Web Token (JWT). For more information, see [Get a JWT](./apix-06-get-jwt.md).
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial. It can also be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
@@ -25,11 +24,10 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
 1. Export your domain name and gateway name as environment variables:
 
    ```shell
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example: api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
-
+   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. Create a VirtualService:
 
@@ -66,11 +64,10 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
 1. Export your domain name and gateway name as environment variables:
 
    ```shell
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example: api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
-
+   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. Create a VirtualService:
 

@@ -7,8 +7,6 @@ This tutorial shows how to set up your custom domain and prepare a certificate f
 
 ## Prerequisites
 
-To follow this tutorial, use Kyma 2.0 or higher.
-
 If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create those workloads, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
@@ -19,11 +17,11 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 1. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
 
-  See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Then run:
+  See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines to create a secret in your Namespace. Then export the following value as an environment variable:
 
-  ```bash
-  kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
-  ```
+   ```bash
+   export SECRET={SECRET_NAME}
+   ```
 
 2. Create a DNSProvider and a DNSEntry custom resource (CR).
 
@@ -33,7 +31,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    ```bash
    export SPEC_TYPE={PROVIDER_TYPE}
-   export SECRET={SECRET_NAME}
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # The domain that you own, for example, mydomain.com
    ```
 
@@ -130,7 +127,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
      issuerRef:
        name: $ISSUER
-       namespace: default
+       namespace: $NAMESPACE
    EOF
    ```
    >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate kyma-gateway-certs -n istio-system `

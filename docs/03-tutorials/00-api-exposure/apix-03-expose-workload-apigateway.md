@@ -3,6 +3,7 @@ title: Expose a workload
 ---
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.
+   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
 The tutorial may be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
 
@@ -24,10 +25,10 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
    export GATEWAY=$NAMESPACE/httpbin-gateway
    ```
-   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
+   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. Expose the instance of the HttpBin service by creating an APIRule CR in your Namespace. Run:
 
@@ -86,11 +87,10 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
-
+   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. Expose the sample Function by creating an APIRule CR in your Namespace. Run:
 

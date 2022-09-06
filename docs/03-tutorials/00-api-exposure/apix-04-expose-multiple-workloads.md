@@ -22,11 +22,10 @@ Follow the instructions to expose your instance of the HttpBin service and your 
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
-
+   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace.
 In the following example, the services definition at the **spec.rules** level overwrites the service definition at the **spec.service** level. Run:
@@ -78,11 +77,10 @@ Follow the instruction to expose your instance of the HttpBin service and your s
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example, api.mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
-   >**NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`
-
+   >**NOTE:** In this step, you provide `DOMAIN_NAME` which must be a Kyma domain or your custom subdomain, for example, api.mydomain.com. If you don't want to use your custom domain, replace `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
 2. To expose the instance of the HttpBin service and the instance of the sample Function, create an API Rule CR in your Namespace. Run:
 
