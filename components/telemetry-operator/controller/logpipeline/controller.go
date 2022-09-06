@@ -103,6 +103,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(ctx, &allPipelines); err != nil {
+		log.Error(err, "Failed to get all log pipelines")
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+	}
+	r.updateMetrics(&allPipelines)
+
 	secretsOK := r.syncer.secretHelper.ValidatePipelineSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
@@ -117,18 +124,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
 	}
 
-	var allPipelines telemetryv1alpha1.LogPipelineList
-	if err := r.List(ctx, &allPipelines); err != nil {
-		log.Error(err, "Failed to get all log pipelines")
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
-	}
-
 	changed, err := r.syncer.syncAll(ctx, &logPipeline, &allPipelines)
 	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
-
-	r.updateMetrics(&allPipelines)
 
 	if changed {
 		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
