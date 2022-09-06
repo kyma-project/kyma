@@ -101,6 +101,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		log.Error(err, "Failed to get all log pipelines")
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 	}
+	log.Info(fmt.Sprintf("TEST: %#v", allPipelines.Items))
 	r.updateMetrics(&allPipelines)
 
 	var logPipeline telemetryv1alpha1.LogPipeline
