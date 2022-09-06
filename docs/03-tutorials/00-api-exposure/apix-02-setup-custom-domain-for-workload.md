@@ -31,8 +31,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    ```bash
    export SPEC_TYPE={PROVIDER_TYPE}
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # The domain that you own, for example, mydomain.com
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
    ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, mydomain.com
+
 
     ```bash
     cat <<EOF | kubectl apply -f -
