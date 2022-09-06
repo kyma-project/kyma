@@ -140,9 +140,16 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if *s.instance.Spec.RuntimeImageOverride != "" {
+	if s.instance.Spec.RuntimeImageOverride != nil {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", *s.instance.Spec.RuntimeImageOverride))
 	}
+	var resourceRequirements corev1.ResourceRequirements
+	if s.instance.Spec.ResourceConfiguration != nil &&
+		s.instance.Spec.ResourceConfiguration.Build != nil &&
+		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
+		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
+	}
+
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
 	return batchv1.Job{
@@ -218,7 +225,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       *s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       resourceRequirements,
 							VolumeMounts:    s.getGitBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
