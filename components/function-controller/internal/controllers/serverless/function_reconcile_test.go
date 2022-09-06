@@ -1319,7 +1319,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		function = &serverlessv1alpha2.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(*function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
 
 		t.Log("should detect runtimeImageOverride rollback")
@@ -1333,7 +1333,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha2.Function{}
-		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
+		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.BeNil())
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
 	})
 }
