@@ -53,7 +53,7 @@ func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.Log
 		return false, err
 	}
 
-	variablesChanged, err := s.syncVariables(ctx, allPipelines)
+	variablesChanged, err := s.syncReferencedSecrets(ctx, allPipelines)
 	if err != nil {
 		log.Error(err, "Failed to sync variables")
 		return false, err
@@ -154,8 +154,8 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 	return changed, nil
 }
 
-// syncVariables copies referenced secrets to global Fluent Bit environment secret.
-func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
+// syncReferencedSecrets copies referenced secrets to global Fluent Bit environment secret.
+func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
 	log := logf.FromContext(ctx)
 	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.config.EnvSecret)
 	if err != nil {

@@ -88,7 +88,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret).Build()
 
 	sut := newSyncer(mockClient, testConfig)
-	restartRequired, err := sut.syncVariables(context.Background(), &logPipelines)
+	restartRequired, err := sut.syncReferencedSecrets(context.Background(), &logPipelines)
 	require.NoError(t, err)
 	require.True(t, restartRequired)
 
