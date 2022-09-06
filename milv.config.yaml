@@ -1,5 +1,5 @@
 #TODO: remove https://dashboard.kyma-project, https://kiali.kyma.example.com/oauth2/callback  after it's available
-external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com" ]
+external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com", "https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration" ]
 files-to-ignore: [ "/vendor/", "/testdata/" ]
 timeout: 60
 request-repeats: 5

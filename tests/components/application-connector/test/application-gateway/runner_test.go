@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/httpd"
 )
 
 var applications = []string{"positive-authorisation", "negative-authorisation", "path-related-error-handling", "missing-resources-error-handling", "proxy-cases", "proxy-errors"}
@@ -20,7 +22,7 @@ func (gs *GatewaySuite) TestGetRequest() {
 		gs.Run(app.Spec.Description, func() {
 			for _, service := range app.Spec.Services {
 				gs.Run(service.Description, func() {
-					http := NewHttpCli(gs.T())
+					http := httpd.NewCli(gs.T())
 
 					for _, entry := range service.Entries {
 						if entry.Type != "API" {
@@ -49,7 +51,7 @@ func (gs *GatewaySuite) TestResponseBody() {
 	gs.Nil(err)
 	for _, service := range app.Spec.Services {
 		gs.Run(service.Description, func() {
-			http := NewHttpCli(gs.T())
+			http := httpd.NewCli(gs.T())
 
 			for _, entry := range service.Entries {
 				if entry.Type != "API" {
@@ -79,7 +81,7 @@ func (gs *GatewaySuite) TestBodyPerMethod() {
 	gs.Nil(err)
 	for _, service := range app.Spec.Services {
 		gs.Run(service.Description, func() {
-			httpCli := NewHttpCli(gs.T())
+			httpCli := httpd.NewCli(gs.T())
 
 			for _, entry := range service.Entries {
 				if entry.Type != "API" {
