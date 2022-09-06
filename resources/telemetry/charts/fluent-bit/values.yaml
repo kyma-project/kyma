@@ -256,7 +256,7 @@ extraContainers: |
       requests:
         memory: 5Mi
     args:
-      - storage-name=/data/flb-storage/
+      - --storage-path=/data/flb-storage/
       - --metric-name=telemetry_fsbuffer_usage_bytes
     ports:
       - name: http-buff-metr
