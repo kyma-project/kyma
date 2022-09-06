@@ -96,19 +96,19 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 
-	var logPipeline telemetryv1alpha1.LogPipeline
-	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
-		log.Info("Ignoring deleted LogPipeline")
-		// Ignore not-found errors since we can get them on deleted requests
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
 		log.Error(err, "Failed to get all log pipelines")
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 	}
 	r.updateMetrics(&allPipelines)
+
+	var logPipeline telemetryv1alpha1.LogPipeline
+	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
+		log.Info("Ignoring deleted LogPipeline")
+		// Ignore not-found errors since we can get them on deleted requests
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	secretsOK := r.syncer.secretHelper.ValidatePipelineSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
