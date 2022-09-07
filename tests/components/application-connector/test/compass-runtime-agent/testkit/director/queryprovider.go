@@ -4,13 +4,13 @@ import "fmt"
 
 type queryProvider struct{}
 
-func (qp queryProvider) registerApplicationMutation(appName, scenarioName string) string {
+// at the moment just register application
+// scenario will be added later
+func (qp queryProvider) registerApplicationMutation(appName, _ string) string {
 	return fmt.Sprintf(`mutation {
 	result: registerApplication(in: {
-		name: "%s" 
+		name: "%s"
 	}) { id } }`, appName)
-	//return fmt.Sprintf(`mutation {
-	//result: registerApplication(in: %s) { id } }`, appInput)
 }
 
 func (qp queryProvider) unregisterApplicationMutation(applicationID string) string {

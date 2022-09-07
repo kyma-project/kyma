@@ -27,21 +27,21 @@ const (
 	oneTimeToken    = "54321"
 	connectorURL    = "https://kyma.cx/connector/graphql"
 
+	//expectedRegisterApplicationQuery = `mutation {
+	//result: registerApplication(in: {
+	//	name: "Test-application-123",
+	//	labels: { scenarios: ["Testing-scenario"] }
+	//}) { id } }`
+
 	expectedRegisterApplicationQuery = `mutation {
 	result: registerApplication(in: {
-		name: "Test-application-123",
-		labels: { scenarios: ["Testing-scenario"] } 
+		name: "Test-application-123"
 	}) { id } }`
 
 	expectedDeleteApplicationQuery = `mutation {
 	result: unregisterApplication(id: "test-application-ID-12345") {
 		id
 	} }`
-
-	//expectedOneTimeTokenForAppQuery = `mutation {
-	//result: requestOneTimeTokenForApplication(id: "test-application-ID-12345") {
-	//	token connectorURL
-	//}}`
 )
 
 var (
@@ -79,10 +79,10 @@ func TestDirectorClient_ApplicationRegistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(token, nil)
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario, tenantValue)
+		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario)
 
 		// then
 		assert.NoError(t, err)
@@ -99,10 +99,10 @@ func TestDirectorClient_ApplicationRegistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(token, nil)
 
-		configClient := NewDirectorClient(nil, mockedOAuthClient)
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario, tenantValue)
+		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario)
 
 		// then
 		assert.Error(t, err)
@@ -119,10 +119,10 @@ func TestDirectorClient_ApplicationRegistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(expiredToken, nil)
 
-		configClient := NewDirectorClient(nil, mockedOAuthClient)
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario, tenantValue)
+		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario)
 
 		// then
 		assert.Error(t, err)
@@ -134,10 +134,10 @@ func TestDirectorClient_ApplicationRegistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(oauth.Token{}, errors.New("Failed token error"))
 
-		configClient := NewDirectorClient(nil, mockedOAuthClient)
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario, tenantValue)
+		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario)
 
 		// then
 		assert.Error(t, err)
@@ -161,10 +161,10 @@ func TestDirectorClient_ApplicationRegistering(t *testing.T) {
 			cfg.Result = nil
 		})
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario, tenantValue)
+		receivedApplicationID, err := configClient.RegisterApplication(testAppName, testAppScenario)
 
 		// then
 		assert.Error(t, err)
@@ -188,10 +188,10 @@ func TestDirectorClient_ApplicationRegistering(t *testing.T) {
 			cfg.Result = nil
 		})
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedRuntimeID, err := configClient.RegisterApplication(testAppName, testAppScenario, tenantValue)
+		receivedRuntimeID, err := configClient.RegisterApplication(testAppName, testAppScenario)
 
 		// then
 		assert.Error(t, err)
@@ -229,10 +229,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.NoError(t, err)
@@ -248,10 +248,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(emptyToken, nil)
 
-		configClient := NewDirectorClient(nil, mockedOAuthClient)
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.Error(t, err)
@@ -267,10 +267,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(expiredToken, nil)
 
-		configClient := NewDirectorClient(nil, mockedOAuthClient)
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.Error(t, err)
@@ -281,10 +281,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(oauth.Token{}, errors.New("Failed token error"))
 
-		configClient := NewDirectorClient(nil, mockedOAuthClient)
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.Error(t, err)
@@ -308,10 +308,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 			cfg.Result = nil
 		})
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.Error(t, err)
@@ -334,10 +334,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.Error(t, err)
@@ -368,10 +368,10 @@ func TestDirectorClient_ApplicationUnregistering(t *testing.T) {
 		mockedOAuthClient := &oauthmocks.Client{}
 		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
 
-		configClient := NewDirectorClient(gqlClient, mockedOAuthClient)
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		err := configClient.UnregisterApplication(applicationTestingID, tenantValue)
+		err := configClient.UnregisterApplication(applicationTestingID)
 
 		// then
 		assert.Error(t, err)

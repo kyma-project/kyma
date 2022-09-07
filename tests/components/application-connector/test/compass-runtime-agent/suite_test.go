@@ -43,15 +43,18 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 
 	gs.T().Logf("Config: %s", gs.testConfig.String())
 
-	directorClient, err := gs.makeCompassDirectorClient()
+	_, err = gs.makeCompassDirectorClient()
 	gs.Require().Nil(err)
 
-	gs.T().Log("Attempt to unregister application in compass")
-	appID, err := directorClient.RegisterApplication("oko", "auto-testing", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
-	//err = directorClient.UnregisterApplication("218a1089-fb05-47a2-b1a9-4d09d854eeab", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
-	gs.Require().Nil(err)
+	//gs.T().Log("Attempt to unregister application in compass")
+	//appID, err := directorClient.RegisterApplication("oko", "auto-testing")
+	//gs.Require().Nil(err)
 
-	gs.T().Logf("Sucessfully registered application %s in compass", appID)
+	//gs.T().Logf("Sucessfully registered application %s in compass", appID)
+
+	//err = directorClient.UnregisterApplication(appID)
+	//gs.Require().Nil(err)
+	//gs.T().Logf("Sucessfully unregistered application %s in compass", appID)
 
 	// TODO Pass Tenant from configuration
 	gs.appComparator, err = applications.NewComparator(gs.Require())
@@ -90,5 +93,5 @@ func (gs *CompassRuntimeAgentSuite) makeCompassDirectorClient() (director.Client
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not create OAuthClient client")
 	}
-	return director.NewDirectorClient(gqlClient, oauthClient), nil
+	return director.NewDirectorClient(gqlClient, oauthClient, gs.testConfig.TestingTenant), nil
 }

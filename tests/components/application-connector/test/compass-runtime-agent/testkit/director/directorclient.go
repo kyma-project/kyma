@@ -15,10 +15,10 @@ const (
 	TenantHeader        = "Tenant"
 )
 
-//go:generate mockery --name=DirectorClient
+//go:generate mockery --name=Client
 type Client interface {
-	RegisterApplication(appName, scenario, tenant string) (string, error)
-	UnregisterApplication(id string, tenant string) error
+	RegisterApplication(appName, scenario string) (string, error)
+	UnregisterApplication(id string) error
 }
 
 type directorClient struct {
@@ -27,9 +27,10 @@ type directorClient struct {
 	graphqlizer   graphqlizer.Graphqlizer
 	token         oauth.Token
 	oauthClient   oauth.Client
+	tenant        string
 }
 
-func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client) Client {
+func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client, tenant string) Client {
 
 	return &directorClient{
 		gqlClient:     gqlClient,
@@ -37,6 +38,7 @@ func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client) Client {
 		queryProvider: queryProvider{},
 		graphqlizer:   graphqlizer.Graphqlizer{},
 		token:         oauth.Token{},
+		tenant:        tenant,
 	}
 }
 
@@ -54,7 +56,7 @@ func (cc *directorClient) getToken() error {
 	return nil
 }
 
-func (cc *directorClient) RegisterApplication(appName, scenario, tenant string) (string, error) {
+func (cc *directorClient) RegisterApplication(appName, scenario string) (string, error) {
 	log.Infof("Registering Application on Director service")
 
 	//var labels graphql.Labels
@@ -77,7 +79,7 @@ func (cc *directorClient) RegisterApplication(appName, scenario, tenant string) 
 	registerAppQuery := cc.queryProvider.registerApplicationMutation(appName, scenario)
 
 	var response CreateApplicationResponse
-	appErr := cc.executeDirectorGraphQLCall(registerAppQuery, tenant, &response)
+	appErr := cc.executeDirectorGraphQLCall(registerAppQuery, cc.tenant, &response)
 	if appErr != nil {
 		return "", errors.Wrap(appErr, "Failed to register application in Director. Request failed")
 	}
@@ -87,16 +89,16 @@ func (cc *directorClient) RegisterApplication(appName, scenario, tenant string) 
 		return "", errors.New("Failed to register application in Director: Received nil response.")
 	}
 
-	log.Infof("Successfully registered application %s in Director for tenant %s", appName, tenant)
+	log.Infof("Successfully registered application %s in Director for tenant %s", appName, cc.tenant)
 
 	return response.Result.ID, nil
 }
 
-func (cc *directorClient) UnregisterApplication(appID, tenant string) error {
+func (cc *directorClient) UnregisterApplication(appID string) error {
 	runtimeQuery := cc.queryProvider.unregisterApplicationMutation(appID)
 
 	var response DeleteApplicationResponse
-	err := cc.executeDirectorGraphQLCall(runtimeQuery, tenant, &response)
+	err := cc.executeDirectorGraphQLCall(runtimeQuery, cc.tenant, &response)
 	if err != nil {
 		return fmt.Errorf("Failed to unregister application %s in Director", appID)
 	}
@@ -109,7 +111,7 @@ func (cc *directorClient) UnregisterApplication(appID, tenant string) error {
 		return fmt.Errorf("Failed to unregister application %s in Director: received unexpected applicationID.", appID)
 	}
 
-	log.Infof("Successfully unregistered Application %s in Director for tenant %s", appID, tenant)
+	log.Infof("Successfully unregistered Application %s in Director for tenant %s", appID, cc.tenant)
 
 	return nil
 }
