@@ -10,14 +10,15 @@ type Command struct {
 	Cmd           string
 	Args          []string
 	OutputChannel chan string
+	cmd *exec.Cmd
 }
 
 func (c *Command) Run() (chan struct{}, error) {
-	cmd := exec.Command(c.Cmd, c.Args...)
-	r, _ := cmd.StdoutPipe()
+	c.cmd = exec.Command(c.Cmd, c.Args...)
+	r, _ := c.cmd.StdoutPipe()
 
 	// Use the same pipe for standard error
-	cmd.Stderr = cmd.Stdout
+	c.cmd.Stderr = c.cmd.Stdout
 
 	// Make a new channel which will be used to ensure we get all output
 	done := make(chan struct{})
@@ -42,11 +43,15 @@ func (c *Command) Run() (chan struct{}, error) {
 	}()
 
 	// Start the command and check for errors
-	err := cmd.Start()
+	err := c.cmd.Start()
 	if err != nil {
 		return nil, err
 	}
-	go cmd.Wait()
+	go c.cmd.Wait()
 
 	return done, nil
+}
+
+func (c *Command) Kill(){
+	c.cmd.Process.Kill()
 }

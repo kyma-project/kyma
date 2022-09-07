@@ -46,6 +46,7 @@ func InitializeScenarioReconcilation(ctx *godog.ScenarioContext) {
 	ctx.Step(`^istioctl install takes place$`, reconcilationCase.istioctlInstallTakesPlace)
 	ctx.Step(`^the httpbin deployment in "([^"]*)" namespace gets restarted until there is no sidecar$`, reconcilationCase.httpbinGetsRestartedUntilThereIsNoSidecar)
 	ctx.Step(`^reconciler restarts the faulty deployment$`, reconcilationCase.reconcilerRestartsTheFaultyDeployment)
+	ctx.Step(`^the reconcilation is aborted$`, reconcilationCase.abort)
 	InitializeScenarioIstioInstalled(ctx)
 }
 
@@ -130,4 +131,9 @@ func (i *istioReconcilationCase) reconcilerRestartsTheFaultyDeployment() error {
 			return errors.New("Reconcilation didn't restart the faulty pod")
 		}
 	}
+}
+
+func (i *istioReconcilationCase) abort() error{
+	i.command.Kill()
+	return nil
 }
