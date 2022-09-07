@@ -31,7 +31,7 @@ type comparator struct {
 	actualNamespace   string
 }
 
-func (c comparator) Compare(actual, expected string) error {
+func (c comparator) Compare(expected, actual string) error {
 
 	if actual == "" || expected == "" {
 		return errors.New("empty actual or expected application name")
@@ -49,17 +49,17 @@ func (c comparator) Compare(actual, expected string) error {
 
 	c.assertions.Equal(expectedApp.Name, actualApp.Name)
 	c.assertions.Equal(expectedApp.Namespace, actualApp.Namespace)
-	c.compareSpec(actualApp.Spec, expectedApp.Spec)
+	c.compareSpec(expectedApp.Spec, actualApp.Spec)
 	return nil
 }
 
-func (c comparator) compareSpec(actual, expected v1alpha1.ApplicationSpec) {
+func (c comparator) compareSpec(expected, actual v1alpha1.ApplicationSpec) {
 
 	a := c.assertions
 	a.Equal(expected.Description, actual.Description)
 	a.Equal(expected.SkipInstallation, actual.SkipInstallation)
 
-	c.compareServices(actual.Services, expected.Services)
+	c.compareServices(expected.Services, actual.Services)
 
 	a.Equal(expected.Labels, actual.Labels)
 	a.Equal(expected.Tenant, actual.Tenant)
@@ -74,7 +74,7 @@ func (c comparator) compareSpec(actual, expected v1alpha1.ApplicationSpec) {
 	a.Equal(expected.SkipVerify, actual.SkipVerify)
 }
 
-func (c comparator) compareServices(actual, expected []v1alpha1.Service) {
+func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
 
 	a := c.assertions
 	a.Equal(len(expected), len(actual))
@@ -86,13 +86,13 @@ func (c comparator) compareServices(actual, expected []v1alpha1.Service) {
 		a.Equal(expected[i].DisplayName, actual[i].DisplayName)
 		a.Equal(expected[i].Description, actual[i].Description)
 
-		c.compareEntries(actual[i].Entries, expected[i].Entries)
+		c.compareEntries(expected[i].Entries, actual[i].Entries)
 
 		a.Equal(expected[i].AuthCreateParameterSchema, actual[i].AuthCreateParameterSchema)
 	}
 }
 
-func (c comparator) compareEntries(actual, expected []v1alpha1.Entry) {
+func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
 
 	a := c.assertions
 	a.Equal(len(actual), len(expected))
@@ -103,7 +103,7 @@ func (c comparator) compareEntries(actual, expected []v1alpha1.Entry) {
 		a.Equal(expected[i].SpecificationUrl, actual[i].SpecificationUrl)
 		a.Equal(expected[i].ApiType, actual[i].ApiType)
 
-		c.compareCredentials(actual[i].Credentials, expected[i].Credentials)
+		c.compareCredentials(expected[i].Credentials, actual[i].Credentials)
 
 		a.Equal(expected[i].RequestParametersSecretName, actual[i].RequestParametersSecretName)
 		a.Equal(expected[i].Name, actual[i].Name)
@@ -112,16 +112,16 @@ func (c comparator) compareEntries(actual, expected []v1alpha1.Entry) {
 	}
 }
 
-func (c comparator) compareCredentials(actual, expected v1alpha1.Credentials) {
+func (c comparator) compareCredentials(expected, actual v1alpha1.Credentials) {
 
 	a := c.assertions
 
-	a.Equal(actual.Type, expected.Type)
+	a.Equal(expected.Type, actual.Type)
 
-	err := c.secretComparer.Compare(actual.SecretName, expected.SecretName)
+	err := c.secretComparer.Compare(expected.SecretName, actual.SecretName)
 	a.NoError(err)
 
-	a.Equal(actual.AuthenticationUrl, expected.AuthenticationUrl)
+	a.Equal(expected.AuthenticationUrl, actual.AuthenticationUrl)
 
 	a.Equal(expected.CSRFInfo, actual.CSRFInfo)
 }

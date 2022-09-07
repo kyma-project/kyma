@@ -10,13 +10,13 @@ import (
 
 //go:generate mockery --name=Comparator
 type Comparator interface {
-	Compare(actual, expected string) error
+	Compare(expected, actual string) error
 }
 
-func NewSecretComparator(assertions *require.Assertions, cli kubernetes.Interface, expectedNamespace, actualNamespace string) (Comparator, error) {
+func NewSecretComparator(assertions *require.Assertions, coreClientSet kubernetes.Interface, expectedNamespace, actualNamespace string) (Comparator, error) {
 	return &secretComparator{
 		assertions:        assertions,
-		cli:               cli,
+		coreClientSet:     coreClientSet,
 		expectedNamespace: expectedNamespace,
 		actualNamespace:   actualNamespace,
 	}, nil
@@ -24,12 +24,12 @@ func NewSecretComparator(assertions *require.Assertions, cli kubernetes.Interfac
 
 type secretComparator struct {
 	assertions        *require.Assertions
-	cli               kubernetes.Interface
+	coreClientSet     kubernetes.Interface
 	expectedNamespace string
 	actualNamespace   string
 }
 
-func (c secretComparator) Compare(actual, expected string) error {
+func (c secretComparator) Compare(expected, actual string) error {
 
 	if actual == "" && expected == "" {
 		return nil
@@ -39,8 +39,8 @@ func (c secretComparator) Compare(actual, expected string) error {
 		return errors.New("empty actual or expected secret name")
 	}
 
-	expectedSecretRepo := c.cli.CoreV1().Secrets(c.expectedNamespace)
-	actualSecretRepo := c.cli.CoreV1().Secrets(c.actualNamespace)
+	expectedSecretRepo := c.coreClientSet.CoreV1().Secrets(c.expectedNamespace)
+	actualSecretRepo := c.coreClientSet.CoreV1().Secrets(c.actualNamespace)
 
 	expectedSecret, err := expectedSecretRepo.Get(context.Background(), expected, metav1.GetOptions{})
 	if err != nil {

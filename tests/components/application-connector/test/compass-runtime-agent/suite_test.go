@@ -14,10 +14,10 @@ import (
 
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
-	cli            *cli.Clientset
-	kcli           *kubernetes.Clientset
-	directorClient director.Client
-	appComparator  applications.Comparator
+	applicationsClientSet *cli.Clientset
+	coreClientSet         *kubernetes.Clientset
+	directorClient        director.Client
+	appComparator         applications.Comparator
 }
 
 func initDirectorClient() director.Client {
@@ -28,10 +28,10 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	cfg, err := rest.InClusterConfig()
 	gs.Require().Nil(err)
 
-	gs.cli, err = cli.NewForConfig(cfg)
+	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
-	kcli, err := kubernetes.NewForConfig(cfg)
+	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
 	// TODO Pass Tenant from configuration
@@ -39,10 +39,10 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.Require().Nil(err)
 
 	// TODO: Pass namespaces names
-	secretComparator, err := applications.NewSecretComparator(gs.Require(), kcli, "", "")
+	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, "", "")
 	gs.Require().Nil(err)
 
-	applicationGetter := gs.cli.ApplicationconnectorV1alpha1().Applications()
+	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
 	gs.Require().Nil(err)
 }

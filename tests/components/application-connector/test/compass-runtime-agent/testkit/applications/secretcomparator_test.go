@@ -16,13 +16,13 @@ func TestCompare(t *testing.T) {
 	t.Run("should return true if secrets are equal", func(t *testing.T) {
 		//given
 		coreV1 := fake.NewSimpleClientset()
-		fakeComparator, err := NewSecretComparator(require.New(t), coreV1, "test", "kyma-integration")
+		secretComparator, err := NewSecretComparator(require.New(t), coreV1, "test", "kyma-integration")
 		require.NoError(t, err)
 		createFakeCredentialsSecret(t, coreV1.CoreV1().Secrets("test"), "expected", "test")
 		createFakeCredentialsSecret(t, coreV1.CoreV1().Secrets("kyma-integration"), "actual", "kyma-integration")
 
 		//when
-		err = fakeComparator.Compare("actual", "expected")
+		err = secretComparator.Compare("expected", "actual")
 
 		// then
 		require.NoError(t, err)
@@ -31,12 +31,12 @@ func TestCompare(t *testing.T) {
 	t.Run("should return error if failed to read actual secret", func(t *testing.T) {
 		//given
 		coreV1 := fake.NewSimpleClientset()
-		fakeComparator, err := NewSecretComparator(require.New(t), coreV1, "test", "kyma-integration")
+		secretComparator, err := NewSecretComparator(require.New(t), coreV1, "test", "kyma-integration")
 		require.NoError(t, err)
 		createFakeCredentialsSecret(t, coreV1.CoreV1().Secrets("test"), "expected", "test")
 
 		//when
-		err = fakeComparator.Compare("actual", "expected")
+		err = secretComparator.Compare("actual", "expected")
 
 		// then
 		require.Error(t, err)
@@ -45,12 +45,12 @@ func TestCompare(t *testing.T) {
 	t.Run("should return error if failed to read expected secret", func(t *testing.T) {
 		//given
 		coreV1 := fake.NewSimpleClientset()
-		fakeComparator, err := NewSecretComparator(require.New(t), coreV1, "test", "kyma-integration")
+		secretComparator, err := NewSecretComparator(require.New(t), coreV1, "test", "kyma-integration")
 		require.NoError(t, err)
 		createFakeCredentialsSecret(t, coreV1.CoreV1().Secrets("kyma-integration"), "actual", "kyma-integration")
 
 		//when
-		err = fakeComparator.Compare("actual", "expected")
+		err = secretComparator.Compare("actual", "expected")
 
 		// then
 		require.Error(t, err)
@@ -58,11 +58,11 @@ func TestCompare(t *testing.T) {
 
 	t.Run("should return error if expected secret name is empty", func(t *testing.T) {
 		//given
-		fakeComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
+		secretComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
 		require.NoError(t, err)
 
 		//when
-		err = fakeComparator.Compare("actual", "")
+		err = secretComparator.Compare("actual", "")
 
 		// then
 		require.Error(t, err)
@@ -70,11 +70,11 @@ func TestCompare(t *testing.T) {
 
 	t.Run("should return error if actual secret name is empty", func(t *testing.T) {
 		//given
-		fakeComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
+		secretComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
 		require.NoError(t, err)
 
 		//when
-		err = fakeComparator.Compare("", "expected")
+		err = secretComparator.Compare("", "expected")
 
 		// then
 		require.Error(t, err)
@@ -82,11 +82,11 @@ func TestCompare(t *testing.T) {
 
 	t.Run("should return no error if actual and expected secret name is empty", func(t *testing.T) {
 		//given
-		fakeComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
+		secretComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
 		require.NoError(t, err)
 
 		//when
-		err = fakeComparator.Compare("", "")
+		err = secretComparator.Compare("", "")
 
 		// then
 		require.NoError(t, err)
