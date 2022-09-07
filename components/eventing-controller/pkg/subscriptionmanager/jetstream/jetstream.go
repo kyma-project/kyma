@@ -2,7 +2,8 @@ package jetstream
 
 import (
 	"context"
-	"fmt"
+
+	"golang.org/x/xerrors"
 
 	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
 
@@ -72,7 +73,7 @@ func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, met
 // Init initialize the JetStream subscription manager.
 func (sm *SubscriptionManager) Init(mgr manager.Manager) error {
 	if len(sm.envCfg.URL) == 0 {
-		return fmt.Errorf("env var URL must be a non-empty value")
+		return xerrors.Errorf("env var URL must be a non-empty value")
 	}
 	sm.mgr = mgr
 	sm.namedLogger().Info("initialized JetStream subscription manager")
@@ -104,7 +105,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 	//  the reconciler, not the other way around.
 	sm.backend = jetStreamReconciler.Backend
 	if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
-		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
+		return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
 	}
 	sm.namedLogger().Info("Started JetStream subscription manager")
 	return nil

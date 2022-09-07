@@ -152,7 +152,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("not able to parse sink url with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
+						utils.ConditionInvalidSink("failed to parse subscription sink URL: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")},
@@ -168,7 +168,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink does not contain suffix: svc.cluster.local in the URL")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It does not contain suffix: svc.cluster.local")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not contain suffix: svc.cluster.local")},
@@ -184,7 +184,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")},
@@ -217,7 +217,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It is not a valid cluster local svc: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
@@ -814,7 +814,8 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 
 // getSubscriptionFromJetStream returns a NATS subscription for a given subscription and subject.
 // NOTE: We need to give the controller enough time to react on the changes. Otherwise, the returned NATS subscription could have the wrong state.
-//       For this reason Eventually is used here.
+//
+//	For this reason Eventually is used here.
 func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 

@@ -194,7 +194,7 @@ func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
 	condition := eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, nats.ErrBadSubject.Error(),
+		corev1.ConditionFalse, "failed to get clean subjects: "+nats.ErrBadSubject.Error(),
 	)
 	return HaveCondition(condition)
 }
@@ -203,7 +203,7 @@ func HaveConditionInvalidPrefix() gomegatypes.GomegaMatcher {
 	condition := eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, "prefix not found",
+		corev1.ConditionFalse, "failed to get clean subjects: prefix not found",
 	)
 	return HaveCondition(condition)
 }
