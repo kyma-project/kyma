@@ -1,4 +1,7 @@
 {{- /*
+  Customization: KubeletPodStartUpLatencyHigh: group expression uses additional "service" label to avoid failing evaluation if the stack is deployed twice, see also https://github.com/kyma-project/kyma/pull/11771
+*/ -}}
+{{- /*
 Generated from 'kubernetes-system-kubelet' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubernetesControlPlane-prometheusRule.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
@@ -125,7 +128,7 @@ spec:
         description: Kubelet Pod startup 99th percentile latency is {{`{{`}} $value {{`}}`}} seconds on node {{`{{`}} $labels.node {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}/kubernetes/kubeletpodstartuplatencyhigh
         summary: Kubelet Pod startup latency is too high.
-      expr: histogram_quantile(0.99, sum(rate(kubelet_pod_worker_duration_seconds_bucket{job="kubelet", metrics_path="/metrics"}[5m])) by (cluster, instance, le)) * on(cluster, instance) group_left(node) kubelet_node_name{job="kubelet", metrics_path="/metrics"} > 60
+      expr: histogram_quantile(0.99, sum(rate(kubelet_pod_worker_duration_seconds_bucket{job="kubelet", metrics_path="/metrics"}[5m])) by (cluster, instance, le)) * on(cluster, instance) group_left(node) kubelet_node_name{job="kubelet", metrics_path="/metrics", service="{{ template "kube-prometheus-stack.fullname" . }}-kubelet"} > 60
       for: 15m
       labels:
         severity: warning
