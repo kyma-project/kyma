@@ -1,12 +1,12 @@
 {{- /*
-  Customization: Some changes are made to the default label set.
-  Added labels recommended by Kubernetes and Helm:
-    helm.sh/chart
-    app.kubernetes.io/managed-by
-    app.kubernetes.io/name
-    app.kubernetes.io/instance
-  Removed labels:
-    heritage
+  Customization: 
+    * Added labels recommended by Kubernetes and Helm:
+        - helm.sh/chart
+        - app.kubernetes.io/managed-by
+        - app.kubernetes.io/name
+        - app.kubernetes.io/instance
+    * Removed labels:
+        - heritage
 */ -}}
 
 {{/* vim: set filetype=mustache: */}}
