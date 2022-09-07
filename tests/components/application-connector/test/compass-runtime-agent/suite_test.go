@@ -1,6 +1,8 @@
 package compass_runtime_agent
 
 import (
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"net/http"
 	"testing"
 
@@ -11,7 +13,13 @@ import (
 
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
-	cli *cli.Clientset
+	cli            *cli.Clientset
+	directorClient director.Client
+	appComparator  applications.Comparator
+}
+
+func initDirectorClient() director.Client {
+	return nil
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {
@@ -19,6 +27,13 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.Require().Nil(err)
 
 	gs.cli, err = cli.NewForConfig(cfg)
+	gs.Require().Nil(err)
+
+	// TODO Pass Tenant from configuration
+	gs.directorClient, err = director.NewDirectorClient("")
+	gs.Require().Nil(err)
+
+	gs.appComparator, err = applications.NewComparator(gs.Require())
 	gs.Require().Nil(err)
 }
 
