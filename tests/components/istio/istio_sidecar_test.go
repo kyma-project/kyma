@@ -34,12 +34,33 @@ func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
 }
 
 func (i *istioInstalledCase) httpBinPodShouldHaveSidecar(shouldHave string, targetNamespace string) error {
+	ready := make(chan bool)
+	go func() {
+		for {
+			time.Sleep(time.Millisecond * 200)
+			pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{
+				LabelSelector: "app=httpbin",
+			})
+			if err != nil {
+				continue
+			}
+			for _, pod := range pods.Items {
+				if pod.Status.Phase != v1.PodRunning {
+					continue
+				}
+			}
+			ready <- true
+		}
+	}()
+
+	<-ready
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "app=httpbin",
 	})
 	if err != nil {
 		return err
 	}
+
 	for _, pod := range pods.Items {
 		if (shouldHave == "should") != hasIstioProxy(pod.Spec.Containers) {
 			return fmt.Errorf("istio sidecars %s be deployed in %s", shouldHave, targetNamespace)
@@ -71,6 +92,24 @@ func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(targetNamespac
 }
 
 func (i *istioInstalledCase) targetNamespacePodsShouldNotHaveSidecar(targetNamespace string) error {
+	ready := make(chan bool)
+	go func() {
+		for {
+			time.Sleep(time.Millisecond * 200)
+			pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
+			if err != nil {
+				continue
+			}
+			for _, pod := range pods.Items {
+				if pod.Status.Phase != v1.PodRunning {
+					continue
+				}
+			}
+			ready <- true
+		}
+	}()
+	<- ready
+
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
