@@ -102,7 +102,7 @@ func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destSv
 	c.latency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
 }
 
-// RecordEventType records an eventTypeLabel metric
+// RecordEventType records an eventType metric
 func (c *Collector) RecordEventType(eventType, eventSource string, statusCode int) {
 	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
 }
