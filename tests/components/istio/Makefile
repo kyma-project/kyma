@@ -21,13 +21,15 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
-ifeq ($(EXPORT_RESULT), true)
-	$(GOTEST) -v -race ./... --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
-else
-	$(GOTEST) -v -race ./...
-endif
+	$(GOTEST) -run TestIstioInstalled github.com/kyma-project/kyma/tests/components/istio -v -race
 
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
+
+
+test-reconcilation: ## Run the tests of the project
+	$(GOTEST) -run "^TestIstioReconcilation$$" github.com/kyma-project/kyma/tests/components/istio -v -race
+
+test-reconcilation-k3d: provision-k3d kyma-istio-deploy test-reconciler ## Run tests on k3d cluster
 
 provision-k3d: ## Provision k3d cluster
 	kyma provision k3d --port 8080:80@loadbalancer --ci

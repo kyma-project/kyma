@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/cucumber/godog v0.12.5
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/spf13/pflag v1.0.5
 	github.com/tidwall/pretty v1.2.0
 	gitlab.com/rodrigoodhin/gocure v0.0.0-20220301084845-20a07464f4f0
 	k8s.io/api v0.24.4
@@ -16,6 +15,7 @@ require (
 
 require (
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	istio.io/api v0.0.0-20220817131511-59047e057639 // indirect
 	sigs.k8s.io/controller-runtime v0.12.3 // indirect
 )
@@ -47,6 +47,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/tdewolff/minify/v2 v2.10.0 // indirect
 	github.com/tdewolff/parse/v2 v2.5.27 // indirect
+	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
 	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7 // indirect
 	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 // indirect
