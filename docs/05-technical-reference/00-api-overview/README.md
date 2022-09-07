@@ -66,7 +66,7 @@ For example, an object can be written as v1 and then read back as v2 and convert
 **Rule #4a: minimum API lifetime is determined by the API stability level**
 
    * **GA API versions may be marked as deprecated, but must not be removed within a major version of a Kyma module**
-   * **Beta API versions must be supported for 9 months or 3 releases (whichever is longer) after deprecation**
+   * **Beta API versions must be supported for 6 months or 3 releases (whichever is longer) after deprecation**
    * **Alpha API versions may be removed in any release without prior deprecation notice**
 
 **Rule #4b: The "preferred" API version and the "storage version" for a given group may not advance until after a release has been made that supports both the new version and the previous version**
