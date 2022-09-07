@@ -96,7 +96,7 @@ func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
 func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
 
 	a := c.assertions
-	a.Equal(len(actual), len(expected))
+	a.Equal(len(expected), len(actual))
 
 	for i := 0; i < len(actual); i++ {
 		a.Equal(expected[i].Type, actual[i].Type)
