@@ -36,6 +36,8 @@ const (
 	ValidationWebhookName          = "validation.webhook.serverless.kyma-project.io"
 	ConvertingWebHookName          = "converting.webhook.serverless.kyma-project.io"
 
+	WebhookTimeout = 15
+
 	FunctionDefaultingWebhookPath       = "/defaulting/functions"
 	RegistryConfigDefaultingWebhookPath = "/defaulting/registry-config-secrets"
 	FunctionValidationWebhookPath       = "/validation/function"
@@ -143,7 +145,7 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 			},
 		},
 		SideEffects:    &sideEffects,
-		TimeoutSeconds: pointer.Int32(30),
+		TimeoutSeconds: pointer.Int32(WebhookTimeout),
 	}
 }
 
@@ -168,7 +170,7 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 		},
 		FailurePolicy:           &failurePolicy,
 		MatchPolicy:             &matchPolicy,
-		TimeoutSeconds:          pointer.Int32(30),
+		TimeoutSeconds:          pointer.Int32(WebhookTimeout),
 		SideEffects:             &sideEffects,
 		AdmissionReviewVersions: []string{"v1beta1", "v1"},
 		ObjectSelector: &metav1.LabelSelector{
@@ -254,7 +256,7 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 					},
 				},
 				SideEffects:    &sideEffects,
-				TimeoutSeconds: pointer.Int32(30),
+				TimeoutSeconds: pointer.Int32(WebhookTimeout),
 			},
 		},
 	}
@@ -285,7 +287,7 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 		MatchPolicy:        &matchPolicy,
 		ReinvocationPolicy: &reinvocationPolicy,
 		SideEffects:        &sideEffects,
-		TimeoutSeconds:     pointer.Int32(15),
+		TimeoutSeconds:     pointer.Int32(WebhookTimeout),
 	}
 }
 
