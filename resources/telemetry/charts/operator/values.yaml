@@ -77,7 +77,7 @@ serviceMonitor:
       keyFile: /etc/prometheus/secrets/istio.default/key.pem
     metricRelabelings:
      - action: keep
-       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|telemetry_fluentbit_triggered_restarts_total)$
+       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|telemetry_fluentbit_triggered_restarts_total|telemetry_all_logpipelines|telemetry_unsupported_logpipelines)$
        sourceLabels: [ __name__ ]
 
 logProcessor: fluent-bit
