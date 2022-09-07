@@ -141,7 +141,7 @@ async function assertMetricsExist() {
 
     {
       'telemetry-operator-metrics': [
-        {'telemetry_fluentbit_triggered_restarts_total': [[]]},]
+        {'telemetry_fluentbit_triggered_restarts_total': [[]]}],
     },
 
   ];
