@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -157,7 +156,7 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		givenCondition := serverlessv1alpha2.Condition{
 			Type:               serverlessv1alpha2.ConditionConfigurationReady,
 			Status:             corev1.ConditionTrue,
-			LastTransitionTime: metav1.Now(),
+			LastTransitionTime: metav1.Now().Rfc3339Copy(),
 			Reason:             serverlessv1alpha2.ConditionReasonConfigMapCreated,
 			Message:            fmt.Sprint("ConfigMap test-configmap created"),
 		}
@@ -175,39 +174,46 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 
 		gotCondition := testFunction.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
 		require.NotNil(t, gotCondition)
-		require.True(t, equalConditions([]serverlessv1alpha2.Condition{givenCondition}, []serverlessv1alpha2.Condition{*gotCondition}))
 
-		logrus.Infof("-----------------------------%v", gotCondition)
-
+		require.True(t, equalConditions([]serverlessv1alpha2.Condition{givenCondition},
+			[]serverlessv1alpha2.Condition{*gotCondition}))
 	})
-	// FIXME: This is broken.
+
 	t.Run("ConfigMapUpdated", func(t *testing.T) {
-		givenCondition := serverlessv1alpha2.Condition{
+		err := stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
+		require.NoError(t, err)
+		require.NotNil(t, testFunction.Status)
+
+		existingCondition := testFunction.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
+		require.NotNil(t, existingCondition)
+
+		updatedCondition := serverlessv1alpha2.Condition{
 			Type:               serverlessv1alpha2.ConditionConfigurationReady,
 			Status:             corev1.ConditionTrue,
-			LastTransitionTime: metav1.Time{time.Now().Add(1 * time.Minute)},
+			LastTransitionTime: metav1.Time{time.Now().Add(5 * time.Minute)}.Rfc3339Copy(),
 			Reason:             serverlessv1alpha2.ConditionReasonConfigMapUpdated,
 			Message:            fmt.Sprintf("ConfigMap test-configmap Updated"),
 		}
 
-		statusUpdateFunc := buildGenericStatusUpdateStateFn(givenCondition, nil, "")
+		statusUpdateFunc := buildGenericStatusUpdateStateFn(updatedCondition, nil, "")
 		nextStateFunc := statusUpdateFunc(ctx, stateReconciler, state)
-
 		require.Nil(t, nextStateFunc)
 		require.NoError(t, stateReconciler.err)
 
-		err := stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
-
+		err = stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 		require.NoError(t, err)
 		require.NotNil(t, testFunction.Status)
 
 		gotCondition := testFunction.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
 		require.NotNil(t, gotCondition)
-		// FIXME: this should be false
-		require.True(t, equalConditions([]serverlessv1alpha2.Condition{givenCondition}, []serverlessv1alpha2.Condition{*gotCondition}))
 
-		logrus.Infof("-----------------------------%v", gotCondition)
+		// The existing condition has been updated
+		require.False(t, equalConditions([]serverlessv1alpha2.Condition{*existingCondition},
+			[]serverlessv1alpha2.Condition{*gotCondition}))
 
+		// The given condition has been set correctly
+		require.True(t, equalConditions([]serverlessv1alpha2.Condition{updatedCondition},
+			[]serverlessv1alpha2.Condition{*gotCondition}))
 	})
 
 	t.Run("SourceUpdated", func(t *testing.T) {
@@ -219,7 +225,7 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		givenCondition := serverlessv1alpha2.Condition{
 			Type:               serverlessv1alpha2.ConditionConfigurationReady,
 			Status:             corev1.ConditionTrue,
-			LastTransitionTime: metav1.Now(),
+			LastTransitionTime: metav1.Now().Rfc3339Copy(),
 			Reason:             serverlessv1alpha2.ConditionReasonSourceUpdated,
 			Message:            fmt.Sprintf("Sources %s updated", state.instance.Name),
 		}
@@ -239,8 +245,6 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		require.True(t, equalConditions([]serverlessv1alpha2.Condition{givenCondition}, []serverlessv1alpha2.Condition{*gotCondition}))
 
 		require.Equal(t, testFunction.Spec.Source.GitRepository.BaseDir, testFunction.Status.BaseDir)
-		logrus.Infof("-----------------------------%v", gotCondition)
-
 	})
 
 }

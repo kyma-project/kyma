@@ -284,3 +284,18 @@ func (c *Condition) IsTrue() bool {
 }
 
 func (f *Function) Hub() {}
+
+func (l *Condition) Equal(r *Condition) bool {
+	if l == nil && r == nil {
+		return true
+	}
+
+	if l.Type != r.Type ||
+		l.Status != r.Status ||
+		l.Reason != r.Reason ||
+		l.Message != r.Message ||
+		!l.LastTransitionTime.Equal(&r.LastTransitionTime) {
+		return false
+	}
+	return true
+}

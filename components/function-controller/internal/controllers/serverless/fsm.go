@@ -95,7 +95,10 @@ var (
 // this function is a terminator
 func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, repo *serverlessv1alpha2.Repository, commit string) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
-		condition.LastTransitionTime = metav1.Now()
+		if condition.LastTransitionTime.IsZero() {
+			r.err = fmt.Errorf("LastTransitionTime for condition %s is not set", condition.Type)
+			return nil
+		}
 		currentFunction := &serverlessv1alpha2.Function{}
 
 		r.err = r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: s.instance.Name}, currentFunction)
@@ -105,7 +108,8 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 		}
 
 		currentFunction.Status.Conditions = updateCondition(currentFunction.Status.Conditions, condition)
-		equalConditions := equalConditions(s.instance.Status.Conditions, currentFunction.Status.Conditions)
+		// equalConditions := equalConditions(s.instance.Status.Conditions, currentFunction.Status.Conditions)
+		equalConditions := reflect.DeepEqual(s.instance.Status.Conditions, currentFunction.Status.Conditions)
 
 		isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
 		if equalConditions {
@@ -141,22 +145,30 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 		}
 
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
-			if err := r.client.Status().Update(ctx, currentFunction); err != nil {
+			if err := r.updateFunctionStatusWithEvent(ctx, currentFunction, condition); err != nil {
 				r.log.Warnf("while updating function status: %s", err)
 			}
-
 			r.statsCollector.UpdateReconcileStats(&s.instance, condition)
-
-			eventType := "Normal"
-			if condition.Status == corev1.ConditionFalse {
-				eventType = "Warning"
-			}
-
-			r.recorder.Event(currentFunction, eventType, string(condition.Reason), condition.Message)
 		}
 		return nil
 	}
 }
+
+func (m *reconciler) updateFunctionStatusWithEvent(ctx context.Context, f *serverlessv1alpha2.Function, condition serverlessv1alpha2.Condition) error {
+	if err := m.client.Status().Update(ctx, f); err != nil {
+		return err
+	}
+
+	eventType := "Normal"
+	if condition.Status == corev1.ConditionFalse {
+		eventType = "Warning"
+	}
+
+	m.recorder.Event(f, eventType, string(condition.Reason), condition.Message)
+	return nil
+}
+
+// func updateGitFunctionStatus(f *serverlessv1alpha2.Function)
 
 func buildStatusUpdateStateFnWithCondition(condition serverlessv1alpha2.Condition) stateFn {
 	return buildGenericStatusUpdateStateFn(condition, nil, "")
