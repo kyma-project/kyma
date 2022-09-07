@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      restartPolicy: Never
       serviceAccountName: {{ .Values.serviceAccountName }}
       containers:
         - name: compass-runtime-agent-test
@@ -22,5 +23,4 @@ spec:
               value: {{.Values.oauthCredentialsSecretName}}
             - name: APP_OAUTH_CREDENTIALS_NAMESPACE
               value: {{ .Values.oauthCredentialsNamespace }}
-      restartPolicy: Never
   backoffLimit: 0

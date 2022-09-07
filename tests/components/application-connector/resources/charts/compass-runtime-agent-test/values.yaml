@@ -14,7 +14,6 @@ images:
     name: "compass-runtime-agent-test"
     version: "PR-15380"
 
-
 compassCredentials:
   clientID: ""
   clientSecret: ""
