@@ -51,7 +51,7 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	//err = directorClient.UnregisterApplication("218a1089-fb05-47a2-b1a9-4d09d854eeab", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
 	gs.Require().Nil(err)
 
-	gs.T().Log("Sucessfully unregistered application %s in compass", appID)
+	gs.T().Logf("Sucessfully registered application %s in compass", appID)
 
 	// TODO Pass Tenant from configuration
 	gs.appComparator, err = applications.NewComparator(gs.Require())

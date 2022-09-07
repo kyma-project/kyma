@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/executor"
-	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
@@ -20,22 +19,22 @@ type ApplicationReader interface {
 
 func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	// Created in chart
-	expectedAppName := "app1"
-	scenarioName := "auto-testing"
-	compassAppName := expectedAppName + random.RandomString(10)
+	//expectedAppName := "app1"
+	//scenarioName := "auto-testing"
+	//compassAppName := expectedAppName + random.RandomString(10)
 
 	// Create Application in Director and wait until it gets created
-	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, scenarioName, expectedAppName)
-	gs.Require().NoError(err)
-
-	// Compare Application created by Compass Runtime Agent with expected result
-	err = gs.appComparator.Compare(compassAppName, expectedAppName)
-	gs.Require().NoError(err)
-
-	// Clean up
-	err = gs.directorClient.UnregisterApplication(applicationID, gs.testConfig.TestingTenant)
-	gs.Require().NoError(err)
+	//applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
+	//applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, scenarioName, expectedAppName)
+	//gs.Require().NoError(err)
+	//
+	//// Compare Application created by Compass Runtime Agent with expected result
+	//err = gs.appComparator.Compare(compassAppName, expectedAppName)
+	//gs.Require().NoError(err)
+	//
+	//// Clean up
+	//err = gs.directorClient.UnregisterApplication(applicationID, gs.testConfig.TestingTenant)
+	//gs.Require().NoError(err)
 }
 
 func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, scenarioName, expectedAppName string) (string, error) {
