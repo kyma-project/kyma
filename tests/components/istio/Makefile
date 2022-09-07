@@ -19,17 +19,14 @@ RESET  := $(shell tput -Txterm sgr0)
 all: help
 
 ## Test:
-
 test: ## Run the tests of the project
+ifeq ($(RECONCILATION_TEST), true)
+	$(GOTEST) -run "^TestIstioReconcilation$$" github.com/kyma-project/kyma/tests/components/istio -v -race
+else
 	$(GOTEST) -run TestIstioInstalled github.com/kyma-project/kyma/tests/components/istio -v -race
+endif
 
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
-
-
-test-reconcilation: ## Run the tests of the project
-	$(GOTEST) -run "^TestIstioReconcilation$$" github.com/kyma-project/kyma/tests/components/istio -v -race
-
-test-reconcilation-k3d: provision-k3d kyma-istio-deploy test-reconcilation ## Run tests on k3d cluster
 
 provision-k3d: ## Provision k3d cluster
 	kyma provision k3d --port 8080:80@loadbalancer --ci
