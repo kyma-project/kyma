@@ -15,15 +15,15 @@ func TestApplicationCrdCompare(t *testing.T) {
 	t.Run("should compare applications", func(t *testing.T) {
 		secretComparatorMock := &mocks.Comparator{}
 		applicationGetterMock := &mocks.ApplicationGetter{}
-		actualApp := getTestApp()
-		expectedApp := getTestApp()
+		actualApp := getTestApp("actual", "actualNamespace", "actualSecret")
+		expectedApp := getTestApp("expected", "expectedNamespace", "expectedSecret")
 
-		secretComparatorMock.On("Compare", "actualSecret", "actualSecret").Return(nil)
+		secretComparatorMock.On("Compare", "expectedSecret", "actualSecret").Return(nil)
 		applicationGetterMock.On("Get", mock.Anything, "actual", v1.GetOptions{}).Return(actualApp, nil).Once()
 		applicationGetterMock.On("Get", mock.Anything, "expected", v1.GetOptions{}).Return(expectedApp, nil).Once()
 
 		//when
-		applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
+		applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expectedNamespace", "actualNamespace")
 		err = applicationComparator.Compare("expected", "actual")
 
 		//then
@@ -96,14 +96,14 @@ func TestApplicationCrdCompare(t *testing.T) {
 	})
 }
 
-func getTestApp() *v1alpha1.Application {
+func getTestApp(name, namespace, secretName string) *v1alpha1.Application {
 	//given
 	services := make([]v1alpha1.Service, 0, 0)
 	entries := make([]v1alpha1.Entry, 0, 0)
 
 	credentials := v1alpha1.Credentials{
 		Type:              "OAuth",
-		SecretName:        "actualSecret",
+		SecretName:        secretName,
 		AuthenticationUrl: "authURL",
 		CSRFInfo:          &v1alpha1.CSRFInfo{TokenEndpointURL: "csrfTokenURL"},
 	}
@@ -167,11 +167,11 @@ func getTestApp() *v1alpha1.Application {
 	return &v1alpha1.Application{
 		TypeMeta: v1.TypeMeta{},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      "test",
-			Namespace: "test",
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: v1alpha1.ApplicationSpec{
-			Description:      "test",
+			Description:      "testapp",
 			SkipInstallation: false,
 			Services:         services,
 			Labels:           nil,

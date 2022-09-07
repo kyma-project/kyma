@@ -47,8 +47,9 @@ func (c comparator) Compare(expected, actual string) error {
 		return err
 	}
 
-	c.assertions.Equal(expectedApp.Name, actualApp.Name)
-	c.assertions.Equal(expectedApp.Namespace, actualApp.Namespace)
+	c.assertions.Equal(expectedApp.Namespace, c.expectedNamespace)
+	c.assertions.Equal(actualApp.Namespace, c.actualNamespace)
+
 	c.compareSpec(expectedApp.Spec, actualApp.Spec)
 	return nil
 }
