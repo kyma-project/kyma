@@ -110,10 +110,11 @@ func (i *istioReconcilationCase) httpbinGetsRestartedUntilThereIsNoSidecar(names
 		case <-i.doneChannel:
 			return errors.New("The httpbin deployment could not be restarted to a state without sidecar")
 		case <-noSidecar:
+			time.Sleep(time.Millisecond * 200)
 			return nil
-		default:
-			// Continue with reconcilation
-			<-i.command.OutputChannel
+		// Continue with reconcilation
+		case <-i.command.OutputChannel:
+
 		}
 	}
 }

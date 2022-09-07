@@ -28,32 +28,13 @@ func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Httpbin deployment is deployed and ready in "([^"]*)" namespace$`, installedCase.waitForHttpBinInTargetNamespace)
 	ctx.Step(`^there should be no pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldNotHaveSidecar)
 	ctx.Step(`^there should be some pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldHaveSidecar)
+	ctx.Step(`^there is (\d+) Httpbin deployment in "([^"]*)" namespace$`, installedCase.thereIsNHttpbinPod)
 	ctx.Step(`^there "([^"]*)" be Istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from "([^"]*)" namespace$`, installedCase.deleteHttpBinInTargetNamespace)
 	ctx.Step(`^"([^"]*)" namespace is deleted$`, installedCase.deleteTargetNamespace)
 }
 
 func (i *istioInstalledCase) httpBinPodShouldHaveSidecar(shouldHave string, targetNamespace string) error {
-	ready := make(chan bool)
-	go func() {
-		for {
-			time.Sleep(time.Millisecond * 200)
-			pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{
-				LabelSelector: "app=httpbin",
-			})
-			if err != nil {
-				continue
-			}
-			for _, pod := range pods.Items {
-				if pod.Status.Phase != v1.PodRunning {
-					continue
-				}
-			}
-			ready <- true
-		}
-	}()
-
-	<-ready
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "app=httpbin",
 	})
@@ -92,24 +73,6 @@ func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(targetNamespac
 }
 
 func (i *istioInstalledCase) targetNamespacePodsShouldNotHaveSidecar(targetNamespace string) error {
-	ready := make(chan bool)
-	go func() {
-		for {
-			time.Sleep(time.Millisecond * 200)
-			pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
-			if err != nil {
-				continue
-			}
-			for _, pod := range pods.Items {
-				if pod.Status.Phase != v1.PodRunning {
-					continue
-				}
-			}
-			ready <- true
-		}
-	}()
-	<- ready
-
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -210,5 +173,24 @@ func (i *istioInstalledCase) labelTargetNamespace(targetNamespace string, labelN
 		return fmt.Errorf("could not label namespace %s", targetNamespace)
 	}
 
+	return nil
+}
+
+func (i *istioInstalledCase) thereIsNHttpbinPod(n int, namespace string) error {
+	err := wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+		pods, err := k8sClient.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: "app=httpbin",
+		})
+		if err != nil {
+			return false, err
+		}
+		if len(pods.Items) > 1 {
+			return false, err
+		}
+		return true, nil
+	})
+	if err != nil {
+		return fmt.Errorf("there is more then one httpbin pod: %s", err)
+	}
 	return nil
 }
