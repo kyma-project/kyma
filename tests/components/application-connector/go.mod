@@ -3,6 +3,7 @@ module github.com/kyma-project/kyma/tests/components/application-connector
 go 1.18
 
 require (
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/go-http-utils/logger v0.0.0-20161128092850-f3a42dcdeae6
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0

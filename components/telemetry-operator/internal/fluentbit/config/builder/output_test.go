@@ -3,8 +3,9 @@ package builder
 import (
 	"testing"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
@@ -23,7 +24,7 @@ func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -35,11 +36,11 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
     name                     http
     match                    foo.*
     allow_duplicated_headers true
-    format                   json
+    format                   yaml
     host                     localhost
     http_passwd              password
     http_user                user
-    port                     443
+    port                     1234
     storage.total_limit_size 1G
     tls                      on
     tls.verify               on
@@ -49,24 +50,20 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
-					Dedot: true,
-					Host: telemetryv1alpha1.ValueType{
-						Value: "localhost",
-					},
-					User: telemetryv1alpha1.ValueType{
-						Value: "user",
-					},
-					Password: telemetryv1alpha1.ValueType{
-						Value: "password",
-					},
-					URI: "/customindex/kyma",
+				HTTP: &telemetryv1alpha1.HTTPOutput{
+					Dedot:    true,
+					Port:     "1234",
+					Host:     telemetryv1alpha1.ValueType{Value: "localhost"},
+					User:     telemetryv1alpha1.ValueType{Value: "user"},
+					Password: telemetryv1alpha1.ValueType{Value: "password"},
+					URI:      "/customindex/kyma",
+					Format:   "yaml",
 				},
 			},
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -92,30 +89,26 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				HTTP: telemetryv1alpha1.HTTPOutput{
+				HTTP: &telemetryv1alpha1.HTTPOutput{
 					Dedot: true,
-					Host: telemetryv1alpha1.ValueType{
-						Value: "localhost",
-					},
-					User: telemetryv1alpha1.ValueType{
-						Value: "user",
-					},
+					URI:   "/my-uri",
+					Host:  telemetryv1alpha1.ValueType{Value: "localhost"},
+					User:  telemetryv1alpha1.ValueType{Value: "user"},
 					Password: telemetryv1alpha1.ValueType{
-						ValueFrom: telemetryv1alpha1.ValueFromType{
-							SecretKey: telemetryv1alpha1.SecretKeyRef{
+						ValueFrom: &telemetryv1alpha1.ValueFromSource{
+							SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 								Name:      "secret",
 								Key:       "key",
 								Namespace: "my-namespace",
 							},
 						},
 					},
-					URI: "/my-uri",
 				},
 			},
 		},
 	}
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -139,10 +132,8 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Output: telemetryv1alpha1.Output{
-				Loki: telemetryv1alpha1.LokiOutput{
-					URL: telemetryv1alpha1.ValueType{
-						Value: "http:loki:3100",
-					},
+				Loki: &telemetryv1alpha1.LokiOutput{
+					URL: telemetryv1alpha1.ValueType{Value: "http:loki:3100"},
 					Labels: map[string]string{
 						"job":        "telemetry-fluent-bit",
 						"cluster-id": "123"},
@@ -151,8 +142,9 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 			},
 		},
 	}
+
 	logPipeline.Name = "foo"
-	pipelineConfig := PipelineConfig{FsBufferLimit: "1G"}
+	pipelineConfig := PipelineDefaults{FsBufferLimit: "1G"}
 
 	actual := createOutputSection(logPipeline, pipelineConfig)
 	require.NotEmpty(t, actual)
@@ -170,8 +162,8 @@ func TestResolveValueWithValue(t *testing.T) {
 
 func TestResolveValueWithSecretKeyRef(t *testing.T) {
 	value := telemetryv1alpha1.ValueType{
-		ValueFrom: telemetryv1alpha1.ValueFromType{
-			SecretKey: telemetryv1alpha1.SecretKeyRef{
+		ValueFrom: &telemetryv1alpha1.ValueFromSource{
+			SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
 				Name:      "test-name",
 				Key:       "test-key",
 				Namespace: "test-namespace",

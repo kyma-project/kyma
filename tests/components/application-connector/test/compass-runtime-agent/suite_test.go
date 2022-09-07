@@ -6,6 +6,8 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
 	"github.com/vrischmann/envconfig"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"net/http"
 	"testing"
 	"time"
@@ -18,8 +20,14 @@ import (
 
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
-	appClientSet *cli.Clientset
+	cli            *cli.Clientset
+	directorClient director.Client
+	appComparator  applications.Comparator
 	testConfig   config
+}
+
+func initDirectorClient() director.Client {
+	return nil
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {
@@ -43,13 +51,12 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	err = directorClient.UnregisterApplication("218a1089-fb05-47a2-b1a9-4d09d854eeab", "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae")
 	gs.Require().Nil(err)
 
-	//gs.T().Logf("Unregistered applicationID is %s", appID)
+	// TODO Pass Tenant from configuration
+	gs.directorClient, err = director.NewDirectorClient("")
+	gs.Require().Nil(err)
 
-	// Checmy pokryc wsyztkie typy autoryzacji czyli miec jedna apkę która będzie miala wszystkie typy autoryzacji
-	// Mozemy po prostu zahardkodować pelna mutację albo kilka mutacji
-	//
-	// jakie będą scenariusze?
-	//
+	gs.appComparator, err = applications.NewComparator(gs.Require())
+	gs.Require().Nil(err)
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
@@ -63,6 +70,7 @@ func TestCompassRuntimeAgentSuite(t *testing.T) {
 	suite.Run(t, new(CompassRuntimeAgentSuite))
 }
 
+// to przenieść do pakietu director
 func (gs *CompassRuntimeAgentSuite) newDirectorClient(directorURL, secretNamespace, secretName string, skipDirectorCertVerification bool, config *rest.Config) (director.DirectorClient, error) {
 	coreClientset, err := kubernetes.NewForConfig(config)
 	gs.Require().Nil(err)

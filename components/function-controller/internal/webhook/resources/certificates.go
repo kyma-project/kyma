@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -30,7 +31,7 @@ const (
 	FunctionCRDName = "functions.serverless.kyma-project.io"
 )
 
-func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string) error {
+func SetupCertificates(ctx context.Context, secretName, secretNamespace, serviceName string, logger *zap.SugaredLogger) error {
 	// We are going to talk to the API server _before_ we start the manager.
 	// Since the default manager client reads from cache, we will get an error.
 	// So, we create a "serverClient" that would read from the API directly.
@@ -43,7 +44,7 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 		return errors.Wrap(err, "while adding apiextensions.v1 schema to k8s client")
 	}
 
-	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName); err != nil {
+	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName, logger.Named("webhook-secret")); err != nil {
 		return errors.Wrap(err, "failed to ensure webhook secret")
 	}
 
@@ -59,22 +60,21 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	return nil
 }
 
-func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string) error {
-	logger := ctrl.LoggerFrom(ctx)
+func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string, log *zap.SugaredLogger) error {
 	secret := &corev1.Secret{}
-	logger.Info("ensuring webhook secret")
+	log.Info("ensuring webhook secret")
 	err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, secret)
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return errors.Wrap(err, "failed to get webhook secret")
 	}
 
 	if apiErrors.IsNotFound(err) {
-		logger.Info("creating webhook secret")
+		log.Info("creating webhook secret")
 		return createSecret(ctx, client, secretName, secretNamespace, serviceName)
 	}
 
-	logger.Info("updating pre-exiting webhook secret")
-	if err := updateSecret(ctx, client, logger, secret, serviceName); err != nil {
+	log.Info("updating pre-exiting webhook secret")
+	if err := updateSecret(ctx, client, log, secret, serviceName); err != nil {
 		return errors.Wrap(err, "failed to update secret")
 	}
 	return nil
@@ -125,7 +125,7 @@ func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace
 	return nil
 }
 
-func updateSecret(ctx context.Context, client ctrlclient.Client, log logr.Logger, secret *corev1.Secret, serviceName string) error {
+func updateSecret(ctx context.Context, client ctrlclient.Client, log *zap.SugaredLogger, secret *corev1.Secret, serviceName string) error {
 	valid, err := isValidSecret(secret)
 	if valid {
 		return nil

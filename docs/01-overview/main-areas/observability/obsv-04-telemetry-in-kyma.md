@@ -545,7 +545,7 @@ You cannot enable the following plugins, because they potentially harm the stabi
 ### Reserved log attributes
 The log attribute named `kubernetes` is a special attribute that's enriched by the `kubernetes` filter. When you use that attribute as part of your structured log payload, the metadata enriched by the filter are overwritten by the payload data. Filters that rely on the original metadata might no longer work as expected.
 
-Furthermore, the prefix `__k8s__` is used internally by the telemetry operator. When you use the attribute prefix in your log data, the data might be overwritten.
+Furthermore, the prefix `__kyma__` is used internally by the telemetry operator. When you use the attribute prefix in your log data, the data might be overwritten.
 
 ### Buffer limits
 
