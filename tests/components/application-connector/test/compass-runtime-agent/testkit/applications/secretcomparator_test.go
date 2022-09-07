@@ -23,6 +23,8 @@ func TestCompare(t *testing.T) {
 
 		//when
 		err = fakeComparator.Compare("actual", "expected")
+
+		// then
 		require.NoError(t, err)
 	})
 
@@ -35,6 +37,8 @@ func TestCompare(t *testing.T) {
 
 		//when
 		err = fakeComparator.Compare("actual", "expected")
+
+		// then
 		require.Error(t, err)
 	})
 
@@ -47,7 +51,45 @@ func TestCompare(t *testing.T) {
 
 		//when
 		err = fakeComparator.Compare("actual", "expected")
+
+		// then
 		require.Error(t, err)
+	})
+
+	t.Run("should return error if expected secret name is empty", func(t *testing.T) {
+		//given
+		fakeComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
+		require.NoError(t, err)
+
+		//when
+		err = fakeComparator.Compare("actual", "")
+
+		// then
+		require.Error(t, err)
+	})
+
+	t.Run("should return error if actual secret name is empty", func(t *testing.T) {
+		//given
+		fakeComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
+		require.NoError(t, err)
+
+		//when
+		err = fakeComparator.Compare("", "expected")
+
+		// then
+		require.Error(t, err)
+	})
+
+	t.Run("should return no error if actual and expected secret name is empty", func(t *testing.T) {
+		//given
+		fakeComparator, err := NewSecretComparator(require.New(t), nil, "test", "kyma-integration")
+		require.NoError(t, err)
+
+		//when
+		err = fakeComparator.Compare("", "")
+
+		// then
+		require.NoError(t, err)
 	})
 }
 
