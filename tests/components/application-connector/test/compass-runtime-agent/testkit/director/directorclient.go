@@ -16,10 +16,9 @@ const (
 )
 
 //go:generate mockery --name=DirectorClient
-type DirectorClient interface {
+type Client interface {
 	RegisterApplication(appName, scenario, tenant string) (string, error)
 	UnregisterApplication(id string, tenant string) error
-	//RequestOneTimeTokenForApplication() error
 }
 
 type directorClient struct {
@@ -30,7 +29,8 @@ type directorClient struct {
 	oauthClient   oauth.Client
 }
 
-func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client) DirectorClient {
+func NewDirectorClient(gqlClient gql.Client, oauthClient oauth.Client) Client {
+
 	return &directorClient{
 		gqlClient:     gqlClient,
 		oauthClient:   oauthClient,

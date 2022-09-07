@@ -20,10 +20,3 @@ func (qp queryProvider) unregisterApplicationMutation(applicationID string) stri
 		id
 	} }`, applicationID)
 }
-
-//func (qp queryProvider) requestOneTimeTokenMutationForApp(applicationID string) string {
-//	return fmt.Sprintf(`mutation {
-//	result: requestOneTimeTokenForRuntime(id: "%s") {
-//		token connectorURL
-//}}`, applicationID)
-//}

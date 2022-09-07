@@ -27,12 +27,19 @@ type oauthClient struct {
 	secretName    string
 }
 
-func NewOauthClient(client *http.Client, secrets v1.SecretInterface, secretName string) Client {
+func NewOauthClient(client *http.Client, secrets v1.SecretInterface, secretName string) (Client, error) {
+
+	_, err := secrets.Get(context.Background(), secretName, metav1.GetOptions{})
+
+	if err != nil {
+		return nil, fmt.Errorf("Cound not access oauthCredential secret %s", secretName)
+	}
+
 	return &oauthClient{
 		httpClient:    client,
 		secretsClient: secrets,
 		secretName:    secretName,
-	}
+	}, nil
 }
 
 func (c *oauthClient) GetAuthorizationToken() (Token, error) {
