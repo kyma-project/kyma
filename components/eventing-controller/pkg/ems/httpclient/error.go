@@ -21,7 +21,7 @@ func NewError(err error, opts ...ErrorOpt) *Error {
 	return e
 }
 
-// Error provides a description of the error including all fields which are initialized to a non-default value
+// Error provides a description of the error including all fields which are initialized to a non-default value.
 func (e Error) Error() string {
 	messageParts := make([]string, 0)
 

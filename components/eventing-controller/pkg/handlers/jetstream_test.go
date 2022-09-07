@@ -1283,7 +1283,7 @@ type TestEnvironment struct {
 	natsPort   int
 }
 
-// setupTestEnvironment is a TestEnvironment constructor
+// setupTestEnvironment is a TestEnvironment constructor.
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer, natsPort := startNATSServer(evtesting.WithJetStreamEnabled())
 	natsConfig := defaultNatsConfig(natsServer.ClientURL())

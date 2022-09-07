@@ -39,7 +39,7 @@ type defaultSinkValidator struct {
 	logger   *logger.Logger
 }
 
-// compile-time check
+// Perform a compile-time check.
 var _ Validator = &defaultSinkValidator{}
 
 func NewValidator(ctx context.Context, client client.Client, recorder record.EventRecorder, logger *logger.Logger) Validator {

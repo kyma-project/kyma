@@ -97,7 +97,7 @@ func GetFreePort() (port int, err error) {
 	return
 }
 
-// NewAPIRule returns a valid APIRule
+// NewAPIRule returns a valid APIRule.
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	apiRule := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
@@ -383,7 +383,7 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 }
 
 // WithNotCleanFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters
+// A not clean event-type means it contains none-alphanumeric characters.
 func WithNotCleanFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventTypeNotClean)
 }
@@ -412,17 +412,17 @@ func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svcNamespace, svcName))
 }
 
-// WithSinkURLFromSvcAndPath sets a kubernetes service as the sink
+// WithSinkURLFromSvcAndPath sets a kubernetes service as the sink.
 func WithSinkURLFromSvcAndPath(svc *corev1.Service, path string) SubscriptionOpt {
 	return WithSinkURL(fmt.Sprintf("%s%s", ValidSinkURL(svc.Namespace, svc.Name), path))
 }
 
-// WithSinkURLFromSvc sets a kubernetes service as the sink
+// WithSinkURLFromSvc sets a kubernetes service as the sink.
 func WithSinkURLFromSvc(svc *corev1.Service) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svc.Namespace, svc.Name))
 }
 
-// ValidSinkURL converts a namespace and service name to a valid sink url
+// ValidSinkURL converts a namespace and service name to a valid sink url.
 func ValidSinkURL(namespace, svcName string) string {
 	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, namespace)
 }
@@ -432,7 +432,7 @@ func WithSinkURL(sinkURL string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
 }
 
-// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now()
+// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now().
 func WithNonZeroDeletionTimestamp() SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		now := metav1.Now()
@@ -597,7 +597,7 @@ func DefaultReadyCondition() eventingv1alpha1.Condition {
 		corev1.ConditionTrue, "")
 }
 
-// ToSubscription converts an unstructured subscription into a typed one
+// ToSubscription converts an unstructured subscription into a typed one.
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
 	subscription := new(eventingv1alpha1.Subscription)
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
@@ -607,7 +607,7 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
-// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
+// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule.
 func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
 	u := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
@@ -618,7 +618,7 @@ func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) 
 	return u, nil
 }
 
-// SetupSchemeOrDie add a scheme to eventing API schemes
+// SetupSchemeOrDie add a scheme to eventing API schemes.
 func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {
@@ -631,7 +631,7 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	return scheme, nil
 }
 
-// SubscriptionGroupVersionResource returns the GVR of a subscription
+// SubscriptionGroupVersionResource returns the GVR of a subscription.
 func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
@@ -640,7 +640,7 @@ func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-// NewFakeSubscriptionClient returns a fake dynamic subscription client
+// NewFakeSubscriptionClient returns a fake dynamic subscription client.
 func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error) {
 	scheme, err := SetupSchemeOrDie()
 	if err != nil {

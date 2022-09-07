@@ -180,7 +180,7 @@ func TestSubscription(t *testing.T) {
 
 // TestNatsSubAfterSync_NoChange tests the SyncSubscription method
 // when there is no change in the subscription then the method should
-// not re-create NATS subjects on nats-server
+// not re-create NATS subjects on nats-server.
 func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -261,7 +261,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 
 // TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
 // when only the sink is changed in subscription, then it should not re-create
-// NATS subjects on nats-server
+// NATS subjects on nats-server.
 func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -346,7 +346,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_FiltersChange tests the SyncSubscription method
-// when the filters are changed in subscription
+// when the filters are changed in subscription.
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -438,7 +438,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_FilterAdded tests the SyncSubscription method
-// when a new filter is added in subscription
+// when a new filter is added in subscription.
 func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -535,7 +535,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_FilterRemoved tests the SyncSubscription method
-// when a filter is removed from subscription
+// when a filter is removed from subscription.
 func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -636,7 +636,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 
 // TestNatsSubAfterSync_MultipleSubs tests the SyncSubscription method
 // when there are two subscriptions and the filter is changed in one subscription
-// it should not affect the NATS subscriptions of other Kyma subscriptions
+// it should not affect the NATS subscriptions of other Kyma subscriptions.
 func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -742,7 +742,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	}
 }
 
-// Test_isNatsSubAssociatedWithKymaSub tests the isNatsSubAssociatedWithKymaSub method
+// Test_isNatsSubAssociatedWithKymaSub tests the isNatsSubAssociatedWithKymaSub method.
 func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	g := NewWithT(t)
 

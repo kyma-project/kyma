@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
-// WebhookAuth defines the Webhook called by an active subscription in BEB
+// WebhookAuth defines the Webhook called by an active subscription in BEB.
 type WebhookAuth struct {
 	// Type defines type of authentication
 	// +optional
@@ -31,21 +31,21 @@ type WebhookAuth struct {
 	Scope []string `json:"scope,omitempty"`
 }
 
-// ProtocolSettings defines the CE protocol setting specification implementation
+// ProtocolSettings defines the CE protocol setting specification implementation.
 type ProtocolSettings struct {
-	// ContentMode defines content mode for eventing based on BEB
+	// ContentMode defines content mode for eventing based on BEB.
 	// +optional
 	ContentMode *string `json:"contentMode,omitempty"`
 
-	// ExemptHandshake defines whether exempt handshake for eventing based on BEB
+	// ExemptHandshake defines whether exempt handshake for eventing based on BEB.
 	// +optional
 	ExemptHandshake *bool `json:"exemptHandshake,omitempty"`
 
-	// Qos defines quality of service for eventing based on BEB
+	// Qos defines quality of service for eventing based on BEB.
 	// +optional
 	Qos *string `json:"qos,omitempty"`
 
-	// WebhookAuth defines the Webhook called by an active subscription in BEB
+	// WebhookAuth defines the Webhook called by an active subscription in BEB.
 	// +optional
 	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
 }
@@ -55,7 +55,7 @@ const (
 	ProtocolSettingsContentModeStructured string = "STRUCTURED"
 )
 
-// Filter defines the CE filter element
+// Filter defines the CE filter element.
 type Filter struct {
 	// Type defines the type of the filter
 	// +optional
@@ -68,7 +68,7 @@ type Filter struct {
 	Value string `json:"value"`
 }
 
-// BEBFilter defines the BEB filter element as a combination of two CE filter elements
+// BEBFilter defines the BEB filter element as a combination of two CE filter elements.
 type BEBFilter struct {
 	// EventSource defines the source of CE filter
 	EventSource *Filter `json:"eventSource"`
@@ -81,7 +81,7 @@ func (bf *BEBFilter) hash() (uint64, error) {
 	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
 }
 
-// BEBFilters defines the list of BEB filters
+// BEBFilters defines the list of BEB filters.
 type BEBFilters struct {
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
@@ -89,7 +89,7 @@ type BEBFilters struct {
 	Filters []*BEBFilter `json:"filters"`
 }
 
-// Deduplicate returns a deduplicated copy of BEBFilters
+// Deduplicate returns a deduplicated copy of BEBFilters.
 func (bf *BEBFilters) Deduplicate() (*BEBFilters, error) {
 	seen := map[uint64]struct{}{}
 	result := &BEBFilters{
@@ -115,7 +115,7 @@ type SubscriptionConfig struct {
 }
 
 // MergeSubsConfigs returns a valid subscription config object based on the provided config,
-// complemented with default values, if necessary
+// complemented with default values, if necessary.
 func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscriptionConfig) *SubscriptionConfig {
 	merged := &SubscriptionConfig{
 		MaxInFlightMessages: defaults.MaxInFlightMessages,
@@ -129,7 +129,7 @@ func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscript
 	return merged
 }
 
-// SubscriptionSpec defines the desired state of Subscription
+// SubscriptionSpec defines the desired state of Subscription.
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only.
 	// +optional
@@ -225,7 +225,7 @@ type SubscriptionStatus struct {
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
 
-// Subscription is the Schema for the subscriptions API
+// Subscription is the Schema for the subscriptions API.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -249,7 +249,7 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 
 // +kubebuilder:object:root=true
 
-// SubscriptionList contains a list of Subscription
+// SubscriptionList contains a list of Subscription.
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

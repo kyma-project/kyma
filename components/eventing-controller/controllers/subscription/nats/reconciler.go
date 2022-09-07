@@ -28,7 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
-// Reconciler reconciles a Subscription object
+// Reconciler reconciles a Subscription object.
 type Reconciler struct {
 	client.Client
 	ctx              context.Context
@@ -97,7 +97,7 @@ func (r *Reconciler) getAllKymaSubscriptions(ctx context.Context) ([]eventingv1a
 	return subs.Items, nil
 }
 
-// SetupUnmanaged creates a controller under the client control
+// SetupUnmanaged creates a controller under the client control.
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
@@ -226,8 +226,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
-// syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (bool, error) {
+// syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription.
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
 	statusChanged := false
 	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
@@ -280,7 +280,7 @@ func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.S
 	return nil
 }
 
-// syncSubscriptionStatus syncs Subscription status
+// syncSubscriptionStatus syncs Subscription status.
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, forceUpdateStatus bool, message string) error {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionContained := false
@@ -369,7 +369,7 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 // utilities functions
 //
 
-// equalsConditionsIgnoringTime checks if two conditions are equal, ignoring lastTransitionTime
+// equalsConditionsIgnoringTime checks if two conditions are equal, ignoring lastTransitionTime.
 func equalsConditionsIgnoringTime(a, b eventingv1alpha1.Condition) bool {
 	return a.Type == b.Type && a.Status == b.Status && a.Reason == b.Reason && a.Message == b.Message
 }

@@ -59,7 +59,7 @@ func hashSubscriptionFullName(domainName, namespace, name string) string {
 }
 
 // produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
-// Requires maxLength >= len(hash)
+// Requires maxLength >= len(hash).
 func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 	if len(hash) > maxLength {
 		// This shouldn't happen!
@@ -227,7 +227,7 @@ func getInternalView4Ems(subscription *types.Subscription) *types.Subscription {
 	return emsSubscription
 }
 
-// GetRandString returns a random string of the given length
+// GetRandString returns a random string of the given length.
 func GetRandString(l int) string {
 	b := make([]byte, l)
 	for i := range b {

@@ -43,7 +43,7 @@ func (e *HTTPStatusError) Is(target error) bool {
 	return (e.StatusCode == t.StatusCode)
 }
 
-// compile time check
+// Perform a compile time check.
 var _ BEBBackend = &BEB{}
 
 type BEBBackend interface {
@@ -117,7 +117,7 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 	}
 }
 
-// SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
+// SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed.
 func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
@@ -194,7 +194,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	return statusChanged, nil
 }
 
-// DeleteSubscription deletes the corresponding EMS subscription
+// DeleteSubscription deletes the corresponding EMS subscription.
 func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
@@ -279,7 +279,7 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 	return nil
 }
 
-// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
+// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription.
 func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus == nil {

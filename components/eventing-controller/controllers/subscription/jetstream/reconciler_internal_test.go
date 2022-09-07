@@ -461,7 +461,7 @@ type TestEnvironment struct {
 	Recorder   *record.FakeRecorder
 }
 
-// setupTestEnvironment is a TestEnvironment constructor
+// setupTestEnvironment is a TestEnvironment constructor.
 func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment {
 	mockedBackend := &mocks.JetStreamBackend{}
 	ctx := context.Background()

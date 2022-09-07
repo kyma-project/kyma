@@ -10,7 +10,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 )
 
-// compile time check
+// Perform a compile time check.
 var _ PublisherManager = Client{}
 
 const (

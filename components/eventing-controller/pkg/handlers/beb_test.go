@@ -62,7 +62,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	bebMock.Stop()
 }
 
-// fixtureValidSubscription returns a valid subscription
+// fixtureValidSubscription returns a valid subscription.
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
 	return controllertesting.NewSubscription(
 		name, namespace,

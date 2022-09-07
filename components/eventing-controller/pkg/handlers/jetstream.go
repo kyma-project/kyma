@@ -204,7 +204,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	return nil
 }
 
-// GetJetStreamSubjects returns a list of subjects appended with prefix if needed
+// GetJetStreamSubjects returns a list of subjects appended with prefix if needed.
 func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 	var result []string
 	for _, subject := range subjects {

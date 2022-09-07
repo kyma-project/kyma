@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-// compile time check
+// Perform a compile time check.
 var _ BaseURLAwareClient = Client{}
 
 // BaseURLAwareClient is a http client that can build requests not from a full URL, but from a path relative to a configured base url
-// this is useful for REST-APIs that always connect to the same host, but on different paths
+// this is useful for REST-APIs that always connect to the same host, but on different paths.
 type BaseURLAwareClient interface {
 	NewRequest(method, path string, body interface{}) (*http.Request, *Error)
 	Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error)
