@@ -132,7 +132,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        namespace: $NAMESPACE
    EOF
    ```
-   >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate kyma-gateway-certs -n istio-system `
+   >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate httpbin-cert -n istio-system `
 
 5. Create a Gateway CR. Run:
 
