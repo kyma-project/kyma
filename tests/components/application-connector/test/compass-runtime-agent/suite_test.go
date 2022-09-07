@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
 	cli            *cli.Clientset
