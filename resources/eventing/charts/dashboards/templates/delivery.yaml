@@ -74,7 +74,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by (event_type) (rate(eventing_epp_event_type_published_total{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by (event_type) (rate(nats_epp_event_type_published_total{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 5xx",
@@ -82,7 +82,7 @@ data:
               },
               {
                 "exemplar": true,
-                "expr": "sum by (event_type) (rate(eventing_epp_event_type_published_total{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by (event_type) (rate(nats_epp_event_type_published_total{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 4xx",
@@ -189,14 +189,14 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(eventing_ec_delivery_per_subscription_total{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(nats_ec_delivery_per_subscription_total{response_code=~\"[5].*\", event_type=~\"$eventType\"}[5m]))",
                 "interval": "",
                 "legendFormat": "{{event_type}} 5xx (subscriptionName={{subscription_name}}, sink={{sink}})",
                 "refId": "A"
               },
               {
                 "exemplar": true,
-                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(eventing_ec_delivery_per_subscription_total{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(nats_ec_delivery_per_subscription_total{response_code=~\"[4].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 4xx (subscriptionName={{subscription_name}}, sink={{sink}})",
@@ -303,7 +303,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by (event_type) (rate(eventing_epp_event_type_published_total{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by (event_type) (rate(nats_epp_event_type_published_total{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 2xx",
@@ -400,7 +400,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(eventing_ec_delivery_per_subscription_total{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
+                "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(nats_ec_delivery_per_subscription_total{response_code=~\"[2].*\", event_type=~\"$eventType\"}[5m]))",
                 "hide": false,
                 "interval": "",
                 "legendFormat": "{{event_type}} 2xx (subscriptionName={{subscription_name}}, sink={{sink}})",
@@ -815,7 +815,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) jetstream_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(eventing_epp_event_type_published_total{event_type=~\"$eventType\"}) by (event_type)",
+                "expr": "count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) nats_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(nats_epp_event_type_published_total{event_type=~\"$eventType\"}) by (event_type)",
                 "format": "table",
                 "instant": false,
                 "interval": "",
@@ -919,7 +919,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum(eventing_epp_event_type_published_total{event_type=~\"$eventType\"}) by (event_type) unless (count(eventing_epp_event_type_published_total * on(event_type) group_left() sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type) jetstream_ec_event_type_subscribed_total) by (event_type)) by (event_type))",
+                "expr": "sum(nats_epp_event_type_published_total{event_type=~\"$eventType\"}) by (event_type) unless (count(nats_epp_event_type_published_total * on(event_type) group_left() sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type) nats_ec_event_type_subscribed_total) by (event_type)) by (event_type))",
                 "format": "table",
                 "instant": false,
                 "interval": "",
@@ -1033,7 +1033,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) jetstream_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) jetstream_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(rate(eventing_epp_event_type_published_total{}[$__range])) by (event_type)",
+                "expr": "sum(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) nats_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) unless count(nats_consumer_ack_floor_consumer_seq * on(consumer_name) group_left(event_type, subscription_name, subscription_namespace) nats_ec_event_type_subscribed_total) by (event_type, subscription_name, subscription_namespace) * on(event_type) group_left() sum(rate(nats_epp_event_type_published_total{}[$__range])) by (event_type)",
                 "format": "table",
                 "instant": true,
                 "interval": "",
@@ -1096,7 +1096,7 @@ data:
                 ]
               },
               "datasource": null,
-              "definition": "label_values(eventing_epp_event_type_published_total, event_type)",
+              "definition": "label_values(nats_epp_event_type_published_total, event_type)",
               "description": null,
               "error": null,
               "hide": 0,
@@ -1106,7 +1106,7 @@ data:
               "name": "eventType",
               "options": [],
               "query": {
-                "query": "label_values(eventing_epp_event_type_published_total, event_type)",
+                "query": "label_values(nats_epp_event_type_published_total, event_type)",
                 "refId": "StandardVariableQuery"
               },
               "refresh": 2,

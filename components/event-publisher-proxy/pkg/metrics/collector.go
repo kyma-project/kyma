@@ -8,30 +8,30 @@ import (
 )
 
 const (
-	// Errors name of the errors metric
-	Errors = "eventing_epp_errors_total"
-	// Latency name of the latency metric
-	Latency = "eventing_epp_messaging_server_latency_duration_nanoseconds"
-	// EventTypePublishedMetricKey name of the eventType metric
-	EventTypePublishedMetricKey = "eventing_epp_event_type_published_total"
-	//EventRequests name if the eventRequests metric
-	EventRequests = "eventing_epp_requests_total"
-	// errorsHelp help for the errors metric
+	// ErrorsKey name of the errors metric
+	ErrorsKey = "eventing_epp_errors_total"
+	// LatencyKey name of the latency metric
+	LatencyKey = "eventing_epp_messaging_server_latency_duration_milliseconds"
+	// EventTypePublishedMetricKey name of the eventTypeLabel metric
+	EventTypePublishedMetricKey = "nats_epp_event_type_published_total"
+	//EventRequestsKey name of the eventRequests metric
+	EventRequestsKey = "eventing_epp_requests_total"
+	// errorsHelp help text for the errors metric
 	errorsHelp = "The total number of errors while sending events to the messaging server"
-	// latencyHelp help for the latency metric
-	latencyHelp = "The duration of sending events to the messaging server in nanoseconds"
-	// eventTypePublishedMetricHelp help for the eventType metric
-	eventTypePublishedMetricHelp = "The total number of events published for a given eventType"
-	// eventRequestsHelp help for event requests metric
+	// latencyHelp help text for the latency metric
+	latencyHelp = "The duration of sending events to the messaging server in milliseconds"
+	// eventTypePublishedMetricHelp help text for the eventTypeLabel metric
+	eventTypePublishedMetricHelp = "The total number of events published for a given eventTypeLabel"
+	// eventRequestsHelp help text for event requests metric
 	eventRequestsHelp = "The total number of event requests"
-	//responseCode is the name of the status code labels used by multiple metrics
-	responseCode = "response_code"
-	//destSvc is the name of the destination service label used by multiple metrics
-	destSvc = "destination_service"
-	// eventType is the name of the event type label used by metrics
-	eventType = "event_type"
-	// eventSource is the name of the event source label used by metrics
-	eventSource = "event_source"
+	//responseCodeLabel name of the status code labels used by multiple metrics
+	responseCodeLabel = "response_code"
+	//destSvcLabel name of the destination service label used by multiple metrics
+	destSvcLabel = "destination_service"
+	// eventTypeLabel name of the event type label used by metrics
+	eventTypeLabel = "event_type"
+	// eventSourceLabel name of the event source label used by metrics
+	eventSourceLabel = "event_source"
 )
 
 // Collector implements the prometheus.Collector interface
@@ -47,31 +47,31 @@ func NewCollector() *Collector {
 	return &Collector{
 		errors: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: Errors,
+				Name: ErrorsKey,
 				Help: errorsHelp,
 			},
 			[]string{},
 		),
 		latency: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name: Latency,
+				Name: LatencyKey,
 				Help: latencyHelp,
 			},
-			[]string{responseCode, destSvc},
+			[]string{responseCodeLabel, destSvcLabel},
 		),
 		eventType: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: EventTypePublishedMetricKey,
 				Help: eventTypePublishedMetricHelp,
 			},
-			[]string{eventType, eventSource, responseCode},
+			[]string{eventTypeLabel, eventSourceLabel, responseCodeLabel},
 		),
 		requests: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: EventRequests,
+				Name: EventRequestsKey,
 				Help: eventRequestsHelp,
 			},
-			[]string{responseCode, destSvc},
+			[]string{responseCodeLabel, destSvcLabel},
 		),
 	}
 }
@@ -102,12 +102,12 @@ func (c *Collector) RecordLatency(duration time.Duration, statusCode int, destSv
 	c.latency.WithLabelValues(fmt.Sprint(statusCode), destSvc).Observe(float64(duration.Milliseconds()))
 }
 
-// RecordEventType records a eventType metric
+// RecordEventType records an eventTypeLabel metric
 func (c *Collector) RecordEventType(eventType, eventSource string, statusCode int) {
 	c.eventType.WithLabelValues(eventType, eventSource, fmt.Sprint(statusCode)).Inc()
 }
 
-// RecordRequests records a eventRequests metric
+// RecordRequests records an eventRequests metric
 func (c *Collector) RecordRequests(statusCode int, destSvc string) {
 	c.requests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }

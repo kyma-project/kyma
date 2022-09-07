@@ -9,9 +9,9 @@ import (
 
 const (
 	// deliveryMetricKey name of the delivery per subscription metric
-	deliveryMetricKey = "eventing_ec_delivery_per_subscription_total"
+	deliveryMetricKey = "nats_ec_delivery_per_subscription_total"
 	// eventTypeSubscribedMetricKey name of the eventType subscribed metric
-	eventTypeSubscribedMetricKey = "jetstream_ec_event_type_subscribed_total"
+	eventTypeSubscribedMetricKey = "nats_ec_event_type_subscribed_total"
 	// deliveryMetricHelp help text for the delivery per subscription metric
 	deliveryMetricHelp = "The total number of dispatched events per subscription"
 	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric
@@ -62,12 +62,12 @@ func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.eventTypes)
 }
 
-// RecordDeliveryPerSubscription records a eventing_ec_delivery_per_subscription_total metric
+// RecordDeliveryPerSubscription records a nats_ec_delivery_per_subscription_total metric
 func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
 	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }
 
-// RecordEventTypes records the jetstream_ec_event_type_subscribed_total metric
+// RecordEventTypes records a nats_ec_event_type_subscribed_total metric
 func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, eventType, consumer string) {
 	c.eventTypes.WithLabelValues(subscriptionName, subscriptionNamespace, eventType, consumer).Inc()
 }
