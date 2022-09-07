@@ -2,11 +2,13 @@ package application_gateway
 
 import (
 	"time"
+
+	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/httpd"
 )
 
 func (gs *GatewaySuite) TestComplex() {
 	gs.Run("OAuth token renewal", func() {
-		http := NewHttpCli(gs.T())
+		http := httpd.NewCli(gs.T())
 
 		url := gatewayURL("complex-cases", "oauth-expired-token-renewal")
 		gs.T().Log("Url:", url)

@@ -100,8 +100,12 @@ containers:
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
     {{- end }}
-  {{- if .Values.extraContainers }}
-    {{- toYaml .Values.extraContainers | nindent 2 }}
+  {{- with .Values.extraContainers }}
+  {{- if kindIs "string" . }}
+    {{- tpl . $ | nindent 2 }}
+  {{- else }}
+    {{-  toYaml . | nindent 2 }}
+  {{- end -}}
   {{- end }}
 volumes:
   - name: config

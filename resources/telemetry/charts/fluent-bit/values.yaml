@@ -82,6 +82,16 @@ service:
 
 serviceMonitor:
   enabled: true
+  serviceMonitorPorts:
+    - port: http-buff-metr
+      path: /metrics
+      scheme: https
+      tlsConfig:
+        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+        keyFile: /etc/prometheus/secrets/istio.default/key.pem
+        insecureSkipVerify: true
+
 #   namespace: monitoring
 #   interval: 10s
 #   scrapeTimeout: 10s
@@ -236,21 +246,33 @@ envFrom:
       name: telemetry-fluent-bit-env
       optional: true
 
-extraContainers: []
-#   - name: do-something
-#     image: busybox
-#     command: ['do', 'something']
+extraContainers: |
+  - name: exporter
+    image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
+    resources:
+      limits:
+        cpu: 100m
+        memory: 50Mi
+      requests:
+        memory: 5Mi
+    ports:
+      - name: http-buff-metr
+        containerPort: 2021
+        protocol: TCP
+    volumeMounts:
+      - name: varfluentbit
+        mountPath: /data
 
 flush: 1
 
 metricsPort: 2020
 
-extraPorts: []
-#   - port: 5170
-#     containerPort: 5170
-#     protocol: TCP
-#     name: tcp
-#     nodePort: 30517
+extraPorts:
+  - name: http-buff-metr
+    containerPort: 2021
+    protocol: TCP
+    port: 2021
+
 
 extraVolumes:
   - name: shared-fluent-bit-config
@@ -334,8 +356,8 @@ config:
         HTTP_Server On
         HTTP_Listen 0.0.0.0
         HTTP_Port {{ .Values.metricsPort }}
-        Health_Check On
         storage.path /data/flb-storage/
+        storage.metrics on
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |

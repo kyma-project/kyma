@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/vrischmann/envconfig"
-	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -65,7 +63,6 @@ type healthzConfig struct {
 func main() {
 	config, err := loadConfig("APP")
 	if err != nil {
-		ctrl.SetLogger(ctrlzap.New())
 		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
@@ -176,7 +173,7 @@ func main() {
 
 	// +kubebuilder:scaffold:builder
 
-	setupLog.Info("Running manager")
+	zapLogger.Info("Running manager")
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
@@ -192,19 +189,4 @@ func loadConfig(prefix string) (config, error) {
 	}
 
 	return cfg, nil
-}
-
-func toZapLogLevel(level string) (zapcore.Level, error) {
-	switch level {
-	case "debug":
-		return zapcore.DebugLevel, nil
-	case "info":
-		return zapcore.InfoLevel, nil
-	case "warn":
-		return zapcore.WarnLevel, nil
-	case "error":
-		return zapcore.ErrorLevel, nil
-	default:
-		return 0, fmt.Errorf("Desired log level: %s not exist", level)
-	}
 }

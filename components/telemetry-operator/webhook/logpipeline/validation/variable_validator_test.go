@@ -10,26 +10,28 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestValidateSecretRefs(t *testing.T) {
+func TestValidateSecretKeyRefs(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Variables: []telemetryv1alpha1.VariableReference{
+			Variables: []telemetryv1alpha1.VariableRef{
 				{
 					Name: "foo1",
-					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "fooN",
-						Namespace: "fooNs",
-						Key:       "foo",
-					},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+							Name:      "fooN",
+							Namespace: "fooNs",
+							Key:       "foo",
+						},
 					},
 				},
 				{
 					Name: "foo2",
-					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "fooN",
-						Namespace: "fooNs",
-						Key:       "foo",
-					}},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+							Name:      "fooN",
+							Namespace: "fooNs",
+							Key:       "foo",
+						}},
 				},
 			},
 		},
@@ -44,13 +46,14 @@ func TestValidateSecretRefs(t *testing.T) {
 			Name: "pipe2",
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Variables: []telemetryv1alpha1.VariableReference{{
+			Variables: []telemetryv1alpha1.VariableRef{{
 				Name: "foo2",
-				ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-					Name:      "fooN",
-					Namespace: "fooNs",
-					Key:       "foo",
-				}},
+				ValueFrom: telemetryv1alpha1.ValueFromSource{
+					SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+						Name:      "fooN",
+						Namespace: "fooNs",
+						Key:       "foo",
+					}},
 			}},
 		},
 	}
@@ -64,23 +67,25 @@ func TestValidateSecretRefs(t *testing.T) {
 func TestVariableValidator(t *testing.T) {
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Variables: []telemetryv1alpha1.VariableReference{
+			Variables: []telemetryv1alpha1.VariableRef{
 				{
 					Name: "foo1",
-					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "fooN",
-						Namespace: "fooNs",
-						Key:       "foo",
-					},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+							Name:      "fooN",
+							Namespace: "fooNs",
+							Key:       "foo",
+						},
 					},
 				},
 				{
 					Name: "foo2",
-					ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: telemetryv1alpha1.SecretKeyRef{
-						Name:      "",
-						Namespace: "",
-						Key:       "",
-					}},
+					ValueFrom: telemetryv1alpha1.ValueFromSource{
+						SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+							Name:      "",
+							Namespace: "",
+							Key:       "",
+						}},
 				},
 			},
 		},

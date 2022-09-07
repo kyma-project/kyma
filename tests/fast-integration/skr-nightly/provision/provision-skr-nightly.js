@@ -22,7 +22,6 @@ const {
   keb,
   director,
   oidcE2ETest,
-  commerceMockTest,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -99,6 +98,6 @@ describe('SKR nightly', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
+
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  commerceMockTest(options);
 });

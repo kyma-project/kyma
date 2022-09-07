@@ -20,19 +20,17 @@ import (
 	"context"
 	"fmt"
 
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
+	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-
 	"github.com/prometheus/client_golang/prometheus"
-
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
 type Config struct {
@@ -46,30 +44,35 @@ type Config struct {
 // Reconciler reconciles a LogPipeline object
 type Reconciler struct {
 	client.Client
-	config           Config
-	syncer           *syncer
-	unsupportedTotal prometheus.Gauge
-	daemonSetHelper  *kubernetes.DaemonSetHelper
+	config                  Config
+	syncer                  *syncer
+	daemonSetHelper         *kubernetes.DaemonSetHelper
+	allLogPipelines         prometheus.Gauge
+	unsupportedLogPipelines prometheus.Gauge
 }
 
 // NewReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
 func NewReconciler(
 	client client.Client,
 	config Config,
-	restartsTotal prometheus.Counter,
 ) *Reconciler {
 	var r Reconciler
 
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
-	r.unsupportedTotal = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "telemetry_plugins_unsupported_total",
-		Help: "Number of custom filters or outputs to indicate unsupported mode.",
+	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "telemetry_all_logpipelines",
+		Help: "Number of log pipelines.",
 	})
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, restartsTotal)
+	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "telemetry_unsupported_logpipelines",
+		Help: "Number of log pipelines with custom filters or outputs.",
+	})
+	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 
-	metrics.Registry.MustRegister(r.unsupportedTotal)
+	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
+	controllermetrics.RegisterMetrics()
 
 	return &r
 }
@@ -93,6 +96,13 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(ctx, &allPipelines); err != nil {
+		log.Error(err, "Failed to get all log pipelines")
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+	}
+	r.updateMetrics(&allPipelines)
+
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
 		log.Info("Ignoring deleted LogPipeline")
@@ -106,20 +116,18 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := IsUnsupported(logPipeline)
-		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
+		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 		}
 
 		return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
 	}
 
-	changed, err := r.syncer.SyncAll(ctx, &logPipeline)
+	changed, err := r.syncer.syncAll(ctx, &logPipeline, &allPipelines)
 	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
-
-	r.unsupportedTotal.Set(float64(r.syncer.unsupportedPluginsTotal))
 
 	if changed {
 		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
@@ -138,8 +146,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipeLineUnsupported := IsUnsupported(logPipeline)
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
+		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
 
@@ -163,9 +171,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipeLineUnsupported := IsUnsupported(logPipeline)
+		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
 
-		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipeLineUnsupported); err != nil {
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
 	}
@@ -205,4 +213,29 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 		return err
 	}
 	return nil
+}
+
+func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineList) {
+	r.allLogPipelines.Set(float64(count(allPipelines, isNotMarkedForDeletion)))
+	r.unsupportedLogPipelines.Set(float64(count(allPipelines, isUnsupported)))
+}
+
+type keepFunc func(*telemetryv1alpha1.LogPipeline) bool
+
+func count(pipelines *telemetryv1alpha1.LogPipelineList, keep keepFunc) int {
+	count := 0
+	for i := range pipelines.Items {
+		if keep(&pipelines.Items[i]) {
+			count++
+		}
+	}
+	return count
+}
+
+func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
+	return pipeline.DeletionTimestamp.IsZero()
+}
+
+func isUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
+	return isNotMarkedForDeletion(pipeline) && pipeline.ContainsCustomPlugin()
 }
