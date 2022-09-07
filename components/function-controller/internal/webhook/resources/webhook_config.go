@@ -285,7 +285,7 @@ func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistration
 		MatchPolicy:        &matchPolicy,
 		ReinvocationPolicy: &reinvocationPolicy,
 		SideEffects:        &sideEffects,
-		TimeoutSeconds:     pointer.Int32(30),
+		TimeoutSeconds:     pointer.Int32(15),
 	}
 }
 
