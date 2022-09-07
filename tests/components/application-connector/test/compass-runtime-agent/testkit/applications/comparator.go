@@ -5,7 +5,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reflect"
 )
 
 type ApplicationGetter interface {
@@ -69,13 +68,13 @@ func (c comparator) compareSpec(actual, expected v1alpha1.ApplicationSpec) {
 	a.Equal(expected.SkipVerify, actual.SkipVerify)
 }
 
-func compareLabels(actual, expected map[string]string) bool {
-	if len(actual) != len(expected) {
-		return false
-	}
-
-	return reflect.DeepEqual(actual, expected)
-}
+//func compareLabels(actual, expected map[string]string) bool {
+//	if len(actual) != len(expected) {
+//		return false
+//	}
+//
+//	return reflect.DeepEqual(actual, expected)
+//}
 
 func (c comparator) compareCompassMetadata(actual, expected *v1alpha1.CompassMetadata) {
 
@@ -86,14 +85,13 @@ func (c comparator) compareCompassMetadata(actual, expected *v1alpha1.CompassMet
 }
 
 func (c comparator) compareAuthentication(actual, expected v1alpha1.Authentication) {
-	if len(actual.ClientIds) != len(expected.ClientIds) {
-		return false
-	}
 
-	return reflect.DeepEqual(actual.ClientIds, expected.ClientIds)
+	a := c.assertions
+	a.Equal(len(actual.ClientIds), len(expected.ClientIds))
+	a.Equal(actual.ClientIds, expected.ClientIds) //deep equal
 }
 
-func (c comparator) compareServices(actual, expected []v1alpha1.Service) bool {
+func (c comparator) compareServices(actual, expected []v1alpha1.Service) {
 
 	a := c.assertions
 	a.Equal(len(expected), len(actual))
@@ -107,10 +105,9 @@ func (c comparator) compareServices(actual, expected []v1alpha1.Service) bool {
 		a.Equal(expected[i].Entries, actual[i].Entries)
 		a.Equal(expected[i].AuthCreateParameterSchema, actual[i].AuthCreateParameterSchema)
 	}
-	return true
 }
 
-func (c comparator) compareEntries(actual, expected []v1alpha1.Entry) bool {
+func (c comparator) compareEntries(actual, expected []v1alpha1.Entry) {
 
 	a := c.assertions
 	a.Equal(len(actual), len(expected))
@@ -121,39 +118,34 @@ func (c comparator) compareEntries(actual, expected []v1alpha1.Entry) bool {
 		a.Equal(actual[i].SpecificationUrl, actual[i].SpecificationUrl)
 		a.Equal(actual[i].ApiType, actual[i].ApiType)
 
-		//TODO///
-		credentialsEqual := c.compareCredentials(actual[i].Credentials, actual[i].Credentials)
+		c.compareCredentials(actual[i].Credentials, actual[i].Credentials)
 
 		a.Equal(actual[i].RequestParametersSecretName, actual[i].RequestParametersSecretName)
 		a.Equal(actual[i].Name, actual[i].Name)
 		a.Equal(actual[i].ID, actual[i].ID)
 		a.Equal(actual[i].CentralGatewayUrl, actual[i].CentralGatewayUrl)
 	}
-	return true
+
 }
 
-func (c comparator) compareCredentials(actual, expected v1alpha1.Credentials) bool {
+func (c comparator) compareCredentials(actual, expected v1alpha1.Credentials) {
 
 	a := c.assertions
 
-	//one moga byc puste, no auth metod
-	if actual ==
-
-	//if actual == (v1alpha1.Credentials{}) && expected != (v1alpha1.Credentials{}) || expected == (v1alpha1.Credentials{}) && actual != (v1alpha1.Credentials{}) {
-	//	return false
-	//}
-
-	typeEqual := actual.Type == expected.Type
-
-	if !typeEqual {
-		return false
+	if (actual == v1alpha1.Credentials{} && expected == v1alpha1.Credentials{}) {
+		return
 	}
 
-	dataEqual := comparer.Compare(actual.SecretName, "oauth-test-expected")
-	secretNameEqual := actual.SecretName == expected.SecretName
-	authenticationUrlEqual := actual.AuthenticationUrl == expected.AuthenticationUrl
-	csrfInfoEqual := c.compareCSRF(actual.CSRFInfo, expected.CSRFInfo)
-	return typeEqual && secretNameEqual && authenticationUrlEqual && csrfInfoEqual && dataEqual
+	a.Equal(actual.Type, expected.Type)
+
+	err := c.secretComparer.Compare(actual.SecretName, "oauth-test-expected")
+	a.NoError(err)
+
+	a.Equal(actual.SecretName, expected.SecretName)
+	a.Equal(actual.AuthenticationUrl, expected.AuthenticationUrl)
+
+	c.compareCSRF(actual.CSRFInfo, expected.CSRFInfo)
+
 }
 
 func (c comparator) compareCSRF(actual, expected *v1alpha1.CSRFInfo) {
