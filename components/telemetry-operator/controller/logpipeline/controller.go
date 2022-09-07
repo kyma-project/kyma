@@ -25,8 +25,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/strings/slices"
 	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -136,11 +138,11 @@ func (r *Reconciler) checkSecrets() predicate.Predicate {
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
-		//WithEventFilter(r.checkSecrets()).
-		//Watches(
-		//	&source.Kind{Type: &corev1.Secret{}},
-		//	handler.EnqueueRequestsFromMapFunc(r.prepareReconciliationsForSecret),
-		//).
+		WithEventFilter(r.checkSecrets()).
+		Watches(
+			&source.Kind{Type: &corev1.Secret{}},
+			handler.EnqueueRequestsFromMapFunc(r.prepareReconciliationsForSecret),
+		).
 		Complete(r)
 }
 func (r *Reconciler) prepareReconciliationsForSecret(secret client.Object) []reconcile.Request {

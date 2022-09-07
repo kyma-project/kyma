@@ -157,7 +157,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	go watcher()
+	//go watcher()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		SyncPeriod:             &syncPeriod,
