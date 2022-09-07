@@ -195,33 +195,19 @@ func (spec *FunctionSpec) validateEnv(vc *ValidationConfig) error {
 func (spec *FunctionSpec) validateFunctionResources(vc *ValidationConfig) error {
 	minMemory := resource.MustParse(vc.Function.Resources.MinRequestMemory)
 	minCPU := resource.MustParse(vc.Function.Resources.MinRequestCPU)
-	var configResources = FunctionSpec{
-		ResourceConfiguration: &ResourceConfiguration{
-			Function: &ResourceRequirements{
-				Resources: &corev1.ResourceRequirements{},
-			},
-		},
-	}
 	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil && spec.ResourceConfiguration.Function.Resources != nil {
 		return validateResources(spec.ResourceConfiguration.Function.Resources, minMemory, minCPU, "spec.resourceConfiguration.function.resources")
 	}
-	return validateResources(configResources.ResourceConfiguration.Function.Resources, minMemory, minCPU, "spec.resourceConfiguration.function.resources")
+	return nil
 }
 
 func (spec *FunctionSpec) validateBuildResources(vc *ValidationConfig) error {
 	minMemory := resource.MustParse(vc.BuildJob.Resources.MinRequestMemory)
 	minCPU := resource.MustParse(vc.BuildJob.Resources.MinRequestCPU)
-	var configResources = FunctionSpec{
-		ResourceConfiguration: &ResourceConfiguration{
-			Build: &ResourceRequirements{
-				Resources: &corev1.ResourceRequirements{},
-			},
-		},
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Build != nil && spec.ResourceConfiguration.Build.Resources != nil {
+		return validateResources(spec.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.build.resources")
 	}
-	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil && spec.ResourceConfiguration.Function.Resources != nil {
-		configResources.ResourceConfiguration.Build.Resources = spec.ResourceConfiguration.Function.Resources
-	}
-	return validateResources(configResources.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.Build.resources")
+	return nil
 }
 
 func (spec *FunctionSpec) validateSources(vc *ValidationConfig) error {
@@ -305,11 +291,11 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 	minValue := vc.Function.Replicas.MinValue
 	var maxReplicas *int32
 	var minReplicas *int32
-	if spec.ScaleConfig != nil {
-		maxReplicas = spec.ScaleConfig.MaxReplicas
-		minReplicas = spec.ScaleConfig.MinReplicas
+	if spec.ScaleConfig == nil {
+		return nil
 	}
-
+	maxReplicas = spec.ScaleConfig.MaxReplicas
+	minReplicas = spec.ScaleConfig.MinReplicas
 	allErrs := []string{}
 	if spec.Replicas != nil && spec.ScaleConfig != nil {
 		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are use at the same time")
