@@ -79,17 +79,13 @@ func TestIstioInstalledProduction(t *testing.T) {
 func TestIstioReconcilation(t *testing.T) {
 	InitTest()
 
-	evalOpts := goDogOpts
-	evalOpts.Paths = []string{"features/istio_reconcilation.feature"}
+	opts := goDogOpts
+	opts.Paths = []string{"features/istio_reconcilation.feature"}
 
 	suite := godog.TestSuite{
-		Name:                evalProfile,
+		Name:                "reconcilation-tests",
 		ScenarioInitializer: InitializeScenarioReconcilation,
-		Options:             &evalOpts,
-	}
-
-	if suite.Name != os.Getenv(deployedKymaProfileVar) {
-		t.Skip()
+		Options:             &opts,
 	}
 
 	suiteExitCode := suite.Run()
