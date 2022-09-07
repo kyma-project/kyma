@@ -36,23 +36,23 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, mydomain.com
 
 
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: dns.gardener.cloud/v1alpha1
-    kind: DNSProvider
-    metadata:
-      name: dns-provider
-      namespace: $NAMESPACE
-      annotations:
-        dns.gardener.cloud/class: garden
-    spec:
-      type: $SPEC_TYPE
-      secretRef:
-        name: $SECRET
-      domains:
-        include:
-          - $DOMAIN_TO_EXPOSE_WORKLOADS
-    EOF
+      ```bash
+      cat <<EOF | kubectl apply -f -
+      apiVersion: dns.gardener.cloud/v1alpha1
+      kind: DNSProvider
+      metadata:
+        name: dns-provider
+        namespace: $NAMESPACE
+        annotations:
+          dns.gardener.cloud/class: garden
+      spec:
+        type: $SPEC_TYPE
+        secretRef:
+          name: $SECRET
+        domains:
+          include:
+            - $DOMAIN_TO_EXPOSE_WORKLOADS
+      EOF
     ```
 
    - Export the following values as environment variables and run the command provided:
