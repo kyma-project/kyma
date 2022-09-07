@@ -7,9 +7,8 @@ type queryProvider struct{}
 func (qp queryProvider) registerApplicationMutation(appName, scenarioName string) string {
 	return fmt.Sprintf(`mutation {
 	result: registerApplication(in: {
-		name: "%s",
-		labels: { scenarios: ["%s"] } 
-	}) { id } }`, appName, scenarioName)
+		name: "%s" 
+	}) { id } }`, appName)
 	//return fmt.Sprintf(`mutation {
 	//result: registerApplication(in: %s) { id } }`, appInput)
 }
