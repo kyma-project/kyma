@@ -283,8 +283,6 @@ func (c *Condition) IsTrue() bool {
 	return c.Status == v1.ConditionTrue
 }
 
-func (f *Function) Hub() {}
-
 func (l *Condition) Equal(r *Condition) bool {
 	if l == nil && r == nil {
 		return true

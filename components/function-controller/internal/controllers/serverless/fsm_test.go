@@ -170,7 +170,7 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		err := stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 
 		require.NoError(t, err)
-		require.NotNil(t, testFunction.Status)
+		require.NotEmpty(t, testFunction.Status)
 
 		gotCondition := testFunction.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
 		require.NotNil(t, gotCondition)
@@ -202,7 +202,7 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 
 		err = stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 		require.NoError(t, err)
-		require.NotNil(t, testFunction.Status)
+		require.NotEmpty(t, testFunction.Status)
 
 		gotCondition := testFunction.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
 		require.NotNil(t, gotCondition)
@@ -238,7 +238,7 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 
 		err := stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 		require.NoError(t, err)
-		require.NotNil(t, testFunction.Status)
+		require.NotEmpty(t, testFunction.Status)
 
 		gotCondition := testFunction.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
 		require.NotNil(t, gotCondition)

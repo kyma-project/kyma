@@ -91,7 +91,6 @@ var (
 	ErrBuildReconcilerFailed = errors.New("build reconciler failed")
 )
 
-// TODO create issue to refactor this
 // this function is a terminator
 func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, repo *serverlessv1alpha2.Repository, commit string) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
@@ -99,66 +98,65 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 			r.err = fmt.Errorf("LastTransitionTime for condition %s is not set", condition.Type)
 			return nil
 		}
-		currentFunction := &serverlessv1alpha2.Function{}
+		existingFunction := &serverlessv1alpha2.Function{}
 
-		r.err = r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: s.instance.Name}, currentFunction)
+		r.err = r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: s.instance.Name}, existingFunction)
 		if r.err != nil {
 			r.err = client.IgnoreNotFound(r.err)
 			return nil
 		}
 
-		currentFunction.Status.Conditions = updateCondition(currentFunction.Status.Conditions, condition)
-		// equalConditions := equalConditions(s.instance.Status.Conditions, currentFunction.Status.Conditions)
-		equalConditions := reflect.DeepEqual(s.instance.Status.Conditions, currentFunction.Status.Conditions)
+		updatedStatus := existingFunction.Status.DeepCopy()
+		updatedStatus.Conditions = updateCondition(existingFunction.Status.Conditions, condition)
 
-		isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
-		if equalConditions {
-
-			if !isGitType {
-				return nil
-			}
-			// checking if status changed in gitops flow
-			if equalRepositories(s.instance.Status.Repository, repo) &&
-				s.instance.Status.Commit == commit {
-				return nil
-			}
-		}
-
-		if repo != nil {
-			currentFunction.Status.Repository = *repo
-			currentFunction.Status.Commit = commit
-		}
-
-		currentFunction.Status.Runtime = s.instance.Spec.Runtime
-		currentFunction.Status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
-
-		// set scale sub-resource
-		selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})
-		if err != nil {
-			r.log.Warnf("failed to get selector for labelSelector: %w", err)
+		if err := r.populateStatusFromSystemState(updatedStatus, s); err != nil {
+			r.err = err
 			return nil
 		}
-		currentFunction.Status.PodSelector = selector.String()
 
-		if len(s.deployments.Items) > 0 {
-			currentFunction.Status.Replicas = s.deployments.Items[0].Status.Replicas
+		isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
+		if isGitType && repo != nil {
+			updatedStatus.Repository = *repo
+			updatedStatus.Commit = commit
 		}
 
-		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
-			if err := r.updateFunctionStatusWithEvent(ctx, currentFunction, condition); err != nil {
-				r.log.Warnf("while updating function status: %s", err)
-			}
-			r.statsCollector.UpdateReconcileStats(&s.instance, condition)
+		if err := r.updateFunctionStatusWithEvent(ctx, existingFunction, updatedStatus, condition); err != nil {
+			r.log.Warnf("while updating function status: %s", err)
+			r.err = err
+			return nil
 		}
+		r.statsCollector.UpdateReconcileStats(&s.instance, condition)
 		return nil
 	}
 }
 
-func (m *reconciler) updateFunctionStatusWithEvent(ctx context.Context, f *serverlessv1alpha2.Function, condition serverlessv1alpha2.Condition) error {
+func (m *reconciler) populateStatusFromSystemState(status *serverlessv1alpha2.FunctionStatus, s *systemState) error {
+	status.Runtime = s.instance.Spec.Runtime
+	status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
+
+	// set scale sub-resource
+	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})
+	if err != nil {
+		m.log.Warnf("failed to get selector for labelSelector: %w", err)
+		return err
+	}
+	status.PodSelector = selector.String()
+
+	if len(s.deployments.Items) > 0 {
+		status.Replicas = s.deployments.Items[0].Status.Replicas
+	}
+	return nil
+}
+
+func (m *reconciler) updateFunctionStatusWithEvent(ctx context.Context, f *serverlessv1alpha2.Function, s *serverlessv1alpha2.FunctionStatus, condition serverlessv1alpha2.Condition) error {
+
+	if reflect.DeepEqual(f.Status, s) {
+		return nil
+	}
+	f.Status = *s
 	if err := m.client.Status().Update(ctx, f); err != nil {
 		return err
 	}
-
 	eventType := "Normal"
 	if condition.Status == corev1.ConditionFalse {
 		eventType = "Warning"
@@ -167,8 +165,6 @@ func (m *reconciler) updateFunctionStatusWithEvent(ctx context.Context, f *serve
 	m.recorder.Event(f, eventType, string(condition.Reason), condition.Message)
 	return nil
 }
-
-// func updateGitFunctionStatus(f *serverlessv1alpha2.Function)
 
 func buildStatusUpdateStateFnWithCondition(condition serverlessv1alpha2.Condition) stateFn {
 	return buildGenericStatusUpdateStateFn(condition, nil, "")
@@ -263,7 +259,8 @@ func skipGitSourceCheck(f serverlessv1alpha2.Function, cfg cfg) bool {
 		return false
 	}
 
-	// ConditionConfigurationReady is set to true for git functions when the source is updated. if not, this is a new function, we need to do git check.
+	// ConditionConfigurationReady is set to true for git functions when the source is updated.
+	// if not, this is a new function, we need to do git check.
 	configured := f.Status.Condition(serverlessv1alpha2.ConditionConfigurationReady)
 	if configured == nil || !configured.IsTrue() {
 		return false
