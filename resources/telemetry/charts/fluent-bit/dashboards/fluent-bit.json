@@ -75,9 +75,7 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "mappings": [],
-          "nullValueMode": "connected",
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -97,7 +95,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 24,
+        "w": 19,
         "x": 0,
         "y": 1
       },
@@ -141,6 +139,77 @@
           "interval": "",
           "legendFormat": "Non-Ready Nodes",
           "refId": "C"
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "$DS_PROMETHEUS",
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "Unsupported Mode",
+          "mappings": [
+            {
+              "from": "1",
+              "id": 1,
+              "text": "1",
+              "to": "10",
+              "type": 2
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 19,
+        "y": 1
+      },
+      "id": 58,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "telemetry_unsupported_logpipelines{service=\"telemetry-operator-metrics\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "refId": "A"
         }
       ],
       "transparent": true,
