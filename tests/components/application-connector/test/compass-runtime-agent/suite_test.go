@@ -39,7 +39,11 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.Require().Nil(err)
 
 	// TODO: Pass namespaces names
-	gs.appComparator, err = applications.NewComparator(gs.Require(), kcli, "", "")
+	secretComparator, err := applications.NewSecretComparator(gs.Require(), kcli, "", "")
+	gs.Require().Nil(err)
+
+	applicationGetter := gs.cli.ApplicationconnectorV1alpha1().Applications()
+	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
 	gs.Require().Nil(err)
 }
 
