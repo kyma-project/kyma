@@ -1,7 +1,8 @@
 {{- /*
   Customization: 
   * Dashboard not editable
-  * Remove hard-coded monitoring namespace in label_values
+  * Remove hard-coded monitoring namespace and job in label_values
+    {job="prometheus-k8s",namespace="monitoring"}
 */ -}}
 {{- /*
 Generated from 'prometheus' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
@@ -1161,7 +1162,7 @@ data:
                     "options": [
 
                     ],
-                     "query": "label_values(prometheus_build_info, job)",
+                    "query": "label_values(prometheus_build_info, job)",
                     "refresh": 1,
                     "regex": "",
                     "sort": 2,

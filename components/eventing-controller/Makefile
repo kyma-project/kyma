@@ -131,3 +131,6 @@ $(eval $(call buildpack-mount,manifests))
 
 resolve_clean:
 	rm -rf vendor
+
+lint-thoroughly:
+	golangci-lint run
