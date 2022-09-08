@@ -55,3 +55,20 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 	}
 	return nats.DeliverNew()
 }
+
+// toJetStreamConsumerDeliverPolicy returns a nats.DeliverPolicy based on the given deliver policy string value.
+// It returns "DeliverNew" as the default nats.DeliverPolicy, if the given deliver policy value is not supported.
+// Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
+func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
+	switch deliverPolicy {
+	case ConsumerDeliverPolicyAll:
+		return nats.DeliverAllPolicy
+	case ConsumerDeliverPolicyLast:
+		return nats.DeliverLastPolicy
+	case ConsumerDeliverPolicyLastPerSubject:
+		return nats.DeliverLastPerSubjectPolicy
+	case ConsumerDeliverPolicyNew:
+		return nats.DeliverNewPolicy
+	}
+	return nats.DeliverNewPolicy
+}

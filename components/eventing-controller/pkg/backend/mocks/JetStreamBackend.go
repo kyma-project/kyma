@@ -72,3 +72,8 @@ func (_m *JetStreamBackend) SyncSubscription(subscription *v1alpha1.Subscription
 
 	return r0
 }
+
+// UnsubscribeOnNats provides a mock function with given fields:
+func (_m *JetStreamBackend) UnsubscribeOnNats() {
+	_m.Called()
+}
