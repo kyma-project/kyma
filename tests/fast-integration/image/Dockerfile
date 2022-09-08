@@ -24,6 +24,7 @@ WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
 RUN chmod +x /clone-and-run-fit.sh
 
+# Creating non-root user and giving all access to /kyma directory
 RUN addgroup -g 10001 runner \
     && adduser -u 10001 -G runner -s /bin/sh -D runner \
     && mkdir /kyma \
