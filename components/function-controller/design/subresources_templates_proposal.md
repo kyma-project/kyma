@@ -60,7 +60,7 @@ If the fields are partially set, the controller must fill them with the user-def
 
 The lower specification fields must have higher precedence over the high-level fields. This allows for overriding a limited set of template subfields without filling out the template completely.
 
-### Version Conversion
+### Version conversion
 
 The backward compatibility/conversion for these fields into v1alpha1 is not supported as we are moving away from v1alpha1.
 
