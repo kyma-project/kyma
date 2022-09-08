@@ -50,7 +50,7 @@ Both fields are optional. They must be defaulted based on the values of the high
 
 ### Defaulting
 
-The high level Spec fields should be defaulted by the _defaulting webhook_.
+The high-level specification fields must be defaulted using the _defaulting webhook_.
 
 If the template fields are not set, they should be defaulted based on the high level Spec by the _function controller_. 
 
