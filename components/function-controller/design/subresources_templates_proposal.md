@@ -66,7 +66,7 @@ The backward compatibility/conversion for these fields into v1alpha1 is not supp
 
 ### Upgrades and Backward Compatibility
 
-The proposed changes should not cause any backward compatibility issues with _existing_ v1alpha2 functions created before releasing these changes. Worst case upgrade scenario should not be more than triggering a function rebuild due to Spec changes in the function and/or it's sub resources.
+The proposed changes must not cause any backward compatibility issues with _existing_ v1alpha2 Functions created before releasing these changes. Worst case upgrade scenario should not be worse than triggering a Function rebuild due to specification changes in the Function and its subresources.
 
 ### Kyma Cli/Busola Support
 
