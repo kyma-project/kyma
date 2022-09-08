@@ -19,7 +19,7 @@ Give Serverless users the ability to:
 - Provide a rollout plan to implement this functionality in small increments and avoid the need to roll out a new API version
 
 ### Non-Goals
-- Define a new Spec API version
+- Define a new API version specification
 
 ## Proposal
 
