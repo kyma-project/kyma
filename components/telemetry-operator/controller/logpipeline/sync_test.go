@@ -46,31 +46,6 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	require.Equal(t, result, false)
 }
 
-func TestUnsupportedTotal(t *testing.T) {
-	l1OpCustom := `Name  foo
-Alias  bar`
-	l2FilterCustom1 := telemetryv1alpha1.Filter{
-		Custom: `Name  filter1`,
-	}
-	l2FilterCustom2 := telemetryv1alpha1.Filter{
-		Custom: `Name  filter2`,
-	}
-	l1 := telemetryv1alpha1.LogPipeline{
-		ObjectMeta: metav1.ObjectMeta{Name: "l1"},
-		Spec:       telemetryv1alpha1.LogPipelineSpec{Output: telemetryv1alpha1.Output{Custom: l1OpCustom}},
-	}
-	l2 := telemetryv1alpha1.LogPipeline{
-		ObjectMeta: metav1.ObjectMeta{Name: "l2"},
-		Spec:       telemetryv1alpha1.LogPipelineSpec{Filters: []telemetryv1alpha1.Filter{l2FilterCustom1, l2FilterCustom2}},
-	}
-	logPipelines := &telemetryv1alpha1.LogPipelineList{Items: []telemetryv1alpha1.LogPipeline{l1, l2}}
-
-	mockClient := &mocks.Client{}
-	sut := newSyncer(mockClient, testConfig)
-	sut.syncUnsupportedPluginsTotal(logPipelines)
-	require.Equal(t, 2, sut.unsupportedPluginsTotal)
-}
-
 func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	s := scheme.Scheme
 	err := telemetryv1alpha1.AddToScheme(s)
@@ -113,7 +88,7 @@ func TestSyncVariablesFromHttpOutput(t *testing.T) {
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret).Build()
 
 	sut := newSyncer(mockClient, testConfig)
-	restartRequired, err := sut.syncVariables(context.Background(), &logPipelines)
+	restartRequired, err := sut.syncReferencedSecrets(context.Background(), &logPipelines)
 	require.NoError(t, err)
 	require.True(t, restartRequired)
 

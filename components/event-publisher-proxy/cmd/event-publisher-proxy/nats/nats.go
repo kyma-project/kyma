@@ -3,14 +3,15 @@ package nats
 import (
 	"context"
 
+	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -56,8 +57,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 // Init implements the Commander interface and initializes the publisher to NATS.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		c.namedLogger().Errorw("Failed to read configuration", "error", err)
-		return err
+		return xerrors.Errorf("failed to read configuration for %s : %v", natsCommanderName, err)
 	}
 	return nil
 }
@@ -80,8 +80,7 @@ func (c *Commander) Start() error {
 		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
 	)
 	if err != nil {
-		c.namedLogger().Errorw("Failed to connect to backend server", "error", err)
-		return err
+		return xerrors.Errorf("failed to connect to backend server for %s : %v", natsCommanderName, err)
 	}
 	defer connection.Close()
 
@@ -127,8 +126,7 @@ func (c *Commander) Start() error {
 	// start handler which blocks until it receives a shutdown signal
 	if err := nats.NewHandler(messageReceiver, &messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
-		c.namedLogger().Errorw("Failed to start handler", "error", err)
-		return err
+		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
 
 	c.namedLogger().Infof("Event Publisher was shut down")

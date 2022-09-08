@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -156,7 +158,7 @@ func validateEventTypeContainsApplicationName(name string) testingutils.Validato
 			return err
 		}
 		if !strings.Contains(eventType, name) {
-			return fmt.Errorf("event-type:%s does not contain application name:%s", eventType, name)
+			return xerrors.Errorf("event-type:%s does not contain application name:%s", eventType, name)
 		}
 		return nil
 	}
