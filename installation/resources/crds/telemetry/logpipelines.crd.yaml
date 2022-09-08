@@ -61,7 +61,7 @@ spec:
                   description: Filter describes a Fluent Bit filter configuration
                   properties:
                     custom:
-                      description: "Filter definition in the Fluent Bit syntax. Note: Usage of a `custom` filter will put the LogPipeline in unsupported mode"
+                      description: "Filter definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode"
                       type: string
                   type: object
                 type: array

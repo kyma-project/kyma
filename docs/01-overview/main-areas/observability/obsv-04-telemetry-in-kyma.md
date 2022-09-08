@@ -534,7 +534,7 @@ Currently there are the following limitations for LogPipelines that are served b
 
 ### Unsupported Mode
 
-The `unsupportedMode` attribute of a `LogPipeline` indicates that you are using a `custom` filter and/or output. The Kyma Team is not providing support for a custom configuration.
+The `unsupportedMode` attribute of a `LogPipeline` indicates that you are using a `custom` filter and/or `custom` output. The Kyma team does not provide support for a custom configuration.
 
 ### Fluent Bit plugins
 
