@@ -27,7 +27,7 @@ Use a modified version of [PodTemplateSpec](https://github.com/kubernetes/kubern
 
 A modified version is needed because we need to protect certain parts of the Pod specification, for example, commands and arguments for the main container in the Pod.
 
-The proposal doesn't include removing or moving any existing Spec fields and only adds non-breaking changes to the Spec. This ensure that there is no need to rollout a new API version and ensure backward compatibility with released v1alpha2 Spec/API.
+The proposal doesn't include removing or moving any existing specification fields and only adds non-breaking changes. This ensures no need to roll out a new API version and backward compatibility with the released v1alpha2 Spec/API.
 
 ## Design details
 
