@@ -82,7 +82,6 @@ func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
 
 	for i := 0; i < len(actual); i++ {
 		a.Equal(expected[i].Name, actual[i].Name)
-		a.Equal(expected[i].ID, actual[i].ID)
 		a.Equal(expected[i].Identifier, actual[i].Identifier)
 		a.Equal(expected[i].DisplayName, actual[i].DisplayName)
 		a.Equal(expected[i].Description, actual[i].Description)
@@ -108,7 +107,6 @@ func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
 
 		a.Equal(expected[i].RequestParametersSecretName, actual[i].RequestParametersSecretName)
 		a.Equal(expected[i].Name, actual[i].Name)
-		a.Equal(expected[i].ID, actual[i].ID)
 		a.Equal(expected[i].CentralGatewayUrl, actual[i].CentralGatewayUrl)
 	}
 }
