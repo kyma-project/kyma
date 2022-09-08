@@ -19,10 +19,11 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -30,12 +31,10 @@ const (
 	reconcilerName = "jetstream-subscription-reconciler"
 )
 
-var Finalizer = eventingv1alpha1.GroupVersion.Group
-
 type Reconciler struct {
 	client.Client
 	ctx                 context.Context
-	Backend             handlers.JetStreamBackend
+	Backend             jetstream.Backend
 	recorder            record.EventRecorder
 	logger              *logger.Logger
 	eventTypeCleaner    eventtype.Cleaner
@@ -44,7 +43,7 @@ type Reconciler struct {
 	customEventsChannel chan event.GenericEvent
 }
 
-func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers.JetStreamBackend, logger *logger.Logger,
+func NewReconciler(ctx context.Context, client client.Client, jsHandler jetstream.Backend, logger *logger.Logger,
 	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
@@ -201,7 +200,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 
 // handleSubscriptionDeletion deletes the JetStream subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
+	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
@@ -209,7 +208,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 		}
 
 		// remove our finalizer from the list and update it.
-		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, Finalizer)
+		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
 			return xerrors.Errorf("failed to remove finalizer from subscription: %v", err)
@@ -220,10 +219,10 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 }
 
 // addFinalizerToSubscription appends the eventing finalizer to the subscription.
-func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
-	if err := r.Update(context.Background(), subscription); err != nil {
+	if err := r.Update(context.Background(), sub); err != nil {
 		return xerrors.Errorf("failed to add finalizer to subscription: %v", err)
 	}
 	log.Debug("Added finalizer to subscription")
@@ -233,7 +232,7 @@ func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.S
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription.
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	statusChanged := false
-	cleanedSubjects, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	cleanedSubjects, err := backendnats.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		subscription.Status.InitializeCleanEventTypes()
 		return true, xerrors.Errorf("failed to get clean subjects: %v", err)
@@ -301,8 +300,8 @@ func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 }
 
 // containsFinalizer checks if the subscription contains our Finalizer.
-func containsFinalizer(subscription *eventingv1alpha1.Subscription) bool {
-	return utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer)
+func containsFinalizer(sub *eventingv1alpha1.Subscription) bool {
+	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

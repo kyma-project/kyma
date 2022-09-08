@@ -1,5 +1,5 @@
 //nolint:gosec
-package handlers
+package utils
 
 import (
 	"context"
@@ -21,6 +21,7 @@ import (
 	"github.com/pkg/errors"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
@@ -78,7 +79,7 @@ func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func getHash(subscription *types.Subscription) (int64, error) {
+func GetHash(subscription *types.Subscription) (int64, error) {
 	hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil)
 	if err != nil {
 		return 0, err
@@ -110,7 +111,7 @@ func getQos(qosStr string) (types.Qos, error) {
 	}
 }
 
-func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule,
+func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule,
 	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
 	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
@@ -203,7 +204,7 @@ func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventing
 	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Service.Host, path), nil
 }
 
-func getInternalView4Ems(subscription *types.Subscription) *types.Subscription {
+func GetInternalView4Ems(subscription *types.Subscription) *types.Subscription {
 	emsSubscription := &types.Subscription{}
 
 	// Name

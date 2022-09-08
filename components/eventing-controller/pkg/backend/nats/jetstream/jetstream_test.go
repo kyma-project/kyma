@@ -1,4 +1,4 @@
-package handlers
+package jetstream
 
 import (
 	"errors"
@@ -8,18 +8,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -171,7 +172,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	subject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
@@ -260,7 +261,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	subject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
@@ -347,7 +348,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	subject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
@@ -380,7 +381,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get new cleaned subject
-	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	newSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, newSubject)
 
@@ -446,7 +447,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	firstSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	firstSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, firstSubject)
 
@@ -465,7 +466,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
 
 	// get new cleaned subject
-	secondSubject, err := getCleanSubject(newFilter, testEnvironment.cleaner)
+	secondSubject, err := backendnats.GetCleanSubject(newFilter, testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
 	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
@@ -546,11 +547,11 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subjects
-	firstSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	firstSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, firstSubject)
 
-	secondSubject, err := getCleanSubject(sub.Spec.Filter.Filters[1], testEnvironment.cleaner)
+	secondSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[1], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
 
@@ -680,7 +681,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	require.NoError(t, err)
 
 	// get new cleaned subject from subscription 1
-	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	newSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, newSubject)
 
@@ -704,7 +705,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	require.NotEqual(t, subBytesLimit, bytesLimit)
 
 	// get cleaned subject for subscription 2
-	cleanSubjectSub2, err := getCleanSubject(sub2.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	cleanSubjectSub2, err := backendnats.GetCleanSubject(sub2.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, cleanSubjectSub2)
 
@@ -922,7 +923,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 	require.Eventually(t, func() bool {
 		// fetch consumer info from JetStream
 		consumerName := NewSubscriptionSubjectIdentifier(sub, jsBackend.GetJetstreamSubject(sub.Status.CleanEventTypes[0])).ConsumerName()
-		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.config.JSStreamName, consumerName)
+		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, consumerName)
 		require.NoError(t, err)
 
 		// since our subscriber is not in running state,
@@ -1042,22 +1043,22 @@ func TestJetStream_ServerRestart(t *testing.T) {
 		{
 			name:               "with reconnects disabled and memory storage for streams",
 			givenMaxReconnects: 0,
-			givenStorageType:   JetStreamStorageTypeMemory,
+			givenStorageType:   StorageTypeMemory,
 		},
 		{
 			name:               "with reconnects enabled and memory storage for streams",
 			givenMaxReconnects: defaultMaxReconnects,
-			givenStorageType:   JetStreamStorageTypeMemory,
+			givenStorageType:   StorageTypeMemory,
 		},
 		{
 			name:               "with reconnects disabled and file storage for streams",
 			givenMaxReconnects: 0,
-			givenStorageType:   JetStreamStorageTypeFile,
+			givenStorageType:   StorageTypeFile,
 		},
 		{
 			name:               "with reconnects enabled and file storage for streams",
 			givenMaxReconnects: defaultMaxReconnects,
-			givenStorageType:   JetStreamStorageTypeFile,
+			givenStorageType:   StorageTypeFile,
 		},
 	}
 
@@ -1071,8 +1072,8 @@ func TestJetStream_ServerRestart(t *testing.T) {
 			defer testEnvironment.jsClient.natsConn.Close()
 			defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
-			jsBackend.config.JSStreamStorageType = tc.givenStorageType
-			jsBackend.config.MaxReconnects = tc.givenMaxReconnects
+			jsBackend.Config.JSStreamStorageType = tc.givenStorageType
+			jsBackend.Config.MaxReconnects = tc.givenMaxReconnects
 			initErr := jsBackend.Initialize(nil)
 			require.NoError(t, initErr)
 
@@ -1115,7 +1116,7 @@ func TestJetStream_ServerRestart(t *testing.T) {
 			}
 
 			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-			if tc.givenStorageType == JetStreamStorageTypeMemory && tc.givenMaxReconnects == 0 {
+			if tc.givenStorageType == StorageTypeMemory && tc.givenMaxReconnects == 0 {
 				// for memory storage with reconnects disabled
 				require.True(t, errors.Is(err, nats.ErrStreamNotFound))
 			} else {
@@ -1157,8 +1158,8 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 	defer testEnvironment.jsClient.natsConn.Close()
 	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
-	jsBackend.config.JSStreamStorageType = JetStreamStorageTypeFile
-	jsBackend.config.MaxReconnects = 0
+	jsBackend.Config.JSStreamStorageType = StorageTypeFile
+	jsBackend.Config.MaxReconnects = 0
 	initErr := jsBackend.Initialize(nil)
 	require.NoError(t, initErr)
 
@@ -1241,8 +1242,8 @@ func defaultNatsConfig(url string) env.NatsConfig {
 		MaxReconnects:           defaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
 		JSStreamName:            defaultStreamName,
-		JSStreamStorageType:     JetStreamStorageTypeMemory,
-		JSStreamRetentionPolicy: JetStreamRetentionPolicyInterest,
+		JSStreamStorageType:     StorageTypeMemory,
+		JSStreamRetentionPolicy: RetentionPolicyInterest,
 	}
 }
 
@@ -1264,7 +1265,7 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 }
 
 func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error {
-	cleanEventType, err := GetCleanSubjects(sub, cleaner)
+	cleanEventType, err := backendnats.GetCleanSubjects(sub, cleaner)
 	if err != nil {
 		return err
 	}
@@ -1285,7 +1286,8 @@ type TestEnvironment struct {
 
 // setupTestEnvironment is a TestEnvironment constructor
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	natsServer, natsPort := startNATSServer(evtesting.WithJetStreamEnabled())
+	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
+	require.NoError(t, err)
 	natsConfig := defaultNatsConfig(natsServer.ClientURL())
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
@@ -1295,7 +1297,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 
 	jsClient := getJetStreamClient(t, natsConfig.URL)
 	jsBackend := NewJetStream(natsConfig, metricsCollector, defaultLogger)
-	cleaner := createEventTypeCleaner(evtesting.EventTypePrefix, evtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(evtesting.EventTypePrefix, evtesting.ApplicationNameNotClean, defaultLogger)
 
 	return &TestEnvironment{
 		jsBackend:  jsBackend,
