@@ -58,7 +58,7 @@ If the fields are partially set, the controller must fill them with the user-def
 
 ### Precedence
 
-The lower Spec fields should have higher precedence over the high level fields. This it would be possible to only override a limited set of the template subfields without having to fill out the full template.
+The lower specification fields must have higher precedence over the high-level fields. This allows for overriding a limited set of template subfields without filling out the template completely.
 
 ### Version Conversion
 
