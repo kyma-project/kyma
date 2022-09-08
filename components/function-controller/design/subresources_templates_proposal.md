@@ -54,7 +54,7 @@ The high-level specification fields must be defaulted using the _defaulting webh
 
 If the template fields are not set, they should be defaulted based on the high-level specification by the Function controller. 
 
-If the fields are partially set, the controller should fill them with the user defined values and default unset subfields based on the high level fields.
+If the fields are partially set, the controller must fill them with the user-defined values and default unset subfields based on the high-level fields.
 
 ### Precedence
 
