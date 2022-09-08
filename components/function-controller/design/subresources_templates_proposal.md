@@ -1,6 +1,6 @@
 # Function subresources templating for Serverless v1alpha2
 
-## Summery
+## Summary
 
 The current Serverless API allows for limited ability to configure the generated functions subresources (deployment, build job). Additionally, it doesn't allow for separate configuration for build and functions resources except for memory/cpu resources.
 
