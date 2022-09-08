@@ -19,14 +19,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	jetstream2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
+	subscriptionjetstream "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -40,8 +40,8 @@ const (
 )
 
 type jetStreamTestEnsemble struct {
-	reconciler       *jetstream2.Reconciler
-	jetStreamBackend *jetstream.JetStream
+	reconciler       *subscriptionjetstream.Reconciler
+	jetStreamBackend *natsjetstream.JetStream
 	*utils.TestEnsemble
 }
 
@@ -780,13 +780,13 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	jetStreamHandler := jetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
+	jetStreamHandler := natsjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-nats")
 
-	ens.reconciler = jetstream2.NewReconciler(
+	ens.reconciler = subscriptionjetstream.NewReconciler(
 		ctx,
 		k8sClient,
 		jetStreamHandler,
@@ -800,7 +800,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	ens.jetStreamBackend = ens.reconciler.Backend.(*jetstream.JetStream)
+	ens.jetStreamBackend = ens.reconciler.Backend.(*natsjetstream.JetStream)
 
 	go func() {
 		err = k8sManager.Start(ctx)
@@ -821,7 +821,7 @@ func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *even
 
 	return g.Eventually(func() *nats.Subscription {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
-		subscriptionSubject := jetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
+		subscriptionSubject := natsjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
 			if key.ConsumerName() == subscriptionSubject.ConsumerName() {
 				return sub
