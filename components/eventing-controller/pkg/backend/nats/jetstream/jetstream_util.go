@@ -61,13 +61,13 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 // Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
 func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
 	switch deliverPolicy {
-	case JetStreamConsumerDeliverPolicyAll:
+	case ConsumerDeliverPolicyAll:
 		return nats.DeliverAllPolicy
-	case JetStreamConsumerDeliverPolicyLast:
+	case ConsumerDeliverPolicyLast:
 		return nats.DeliverLastPolicy
-	case JetStreamConsumerDeliverPolicyLastPerSubject:
+	case ConsumerDeliverPolicyLastPerSubject:
 		return nats.DeliverLastPerSubjectPolicy
-	case JetStreamConsumerDeliverPolicyNew:
+	case ConsumerDeliverPolicyNew:
 		return nats.DeliverNewPolicy
 	}
 	return nats.DeliverNewPolicy
