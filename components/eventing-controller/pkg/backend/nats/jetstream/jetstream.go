@@ -179,6 +179,10 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 // UnsubscribeOnNats removes the interest for all NATS Subscriptions
 func (js *JetStream) UnsubscribeOnNats() {
+	// unsubscribe call to JetStream is async hence checking the status of the connection is important
+	if err := js.checkJetStreamConnection(js.namedLogger()); err != nil {
+		js.logger.WithContext().Errorw("Failed to unsubscribe on NATS JetStream", "err", err)
+	}
 	for _, jsSub := range js.subscriptions {
 		if err := jsSub.Unsubscribe(); err != nil {
 			js.logger.WithContext().Errorw("Failed to unsubscribe on NATS JetStream", "err", err)
@@ -431,6 +435,10 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 				continue
 			}
 			log.Debug("Created consumer on JetStream")
+		}
+
+		if consumerInfo.PushBound {
+			continue
 		}
 
 		// subscribe to the given subject using the existing consumer
