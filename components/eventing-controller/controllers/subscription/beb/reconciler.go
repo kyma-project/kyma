@@ -12,6 +12,8 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -121,9 +123,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// sync Finalizers, ensure the finalizer is set
 	if err := r.syncFinalizer(sub, log); err != nil {
 		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
-			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
+			return ctrl.Result{}, xerrors.Errorf(updateErr.Error()+": %v", err)
 		}
-		return ctrl.Result{}, errors.Wrap(err, "sync finalizer failed")
+		return ctrl.Result{}, xerrors.Errorf("failed to sync finalizer: %v", err)
 	}
 
 	// sync APIRule for the desired subscription
@@ -132,7 +134,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	sub.Status.SetConditionAPIRuleStatus(err)
 	if !recerrors.IsSkippable(err) {
 		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
-			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
+			return ctrl.Result{}, xerrors.Errorf(updateErr.Error()+": %v", err)
 		}
 		return ctrl.Result{}, err
 	}
@@ -141,7 +143,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	ready, err := r.syncBEBSubscription(sub, apiRule, log)
 	if err != nil {
 		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
-			return ctrl.Result{}, errors.Wrap(err, updateErr.Error())
+			return ctrl.Result{}, xerrors.Errorf(updateErr.Error()+": %v", err)
 		}
 		return ctrl.Result{}, err
 	}
@@ -188,7 +190,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, sub *eventingv1alph
 	// update the subscription object in k8s
 	if !reflect.DeepEqual(latestSubscription.ObjectMeta.Finalizers, newSubscription.ObjectMeta.Finalizers) {
 		if err := r.Update(ctx, newSubscription); err != nil {
-			return errors.Wrapf(err, "remove finalizer failed name: %s", eventingv1alpha1.Finalizer)
+			return xerrors.Errorf("failed to remove finalizer name '%s': %v", eventingv1alpha1.Finalizer, err)
 		}
 		logger.Debugw("Updated subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
 	}
@@ -218,8 +220,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubsc
 
 	// update the status for subscription in k8s
 	if err := r.Status().Update(ctx, newSubscription); err != nil {
-		logger.Errorw("Failed to update subscription status", "error", err)
-		return err
+		return xerrors.Errorf("failed to update subscription status: %v", err)
 	}
 	logger.Debugw("Updated subscription status", "oldStatus", oldSubscription.Status, "newStatus", newSubscription.Status)
 
@@ -273,8 +274,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	// check if the beb subscription is active
 	isActive, err := r.checkStatusActive(subscription)
 	if err != nil {
-		logger.Errorw("Reached retry timeout", "error", err)
-		return false, err
+		return false, xerrors.Errorf("reached retry timeout: %v", err)
 	}
 
 	// sync the condition: ConditionSubscribed
@@ -346,12 +346,12 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
-		return nil, recerrors.NewSkippable(errors.Wrapf(err, "parse sink URI failed"))
+		return nil, recerrors.NewSkippable(xerrors.Errorf("failed to parse sink URL: %v", err))
 	}
 
 	apiRule, err := r.createOrUpdateAPIRule(ctx, subscription, *sURL, logger)
 	if err != nil {
-		return nil, errors.Wrap(err, "create or update APIRule failed")
+		return nil, xerrors.Errorf("failed to create or update APIRule: %v", err)
 	}
 
 	if apiRule != nil {
@@ -364,7 +364,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 	// set subscription sink only if the APIRule is ready
 	if apiRuleReady {
 		if err := setSubscriptionStatusExternalSink(subscription, apiRule); err != nil {
-			return apiRule, errors.Wrapf(err, "set subscription status externalSink failed namespace:%s name:%s", subscription.Namespace, subscription.Name)
+			return apiRule, xerrors.Errorf("failed to set subscription status externalSink namespace=%s, name=%s : %v", subscription.Namespace, subscription.Name, err)
 		}
 		return apiRule, nil
 	}
@@ -376,7 +376,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *eventingv1alpha1.Subscription, sink url.URL, logger *zap.SugaredLogger) (*apigatewayv1alpha1.APIRule, error) {
 	svcNs, svcName, err := getSvcNsAndName(sink.Host)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse svc name and ns in create or update APIRule failed")
+		return nil, xerrors.Errorf("failed to parse svc name and ns in create or update APIRule: %v", err)
 	}
 	labels := map[string]string{
 		constants.ControllerServiceLabelKey:  svcName,
@@ -385,12 +385,12 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 
 	svcPort, err := utils.GetPortNumberFromURL(sink)
 	if err != nil {
-		return nil, errors.Wrap(err, "convert URL port to APIRule port failed")
+		return nil, xerrors.Errorf("failed to convert URL port to APIRule port: %v", err)
 	}
 	var reusableAPIRule *apigatewayv1alpha1.APIRule
 	existingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fetch APIRule failed for labels: %v", labels)
+		return nil, xerrors.Errorf("failed to fetch APIRule for labels=%v : %v", labels, err)
 	}
 	if existingAPIRules != nil {
 		reusableAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
@@ -399,13 +399,13 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	// Get all subscriptions valid for the cluster-local subscriber
 	subscriptions, err := r.getSubscriptionsForASvc(ctx, svcNs, svcName)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fetch subscriptions failed for subscriber namespace:%s name:%s", svcNs, svcName)
+		return nil, xerrors.Errorf("failed to fetch subscriptions for subscriber namespace=%s, name=%s : %v", svcNs, svcName, err)
 	}
 	filteredSubscriptions := r.filterSubscriptionsOnPort(subscriptions, svcPort)
 
 	desiredAPIRule := r.makeAPIRule(svcNs, svcName, labels, filteredSubscriptions, svcPort)
 	if err != nil {
-		return nil, errors.Wrap(err, "make APIRule failed")
+		return nil, xerrors.Errorf("failed to make APIRule: %v", err)
 	}
 
 	// update or remove the previous APIRule if it is not used by other subscriptions
@@ -417,7 +417,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	if reusableAPIRule == nil {
 		if err := r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{}); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
-			return nil, errors.Wrap(err, "create APIRule failed")
+			return nil, xerrors.Errorf("failed to create APIRule: %v", err)
 		}
 
 		events.Normal(r.recorder, subscription, events.ReasonCreate, "Create APIRule succeeded %s", desiredAPIRule.Name)
@@ -432,7 +432,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
 	if err != nil {
 		events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update APIRule failed %s", desiredAPIRule.Name)
-		return nil, errors.Wrap(err, "update APIRule failed")
+		return nil, xerrors.Errorf("failed to update APIRule: %v", err)
 	}
 	events.Normal(r.recorder, subscription, events.ReasonUpdate, "Update APIRule succeeded %s", desiredAPIRule.Name)
 
@@ -718,19 +718,16 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscript
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
-		r.namedLogger().Errorw("Failed to create unmanaged controller", "error", err)
-		return err
+		return xerrors.Errorf("failed to create unmanaged controller: %v", err)
 	}
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("Failed to watch subscriptions", "error", err)
-		return err
+		return xerrors.Errorf("failed to watch subscriptions: %v", err)
 	}
 
 	apiRuleEventHandler := &handler.EnqueueRequestForOwner{OwnerType: &eventingv1alpha1.Subscription{}, IsController: false}
 	if err := ctru.Watch(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, apiRuleEventHandler); err != nil {
-		r.namedLogger().Errorw("Failed to watch APIRule", "error", err)
-		return err
+		return xerrors.Errorf("failed to watch APIRule: %v", err)
 	}
 
 	go func(r *Reconciler, c controller.Controller) {
@@ -765,7 +762,7 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 
 	u, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		return errors.Wrapf(err, "invalid sink for subscription namespace:%s name:%s", subscription.Namespace, subscription.Name)
+		return xerrors.Errorf("invalid sink for subscription namespace=%s name=%s : %v", subscription.Namespace, subscription.Name, err)
 	}
 
 	path := u.Path
@@ -835,7 +832,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 	if t0, er := time.Parse(time.RFC3339, subscription.Status.FailedActivation); er != nil {
 		err = er
 	} else if t1.Sub(t0) > timeoutRetryActiveEmsStatus {
-		err = fmt.Errorf("timeout waiting for the subscription to be active: %v", subscription.Name)
+		err = xerrors.Errorf("timeout waiting for the subscription to be active: %s", subscription.Name)
 	}
 
 	return false, err
@@ -847,13 +844,11 @@ func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subs
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
 		var err error
 		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastFailedDelivery); err != nil {
-			r.namedLogger().Errorw("Failed to parse LastFailedDelivery", "error", err)
-			return true, err
+			return true, xerrors.Errorf("failed to parse LastFailedDelivery: %v", err)
 		}
 		if len(subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery) > 0 {
 			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery); err != nil {
-				r.namedLogger().Errorw("Failed to parse LastSuccessfulDelivery", "error", err)
-				return true, err
+				return true, xerrors.Errorf("failed to parse LastSuccessfulDelivery: %v", err)
 			}
 		}
 		if lastFailedDeliveryTime.After(LastSuccessfulDeliveryTime) {

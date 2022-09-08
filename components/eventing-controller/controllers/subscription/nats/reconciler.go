@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
@@ -98,13 +98,11 @@ func (r *Reconciler) getAllKymaSubscriptions(ctx context.Context) ([]eventingv1a
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
-		r.namedLogger().Errorw("Failed to create unmanaged controller", "error", err)
-		return err
+		return xerrors.Errorf("failed to create unmanaged controller: %v", err)
 	}
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("Failed to setup watch for subscriptions", "error", err)
-		return err
+		return xerrors.Errorf("failed to setup watch for subscriptions: %v", err)
 	}
 
 	p := predicate.Funcs{
@@ -128,13 +126,11 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		},
 	}
 	if err := ctru.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{}, p); err != nil {
-		r.namedLogger().Errorw("Failed to setup watch for NATS server", "pod", natsFirstInstanceName, "error", err)
-		return err
+		return xerrors.Errorf("failed to setup watch for NATS server, pod=%s : %v", natsFirstInstanceName, err)
 	}
 
 	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("Failed to setup watch for custom channel", "error", err)
-		return err
+		return xerrors.Errorf("failed to setup watch for custom channel: %v", err)
 	}
 
 	go func(r *Reconciler, c controller.Controller) {
@@ -192,33 +188,30 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the cleanEventTypes and config values in the subscription, if changed
-	statusChanged, err := r.syncInitialStatus(sub, log)
+	statusChanged, err := r.syncInitialStatus(sub)
 	if err != nil {
-		log.Errorw("Failed to sync initial status", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, sub, false, statusChanged, err.Error()); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, xerrors.Errorf("failed to sync subscription initial status: %v", err)
 	}
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(sub); err != nil {
-		log.Errorw("Failed to validate sink URL", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, sub, false, statusChanged, err.Error()); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
-		return ctrl.Result{}, err
+		return ctrl.Result{}, xerrors.Errorf("failed to validate subscription sink URL: %v", err)
 	}
 
 	// Synchronize Kyma subscription to NATS backend
 	syncErr := r.Backend.SyncSubscription(sub)
 	if syncErr != nil {
-		log.Errorw("Failed to sync subscription to NATS backend", "error", syncErr)
 		if err := r.syncSubscriptionStatus(ctx, sub, false, statusChanged, syncErr.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, syncErr
+		return ctrl.Result{}, xerrors.Errorf("failed to sync subscription to NATS backend: %v", syncErr)
 	}
 	log.Debug("Creation of NATS subscriptions succeeded")
 
@@ -231,13 +224,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	statusChanged := false
 	cleanEventTypes, err := backendnats.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
-		log.Errorw("Failed to get clean subject", "error", err)
 		subscription.Status.InitializeCleanEventTypes()
-		return true, err
+		return true, xerrors.Errorf("failed to get clean subjects: %v", err)
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanEventTypes) {
 		subscription.Status.CleanEventTypes = cleanEventTypes
@@ -256,21 +248,19 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 }
 
 // handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
-func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	if utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
-		if err := r.Backend.DeleteSubscription(sub); err != nil {
-			log.Errorw("Failed to delete NATS subscription", "error", err)
+func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
+		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
-			return err
+			return xerrors.Errorf("failed to delete NATS subscription: %v", err)
 		}
 
 		// remove our finalizer from the list and update it.
-		sub.ObjectMeta.Finalizers = utils.RemoveString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
-		if err := r.Client.Update(ctx, sub); err != nil {
-			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription failed %s", sub.Name)
-			log.Errorw("Failed to remove finalizer from subscription", "error", err)
-			return err
+		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+		if err := r.Client.Update(ctx, subscription); err != nil {
+			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
+			return xerrors.Errorf("failed to remove finalizer from subscription: %v", err)
 		}
 		log.Debug("Removed finalizer from subscription")
 	}
@@ -278,11 +268,10 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, sub *eventi
 }
 
 // addFinalizerToSubscription appends the eventing finalizer to the subscription.
-func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
-	if err := r.Update(context.Background(), sub); err != nil {
-		log.Errorw("Failed to add finalizer to subscription", "error", err)
-		return err
+func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+	if err := r.Update(context.Background(), subscription); err != nil {
+		return xerrors.Errorf("failed to add finalizer to subscription: %v", err)
 	}
 	log.Debug("Added finalizer to subscription")
 	return nil
@@ -336,7 +325,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
 		if err != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
-			return errors.Wrapf(err, "update subscription status failed")
+			return xerrors.Errorf("failed to update subscription status: %v", err)
 		}
 		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
 	}

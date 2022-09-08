@@ -15,6 +15,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -147,7 +148,7 @@ func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
 	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
 	subKeyPrefix := backendnats.CreateKeyPrefix(subscription)
-	if err := js.checkJetStreamConnection(log); err != nil {
+	if err := js.checkJetStreamConnection(); err != nil {
 		return err
 	}
 
@@ -192,7 +193,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetstreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName(), log); err != nil {
+		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
 			return err
 		}
 	}
@@ -222,7 +223,7 @@ func (js *JetStream) validateConfig() error {
 		return errors.New("Stream name cannot be empty")
 	}
 	if len(js.Config.JSStreamName) > jsMaxStreamNameLength {
-		return fmt.Errorf("Stream name should be max %d characters long", jsMaxStreamNameLength)
+		return xerrors.Errorf("Stream name should be max %d characters long", jsMaxStreamNameLength)
 	}
 	if _, err := toJetStreamStorageType(js.Config.JSStreamStorageType); err != nil {
 		return err
@@ -249,7 +250,7 @@ func (js *JetStream) initNATSConn(connCloseHandler backendnats.ConnClosedHandler
 		}
 		conn, err := nats.Connect(js.Config.URL, jsOptions...)
 		if err != nil || !conn.IsConnected() {
-			return errors.Wrapf(err, "failed to connect to NATS JetStream")
+			return xerrors.Errorf("failed to connect to NATS JetStream: %v", err)
 		}
 		js.conn = conn
 		js.connClosedHandler = connCloseHandler
@@ -264,7 +265,7 @@ func (js *JetStream) initNATSConn(connCloseHandler backendnats.ConnClosedHandler
 func (js *JetStream) initJSContext() error {
 	jsCtx, err := js.conn.JetStream()
 	if err != nil {
-		return errors.Wrapf(err, "failed to create the JetStream context")
+		return xerrors.Errorf("failed to create the JetStream context: %v", err)
 	}
 	js.jsCtx = jsCtx
 	return nil
@@ -330,7 +331,7 @@ func (js *JetStream) syncSubscriptionFilters(subscription *eventingv1alpha1.Subs
 		if err != nil {
 			if err == nats.ErrConsumerNotFound {
 				log.Infow("Deleting invalid Consumer!")
-				if err := js.deleteConsumerFromJetStream(key.ConsumerName(), log); err != nil {
+				if err := js.deleteConsumerFromJetStream(key.ConsumerName()); err != nil {
 					return err
 				}
 				delete(js.subscriptions, key)
@@ -406,8 +407,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
 		if err != nil {
-			log.Errorw("Failed to subscribe on JetStream", "error", err)
-			return err
+			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
 		}
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
@@ -495,19 +495,18 @@ func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectId
 // deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db.
 func (js *JetStream) deleteSubscriptionFromJetStream(jsSub *nats.Subscription, jsSubKey SubscriptionSubjectIdentifier, log *zap.SugaredLogger) error {
 	// unsubscribe call to JetStream is async hence checking the status of the connection is important
-	if err := js.checkJetStreamConnection(log); err != nil {
+	if err := js.checkJetStreamConnection(); err != nil {
 		return err
 	}
 
 	if jsSub.IsValid() {
 		// unsubscribe will also delete the consumer on JS server
 		if err := jsSub.Unsubscribe(); err != nil {
-			log.Errorw("Failed to unsubscribe from JetStream", "error", err, "jsSub", jsSub)
-			return errors.Wrapf(err, "unsubscribe failed")
+			return xerrors.Errorf("failed to unsubscribe subscription %v from JetStream: %v", jsSub, err)
 		}
 	} else {
 		// if JS sub is not valid, then we need to delete the consumer on JetStream
-		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName(), log); err != nil {
+		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
 			return err
 		}
 	}
@@ -519,27 +518,25 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub *nats.Subscription, j
 }
 
 // deleteConsumerFromJS deletes consumer from JetStream.
-func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLogger) error {
+func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 	// checking the status of the connection is important
-	if err := js.checkJetStreamConnection(log); err != nil {
+	if err := js.checkJetStreamConnection(); err != nil {
 		return err
 	}
 
 	if err := js.jsCtx.DeleteConsumer(js.Config.JSStreamName, name); err != nil && err != nats.ErrConsumerNotFound {
 		// if it is not a Not Found error, then return error
-		log.Errorw("Failed to delete consumer from JetStream", "error", err, "consumer", name)
-		return err
+		return xerrors.Errorf("failed to delete consumer %s from JetStream: %v", name, err)
 	}
 
 	return nil
 }
 
 // checkJetStreamConnection reconnects to the server if the server is not connected.
-func (js *JetStream) checkJetStreamConnection(log *zap.SugaredLogger) error {
+func (js *JetStream) checkJetStreamConnection() error {
 	if js.conn.Status() != nats.CONNECTED {
 		if err := js.Initialize(js.connClosedHandler); err != nil {
-			log.Errorw("Failed to connect to JetStream", "status", js.conn.Status(), "error", err)
-			return errors.Wrapf(err, "connect to JetStream failed")
+			return xerrors.Errorf("failed to connect to JetStream with status %d: %v", js.conn.Status(), err)
 		}
 	}
 	return nil

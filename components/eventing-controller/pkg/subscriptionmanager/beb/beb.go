@@ -9,6 +9,7 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -118,7 +119,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	)
 	c.backend = bebReconciler.Backend
 	if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
-		return fmt.Errorf("setup BEB subscription controller failed: %v", err)
+		return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
 	}
 	return nil
 }
@@ -170,9 +171,7 @@ func cleanup(backend backendbeb.Backend, dynamicClient dynamic.Interface, logger
 	var bebBackend *backendbeb.BEB
 	var ok bool
 	if bebBackend, ok = backend.(*backendbeb.BEB); !ok {
-		err := errors.New("convert backend handler to BEB handler failed")
-		logger.Errorw("No BEB backend exists", "error", err)
-		return err
+		return xerrors.Errorf("no BEB backend exists: convert backend handler to BEB handler failed")
 	}
 
 	// Fetch all subscriptions.

@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/xerrors"
+
 	"github.com/stretchr/testify/mock"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -299,7 +301,7 @@ func Test_syncInitialStatus(t *testing.T) {
 			sub := testCase.givenSub
 
 			// when
-			gotStatus, err := r.syncInitialStatus(sub, r.namedLogger())
+			gotStatus, err := r.syncInitialStatus(sub)
 			require.NoError(t, err)
 
 			// then
@@ -372,7 +374,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  backendSyncErr,
+			wantReconcileError:  xerrors.Errorf("failed to sync subscription to NATS backend: %v", backendSyncErr),
 		},
 		{
 			name:              "Return error and default Result{} when backend delete returns error",
@@ -385,7 +387,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  backendDeleteErr,
+			wantReconcileError:  xerrors.Errorf("failed to delete NATS subscription: %v", backendDeleteErr),
 		},
 		{
 			name:              "Return error and default Result{} when validator returns error",
@@ -398,7 +400,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, unhappyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  validatorErr,
+			wantReconcileError:  xerrors.Errorf("failed to validate subscription sink URL: %v", validatorErr),
 		},
 		{
 			name:              "Return error and default Result{} when event type cleaner returns error",
@@ -411,7 +413,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, fakeClient, te.backend, unhappyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  cleanerErr,
+			wantReconcileError:  xerrors.Errorf("failed to sync subscription initial status: %v", xerrors.Errorf("failed to get clean subjects: %v", cleanerErr)),
 		},
 	}
 
@@ -425,7 +427,11 @@ func TestReconciler_Reconcile(t *testing.T) {
 			}}
 			res, err := reconciler.Reconcile(context.Background(), r)
 			req.Equal(res, tc.wantReconcileResult)
-			req.Equal(err, tc.wantReconcileError)
+			if tc.wantReconcileError == nil {
+				req.Equal(err, nil)
+			} else {
+				req.Equal(err.Error(), tc.wantReconcileError.Error())
+			}
 		})
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -126,9 +126,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the cleanEventTypes and config values in the subscription status, if changed
-	statusChanged, err := r.syncInitialStatus(desiredSubscription, log)
+	statusChanged, err := r.syncInitialStatus(desiredSubscription)
 	if err != nil {
-		log.Errorw("Failed to sync initial status", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
@@ -137,7 +136,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
-		log.Errorw("Failed to validate sink URL", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
@@ -147,7 +145,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Synchronize Kyma subscription to JetStream backend
 	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
-		log.Errorw("Failed to sync subscription", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
@@ -194,7 +191,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
 		if err != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
-			return errors.Wrapf(err, "update subscription status failed")
+			return xerrors.Errorf("failed to update subscription status: %v", err)
 		}
 		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
 	}
@@ -202,21 +199,19 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 }
 
 // handleSubscriptionDeletion deletes the JetStream subscription and removes its finalizer if it is set.
-func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	if utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
-		if err := r.Backend.DeleteSubscription(sub); err != nil {
-			log.Errorw("Failed to delete JetStream subscription", "error", err)
+func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
+		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
-			return err
+			return xerrors.Errorf("failed to delete JetStream subscription: %v", err)
 		}
 
 		// remove our finalizer from the list and update it.
-		sub.ObjectMeta.Finalizers = utils.RemoveString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
-		if err := r.Client.Update(ctx, sub); err != nil {
-			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription failed %s", sub.Name)
-			log.Errorw("Failed to remove finalizer from subscription", "error", err)
-			return err
+		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+		if err := r.Client.Update(ctx, subscription); err != nil {
+			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
+			return xerrors.Errorf("failed to remove finalizer from subscription: %v", err)
 		}
 		log.Debug("Removed finalizer from subscription")
 	}
@@ -228,21 +223,19 @@ func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha1.Subscripti
 	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
 	if err := r.Update(context.Background(), sub); err != nil {
-		log.Errorw("Failed to add finalizer to subscription", "error", err)
-		return err
+		return xerrors.Errorf("failed to add finalizer to subscription: %v", err)
 	}
 	log.Debug("Added finalizer to subscription")
 	return nil
 }
 
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription.
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	statusChanged := false
 	cleanedSubjects, err := backendnats.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
-		log.Errorw("Failed to get clean subjects", "error", err)
 		subscription.Status.InitializeCleanEventTypes()
-		return true, err
+		return true, xerrors.Errorf("failed to get clean subjects: %v", err)
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanedSubjects) {
 		subscription.Status.CleanEventTypes = cleanedSubjects

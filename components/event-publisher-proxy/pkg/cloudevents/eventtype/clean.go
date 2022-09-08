@@ -3,6 +3,8 @@ package eventtype
 import (
 	"regexp"
 
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 
@@ -43,8 +45,7 @@ func (c *cleaner) Clean(eventType string) (string, error) {
 
 	appName, event, version, err := parse(eventType, c.eventTypePrefix)
 	if err != nil {
-		namedLogger.Errorw("Failed to parse event-type", "error", err)
-		return "", err
+		return "", xerrors.Errorf("failed to parse event-type=%s with prefix=%s: %v", eventType, c.eventTypePrefix, err)
 	}
 
 	// clean the application name

@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -115,7 +116,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, happyCleaner, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  backendDeleteErr,
+			wantReconcileError:  xerrors.Errorf("failed to delete JetStream subscription: %v", backendDeleteErr),
 		},
 		{
 			name:              "Return error and default Result{} when validator returns error",
@@ -139,7 +140,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, unhappyCleaner, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  cleanerErr,
+			wantReconcileError:  xerrors.Errorf("failed to get clean subjects: %v", cleanerErr),
 		},
 	}
 
@@ -153,7 +154,11 @@ func TestReconciler_Reconcile(t *testing.T) {
 			}}
 			res, err := reconciler.Reconcile(context.Background(), r)
 			req.Equal(res, tc.wantReconcileResult)
-			req.Equal(err, tc.wantReconcileError)
+			if tc.wantReconcileError == nil {
+				req.Equal(err, nil)
+			} else {
+				req.Equal(err.Error(), tc.wantReconcileError.Error())
+			}
 		})
 	}
 }
@@ -431,7 +436,7 @@ func Test_syncInitialStatus(t *testing.T) {
 			sub := testCase.givenSub
 
 			// when
-			gotStatus, err := r.syncInitialStatus(sub, r.namedLogger())
+			gotStatus, err := r.syncInitialStatus(sub)
 			require.NoError(t, err)
 
 			// then
