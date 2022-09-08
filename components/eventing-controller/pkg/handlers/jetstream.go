@@ -426,7 +426,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 
 		// create the consumer in case it doesn't exist
 		if consumerInfo == nil {
-			_, err = js.jsCtx.AddConsumer(
+			consumerInfo, err = js.jsCtx.AddConsumer(
 				js.config.JSStreamName,
 				js.getConsumerConfig(subscription, jsSubKey, jsSubject),
 			)
