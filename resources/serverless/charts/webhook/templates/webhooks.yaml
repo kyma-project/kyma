@@ -14,7 +14,7 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
-    timeoutSeconds: 30
+    timeoutSeconds: 15
     admissionReviewVersions: ["v1beta1", "v1"]
     name: validation.webhook.serverless.kyma-project.io
 ---
@@ -32,7 +32,7 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
-    timeoutSeconds: 30
+    timeoutSeconds: 15
     admissionReviewVersions: ["v1beta1", "v1"]
     name: defaulting.webhook.serverless.kyma-project.io
   - clientConfig:
@@ -42,6 +42,6 @@ webhooks:
     failurePolicy: Fail
     sideEffects: None
     matchPolicy: Exact
-    timeoutSeconds: 30
+    timeoutSeconds: 15
     admissionReviewVersions: ["v1beta1", "v1"]
     name: mutating.secret.webhook.serverless.kyma-project.io
