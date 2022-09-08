@@ -79,6 +79,6 @@ As high level breakdown of the required effort, it should be possible to impleme
 - Define and implement the modified `PodSpecTemplate` type.
 - Add required defaulting logic to the controller (no changes in reconciliation).
 - Refactor build job reconciliation to be based on the the build template.
-- Add Integration tests for build job reconciliation to be based on the build template.
+- Add integration tests for build job reconciliation to be based on the build template.
 - Refactor runtime deployment reconciliation to be based on runtime template
 - Add Integration tests for runtime deployment reconciliation to be based on the runtime deployment template.
