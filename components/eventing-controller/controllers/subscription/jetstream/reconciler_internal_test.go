@@ -18,7 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
@@ -45,13 +44,13 @@ func TestReconciler_Reconcile(t *testing.T) {
 	defaultSubConfig := env.DefaultSubscriptionConfig{}
 	// A subscription with the correct Finalizer, ready for reconciliation with the backend.
 	testSub := controllertesting.NewSubscription("sub1", "test",
-		controllertesting.WithFinalizers([]string{subscription.Finalizer}),
+		controllertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
 	)
 	// A subscription marked for deletion.
 	testSubUnderDeletion := controllertesting.NewSubscription("sub2", "test",
 		controllertesting.WithNonZeroDeletionTimestamp(),
-		controllertesting.WithFinalizers([]string{subscription.Finalizer}),
+		controllertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
 	)
 
@@ -177,7 +176,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		},
 		{
 			name:            "With eventing finalizer the NATS subscription should be deleted and the finalizer should be cleared",
-			givenFinalizers: []string{subscription.Finalizer},
+			givenFinalizers: []string{eventingv1alpha1.Finalizer},
 			wantDeleteCall:  true,
 			wantFinalizers:  []string{},
 		},

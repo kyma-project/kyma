@@ -20,7 +20,6 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
@@ -187,7 +186,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent to
 	// registering our finalizer.
-	if !utils.ContainsString(sub.ObjectMeta.Finalizers, subscription.Finalizer) {
+	if !utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
 		err := r.addFinalizerToSubscription(sub, log)
 		return ctrl.Result{}, err
 	}
@@ -258,7 +257,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 
 // handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	if utils.ContainsString(sub.ObjectMeta.Finalizers, subscription.Finalizer) {
+	if utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
 		if err := r.Backend.DeleteSubscription(sub); err != nil {
 			log.Errorw("Failed to delete NATS subscription", "error", err)
 			// if failed to delete the external dependency here, return with error
@@ -267,7 +266,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, sub *eventi
 		}
 
 		// remove our finalizer from the list and update it.
-		sub.ObjectMeta.Finalizers = utils.RemoveString(sub.ObjectMeta.Finalizers, subscription.Finalizer)
+		sub.ObjectMeta.Finalizers = utils.RemoveString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 		if err := r.Client.Update(ctx, sub); err != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription failed %s", sub.Name)
 			log.Errorw("Failed to remove finalizer from subscription", "error", err)
@@ -280,7 +279,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, sub *eventi
 
 // addFinalizerToSubscription appends the eventing finalizer to the subscription.
 func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, subscription.Finalizer)
+	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	if err := r.Update(context.Background(), sub); err != nil {
 		log.Errorw("Failed to add finalizer to subscription", "error", err)
 		return err

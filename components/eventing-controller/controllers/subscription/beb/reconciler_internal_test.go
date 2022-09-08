@@ -21,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
@@ -49,7 +48,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 	// A subscription with the correct Finalizer, conditions and status ready for reconciliation with the backend.
 	testSub := reconcilertesting.NewSubscription("sub1", "test",
 		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
-		reconcilertesting.WithFinalizers([]string{subscription.Finalizer}),
+		reconcilertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
 		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
@@ -57,14 +56,14 @@ func TestReconciler_Reconcile(t *testing.T) {
 	// A subscription marked for deletion.
 	testSubUnderDeletion := reconcilertesting.NewSubscription("sub2", "test",
 		reconcilertesting.WithNonZeroDeletionTimestamp(),
-		reconcilertesting.WithFinalizers([]string{subscription.Finalizer}),
+		reconcilertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 	)
 
 	// A subscription with the correct Finalizer, conditions and status Paused for reconciliation with the backend.
 	testSubPaused := reconcilertesting.NewSubscription("sub3", "test",
 		reconcilertesting.WithConditions(eventingv1alpha1.MakeSubscriptionConditions()),
-		reconcilertesting.WithFinalizers([]string{subscription.Finalizer}),
+		reconcilertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
 		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusPaused)),

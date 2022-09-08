@@ -27,7 +27,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
@@ -189,7 +188,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, sub *eventingv1alph
 	// update the subscription object in k8s
 	if !reflect.DeepEqual(latestSubscription.ObjectMeta.Finalizers, newSubscription.ObjectMeta.Finalizers) {
 		if err := r.Update(ctx, newSubscription); err != nil {
-			return errors.Wrapf(err, "remove finalizer failed name: %s", subscription.Finalizer)
+			return errors.Wrapf(err, "remove finalizer failed name: %s", eventingv1alpha1.Finalizer)
 		}
 		logger.Debugw("Updated subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
 	}
@@ -780,7 +779,7 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 }
 
 func (r *Reconciler) addFinalizer(sub *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
-	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, subscription.Finalizer)
+	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	logger.Debug("Added finalizer to subscription")
 	return nil
 }
@@ -790,7 +789,7 @@ func (r *Reconciler) removeFinalizer(sub *eventingv1alpha1.Subscription) {
 
 	// Build finalizer list without the one the controller owns
 	for _, finalizer := range sub.ObjectMeta.Finalizers {
-		if finalizer == subscription.Finalizer {
+		if finalizer == eventingv1alpha1.Finalizer {
 			continue
 		}
 		finalizers = append(finalizers, finalizer)
@@ -803,7 +802,7 @@ func (r *Reconciler) removeFinalizer(sub *eventingv1alpha1.Subscription) {
 func (r *Reconciler) isFinalizerSet(sub *eventingv1alpha1.Subscription) bool {
 	// Check if finalizer is already set
 	for _, finalizer := range sub.ObjectMeta.Finalizers {
-		if finalizer == subscription.Finalizer {
+		if finalizer == eventingv1alpha1.Finalizer {
 			return true
 		}
 	}

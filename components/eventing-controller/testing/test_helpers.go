@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -635,8 +634,8 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 // SubscriptionGroupVersionResource returns the GVR of a subscription
 func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
-		Version:  subscription.GroupVersion.Version,
-		Group:    subscription.GroupVersion.Group,
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
 		Resource: "subscriptions",
 	}
 }

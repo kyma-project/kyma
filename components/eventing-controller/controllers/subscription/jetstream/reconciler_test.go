@@ -19,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	jetstream2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -106,7 +105,7 @@ func TestCreateSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveSubscriptionFinalizer(subscription.Finalizer),
+					reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					reconcilertesting.OrderCreatedEventType: {
