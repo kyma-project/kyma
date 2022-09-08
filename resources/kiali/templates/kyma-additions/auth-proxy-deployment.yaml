@@ -46,6 +46,7 @@ spec:
         - --auth-logging={{ .Values.authProxy.config.authLogging }}
         - --request-logging={{ .Values.authProxy.config.requestLogging }}
         - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
+        - --upstream-timeout={{ .Values.authProxy.config.upstreamTimeout }}
         envFrom:
         - secretRef:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy-default
