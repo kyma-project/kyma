@@ -44,7 +44,7 @@ The proposed functionality can be implemented by adding the two following fields
 
 *Note:* Decide if you want to implement this directly under the Function specification or grouped in a specification field, for example, `spec.Templates`.
 
-Both fields will be of the modified version of the PodTemplateSpec.
+Both fields are from the modified version of the `PodTemplateSpec`.
 
 Both fields will be optional. They should be defaulted based on the values of the high level Spec fields.
 
