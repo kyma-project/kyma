@@ -2,7 +2,7 @@
 
 ## Summary
 
-The current Serverless API allows for limited ability to configure the generated functions subresources (deployment, build job). Additionally, it doesn't allow for separate configuration for build and functions resources except for memory/cpu resources.
+The current Serverless API allows for limited configuration of the generated Function's subresources (deployment, build job). Additionally, it doesn't allow for separate configuration for build and Function's resources except for memory/CPU resources.
 
 The current v1alpha2 Serverless API supports templating of Function's subresources _without_ the need to roll out a new API version.
 
