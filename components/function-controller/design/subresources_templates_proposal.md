@@ -46,7 +46,7 @@ The proposed functionality can be implemented by adding the two following fields
 
 Both fields are from the modified version of the `PodTemplateSpec`.
 
-Both fields will be optional. They should be defaulted based on the values of the high level Spec fields.
+Both fields are optional. They must be defaulted based on the values of the high-level specification fields.
 
 ### Defaulting
 
