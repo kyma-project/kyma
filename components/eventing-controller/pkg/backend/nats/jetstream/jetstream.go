@@ -49,6 +49,9 @@ type Backend interface {
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name as prefix if needed
 	GetJetStreamSubjects(subjects []string) []string
+
+	// UnsubscribeOnNats removes the interest for all NATS Subscriptions
+	UnsubscribeOnNats()
 }
 
 // SubscriptionSubjectIdentifier is used to uniquely identify a Subscription subject.
@@ -172,6 +175,15 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		return err
 	}
 	return nil
+}
+
+// UnsubscribeOnNats removes the interest for all NATS Subscriptions
+func (js *JetStream) UnsubscribeOnNats() {
+	for _, jsSub := range js.subscriptions {
+		if err := jsSub.Unsubscribe(); err != nil {
+			js.logger.WithContext().Errorw("Failed to unsubscribe on NATS JetStream", "err", err)
+		}
+	}
 }
 
 func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
@@ -369,7 +381,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 			log.Debugw("Skipping creation subscription on JetStream because it already exists")
 			continue
 		}
-		log.Debugw("Recreating subscription on JetStream because it was invalid")
+		log.Debug("Recreating subscription on JetStream because it was invalid")
 		// bind the existing consumer to a new subscription on JetStream
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
@@ -384,7 +396,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 		} else {
 			// save recreated JetStream subscription in storage
 			js.subscriptions[jsSubKey] = jsSubscription
-			log.Debugw("Recreated subscription on JetStream")
+			log.Debug("Recreated subscription on JetStream")
 		}
 	}
 }
@@ -397,22 +409,48 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		log := log.With("subject", subject)
 
+		// skip for existing subscriptions
 		if _, ok := js.subscriptions[jsSubKey]; ok {
 			continue
 		}
 
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get consumer info", "error", err)
+			continue
+		}
+
+		// create the consumer in case it doesn't exist
+		if consumerInfo == nil {
+			consumerInfo, err = js.jsCtx.AddConsumer(
+				js.Config.JSStreamName,
+				js.getConsumerConfig(subscription, jsSubKey, jsSubject),
+			)
+			if err != nil {
+				log.Errorw("Failed to create a consumer", "error", err)
+				continue
+			}
+			log.Debug("Created consumer on JetStream")
+		}
+
+		if consumerInfo.PushBound {
+			continue
+		}
+
+		// subscribe to the given subject using the existing consumer
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
+
 		if err != nil {
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
 		}
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
 		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
-		log.Debugw("Created subscription on JetStream")
+		log.Debug("Created subscription on JetStream")
 	}
 	return nil
 }
@@ -431,8 +469,26 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
+		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
 	}
 	return defaultOpts
+}
+
+func (js *JetStream) getConsumerConfig(subscription *eventingv1alpha1.Subscription, jsSubKey SubscriptionSubjectIdentifier, jsSubject string) *nats.ConsumerConfig {
+	return &nats.ConsumerConfig{
+		Durable:        jsSubKey.ConsumerName(),
+		Description:    jsSubKey.namespacedSubjectName,
+		DeliverPolicy:  nats.DeliverNewPolicy,
+		FlowControl:    true,
+		MaxAckPending:  subscription.Status.Config.MaxInFlightMessages,
+		AckPolicy:      nats.AckExplicitPolicy,
+		AckWait:        jsConsumerAcKWait,
+		MaxDeliver:     jsConsumerMaxRedeliver,
+		FilterSubject:  jsSubject,
+		ReplayPolicy:   nats.ReplayInstantPolicy,
+		DeliverSubject: nats.NewInbox(),
+		Heartbeat:      idleHeartBeatDuration,
+	}
 }
 
 func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {

@@ -73,6 +73,11 @@ func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, resyncPeri
 	}
 }
 
+// UnsubscribeAll the subscriptionmanager.Manager interface.
+func (c *SubscriptionManager) UnsubscribeAll() error {
+	return nil
+}
+
 // Init implements the subscriptionmanager.Manager interface.
 func (c *SubscriptionManager) Init(mgr manager.Manager) error {
 	if len(c.envCfg.Domain) == 0 {

@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	testing2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
@@ -1475,4 +1477,94 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 			assert.Equal(t, tc.wantNamespacedName, tc.givenIdentifier.NamespacedName())
 		})
 	}
+}
+
+// Test_CreateConsumer tests the creation of the valid consumer on NATS server
+func Test_CreateConsumer(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	require.True(t, subscriber.IsRunning())
+
+	// create a new Subscription
+	cleanEventTypes := []string{testing2.NewCleanEventType("0")}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+		evtesting.WithStatusCleanEventTypes(cleanEventTypes),
+	)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+
+	// init the required strings
+	jsSubject := jsBackend.GetJetstreamSubject(sub.Status.CleanEventTypes[0])
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+	subKeyPrefix := backendnats.CreateKeyPrefix(sub)
+
+	// no consumer resources yet
+	assert.Empty(t, jsBackend.subscriptions)
+	consumerInfo, _ := jsBackend.jsCtx.ConsumerInfo(defaultStreamName, jsSubKey.ConsumerName())
+	assert.Nil(t, consumerInfo)
+
+	// send an event, which should not be dispatched, because there is no consumer yet
+	ev2data := "newsampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	require.Error(t, subscriber.CheckEvent(expectedEv2Data))
+	info, err := jsBackend.jsCtx.StreamInfo(defaultStreamName)
+	require.NoError(t, err)
+	require.Equal(t, info.State.Consumers, 0)
+
+	// when
+	jsBackend.sinks.Store(subKeyPrefix, sub.Spec.Sink)
+	require.NoError(t, jsBackend.createConsumer(sub, jsBackend.getCallback(subKeyPrefix, sub.Name), jsBackend.namedLogger()))
+
+	// then
+	// the expected consumer should have been created
+	consumerInfo, _ = jsBackend.jsCtx.ConsumerInfo(defaultStreamName, jsSubKey.ConsumerName())
+	require.NotNil(t, consumerInfo)
+	require.Equal(t, consumerInfo.Name, jsSubKey.ConsumerName())
+	require.Equal(t, len(jsBackend.subscriptions), 1)
+	info, err = jsBackend.jsCtx.StreamInfo(defaultStreamName)
+	require.NoError(t, err)
+	require.Equal(t, info.State.Consumers, 1)
+
+	// send the event again, which should be dispatched
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+
+	// unsubscribe from topic, this will keep the consumer, but remove the NATS Subscription
+	for key, sub := range jsBackend.subscriptions {
+		require.NoError(t, sub.Unsubscribe())
+		delete(jsBackend.subscriptions, key)
+	}
+
+	// send the event again, which should not be dispatched due to missing subscription
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+	err = subscriber.CheckEvent(expectedEv2Data)
+	require.Error(t, err)
+
+	info, err = jsBackend.jsCtx.StreamInfo(defaultStreamName)
+	require.NoError(t, err)
+	require.Equal(t, int(info.State.Msgs), 1)
+
+	// this should resubscribe to existing consumer
+	require.NoError(t, jsBackend.createConsumer(sub, jsBackend.getCallback(subKeyPrefix, sub.Name), jsBackend.namedLogger()))
+
+	// the same event should be redelivered
+	require.Eventually(t, func() bool {
+		return subscriber.CheckEvent(expectedEv2Data) == nil
+	}, 60*time.Second, 5*time.Second)
+
+	info, err = jsBackend.jsCtx.StreamInfo(defaultStreamName)
+	require.NoError(t, err)
+	require.Equal(t, int(info.State.Msgs), 0)
 }
