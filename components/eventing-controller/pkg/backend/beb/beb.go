@@ -11,13 +11,13 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	handlerutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -64,7 +64,7 @@ type OAuth2ClientCredentials struct {
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, mapper handlerutils.NameMapper, logger *logger.Logger) *BEB {
+func NewBEB(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper, logger *logger.Logger) *BEB {
 	return &BEB{
 		OAth2credentials: credentials,
 		logger:           logger,
@@ -78,7 +78,7 @@ type BEB struct {
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
 	OAth2credentials *OAuth2ClientCredentials
-	SubNameMapper    handlerutils.NameMapper
+	SubNameMapper    backendutils.NameMapper
 	logger           *logger.Logger
 }
 
@@ -125,13 +125,13 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := handlerutils.GetInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
+	sEv2, err := backendutils.GetInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription internal view", ErrorLogKey, err)
 		return false, err
 	}
 
-	newEv2Hash, err := handlerutils.GetHash(sEv2)
+	newEv2Hash, err := backendutils.GetHash(sEv2)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription hash", ErrorLogKey, err)
 		return false, err
@@ -168,8 +168,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			}
 		}
 		// get the internal view for the EMS subscription
-		sEms := handlerutils.GetInternalView4Ems(bebSubscription)
-		newEmsHash, err := handlerutils.GetHash(sEms)
+		sEms := backendutils.GetInternalView4Ems(bebSubscription)
+		newEmsHash, err := backendutils.GetHash(sEms)
 		if err != nil {
 			log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 			return false, err
@@ -228,11 +228,11 @@ func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	// get the new hash
-	sEMS := handlerutils.GetInternalView4Ems(bebSubscription)
+	sEMS := backendutils.GetInternalView4Ems(bebSubscription)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription internal view", ErrorLogKey, err)
 	}
-	newEmsHash, err := handlerutils.GetHash(sEMS)
+	newEmsHash, err := backendutils.GetHash(sEMS)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 		return nil, 0, err

@@ -18,11 +18,11 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	ecnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
-	testing2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/testing"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -84,7 +84,7 @@ func TestConvertMsgToCE(t *testing.T) {
 				Subject: "fooeventtype",
 				Reply:   "",
 				Header:  nil,
-				Data:    []byte(testing2.NewNatsMessagePayload("foo-data", "id", "foosource", eventTime, "fooeventtype")),
+				Data:    []byte(natstesting.NewNatsMessagePayload("foo-data", "id", "foosource", eventTime, "fooeventtype")),
 				Sub:     nil,
 			},
 			expectedCloudEvent: eventingtesting.NewCloudEvent("\"foo-data\"", "id", "foosource", eventTime, "fooeventtype", t),
@@ -95,7 +95,7 @@ func TestConvertMsgToCE(t *testing.T) {
 				Subject: "fooeventtype",
 				Reply:   "",
 				Header:  nil,
-				Data:    []byte(testing2.NewNatsMessagePayload("foo-data", "", "foosource", eventTime, "fooeventtype")),
+				Data:    []byte(natstesting.NewNatsMessagePayload("foo-data", "", "foosource", eventTime, "fooeventtype")),
 				Sub:     nil,
 			},
 			expectedCloudEvent: ceevent.New(ceevent.CloudEventsVersionV1),
@@ -104,7 +104,7 @@ func TestConvertMsgToCE(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotCE, err := ecnats.ConvertMsgToCE(&tc.natsMsg)
+			gotCE, err := backendnats.ConvertMsgToCE(&tc.natsMsg)
 			if err != nil && tc.expectedErr == nil {
 				t.Fatalf("Should not give error, got: %v", err)
 			}
@@ -134,7 +134,7 @@ func TestConvertMsgToCE(t *testing.T) {
 
 func TestSubscription(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -157,7 +157,7 @@ func TestSubscription(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
 	err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
@@ -182,7 +182,7 @@ func TestSubscription(t *testing.T) {
 func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	g := NewWithT(t)
 
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -204,13 +204,13 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
 	err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
-	subject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	subject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
@@ -225,7 +225,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	msgLimit, bytesLimit := 2048, 2048
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, subject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 		// set metadata on nats subscription
@@ -239,7 +239,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, subject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -264,7 +264,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 // NATS subjects on nats-server
 func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -289,13 +289,13 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber1.SinkURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
 	err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
-	subject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	subject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
@@ -310,7 +310,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	msgLimit, bytesLimit := 2048, 2048
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, subject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 		// set metadata on nats subscription
@@ -325,7 +325,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, subject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -350,7 +350,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 // when the filters are changed in subscription
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -372,13 +372,13 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
 	err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
-	subject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	subject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
@@ -406,7 +406,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	// get new cleaned subject
-	newSubject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	newSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(newSubject).To(Not(BeEmpty()))
 
@@ -414,7 +414,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	// because the subscriptions should have being re-created for new subject
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, newSubject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, newSubject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -443,7 +443,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 // when a new filter is added in subscription
 func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -468,13 +468,13 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
 	err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
-	firstSubject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	firstSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(firstSubject).To(Not(BeEmpty()))
 
@@ -493,7 +493,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
 
 	// get new cleaned subject
-	secondSubject, err := ecnats.GetCleanSubject(newFilter, cleaner)
+	secondSubject, err := backendnats.GetCleanSubject(newFilter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(secondSubject).To(Not(BeEmpty()))
 
@@ -509,7 +509,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 
 	// Verify that the nats subscriptions for first subject was not re-created
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, firstSubject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, firstSubject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -541,7 +541,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 // when a filter is removed from subscription
 func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -559,7 +559,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
 	// // ###### Test logic ######
 	// Create a subscription with two filters
@@ -577,11 +577,11 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subjects
-	firstSubject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	firstSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(firstSubject).To(Not(BeEmpty()))
 
-	secondSubject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[1], cleaner)
+	secondSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[1], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(secondSubject).To(Not(BeEmpty()))
 
@@ -610,7 +610,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 
 	// Verify that the nats subscriptions for first subject was not re-created
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, firstSubject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, firstSubject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -643,7 +643,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 // it should not affect the NATS subscriptions of other Kyma subscriptions
 func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -661,7 +661,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
 	// // ###### Test logic ######
 	// Create two subscriptions with single filter
@@ -702,7 +702,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	// get new cleaned subject from subscription 1
-	newSubject, err := ecnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	newSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(newSubject).To(Not(BeEmpty()))
 
@@ -713,7 +713,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync for subscription 1
 	// because the subscriptions should have being re-created for new subject
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub, newSubject, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub, newSubject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -726,7 +726,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	}
 
 	// get cleaned subject for subscription 2
-	cleanSubjectSub2, err := ecnats.GetCleanSubject(sub2.Spec.Filter.Filters[0], cleaner)
+	cleanSubjectSub2, err := backendnats.GetCleanSubject(sub2.Spec.Filter.Filters[0], cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(cleanSubjectSub2).To(Not(BeEmpty()))
 
@@ -734,7 +734,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	// because the subscriptions should NOT have being re-created as
 	// subscription 2 was not modified
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[ecnats.CreateKey(sub2, cleanSubjectSub2, i)]
+		natsSub := natsBackend.subscriptions[backendnats.CreateKey(sub2, cleanSubjectSub2, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
@@ -755,7 +755,7 @@ func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	// create subscription 1 and its nats subscription
 	cleanSubject1 := "subOne"
 	sub1 := eventingtesting.NewSubscription(cleanSubject1, "foo", eventingtesting.WithNotCleanFilter())
-	natsSub1Key := ecnats.CreateKey(sub1, cleanSubject1, 0)
+	natsSub1Key := backendnats.CreateKey(sub1, cleanSubject1, 0)
 	natsSub1 := &nats.Subscription{
 		Subject: cleanSubject1,
 	}
@@ -763,26 +763,26 @@ func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	// create subscription 2 and its nats subscription
 	cleanSubject2 := "subOneTwo"
 	sub2 := eventingtesting.NewSubscription(cleanSubject2, "foo", eventingtesting.WithNotCleanFilter())
-	natsSub2Key := ecnats.CreateKey(sub2, cleanSubject2, 0)
+	natsSub2Key := backendnats.CreateKey(sub2, cleanSubject2, 0)
 	natsSub2 := &nats.Subscription{
 		Subject: cleanSubject2,
 	}
 
 	// // ###### Test logic ######
 	// Should return true because natsSub1 is associated with sub1
-	g.Expect(ecnats.IsNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub1)).To(Equal(true))
+	g.Expect(backendnats.IsNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub1)).To(Equal(true))
 	// Should return true because natsSub2 is associated with sub2
-	g.Expect(ecnats.IsNatsSubAssociatedWithKymaSub(natsSub2Key, natsSub2, sub2)).To(Equal(true))
+	g.Expect(backendnats.IsNatsSubAssociatedWithKymaSub(natsSub2Key, natsSub2, sub2)).To(Equal(true))
 
 	// Should return false because natsSub1 is NOT associated with sub2
-	g.Expect(ecnats.IsNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub2)).To(Equal(false))
+	g.Expect(backendnats.IsNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub2)).To(Equal(false))
 	// Should return false because natsSub2 is NOT associated with sub1
-	g.Expect(ecnats.IsNatsSubAssociatedWithKymaSub(natsSub2Key, natsSub2, sub1)).To(Equal(false))
+	g.Expect(backendnats.IsNatsSubAssociatedWithKymaSub(natsSub2Key, natsSub2, sub1)).To(Equal(false))
 }
 
 func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -800,7 +800,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
 	// Create 3 subscriptions having the same sink and the same event type
 	var subs [3]*eventingv1alpha1.Subscription
@@ -839,7 +839,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 
 func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -877,7 +877,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 
 func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -890,7 +890,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, metrics.NewCollector(), defaultLogger)
 	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo",
@@ -905,7 +905,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	filter := sub.Spec.Filter.Filters[0]
-	subject, err := ecnats.GetCleanSubject(filter, cleaner)
+	subject, err := backendnats.GetCleanSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
@@ -913,7 +913,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	var key string
 	var natsSub *nats.Subscription
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		key = ecnats.CreateKey(sub, subject, i)
+		key = backendnats.CreateKey(sub, subject, i)
 		natsSub = natsBackend.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
@@ -930,7 +930,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
-		key = ecnats.CreateKey(sub, subject, i)
+		key = backendnats.CreateKey(sub, subject, i)
 		natsSub = natsBackend.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
@@ -943,7 +943,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 func TestIsValidSubscription(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -961,7 +961,7 @@ func TestIsValidSubscription(t *testing.T) {
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	sub := eventingtesting.NewSubscription("sub", "foo",
 		eventingtesting.WithOrderCreatedFilter(),
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
@@ -972,7 +972,7 @@ func TestIsValidSubscription(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	filter := sub.Spec.Filter.Filters[0]
-	subject, err := ecnats.GetCleanSubject(filter, cleaner)
+	subject, err := backendnats.GetCleanSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
@@ -980,13 +980,13 @@ func TestIsValidSubscription(t *testing.T) {
 	var key string
 	var natsSub *nats.Subscription
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-		key = ecnats.CreateKey(sub, subject, i)
+		key = backendnats.CreateKey(sub, subject, i)
 		g.Expect(key).To(Not(BeEmpty()))
 		natsSub = natsBackend.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))
 	}
 	// check the mapping of Kyma subscription and Nats subscription
-	nsn := ecnats.CreateKymaSubscriptionNamespacedName(key, natsSub)
+	nsn := backendnats.CreateKymaSubscriptionNamespacedName(key, natsSub)
 	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
 	g.Expect(nsn.Name).To(BeIdenticalTo(sub.Name))
 	// the associated NATS subscription should be valid
@@ -1005,7 +1005,7 @@ func TestIsValidSubscription(t *testing.T) {
 	invalidNsn = natsBackend.GetInvalidSubscriptions()
 	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(defaultSubsConfig.MaxInFlightMessages))
 	// restart NATS server
-	newNatsServer, _, err := testing2.StartNATSServer()
+	newNatsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer newNatsServer.Shutdown()
 	// check that only one invalid subscription still exist, the controller is not running...
@@ -1017,7 +1017,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
 	defaultLogger := getLogger(g, kymalogger.INFO)
 
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 
@@ -1041,7 +1041,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	sub := eventingtesting.NewSubscription("sub", "foo",
 		eventingtesting.WithOrderCreatedFilter(),
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
@@ -1067,7 +1067,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
 	defaultLogger := getLogger(g, kymalogger.INFO)
 
-	natsServer, _, err := testing2.StartNATSServer()
+	natsServer, _, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 
@@ -1096,7 +1096,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber.InternalErrorURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	addCleanEventTypesToStatus(subscription, cleaner)
 	err = natsBackend.SyncSubscription(subscription)
 	g.Expect(err).To(BeNil())
@@ -1112,7 +1112,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 
 func TestSubscription_NATSServerRestart(t *testing.T) {
 	g := NewWithT(t)
-	natsServer, natsPort, err := testing2.StartNATSServer()
+	natsServer, natsPort, err := natstesting.StartNATSServer()
 	g.Expect(err).To(BeNil())
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
@@ -1136,7 +1136,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	cleaner := ecnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	cleaner := backendnats.CreateEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
 	err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
@@ -1163,7 +1163,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 }
 
 func addCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) {
-	sub.Status.CleanEventTypes, _ = ecnats.GetCleanSubjects(sub, cleaner)
+	sub.Status.CleanEventTypes, _ = backendnats.GetCleanSubjects(sub, cleaner)
 }
 
 func getLogger(g *GomegaWithT, level kymalogger.Level) *logger.Logger { //nolint:unparam

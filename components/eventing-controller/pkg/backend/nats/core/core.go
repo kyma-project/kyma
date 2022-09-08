@@ -5,14 +5,6 @@ import (
 	"net/http"
 	"sync"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	ecnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
-
-	"k8s.io/apimachinery/pkg/types"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2context "github.com/cloudevents/sdk-go/v2/context"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -20,10 +12,15 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 // compile time check
@@ -38,7 +35,7 @@ type NatsBackend interface {
 	// Initialize connects and initializes the NATS backend.
 	// connCloseHandler can be used to register a handler that gets called when connection
 	// to the NATS server is closed and retry attempts are exceeded.
-	Initialize(connCloseHandler ecnats.ConnClosedHandler) error
+	Initialize(connCloseHandler backendnats.ConnClosedHandler) error
 
 	// SyncSubscription synchronizes the Kyma Subscription on the NATS backend.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -55,11 +52,11 @@ type Nats struct {
 	connection        *nats.Conn
 	subscriptions     map[string]*nats.Subscription
 	sinks             sync.Map
-	connClosedHandler ecnats.ConnClosedHandler
-	metricsCollector  *pkgmetrics.Collector
+	connClosedHandler backendnats.ConnClosedHandler
+	metricsCollector  *backendmetrics.Collector
 }
 
-func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *Nats {
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *Nats {
 	return &Nats{
 		Config:            config,
 		defaultSubsConfig: subsConfig,
@@ -70,7 +67,7 @@ func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, me
 }
 
 // Initialize creates a connection to NATS.
-func (n *Nats) Initialize(connCloseHandler ecnats.ConnClosedHandler) (err error) {
+func (n *Nats) Initialize(connCloseHandler backendnats.ConnClosedHandler) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
 		natsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -116,7 +113,7 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
-	subKeyPrefix := ecnats.CreateKeyPrefix(sub)
+	subKeyPrefix := backendnats.CreateKeyPrefix(sub)
 
 	err := n.cleanupNATSSubscriptions(sub, log)
 	if err != nil {
@@ -150,8 +147,8 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 func (n *Nats) createSubscriberPerMaxInFlight(sub *eventingv1alpha1.Subscription, subject string, log *zap.SugaredLogger, callback nats.MsgHandler) error {
 	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
 		// queueGroupName must be unique for each subscription and subject
-		queueGroupName := ecnats.CreateKeyPrefix(sub) + string(types.Separator) + subject
-		natsSubKey := ecnats.CreateKey(sub, subject, i)
+		queueGroupName := backendnats.CreateKeyPrefix(sub) + string(types.Separator) + subject
+		natsSubKey := backendnats.CreateKey(sub, subject, i)
 
 		// check if the subscription already exists and if it is valid.
 		if existingNatsSub, ok := n.subscriptions[natsSubKey]; ok {
@@ -183,7 +180,7 @@ func (n *Nats) cleanupNATSSubscriptions(sub *eventingv1alpha1.Subscription, log 
 	// which is not anymore in this subscription filters (i.e. cleanSubjects).
 	// e.g. when filters are modified.
 	for key, s := range n.subscriptions {
-		if ecnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.Subject) {
+		if backendnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.Subject) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return err
 			}
@@ -199,7 +196,7 @@ func (n *Nats) cleanupNATSSubscriptions(sub *eventingv1alpha1.Subscription, log 
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
-	subKeyPrefix := ecnats.CreateKeyPrefix(sub)
+	subKeyPrefix := backendnats.CreateKeyPrefix(sub)
 	for key, s := range n.subscriptions {
 		// format logger
 		log := n.namedLogger().With(
@@ -211,7 +208,7 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 			"subject", s.Subject,
 		)
 
-		if ecnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) {
+		if backendnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return err
 			}
@@ -228,7 +225,7 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	for k, v := range n.subscriptions {
 		if !v.IsValid() {
 			n.namedLogger().Debugw("Invalid NATS subscription", "key", k, "subject", v.Subject)
-			nsn = append(nsn, ecnats.CreateKymaSubscriptionNamespacedName(k, v))
+			nsn = append(nsn, backendnats.CreateKymaSubscriptionNamespacedName(k, v))
 		}
 	}
 	return &nsn
@@ -276,7 +273,7 @@ func (n *Nats) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandle
 			return
 		}
 
-		ce, err := ecnats.ConvertMsgToCE(msg)
+		ce, err := backendnats.ConvertMsgToCE(msg)
 		if err != nil {
 			n.namedLogger().Errorw("Failed to convert NATS message to CloudEvent", "error", err)
 			return

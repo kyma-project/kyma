@@ -5,7 +5,7 @@ import (
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 )
 
 func BeValidSubscription() gomegatypes.GomegaMatcher {

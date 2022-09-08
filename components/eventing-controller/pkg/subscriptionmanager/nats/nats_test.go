@@ -6,25 +6,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	nats2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/onsi/gomega"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
-
-	"github.com/onsi/gomega"
-
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -95,7 +90,7 @@ func TestCleanup(t *testing.T) {
 	cleaner := func(et string) (string, error) {
 		return et, nil
 	}
-	testSub.Status.CleanEventTypes, _ = nats2.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
+	testSub.Status.CleanEventTypes, _ = backendnats.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
 
 	// Create NATS subscription
 	err = natsSubMgr.Backend.SyncSubscription(testSub)

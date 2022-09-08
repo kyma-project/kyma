@@ -19,12 +19,12 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/jetstream"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -48,14 +48,14 @@ type SubscriptionManager struct {
 	envCfg           env.NatsConfig
 	restCfg          *rest.Config
 	metricsAddr      string
-	metricsCollector *pkgmetrics.Collector
+	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
 	backend          natsjetstream.Backend
 	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:           natsConfig,
 		restCfg:          restCfg,

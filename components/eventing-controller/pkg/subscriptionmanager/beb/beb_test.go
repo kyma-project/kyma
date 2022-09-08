@@ -9,9 +9,9 @@ import (
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"

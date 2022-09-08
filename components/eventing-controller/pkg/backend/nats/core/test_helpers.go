@@ -1,4 +1,4 @@
-package jetstream
+package core
 
 import (
 	"bytes"
@@ -6,33 +6,33 @@ import (
 	"net/http"
 	"time"
 
-	nats2 "github.com/cloudevents/sdk-go/protocol/nats/v2"
-	v2 "github.com/cloudevents/sdk-go/v2"
+	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
+	ce "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
-	testing2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/testing"
-	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
-func SendEventToJetStream(jsClient *JetStream, data string) error {
+func SendEventToNATS(natsClient *Nats, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
-	eventType := evtesting.OrderCreatedEventType
+	eventType := eventingtesting.OrderCreatedEventType
 	eventTime := time.Now().Format(time.RFC3339)
-	sampleEvent := testing2.NewNatsMessagePayload(data, "id", evtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.GetJetstreamSubject(eventType), []byte(sampleEvent))
+	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
+	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 }
 
-func SendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string) error {
+func SendEventToNATSOnEventType(natsClient *Nats, eventType string, data string) error {
 	eventTime := time.Now().Format(time.RFC3339)
-	sampleEvent := testing2.NewNatsMessagePayload(data, "id", evtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.GetJetstreamSubject(eventType), []byte(sampleEvent))
+	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
+	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 }
 
-func SendBinaryCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData string) error {
+func SendBinaryCloudEventToNATS(natsClient *Nats, subject, eventData string) error {
 	// create a CE binary-mode http request
-	headers := evtesting.GetBinaryMessageHeaders()
+	headers := eventingtesting.GetBinaryMessageHeaders()
 	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(eventData)))
 	if err != nil {
 		return err
@@ -53,13 +53,13 @@ func SendBinaryCloudEventToJetStream(jetStreamClient *JetStream, subject, eventD
 		return err
 	}
 	// get a CE sender for the embedded NATS using CE-SDK
-	natsOpts := nats2.NatsOptions()
-	url := jetStreamClient.Config.URL
-	sender, err := nats2.NewSender(url, subject, natsOpts)
+	natsOpts := cenats.NatsOptions()
+	url := natsClient.Config.URL
+	sender, err := cenats.NewSender(url, subject, natsOpts)
 	if err != nil {
 		return nil
 	}
-	client, err := v2.NewClient(sender)
+	client, err := ce.NewClient(sender)
 	if err != nil {
 		return err
 	}
@@ -71,9 +71,9 @@ func SendBinaryCloudEventToJetStream(jetStreamClient *JetStream, subject, eventD
 	return nil
 }
 
-func SendStructuredCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData string) error {
+func SendStructuredCloudEventToNATS(natsClient *Nats, subject, eventData string) error {
 	// create a CE structured-mode http request
-	headers := evtesting.GetStructuredMessageHeaders()
+	headers := eventingtesting.GetStructuredMessageHeaders()
 	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(eventData)))
 	if err != nil {
 		return err
@@ -94,13 +94,13 @@ func SendStructuredCloudEventToJetStream(jetStreamClient *JetStream, subject, ev
 		return err
 	}
 	// get a CE sender for the embedded NATS
-	natsOpts := nats2.NatsOptions()
-	url := jetStreamClient.Config.URL
-	sender, err := nats2.NewSender(url, subject, natsOpts)
+	natsOpts := cenats.NatsOptions()
+	url := natsClient.Config.URL
+	sender, err := cenats.NewSender(url, subject, natsOpts)
 	if err != nil {
 		return nil
 	}
-	client, err := v2.NewClient(sender)
+	client, err := ce.NewClient(sender)
 	if err != nil {
 		return err
 	}

@@ -23,13 +23,13 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-	utils2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -435,7 +435,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 	r := Reconciler{
-		nameMapper: utils2.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 	}
 
 	for _, tc := range testCases {
@@ -538,7 +538,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: utils2.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 		logger:     logger,
 	}
 
@@ -919,7 +919,7 @@ type testEnvironment struct {
 	recorder    *record.FakeRecorder
 	cfg         env.Config
 	credentials *beb.OAuth2ClientCredentials
-	mapper      utils2.NameMapper
+	mapper      backendutils.NameMapper
 	cleaner     eventtype.Cleaner
 }
 
@@ -934,7 +934,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 	}
 	emptyConfig := env.Config{}
 	credentials := &beb.OAuth2ClientCredentials{}
-	nameMapper := utils2.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength)
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength)
 	cleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
 
 	return &testEnvironment{

@@ -4,14 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats/core"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -21,13 +15,15 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
+	subscriptionnats "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
@@ -53,7 +49,7 @@ type SubscriptionManager struct {
 	envCfg           env.NatsConfig
 	restCfg          *rest.Config
 	metricsAddr      string
-	metricsCollector *pkgmetrics.Collector
+	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
 	backend          core.NatsBackend
 	logger           *logger.Logger
@@ -61,7 +57,7 @@ type SubscriptionManager struct {
 
 // NewSubscriptionManager creates the subscription manager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:           natsConfig,
 		restCfg:          restCfg,
@@ -91,7 +87,7 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	natsHandler := core.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
-	natsReconciler := subscription.NewReconciler(
+	natsReconciler := subscriptionnats.NewReconciler(
 		ctx,
 		client,
 		natsHandler,

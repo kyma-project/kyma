@@ -22,11 +22,11 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	handlersbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -56,7 +56,7 @@ type SubscriptionManager struct {
 	metricsAddr  string
 	resyncPeriod time.Duration
 	mgr          manager.Manager
-	backend      handlersbeb.Backend
+	backend      backendbeb.Backend
 	logger       *logger.Logger
 }
 
@@ -96,11 +96,11 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 
 	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlersbeb.MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), backendbeb.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
-		"maxNameLength", handlersbeb.MaxBEBSubscriptionNameLength)
-	bebHandler := handlersbeb.NewBEB(oauth2credential, nameMapper, c.logger)
+		"maxNameLength", backendbeb.MaxBEBSubscriptionNameLength)
+	bebHandler := backendbeb.NewBEB(oauth2credential, nameMapper, c.logger)
 
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
@@ -163,13 +163,13 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 }
 
 // cleanup removes all created BEB artifacts.
-func cleanup(backend handlersbeb.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend backendbeb.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var bebBackend *handlersbeb.BEB
+	var bebBackend *backendbeb.BEB
 	var ok bool
-	if bebBackend, ok = backend.(*handlersbeb.BEB); !ok {
+	if bebBackend, ok = backend.(*backendbeb.BEB); !ok {
 		err := errors.New("convert backend handler to BEB handler failed")
 		logger.Errorw("No BEB backend exists", "error", err)
 		return err
@@ -217,7 +217,7 @@ func cleanup(backend handlersbeb.Backend, dynamicClient dynamic.Interface, logge
 	return nil
 }
 
-func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlersbeb.OAuth2ClientCredentials, error) {
+func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*backendbeb.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
 	id, ok := val.([]byte)
 	if !ok {
@@ -228,7 +228,7 @@ func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlersbeb
 	if !ok {
 		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
 	}
-	return &handlersbeb.OAuth2ClientCredentials{
+	return &backendbeb.OAuth2ClientCredentials{
 		ClientID:     string(id),
 		ClientSecret: string(secret),
 	}, nil

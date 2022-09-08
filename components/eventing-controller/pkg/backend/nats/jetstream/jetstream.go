@@ -16,11 +16,10 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	ecnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/nats"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -39,7 +38,7 @@ const (
 
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
-	Initialize(connCloseHandler ecnats.ConnClosedHandler) error
+	Initialize(connCloseHandler backendnats.ConnClosedHandler) error
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of Jetstream.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -96,12 +95,12 @@ type JetStream struct {
 	subscriptions map[SubscriptionSubjectIdentifier]*nats.Subscription
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
-	connClosedHandler ecnats.ConnClosedHandler
+	connClosedHandler backendnats.ConnClosedHandler
 	logger            *logger.Logger
-	metricsCollector  *pkgmetrics.Collector
+	metricsCollector  *backendmetrics.Collector
 }
 
-func NewJetStream(config env.NatsConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
@@ -129,7 +128,7 @@ func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
 	return nil
 }
 
-func (js *JetStream) Initialize(connCloseHandler ecnats.ConnClosedHandler) error {
+func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
@@ -147,7 +146,7 @@ func (js *JetStream) Initialize(connCloseHandler ecnats.ConnClosedHandler) error
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
 	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
-	subKeyPrefix := ecnats.CreateKeyPrefix(subscription)
+	subKeyPrefix := backendnats.CreateKeyPrefix(subscription)
 	if err := js.checkJetStreamConnection(log); err != nil {
 		return err
 	}
@@ -199,7 +198,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	}
 
 	// delete subscription sink info from storage
-	js.sinks.Delete(ecnats.CreateKeyPrefix(subscription))
+	js.sinks.Delete(backendnats.CreateKeyPrefix(subscription))
 
 	return nil
 }
@@ -241,7 +240,7 @@ func (js *JetStream) handleReconnect(_ *nats.Conn) {
 	}
 }
 
-func (js *JetStream) initNATSConn(connCloseHandler ecnats.ConnClosedHandler) error {
+func (js *JetStream) initNATSConn(connCloseHandler backendnats.ConnClosedHandler) error {
 	if js.conn == nil || js.conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -450,7 +449,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := ecnats.ConvertMsgToCE(msg)
+		ce, err := backendnats.ConvertMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return
@@ -490,7 +489,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
 // have the same namespaced name, otherwise returns false.
 func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription) bool {
-	return ecnats.CreateKeyPrefix(subscription) == jsSubKey.NamespacedName()
+	return backendnats.CreateKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
 // deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db.
