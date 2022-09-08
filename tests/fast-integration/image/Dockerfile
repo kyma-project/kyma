@@ -24,4 +24,10 @@ WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
 RUN chmod +x /clone-and-run-fit.sh
 
+RUN addgroup -g 10001 runner \
+    && adduser -u 10001 -G runner -s /bin/sh -D runner \
+    && mkdir /kyma \
+    && chown -R runner:runner /kyma
+USER 10001
+
 CMD ["./clone-and-run-fit.sh"]
