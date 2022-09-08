@@ -532,7 +532,7 @@ Currently there are the following limitations for LogPipelines that are served b
 
 ### Unsupported Mode
 
-If you use a `custom` filter or output, you directly access the API of the underlying Fluent Bit configuration. Because Kyma cannot test every feature provided by Fluent Bit, a LogPipeline using custom filters or outputs runs in `unsupported mode`. Also, Kyma cannot guarantee full compatibility over subsequent releases.
+The `unsupportedMode` attribute of a `LogPipeline` indicates that you are using a `custom` filter and/or output. The Kyma Team is not providing support for a custom configuration.
 
 ### Fluent Bit plugins
 
