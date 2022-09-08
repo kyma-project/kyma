@@ -28,7 +28,7 @@ func initExporterAndRecordMetrics(path string) {
 		panic(err)
 	}
 
-	exp := NewExporter(path, "telemetry_fsbuffer_usage_bytes", exporterLogger)
+	exp := NewExporter(path, "test_metric", exporterLogger)
 	exporterLogger.WithContext().Info("Exporter is initialized")
 
 	exp.RecordMetrics(5)
@@ -73,9 +73,9 @@ func prepareMockDirectories(testDir string) (string, error) {
 		return "", err
 	}
 
-	emitters := []string{"emitter1", "emitter2", "emitter3"}
-	for i, emitterName := range emitters {
-		err = prepareMockDirectory(dirPath, emitterName, int64(i*100))
+	directories := []string{"dir1", "dir2", "dir3"}
+	for i, dirName := range directories {
+		err = prepareMockDirectory(dirPath, dirName, int64(i*100))
 		if err != nil {
 			return "", err
 		}
@@ -119,9 +119,9 @@ func TestListDir(t *testing.T) {
 	assert.NoError(t, errDirs)
 
 	expectedDirectories := []directory{
-		{name: "emitter1", size: int64(0)},
-		{name: "emitter2", size: int64(100)},
-		{name: "emitter3", size: int64(200)},
+		{name: "dir1", size: int64(0)},
+		{name: "dir2", size: int64(100)},
+		{name: "dir3", size: int64(200)},
 	}
 
 	directories, err := listDirs(dirPath)
@@ -163,18 +163,18 @@ func TestRecordMetric(t *testing.T) {
 	initialMetrics, err := getMetrics(2021)
 	require.NoError(t, err)
 
-	emitters, err := os.ReadDir(dirPath)
+	directories, err := os.ReadDir(dirPath)
 	require.NoError(t, err)
-	emitterMetricInitialValue, prs := initialMetrics["telemetry_fsbuffer_usage_bytes{directory=\""+emitters[0].Name()+"\"}"]
+	emitterMetricInitialValue, prs := initialMetrics["test_metric{directory=\""+directories[0].Name()+"\"}"]
 	require.True(t, prs)
 
-	err = writeMockFileToDirectory(dirPath+"/"+emitters[0].Name(), "main_test.txt", 500)
+	err = writeMockFileToDirectory(dirPath+"/"+directories[0].Name(), "main_test.txt", 500)
 	require.NoError(t, err)
 	time.Sleep(10 * time.Second)
 
 	metrics, err := getMetrics(2021)
 	require.NoError(t, err)
-	emitterMetricValue, prs := metrics["telemetry_fsbuffer_usage_bytes{directory=\""+emitters[0].Name()+"\"}"]
+	emitterMetricValue, prs := metrics["test_metric{directory=\""+directories[0].Name()+"\"}"]
 	require.True(t, prs)
 
 	require.NotEqual(t, emitterMetricInitialValue, emitterMetricValue)

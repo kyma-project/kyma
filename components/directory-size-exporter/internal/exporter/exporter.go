@@ -15,9 +15,9 @@ type Exporter interface {
 }
 
 type exporter struct {
-	FsBuffeLabelsVector *prometheus.GaugeVec
-	LogPath             string
-	Logger              *logger.Logger
+	DirectoriesLabelsVector *prometheus.GaugeVec
+	LogPath                 string
+	Logger                  *logger.Logger
 }
 
 type directory struct {
@@ -25,18 +25,18 @@ type directory struct {
 	size int64
 }
 
-func NewExporter(dataPath string, dirsSizeMetricName string, logger *logger.Logger) Exporter {
+func NewExporter(dataPath string, metricName string, logger *logger.Logger) Exporter {
 	metricsGague := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "",
 		Subsystem: "",
-		Name:      dirsSizeMetricName,
-		Help:      "Disk size for different emitters",
+		Name:      metricName,
+		Help:      "Folder sizes of sub-directories",
 	}, []string{"directory"})
 
 	return &exporter{
-		FsBuffeLabelsVector: metricsGague,
-		LogPath:             dataPath,
-		Logger:              logger,
+		DirectoriesLabelsVector: metricsGague,
+		LogPath:                 dataPath,
+		Logger:                  logger,
 	}
 }
 
@@ -62,7 +62,7 @@ func (v *exporter) recordingIteration(logPath string) {
 		v.Logger.WithContext().Error(errDirList)
 	}
 	for _, dir := range directories {
-		v.FsBuffeLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
+		v.DirectoriesLabelsVector.WithLabelValues(dir.name).Set(float64(dir.size))
 	}
 }
 
