@@ -51,7 +51,7 @@ type SubscriptionManager struct {
 	metricsAddr      string
 	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
-	backend          core.NatsBackend
+	backend          core.Backend
 	logger           *logger.Logger
 }
 
@@ -116,7 +116,7 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all NATS artifacts.
-func cleanup(backend core.NatsBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend core.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

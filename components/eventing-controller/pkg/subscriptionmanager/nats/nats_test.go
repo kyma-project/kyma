@@ -25,7 +25,7 @@ import (
 
 type natsSubMgrMock struct {
 	Client  dynamic.Interface
-	Backend core.NatsBackend
+	Backend core.Backend
 }
 
 func (c *natsSubMgrMock) Init(_ manager.Manager) error {

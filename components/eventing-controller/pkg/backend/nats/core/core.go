@@ -24,14 +24,14 @@ import (
 )
 
 // compile time check
-var _ NatsBackend = &Nats{}
+var _ Backend = &Nats{}
 
 const (
 	backoffStrategy = cev2context.BackoffStrategyConstant
 	natsHandlerName = "nats-handler"
 )
 
-type NatsBackend interface {
+type Backend interface {
 	// Initialize connects and initializes the NATS backend.
 	// connCloseHandler can be used to register a handler that gets called when connection
 	// to the NATS server is closed and retry attempts are exceeded.

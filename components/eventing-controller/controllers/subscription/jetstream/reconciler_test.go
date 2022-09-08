@@ -815,8 +815,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 
 // getSubscriptionFromJetStream returns a NATS subscription for a given subscription and subject.
 // NOTE: We need to give the controller enough time to react on the changes. Otherwise, the returned NATS subscription could have the wrong state.
-//
-//	For this reason Eventually is used here.
+// For this reason Eventually is used here.
 func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 

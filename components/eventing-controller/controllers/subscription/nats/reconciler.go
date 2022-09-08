@@ -33,7 +33,7 @@ import (
 type Reconciler struct {
 	client.Client
 	ctx              context.Context
-	Backend          core.NatsBackend
+	Backend          core.Backend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	subsConfig       env.DefaultSubscriptionConfig
@@ -49,7 +49,7 @@ const (
 	reconcilerName        = "nats-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, natsHandler core.NatsBackend, cleaner eventtype.Cleaner,
+func NewReconciler(ctx context.Context, client client.Client, natsHandler core.Backend, cleaner eventtype.Cleaner,
 	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
