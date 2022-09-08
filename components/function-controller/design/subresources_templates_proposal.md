@@ -31,7 +31,7 @@ The proposal doesn't include removing or moving any existing specification field
 
 ## Design details
 
-Currently, we expose the following _relevant_ high level Spec fields:
+Currently, we expose the following _relevant_ high-level specification fields:
 - `Env`
 - `ResourceConfiguration`
 - `ScaleConfig`
