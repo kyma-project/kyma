@@ -477,7 +477,7 @@ func (js *JetStream) getConsumerConfig(subscription *eventingv1alpha1.Subscripti
 	return &nats.ConsumerConfig{
 		Durable:        jsSubKey.ConsumerName(),
 		Description:    jsSubKey.namespacedSubjectName,
-		DeliverPolicy:  nats.DeliverNewPolicy,
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.Config.JSConsumerDeliverPolicy),
 		FlowControl:    true,
 		MaxAckPending:  subscription.Status.Config.MaxInFlightMessages,
 		AckPolicy:      nats.AckExplicitPolicy,
