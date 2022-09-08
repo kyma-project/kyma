@@ -16,7 +16,7 @@ Give Serverless users the ability to:
 ### Goals
 
 - Add more flexibility to the Serverless API.
-- Provide a rollout plan to implement this functionality in small increments and avoid the need to rollout a new API version
+- Provide a rollout plan to implement this functionality in small increments and avoid the need to roll out a new API version
 
 ### Non-Goals
 - Define a new Spec API version
