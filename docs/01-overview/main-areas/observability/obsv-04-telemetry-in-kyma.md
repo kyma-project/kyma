@@ -140,8 +140,10 @@ To avoid problems with such recursive logs, it is recommended that you exclude t
 spec:
   input:
     application:
-      includeSystemNamespaces: true
-      excludeContainers:
+      namespaces:
+        system: true
+      containers:
+        exclude:
         - fluent-bit
 ```
 
