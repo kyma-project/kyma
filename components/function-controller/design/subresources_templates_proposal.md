@@ -42,7 +42,7 @@ The proposed functionality can be implemented by adding the two following fields
 - `RuntimeTemplate`
 - `BuildTemplate`
 
-*Note:* We should decide if we want to the implement this directly under the function Spec or grouped in a Spec field, e.g. `spec.Templates`.
+*Note:* Decide if you want to implement this directly under the Function specification or grouped in a specification field, for example, `spec.Templates`.
 
 Both fields will be of the modified version of the PodTemplateSpec.
 
