@@ -1,4 +1,4 @@
-# Function Subresources Templating for Serverless v1alpha2
+# Function subresources templating for Serverless v1alpha2
 
 ## Summery
 
