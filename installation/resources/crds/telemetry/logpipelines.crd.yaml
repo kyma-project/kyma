@@ -61,6 +61,7 @@ spec:
                   description: Filter describes a Fluent Bit filter configuration
                   properties:
                     custom:
+                      description: "Filter definition in the Fluent Bit syntax. Note: Usage of a `custom` filter will put the LogPipeline in unsupported mode"
                       type: string
                   type: object
                 type: array
@@ -109,9 +110,10 @@ spec:
                 description: Output describes a Fluent Bit output configuration section
                 properties:
                   custom:
+                    description: "Output definition in the Fluent Bit syntax. Note: Usage of a `custom` output will put the LogPipeline in unsupported mode"
                     type: string
                   grafana-loki:
-                    description: LokiOutput describes a Fluent Bit Loki output configuration
+                    description: "Configures an output to the Kyma-internal Loki instance. Note: this output is considered legacy and is only available for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead."
                     properties:
                       labels:
                         additionalProperties:
@@ -140,7 +142,7 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: HttpOutput describes a Fluent Bit HTTP output configuration
+                    description: Configures an HTTP-based output compatible with the FluentBit HTTP output plugin
                     properties:
                       compress:
                         type: string
