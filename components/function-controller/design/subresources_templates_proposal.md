@@ -72,7 +72,7 @@ The proposed changes must not cause any backward compatibility issues with _exis
 
 These fields should not be supported by Kyma CLI or Busola. The implementation is complex, and this advanced feature is not likely to be used through these interfaces. Additionally, it complicates the gradual rollout of the feature.
 
-## Implementation Breakdown
+## Implementation breakdown
 
 As high level breakdown of the required effort, it should be possible to implement and merge the following tasks individually into main. Trying to further breakdown the list would be great.
 
