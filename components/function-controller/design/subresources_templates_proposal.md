@@ -9,7 +9,7 @@ The current v1alpha2 Serverless API supports templating of Function's subresourc
 ## Motivation
 
 Give Serverless users the ability to:
-- Separate configuration for function deployments and build jobs.
+- Separate configuration for Function deployments and build jobs.
 - Configure volume mounts for function subresources
 - Configure sidecars for function deployments (?)
 
