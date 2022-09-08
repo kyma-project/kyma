@@ -23,7 +23,7 @@ Give Serverless users the ability to:
 
 ## Proposal
 
-Use a modified version of [PodTemplateSpec](https://github.com/kubernetes/kubernetes/blob/64ed9145452d2d1d324d2437566f1ea1ce76f226/pkg/apis/core/types.go#L3443) as a base for function build/deployment templates. 
+Use a modified version of [PodTemplateSpec](https://github.com/kubernetes/kubernetes/blob/64ed9145452d2d1d324d2437566f1ea1ce76f226/pkg/apis/core/types.go#L3443) as a base for the Function build and deployment templates. 
 
 A modified version is needed because we need to protect certain parts of the Pod spec (commands and args for the main container in the pod for example).
 
