@@ -62,6 +62,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 		WithLogEnvVars(publisherConfig),
 	)
 }
+
 func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
