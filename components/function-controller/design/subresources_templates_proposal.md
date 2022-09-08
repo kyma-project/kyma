@@ -38,7 +38,7 @@ Currently, we expose the following _relevant_ high-level specification fields:
 - `Replicas`
 - `Template` (Labels and annotations, currently not applied)
 
-The proposed functionality can be implemented by adding the two following fields to the spec:
+The proposed functionality can be implemented by adding the two following fields to the specification:
 - `RuntimeTemplate`
 - `BuildTemplate`
 
