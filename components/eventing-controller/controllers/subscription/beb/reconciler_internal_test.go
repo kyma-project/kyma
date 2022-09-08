@@ -645,12 +645,12 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 		{
 			name: "should replace condition with status true if lastDelivery was okay",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
-				s.Status.InitializeConditions()
-				s.Status.Ready = false
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				sub.Status.InitializeConditions()
+				sub.Status.Ready = false
 
 				// mark ConditionWebhookCallStatus conditions as false
-				s.Status.Conditions = []eventingv1alpha1.Condition{
+				sub.Status.Conditions = []eventingv1alpha1.Condition{
 					{
 						Type:               eventingv1alpha1.ConditionSubscribed,
 						LastTransitionTime: currentTime,
@@ -664,12 +664,12 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				}
 				// set EmsSubscriptionStatus
 				// LastSuccessfulDelivery is latest
-				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return s
+				return sub
 			}(),
 			givenIsSubscribed: true,
 			wantCondition: eventingv1alpha1.Condition{
@@ -826,14 +826,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return error if LastFailedDelivery is invalid",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "",
 					LastFailedDelivery:       "invalid",
 					LastFailedDeliveryReason: "",
 				}
-				return s
+				return sub
 			}(),
 			wantResult: true,
 			wantError:  errors.New(`failed to parse LastFailedDelivery: parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
@@ -841,14 +841,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return error if LastFailedDelivery is valid but LastSuccessfulDelivery is invalid",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "invalid",
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return s
+				return sub
 			}(),
 			wantResult: true,
 			wantError:  errors.New(`failed to parse LastSuccessfulDelivery: parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`),
@@ -856,14 +856,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return true if last delivery of event was failed",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return s
+				return sub
 			}(),
 			wantResult: true,
 			wantError:  nil,
@@ -871,14 +871,14 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		{
 			name: "should return false if last delivery of event was success",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace")
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				s.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
+				sub.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
 				}
-				return s
+				return sub
 			}(),
 			wantResult: false,
 			wantError:  nil,
