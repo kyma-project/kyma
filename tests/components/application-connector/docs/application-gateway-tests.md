@@ -19,14 +19,14 @@
 ## Design and architecture
 
 The tests consist of:
-- [Application CRs](../resources/charts/gateway-test/templates/applications/) describing the test cases
-- [Secrets](../resources/charts/gateway-test/templates/applications/credentials) referenced by the Application CRs
+- [Application CRs](../resources/charts/gateway-test/charts/test/templates/applications/) describing the test cases
+- [Secrets](../resources/charts/gateway-test/charts/test/templates/applications/credentials) referenced by the Application CRs
 - [Test runners](../test/application-gateway/) with various checks for the subsets of cases, grouped by the Application CRs
 - [Mock application](../tools/external-api-mock-app/) which simulates the remote endpoints
 
 Additionally, the following resources are created on the cluster:
-- [Service Account](../resources/charts/gateway-test/templates/service-account.yml) used by the tests to read the Application CRs
-- [Secrets](../resources/charts/gateway-test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
+- [Service Account](../resources/charts/gateway-test/charts/test/templates/service-account.yml) used by the tests to read the Application CRs
+- [Secrets](../resources/charts/gateway-test/charts/test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
 
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
 The test Job and the mock application deployment are in the `test` Namespace.
@@ -70,7 +70,7 @@ To test authentication methods, we have the following API:
 ![8090 authorisation methods API](assets/api-auth-methods-mtls.png)
 
 The credentials used for authentication, such as `clientID`, are [hardcoded](../tools/external-api-mock-app/config.go).
-The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](../resources/charts/gateway-test/templates/target-api-mock/credentials/mtls-cert-secret.yml).
+The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](../resources/charts/gateway-test/charts/test/templates/target-api-mock/credentials/mtls-cert-secret.yml).
 
 > **NOTE:** Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
@@ -78,7 +78,7 @@ The server key, server certificate, and the CA root certificate for port `8090` 
 
 This API is identical to the one exposed on port `8090`.
 The HTTPS server on port `8091` uses an expired server certificate.
-The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](../resources/charts/gateway-test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml).
+The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](../resources/charts/gateway-test/charts/test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml).
 
 > **NOTE:** Port `8091` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
@@ -155,7 +155,7 @@ By default, the tests clean up after themselves, removing all the previously cre
 
 To run the mock application locally, follow these steps:
 
-1. Change all the **targetUrl** values in the [Application CRs](../resources/charts/gateway-test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
+1. Change all the **targetUrl** values in the [Application CRs](../resources/charts/gateway-test/charts/test/templates/applications/) to reflect the new application URL. For example, `http://localhost:8081/v1/api/unsecure/ok`.
 2. Change all the **centralGatewayUrl** values to reflect the new Application Gateway URL. For example, `http://localhost:8080/positive-authorisation/unsecure-always-ok`.
 3. Deploy all the resources on the cluster.
    > **NOTE:** You can omit the test Job and the Central Gateway, but it's easier to just let them fail.

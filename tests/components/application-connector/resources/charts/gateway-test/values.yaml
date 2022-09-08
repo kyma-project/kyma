@@ -1,10 +1,11 @@
-serviceAccountName: "test-account"
-namespace: "test"
+global:
+  serviceAccountName: "test-account"
+  namespace: "test"
 
-mockServiceName: "mock-application"
+  mockServiceName: "mock-application"
 
-containerRegistry:
-  path: "eu.gcr.io/kyma-project"
+  containerRegistry:
+    path: "eu.gcr.io/kyma-project"
 
 images:
   gatewayTest:

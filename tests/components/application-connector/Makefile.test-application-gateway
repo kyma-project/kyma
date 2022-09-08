@@ -31,17 +31,21 @@ test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resource
 	./scripts/check-pod-logs.sh application-gateway-test; \
 
 create-resources:
-	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled
 
-	helm template resources/charts/gateway-test \
+    helm template resources/charts/gateway-test/charts/echoserver \
+    	--set global.namespace=$(NAMESPACE) \
+    | kubectl apply -f -
+    kubectl rollout status deployment echoserver -n test --timeout=90s
+
+	helm template resources/charts/gateway-test/charts/test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
     | kubectl apply -f -
 
 clean-gateway-test:
-	helm template resources/charts/gateway-test  | kubectl delete -f -
+	helm template resources/charts/gateway-test --set namespace=$(NAMESPACE) | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
 
 disable-sidecar-for-mtls-test:
@@ -52,7 +56,7 @@ enable-sidecar-after-mtls-test:
 	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
 generate-certs:
-	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
-	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
+	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/charts/test/certs/positive
+	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/charts/test/certs/negative
 
 
