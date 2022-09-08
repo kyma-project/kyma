@@ -30,7 +30,7 @@ func main() {
 	flag.StringVar(&port, "port", "2021", "Port for exposing the metrics")
 	flag.IntVar(&interval, "interval", 30, "Interval to calculate the metric ")
 
-	flag.Parse()
+	
 
 	flag.Parse()
 	if err := validateFlags(); err != nil {
