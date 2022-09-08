@@ -25,7 +25,7 @@ Give Serverless users the ability to:
 
 Use a modified version of [PodTemplateSpec](https://github.com/kubernetes/kubernetes/blob/64ed9145452d2d1d324d2437566f1ea1ce76f226/pkg/apis/core/types.go#L3443) as a base for the Function build and deployment templates. 
 
-A modified version is needed because we need to protect certain parts of the Pod spec (commands and args for the main container in the pod for example).
+A modified version is needed because we need to protect certain parts of the Pod specification, for example, commands and arguments for the main container in the Pod.
 
 The proposal doesn't include removing or moving any existing Spec fields and only adds non-breaking changes to the Spec. This ensure that there is no need to rollout a new API version and ensure backward compatibility with released v1alpha2 Spec/API.
 
