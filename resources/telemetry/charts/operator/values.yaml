@@ -59,6 +59,7 @@ service:
   portName: http-metrics
 
 webhook:
+  timeout: 15
   service:
     port: 443
     protocol: TCP
