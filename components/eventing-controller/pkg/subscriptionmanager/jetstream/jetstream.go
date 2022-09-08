@@ -50,9 +50,9 @@ type SubscriptionManager struct {
 	restCfg          *rest.Config
 	metricsAddr      string
 	metricsCollector *backendmetrics.Collector
-	mgr     manager.Manager
-	backend backendjetstream.Backend
-	logger  *logger.Logger
+	mgr              manager.Manager
+	backend          backendjetstream.Backend
+	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
