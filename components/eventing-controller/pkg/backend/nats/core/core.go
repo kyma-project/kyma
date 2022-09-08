@@ -135,9 +135,9 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 			}
 		}
 
-		err2 := n.createSubscriberPerMaxInFlight(sub, subject, log, callback)
-		if err2 != nil {
-			return err2
+		err = n.createSubscriberPerMaxInFlight(sub, subject, log, callback)
+		if err != nil {
+			return err
 		}
 	}
 

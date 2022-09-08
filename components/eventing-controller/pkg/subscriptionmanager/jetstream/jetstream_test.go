@@ -18,7 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
-	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -57,7 +57,7 @@ func TestCleanup(t *testing.T) {
 type TestEnvironment struct {
 	ctx           context.Context
 	dynamicClient dynamic.Interface
-	jsBackend     *natsjetstream.JetStream
+	jsBackend     *backendjetstream.JetStream
 	jsCtx         nats.JetStreamContext
 	natsServer    *server.Server
 	subscriber    *controllertesting.Subscriber
@@ -89,8 +89,8 @@ func getNATSConf(natsURL string) env.NatsConfig {
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         controllertesting.EventTypePrefix,
 		JSStreamName:            controllertesting.EventTypePrefix,
-		JSStreamStorageType:     natsjetstream.StorageTypeMemory,
-		JSStreamRetentionPolicy: natsjetstream.RetentionPolicyInterest,
+		JSStreamStorageType:     backendjetstream.StorageTypeMemory,
+		JSStreamRetentionPolicy: backendjetstream.RetentionPolicyInterest,
 	}
 }
 
@@ -104,7 +104,7 @@ func setUpNATSServer(t *testing.T) *server.Server {
 	return natsServer
 }
 
-func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *natsjetstream.JetStream) *eventingv1alpha1.Subscription {
+func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *backendjetstream.JetStream) *eventingv1alpha1.Subscription {
 	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
 	// create test subscription
 	testSub := controllertesting.NewSubscription(
@@ -139,7 +139,7 @@ func (te *TestEnvironment) testSendingAndReceivingAnEvent() error {
 	}
 
 	// send an event
-	err = natsjetstream.SendEventToJetStream(te.jsBackend, data)
+	err = backendjetstream.SendEventToJetStream(te.jsBackend, data)
 
 	if err != nil {
 		return err
@@ -176,7 +176,7 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 	metricsCollector := metrics.NewCollector()
 
 	// Create an instance of the JetStream Backend
-	jsBackend := natsjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
+	jsBackend := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 
 	// Initialize JetStream Backend
 	err = jsBackend.Initialize(nil)

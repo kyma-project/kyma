@@ -22,7 +22,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -50,9 +50,9 @@ type SubscriptionManager struct {
 	restCfg          *rest.Config
 	metricsAddr      string
 	metricsCollector *backendmetrics.Collector
-	mgr              manager.Manager
-	backend          natsjetstream.Backend
-	logger           *logger.Logger
+	mgr     manager.Manager
+	backend backendjetstream.Backend
+	logger  *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
@@ -82,7 +82,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	client := sm.mgr.GetClient()
 	recorder := sm.mgr.GetEventRecorderFor("eventing-controller-jetstream")
-	jetStreamHandler := natsjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
+	jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
@@ -117,13 +117,13 @@ func (sm *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all JetStream artifacts.
-func cleanup(backend natsjetstream.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend backendjetstream.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var ok bool
-	var jsBackend *natsjetstream.JetStream
-	if jsBackend, ok = backend.(*natsjetstream.JetStream); !ok {
+	var jsBackend *backendjetstream.JetStream
+	if jsBackend, ok = backend.(*backendjetstream.JetStream); !ok {
 		err := errors.New("converting backend handler to JetStream handler failed")
 		return err
 	}

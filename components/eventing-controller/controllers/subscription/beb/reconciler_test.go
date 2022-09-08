@@ -683,7 +683,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Reusing APIRule from Subscription 2")
 			getSubscription(ctx, readySubscription1).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
 
-			By("GetFreePort the reused APIRule (from subscription 2)")
+			By("Get the reused APIRule (from subscription 2)")
 			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(ctx, apiRuleNew).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),

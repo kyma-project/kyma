@@ -26,7 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	natsjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -41,7 +41,7 @@ const (
 
 type jetStreamTestEnsemble struct {
 	reconciler       *subscriptionjetstream.Reconciler
-	jetStreamBackend *natsjetstream.JetStream
+	jetStreamBackend *backendjetstream.JetStream
 	*utils.TestEnsemble
 }
 
@@ -780,7 +780,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	jetStreamHandler := natsjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
+	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
@@ -800,7 +800,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	ens.jetStreamBackend = ens.reconciler.Backend.(*natsjetstream.JetStream)
+	ens.jetStreamBackend = ens.reconciler.Backend.(*backendjetstream.JetStream)
 
 	go func() {
 		err = k8sManager.Start(ctx)
@@ -821,7 +821,7 @@ func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *even
 
 	return g.Eventually(func() *nats.Subscription {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
-		subscriptionSubject := natsjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
+		subscriptionSubject := backendjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
 			if key.ConsumerName() == subscriptionSubject.ConsumerName() {
 				return sub
