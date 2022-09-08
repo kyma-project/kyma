@@ -74,7 +74,7 @@ These fields should not be supported by Kyma CLI or Busola. The implementation i
 
 ## Implementation breakdown
 
-As high level breakdown of the required effort, it should be possible to implement and merge the following tasks individually into main. Trying to further breakdown the list would be great.
+As the high-level breakdown of the required effort, it should be possible to implement and merge the following tasks individually into the main. The list is not complete and additional points can be added.
 
 - Define and implement the modified `PodSpecTemplate` type.
 - Add required defaulting logic to the controller (no changes in reconciliation).
