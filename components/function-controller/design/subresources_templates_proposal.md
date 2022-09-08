@@ -62,7 +62,7 @@ The lower specification fields must have higher precedence over the high-level f
 
 ### Version conversion
 
-The backward compatibility/conversion for these fields into v1alpha1 is not supported as we are moving away from v1alpha1.
+The backward conversion for these fields into v1alpha1 is not supported as we are moving away from v1alpha1.
 
 ### Upgrades and backward compatibility
 
