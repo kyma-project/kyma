@@ -1,5 +1,5 @@
 ---
-title: Customize Function Traces
+title: Customize Function traces
 ---
 
 This tutorial shows how to use the build-in OpenTelemetry tracer object to send custom trace data to the Jaeger service.
@@ -15,7 +15,7 @@ Before you start, make sure you have these tools installed:
 
 ## Steps
 
-Following code samples ilustrate how to enrich the default trace with custom spans, event and tags:
+The following code samples illustrate how to enrich the default trace with custom spans, events, and tags:
 
 1. [Create an inline Function](./svls-01-create-inline-function.md) with the following body:
 
