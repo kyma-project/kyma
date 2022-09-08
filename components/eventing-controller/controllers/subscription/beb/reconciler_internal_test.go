@@ -231,10 +231,10 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "Updating a condition marks the status as changed",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace",
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
 					reconcilertesting.WithNotCleanFilter())
-				s.Status.InitializeConditions()
-				return s
+				sub.Status.InitializeConditions()
+				return sub
 			}(),
 			giveCondition: func() eventingv1alpha1.Condition {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
@@ -245,14 +245,14 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "All conditions true means status is ready",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				s := reconcilertesting.NewSubscription("some-name", "some-namespace",
+				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
 					reconcilertesting.WithNotCleanFilter(),
 					reconcilertesting.WithWebhookAuthForBEB())
-				s.Status.InitializeConditions()
-				s.Status.Ready = false
+				sub.Status.InitializeConditions()
+				sub.Status.Ready = false
 
 				// mark all conditions as true
-				s.Status.Conditions = []eventingv1alpha1.Condition{
+				sub.Status.Conditions = []eventingv1alpha1.Condition{
 					{
 						Type:               eventingv1alpha1.ConditionSubscribed,
 						LastTransitionTime: metav1.Now(),
@@ -264,7 +264,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 						Status:             corev1.ConditionTrue,
 					},
 				}
-				return s
+				return sub
 			}(),
 			giveCondition: func() eventingv1alpha1.Condition {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
@@ -279,12 +279,12 @@ func Test_replaceStatusCondition(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			s := tt.giveSubscription
+			sub := tt.giveSubscription
 			condition := tt.giveCondition
-			statusChanged := r.replaceStatusCondition(s, condition)
+			statusChanged := r.replaceStatusCondition(sub, condition)
 			g.Expect(statusChanged).To(BeEquivalentTo(tt.wantStatusChanged))
-			g.Expect(s.Status.Conditions).To(ContainElement(condition))
-			g.Expect(s.Status.Ready).To(BeEquivalentTo(tt.wantReady))
+			g.Expect(sub.Status.Conditions).To(ContainElement(condition))
+			g.Expect(sub.Status.Ready).To(BeEquivalentTo(tt.wantReady))
 		})
 	}
 }
