@@ -10,7 +10,7 @@ Keep in mind that the Serverless Functions implement the [scale subresource](htt
 
 Before you start, make sure you have these tools installed:
 
-- Kyma installed on a cluster
+- [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) on a cluster
 
 ## Steps
 
