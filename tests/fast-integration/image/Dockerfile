@@ -1,5 +1,6 @@
 FROM node:14.20.0-alpine3.16
 
+ENV KYMA_VERSION=main
 ENV FIT_MAKE_TARGET=ci-skr
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
