@@ -81,7 +81,7 @@ func main() {
 
 	// Init the commander.
 	if err := commander.Init(); err != nil {
-		setupLogger.Fatalw("Commander initialization failed", "error", err)
+		setupLogger.Fatalw("Commander compassruntimeagentinit failed", "error", err)
 	}
 
 	// Start the metrics server.
