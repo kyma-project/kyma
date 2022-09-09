@@ -59,6 +59,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    ```bash
    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # Assuming only one LoadBalancer with external IP
    ```
+   **NOTE:** For some cluster providers you may need to replace the`ip` with the `hostname`, for example, in AWS, set `jsonpath='{.status.loadBalancer.ingress[0].hostname}'`
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -131,7 +132,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        namespace: $NAMESPACE
    EOF
    ```
-   >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate httpbin-cert -n istio-system `
+   >**NOTE:** Run the following command to check the certificate status: `kubectl get certificate httpbin-cert -n istio-system`
 
 5. Create a Gateway CR. Run:
 
