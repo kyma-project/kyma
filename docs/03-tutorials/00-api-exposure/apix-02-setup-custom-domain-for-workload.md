@@ -3,7 +3,7 @@ title: Set up a custom domain for a workload
 ---
 
 This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
-  >**NOTE:** Feel free to skip this tutorial if you use a Kyma domain instead of your custom domain.
+  >**NOTE:** Skip this tutorial if you use a Kyma domain instead of your custom domain.
 
 ## Prerequisites
 
