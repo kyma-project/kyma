@@ -1,4 +1,4 @@
-package handlers
+package beb
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -24,7 +25,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())
 
-	nameMapper := NewBEBSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
+	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
 	beb := NewBEB(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock

@@ -1,4 +1,4 @@
-package handlers
+package beb
 
 import (
 	"errors"
@@ -11,19 +11,20 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
 	bebHandlerName               = "beb-handler"
 	MaxBEBSubscriptionNameLength = 50
-	BEBSubscriptionNameLogKey    = "bebSubscriptionName"
+	SubscriptionNameLogKey       = "bebSubscriptionName"
 	ErrorLogKey                  = "error"
 )
 
@@ -40,13 +41,13 @@ func (e *HTTPStatusError) Is(target error) bool {
 	if !ok {
 		return false
 	}
-	return (e.StatusCode == t.StatusCode)
+	return e.StatusCode == t.StatusCode
 }
 
 // Perform a compile time check.
-var _ BEBBackend = &BEB{}
+var _ Backend = &BEB{}
 
-type BEBBackend interface {
+type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(cfg env.Config) error
 
@@ -63,7 +64,7 @@ type OAuth2ClientCredentials struct {
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *BEB {
+func NewBEB(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper, logger *logger.Logger) *BEB {
 	return &BEB{
 		OAth2credentials: credentials,
 		logger:           logger,
@@ -77,11 +78,11 @@ type BEB struct {
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
 	OAth2credentials *OAuth2ClientCredentials
-	SubNameMapper    NameMapper
+	SubNameMapper    backendutils.NameMapper
 	logger           *logger.Logger
 }
 
-type BEBResponse struct {
+type Response struct {
 	StatusCode int
 	Error      error
 }
@@ -124,13 +125,13 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
+	sEv2, err := backendutils.GetInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription internal view", ErrorLogKey, err)
 		return false, err
 	}
 
-	newEv2Hash, err := getHash(sEv2)
+	newEv2Hash, err := backendutils.GetHash(sEv2)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription hash", ErrorLogKey, err)
 		return false, err
@@ -154,10 +155,10 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("Failed to get BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
+			log.Errorw("Failed to get BEB subscription", SubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
 			httpStatusNotFoundError := HTTPStatusError{StatusCode: http.StatusNotFound}
 			if errors.Is(err, httpStatusNotFoundError) {
-				log.Infow("Recreating BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name)
+				log.Infow("Recreating BEB subscription", SubscriptionNameLogKey, sEv2.Name)
 				bebSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
 				if err != nil {
 					return false, err
@@ -167,8 +168,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			}
 		}
 		// get the internal view for the EMS subscription
-		sEms := getInternalView4Ems(bebSubscription)
-		newEmsHash, err := getHash(sEms)
+		sEms := backendutils.GetInternalView4Ems(bebSubscription)
+		newEmsHash, err := backendutils.GetHash(sEms)
 		if err != nil {
 			log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 			return false, err
@@ -200,7 +201,7 @@ func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) er
 }
 
 func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
-	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
+	log = log.With(SubscriptionNameLogKey, subscription.Name)
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		log.Errorw("Failed to delete BEB subscription", ErrorLogKey, err)
@@ -227,11 +228,11 @@ func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	// get the new hash
-	sEMS := getInternalView4Ems(bebSubscription)
+	sEMS := backendutils.GetInternalView4Ems(bebSubscription)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription internal view", ErrorLogKey, err)
 	}
-	newEmsHash, err := getHash(sEMS)
+	newEmsHash, err := backendutils.GetHash(sEMS)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
 		return nil, 0, err
@@ -247,7 +248,7 @@ func (b *BEB) createAndGetSubscription(subscription *types.Subscription, cleaner
 		return nil, err
 	}
 
-	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
+	log = log.With(SubscriptionNameLogKey, subscription.Name)
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
 		log.Errorw("Failed to create BEB subscription", ErrorLogKey, err)

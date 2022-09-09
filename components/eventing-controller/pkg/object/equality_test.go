@@ -4,17 +4,15 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	corev1 "k8s.io/api/core/v1"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
-	appsv1 "k8s.io/api/apps/v1"
-
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 func TestApiRuleEqual(t *testing.T) {

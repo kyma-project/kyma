@@ -1,4 +1,4 @@
-package handlers
+package jetstream
 
 import (
 	"context"
@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
@@ -21,12 +19,14 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
-var _ JetStreamBackend = &JetStream{}
+var _ Backend = &JetStream{}
 
 const (
 	jsHandlerName          = "jetstream-handler"
@@ -37,9 +37,9 @@ const (
 	separator              = "/"
 )
 
-type JetStreamBackend interface {
+type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
-	Initialize(connCloseHandler ConnClosedHandler) error
+	Initialize(connCloseHandler backendnats.ConnClosedHandler) error
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of Jetstream.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -89,21 +89,21 @@ func computeNamespacedSubjectName(subscription *eventingv1alpha1.Subscription, s
 }
 
 type JetStream struct {
-	config        env.NatsConfig
+	Config        env.NatsConfig
 	conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client
 	subscriptions map[SubscriptionSubjectIdentifier]*nats.Subscription
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
-	connClosedHandler ConnClosedHandler
+	connClosedHandler backendnats.ConnClosedHandler
 	logger            *logger.Logger
-	metricsCollector  *pkgmetrics.Collector
+	metricsCollector  *backendmetrics.Collector
 }
 
-func NewJetStream(config env.NatsConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *JetStream {
 	return &JetStream{
-		config:           config,
+		Config:           config,
 		logger:           logger,
 		subscriptions:    make(map[SubscriptionSubjectIdentifier]*nats.Subscription),
 		metricsCollector: metricsCollector,
@@ -129,7 +129,7 @@ func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
 	return nil
 }
 
-func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
+func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	if err := js.initJSContext(); err != nil {
 		return err
 	}
-	if err := js.initCloudEventClient(js.config); err != nil {
+	if err := js.initCloudEventClient(js.Config); err != nil {
 		return err
 	}
 	return js.ensureStreamExists()
@@ -147,7 +147,7 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
 	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
-	subKeyPrefix := createKeyPrefix(subscription)
+	subKeyPrefix := backendnats.CreateKeyPrefix(subscription)
 	if err := js.checkJetStreamConnection(); err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	}
 
 	// delete subscription sink info from storage
-	js.sinks.Delete(createKeyPrefix(subscription))
+	js.sinks.Delete(backendnats.CreateKeyPrefix(subscription))
 
 	return nil
 }
@@ -219,16 +219,16 @@ func (js *JetStream) GetJetstreamSubject(subject string) string {
 }
 
 func (js *JetStream) validateConfig() error {
-	if js.config.JSStreamName == "" {
+	if js.Config.JSStreamName == "" {
 		return errors.New("Stream name cannot be empty")
 	}
-	if len(js.config.JSStreamName) > jsMaxStreamNameLength {
+	if len(js.Config.JSStreamName) > jsMaxStreamNameLength {
 		return xerrors.Errorf("Stream name should be max %d characters long", jsMaxStreamNameLength)
 	}
-	if _, err := toJetStreamStorageType(js.config.JSStreamStorageType); err != nil {
+	if _, err := toJetStreamStorageType(js.Config.JSStreamStorageType); err != nil {
 		return err
 	}
-	if _, err := toJetStreamRetentionPolicy(js.config.JSStreamRetentionPolicy); err != nil {
+	if _, err := toJetStreamRetentionPolicy(js.Config.JSStreamRetentionPolicy); err != nil {
 		return err
 	}
 	return nil
@@ -241,14 +241,14 @@ func (js *JetStream) handleReconnect(_ *nats.Conn) {
 	}
 }
 
-func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
+func (js *JetStream) initNATSConn(connCloseHandler backendnats.ConnClosedHandler) error {
 	if js.conn == nil || js.conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
-			nats.MaxReconnects(js.config.MaxReconnects),
-			nats.ReconnectWait(js.config.ReconnectWait),
+			nats.MaxReconnects(js.Config.MaxReconnects),
+			nats.ReconnectWait(js.Config.ReconnectWait),
 		}
-		conn, err := nats.Connect(js.config.URL, jsOptions...)
+		conn, err := nats.Connect(js.Config.URL, jsOptions...)
 		if err != nil || !conn.IsConnected() {
 			return xerrors.Errorf("failed to connect to NATS JetStream: %v", err)
 		}
@@ -272,7 +272,7 @@ func (js *JetStream) initJSContext() error {
 }
 
 func (js *JetStream) ensureStreamExists() error {
-	if info, err := js.jsCtx.StreamInfo(js.config.JSStreamName); err == nil {
+	if info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName); err == nil {
 		// TODO: in case the stream exists, should we make sure all of its configs matches the stream config in the chart?
 		js.namedLogger().Infow("Reusing existing Stream", "stream-info", info)
 		return nil
@@ -282,12 +282,12 @@ func (js *JetStream) ensureStreamExists() error {
 		js.namedLogger().Debugw("The connection to NATS server is not established!")
 		return err
 	}
-	streamConfig, err := getStreamConfig(js.config)
+	streamConfig, err := getStreamConfig(js.Config)
 	if err != nil {
 		return err
 	}
 	js.namedLogger().Infow("Stream not found, creating a new Stream",
-		"streamName", js.config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
+		"streamName", js.Config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
 	_, err = js.jsCtx.AddStream(streamConfig)
 	return err
 }
@@ -374,7 +374,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
-			nats.Bind(js.config.JSStreamName, jsSubKey.ConsumerName()),
+			nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
 		)
 		if err != nil {
 			if err != nats.ErrConsumerNotFound {
@@ -427,7 +427,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.AckExplicit(),
 		nats.IdleHeartbeat(idleHeartBeatDuration),
 		nats.EnableFlowControl(),
-		toJetStreamConsumerDeliverPolicyOptOrDefault(js.config.JSConsumerDeliverPolicy),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
@@ -449,7 +449,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := convertMsgToCE(msg)
+		ce, err := backendnats.ConvertMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return
@@ -489,7 +489,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
 // have the same namespaced name, otherwise returns false.
 func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription) bool {
-	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
+	return backendnats.CreateKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
 // deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db.
@@ -524,7 +524,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 		return err
 	}
 
-	if err := js.jsCtx.DeleteConsumer(js.config.JSStreamName, name); err != nil && err != nats.ErrConsumerNotFound {
+	if err := js.jsCtx.DeleteConsumer(js.Config.JSStreamName, name); err != nil && err != nats.ErrConsumerNotFound {
 		// if it is not a Not Found error, then return error
 		return xerrors.Errorf("failed to delete consumer %s from JetStream: %v", name, err)
 	}

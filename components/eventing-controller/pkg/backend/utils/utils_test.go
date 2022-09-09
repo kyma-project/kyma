@@ -1,5 +1,5 @@
 //nolint:gosec
-package handlers
+package utils
 
 import (
 	"crypto/sha1"
@@ -23,7 +23,7 @@ func TestGetHash(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	bebSubscription := types.Subscription{}
-	hash, err := getHash(&bebSubscription)
+	hash, err := GetHash(&bebSubscription)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(hash).To(BeNumerically(">", 0))
 }
@@ -98,7 +98,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "", defaultNameMapper)
+		gotBEBSubscription, err := GetInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "", defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -126,7 +126,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubscription, err := GetInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -168,7 +168,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subWithGivenWebhookAuth, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubscription, err := GetInternalView4Ev2(subWithGivenWebhookAuth, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -195,7 +195,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubWithDefaultCfg, err := getInternalView4Ev2(subscriptionWithoutWebhookAuth, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubWithDefaultCfg, err := GetInternalView4Ev2(subscriptionWithoutWebhookAuth, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -225,7 +225,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 	}
 
 	// then
-	bebSubscription := getInternalView4Ems(emsSubscription)
+	bebSubscription := GetInternalView4Ems(emsSubscription)
 
 	// when
 	g.Expect(bebSubscription.Name).To(BeEquivalentTo(emsSubscription.Name))
