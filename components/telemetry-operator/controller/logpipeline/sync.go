@@ -21,11 +21,9 @@ const (
 
 type syncer struct {
 	client.Client
-	config                  Config
-	enableUnsupportedPlugin bool
-	unsupportedPluginsTotal int
-	secretHelper            *secretHelper
-	k8sGetterOrCreator      *kubernetes.GetterOrCreator
+	config             Config
+	secretHelper       *secretHelper
+	k8sGetterOrCreator *kubernetes.GetterOrCreator
 }
 
 func newSyncer(
@@ -40,34 +38,26 @@ func newSyncer(
 	return &s
 }
 
-func (s *syncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.LogPipeline, allPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
 	log := logf.FromContext(ctx)
 
-	sectionsChanged, err := s.syncSectionsConfigMap(ctx, logPipeline)
+	sectionsChanged, err := s.syncSectionsConfigMap(ctx, newPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
 		return false, err
 	}
 
-	filesChanged, err := s.syncFilesConfigMap(ctx, logPipeline)
+	filesChanged, err := s.syncFilesConfigMap(ctx, newPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
 		return false, err
 	}
 
-	var logPipelines telemetryv1alpha1.LogPipelineList
-	err = s.List(ctx, &logPipelines)
-	if err != nil {
-		return false, err
-	}
-
-	variablesChanged, err := s.syncVariables(ctx, &logPipelines)
+	variablesChanged, err := s.syncReferencedSecrets(ctx, allPipelines)
 	if err != nil {
 		log.Error(err, "Failed to sync variables")
 		return false, err
 	}
-
-	s.syncUnsupportedPluginsTotal(&logPipelines)
 
 	return sectionsChanged || filesChanged || variablesChanged, nil
 }
@@ -164,8 +154,8 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 	return changed, nil
 }
 
-// syncVariables copies referenced secrets to global Fluent Bit environment secret.
-func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
+// syncReferencedSecrets copies referenced secrets to global Fluent Bit environment secret.
+func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
 	log := logf.FromContext(ctx)
 	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.config.EnvSecret)
 	if err != nil {
@@ -177,7 +167,7 @@ func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alp
 
 	for i := range logPipelines.Items {
 		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
-			err := s.secretHelper.CopySecretData(ctx, *&field.secretKeyRef, field.targetSecretKey, newSecret.Data)
+			err := s.secretHelper.CopySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data)
 			if err != nil {
 				log.Error(err, "unable to find secret for http host")
 				return false, err
@@ -195,31 +185,4 @@ func (s *syncer) syncVariables(ctx context.Context, logPipelines *telemetryv1alp
 		return false, err
 	}
 	return secretHasChanged, nil
-}
-
-// syncUnsupportedPluginsTotal checks if any LogPipeline defines a unsupported Filter or Output.
-func (s *syncer) syncUnsupportedPluginsTotal(logPipelines *telemetryv1alpha1.LogPipelineList) {
-	unsupportedPluginsTotal := 0
-	for _, l := range logPipelines.Items {
-		if !l.DeletionTimestamp.IsZero() {
-			continue
-		}
-		if IsUnsupported(l) {
-			unsupportedPluginsTotal++
-		}
-	}
-
-	s.unsupportedPluginsTotal = unsupportedPluginsTotal
-}
-
-func IsUnsupported(pipeline telemetryv1alpha1.LogPipeline) bool {
-	if pipeline.Spec.Output.Custom != "" {
-		return true
-	}
-	for _, f := range pipeline.Spec.Filters {
-		if f.Custom != "" {
-			return true
-		}
-	}
-	return false
 }

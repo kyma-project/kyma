@@ -30,7 +30,7 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	gs.Require().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-	err = gs.appComparator.Compare(compassAppName, expectedAppName)
+	err = gs.appComparator.Compare(expectedAppName, compassAppName)
 	gs.Require().NoError(err)
 
 	// Clean up
@@ -38,7 +38,7 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	gs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, scenarioName, expectedAppName string) (string, error) {
+func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
 
 	var applicationID string
 

@@ -38,6 +38,10 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
+	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
+	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
+	gs.Require().Nil(err)
+
 	gs.coreClientset, err = kubernetes.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
@@ -46,6 +50,12 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	_, err = gs.makeCompassDirectorClient()
 	gs.Require().Nil(err)
 
+	// TODO: Pass namespaces names
+	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, "", "")
+	gs.Require().Nil(err)
+
+	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
+	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
 	//gs.T().Log("Attempt to unregister application in compass")
 	//appID, err := directorClient.RegisterApplication("oko", "auto-testing")
 	//gs.Require().Nil(err)

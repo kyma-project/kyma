@@ -4,6 +4,7 @@ GOPATH ?= $(shell go env GOPATH)
 MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
 TEST_TIMEOUT = "3m"
+MAKEFILE_NAME=Makefile.test-application-gateway
 
 .PHONY: test clean
 .PHONY: test-gateway test-gateway-debug clean-gateway-test disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
@@ -15,11 +16,11 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 	if kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; then \
 	echo "Success! Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
-	$(MAKE) clean-gateway-test; \
+	$(MAKE) clean-gateway-test -f $(MAKEFILE_NAME); \
 	else \
 	echo "Tests failed! Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
-	$(MAKE) clean-gateway-test; \
+	$(MAKE) clean-gateway-test -f $(MAKEFILE_NAME); \
 	exit 1; \
 	fi
 

@@ -25,11 +25,11 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	natscore "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 )
@@ -42,7 +42,7 @@ const (
 
 type natsTestEnsemble struct {
 	reconciler  *natsreconciler.Reconciler
-	natsBackend *handlers.Nats
+	natsBackend *natscore.Nats
 	*utils.TestEnsemble
 }
 
@@ -151,7 +151,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("not able to parse sink url with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
+						utils.ConditionInvalidSink("failed to parse subscription sink URL: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")},
@@ -167,7 +167,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink does not contain suffix: svc.cluster.local in the URL")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It does not contain suffix: svc.cluster.local")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not contain suffix: svc.cluster.local")},
@@ -183,7 +183,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")},
@@ -216,7 +216,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It is not a valid cluster local svc: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
@@ -666,7 +666,7 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	natsHandler := handlers.NewNats(envConf, ens.DefaultSubscriptionConfig, metricsCollector, defaultLogger)
+	natsHandler := natscore.NewNats(envConf, ens.DefaultSubscriptionConfig, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
@@ -686,7 +686,7 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	ens.natsBackend = ens.reconciler.Backend.(*handlers.Nats)
+	ens.natsBackend = ens.reconciler.Backend.(*natscore.Nats)
 
 	go func() {
 		err = k8sManager.Start(ctx)
