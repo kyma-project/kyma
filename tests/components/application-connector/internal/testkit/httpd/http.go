@@ -12,7 +12,14 @@ type LogHttp struct {
 }
 
 func NewCli(t *testing.T) LogHttp {
-	return LogHttp{t: t, httpCli: &http.Client{}}
+	return LogHttp{
+		t: t,
+		httpCli: &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+	}
 }
 
 func (c LogHttp) Get(url string) (resp *http.Response, body []byte, err error) {
