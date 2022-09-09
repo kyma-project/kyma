@@ -14,7 +14,7 @@ You can enable sidecar proxy injection for either an entire Namespace or a singl
 
 * To enable sidecar proxy injection for a Deployment, add this to the Deployment configuration file as either a label or an annotation: `sidecar.istio.io/inject: "true"`
 
-Please note that the Namespace label will take precedence before the Pod label or annotations.
+Note that the Namespace label takes precedence over the Pod label or annotation.
 
 Read the [Istio documentation](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) to learn more about sidecar proxy injection and consider [benefits of having the sidecar container inside your application pod](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md).
 
