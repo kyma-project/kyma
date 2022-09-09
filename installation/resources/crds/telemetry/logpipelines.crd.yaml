@@ -58,27 +58,37 @@ spec:
                 type: array
               filters:
                 items:
-                  description: Filter describes a Fluent Bit filter configuration
+                  description: Filter describes a filtering option on the logs of
+                    the pipeline.
                   properties:
                     custom:
-                      description: "Filter definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode"
+                      description: 'Custom filter definition in the Fluent Bit syntax.
+                        Note: If you use a `custom` filter, you put the LogPipeline
+                        in unsupported mode'
                       type: string
                   type: object
                 type: array
               input:
-                description: Input describes a Fluent Bit input configuration section
+                description: Input describes an log input for a LogPipeline
                 properties:
                   application:
-                    description: ApplicationInput is the default type of Input that
-                      handles application logs
+                    description: Application configures in more detail from which
+                      containers application logs should be enabled as input
                     properties:
                       containers:
+                        description: InputContainers describes whether application
+                          logs from specific containers should be selected. The options
+                          are mutually exclusive.
                         properties:
                           exclude:
+                            description: Exclude describes to exclude only the container
+                              logs with the specified container names
                             items:
                               type: string
                             type: array
                           include:
+                            description: Include describes to include only the container
+                              logs with the specified container names
                             items:
                               type: string
                             type: array
@@ -92,16 +102,27 @@ spec:
                           Kubernetes annotations. The default is false.
                         type: boolean
                       namespaces:
+                        description: InputNamespaces describes whether application
+                          logs from specific namespaces should be selected. The options
+                          are mutually exclusive. System namespaces are excluded by
+                          default from the collection
                         properties:
                           exclude:
+                            description: Exclude describes to exclude only the container
+                              logs of the specified namespace names
                             items:
                               type: string
                             type: array
                           include:
+                            description: Include describes to include only the container
+                              logs of the specified namespace names
                             items:
                               type: string
                             type: array
                           system:
+                            description: System describes to include the container
+                              logs of the system namespaces like kube-system, istio-system
+                              and kyma-system
                             type: boolean
                         type: object
                     type: object
@@ -110,10 +131,17 @@ spec:
                 description: Output describes a Fluent Bit output configuration section
                 properties:
                   custom:
-                    description: "Output definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode"
+                    description: 'Custom output definition in the Fluent Bit syntax.
+                      Note: If you use a `custom` output, you put the LogPipeline
+                      in unsupported mode'
                     type: string
                   grafana-loki:
-                    description: "Configures an output to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead."
+                    description: 'LokiOutput configures an output to the Kyma-internal
+                      Loki instance. Note: This output is considered legacy and is
+                      only provided for backwards compatibility with the in-cluster
+                      Loki instance. It might not be compatible with latest Loki versions.
+                      For integration with a Loki-based system, use the `custom` output
+                      with name `loki` instead.'
                     properties:
                       labels:
                         additionalProperties:
@@ -142,7 +170,8 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: Configures an HTTP-based output compatible with the FluentBit HTTP output plugin
+                    description: HttpOutput configures an HTTP-based output compatible
+                      with the FluentBit HTTP output plugin
                     properties:
                       compress:
                         type: string
