@@ -38,6 +38,7 @@ create-resources:
         --set mockServiceName=$(MOCK_SERVICE_NAME) \
         --values resources/charts/gateway-test/values.yaml \
     | kubectl apply -f -
+	kubectl rollout status deployment mock-application -n test --timeout=90s
 
 	helm template resources/charts/gateway-test/charts/test \
     	--set namespace=$(NAMESPACE) \
