@@ -28,8 +28,8 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 
 describe('SKR nightly', function() {
-  this._timeout(3600000 * 3); // 3h
-  this._slow(5000);
+  this.timeout(3600000 * 3); // 3h
+  this.slow(5000);
 
   const provisioningTimeout = 1000 * 60 * 60; // 1h
   const deprovisioningTimeout = 1000 * 60 * 30; // 30m
