@@ -253,7 +253,7 @@ func Test_GetBEBEnvVars(t *testing.T) {
 	}
 }
 
-// natsBackendAssertions checks the NATS-specific data was set in the NewNATSPublisherDeployment
+// natsBackendAssertions checks that the NATS-specific data was set in the NewNATSPublisherDeployment.
 func natsBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	container := findPublisherContainer(deployment)
 	assert.NotNil(t, container)
@@ -272,7 +272,7 @@ func natsBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	}
 }
 
-// bebBackendAssertions checks the beb-specific data was set in the NewBEBPublisherDeployment
+// bebBackendAssertions checks that the beb-specific data was set in the NewBEBPublisherDeployment.
 func bebBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	container := findPublisherContainer(deployment)
 	assert.NotNil(t, container)
@@ -285,7 +285,7 @@ func bebBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	assert.Empty(t, deployment.Spec.Template.Spec.Affinity)
 }
 
-// findPublisherContainer gets the publisher proxy container by its name
+// findPublisherContainer gets the publisher proxy container by its name.
 func findPublisherContainer(deployment appsv1.Deployment) v1.Container {
 	var container v1.Container
 	for _, c := range deployment.Spec.Template.Spec.Containers {

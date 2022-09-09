@@ -8,26 +8,26 @@ import (
 )
 
 const (
-	// deliveryMetricKey name of the delivery per subscription metric
+	// deliveryMetricKey name of the delivery per subscription metric.
 	deliveryMetricKey = "delivery_per_subscription"
 
-	// deliveryMetricHelp help text for the delivery per subscription metric
+	// deliveryMetricHelp help text for the delivery per subscription metric.
 	deliveryMetricHelp = "Number of dispatched events per subscription"
 
-	// eventTypeSubscribedMetricKey name of the eventType subscribed metric
+	// eventTypeSubscribedMetricKey name of the eventType subscribed metric.
 	eventTypeSubscribedMetricKey = "event_type_subscribed"
 
-	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric
+	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric.
 	eventTypeSubscribedMetricHelp = "All the eventTypes subscribed using the Subscription CRD"
 )
 
-// Collector implements the prometheus.Collector interface
+// Collector implements the prometheus.Collector interface.
 type Collector struct {
 	deliveryPerSubscription *prometheus.CounterVec
 	eventTypes              *prometheus.CounterVec
 }
 
-// NewCollector a new instance of Collector
+// NewCollector a new instance of Collector.
 func NewCollector() *Collector {
 	return &Collector{
 		deliveryPerSubscription: prometheus.NewCounterVec(
@@ -47,30 +47,30 @@ func NewCollector() *Collector {
 	}
 }
 
-// Describe implements the prometheus.Collector interface Describe method
+// Describe implements the prometheus.Collector interface Describe method.
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.deliveryPerSubscription.Describe(ch)
 	c.eventTypes.Describe(ch)
 }
 
-// Collect implements the prometheus.Collector interface Collect method
+// Collect implements the prometheus.Collector interface Collect method.
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.deliveryPerSubscription.Collect(ch)
 	c.eventTypes.Collect(ch)
 }
 
-// RecordDeliveryPerSubscription records the delivery_per_subscription metric
+// RecordDeliveryPerSubscription records the delivery_per_subscription metric.
 func (c *Collector) RecordDeliveryPerSubscription(subscriptionName, eventType, sink string, statusCode int) {
 	c.deliveryPerSubscription.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }
 
-// RegisterMetrics registers the metrics
+// RegisterMetrics registers the metrics.
 func (c *Collector) RegisterMetrics() {
 	metrics.Registry.MustRegister(c.deliveryPerSubscription)
 	metrics.Registry.MustRegister(c.eventTypes)
 }
 
-// RecordEventTypes records the event_type_subscribed metric
+// RecordEventTypes records the event_type_subscribed metric.
 func (c *Collector) RecordEventTypes(subscriptionName, subscriptionNamespace, eventType, consumer string) {
 	c.eventTypes.WithLabelValues(subscriptionName, subscriptionNamespace, eventType, consumer).Inc()
 }

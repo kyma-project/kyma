@@ -1152,7 +1152,7 @@ func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1alpha1.APIRul
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// getSubscription fetches a subscription using the lookupKey and allows making assertions on it
+// getSubscription fetches a subscription using the lookupKey and allows making assertions on it.
 func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
@@ -1181,7 +1181,7 @@ func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
 	})
 }
 
-// ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller)
+// ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller).
 func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
 	By(fmt.Sprintf("Ensuring the APIRule %q is updated", apiRule.Name))
 
@@ -1243,7 +1243,7 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 	Expect(k8sClient.Create(ctx, svc)).Should(Succeed())
 }
 
-// getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
+// getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions.
 func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
 	return Eventually(func() []bebtypes.Subscription {
 		for req, sub := range beb.Requests.GetSubscriptions() {
@@ -1255,7 +1255,7 @@ func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema
+// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema.
 func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	if subscription.Namespace != "default " {
 		namespace := fixtureNamespace(subscription.Namespace)
@@ -1283,7 +1283,7 @@ func fixtureNamespace(name string) *v1.Namespace {
 	return &namespace
 }
 
-// printSubscriptions prints all subscriptions in the given namespace
+// printSubscriptions prints all subscriptions in the given namespace.
 func printSubscriptions(namespace string) error {
 	// print subscription details
 	ctx := context.TODO()
@@ -1495,7 +1495,7 @@ var _ = AfterSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 })
 
-// startBEBMock starts the beb mock and configures the controller process to use it
+// startBEBMock starts the beb mock and configures the controller process to use it.
 func startBEBMock() *reconcilertesting.BEBMock {
 	By("Preparing BEB Mock")
 	beb = reconcilertesting.NewBEBMock()
@@ -1507,7 +1507,7 @@ func startBEBMock() *reconcilertesting.BEBMock {
 // - wait until an APIRule is linked in the Subscription
 // - mark the APIRule as ready
 // - wait until the Subscription is ready
-// - as soon as both the APIRule and Subscription are ready, the function returns both objects
+// - as soon as both the APIRule and Subscription are ready, the function returns both objects.
 func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubscription *eventingv1alpha1.Subscription, service *v1.Service) (*eventingv1alpha1.Subscription, *apigatewayv1alpha1.APIRule) {
 	ensureSubscriberSvcCreated(ctx, service)
 	ensureSubscriptionCreated(ctx, givenSubscription)

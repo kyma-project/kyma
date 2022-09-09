@@ -35,7 +35,7 @@ type cleaner struct {
 	logger            *logger.Logger
 }
 
-// compile-time check
+// Perform a compile-time check.
 var _ Cleaner = &cleaner{}
 
 func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logger.Logger) Cleaner {

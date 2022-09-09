@@ -922,7 +922,7 @@ type testEnvironment struct {
 	cleaner     eventtype.Cleaner
 }
 
-// setupTestEnvironment is a testEnvironment constructor
+// setupTestEnvironment is a testEnvironment constructor.
 func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment {
 	mockedBackend := &mocks.BEBBackend{}
 	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()

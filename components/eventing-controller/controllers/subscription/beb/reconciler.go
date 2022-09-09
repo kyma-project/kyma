@@ -41,7 +41,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
-// Reconciler reconciles a Subscription object
+// Reconciler reconciles a Subscription object.
 type Reconciler struct {
 	ctx context.Context
 	client.Client
@@ -161,7 +161,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return result, nil
 }
 
-// updateSubscription updates the subscription changes to k8s
+// updateSubscription updates the subscription changes to k8s.
 func (r *Reconciler) updateSubscription(ctx context.Context, sub *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	namespacedName := &k8stypes.NamespacedName{
 		Name:      sub.Name,
@@ -198,7 +198,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, sub *eventingv1alph
 	return nil
 }
 
-// emitConditionEvents check each condition, if the condition is modified then emit an event
+// emitConditionEvents check each condition, if the condition is modified then emit an event.
 func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) {
 	for _, condition := range newSubscription.Status.Conditions {
 		oldCondition := oldSubscription.Status.FindCondition(condition.Type)
@@ -211,7 +211,7 @@ func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *event
 	}
 }
 
-// updateStatus updates the status to k8s if modified
+// updateStatus updates the status to k8s if modified.
 func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	// compare the status taking into consideration lastTransitionTime in conditions
 	if object.IsSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
@@ -227,7 +227,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubsc
 	return nil
 }
 
-// syncFinalizer sets the finalizer in the Subscription
+// syncFinalizer sets the finalizer in the Subscription.
 func (r *Reconciler) syncFinalizer(subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	// Check if finalizer is already set
 	if r.isFinalizerSet(subscription) {
@@ -289,7 +289,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	return isActive, nil
 }
 
-// syncConditionSubscribed syncs the condition ConditionSubscribed
+// syncConditionSubscribed syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subscription, err error) {
 	// Include the BEB subscription ID in the Condition message
 	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
@@ -302,7 +302,7 @@ func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subs
 	r.replaceStatusCondition(subscription, condition)
 }
 
-// syncConditionSubscriptionActive syncs the condition ConditionSubscribed
+// syncConditionSubscriptionActive syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha1.Subscription, isActive bool, logger *zap.SugaredLogger) {
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 	if !isActive {
@@ -314,7 +314,7 @@ func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alp
 }
 
 // syncConditionWebhookCallStatus syncs the condition WebhookCallStatus
-// checks if the last webhook call returned an error
+// checks if the last webhook call returned an error.
 func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alpha1.Subscription) {
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionWebhookCallStatus, eventingv1alpha1.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, "")
 	if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
@@ -327,7 +327,7 @@ func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alph
 	r.replaceStatusCondition(subscription, condition)
 }
 
-// deleteBEBSubscription deletes the BEB subscription and updates the condition and k8s events
+// deleteBEBSubscription deletes the BEB subscription and updates the condition and k8s events.
 func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	logger.Debug("Deleting BEB subscription")
 	if err := r.Backend.DeleteSubscription(subscription); err != nil {
@@ -516,7 +516,7 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 	return nil
 }
 
-// getSubscriptionsForASvc returns a list of Subscriptions which are valid for the subscriber in focus
+// getSubscriptionsForASvc returns a list of Subscriptions which are valid for the subscriber in focus.
 func (r *Reconciler) getSubscriptionsForASvc(ctx context.Context, svcNs, svcName string) ([]eventingv1alpha1.Subscription, error) {
 	subscriptions := &eventingv1alpha1.SubscriptionList{}
 	relevantSubs := make([]eventingv1alpha1.Subscription, 0)
@@ -549,7 +549,7 @@ func (r *Reconciler) getSubscriptionsForASvc(ctx context.Context, svcNs, svcName
 	return relevantSubs, nil
 }
 
-// filterSubscriptionsOnPort returns a list of Subscriptions which matches a particular port
+// filterSubscriptionsOnPort returns a list of Subscriptions which matches a particular port.
 func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscription, svcPort uint32) []eventingv1alpha1.Subscription {
 	filteredSubs := make([]eventingv1alpha1.Subscription, 0)
 	for _, sub := range subList {
@@ -611,7 +611,7 @@ func (r *Reconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1alpha1.
 	return nil
 }
 
-// getSvcNsAndName returns namespace and name of the svc from the URL
+// getSvcNsAndName returns namespace and name of the svc from the URL.
 func getSvcNsAndName(url string) (string, string, error) {
 	parts := strings.Split(url, ".")
 	if len(parts) < 2 {
@@ -620,7 +620,7 @@ func getSvcNsAndName(url string) (string, string, error) {
 	return parts[1], parts[0], nil
 }
 
-// syncInitialStatus determines the desired initial status and updates it accordingly (if conditions changed)
+// syncInitialStatus determines the desired initial status and updates it accordingly (if conditions changed).
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) {
 	if subscription.Status.CleanEventTypes == nil {
 		subscription.Status.InitializeCleanEventTypes()
@@ -648,7 +648,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	subscription.Status.ExternalSink = ""
 }
 
-// getRequiredConditions removes the non-required conditions from the subscription  and adds any missing required-conditions
+// getRequiredConditions removes the non-required conditions from the subscription  and adds any missing required-conditions.
 func getRequiredConditions(subscriptionConditions, expectedConditions []eventingv1alpha1.Condition) []eventingv1alpha1.Condition {
 	var requiredConditions []eventingv1alpha1.Condition
 	expectedConditionsMap := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
@@ -672,7 +672,7 @@ func getRequiredConditions(subscriptionConditions, expectedConditions []eventing
 }
 
 // replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
-// So make sure you always use this method then changing a condition
+// So make sure you always use this method then changing a condition.
 func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) bool {
 	// the subscription is ready if all conditions are fulfilled
 	isReady := true
@@ -705,7 +705,7 @@ func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subsc
 	return true
 }
 
-// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status
+// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status.
 func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) {
 	eventType := corev1.EventTypeNormal
 	if condition.Status == corev1.ConditionFalse {
@@ -714,7 +714,7 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscript
 	r.recorder.Event(subscription, eventType, string(condition.Reason), condition.Message)
 }
 
-// SetupUnmanaged creates a controller under the client control
+// SetupUnmanaged creates a controller under the client control.
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
@@ -795,7 +795,7 @@ func (r *Reconciler) removeFinalizer(sub *eventingv1alpha1.Subscription) {
 	sub.ObjectMeta.Finalizers = finalizers
 }
 
-// isFinalizerSet checks if a finalizer is set on the Subscription which belongs to this controller
+// isFinalizerSet checks if a finalizer is set on the Subscription which belongs to this controller.
 func (r *Reconciler) isFinalizerSet(sub *eventingv1alpha1.Subscription) bool {
 	// Check if finalizer is already set
 	for _, finalizer := range sub.ObjectMeta.Finalizers {
@@ -806,12 +806,12 @@ func (r *Reconciler) isFinalizerSet(sub *eventingv1alpha1.Subscription) bool {
 	return false
 }
 
-// isInDeletion checks if the Subscription shall be deleted
+// isInDeletion checks if the Subscription shall be deleted.
 func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 	return !subscription.DeletionTimestamp.IsZero()
 }
 
-// checkStatusActive checks if the subscription is active and if not, sets a timer for retry
+// checkStatusActive checks if the subscription is active and if not, sets a timer for retry.
 func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (active bool, err error) {
 	// check if the EMS subscription status is active
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types.SubscriptionStatusActive) {
@@ -838,7 +838,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 	return false, err
 }
 
-// checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery
+// checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery.
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	if len(subscription.Status.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time

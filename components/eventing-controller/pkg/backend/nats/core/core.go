@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
-// compile time check
+// Perform a compile time check.
 var _ Backend = &Nats{}
 
 const (
@@ -194,7 +194,7 @@ func (n *Nats) cleanupNATSSubscriptions(sub *eventingv1alpha1.Subscription, log 
 	return nil
 }
 
-// DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
+// DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription.
 func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 	subKeyPrefix := backendnats.CreateKeyPrefix(sub)
 	for key, s := range n.subscriptions {
@@ -232,12 +232,12 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 }
 
 // GetAllSubscriptions returns the map which contains all details of subscription
-// Use this only for testing purposes
+// Use this only for testing purposes.
 func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
 	return n.subscriptions
 }
 
-// deleteSubFromNats deletes subscription from NATS and from in-memory db
+// deleteSubFromNats deletes subscription from NATS and from in-memory db.
 func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
 	// Unsubscribe call to NATS is async hence checking the status of the connection is important
 	if n.connection.Status() != nats.CONNECTED {
