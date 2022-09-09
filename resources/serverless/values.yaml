@@ -76,25 +76,25 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "f94d14f3"
+      version: "PR-15307"
     function_webhook:
       name: "function-webhook"
-      version: "f94d14f3"
+      version: "PR-15307"
     function_build_init:
       name: "function-build-init"
-      version: "f94d14f3"
+      version: "PR-15307"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "f94d14f3"
+      version: "PR-15307"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "f94d14f3"
+      version: "PR-15307"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "f94d14f3"
+      version: "PR-15307"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "f94d14f3"
+      version: "PR-15307"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-a550386f"
