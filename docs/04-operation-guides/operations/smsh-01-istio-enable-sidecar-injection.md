@@ -12,7 +12,7 @@ You can enable sidecar proxy injection for either an entire Namespace or a singl
    kubectl label namespace {YOUR_NAMESPACE} istio-injection=enabled
    ```
 
-* To enable sidecar proxy injection for a Deployment, you can add this as either label or annotation to the Deployment configuration file: `sidecar.istio.io/inject: "true"`
+* To enable sidecar proxy injection for a Deployment, add this to the Deployment configuration file as either a label or an annotation: `sidecar.istio.io/inject: "true"`
 
 Please note that the Namespace label will take precedence before the Pod label or annotations.
 
