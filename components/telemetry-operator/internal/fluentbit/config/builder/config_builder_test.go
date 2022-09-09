@@ -104,7 +104,7 @@ func TestMergeSectionsConfig(t *testing.T) {
 [OUTPUT]
     name                     http
     match                    foo.*
-    alias                    foo - http
+    alias                    foo-http
     allow_duplicated_headers true
     format                   json
     host                     localhost

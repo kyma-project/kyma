@@ -35,7 +35,7 @@ func TestCreateOutputSectionWithHTTPOutput(t *testing.T) {
 	expected := `[OUTPUT]
     name                     http
     match                    foo.*
-    alias                    foo - http
+    alias                    foo-http
     allow_duplicated_headers true
     format                   yaml
     host                     localhost
@@ -75,7 +75,7 @@ func TestCreateOutputSectionWithHTTPOutputWithSecretReference(t *testing.T) {
 	expected := `[OUTPUT]
     name                     http
     match                    foo.*
-    alias                    foo - http
+    alias                    foo-http
     allow_duplicated_headers true
     format                   json
     host                     localhost
@@ -121,7 +121,7 @@ func TestCreateOutputSectionWithLokiOutput(t *testing.T) {
 	expected := `[OUTPUT]
     name                     grafana-loki
     match                    foo.*
-    alias                    foo - grafana-loki
+    alias                    foo-grafana-loki
     labelmappath             /fluent-bit/etc/loki-labelmap.json
     labels                   {cluster-id="123", job="telemetry-fluent-bit"}
     lineformat               json
