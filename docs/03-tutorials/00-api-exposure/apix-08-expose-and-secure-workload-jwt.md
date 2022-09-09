@@ -4,12 +4,12 @@ title: Expose and secure a workload with JWT
 
 This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The Controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio VirtualService and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
 
-You can use it as a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
+You can use it as a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create them, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
-To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create them, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
+To obtain JWT take a look at [Get a JWT](./apix-06-get-jwt.md) tutorial.
 
 ## Expose, secure, and access your workload
 
@@ -23,11 +23,12 @@ To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
-   export GATEWAY=$NAMESPACE/httpbin-gateway #If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
-2. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the service and secure it by creating an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -74,11 +75,12 @@ To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
-   export GATEWAY=$NAMESPACE/httpbin-gateway #If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
-2. Expose the Function and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the Function and secure it by creating an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -

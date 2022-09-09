@@ -33,7 +33,7 @@ Make sure that the following conditions are met:
       curl -X POST "https://oauth2.{CLUSTER_DOMAIN}/oauth2/introspect" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "token={ACCESS_TOKEN}"
       ```
 
-  4. Generate a [new access token](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-oauth2.md#register-an-oauth2-client-and-get-tokens) if needed.
+  4. Generate a [new access token](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-oauth2.md#register-an-oauth2-client-and-get-tokens) if needed.
 
 - Your client from the OAuth2Client resource is registered properly in Hydra OAuth2 and the OpenID Connect server. You need to call the Hydra administrative endpoint `/client` from inside of the cluster. Follow these steps:
 

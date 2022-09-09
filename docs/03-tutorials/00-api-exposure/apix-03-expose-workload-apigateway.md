@@ -3,12 +3,13 @@ title: Expose a workload
 ---
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.
+   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
-The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
+The tutorial may be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
 ## Expose and access your workload
 
@@ -24,10 +25,12 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
+   export GATEWAY=$NAMESPACE/httpbin-gateway
    ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
-2. Expose the instance of the HttpBin service by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the instance of the HttpBin service by creating an APIRule CR in your Namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -41,7 +44,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      service:
        name: httpbin
        port: 8000
-     gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
+     gateway: $GATEWAY
      rules:
        - path: /.*
          methods: ["GET"]
@@ -84,10 +87,12 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/httpbin-gateway 
    ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
-2. Expose the sample Function by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+2. Expose the sample Function by creating an APIRule CR in your Namespace. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -97,7 +102,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      name: function
      namespace: $NAMESPACE
    spec:
-     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     gateway: $GATEWAY 
      host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: function
