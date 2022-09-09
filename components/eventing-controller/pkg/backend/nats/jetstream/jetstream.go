@@ -181,7 +181,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 func (js *JetStream) UnsubscribeOnNats() {
 	// unsubscribe call to JetStream is async hence checking the status of the connection is important
 	if err := js.checkJetStreamConnection(); err != nil {
-		js.logger.WithContext().Errorw("Failed to unsubscribe on NATS JetStream", "err", err)
+		js.logger.WithContext().Error(err.Error())
 	}
 	for _, jsSub := range js.subscriptions {
 		if err := jsSub.Unsubscribe(); err != nil {
@@ -405,8 +405,9 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 	}
 }
 
-// createConsumer creates a new consumer on NATS for each CleanEventType,
-// when there is no NATS subscription associated with the CleanEventType.
+// createConsumer manually creates a new consumer on NATS for each CleanEventType,
+// when there is no NATS Subscription associated with the CleanEventType.
+// Then it creates a NATS Subscription bound to the created consumer.
 func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetstreamSubject(subject)
@@ -426,7 +427,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 
 		// create the consumer in case it doesn't exist
 		if consumerInfo == nil {
-			_, err = js.jsCtx.AddConsumer(
+			consumerInfo, err = js.jsCtx.AddConsumer(
 				js.Config.JSStreamName,
 				js.getConsumerConfig(subscription, jsSubKey, jsSubject),
 			)
@@ -435,6 +436,10 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 				continue
 			}
 			log.Debug("Created consumer on JetStream")
+		}
+
+		if consumerInfo.PushBound {
+			continue
 		}
 
 		// subscribe to the given subject using the existing consumer
