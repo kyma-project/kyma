@@ -9,12 +9,12 @@ type SecretCreator interface {
 }
 
 type secretCreator struct {
-	coreClientset *kubernetes.Clientset
+	kubernetesInterface kubernetes.Interface
 }
 
-func newSecretCreator(coreClientset *kubernetes.Clientset) SecretCreator {
+func newSecretCreator(kubernetesInterface kubernetes.Interface) SecretCreator {
 	return secretCreator{
-		coreClientset: coreClientset,
+		kubernetesInterface: kubernetesInterface,
 	}
 }
 

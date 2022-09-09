@@ -22,18 +22,18 @@ type CompassRuntimeAgentConfig struct {
 	Tenant       string
 }
 
-func NewCompassRuntimeAgentConfigurator(directorClient DirectorClient, coreClientset *kubernetes.Clientset, tenant string) CompassRuntimeAgentConfigurator {
-	return compassRuntimeAgentConfigurator{
-		directorClient: directorClient,
-		coreClientset:  coreClientset,
-		tenant:         tenant,
-	}
+type compassRuntimeAgentConfigurator struct {
+	directorClient      DirectorClient
+	kubernetesInterface kubernetes.Interface
+	tenant              string
 }
 
-type compassRuntimeAgentConfigurator struct {
-	directorClient DirectorClient
-	coreClientset  *kubernetes.Clientset
-	tenant         string
+func NewCompassRuntimeAgentConfigurator(directorClient DirectorClient, kubernetesInterface kubernetes.Interface, tenant string) CompassRuntimeAgentConfigurator {
+	return compassRuntimeAgentConfigurator{
+		directorClient:      directorClient,
+		kubernetesInterface: kubernetesInterface,
+		tenant:              tenant,
+	}
 }
 
 func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc, error) {
@@ -54,14 +54,14 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 		return nil, errors.Wrap(err, "failed to get token URL")
 	}
 
-	compassRuntimeAgenConfig := CompassRuntimeAgentConfig{
+	compassRuntimeAgentConfig := CompassRuntimeAgentConfig{
 		ConnectorUrl: compassConnectorUrl,
 		RuntimeID:    runtimeID,
 		Token:        token,
 		Tenant:       crc.tenant,
 	}
 
-	secretRollbackFunc, err := crc.createCompassRuntimeAgentSecret(compassRuntimeAgenConfig)
+	secretRollbackFunc, err := crc.createCompassRuntimeAgentSecret(compassRuntimeAgentConfig)
 	if err != nil {
 		{
 			err := newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, nil)()
@@ -94,9 +94,9 @@ func (crc compassRuntimeAgentConfigurator) getTokenUrl() (string, string, error)
 }
 
 func (crc compassRuntimeAgentConfigurator) createCompassRuntimeAgentSecret(config CompassRuntimeAgentConfig) (RollbackSecretFunc, error) {
-	return newSecretCreator(crc.coreClientset).Do("", "", config)
+	return newSecretCreator(crc.kubernetesInterface).Do("", "", config)
 }
 
 func (crc compassRuntimeAgentConfigurator) modifyDeployment() (RollbackDeploymentFunc, error) {
-	return newDeploymentConfiguration(crc.coreClientset).Do("", "")
+	return newDeploymentConfiguration(crc.kubernetesInterface).Do("", "")
 }

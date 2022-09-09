@@ -34,8 +34,8 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
-	// TODO Pass Tenant from configuration
-	gs.directorClient, err = director.NewDirectorClient("")
+	// TODO Init client
+	gs.directorClient = director.NewDirectorClient(nil, nil)
 	gs.Require().Nil(err)
 
 	// TODO: Pass namespaces names

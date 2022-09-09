@@ -9,12 +9,12 @@ type DeploymentConfigurator interface {
 }
 
 type deploymentConfiguration struct {
-	coreClientset *kubernetes.Clientset
+	kubernetesInterface kubernetes.Interface
 }
 
-func newDeploymentConfiguration(coreClientset *kubernetes.Clientset) DeploymentConfigurator {
+func newDeploymentConfiguration(kubernetesInterface kubernetes.Interface) DeploymentConfigurator {
 	return deploymentConfiguration{
-		coreClientset: coreClientset,
+		kubernetesInterface: kubernetesInterface,
 	}
 }
 
