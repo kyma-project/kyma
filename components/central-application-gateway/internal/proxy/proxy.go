@@ -4,12 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"time"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -68,84 +65,11 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
 
-	var body io.ReadCloser
-	if newRequest.GetBody != nil {
-		var err error
-		body, err = newRequest.GetBody()
-		if err != nil {
-			body = nil
-		}
-	}
-
 	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
-
-	req := r
-
-	cacheEntry.Proxy.ModifyResponse = func(resp *http.Response) error {
-		redirectMethod, shouldRedirect, includeBody := redirectBehavior(r.Method, resp, r)
-
-		if !shouldRedirect {
-			return nil
-		}
-
-		loc := resp.Header.Get("Location")
-		if loc == "" {
-			// While most 3xx responses include a Location, it is not
-			// required and 3xx responses without a Location have been
-			// observed in the wild. See issues #17773 and #49281.
-			return nil
-		}
-		u, err := req.URL.Parse(loc)
-		if err != nil {
-			if resp.Body != http.NoBody {
-				resp.Body.Close()
-			}
-			return fmt.Errorf("failed to parse Location header %q: %v", loc, err)
-		}
-		host := ""
-		if req.Host != "" && req.Host != req.URL.Host {
-			// If the caller specified a custom Host header and the
-			// redirect location is relative, preserve the Host header
-			// through the redirect. See issue #22233.
-			if u, _ := url.Parse(loc); u != nil && !u.IsAbs() {
-				host = req.Host
-			}
-		}
-
-		req = &http.Request{
-			Method:   redirectMethod,
-			Response: resp,
-			URL:      u,
-			Host:     host,
-			Cancel:   r.Cancel,
-		}
-		req = req.WithContext(r.Context())
-		copyMap(r.Header, req.Header)
-
-		if includeBody {
-			req.Body = body
-			body, err = req.GetBody()
-			if err != nil {
-				return err
-			}
-		}
-
-		err = p.addAuthorization(req, cacheEntry, serviceAPI.SkipVerify)
-		if err != nil {
-			return err
-		}
-
-		rr := httptest.NewRecorder()
-		cacheEntry.Proxy.ServeHTTP(rr, req)
-
-		*resp = *rr.Result()
-		return nil
-	}
-
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 

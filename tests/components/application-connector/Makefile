@@ -7,7 +7,7 @@ COMPASS_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/compass-
 MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(DOCKER_TAG)"
 MOCK_SERVICE_NAME="mock-application"
 APP_URL = "$(MOCK_SERVICE_NAME).$(NAMESPACE).svc.cluster.local"
-TEST_TIMEOUT = "3m"
+TEST_TIMEOUT = "1m"
 
 .PHONY: release test image clean
 .PHONY: test-gateway test-gateway-debug clean-gateway-test publish-gateway-test image-gateway-test publish-mock-app image-mock-app disable-sidecar-for-mtls-test enable-sidecar-after-mtls-test generate-certs
