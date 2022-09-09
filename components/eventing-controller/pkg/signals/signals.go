@@ -14,7 +14,7 @@ var (
 	onlyOneSignalHandler = make(chan struct{})
 
 	// shutdownSignals array of system signals to cause shutdown.
-	shutdownSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
+	shutdownSignals = []os.Signal{syscall.SIGINT, syscall.SIGTERM}
 )
 
 // SetupSignalHandler registered for SIGTERM and SIGINT. A stop channel is returned

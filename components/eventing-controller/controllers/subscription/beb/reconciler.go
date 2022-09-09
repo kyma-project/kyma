@@ -9,10 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -29,16 +26,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -49,18 +47,14 @@ type Reconciler struct {
 	client.Client
 	logger            *logger.Logger
 	recorder          record.EventRecorder
-	Backend           handlers.BEBBackend
+	Backend           beb.Backend
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
-	oauth2credentials *handlers.OAuth2ClientCredentials
+	oauth2credentials *beb.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
-	nameMapper    handlers.NameMapper
+	nameMapper    backendutils.NameMapper
 	sinkValidator sink.Validator
 }
-
-var (
-	Finalizer = eventingv1alpha1.GroupVersion.Group
-)
 
 const (
 	suffixLength                = 10
@@ -73,8 +67,8 @@ const (
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
-	cfg env.Config, cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials,
-	mapper handlers.NameMapper, validator sink.Validator) *Reconciler {
+	cfg env.Config, cleaner eventtype.Cleaner, bebBackend beb.Backend, credential *beb.OAuth2ClientCredentials,
+	mapper backendutils.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
 		panic(err)
@@ -109,46 +103,46 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// copy the subscription object, so we don't modify the source object
-	subscription := currentSubscription.DeepCopy()
+	sub := currentSubscription.DeepCopy()
 
 	// bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
+	log := utils.LoggerWithSubscription(r.namedLogger(), sub)
 	log.Debugw("Received new reconcile request")
 
 	// instantiate a return object
 	result := ctrl.Result{}
 
 	// handle deletion of the subscription
-	if isInDeletion(subscription) {
-		return r.handleDeleteSubscription(ctx, subscription, log)
+	if isInDeletion(sub) {
+		return r.handleDeleteSubscription(ctx, sub, log)
 	}
 
 	// sync the initial Subscription status
-	r.syncInitialStatus(subscription)
+	r.syncInitialStatus(sub)
 
 	// sync Finalizers, ensure the finalizer is set
-	if err := r.syncFinalizer(subscription, log); err != nil {
-		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
+	if err := r.syncFinalizer(sub, log); err != nil {
+		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
 			return ctrl.Result{}, xerrors.Errorf(updateErr.Error()+": %v", err)
 		}
 		return ctrl.Result{}, xerrors.Errorf("failed to sync finalizer: %v", err)
 	}
 
 	// sync APIRule for the desired subscription
-	apiRule, err := r.syncAPIRule(ctx, subscription, log)
+	apiRule, err := r.syncAPIRule(ctx, sub, log)
 	// sync the condition: ConditionAPIRuleStatus
-	subscription.Status.SetConditionAPIRuleStatus(err)
+	sub.Status.SetConditionAPIRuleStatus(err)
 	if !recerrors.IsSkippable(err) {
-		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
+		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
 			return ctrl.Result{}, xerrors.Errorf(updateErr.Error()+": %v", err)
 		}
 		return ctrl.Result{}, err
 	}
 
 	// sync the BEB Subscription with the Subscription CR
-	ready, err := r.syncBEBSubscription(subscription, apiRule, log)
+	ready, err := r.syncBEBSubscription(sub, apiRule, log)
 	if err != nil {
-		if updateErr := r.updateSubscription(ctx, subscription, log); updateErr != nil {
+		if updateErr := r.updateSubscription(ctx, sub, log); updateErr != nil {
 			return ctrl.Result{}, xerrors.Errorf(updateErr.Error()+": %v", err)
 		}
 		return ctrl.Result{}, err
@@ -160,7 +154,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the subscription if modified
-	if err := r.updateSubscription(ctx, subscription, log); err != nil {
+	if err := r.updateSubscription(ctx, sub, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -168,10 +162,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // updateSubscription updates the subscription changes to k8s
-func (r *Reconciler) updateSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
+func (r *Reconciler) updateSubscription(ctx context.Context, sub *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	namespacedName := &k8stypes.NamespacedName{
-		Name:      subscription.Name,
-		Namespace: subscription.Namespace,
+		Name:      sub.Name,
+		Namespace: sub.Namespace,
 	}
 
 	// fetch the latest subscription object, to avoid k8s conflict errors
@@ -182,8 +176,8 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 
 	// copy new changes to the latest object
 	newSubscription := latestSubscription.DeepCopy()
-	newSubscription.Status = subscription.Status
-	newSubscription.ObjectMeta.Finalizers = subscription.ObjectMeta.Finalizers
+	newSubscription.Status = sub.Status
+	newSubscription.ObjectMeta.Finalizers = sub.ObjectMeta.Finalizers
 
 	// emit the condition events if needed
 	r.emitConditionEvents(latestSubscription, newSubscription, logger)
@@ -196,7 +190,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 	// update the subscription object in k8s
 	if !reflect.DeepEqual(latestSubscription.ObjectMeta.Finalizers, newSubscription.ObjectMeta.Finalizers) {
 		if err := r.Update(ctx, newSubscription); err != nil {
-			return xerrors.Errorf("failed to remove finalizer name '%s': %v", Finalizer, err)
+			return xerrors.Errorf("failed to remove finalizer name '%s': %v", eventingv1alpha1.Finalizer, err)
 		}
 		logger.Debugw("Updated subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
 	}
@@ -583,7 +577,7 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 
 func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) *apigatewayv1alpha1.APIRule {
 
-	randomSuffix := handlers.GetRandString(suffixLength)
+	randomSuffix := backendutils.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 
 	apiRule := object.NewAPIRule(svcNs, apiRuleNamePrefix,
@@ -781,31 +775,31 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 	return nil
 }
 
-func (r *Reconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
-	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+func (r *Reconciler) addFinalizer(sub *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
+	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	logger.Debug("Added finalizer to subscription")
 	return nil
 }
 
-func (r *Reconciler) removeFinalizer(subscription *eventingv1alpha1.Subscription) {
+func (r *Reconciler) removeFinalizer(sub *eventingv1alpha1.Subscription) {
 	var finalizers []string
 
 	// Build finalizer list without the one the controller owns
-	for _, finalizer := range subscription.ObjectMeta.Finalizers {
-		if finalizer == Finalizer {
+	for _, finalizer := range sub.ObjectMeta.Finalizers {
+		if finalizer == eventingv1alpha1.Finalizer {
 			continue
 		}
 		finalizers = append(finalizers, finalizer)
 	}
 
-	subscription.ObjectMeta.Finalizers = finalizers
+	sub.ObjectMeta.Finalizers = finalizers
 }
 
 // isFinalizerSet checks if a finalizer is set on the Subscription which belongs to this controller
-func (r *Reconciler) isFinalizerSet(subscription *eventingv1alpha1.Subscription) bool {
+func (r *Reconciler) isFinalizerSet(sub *eventingv1alpha1.Subscription) bool {
 	// Check if finalizer is already set
-	for _, finalizer := range subscription.ObjectMeta.Finalizers {
-		if finalizer == Finalizer {
+	for _, finalizer := range sub.ObjectMeta.Finalizers {
+		if finalizer == eventingv1alpha1.Finalizer {
 			return true
 		}
 	}

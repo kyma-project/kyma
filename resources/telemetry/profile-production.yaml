@@ -5,4 +5,5 @@ fluent-bit:
     requests:
       cpu: 100m
     limits:
-      cpu: 800m
+      cpu: "1"
+      memory: 512Mi

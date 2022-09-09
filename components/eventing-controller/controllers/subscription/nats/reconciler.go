@@ -21,10 +21,11 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -32,7 +33,7 @@ import (
 type Reconciler struct {
 	client.Client
 	ctx              context.Context
-	Backend          handlers.NatsBackend
+	Backend          core.Backend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	subsConfig       env.DefaultSubscriptionConfig
@@ -42,17 +43,13 @@ type Reconciler struct {
 	customEventsChannel chan event.GenericEvent
 }
 
-var (
-	Finalizer = eventingv1alpha1.GroupVersion.Group
-)
-
 const (
 	natsFirstInstanceName = "eventing-nats-1" // natsFirstInstanceName the name of first instance of NATS cluster
 	natsNamespace         = "kyma-system"     // natsNamespace of NATS cluster
 	reconcilerName        = "nats-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, natsHandler handlers.NatsBackend, cleaner eventtype.Cleaner,
+func NewReconciler(ctx context.Context, client client.Client, natsHandler core.Backend, cleaner eventtype.Cleaner,
 	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
@@ -171,37 +168,37 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Handle only the new subscription
-	subscription := cachedSubscription.DeepCopy()
+	sub := cachedSubscription.DeepCopy()
 
 	// Bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
+	log := utils.LoggerWithSubscription(r.namedLogger(), sub)
 
-	if !subscription.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !sub.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
-		err := r.handleSubscriptionDeletion(ctx, subscription, log)
+		err := r.handleSubscriptionDeletion(ctx, sub, log)
 		return ctrl.Result{}, err
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent to
 	// registering our finalizer.
-	if !utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
-		err := r.addFinalizerToSubscription(subscription, log)
+	if !utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
+		err := r.addFinalizerToSubscription(sub, log)
 		return ctrl.Result{}, err
 	}
 
 	// update the cleanEventTypes and config values in the subscription, if changed
-	statusChanged, err := r.syncInitialStatus(subscription)
+	statusChanged, err := r.syncInitialStatus(sub)
 	if err != nil {
-		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); syncErr != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, sub, false, statusChanged, err.Error()); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		return ctrl.Result{}, xerrors.Errorf("failed to sync subscription initial status: %v", err)
 	}
 
 	// Check for valid sink
-	if err := r.sinkValidator.Validate(subscription); err != nil {
-		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); syncErr != nil {
+	if err := r.sinkValidator.Validate(sub); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, sub, false, statusChanged, err.Error()); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -209,9 +206,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Synchronize Kyma subscription to NATS backend
-	syncErr := r.Backend.SyncSubscription(subscription)
+	syncErr := r.Backend.SyncSubscription(sub)
 	if syncErr != nil {
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, syncErr.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, sub, false, statusChanged, syncErr.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, xerrors.Errorf("failed to sync subscription to NATS backend: %v", syncErr)
@@ -219,7 +216,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log.Debug("Creation of NATS subscriptions succeeded")
 
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, subscription, true, statusChanged, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, sub, true, statusChanged, ""); err != nil {
 		return checkIsConflict(err)
 	}
 
@@ -229,7 +226,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	statusChanged := false
-	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	cleanEventTypes, err := backendnats.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		subscription.Status.InitializeCleanEventTypes()
 		return true, xerrors.Errorf("failed to get clean subjects: %v", err)
@@ -252,7 +249,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 
 // handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
+	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
@@ -260,7 +257,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 		}
 
 		// remove our finalizer from the list and update it.
-		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, Finalizer)
+		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
 			return xerrors.Errorf("failed to remove finalizer from subscription: %v", err)
@@ -272,7 +269,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 
 // addFinalizerToSubscription appends the eventing finalizer to the subscription.
 func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	if err := r.Update(context.Background(), subscription); err != nil {
 		return xerrors.Errorf("failed to add finalizer to subscription: %v", err)
 	}
@@ -336,7 +333,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 }
 
 func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
-	natsHandler, _ := r.Backend.(*handlers.Nats)
+	natsHandler, _ := r.Backend.(*core.Nats)
 	invalidSubs := natsHandler.GetInvalidSubscriptions()
 	for _, v := range *invalidSubs {
 		r.namedLogger().Debugw("Found invalid subscription", "namespace", v.Namespace, "name", v.Name)
