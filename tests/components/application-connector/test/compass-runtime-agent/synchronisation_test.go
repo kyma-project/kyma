@@ -21,12 +21,11 @@ type ApplicationReader interface {
 func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	// Created in chart
 	expectedAppName := "app1"
-	scenarioName := "auto-testing"
 	compassAppName := expectedAppName + random.RandomString(10)
 
 	//Create Application in Director and wait until it gets created
 	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, scenarioName, expectedAppName)
+	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, expectedAppName)
 	gs.Require().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
@@ -41,6 +40,8 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
 
 	var applicationID string
+
+	scenarioName := "auto-testing"
 
 	exec := func() error {
 		id, err := gs.directorClient.RegisterApplication(compassAppName, scenarioName)

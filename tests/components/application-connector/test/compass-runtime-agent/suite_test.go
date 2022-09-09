@@ -21,7 +21,7 @@ import (
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
 	applicationsClientSet *cli.Clientset
-	coreClientset         *kubernetes.Clientset
+	coreClientSet         *kubernetes.Clientset
 	directorClient        director.Client
 	appComparator         applications.Comparator
 	testConfig            config
@@ -42,7 +42,7 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
-	gs.coreClientset, err = kubernetes.NewForConfig(cfg)
+	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
 	gs.T().Logf("Config: %s", gs.testConfig.String())
@@ -66,8 +66,6 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	//gs.Require().Nil(err)
 	//gs.T().Logf("Sucessfully unregistered application %s in compass", appID)
 
-	// TODO Pass Tenant from configuration
-	gs.appComparator, err = applications.NewComparator(gs.Require())
 	gs.Require().Nil(err)
 }
 
@@ -84,7 +82,7 @@ func TestCompassRuntimeAgentSuite(t *testing.T) {
 
 func (gs *CompassRuntimeAgentSuite) makeCompassDirectorClient() (director.Client, error) {
 
-	secretsRepo := gs.coreClientset.CoreV1().Secrets(gs.testConfig.OauthCredentialsNamespace)
+	secretsRepo := gs.coreClientSet.CoreV1().Secrets(gs.testConfig.OauthCredentialsNamespace)
 
 	if secretsRepo == nil {
 		return nil, fmt.Errorf("could not access secrets in %s namespace", gs.testConfig.OauthCredentialsNamespace)
