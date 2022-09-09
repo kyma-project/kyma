@@ -1,4 +1,7 @@
 {{- /*
+  Customization: KubeletPodStartUpLatencyHigh: group expression uses additional "service" label to avoid failing evaluation if the stack is deployed twice, see also https://github.com/kyma-project/kyma/pull/11771
+*/ -}}
+{{- /*
 Generated from 'kubernetes-system-kubelet' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubernetesControlPlane-prometheusRule.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
