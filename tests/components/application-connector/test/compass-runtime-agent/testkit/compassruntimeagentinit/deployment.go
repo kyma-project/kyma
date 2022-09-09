@@ -4,15 +4,11 @@ import "k8s.io/client-go/kubernetes"
 
 type RollbackDeploymentFunc func() error
 
-type DeploymentConfigurator interface {
-	Do(name, namespace string) (RollbackDeploymentFunc, error)
-}
-
 type deploymentConfiguration struct {
 	kubernetesInterface kubernetes.Interface
 }
 
-func newDeploymentConfiguration(kubernetesInterface kubernetes.Interface) DeploymentConfigurator {
+func newDeploymentConfiguration(kubernetesInterface kubernetes.Interface) deploymentConfiguration {
 	return deploymentConfiguration{
 		kubernetesInterface: kubernetesInterface,
 	}

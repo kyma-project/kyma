@@ -5,14 +5,21 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const (
+	CompassSystemNamespace        = "compass-system"
+	CompassRuntimeAgentDeployment = "compass-runtime-agent"
+	NewCompassRuntimeConfigName   = "test-compass-runtime-agent-config"
+)
+
 type CompassRuntimeAgentConfigurator interface {
 	Do(runtimeName string) (RollbackFunc, error)
 }
 
+//go:generate mockery --name=DirectorClient
 type DirectorClient interface {
-	RegisterRuntime(appName, scenarioName string) (string, error)
+	RegisterRuntime(runtimeName string) (string, error)
 	UnregisterRuntime(id string) error
-	GetConnectionToken(runtimeID string) error
+	GetConnectionToken(runtimeID string) (string, string, error)
 }
 
 type CompassRuntimeAgentConfig struct {
@@ -37,29 +44,29 @@ func NewCompassRuntimeAgentConfigurator(directorClient DirectorClient, kubernete
 }
 
 func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc, error) {
-	runtimeID, err := crc.registerRuntime(runtimeName)
+	runtimeID, err := crc.directorClient.RegisterRuntime(runtimeName)
 	if err != nil {
 		return nil, err
 	}
 
-	token, compassConnectorUrl, err := crc.getTokenUrl()
+	token, compassConnectorUrl, err := crc.directorClient.GetConnectionToken(runtimeID)
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to get token URL", runtimeID, nil, nil)
 	}
 
-	compassRuntimeAgentConfig := CompassRuntimeAgentConfig{
+	config := CompassRuntimeAgentConfig{
 		ConnectorUrl: compassConnectorUrl,
 		RuntimeID:    runtimeID,
 		Token:        token,
 		Tenant:       crc.tenant,
 	}
 
-	secretRollbackFunc, err := crc.createCompassRuntimeAgentSecret(compassRuntimeAgentConfig)
+	secretRollbackFunc, err := newSecretCreator(crc.kubernetesInterface).Do(NewCompassRuntimeConfigName, CompassSystemNamespace, config)
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret", runtimeID, nil, nil)
 	}
 
-	deploymentRollbackFunc, err := crc.modifyDeployment()
+	deploymentRollbackFunc, err := newDeploymentConfiguration(crc.kubernetesInterface).Do(CompassRuntimeAgentDeployment, CompassSystemNamespace)
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to modify deployment", runtimeID, nil, nil)
 	}
@@ -77,20 +84,4 @@ func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, w
 	}
 
 	return initialError
-}
-
-func (crc compassRuntimeAgentConfigurator) registerRuntime(runtimeName string) (string, error) {
-	return "", nil
-}
-
-func (crc compassRuntimeAgentConfigurator) getTokenUrl() (string, string, error) {
-	return "", "", nil
-}
-
-func (crc compassRuntimeAgentConfigurator) createCompassRuntimeAgentSecret(config CompassRuntimeAgentConfig) (RollbackSecretFunc, error) {
-	return newSecretCreator(crc.kubernetesInterface).Do("", "", config)
-}
-
-func (crc compassRuntimeAgentConfigurator) modifyDeployment() (RollbackDeploymentFunc, error) {
-	return newDeploymentConfiguration(crc.kubernetesInterface).Do("", "")
 }
