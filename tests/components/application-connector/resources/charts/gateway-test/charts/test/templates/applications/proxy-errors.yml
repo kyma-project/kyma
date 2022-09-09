@@ -2,7 +2,7 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
   name: proxy-errors
-  namespace: "{{ .Values.namespace }}"
+  namespace: "{{ .Values.global.namespace }}"
 spec:
   description: Proxying edge cases
   skipVerify: true
@@ -16,7 +16,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/123"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/code/123"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-errors/code-123"
     - displayName: timeout
       name: timeout
@@ -25,5 +25,5 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/timeout"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/timeout"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/proxy-errors/timeout"

@@ -2,7 +2,7 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
   name: negative-authorisation
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   description: Negative authorisation
   skipVerify: true
@@ -16,11 +16,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-oauth-token"
           credentials:
             secretName: oauth-test-negative-case
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/bad-token"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/bad-token"
             type: OAuth
     - displayName: wrong oauth secret
       name: wrong-oauth-secret
@@ -29,11 +29,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/wrong-oauth-secret"
           credentials:
             secretName: wrong-oauth-test
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
     - displayName: mtls-oauth-other-ca
       name: mtls-oauth-other-ca
@@ -42,11 +42,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-other-ca"
           credentials:
             secretName: mtls-oauth-negative-other-ca
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
     - displayName: mtls-oauth-incorrect-clientid
       name: mtls-oauth-incorrect-clientid
@@ -55,11 +55,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-incorrect-clientid"
           credentials:
             secretName: mtls-oauth-negative-incorrect-clientid
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
     - displayName: mtls-oauth-negative-expired-client-cert
       name: mtls-oauth-negative-expired-client-cert
@@ -68,11 +68,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-negative-expired-client-cert"
           credentials:
             secretName: mtls-oauth-negative-expired-client-cert
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
     - displayName: mtls-oauth-negative-expired-server-cert
       name: mtls-oauth-negative-expired-server-cert
@@ -81,11 +81,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-oauth-negative-expired-server-cert"
           credentials:
             secretName: mtls-oauth-negative-expired-server-cert
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8091/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8091/v1/api/mtls-oauth/token"
             type: OAuthWithCert
     - displayName: mtls-negative-other-ca
       name: mtls-negative-other-ca
@@ -94,7 +94,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-other-ca"
           credentials:
             secretName: mtls-negative-other-ca
@@ -106,7 +106,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-client-cert"
           credentials:
             secretName: mtls-negative-expired-client-cert
@@ -118,7 +118,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8091/v1/api/mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8091/v1/api/mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/mtls-negative-expired-server-cert"
           credentials:
             secretName: mtls-negative-expired-client-cert
@@ -130,13 +130,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-basic"
           credentials:
             secretName: basic-test-negative-case
             type: Basic
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
     - displayName: bad csrf endpoint basic
       name: bad-csrf-endpoint-basic
       providerDisplayName: Basic with CSRF
@@ -144,13 +144,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-basic"
           credentials:
             secretName: basic-test-negative-case
             type: Basic
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
     - displayName: bad csrf token oauth
       name: bad-csrf-token-oauth
       providerDisplayName: OAuth with CSRF
@@ -158,14 +158,14 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-oauth"
           credentials:
             secretName: oauth-test-negative-case
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
     - displayName: bad csrf endpoint oauth
       name: bad-csrf-endpoint-oauth
       providerDisplayName: OAuth with CSRF
@@ -173,14 +173,14 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-oauth"
           credentials:
             secretName: oauth-test-negative-case
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
     - displayName: bad csrf token mtls oauth
       name: bad-csrf-token-mtls-oauth
       providerDisplayName: mTLS-OAuth with CSRF
@@ -188,14 +188,14 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-mtls-oauth"
           credentials:
             secretName: mtls-oauth-negative-case
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
     - displayName: bad csrf endpoint mtls oauth
       name: bad-csrf-endpoint-mtls-oauth
       providerDisplayName: mTLS-OAuth with CSRF
@@ -203,14 +203,14 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-mtls-oauth"
           credentials:
             secretName: mtls-oauth-negative-case
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
     - displayName: bad csrf token mtls
       name: bad-csrf-token-mtls
       providerDisplayName: mTLS with CSRF
@@ -218,13 +218,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-token-mtls"
           credentials:
             secretName: mtls-negative-case
             type: CertificateGen
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/bad-token"
     - displayName: bad csrf endpoint mtls
       name: bad-csrf-endpoint-mtls
       providerDisplayName: mTLS with CSRF
@@ -232,13 +232,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/bad-csrf-endpoint-mtls"
           credentials:
             secretName: mtls-negative-case
             type: CertificateGen
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/nonexistingpath"
     - displayName: basic-auth-with-wrong-request-parameters
       name: basic-auth-with-wrong-request-parameters
       providerDisplayName: Basic
@@ -246,7 +246,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/negative-authorisation/basic-auth-with-wrong-request-parameters"
           requestParametersSecretName: wrong-request-parameters-test
           credentials:

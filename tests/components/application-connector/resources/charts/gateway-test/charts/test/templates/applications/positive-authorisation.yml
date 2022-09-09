@@ -2,7 +2,7 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
   name: positive-authorisation
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   description: Authorisation
   skipVerify: true
@@ -16,7 +16,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecure-always-ok"
     - displayName: basic-auth-ok
       name: basic-auth-ok
@@ -25,7 +25,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-ok"
           credentials:
             secretName: basic-test
@@ -37,11 +37,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/oauth"
           credentials:
             secretName: oauth-test
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
     - displayName: mtls-oauth
       name: mtls-oauth
@@ -50,11 +50,11 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls-oauth"
           credentials:
             secretName: mtls-oauth-positive
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
     - displayName: mtls
       name: mtls
@@ -63,7 +63,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/mtls"
           credentials:
             secretName: mtls-positive
@@ -75,13 +75,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-basic"
           credentials:
             secretName: basic-test
             type: Basic
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
     - displayName: csrf-oauth
       name: csrf-oauth
       providerDisplayName: OAuth with CSRF
@@ -89,14 +89,14 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-oauth"
           credentials:
             secretName: oauth-test
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/oauth/token"
             type: OAuth
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
     - displayName: csrf-mtls-oauth
       name: csrf-mtls-oauth
       providerDisplayName: mTLS-OAuth with CSRF
@@ -104,14 +104,14 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf-oauth/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-mtls-oauth"
           credentials:
             secretName: mtls-oauth-positive
-            authenticationUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
+            authenticationUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/mtls-oauth/token"
             type: OAuthWithCert
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
     - displayName: csrf-mtls
       name: csrf-mtls
       providerDisplayName: mTLS with CSRF
@@ -119,13 +119,13 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "https://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
+          targetUrl: "https://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8090/v1/api/csrf-mtls/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/csrf-mtls"
           credentials:
             secretName: mtls-positive
             type: CertificateGen
             csrfInfo:
-              tokenEndpointURL: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
+              tokenEndpointURL: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/csrf/token"
     - displayName: basic-auth-with-request-parameters
       name: basic-auth-with-request-parameters
       providerDisplayName: Basic
@@ -133,7 +133,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/request-parameters-basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic-auth-with-request-parameters"
           requestParametersSecretName: request-parameters-test
           credentials:

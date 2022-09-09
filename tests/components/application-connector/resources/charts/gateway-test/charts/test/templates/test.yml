@@ -2,19 +2,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: application-gateway-test
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.global.namespace }}
 spec:
   template:
     spec:
-      initContainers:
-        - name: wait-for-services
-          image: opsfleet/depends-on
-          args:
-            - "-service={{ .Values.mockServiceName}}"
       containers:
         - name: application-gateway-test
-          image: {{ include "imageurl" (dict "reg" .Values.containerRegistry "img" .Values.images.gatewayTest) }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.gatewayTest) }}
           imagePullPolicy: Always
       restartPolicy: Never
-      serviceAccountName: {{ .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
   backoffLimit: 0

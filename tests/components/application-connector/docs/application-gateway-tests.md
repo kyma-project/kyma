@@ -26,7 +26,7 @@ The tests consist of:
 
 Additionally, the following resources are created on the cluster:
 - [Service Account](../resources/charts/gateway-test/charts/test/templates/service-account.yml) used by the tests to read the Application CRs
-- [Secrets](../resources/charts/gateway-test/charts/test/templates/target-api-mock/credentials) used by the Mock application to configure mTLS servers
+- [Secrets](../resources/charts/gateway-test/charts/test/templates/applications/credentials) used by the Mock application to configure mTLS servers
 
 The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Application Gateway is installed.
 The test Job and the mock application deployment are in the `test` Namespace.
@@ -70,7 +70,7 @@ To test authentication methods, we have the following API:
 ![8090 authorisation methods API](assets/api-auth-methods-mtls.png)
 
 The credentials used for authentication, such as `clientID`, are [hardcoded](../tools/external-api-mock-app/config.go).
-The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](../resources/charts/gateway-test/charts/test/templates/target-api-mock/credentials/mtls-cert-secret.yml).
+The server key, server certificate, and the CA root certificate for port `8090` are defined in [this Secret](../resources/charts/gateway-test/charts/mock-app/templates/credentials/mtls-cert-secret.yml).
 
 > **NOTE:** Port `8090` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
@@ -78,7 +78,7 @@ The server key, server certificate, and the CA root certificate for port `8090` 
 
 This API is identical to the one exposed on port `8090`.
 The HTTPS server on port `8091` uses an expired server certificate.
-The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](../resources/charts/gateway-test/charts/test/templates/target-api-mock/credentials/expired-mtls-cert-secret.yaml).
+The server key, server certificate, and the CA root certificate for port `8091` are defined in [this Secret](../resources/charts/gateway-test/charts/mock-app/templates/credentials/expired-mtls-cert-secret.yaml).
 
 > **NOTE:** Port `8091` must be excluded from redirection to Envoy, otherwise Application Gateway cannot pass the client certificate to the mock application.
 
