@@ -12,6 +12,7 @@ func TestCreateOutputSectionWithCustomOutput(t *testing.T) {
 	expected := `[OUTPUT]
     name                     null
     match                    foo.*
+    alias                    foo-null
     storage.total_limit_size 1G
 
 `
