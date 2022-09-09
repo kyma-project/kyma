@@ -3,11 +3,6 @@ const {
   deprovisionSKR,
 } = require('../../kyma-environment-broker');
 const {
-  unregisterKymaFromCompass,
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-} = require('../../compass');
-const {
   initializeK8sClient,
 } = require('../../utils');
 const {
@@ -20,7 +15,6 @@ const {
   withScenarioName,
   gardener,
   keb,
-  director,
   oidcE2ETest,
 } = require('../../skr-test');
 
@@ -34,8 +28,8 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 
 describe('SKR nightly', function() {
-  this.timeout(3600000 * 3); // 3h
-  this.slow(5000);
+  this._timeout(3600000 * 3); // 3h
+  this._slow(5000);
 
   const provisioningTimeout = 1000 * 60 * 60; // 1h
   const deprovisioningTimeout = 1000 * 60 * 30; // 30m
@@ -67,7 +61,6 @@ describe('SKR nightly', function() {
       if (runtime) {
         console.log('Deprovision last SKR.');
         await deprovisionSKR(keb, kcp, runtime.instanceID, deprovisioningTimeout);
-        await unregisterKymaFromCompass(director, options.scenarioName);
       } else {
         console.log('Deprovisioning not needed - no previous SKR found.');
       }
@@ -91,8 +84,6 @@ describe('SKR nightly', function() {
       console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
 
       shoot = skr.shoot;
-      await addScenarioInCompass(director, options.scenarioName);
-      await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
       initializeK8sClient({kubeconfig: shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
