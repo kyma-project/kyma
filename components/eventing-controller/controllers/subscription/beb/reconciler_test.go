@@ -39,13 +39,13 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	beb2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -363,7 +363,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Setting a finalizer")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer),
+				reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer),
 			))
 
 			By("Setting a subscribed condition")
@@ -538,7 +538,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Setting a finalizer")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer),
+				reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer),
 			))
 
 			By("Setting a subscribed condition")
@@ -761,7 +761,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer))
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
@@ -840,7 +840,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer))
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
@@ -928,7 +928,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer))
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
@@ -1369,7 +1369,7 @@ var (
 	k8sClient  client.Client
 	testEnv    *envtest.Environment
 	beb        *reconcilertesting.BEBMock
-	nameMapper handlers.NameMapper
+	nameMapper utils.NameMapper
 	mock       *reconcilertesting.BEBMock
 )
 
@@ -1453,7 +1453,7 @@ var _ = BeforeSuite(func(done Done) {
 		Qos:                      string(bebtypes.QosAtLeastOnce),
 	}
 
-	credentials := &beb2.OAuth2ClientCredentials{
+	credentials := &backendbeb.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
@@ -1462,8 +1462,8 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
-	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, beb2.MaxBEBSubscriptionNameLength)
-	bebHandler := beb2.NewBEB(credentials, nameMapper, defaultLogger)
+	nameMapper = utils.NewBEBSubscriptionNameMapper(domain, backendbeb.MaxBEBSubscriptionNameLength)
+	bebHandler := backendbeb.NewBEB(credentials, nameMapper, defaultLogger)
 
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
 	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
@@ -1513,18 +1513,18 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	ensureSubscriptionCreated(ctx, givenSubscription)
 
 	By("Given subscription with none empty APIRule name")
-	subscription := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
+	sub := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
 	// wait for APIRule to be set in Subscription
-	getSubscription(ctx, subscription).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
-	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: subscription.Namespace}}
+	getSubscription(ctx, sub).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.APIRuleName, Namespace: sub.Namespace}}
 	getAPIRule(ctx, apiRule).Should(reconcilertesting.HaveNotEmptyAPIRule())
 	reconcilertesting.MarkReady(apiRule)
 	updateAPIRuleStatus(ctx, apiRule).ShouldNot(HaveOccurred())
 
 	By("Given subscription is ready")
-	getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionReady())
+	getSubscription(ctx, sub).Should(reconcilertesting.HaveSubscriptionReady())
 
-	return subscription, apiRule
+	return sub, apiRule
 }
 
 // countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
@@ -1540,10 +1540,10 @@ func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete
 					countGet++
 				}
 			case http.MethodPost:
-				if subscription, ok := payload.(bebtypes.Subscription); ok {
-					if len(subscription.Events) > 0 {
-						for _, event := range subscription.Events {
-							if event.Type == reconcilertesting.OrderCreatedEventType && subscription.Name == subscriptionName {
+				if sub, ok := payload.(bebtypes.Subscription); ok {
+					if len(sub.Events) > 0 {
+						for _, event := range sub.Events {
+							if event.Type == reconcilertesting.OrderCreatedEventType && sub.Name == subscriptionName {
 								countPost++
 							}
 						}

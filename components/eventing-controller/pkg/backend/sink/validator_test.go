@@ -6,15 +6,16 @@ import (
 	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestSinkValidator(t *testing.T) {
@@ -41,22 +42,22 @@ func TestSinkValidator(t *testing.T) {
 		{
 			name:                  "With invalid URL",
 			givenSubscriptionSink: "http://invalid Sink",
-			wantErrString:         "not able to parse sink url with error",
+			wantErrString:         "failed to parse subscription sink URL",
 		},
 		{
 			name:                  "With invalid suffix",
 			givenSubscriptionSink: "https://svc2.test.local",
-			wantErrString:         "sink does not contain suffix",
+			wantErrString:         "failed to validate subscription sink URL. It does not contain suffix",
 		},
 		{
 			name:                  "With invalid suffix and port",
 			givenSubscriptionSink: "https://svc2.test.local:8080",
-			wantErrString:         "sink does not contain suffix",
+			wantErrString:         "failed to validate subscription sink URL. It does not contain suffix",
 		},
 		{
 			name:                  "With invalid number of subdomains",
 			givenSubscriptionSink: "https://svc.cluster.local:8080", // right suffix but 3 subdomains
-			wantErrString:         "sink should contain 5 sub-domains",
+			wantErrString:         "failed to validate subscription sink URL. It should contain 5 sub-domains",
 		},
 		{
 			name:                  "With different namespaces in subscription and sink name",
@@ -66,13 +67,13 @@ func TestSinkValidator(t *testing.T) {
 		{
 			name:                  "With no existing svc in the cluster",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			wantErrString:         "sink is not a valid cluster local svc, failed with error",
+			wantErrString:         "failed to validate subscription sink URL. It is not a valid cluster local svc",
 		},
 		{
 			name:                  "With no existing svc in the cluster, service has the wrong name",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
 			givenSvcNameToCreate:  "test", // wrong name
-			wantErrString:         "sink is not a valid cluster local svc, failed with error",
+			wantErrString:         "failed to validate subscription sink URL. It is not a valid cluster local svc",
 		},
 		{
 			name:                  "With correct format but missing scheme",

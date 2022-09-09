@@ -9,6 +9,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
+var Finalizer = GroupVersion.Group
+
 // WebhookAuth defines the Webhook called by an active subscription in BEB
 type WebhookAuth struct {
 	// Type defines type of authentication

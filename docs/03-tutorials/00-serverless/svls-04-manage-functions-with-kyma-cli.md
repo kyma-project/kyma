@@ -18,7 +18,7 @@ Before you start, make sure you have these tools installed:
 
 - [Docker](https://www.docker.com/)
 - [Kyma CLI](https://github.com/kyma-project/cli)
-- Kyma installed locally or on a cluster
+- [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) locally or on a cluster
 
 ## Steps
 

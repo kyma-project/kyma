@@ -5,25 +5,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/mock"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
@@ -44,13 +45,13 @@ func TestReconciler_Reconcile(t *testing.T) {
 	defaultSubConfig := env.DefaultSubscriptionConfig{}
 	// A subscription with the correct Finalizer, ready for reconciliation with the backend.
 	testSub := controllertesting.NewSubscription("sub1", "test",
-		controllertesting.WithFinalizers([]string{Finalizer}),
+		controllertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
 	)
 	// A subscription marked for deletion.
 	testSubUnderDeletion := controllertesting.NewSubscription("sub2", "test",
 		controllertesting.WithNonZeroDeletionTimestamp(),
-		controllertesting.WithFinalizers([]string{Finalizer}),
+		controllertesting.WithFinalizers([]string{eventingv1alpha1.Finalizer}),
 		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
 	)
 
@@ -115,7 +116,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, happyCleaner, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  backendDeleteErr,
+			wantReconcileError:  xerrors.Errorf("failed to delete JetStream subscription: %v", backendDeleteErr),
 		},
 		{
 			name:              "Return error and default Result{} when validator returns error",
@@ -139,7 +140,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, unhappyCleaner, defaultSubConfig, happyValidator)
 			},
 			wantReconcileResult: ctrl.Result{},
-			wantReconcileError:  cleanerErr,
+			wantReconcileError:  xerrors.Errorf("failed to get clean subjects: %v", cleanerErr),
 		},
 	}
 
@@ -153,7 +154,11 @@ func TestReconciler_Reconcile(t *testing.T) {
 			}}
 			res, err := reconciler.Reconcile(context.Background(), r)
 			req.Equal(res, tc.wantReconcileResult)
-			req.Equal(err, tc.wantReconcileError)
+			if tc.wantReconcileError == nil {
+				req.Equal(err, nil)
+			} else {
+				req.Equal(err.Error(), tc.wantReconcileError.Error())
+			}
 		})
 	}
 }
@@ -176,7 +181,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		},
 		{
 			name:            "With eventing finalizer the NATS subscription should be deleted and the finalizer should be cleared",
-			givenFinalizers: []string{Finalizer},
+			givenFinalizers: []string{eventingv1alpha1.Finalizer},
 			wantDeleteCall:  true,
 			wantFinalizers:  []string{},
 		},
@@ -192,26 +197,26 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
-			subscription := controllertesting.NewSubscription(subscriptionName, namespaceName,
+			sub := controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithFinalizers(testCase.givenFinalizers),
 			)
-			err := r.Client.Create(testEnvironment.Context, subscription)
+			err := r.Client.Create(testEnvironment.Context, sub)
 			require.NoError(t, err)
 
-			mockedBackend.On("DeleteSubscription", subscription).Return(nil)
+			mockedBackend.On("DeleteSubscription", sub).Return(nil)
 
 			// when
-			err = r.handleSubscriptionDeletion(ctx, subscription, r.namedLogger())
+			err = r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
 			require.NoError(t, err)
 
 			// then
 			if testCase.wantDeleteCall {
-				mockedBackend.AssertCalled(t, "DeleteSubscription", subscription)
+				mockedBackend.AssertCalled(t, "DeleteSubscription", sub)
 			} else {
-				mockedBackend.AssertNotCalled(t, "DeleteSubscription", subscription)
+				mockedBackend.AssertNotCalled(t, "DeleteSubscription", sub)
 			}
 
-			ensureFinalizerMatch(t, subscription, testCase.wantFinalizers)
+			ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
 
 			// check the changes were made on the kubernetes server
 			fetchedSub, err := fetchTestSubscription(ctx, r)
@@ -219,7 +224,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			ensureFinalizerMatch(t, &fetchedSub, testCase.wantFinalizers)
 
 			// clean up
-			err = r.Client.Delete(ctx, subscription)
+			err = r.Client.Delete(ctx, sub)
 			require.NoError(t, err)
 		})
 	}
@@ -431,7 +436,7 @@ func Test_syncInitialStatus(t *testing.T) {
 			sub := testCase.givenSub
 
 			// when
-			gotStatus, err := r.syncInitialStatus(sub, r.namedLogger())
+			gotStatus, err := r.syncInitialStatus(sub)
 			require.NoError(t, err)
 
 			// then

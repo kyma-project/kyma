@@ -19,33 +19,33 @@ type ApplicationReader interface {
 }
 
 func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
+
 	// Created in chart
 	expectedAppName := "app1"
-	scenarioName := "auto-testing"
 	compassAppName := expectedAppName + random.RandomString(10)
 
 	// Create Application in Director and wait until it gets created
 	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, scenarioName, expectedAppName)
+	runtimeID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, expectedAppName)
 	gs.Require().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-	err = gs.appComparator.Compare(compassAppName, expectedAppName)
+	err = gs.appComparator.Compare(expectedAppName, compassAppName)
 	gs.Require().NoError(err)
 
 	// Clean up
-	err = gs.directorClient.UnregisterApplication(applicationID, gs.testConfig.TestingTenant)
+	err = gs.directorClient.UnregisterApplication(runtimeID)
 	gs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, scenarioName, expectedAppName string) (string, error) {
+func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
 
-	var applicationID string
+	var runtimeID string
 
 	exec := func() error {
-		id, err := gs.directorClient.RegisterApplication(compassAppName, scenarioName, gs.testConfig.TestingTenant)
+		id, err := gs.directorClient.RegisterApplication(compassAppName)
 		if err != nil {
-			applicationID = id
+			runtimeID = id
 		}
 		return err
 	}
@@ -59,7 +59,7 @@ func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader Applicatio
 		return err != nil
 	}
 
-	return applicationID, executor.ExecuteAndWaitForCondition{
+	return runtimeID, executor.ExecuteAndWaitForCondition{
 		RetryableExecuteFunc: exec,
 		ConditionMetFunc:     verify,
 		Tick:                 checkAppExistsPeriod,

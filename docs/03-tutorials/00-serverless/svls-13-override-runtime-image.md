@@ -8,7 +8,7 @@ This tutorial shows how to build a custom runtime image and override the Functio
 
 Before you start, make sure you have these tools installed:
 
-- Kyma installed on a cluster
+- [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) on a cluster
 
 ## Steps
 

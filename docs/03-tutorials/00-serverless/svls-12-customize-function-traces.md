@@ -1,5 +1,5 @@
 ---
-title: Use the OpenTelemetry standard
+title: Customize Function traces
 ---
 
 This tutorial shows how to use the build-in OpenTelemetry tracer object to send custom trace data to the Jaeger service.
@@ -11,11 +11,11 @@ Additionally, you can extend the default trace context and create your own custo
 
 Before you start, make sure you have these tools installed:
 
-- Kyma installed on a cluster
+- [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) on a cluster
 
 ## Steps
 
-Follows these steps:
+The following code samples illustrate how to enrich the default trace with custom spans, events, and tags:
 
 1. [Create an inline Function](./svls-01-create-inline-function.md) with the following body:
 
@@ -26,14 +26,45 @@ Follows these steps:
    </summary>
 
       ```javascript
+
+      const { SpanStatusCode } = require("@opentelemetry/api/build/src/trace/status");
+      const axios = require("axios")
       module.exports = {
-         main: function (event, context) {
-            span = event.tracer.startSpan('foo');
-            span.addEvent('bar');
-            span.end();
-            
-            return "hello OpenTelemetry"
+         main: async function (event, context) {
+
+            const data = {
+               name: "John",
+               surname: "Doe",
+               type: "Employee",
+               id: "1234-5678"
+            }
+
+            const span = event.tracer.startSpan('call-to-acme-service');
+            return await callAcme(data)
+               .then(resp => {
+                  if(resp.status!==200){
+                    throw new Error("Unexpected response from acme service");
+                  }
+                  span.addEvent("Data sent");
+                  span.setAttribute("data-type", data.type);
+                  span.setAttribute("data-id", data.id);
+                  span.setStatus({code: SpanStatusCode.OK});
+                  return "Data sent";
+               }).catch(err=> {
+                  console.error(err)
+                  span.setStatus({
+                    code: SpanStatusCode.ERROR,
+                    message: err.message,
+                  });
+                  return err.message;
+               }).finally(()=>{
+                  span.end();
+               });
          }
+      }
+
+      let callAcme = (data)=>{
+         return axios.post('https://acme.com/api/people', data)
       }
       ```
 
