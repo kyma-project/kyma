@@ -10,6 +10,7 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   debug,
   retryPromise,
+  testCompassFlow,
   replaceAllInString,
 } = require('../utils');
 
@@ -200,16 +201,11 @@ function runDashboardTestCase(dashboardName, test) {
 }
 
 async function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
-  if (isSkr) {
-    debug('Skipping eventing monitoring tests on SKR temporarily, because some latest queries are not supported in released version');
-    return;
-  }
-
   let allDashboards = dashboards;
   if (isJetStreamEnabled) {
     allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
   }
-  if (isSkr) {
+  if (isSkr && testCompassFlow) {
     allDashboards = Object.assign(allDashboards, skrDashboards);
   }
 
