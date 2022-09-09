@@ -44,14 +44,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 
 	token, compassConnectorUrl, err := crc.getTokenUrl()
 	if err != nil {
-		{
-			err := newRollbackFunc(runtimeID, crc.directorClient, nil, nil)()
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to get token URL and unregister runtime")
-			}
-		}
-
-		return nil, errors.Wrap(err, "failed to get token URL")
+		return nil, crc.rollbackOnError(err, "failed to get token URL", runtimeID, nil, nil)
 	}
 
 	compassRuntimeAgentConfig := CompassRuntimeAgentConfig{
@@ -63,26 +56,27 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 
 	secretRollbackFunc, err := crc.createCompassRuntimeAgentSecret(compassRuntimeAgentConfig)
 	if err != nil {
-		{
-			err := newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, nil)()
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to create Compass Runtime Configuration secret and unregister runtime")
-			}
-		}
-
-		return nil, errors.Wrap(err, "failed to create Compass Runtime Configuration secret")
+		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret", runtimeID, nil, nil)
 	}
 
 	deploymentRollbackFunc, err := crc.modifyDeployment()
 	if err != nil {
-		err := newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, nil)()
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to create Compass Runtime Configuration secret and unregister runtime")
-		}
-		return nil, err
+		return nil, crc.rollbackOnError(err, "failed to modify deployment", runtimeID, nil, nil)
 	}
 
 	return newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc), nil
+}
+
+func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID string, secretRollbackFunc RollbackSecretFunc, deploymentRollbackFunc RollbackDeploymentFunc) error {
+	err := newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc)()
+	if err != nil {
+		initialWrapped := errors.Wrap(initialError, wrapMsgString)
+		errorWrapped := errors.Wrap(err, "failed to rollback changes after configuring Compass Runtime Agent error")
+
+		return errors.Wrap(errorWrapped, initialWrapped.Error())
+	}
+
+	return initialError
 }
 
 func (crc compassRuntimeAgentConfigurator) registerRuntime(runtimeName string) (string, error) {
