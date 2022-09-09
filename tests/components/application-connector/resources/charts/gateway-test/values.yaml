@@ -2,11 +2,17 @@ global:
   containerRegistry:
     path: "eu.gcr.io/kyma-project"
 
-images:
-  gatewayTest:
-    name: "gateway-test"
-    version: "PR-14912"
+  images:
+    gatewayTest:
+      name: "gateway-test"
+      version: "PR-15421"
 
-  mockApplication:
-    name: "mock-app"
-    version: "PR-14912"
+    mockApplication:
+      name: "mock-app"
+      version: "PR-15421"
+
+  serviceAccountName: "test-account"
+  namespace: "test"
+
+  mockServiceName: "mock-application"
+
