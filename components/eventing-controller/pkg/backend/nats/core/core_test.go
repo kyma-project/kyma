@@ -756,16 +756,20 @@ func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	cleanSubject1 := "subOne"
 	sub1 := eventingtesting.NewSubscription(cleanSubject1, "foo", eventingtesting.WithNotCleanFilter())
 	natsSub1Key := backendnats.CreateKey(sub1, cleanSubject1, 0)
-	natsSub1 := &nats.Subscription{
-		Subject: cleanSubject1,
+	natsSub1 := &backendnats.Subscription{
+		Subscription: &nats.Subscription{
+			Subject: cleanSubject1,
+		},
 	}
 
 	// create subscription 2 and its nats subscription
 	cleanSubject2 := "subOneTwo"
 	sub2 := eventingtesting.NewSubscription(cleanSubject2, "foo", eventingtesting.WithNotCleanFilter())
 	natsSub2Key := backendnats.CreateKey(sub2, cleanSubject2, 0)
-	natsSub2 := &nats.Subscription{
-		Subject: cleanSubject2,
+	natsSub2 := &backendnats.Subscription{
+		Subscription: &nats.Subscription{
+			Subject: cleanSubject2,
+		},
 	}
 
 	// // ###### Test logic ######
@@ -911,7 +915,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	// get internal key
 	var key string
-	var natsSub *nats.Subscription
+	var natsSub backendnats.Subscriber
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
 		key = backendnats.CreateKey(sub, subject, i)
 		natsSub = natsBackend.subscriptions[key]
@@ -978,7 +982,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// get internal key
 	var key string
-	var natsSub *nats.Subscription
+	var natsSub backendnats.Subscriber
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
 		key = backendnats.CreateKey(sub, subject, i)
 		g.Expect(key).To(Not(BeEmpty()))
@@ -1172,11 +1176,11 @@ func getLogger(g *GomegaWithT, level kymalogger.Level) *logger.Logger { //nolint
 	return l
 }
 
-func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
+func checkIsNotValid(sub backendnats.Subscriber, t *testing.T) error {
 	return checkValidity(sub, false, t)
 }
 
-func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) error {
+func checkValidity(sub backendnats.Subscriber, toCheckIsValid bool, t *testing.T) error {
 	maxAttempts := uint(5)
 	delay := time.Second
 	err := retry.Do(
