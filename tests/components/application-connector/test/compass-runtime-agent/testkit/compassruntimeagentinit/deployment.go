@@ -8,6 +8,8 @@ type deploymentConfiguration struct {
 	kubernetesInterface kubernetes.Interface
 }
 
+// TODO Set new cofnig secret name in the deployment
+// Wait until the deployment is rolled out
 func newDeploymentConfiguration(kubernetesInterface kubernetes.Interface) deploymentConfiguration {
 	return deploymentConfiguration{
 		kubernetesInterface: kubernetesInterface,
