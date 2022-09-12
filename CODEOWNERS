@@ -28,8 +28,8 @@
 /components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao @PK85 @dbadura
 /components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/telemetry-operator @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
 /components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
@@ -45,7 +45,7 @@
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
@@ -68,7 +68,7 @@
 /resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
@@ -90,7 +90,7 @@
 /tests/fast-integration/smctl @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
 
 
-/tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
@@ -98,16 +98,16 @@
 
 # performance tests
 /tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
-/tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # The tools/gitserver directory
-/tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
 
 # VERSION file
 VERSION @kyma-project/prow
