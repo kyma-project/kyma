@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	testing2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
+	subscriptiontesting "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
@@ -1479,8 +1479,9 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 	}
 }
 
-// Test_CreatingConsumer tests the creation of the valid consumer on NATS server
-func Test_CreatingConsumer(t *testing.T) {
+// Test_SyncSubscription tests the creation of the valid consumer on NATS server.
+// It also sends events to check if the consumer/subscription logic works.
+func Test_SyncSubscription(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -1494,7 +1495,7 @@ func Test_CreatingConsumer(t *testing.T) {
 	require.True(t, subscriber.IsRunning())
 
 	// create a new Subscription
-	cleanEventTypes := []string{testing2.NewCleanEventType("0")}
+	cleanEventTypes := []string{subscriptiontesting.NewCleanEventType("0")}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
@@ -1539,7 +1540,7 @@ func Test_CreatingConsumer(t *testing.T) {
 	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
 	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
 
-	// unsubscribe from topic, this will keep the consumer, but remove the NATS Subscription
+	// unsubscribe from subject, this will keep the consumer, but remove the NATS Subscription
 	for key, sub := range jsBackend.subscriptions {
 		require.NoError(t, sub.Unsubscribe())
 		delete(jsBackend.subscriptions, key)

@@ -105,8 +105,7 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 }
 
 // UnsubscribeAll the subscriptionmanager.Manager interface.
-func (c *SubscriptionManager) UnsubscribeAll() error {
-	return nil
+func (c *SubscriptionManager) UnsubscribeAll() {
 }
 
 // Stop implements the subscriptionmanager.Manager interface and stops the NATS subscription manager.

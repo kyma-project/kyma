@@ -112,7 +112,5 @@ func main() {
 	}
 
 	// unsubscribe on NATS before shutdown
-	if err := natsSubMgr.UnsubscribeAll(); err != nil {
-		log.Fatalf("Failed to unsubscribe on NATS Server, err: %v", err)
-	}
+	natsSubMgr.UnsubscribeAll()
 }

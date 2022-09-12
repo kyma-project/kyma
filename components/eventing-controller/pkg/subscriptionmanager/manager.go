@@ -19,6 +19,6 @@ type Manager interface {
 	// Stop tells the subscription manager instance to shut down and clean-up.
 	Stop(runCleanup bool) error
 
-	// UnsubscribeAll removes all the subscriptions on the backend side
-	UnsubscribeAll() error
+	// UnsubscribeAll removes all the subscriptions on the backend side.
+	UnsubscribeAll()
 }

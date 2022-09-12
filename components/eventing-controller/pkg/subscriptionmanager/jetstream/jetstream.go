@@ -66,9 +66,8 @@ func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, met
 	}
 }
 
-func (sm *SubscriptionManager) UnsubscribeAll() error {
+func (sm *SubscriptionManager) UnsubscribeAll() {
 	sm.backend.UnsubscribeOnNats()
-	return nil
 }
 
 // Init initialize the JetStream subscription manager.

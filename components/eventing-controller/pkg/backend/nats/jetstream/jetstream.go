@@ -50,7 +50,7 @@ type Backend interface {
 	// GetJetStreamSubjects returns a list of subjects appended with stream name as prefix if needed
 	GetJetStreamSubjects(subjects []string) []string
 
-	// UnsubscribeOnNats removes the interest for all NATS Subscriptions
+	// UnsubscribeOnNats removes the interest for all NATS Subscriptions.
 	UnsubscribeOnNats()
 }
 
@@ -177,15 +177,18 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	return nil
 }
 
-// UnsubscribeOnNats removes the interest for all NATS Subscriptions
+// UnsubscribeOnNats removes the interest for all NATS Subscriptions.
 func (js *JetStream) UnsubscribeOnNats() {
 	// unsubscribe call to JetStream is async hence checking the status of the connection is important
 	if err := js.checkJetStreamConnection(); err != nil {
 		js.logger.WithContext().Error(err.Error())
 	}
-	for _, jsSub := range js.subscriptions {
+	for key, jsSub := range js.subscriptions {
 		if err := jsSub.Unsubscribe(); err != nil {
-			js.logger.WithContext().Errorw("Failed to unsubscribe on NATS JetStream", "err", err)
+			js.logger.WithContext().With(
+				"subscriptionSubject", key,
+				"jetStreamSubject", jsSub.Subject,
+			).Errorw("Failed to unsubscribe on NATS JetStream", "err", err)
 		}
 	}
 }
@@ -422,7 +425,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
 		if err != nil && err != nats.ErrConsumerNotFound {
 			log.Errorw("Failed to get consumer info", "error", err)
-			continue
+			return err
 		}
 
 		// create the consumer in case it doesn't exist
@@ -433,7 +436,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			)
 			if err != nil {
 				log.Errorw("Failed to create a consumer", "error", err)
-				continue
+				return err
 			}
 			log.Debug("Created consumer on JetStream")
 		}
