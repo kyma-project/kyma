@@ -7,16 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	. "github.com/onsi/gomega"
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestGetHash(t *testing.T) {
@@ -51,8 +48,8 @@ func TestGetInternalView4Ev2(t *testing.T) {
 	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
 
 	bebSubEvents := types.Events{types.Event{
-		Source: reconcilertesting.EventSource,
-		Type:   reconcilertesting.OrderCreatedEventType,
+		Source: eventingtesting.EventSource,
+		Type:   eventingtesting.OrderCreatedEventType,
 	}}
 
 	defaultNamespace := "defaultNS"
@@ -64,12 +61,12 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 	t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
 		// given
-		subscription := reconcilertesting.NewSubscription("name", "namespace",
+		subscription := eventingtesting.NewSubscription("name", "namespace",
 			eventingtesting.WithOrderCreatedFilter(),
 			eventingtesting.WithValidSink("ns", svcName),
 		)
 
-		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(
+		subscription.Spec.ProtocolSettings = eventingtesting.NewProtocolSettings(
 			eventingtesting.WithBinaryContentMode(),
 			eventingtesting.WithExemptHandshake(),
 			eventingtesting.WithAtLeastOnceQOS(),
@@ -92,9 +89,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			expectedWebhookAuth,
 		)
 
-		apiRule := reconcilertesting.NewAPIRule(subscription,
-			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(svcName, host),
+		apiRule := eventingtesting.NewAPIRule(subscription,
+			eventingtesting.WithPath(),
+			eventingtesting.WithService(svcName, host),
 		)
 
 		// then
@@ -107,7 +104,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 	t.Run("subscription with default setting", func(t *testing.T) {
 		// given
-		subscription := reconcilertesting.NewSubscription("name", "namespace",
+		subscription := eventingtesting.NewSubscription("name", "namespace",
 			eventingtesting.WithOrderCreatedFilter(),
 			eventingtesting.WithValidSink("ns", svcName),
 		)
@@ -120,9 +117,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			defaultWebhookAuth, // WebhookAuth should retain defaults
 		)
 
-		apiRule := reconcilertesting.NewAPIRule(subscription,
-			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(svcName, host),
+		apiRule := eventingtesting.NewAPIRule(subscription,
+			eventingtesting.WithPath(),
+			eventingtesting.WithService(svcName, host),
 		)
 
 		// then
@@ -135,12 +132,12 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 	t.Run("subscription with custom webhookauth config followed by a subscription with default webhookauth config should not alter the default config", func(t *testing.T) {
 		// given
-		subWithGivenWebhookAuth := reconcilertesting.NewSubscription("name", "namespace",
+		subWithGivenWebhookAuth := eventingtesting.NewSubscription("name", "namespace",
 			eventingtesting.WithOrderCreatedFilter(),
 			eventingtesting.WithValidSink("ns", svcName),
 		)
 
-		subWithGivenWebhookAuth.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(
+		subWithGivenWebhookAuth.Spec.ProtocolSettings = eventingtesting.NewProtocolSettings(
 			eventingtesting.WithBinaryContentMode(),
 			eventingtesting.WithExemptHandshake(),
 			eventingtesting.WithAtLeastOnceQOS(),
@@ -162,9 +159,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			&expectedWebhookAuth, // WebhookAuth should retain the supplied config
 		)
 
-		apiRule := reconcilertesting.NewAPIRule(subWithGivenWebhookAuth,
-			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(svcName, host),
+		apiRule := eventingtesting.NewAPIRule(subWithGivenWebhookAuth,
+			eventingtesting.WithPath(),
+			eventingtesting.WithService(svcName, host),
 		)
 
 		// then
@@ -176,7 +173,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Use another subscription without webhookAuthConfig
 		// given
-		subscriptionWithoutWebhookAuth := reconcilertesting.NewSubscription("name", "namespace",
+		subscriptionWithoutWebhookAuth := eventingtesting.NewSubscription("name", "namespace",
 			eventingtesting.WithOrderCreatedFilter(),
 			eventingtesting.WithValidSink("ns", svcName),
 		)
@@ -189,9 +186,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			defaultWebhookAuth, // WebhookAuth should retain defaults
 		)
 
-		apiRule = reconcilertesting.NewAPIRule(subscriptionWithoutWebhookAuth,
-			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(svcName, host),
+		apiRule = eventingtesting.NewAPIRule(subscriptionWithoutWebhookAuth,
+			eventingtesting.WithPath(),
+			eventingtesting.WithService(svcName, host),
 		)
 
 		// then
@@ -218,8 +215,8 @@ func TestGetInternalView4Ems(t *testing.T) {
 
 		Events: []types.Event{
 			{
-				Source: reconcilertesting.EventSource,
-				Type:   reconcilertesting.OrderCreatedEventTypeNotClean,
+				Source: eventingtesting.EventSource,
+				Type:   eventingtesting.OrderCreatedEventTypeNotClean,
 			},
 		},
 	}
@@ -236,8 +233,8 @@ func TestGetInternalView4Ems(t *testing.T) {
 
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
-			Source: reconcilertesting.EventSource,
-			Type:   reconcilertesting.OrderCreatedEventTypeNotClean,
+			Source: eventingtesting.EventSource,
+			Type:   eventingtesting.OrderCreatedEventTypeNotClean,
 		},
 	}))
 	g.Expect(bebSubscription)
