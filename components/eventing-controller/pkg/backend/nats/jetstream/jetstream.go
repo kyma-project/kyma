@@ -29,12 +29,14 @@ import (
 var _ Backend = &JetStream{}
 
 const (
-	jsHandlerName          = "jetstream-handler"
-	idleHeartBeatDuration  = 1 * time.Minute
-	jsConsumerMaxRedeliver = 100
-	jsConsumerAcKWait      = 30 * time.Second
-	jsMaxStreamNameLength  = 32
-	separator              = "/"
+	jsHandlerName                     = "jetstream-handler"
+	idleHeartBeatDuration             = 1 * time.Minute
+	jsConsumerMaxRedeliver            = 100
+	jsConsumerAcKWait                 = 30 * time.Second
+	jsMaxStreamNameLength             = 32
+	separator                         = "/"
+	NoNatsSubscriptionErr             = "failed to create NATS JetStream subscription for filter: "
+	NoNatsSubscriptionRequeueDuration = 10 * time.Second
 )
 
 type Backend interface {
@@ -171,6 +173,16 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	if err := js.createConsumer(subscription, asyncCallback, log); err != nil {
 		return err
 	}
+
+	// check whether NATS Subscription(s) were created for all the Kyma Subscription filters
+	for _, subject := range subscription.Status.CleanEventTypes {
+		jsSubject := js.GetJetStreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		if _, ok := js.subscriptions[jsSubKey]; !ok {
+			return errors.New(NoNatsSubscriptionErr + jsSubKey.NamespacedName())
+		}
+	}
+
 	return nil
 }
 
@@ -412,6 +424,17 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		log := log.With("subject", subject)
 
 		if _, ok := js.subscriptions[jsSubKey]; ok {
+			continue
+		}
+
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get consumer info", "error", err)
+			return err
+		}
+
+		// skip the subject, in case there is a bound consumer on NATS
+		if consumerInfo != nil && consumerInfo.PushBound {
 			continue
 		}
 

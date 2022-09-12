@@ -3,6 +3,7 @@ package jetstream
 import (
 	"context"
 	"reflect"
+	"strings"
 
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -145,10 +146,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Synchronize Kyma subscription to JetStream backend
 	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
+		result := ctrl.Result{}
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
+			return result, syncErr
 		}
-		return ctrl.Result{}, err
+		// Requeue the Request to reconcile it again if there are no NATS Subscriptions synced
+		if strings.Contains(err.Error(), jetstream.NoNatsSubscriptionErr) {
+			result = ctrl.Result{RequeueAfter: jetstream.NoNatsSubscriptionRequeueDuration}
+			err = nil
+		}
+		return result, err
 	}
 
 	// Update Subscription status
