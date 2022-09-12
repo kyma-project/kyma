@@ -170,7 +170,7 @@ func (n *Nats) createSubscriberPerMaxInFlight(sub *eventingv1alpha1.Subscription
 		}
 
 		// save created NATS subscription in storage
-		n.subscriptions[natsSubKey] = backendnats.Subscription{natsSub}
+		n.subscriptions[natsSubKey] = backendnats.Subscription{Subscription: natsSub}
 	}
 	return nil
 }

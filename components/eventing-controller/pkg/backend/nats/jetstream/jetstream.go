@@ -397,7 +397,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 			delete(js.subscriptions, jsSubKey)
 		} else {
 			// save recreated JetStream subscription in storage
-			js.subscriptions[jsSubKey] = &backendnats.Subscription{jsSubscription}
+			js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
 			log.Debugw("Recreated subscription on JetStream")
 		}
 	}
@@ -424,7 +424,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
 		}
 		// save created JetStream subscription in storage
-		js.subscriptions[jsSubKey] = &backendnats.Subscription{jsSubscription}
+		js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
 		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
 		log.Debugw("Created subscription on JetStream")
 	}
