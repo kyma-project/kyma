@@ -41,7 +41,7 @@ type Input struct {
 	Application ApplicationInput `json:"application,omitempty"`
 }
 
-// ApplicationInput is the default type of Input that handles application logs from runtime containers. It configures in more detail from which containers logs will be selected as input
+// ApplicationInput is the default type of Input that handles application logs from runtime containers. It configures in more detail from which containers logs are selected as input
 type ApplicationInput struct {
 	Namespaces InputNamespaces `json:"namespaces,omitempty"`
 	Containers InputContainers `json:"containers,omitempty"`
@@ -51,17 +51,17 @@ type ApplicationInput struct {
 	DropLabels bool `json:"dropLabels,omitempty"`
 }
 
-// InputNamespaces describes whether application logs from specific namespaces should be selected. The options are mutually exclusive. System namespaces are excluded by default from the collection
+// InputNamespaces describes whether application logs from specific Namespaces are selected. The options are mutually exclusive. System Namespaces are excluded by default from the collection
 type InputNamespaces struct {
-	// Include describes to include only the container logs of the specified namespace names
+	// Include describes to include only the container logs of the specified Namespace names
 	Include []string `json:"include,omitempty"`
-	// Exclude describes to exclude only the container logs of the specified namespace names
+	// Exclude describes to exclude only the container logs of the specified Namespace names
 	Exclude []string `json:"exclude,omitempty"`
-	// System describes to include the container logs of the system namespaces like kube-system, istio-system and kyma-system
+	// System describes to include the container logs of the system Namespaces like kube-system, istio-system, and kyma-system
 	System bool `json:"system,omitempty"`
 }
 
-// InputContainers describes whether application logs from specific containers should be selected. The options are mutually exclusive.
+// InputContainers describes whether application logs from specific containers are selected. The options are mutually exclusive.
 type InputContainers struct {
 	// Include describes to include only the container logs with the specified container names
 	Include []string `json:"include,omitempty"`
@@ -69,7 +69,7 @@ type InputContainers struct {
 	Exclude []string `json:"exclude,omitempty"`
 }
 
-// Filter describes a filtering option on the logs of the pipeline.
+// Filter describes a filtering option on the logs of the pipeline
 type Filter struct {
 	// Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode
 	Custom string `json:"custom,omitempty"`
