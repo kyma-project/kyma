@@ -50,7 +50,7 @@ type Nats struct {
 	logger            *logger.Logger
 	client            cev2.Client
 	connection        *nats.Conn
-	subscriptions     map[string]*nats.Subscription
+	subscriptions     map[string]backendnats.Subscriber
 	sinks             sync.Map
 	connClosedHandler backendnats.ConnClosedHandler
 	metricsCollector  *backendmetrics.Collector
@@ -61,7 +61,7 @@ func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, me
 		Config:            config,
 		defaultSubsConfig: subsConfig,
 		logger:            logger,
-		subscriptions:     make(map[string]*nats.Subscription),
+		subscriptions:     make(map[string]backendnats.Subscriber),
 		metricsCollector:  metricsCollector,
 	}
 }
@@ -152,7 +152,7 @@ func (n *Nats) createSubscriberPerMaxInFlight(sub *eventingv1alpha1.Subscription
 
 		// check if the subscription already exists and if it is valid.
 		if existingNatsSub, ok := n.subscriptions[natsSubKey]; ok {
-			if existingNatsSub.Subject != subject {
+			if existingNatsSub.SubscriptionSubject() != subject {
 				if err := n.deleteSubscriptionFromNATS(existingNatsSub, natsSubKey, log); err != nil {
 					return err
 				}
@@ -170,7 +170,7 @@ func (n *Nats) createSubscriberPerMaxInFlight(sub *eventingv1alpha1.Subscription
 		}
 
 		// save created NATS subscription in storage
-		n.subscriptions[natsSubKey] = natsSub
+		n.subscriptions[natsSubKey] = backendnats.Subscription{Subscription: natsSub}
 	}
 	return nil
 }
@@ -180,14 +180,14 @@ func (n *Nats) cleanupNATSSubscriptions(sub *eventingv1alpha1.Subscription, log 
 	// which is not anymore in this subscription filters (i.e. cleanSubjects).
 	// e.g. when filters are modified.
 	for key, s := range n.subscriptions {
-		if backendnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.Subject) {
+		if backendnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.SubscriptionSubject()) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return err
 			}
 			log.Infow(
 				"Deleted NATS subscription because it was deleted from subscription filters",
 				"subscriptionKey", key,
-				"natsSubject", s.Subject,
+				"natsSubject", s.SubscriptionSubject(),
 			)
 		}
 	}
@@ -205,7 +205,7 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 			"namespace", sub.GetNamespace(),
 			"version", sub.GetGeneration(),
 			"key", key,
-			"subject", s.Subject,
+			"subject", s.SubscriptionSubject(),
 		)
 
 		if backendnats.IsNatsSubAssociatedWithKymaSub(key, s, sub) {
@@ -224,7 +224,7 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	var nsn []types.NamespacedName
 	for k, v := range n.subscriptions {
 		if !v.IsValid() {
-			n.namedLogger().Debugw("Invalid NATS subscription", "key", k, "subject", v.Subject)
+			n.namedLogger().Debugw("Invalid NATS subscription", "key", k, "subject", v.SubscriptionSubject())
 			nsn = append(nsn, backendnats.CreateKymaSubscriptionNamespacedName(k, v))
 		}
 	}
@@ -233,12 +233,12 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 
 // GetAllSubscriptions returns the map which contains all details of subscription
 // Use this only for testing purposes.
-func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
+func (n *Nats) GetAllSubscriptions() map[string]backendnats.Subscriber {
 	return n.subscriptions
 }
 
 // deleteSubFromNats deletes subscription from NATS and from in-memory db.
-func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
+func (n *Nats) deleteSubscriptionFromNATS(natsSub backendnats.Subscriber, subKey string, log *zap.SugaredLogger) error {
 	// Unsubscribe call to NATS is async hence checking the status of the connection is important
 	if n.connection.Status() != nats.CONNECTED {
 		if err := n.Initialize(n.connClosedHandler); err != nil {

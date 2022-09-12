@@ -59,16 +59,16 @@ func GetCleanSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Clean
 	return cleaner.Clean(eventType)
 }
 
-func CreateKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
+func CreateKymaSubscriptionNamespacedName(key string, sub Subscriber) types.NamespacedName {
 	nsn := types.NamespacedName{}
 	nnvalues := strings.Split(key, string(types.Separator))
 	nsn.Namespace = nnvalues[0]
-	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.Subject), ".")
+	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.SubscriptionSubject()), ".")
 	return nsn
 }
 
 // IsNatsSubAssociatedWithKymaSub checks if the NATS subscription is associated / related to Kyma subscription or not.
-func IsNatsSubAssociatedWithKymaSub(natsSubKey string, natsSub *nats.Subscription, sub *eventingv1alpha1.Subscription) bool {
+func IsNatsSubAssociatedWithKymaSub(natsSubKey string, natsSub Subscriber, sub *eventingv1alpha1.Subscription) bool {
 	return CreateKeyPrefix(sub) == CreateKymaSubscriptionNamespacedName(natsSubKey, natsSub).String()
 }
 

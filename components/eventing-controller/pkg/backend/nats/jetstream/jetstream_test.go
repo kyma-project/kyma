@@ -203,7 +203,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetstreamSubject(subject)
+	jsSubject := jsBackend.GetJetStreamSubject(subject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -294,7 +294,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetstreamSubject(subject)
+	jsSubject := jsBackend.GetJetStreamSubject(subject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -388,7 +388,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetstreamSubject(newSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(newSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -481,7 +481,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	// Because we have two filters (i.e. two subjects)
 	require.Len(t, jsBackend.subscriptions, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
-	jsSubject := jsBackend.GetJetstreamSubject(firstSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(firstSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -581,7 +581,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// Check if total existing NATS subscriptions are correct
 	require.Len(t, jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
-	jsSubject := jsBackend.GetJetstreamSubject(firstSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(firstSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -691,7 +691,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 
 	// check if the NATS subscription are NOT the same after sync for subscription 1
 	// because the subscriptions should have being re-created for new subject
-	jsSubject := jsBackend.GetJetstreamSubject(newSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(newSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -712,7 +712,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// check if the NATS subscription are same after sync for subscription 2
 	// because the subscriptions should NOT have being re-created as
 	// subscription 2 was not modified
-	jsSubject = jsBackend.GetJetstreamSubject(cleanSubjectSub2)
+	jsSubject = jsBackend.GetJetStreamSubject(cleanSubjectSub2)
 	jsSubKey = NewSubscriptionSubjectIdentifier(sub2, jsSubject)
 	jsSub = jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -922,7 +922,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 	// then
 	require.Eventually(t, func() bool {
 		// fetch consumer info from JetStream
-		consumerName := NewSubscriptionSubjectIdentifier(sub, jsBackend.GetJetstreamSubject(sub.Status.CleanEventTypes[0])).ConsumerName()
+		consumerName := NewSubscriptionSubjectIdentifier(sub, jsBackend.GetJetStreamSubject(sub.Status.CleanEventTypes[0])).ConsumerName()
 		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, consumerName)
 		require.NoError(t, err)
 
@@ -1019,9 +1019,9 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, err)
 
 	subject := evtesting.CloudEventType
-	require.NoError(t, SendBinaryCloudEventToJetStream(jsBackend, jsBackend.GetJetstreamSubject(subject), evtesting.CloudEventData))
+	require.NoError(t, SendBinaryCloudEventToJetStream(jsBackend, jsBackend.GetJetStreamSubject(subject), evtesting.CloudEventData))
 	require.NoError(t, subscriber.CheckEvent(evtesting.CloudEventData))
-	require.NoError(t, SendStructuredCloudEventToJetStream(jsBackend, jsBackend.GetJetstreamSubject(subject), evtesting.StructuredCloudEvent))
+	require.NoError(t, SendStructuredCloudEventToJetStream(jsBackend, jsBackend.GetJetStreamSubject(subject), evtesting.StructuredCloudEvent))
 	require.NoError(t, subscriber.CheckEvent("\""+evtesting.EventData+"\""))
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }

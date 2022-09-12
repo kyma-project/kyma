@@ -21,13 +21,13 @@ func SendEventToJetStream(jsClient *JetStream, data string) error {
 	eventType := evtesting.OrderCreatedEventType
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.GetJetstreamSubject(eventType), []byte(sampleEvent))
+	return jsClient.conn.Publish(jsClient.GetJetStreamSubject(eventType), []byte(sampleEvent))
 }
 
 func SendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string) error {
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.GetJetstreamSubject(eventType), []byte(sampleEvent))
+	return jsClient.conn.Publish(jsClient.GetJetStreamSubject(eventType), []byte(sampleEvent))
 }
 
 func SendBinaryCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData string) error {

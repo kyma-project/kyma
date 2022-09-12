@@ -234,7 +234,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r := testEnvironment.Context, testEnvironment.Reconciler
 
-	jetStreamError := errors.New("Jetstream is not ready")
+	jetStreamError := errors.New("JetStream is not ready")
 	falseNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 		corev1.ConditionFalse, jetStreamError.Error())
