@@ -17,7 +17,7 @@ RUN apk --no-cache add \
 #################################################################
 
 # Note: kcp-cli doesn't provide releases
-ENV KCPCLI_VERSION=master-1208b417
+ENV KCPCLI_VERSION=master-7e40911a
 RUN curl -fLSs -o /usr/local/bin/kcp https://storage.googleapis.com/kyma-development-artifacts/kcp/${KCPCLI_VERSION}/kcp-linux &&\
     chmod +x /usr/local/bin/kcp
 
