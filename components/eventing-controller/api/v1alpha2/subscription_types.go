@@ -5,13 +5,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type TypeMatching string
-
-const (
-	STANDARD TypeMatching = "standard"
-	EXACT    TypeMatching = "exact"
-)
-
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only.
@@ -51,7 +44,10 @@ type SubscriptionStatus struct {
 	Ready bool `json:"ready"`
 
 	// Types defines the filter's event types after cleanup for use with the configured backend
-	Types []string `json:"types"`
+	Types []EventType `json:"types"`
+
+	// Backend contains backend specific status which are only applicable to the active backend
+	Backend Backend `json:"backend,omitempty"`
 
 	// Ev2hash defines the hash for the Subscription custom resource
 	// +optional
