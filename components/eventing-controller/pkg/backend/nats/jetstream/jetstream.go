@@ -162,10 +162,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	}
 
 	// async callback for maxInflight messages
-	callback := js.getCallback(subKeyPrefix, subscription.Name)
-	asyncCallback := func(m *nats.Msg) {
-		go callback(m)
-	}
+	asyncCallback := js.getCallback(subKeyPrefix, subscription.Name)
 
 	js.bindConsumersForInvalidNATSSubscriptions(subscription, asyncCallback, log)
 	if err := js.createConsumer(subscription, asyncCallback, log); err != nil {
