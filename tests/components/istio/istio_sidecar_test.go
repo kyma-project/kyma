@@ -190,7 +190,7 @@ func (i *istioInstalledCase) thereIsNHttpbinPod(n int, namespace string) error {
 		return true, nil
 	})
 	if err != nil {
-		return fmt.Errorf("there is more then one httpbin pod: %s", err)
+		return fmt.Errorf("there is more than one httpbin pod: %s", err)
 	}
 	return nil
 }
