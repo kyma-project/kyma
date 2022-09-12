@@ -409,6 +409,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 // when there is no NATS Subscription associated with the CleanEventType.
 // Then it creates a NATS Subscription bound to the created consumer.
 func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
+	log.Errorf("js.subs %v", js.subscriptions)
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetstreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
@@ -438,6 +439,8 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			log.Debug("Created consumer on JetStream")
 		}
 
+		log.Errorf("consumer.pushbound %v", consumerInfo.PushBound)
+		log.Errorf("js.subscriptions %v", js.subscriptions)
 		if consumerInfo.PushBound {
 			continue
 		}
@@ -454,7 +457,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
 		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
-		log.Debug("Created subscription on JetStream")
+		log.Errorw("Created subscription on JetStream")
 	}
 	return nil
 }
