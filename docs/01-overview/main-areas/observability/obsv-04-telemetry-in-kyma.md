@@ -4,9 +4,9 @@ title: Telemetry
 
 ## Kyma's telemetry component
 
-Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
+Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The Telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
 
-To support the logging domain, the telemetry component provides a log collector, Fluent Bit. You can configure the log shipment with external systems using runtime configuration with a dedicated Kubernetes API (CRD). With that, you can integrate with vendors such as [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276) using generic outputs, or with any vendor via a [fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa) using the forward output. Kyma's optional logging component complements the telemetry component, providing `Loki` as pre-configured log backend.
+To support the logging domain, the Telemetry component provides a log collector, Fluent Bit. You can configure the log collector with external systems using runtime configuration with a dedicated Kubernetes API (CRD) named `LogPipeline`. Using the LogPipeline's HTTP output, you can natively integrate with vendors such as [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276), or with any vendor using a [Fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa). Furthermore, you can run the collector in an [unsupported mode](#unsupported-mode), leveraging the full output options of Fluent Bit. Additionally, you can always bring your own log collector if you need advanced configuration options.
 
 ## Prerequisites
 
@@ -23,9 +23,9 @@ The telemetry component provides [Fluent Bit](https://fluentbit.io/) as a log co
 1. Container logs are stored by the Kubernetes container runtime under the `var/log` directory and its subdirectories.
 2. Fluent Bit runs as a DaemonSet (one instance per node), detects any new log files in the folder, and tails them using a filesystem buffer for reliability.
 3. Fluent Bit queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
-4. The telemetry component configures Fluent Bit with your custom output configuration.
+4. The Telemetry component configures Fluent Bit with your custom output configuration.
 5. If Kyma's logging component is installed, the operator configures the shipment to the in-cluster Loki instance automatically.
-6. As specified in your custom configuration, Fluent Bit sends the log data to observability systems outside the Kyma cluster.
+6. As specified in your `LogPipeline` configuration, Fluent Bit sends the log data to observability systems outside or inside the Kyma cluster. Here, you can use the integration with HTTP to integrate a system directly or with an additional Fluentd installation.
 7. The user accesses the internal and external observability system to analyze and visualize the logs.
 
 ### Pipelines
@@ -76,9 +76,9 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
     ```
     An output is a data destination configured by a [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) of the relevant type. The LogPipeline supports the following output types:
 
-    - **http**, which pushes the data to the specified http destination.
-    - **grafana-loki**, which pushes the data to the Kyma-internal Loki instance. Note: This output might not be compatible with latest Loki versions. For that, use the `custom` output with name `loki` instead.
-    - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax.
+    - **http**, which sends the data to the specified HTTP destination. The output is designed to integrate with a [Fluentd HTTP Input](https://docs.fluentd.org/input/http), which opens up a huge ecosystem of integration possibilities.
+    - **grafana-loki**, which sends the data to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with Loki, use the `custom` output with name `loki` instead.
+    - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax. Note: If you use a `custom` output, you put the LogPipeline in [unsupported mode](#unsupported-mode).
 
     See the following example of the **custom** output:
     ```yaml
@@ -140,8 +140,10 @@ To avoid problems with such recursive logs, it is recommended that you exclude t
 spec:
   input:
     application:
-      includeSystemNamespaces: true
-      excludeContainers:
+      namespaces:
+        system: true
+      containers:
+        exclude:
         - fluent-bit
 ```
 
@@ -184,7 +186,7 @@ spec:
 
 Integrations into external systems usually need authentication details dealing with sensitive data. To handle that data properly in Secrets, the LogPipeline supports the reference of Secrets.
 
-With the **http** and the **grafana-loki** output definition, the **valueFrom** attribute allows for mapping of Secret keys as visible in the following **http** output example:
+Using the **http** output definition and the **valueFrom** attribute, you can map Secret keys as in the following **http** output example:
 
 ```yaml
 kind: LogPipeline
@@ -348,9 +350,9 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | input.application.keepAnnotations | boolean | Indicates whether to keep all Kubernetes annotations. Default is `false`. |
 | input.application.dropLabels | boolean | Indicates whether to drop all Kubernetes labels. Default is `false`. |
 | filters | []object | List of [Fluent Bit filters](https://docs.fluentbit.io/manual/pipeline/filters) to apply to the logs processed by the pipeline. Filters are executed in sequence, as defined. They are executed before logs are buffered, and with that, are not executed on retries.|
-| filters[].custom | string | Filter definition in the Fluent Bit syntax.|
+| filters[].custom | string | Filter definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in [unsupported mode](#unsupported-mode).|
 | output | object | [Fluent Bit output](https://docs.fluentbit.io/manual/pipeline/outputs) where you want to push the logs. Only one output can be specified. |
-| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/). Note: This output might not be compatible with latest Loki versions. For that, use the `custom` output with name `loki` instead.|
+| output.grafana-loki | object | [Fluent Bit grafana-loki output](https://grafana.com/docs/loki/v2.2.x/clients/fluentbit/). Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with Loki, use the `custom` output with name `loki` instead. |
 | output.grafana-loki.url | object | Grafana Loki URL. |
 | output.grafana-loki.url.value | string | URL value. |
 | output.grafana-loki.url.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
@@ -374,7 +376,7 @@ For details, see the [LogPipeline specification file](https://github.com/kyma-pr
 | output.http.user | object | Basic Auth username.|
 | output.http.user.value | string | Username value, can contain references to Secret values. |
 | output.http.user.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-| output.custom | string | Any other Fluent Bit output specified in the Fluent Bit configuration syntax.|
+| output.custom | string | Any other Fluent Bit output specified in the Fluent Bit configuration syntax. Note: If you use a `custom` output, you put the LogPipeline in [unsupported mode](#unsupported-mode). |
 | variables | []object | A list of mappings from Kubernetes Secret keys to environment variables. Mapped keys are mounted as environment variables, so that they are available as [Variables](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/variables) in the sections.|
 | variables[].name | string | Name of the variable to map. |
 | variables[].valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`.|
@@ -532,7 +534,7 @@ Currently there are the following limitations for LogPipelines that are served b
 
 ### Unsupported Mode
 
-If you use a `custom` filter or output, you directly access the API of the underlying Fluent Bit configuration. Because Kyma cannot test every feature provided by Fluent Bit, a LogPipeline using custom filters or outputs runs in `unsupported mode`. Also, Kyma cannot guarantee full compatibility over subsequent releases.
+The `unsupportedMode` attribute of a `LogPipeline` indicates that you are using a `custom` filter and/or `custom` output. The Kyma team does not provide support for a custom configuration.
 
 ### Fluent Bit plugins
 
