@@ -15,7 +15,7 @@ const (
 	// deliveryMetricHelp help text for the delivery per subscription metric.
 	deliveryMetricHelp = "The total number of dispatched events per subscription"
 	// eventTypeSubscribedMetricHelp help text for the eventType subscribed metric.
-	eventTypeSubscribedMetricHelp = "The total number of all the eventTypes subscribed using the Subscription CRD"
+	eventTypeSubscribedMetricHelp = "The total number of eventTypes subscribed using the Subscription CRD"
 )
 
 // Collector implements the prometheus.Collector interface.
