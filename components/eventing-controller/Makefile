@@ -5,6 +5,7 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/eventing-controller/main.go
 override IGNORE_LINTING_ISSUES =
+override ADDITIONAL_LINTERS="gocognit"
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
@@ -131,3 +132,6 @@ $(eval $(call buildpack-mount,manifests))
 
 resolve_clean:
 	rm -rf vendor
+
+lint-thoroughly:
+	golangci-lint run

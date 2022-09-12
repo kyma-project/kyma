@@ -9,7 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// OAuthHandlerName OAuth handler name supported in Kyma
+// OAuthHandlerName OAuth handler name supported in Kyma.
 const OAuthHandlerName = "oauth2_introspection"
 
 // NewAPIRule creates a APIRule object.
@@ -42,7 +42,7 @@ func ApplyExistingAPIRuleAttributes(src, dst *apigatewayv1alpha1.APIRule) {
 	dst.Status = src.Status
 }
 
-// WithService sets the Service of an APIRule
+// WithService sets the Service of an APIRule.
 func WithService(host, svcName string, port uint32) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
@@ -57,7 +57,7 @@ func WithService(host, svcName string, port uint32) Option {
 	}
 }
 
-// WithGateway sets the gateway of an APIRule
+// WithGateway sets the gateway of an APIRule.
 func WithGateway(gw string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
@@ -65,7 +65,7 @@ func WithGateway(gw string) Option {
 	}
 }
 
-// WithOwnerReference sets the OwnerReferences of an APIRule
+// WithOwnerReference sets the OwnerReferences of an APIRule.
 func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
@@ -88,7 +88,7 @@ func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
 	}
 }
 
-// WithRules sets the rules of an APIRule for all Subscriptions for a subscriber
+// WithRules sets the rules of an APIRule for all Subscriptions for a subscriber.
 func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
@@ -144,7 +144,7 @@ func removeDuplicateValues(values []string) []string {
 	return list
 }
 
-// WithLabels sets the labels for an APIRule
+// WithLabels sets the labels for an APIRule.
 func WithLabels(labels map[string]string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
