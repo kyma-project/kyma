@@ -34,7 +34,7 @@ func TestCreateRewriteTagFilterIncludeNamespaces(t *testing.T) {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          logpipeline1
+    emitter_name          logpipeline1-blabla
     emitter_storage.type  filesystem
     rule                  $kubernetes['namespace_name'] "^(namespace1|namespace2)$" logpipeline1.$TAG true
 
@@ -66,7 +66,7 @@ func TestCreateRewriteTagFilterExcludeNamespaces(t *testing.T) {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          logpipeline1
+    emitter_name          logpipeline1-blabla
     emitter_storage.type  filesystem
     rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true
 
@@ -98,7 +98,7 @@ func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          logpipeline1
+    emitter_name          logpipeline1-blabla
     emitter_storage.type  filesystem
     rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
     rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
@@ -131,7 +131,7 @@ func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          logpipeline1
+    emitter_name          logpipeline1-blabla
     emitter_storage.type  filesystem
     rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
     rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
@@ -166,7 +166,7 @@ func TestCreateRewriteTagFilterExcludeNamespacesAndExcludeContainers(t *testing.
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          logpipeline1
+    emitter_name          logpipeline1-blabla
     emitter_storage.type  filesystem
     rule                  $kubernetes['container_name'] "^(?!container1$).*" logpipeline1.$TAG true
     rule                  $kubernetes['namespace_name'] "^(?!namespace1$|namespace2$).*" logpipeline1.$TAG true

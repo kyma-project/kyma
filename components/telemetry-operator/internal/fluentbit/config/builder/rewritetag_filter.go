@@ -16,7 +16,7 @@ func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, d
 	var sectionBuilder = NewFilterSectionBuilder().
 		AddConfigParam("Name", "rewrite_tag").
 		AddConfigParam("Match", fmt.Sprintf("%s.*", defaults.InputTag)).
-		AddConfigParam("Emitter_Name", logPipeline.Name).
+		AddConfigParam("Emitter_Name", logPipeline.Name+"-blabla").
 		AddConfigParam("Emitter_Storage.type", defaults.StorageType).
 		AddConfigParam("Emitter_Mem_Buf_Limit", defaults.MemoryBufferLimit)
 
