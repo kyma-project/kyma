@@ -35,9 +35,9 @@ type LogPipelineSpec struct {
 	Variables []VariableRef `json:"variables,omitempty"`
 }
 
-// Input describes an log input for a LogPipeline
+// Input describes a log input for a LogPipeline
 type Input struct {
-	// Application configures in more detail from which containers application logs should be enabled as input
+	// Application configures in more detail from which containers application logs are enabled as input
 	Application ApplicationInput `json:"application,omitempty"`
 }
 
@@ -82,7 +82,7 @@ type LokiOutput struct {
 	RemoveKeys []string          `json:"removeKeys,omitempty"`
 }
 
-// HttpOutput configures an HTTP-based output compatible with the FluentBit HTTP output plugin
+// HttpOutput configures an HTTP-based output compatible with the Fluent Bit HTTP output plugin
 type HTTPOutput struct {
 	Host      ValueType `json:"host,omitempty"`
 	User      ValueType `json:"user,omitempty"`
