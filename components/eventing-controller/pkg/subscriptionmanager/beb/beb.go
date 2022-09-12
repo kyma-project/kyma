@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -43,7 +43,7 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
 		return err
 	}
-	if err := apigatewayv1alpha1.AddToScheme(scheme); err != nil {
+	if err := apigatewayv1beta1.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil
