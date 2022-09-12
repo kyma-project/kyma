@@ -41,7 +41,7 @@ type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(connCloseHandler backendnats.ConnClosedHandler) error
 
-	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of Jetstream.
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of JetStream.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
 
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
@@ -191,7 +191,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetstreamSubject(subject)
+		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
 			return err
@@ -208,14 +208,14 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 	var result []string
 	for _, subject := range subjects {
-		result = append(result, js.GetJetstreamSubject(subject))
+		result = append(result, js.GetJetStreamSubject(subject))
 	}
 	return result
 }
 
-// GetJetstreamSubject appends the prefix to subject.
-func (js *JetStream) GetJetstreamSubject(subject string) string {
-	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
+// GetJetStreamSubject appends the prefix to subject.
+func (js *JetStream) GetJetStreamSubject(subject string) string {
+	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 
 func (js *JetStream) validateConfig() error {
@@ -313,7 +313,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
 		// configured stream's subject prefix.
-		Subjects: []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
+		Subjects: []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 	}
 	return streamConfig, nil
 }
@@ -349,14 +349,14 @@ func (js *JetStream) syncSubscriptionFilter(key SubscriptionSubjectIdentifier, s
 		return err
 	}
 
-	err = js.cleanupUnnecessaryJetstreamSubscribers(subscriber, subscription, log, info, key)
+	err = js.cleanupUnnecessaryJetStreamSubscribers(subscriber, subscription, log, info, key)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (js *JetStream) cleanupUnnecessaryJetstreamSubscribers(jsSub backendnats.Subscriber, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger, info *nats.ConsumerInfo, key SubscriptionSubjectIdentifier) error {
+func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub backendnats.Subscriber, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger, info *nats.ConsumerInfo, key SubscriptionSubjectIdentifier) error {
 	if utils.ContainsString(js.GetJetStreamSubjects(subscription.Status.CleanEventTypes), info.Config.FilterSubject) {
 		return nil
 	}
@@ -373,7 +373,7 @@ func (js *JetStream) cleanupUnnecessaryJetstreamSubscribers(jsSub backendnats.Su
 // we will delete the subscription from our internal subscriptions map.
 func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) {
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetstreamSubject(subject)
+		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		log := log.With("subject", subject)
 
@@ -407,7 +407,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 // when there is no NATS subscription associated with the CleanEventType.
 func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetstreamSubject(subject)
+		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		log := log.With("subject", subject)
 
