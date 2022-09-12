@@ -5,6 +5,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type TypeMatching string
+
+const (
+	STANDARD TypeMatching = "standard"
+	EXACT    TypeMatching = "exact"
+)
+
+type EventType struct {
+	OriginalType string `json:"originalType"`
+	CleanType    string `json:"cleanType"`
+}
+
+type Backend struct {
+}
+
 // WebhookAuth defines the Webhook called by an active subscription in BEB
 type WebhookAuth struct {
 	// Type defines type of authentication
