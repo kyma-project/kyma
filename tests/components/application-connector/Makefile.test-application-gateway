@@ -24,24 +24,30 @@ test-gateway: disable-sidecar-for-mtls-test generate-certs create-resources
 	exit 1; \
 	fi
 
-
 test-gateway-debug: disable-sidecar-for-mtls-test generate-certs create-resources
 	kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/application-gateway-test; \
 	echo "Results:"; \
 	./scripts/check-pod-logs.sh application-gateway-test; \
 
 create-resources:
-	@echo $(GOPATH)/bin/go-junit-report/v2 --help
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label namespace $(NAMESPACE) istio-injection=enabled
+	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
 
-	helm template resources/charts/gateway-test \
+	helm template resources/charts/gateway-test/charts/mock-app \
+        --set global.namespace=$(NAMESPACE) \
+        --set mockServiceName=$(MOCK_SERVICE_NAME) \
+        --values resources/charts/gateway-test/values.yaml \
+    | kubectl apply -f -
+	kubectl rollout status deployment mock-application -n test --timeout=90s
+
+	helm template resources/charts/gateway-test/charts/test \
     	--set namespace=$(NAMESPACE) \
     	--set mockServiceName=$(MOCK_SERVICE_NAME) \
+    	--values resources/charts/gateway-test/values.yaml \
     | kubectl apply -f -
 
 clean-gateway-test:
-	helm template resources/charts/gateway-test  | kubectl delete -f -
+	helm template resources/charts/gateway-test --set namespace=$(NAMESPACE) | kubectl delete -f -
 	kubectl delete ns $(NAMESPACE) --ignore-not-found
 
 disable-sidecar-for-mtls-test:
@@ -52,7 +58,8 @@ enable-sidecar-after-mtls-test:
 	kubectl -n kyma-system patch deployment central-application-gateway --type=json --patch '[{ "op": "remove", "path": "/spec/template/metadata/annotations/traffic.sidecar.istio.io~1excludeOutboundPorts"}]'
 
 generate-certs:
-	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/positive
-	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/certs/negative
+	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/charts/test/certs/positive
+	./scripts/generate-self-signed-certs.sh $(APP_URL) ./resources/charts/gateway-test/charts/test/certs/negative
+	cp -p -R ./resources/charts/gateway-test/charts/test/certs ./resources/charts/gateway-test/charts/mock-app
 
 

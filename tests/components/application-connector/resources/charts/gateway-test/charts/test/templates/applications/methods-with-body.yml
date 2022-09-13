@@ -2,7 +2,7 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
   name: methods-with-body
-  namespace: "{{ .Values.namespace }}"
+  namespace: "{{ .Values.global.namespace }}"
 spec:
   description: |-
     Verify if methods, specified by `descritpion`,
@@ -18,7 +18,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/methods-with-body/post"
     - displayName: delete
       name: delete
@@ -27,7 +27,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/methods-with-body/delete"
     - displayName: put
       name: put
@@ -36,5 +36,5 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/echo"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/methods-with-body/put"
