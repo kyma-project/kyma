@@ -20,7 +20,7 @@ import (
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -111,7 +111,7 @@ func getQos(qosStr string) (types.Qos, error) {
 	}
 }
 
-func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule,
+func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1beta1.APIRule,
 	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
 	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
@@ -183,7 +183,7 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	return emsSubscription, nil
 }
 
-func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventingv1alpha1.Subscription) (string, error) {
+func getExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, sub *eventingv1alpha1.Subscription) (string, error) {
 	scheme := "https://"
 	path := ""
 
@@ -201,7 +201,7 @@ func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventing
 			break
 		}
 	}
-	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Service.Host, path), nil
+	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Host, path), nil
 }
 
 func GetInternalView4Ems(subscription *types.Subscription) *types.Subscription {
@@ -293,8 +293,8 @@ func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 
 func APIRuleGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
-		Version:  apigatewayv1alpha1.GroupVersion.Version,
-		Group:    apigatewayv1alpha1.GroupVersion.Group,
+		Version:  apigatewayv1beta1.GroupVersion.Version,
+		Group:    apigatewayv1beta1.GroupVersion.Group,
 		Resource: "apirules",
 	}
 }
