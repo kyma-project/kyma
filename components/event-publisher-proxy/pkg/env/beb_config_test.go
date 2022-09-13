@@ -1,8 +1,13 @@
-package env
+//go:build unit
+// +build unit
+
+package env_test
 
 import (
 	"net/http"
 	"testing"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 )
 
 func TestConfigureTransport(t *testing.T) {
@@ -14,7 +19,7 @@ func TestConfigureTransport(t *testing.T) {
 	)
 
 	transport := &http.Transport{}
-	cfg := BebConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	cfg := sut.BebConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
 	cfg.ConfigureTransport(transport)
 
 	if transport.MaxIdleConns != maxIdleConns {
