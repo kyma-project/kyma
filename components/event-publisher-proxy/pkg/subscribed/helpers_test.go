@@ -1,10 +1,14 @@
-package subscribed
+//go:build unit
+// +build unit
+
+package subscribed_test
 
 import (
 	"reflect"
 	"testing"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
+	eventing "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 func TestFilterEventTypeVersions(t *testing.T) {
@@ -13,8 +17,8 @@ func TestFilterEventTypeVersions(t *testing.T) {
 		appName         string
 		eventTypePrefix string
 		bebNs           string
-		filters         *eventingv1alpha1.BEBFilters
-		expectedEvents  []Event
+		filters         *eventing.BEBFilters
+		expectedEvents  []sut.Event
 	}{
 		{
 			name:            "should return no events when nil filters are provided",
@@ -22,14 +26,14 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			eventTypePrefix: "foo.prefix",
 			bebNs:           "foo.bebns",
 			filters:         nil,
-			expectedEvents:  make([]Event, 0),
+			expectedEvents:  make([]sut.Event, 0),
 		}, {
 			name:            "should return a slice of events when filters are provided",
 			appName:         "foovarkes",
 			eventTypePrefix: "foo.prefix.custom",
 			bebNs:           "/default/foo.kyma/kt1",
 			filters:         NewBEBFilters(WithOneBEBFilter),
-			expectedEvents: []Event{
+			expectedEvents: []sut.Event{
 				NewEvent("order.created", "v1"),
 			},
 		}, {
@@ -38,7 +42,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			eventTypePrefix: "foo.prefix.custom",
 			bebNs:           "/default/foo.kyma/kt1",
 			filters:         NewBEBFilters(WithMultipleBEBFiltersFromSameSource),
-			expectedEvents: []Event{
+			expectedEvents: []sut.Event{
 				NewEvent("order.created", "v1"),
 				NewEvent("order.created", "v1"),
 				NewEvent("order.created", "v1"),
@@ -49,14 +53,14 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			eventTypePrefix: "foo.prefix.custom",
 			bebNs:           "foo-dont-match",
 			filters:         NewBEBFilters(WithMultipleBEBFiltersFromSameSource),
-			expectedEvents:  []Event{},
+			expectedEvents:  []sut.Event{},
 		}, {
 			name:            "should return 2 events(out of multiple) which matches two sources (bebNamespace and empty)",
 			appName:         "foovarkes",
 			eventTypePrefix: "foo.prefix.custom",
 			bebNs:           "foo-match",
 			filters:         NewBEBFilters(WithMultipleBEBFiltersFromDiffSource),
-			expectedEvents: []Event{
+			expectedEvents: []sut.Event{
 				NewEvent("order.created", "v1"),
 				NewEvent("order.created", "v1"),
 			},
@@ -66,7 +70,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			eventTypePrefix: "foo.prefix.custom",
 			bebNs:           "/default/foo.kyma/kt1",
 			filters:         NewBEBFilters(WithMultipleBEBFiltersFromDiffEventTypePrefix),
-			expectedEvents: []Event{
+			expectedEvents: []sut.Event{
 				NewEvent("order.created", "v1"),
 				NewEvent("order.created", "v1"),
 			},
@@ -78,7 +82,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotEvents := FilterEventTypeVersions(tc.eventTypePrefix, tc.bebNs, tc.appName, tc.filters)
+			gotEvents := sut.FilterEventTypeVersions(tc.eventTypePrefix, tc.bebNs, tc.appName, tc.filters)
 			if !reflect.DeepEqual(tc.expectedEvents, gotEvents) {
 				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.expectedEvents, gotEvents)
 			}
@@ -89,23 +93,23 @@ func TestFilterEventTypeVersions(t *testing.T) {
 func TestConvertEventsMapToSlice(t *testing.T) {
 	testCases := []struct {
 		name         string
-		inputMap     map[Event]bool
-		wantedEvents []Event
+		inputMap     map[sut.Event]bool
+		wantedEvents []sut.Event
 	}{
 		{
 			name: "should return events from the map in a slice",
-			inputMap: map[Event]bool{
+			inputMap: map[sut.Event]bool{
 				NewEvent("foo", "v1"): true,
 				NewEvent("bar", "v2"): true,
 			},
-			wantedEvents: []Event{
+			wantedEvents: []sut.Event{
 				NewEvent("foo", "v1"),
 				NewEvent("bar", "v2"),
 			},
 		}, {
 			name:         "should return no events for an empty map of events",
-			inputMap:     map[Event]bool{},
-			wantedEvents: []Event{},
+			inputMap:     map[sut.Event]bool{},
+			wantedEvents: []sut.Event{},
 		},
 	}
 	for _, tc := range testCases {
@@ -113,7 +117,7 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotEvents := ConvertEventsMapToSlice(tc.inputMap)
+			gotEvents := sut.ConvertEventsMapToSlice(tc.inputMap)
 			for _, event := range gotEvents {
 				found := false
 				for _, wantEvent := range tc.wantedEvents {
@@ -133,51 +137,51 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 func TestAddUniqueEventsToResult(t *testing.T) {
 	testCases := []struct {
 		name                   string
-		eventsSubSet           []Event
-		givenUniqEventsAlready map[Event]bool
-		wantedUniqEvents       map[Event]bool
+		eventsSubSet           []sut.Event
+		givenUniqEventsAlready map[sut.Event]bool
+		wantedUniqEvents       map[sut.Event]bool
 	}{
 		{
 			name: "should return unique events along with the existing ones",
-			eventsSubSet: []Event{
+			eventsSubSet: []sut.Event{
 				NewEvent("foo", "v1"),
 				NewEvent("bar", "v1"),
 			},
-			givenUniqEventsAlready: map[Event]bool{
+			givenUniqEventsAlready: map[sut.Event]bool{
 				NewEvent("bar-already-existing", "v1"): true,
 			},
-			wantedUniqEvents: map[Event]bool{
+			wantedUniqEvents: map[sut.Event]bool{
 				NewEvent("foo", "v1"):                  true,
 				NewEvent("bar", "v1"):                  true,
 				NewEvent("bar-already-existing", "v1"): true,
 			},
 		}, {
 			name: "should return unique new events from the subset provided only",
-			eventsSubSet: []Event{
+			eventsSubSet: []sut.Event{
 				NewEvent("foo", "v1"),
 				NewEvent("bar", "v1"),
 			},
 			givenUniqEventsAlready: nil,
-			wantedUniqEvents: map[Event]bool{
+			wantedUniqEvents: map[sut.Event]bool{
 				NewEvent("foo", "v1"): true,
 				NewEvent("bar", "v1"): true,
 			},
 		}, {
 			name:         "should return existing unique events when an empty subset provided",
-			eventsSubSet: []Event{},
-			givenUniqEventsAlready: map[Event]bool{
+			eventsSubSet: []sut.Event{},
+			givenUniqEventsAlready: map[sut.Event]bool{
 				NewEvent("foo", "v1"): true,
 				NewEvent("bar", "v1"): true,
 			},
-			wantedUniqEvents: map[Event]bool{
+			wantedUniqEvents: map[sut.Event]bool{
 				NewEvent("foo", "v1"): true,
 				NewEvent("bar", "v1"): true,
 			},
 		}, {
 			name:                   "should return no unique events when an empty subset provided",
-			eventsSubSet:           []Event{},
-			givenUniqEventsAlready: map[Event]bool{},
-			wantedUniqEvents:       map[Event]bool{},
+			eventsSubSet:           []sut.Event{},
+			givenUniqEventsAlready: map[sut.Event]bool{},
+			wantedUniqEvents:       map[sut.Event]bool{},
 		},
 	}
 	for _, tc := range testCases {
@@ -185,7 +189,7 @@ func TestAddUniqueEventsToResult(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotUniqEvents := AddUniqueEventsToResult(tc.eventsSubSet, tc.givenUniqEventsAlready)
+			gotUniqEvents := sut.AddUniqueEventsToResult(tc.eventsSubSet, tc.givenUniqEventsAlready)
 			if !reflect.DeepEqual(tc.wantedUniqEvents, gotUniqEvents) {
 				t.Errorf("incorrect unique events, wanted: %v, got: %v", tc.wantedUniqEvents, gotUniqEvents)
 			}
@@ -193,10 +197,10 @@ func TestAddUniqueEventsToResult(t *testing.T) {
 	}
 }
 
-type BEBFilterOption func(filter *eventingv1alpha1.BEBFilters)
+type BEBFilterOption func(filter *eventing.BEBFilters)
 
-func NewBEBFilters(opts ...BEBFilterOption) *eventingv1alpha1.BEBFilters {
-	newFilters := &eventingv1alpha1.BEBFilters{}
+func NewBEBFilters(opts ...BEBFilterOption) *eventing.BEBFilters {
+	newFilters := &eventing.BEBFilters{}
 	for _, opt := range opts {
 		opt(newFilters)
 	}
@@ -204,32 +208,32 @@ func NewBEBFilters(opts ...BEBFilterOption) *eventingv1alpha1.BEBFilters {
 	return newFilters
 }
 
-func WithOneBEBFilter(bebFilters *eventingv1alpha1.BEBFilters) {
+func WithOneBEBFilter(bebFilters *eventing.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
+	bebFilters.Filters = []*eventing.BEBFilter{
 		NewBEBFilter(evSource, evType),
 	}
 
 }
 
-func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BEBFilters) {
+func WithMultipleBEBFiltersFromSameSource(bebFilters *eventing.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
+	bebFilters.Filters = []*eventing.BEBFilter{
 		NewBEBFilter(evSource, evType),
 		NewBEBFilter(evSource, evType),
 		NewBEBFilter(evSource, evType),
 	}
 }
 
-func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BEBFilters) {
+func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventing.BEBFilters) {
 	evSource1 := "foo-match"
 	evSource2 := "/default/foo.different/kt1"
 	evSource3 := "/default/foo.different2/kt1"
 	evSource4 := ""
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
+	bebFilters.Filters = []*eventing.BEBFilter{
 		NewBEBFilter(evSource1, evType),
 		NewBEBFilter(evSource2, evType),
 		NewBEBFilter(evSource3, evType),
@@ -237,32 +241,32 @@ func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BEBFilter
 	}
 }
 
-func WithMultipleBEBFiltersFromDiffEventTypePrefix(bebFilters *eventingv1alpha1.BEBFilters) {
+func WithMultipleBEBFiltersFromDiffEventTypePrefix(bebFilters *eventing.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType1 := "foo.prefix.custom.foovarkes.order.created.v1"
 	evType2 := "foo.prefixdifferent.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
+	bebFilters.Filters = []*eventing.BEBFilter{
 		NewBEBFilter(evSource, evType1),
 		NewBEBFilter(evSource, evType2),
 		NewBEBFilter(evSource, evType1),
 	}
 }
 
-func NewBEBFilter(evSource, evType string) *eventingv1alpha1.BEBFilter {
-	return &eventingv1alpha1.BEBFilter{
-		EventSource: &eventingv1alpha1.Filter{
+func NewBEBFilter(evSource, evType string) *eventing.BEBFilter {
+	return &eventing.BEBFilter{
+		EventSource: &eventing.Filter{
 			Property: "source",
 			Value:    evSource,
 		},
-		EventType: &eventingv1alpha1.Filter{
+		EventType: &eventing.Filter{
 			Property: "type",
 			Value:    evType,
 		},
 	}
 }
 
-func NewEvent(name, version string) Event {
-	return Event{
+func NewEvent(name, version string) sut.Event {
+	return sut.Event{
 		Name:    name,
 		Version: version,
 	}
