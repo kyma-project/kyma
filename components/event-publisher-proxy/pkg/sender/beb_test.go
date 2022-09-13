@@ -1,4 +1,7 @@
-package sender
+//go:build unit
+// +build unit
+
+package sender_test
 
 import (
 	"context"
@@ -9,6 +12,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
 
 const (
@@ -28,7 +33,7 @@ func TestNewHttpMessageSender(t *testing.T) {
 	client := oauth.NewClient(context.Background(), &env.BebConfig{})
 	defer client.CloseIdleConnections()
 
-	msgSender := NewBebMessageSender(eventsEndpoint, client)
+	msgSender := sut.NewBebMessageSender(eventsEndpoint, client)
 	if msgSender.Target != eventsEndpoint {
 		t.Errorf("Message sender target is misconfigured want: %s but got: %s", eventsEndpoint, msgSender.Target)
 	}
@@ -43,7 +48,7 @@ func TestNewRequestWithTarget(t *testing.T) {
 	client := oauth.NewClient(context.Background(), &env.BebConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
-	msgSender := NewBebMessageSender(eventsEndpoint, client)
+	msgSender := sut.NewBebMessageSender(eventsEndpoint, client)
 
 	type ctxKey struct{}
 	const ctxValue = "testValue"
@@ -91,7 +96,7 @@ func TestSend(t *testing.T) {
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender := NewBebMessageSender(emsCEURL, client)
+	msgSender := sut.NewBebMessageSender(emsCEURL, client)
 
 	request, err := msgSender.NewRequestWithTarget(ctx, msgSender.Target)
 	if err != nil {

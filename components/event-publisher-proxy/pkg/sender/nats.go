@@ -13,7 +13,7 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-// compile time check
+// Compile time check of interface implementation.
 var _ GenericSender = &NatsMessageSender{}
 
 type GenericSender interface {
