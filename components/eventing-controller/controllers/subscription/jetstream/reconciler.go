@@ -152,7 +152,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 		// Requeue the Request to reconcile it again if there are no NATS Subscriptions synced
 		if strings.Contains(err.Error(), jetstream.NoNatsSubscriptionErr) {
-			result = ctrl.Result{RequeueAfter: jetstream.NoNatsSubscriptionRequeueDuration}
+			result = ctrl.Result{RequeueAfter: jetstream.RequeueDuration}
 			err = nil
 		}
 		return result, err
