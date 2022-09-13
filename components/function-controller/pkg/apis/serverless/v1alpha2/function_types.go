@@ -132,7 +132,7 @@ type FunctionSpec struct {
 	CustomRuntimeConfiguration *ConfigMapRef `json:"customRuntimeConfiguration,omitempty"`
 
 	// +optional
-	RuntimeImageOverride *string `json:"runtimeImageOverride,omitempty"`
+	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 
 	Source Source `json:"source"`
 
@@ -152,7 +152,7 @@ type FunctionSpec struct {
 	Template *Template `json:"template,omitempty"`
 }
 
-//TODO: Status related things needs to be developed.
+// TODO: Status related things needs to be developed.
 type ConditionType string
 
 const (
@@ -263,7 +263,7 @@ type FunctionList struct {
 	Items           []Function `json:"items"`
 }
 
-//nolint
+// nolint
 func init() {
 	SchemeBuilder.Register(
 		&Function{},
