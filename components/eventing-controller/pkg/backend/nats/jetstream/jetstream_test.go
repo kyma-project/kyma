@@ -1518,7 +1518,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			name: "No error expected when js.subscriptions map has entries for all the eventTypes",
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
-				evtesting.WithFilter("", evtesting.OrderCreatedEventType+"2"),
+				evtesting.WithFilter("", evtesting.NewOrderCreatedEventType),
 				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
 			},
 			givenManuallyDeleteSubscription: false,
@@ -1529,14 +1529,14 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			name: "An error is expected, when we manually delete a subscription from js.subscriptions map",
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
-				evtesting.WithFilter("", evtesting.OrderCreatedEventType+"2"),
+				evtesting.WithFilter("", evtesting.NewOrderCreatedEventType),
 				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
 			},
 			givenManuallyDeleteSubscription: true,
-			givenFilterToDelete:             evtesting.OrderCreatedEventType + "2",
+			givenFilterToDelete:             evtesting.NewOrderCreatedEventType,
 			wantNatsSubsLen:                 2,
 			wantErr:                         true,
-			wantErrText:                     fmt.Sprintf(MissingNATSSubscriptionWithInfo, evtesting.OrderCreatedEventType+"2"),
+			wantErrText:                     fmt.Sprintf(MissingNATSSubscriptionMsgWithInfo, evtesting.NewOrderCreatedEventType),
 		},
 	}
 	for i, tc := range testCases {

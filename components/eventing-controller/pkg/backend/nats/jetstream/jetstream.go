@@ -29,15 +29,15 @@ import (
 var _ Backend = &JetStream{}
 
 const (
-	jsHandlerName                   = "jetstream-handler"
-	idleHeartBeatDuration           = 1 * time.Minute
-	jsConsumerMaxRedeliver          = 100
-	jsConsumerAcKWait               = 30 * time.Second
-	jsMaxStreamNameLength           = 32
-	separator                       = "/"
-	MissingNATSSubscription         = "failed to create NATS JetStream subscription"
-	MissingNATSSubscriptionWithInfo = MissingNATSSubscription + " for subject: %v"
-	RequeueDuration                 = 10 * time.Second
+	jsHandlerName                      = "jetstream-handler"
+	idleHeartBeatDuration              = 1 * time.Minute
+	jsConsumerMaxRedeliver             = 100
+	jsConsumerAcKWait                  = 30 * time.Second
+	jsMaxStreamNameLength              = 32
+	separator                          = "/"
+	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
+	MissingNATSSubscriptionMsgWithInfo = MissingNATSSubscriptionMsg + " for subject: %v"
+	RequeueDuration                    = 10 * time.Second
 )
 
 type Backend interface {
@@ -457,11 +457,11 @@ func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha1.
 		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if _, ok := js.subscriptions[jsSubKey]; !ok {
-			return errors.Errorf(MissingNATSSubscriptionWithInfo, subject)
+			return errors.Errorf(MissingNATSSubscriptionMsgWithInfo, subject)
 		}
 	}
 	if len(js.subscriptions) < len(subscription.Status.CleanEventTypes) {
-		return errors.New(MissingNATSSubscription)
+		return errors.New(MissingNATSSubscriptionMsg)
 	}
 	return nil
 }
