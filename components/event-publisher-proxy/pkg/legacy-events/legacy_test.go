@@ -1,4 +1,7 @@
-package legacy
+//go:build unit
+// +build unit
+
+package legacy_test
 
 import (
 	"bytes"
@@ -8,17 +11,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
-	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
-	. "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 )
 
 const (
@@ -103,9 +103,9 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			writer := httptest.NewRecorder()
 			app := applicationtest.NewApplication(tc.givenApplication, applicationTypeLabel(tc.givenTypeLabel))
 			appLister := fake.NewApplicationListerOrDie(ctx, app)
-			transformer := NewTransformer("test", tc.givenPrefix, appLister)
+			transformer := sut.NewTransformer("test", tc.givenPrefix, appLister)
 			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, request)
-			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
+			wantEventType := fmt.Sprintf("%s.%s.%s.%s", tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
 			assert.Equal(t, wantEventType, gotEventType)
 
 			//check eventType
