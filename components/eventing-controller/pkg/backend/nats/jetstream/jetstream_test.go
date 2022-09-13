@@ -1479,7 +1479,7 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 }
 
 // TestJetStream_NoNATSSubscription tests if the error is being triggered
-// when js.subscriptions map is missing.
+// when expected entries in js.subscriptions map are missing.
 func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)

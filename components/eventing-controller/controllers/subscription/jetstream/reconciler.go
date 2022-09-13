@@ -311,7 +311,7 @@ func containsFinalizer(sub *eventingv1alpha1.Subscription) bool {
 	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 }
 
-// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map
+// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map.
 func missingSubscriptionErr(err error) bool {
 	return strings.Contains(err.Error(), jetstream.MissingNATSSubscription)
 }
