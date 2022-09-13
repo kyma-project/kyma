@@ -3,6 +3,7 @@ package jetstream
 import (
 	"context"
 	"reflect"
+	"strings"
 
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -145,10 +146,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Synchronize Kyma subscription to JetStream backend
 	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
+		result := ctrl.Result{}
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
+			return result, syncErr
 		}
-		return ctrl.Result{}, err
+		// Requeue the Request to reconcile it again if there are no NATS Subscriptions synced
+		if missingSubscriptionErr(err) {
+			result = ctrl.Result{RequeueAfter: jetstream.RequeueDuration}
+			err = nil
+		}
+		return result, err
 	}
 
 	// Update Subscription status
@@ -302,6 +309,11 @@ func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 // containsFinalizer checks if the subscription contains our Finalizer.
 func containsFinalizer(sub *eventingv1alpha1.Subscription) bool {
 	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+}
+
+// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map.
+func missingSubscriptionErr(err error) bool {
+	return strings.Contains(err.Error(), jetstream.MissingNATSSubscriptionMsg)
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
