@@ -1,9 +1,14 @@
-package oauth
+//go:build unit
+// +build unit
+
+package oauth_test
 
 import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 )
 
 func TestConfig(t *testing.T) {

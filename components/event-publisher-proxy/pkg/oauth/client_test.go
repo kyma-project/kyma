@@ -1,4 +1,7 @@
-package oauth
+//go:build unit
+// +build unit
+
+package oauth_test
 
 import (
 	"context"
@@ -12,6 +15,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 )
 
 func TestNewClient(t *testing.T) {
@@ -92,7 +97,7 @@ func TestGetToken(t *testing.T) {
 			emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
 			authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
 			cfg := testingutils.NewEnvConfig(emsCEURL, authURL)
-			client := NewClient(context.Background(), cfg)
+			client := sut.NewClient(context.Background(), cfg)
 			defer client.CloseIdleConnections()
 
 			for i := 0; i < test.requestsCount; i++ {
