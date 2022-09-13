@@ -7,12 +7,11 @@ skipDirectorCertVerification: true
 serviceAccountName: "test-compass-runtime-agent"
 
 containerRegistry:
-  path: "eu.gcr.io/kyma-project"
-
+  path: "docker.io/koala7659"
 images:
   compassTest:
     name: "compass-runtime-agent-test"
-    version: "PR-15119"
+    version: "PR-1234"
 
 compassCredentials:
   clientID: ""

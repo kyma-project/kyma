@@ -47,7 +47,7 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 
 	gs.T().Logf("Config: %s", gs.testConfig.String())
 
-	_, err = gs.makeCompassDirectorClient()
+	gs.directorClient, err = gs.makeCompassDirectorClient()
 	gs.Require().Nil(err)
 
 	// TODO: Pass namespaces names
@@ -57,10 +57,10 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
 	//gs.T().Log("Attempt to unregister application in compass")
-	//appID, err := directorClient.RegisterApplication("oko", "auto-testing")
-	//gs.Require().Nil(err)
+	appID, err := gs.directorClient.RegisterApplication("oko2", "auto-testing")
+	gs.Require().Nil(err)
 
-	//gs.T().Logf("Sucessfully registered application %s in compass", appID)
+	gs.T().Logf("Sucessfully registered application %s in compass", appID)
 
 	//err = directorClient.UnregisterApplication(appID)
 	//gs.Require().Nil(err)

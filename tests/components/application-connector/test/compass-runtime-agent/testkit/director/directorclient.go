@@ -76,7 +76,9 @@ func (cc *directorClient) RegisterApplication(appName, scenario string) (string,
 	//	return "", fmt.Errorf("Failed to create graphQLized Runtime input: %s", err.Error())
 	//}
 
-	registerAppQuery := cc.queryProvider.registerApplicationMutation(appName, scenario)
+	displayName := "testing display name"
+
+	registerAppQuery := cc.queryProvider.registerApplicationNewMutation(appName, scenario)
 
 	var response CreateApplicationResponse
 	appErr := cc.executeDirectorGraphQLCall(registerAppQuery, cc.tenant, &response)
