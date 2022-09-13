@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package sender
 
 import (
@@ -8,19 +11,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-
-	"github.com/stretchr/testify/require"
-
-	"github.com/cloudevents/sdk-go/v2/event"
-
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 func TestJetStreamMessageSender(t *testing.T) {

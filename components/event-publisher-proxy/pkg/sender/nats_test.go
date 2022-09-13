@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package sender
 
 import (
@@ -7,12 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-
 	"github.com/stretchr/testify/assert"
 
 	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 func TestNATSMessageSender(t *testing.T) {

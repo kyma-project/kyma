@@ -19,7 +19,7 @@ import (
 
 const (
 	natsBackend           = "nats"
-	jestreamHandlerName   = "jetstream-handler"
+	jetStreamHandlerName  = "jetstream-handler"
 	noSpaceLeftErrMessage = "no space left on device"
 )
 
@@ -34,8 +34,8 @@ type JetStreamMessageSender struct {
 	envCfg     *env.NATSConfig
 }
 
-// NewJetStreamMessageSender returns a new NewJetStreamMessageSender instance with the given nats connection.
-func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *JetStreamMessageSender {
+// NewJetStreamMessageSender returns a new NewJetStreamMessageSender instance with the given NATS connection.
+func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NatsConfig, logger *logger.Logger) *JetStreamMessageSender {
 	return &JetStreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 
@@ -85,7 +85,7 @@ func (s *JetStreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	return http.StatusNoContent, nil
 }
 
-// streamExists checks if the stream with the expected name exists.
+// streamExists checks if a stream with the expected name exists.
 func (s *JetStreamMessageSender) streamExists(connection *nats.Conn) (bool, error) {
 	jsCtx, err := connection.JetStream()
 	if err != nil {

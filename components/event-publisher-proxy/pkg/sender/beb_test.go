@@ -1,4 +1,7 @@
-package sender
+//go:build unit
+// +build unit
+
+package sender_test
 
 import (
 	"context"
@@ -9,6 +12,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
 
 const (
