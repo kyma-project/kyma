@@ -151,7 +151,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return result, syncErr
 		}
 		// Requeue the Request to reconcile it again if there are no NATS Subscriptions synced
-		if strings.Contains(err.Error(), jetstream.NoNatsSubscriptionErr) {
+		if missingSubscriptionErr(err) {
 			result = ctrl.Result{RequeueAfter: jetstream.RequeueDuration}
 			err = nil
 		}
@@ -309,6 +309,11 @@ func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 // containsFinalizer checks if the subscription contains our Finalizer.
 func containsFinalizer(sub *eventingv1alpha1.Subscription) bool {
 	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+}
+
+// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map
+func missingSubscriptionErr(err error) bool {
+	return strings.Contains(err.Error(), jetstream.MissingNATSSubscription)
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

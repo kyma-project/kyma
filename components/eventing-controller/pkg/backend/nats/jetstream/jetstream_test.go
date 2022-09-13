@@ -1479,8 +1479,8 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 }
 
 // TestJetStream_NoNATSSubscription tests if the error is being triggered
-// when expected in-memory representation of NATS subscriptions are missing.
-func TestJetStream_NoNATSSubscription(t *testing.T) {
+// when js.subscriptions map is missing.
+func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -1515,7 +1515,7 @@ func TestJetStream_NoNATSSubscription(t *testing.T) {
 			wantErr:                         false,
 		},
 		{
-			name: "No error should happen when NO in-memory representation of the NATS sub disappear",
+			name: "No error expected when js.subscriptions map has entries for all the eventTypes",
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType+"2"),
@@ -1526,7 +1526,7 @@ func TestJetStream_NoNATSSubscription(t *testing.T) {
 			wantErr:                         false,
 		},
 		{
-			name: "An error is expected, when we manually delete an in-memory representation of the NATS subscription",
+			name: "An error is expected, when we manually delete a subscription from js.subscriptions map",
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType+"2"),
@@ -1536,7 +1536,7 @@ func TestJetStream_NoNATSSubscription(t *testing.T) {
 			givenFilterToDelete:             evtesting.OrderCreatedEventType + "2",
 			wantNatsSubsLen:                 2,
 			wantErr:                         true,
-			wantErrText:                     fmt.Sprintf(NoNatsSubscriptionErrMask, evtesting.OrderCreatedEventType+"2"),
+			wantErrText:                     fmt.Sprintf(MissingNATSSubscriptionWithInfo, evtesting.OrderCreatedEventType+"2"),
 		},
 	}
 	for i, tc := range testCases {
@@ -1554,7 +1554,7 @@ func TestJetStream_NoNATSSubscription(t *testing.T) {
 			assert.Equal(t, len(jsBackend.subscriptions), tc.wantNatsSubsLen)
 
 			if tc.givenManuallyDeleteSubscription {
-				// manually delete the in-memory subscription
+				// manually delete the subscription from map
 				jsSubject := jsBackend.GetJetStreamSubject(tc.givenFilterToDelete)
 				jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 				delete(jsBackend.subscriptions, jsSubKey)
@@ -1566,13 +1566,13 @@ func TestJetStream_NoNATSSubscription(t *testing.T) {
 
 			if tc.wantErr {
 				// the createConsumer function won't create a new Subscription,
-				// because the in-memory subscription was manually deleted
+				// because the subscription was manually deleted from the js.subscriptions map
 				// hence the consumer will be shown in the NATS Backend as still bound
 				err = jsBackend.SyncSubscription(sub)
-				require.True(t, strings.Contains(err.Error(), fmt.Sprintf(NoNatsSubscriptionErrMask, tc.givenFilterToDelete)))
+				require.True(t, strings.Contains(err.Error(), tc.wantErrText))
 			}
 
-			// empty the in-memory representation of the NATS subscriptions
+			// empty the js.subscriptions map
 			require.NoError(t, jsBackend.DeleteSubscription(sub))
 		})
 	}
