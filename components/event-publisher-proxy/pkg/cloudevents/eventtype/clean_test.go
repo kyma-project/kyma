@@ -1,4 +1,7 @@
-package eventtype
+//go:build unit
+// +build unit
+
+package eventtype_test
 
 import (
 	"context"
@@ -11,6 +14,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 )
 
 func TestCleaner(t *testing.T) {
@@ -165,10 +170,15 @@ func TestCleaner(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+			// Given
 			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
 			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, mockedLogger)
+			cleaner := sut.NewCleaner(tc.givenEventTypePrefix, appLister, mockedLogger)
+
+			// When
 			eventType, err := cleaner.Clean(tc.givenEventType)
+
+			// Then
 			require.Equal(t, tc.wantError, err != nil)
 			if !tc.wantError {
 				require.Equal(t, tc.wantEventType, eventType)

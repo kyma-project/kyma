@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package eventtype
 
 import (
@@ -28,7 +31,10 @@ func TestBuilder(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+			// When
 			eventType := build(tc.givenPrefix, tc.givenApplicationName, tc.givenEvent, tc.givenVersion)
+
+			// Then
 			assert.Equal(t, tc.wantEventType, eventType)
 		})
 	}
