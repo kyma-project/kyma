@@ -1,9 +1,13 @@
-package handler
+// +build unit
+
+package handler_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 )
 
 func TestIsARequestWithLegacyEvent(t *testing.T) {
@@ -63,7 +67,7 @@ func TestIsARequestWithLegacyEvent(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			assert.Equal(t, tc.wantedResult, IsARequestWithLegacyEvent(tc.givenURI))
+			assert.Equal(t, tc.wantedResult, sut.IsARequestWithLegacyEvent(tc.givenURI))
 		})
 	}
 }
