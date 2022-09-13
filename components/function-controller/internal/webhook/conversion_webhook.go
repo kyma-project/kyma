@@ -177,7 +177,7 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	}
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	if in.Spec.RuntimeImageOverride != "" {
-		out.Spec.RuntimeImageOverride = &in.Spec.RuntimeImageOverride
+		out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 	}
 
 	//TODO: out.Profile
@@ -299,10 +299,8 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
 	out.Spec.Env = in.Spec.Env
 	out.Spec.Runtime = serverlessv1alpha1.Runtime(in.Spec.Runtime)
+	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
-	if in.Spec.RuntimeImageOverride != nil {
-		out.Spec.RuntimeImageOverride = *in.Spec.RuntimeImageOverride
-	}
 	if in.Spec.ScaleConfig != nil {
 		out.Spec.MaxReplicas = in.Spec.ScaleConfig.MaxReplicas
 		out.Spec.MinReplicas = in.Spec.ScaleConfig.MinReplicas

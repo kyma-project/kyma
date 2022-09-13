@@ -35,7 +35,7 @@ type cfg struct {
 	fn     FunctionConfig
 }
 
-//nolint
+// nolint
 type out struct {
 	err    error
 	result ctrl.Result
@@ -127,9 +127,7 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha2.Condition, rep
 		}
 
 		currentFunction.Status.Runtime = s.instance.Spec.Runtime
-		if s.instance.Spec.RuntimeImageOverride != nil {
-			currentFunction.Status.RuntimeImageOverride = *s.instance.Spec.RuntimeImageOverride
-		}
+		currentFunction.Status.RuntimeImageOverride = s.instance.Spec.RuntimeImageOverride
 
 		// set scale sub-resource
 		selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})

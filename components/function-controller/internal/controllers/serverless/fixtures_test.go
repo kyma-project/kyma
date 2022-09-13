@@ -69,7 +69,7 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 
 func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
 	fn := newFixFunction(namespace, name, minReplicas, maxReplicas)
-	fn.Spec.RuntimeImageOverride = &runtimeImageOverride
+	fn.Spec.RuntimeImageOverride = runtimeImageOverride
 	return fn
 }
 

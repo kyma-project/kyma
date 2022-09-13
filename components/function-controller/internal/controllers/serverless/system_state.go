@@ -140,8 +140,8 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if s.instance.Spec.RuntimeImageOverride != nil {
-		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", *s.instance.Spec.RuntimeImageOverride))
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 	var resourceRequirements corev1.ResourceRequirements
 	if s.instance.Spec.ResourceConfiguration != nil &&
@@ -248,8 +248,8 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if s.instance.Spec.RuntimeImageOverride != nil {
-		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", *s.instance.Spec.RuntimeImageOverride))
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
 	var resourceRequirements corev1.ResourceRequirements
@@ -505,7 +505,7 @@ func (s *systemState) getReplicas(defaultVal int32) *int32 {
 	return &defaultVal
 }
 
-//TODO do not negate
+// TODO do not negate
 func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
 	return len(s.deployments.Items) == 1 &&
 		equalDeployments(s.deployments.Items[0], d, isScalingEnabled(&s.instance))

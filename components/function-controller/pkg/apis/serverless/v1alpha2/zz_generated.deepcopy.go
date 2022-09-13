@@ -231,11 +231,6 @@ func (in *FunctionSpec) DeepCopyInto(out *FunctionSpec) {
 		*out = new(ConfigMapRef)
 		**out = **in
 	}
-	if in.RuntimeImageOverride != nil {
-		in, out := &in.RuntimeImageOverride, &out.RuntimeImageOverride
-		*out = new(string)
-		**out = **in
-	}
 	in.Source.DeepCopyInto(&out.Source)
 	if in.Env != nil {
 		in, out := &in.Env, &out.Env
