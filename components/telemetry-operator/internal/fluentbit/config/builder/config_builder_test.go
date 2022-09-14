@@ -83,7 +83,7 @@ func TestMergeSectionsConfig(t *testing.T) {
     emitter_mem_buf_limit 10M
     emitter_name          foo
     emitter_storage.type  filesystem
-    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$|compass-system$).*" foo.$TAG true
 
 [FILTER]
     name   record_modifier
