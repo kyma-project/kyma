@@ -177,9 +177,20 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
-	//TODO: out.Profile
 	//TODO out.CustomRuntimeCOnfiguration
 
+	convertSpecResourceConfigurationV1Alpha1ToV1Alpha2(in, out)
+
+	out.Spec.Template = serverlessv1alpha2.Template{
+		Labels: in.Spec.Labels,
+	}
+	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
+		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
+	}
+	return nil
+}
+
+func convertSpecResourceConfigurationV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
 	out.Spec.ResourceConfiguration = serverlessv1alpha2.ResourceConfiguration{
 		Build: serverlessv1alpha2.ResourceRequirements{
 			Resources: in.Spec.BuildResources,
@@ -188,13 +199,9 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 			Resources: in.Spec.Resources,
 		},
 	}
-	out.Spec.Template = serverlessv1alpha2.Template{
-		Labels: in.Spec.Labels,
+	if functionResourcesPresetValue, ok := in.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel]; ok {
+		out.Spec.ResourceConfiguration.Function.Profile = functionResourcesPresetValue
 	}
-	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
-		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
-	}
-	return nil
 }
 
 func (w *ConvertingWebhook) convertSourceV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
