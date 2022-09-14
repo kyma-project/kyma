@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package deployment
 
 import (
@@ -60,11 +63,11 @@ func TestNewDeployment(t *testing.T) {
 				t.Errorf("Invalid backend!")
 			}
 
-			// the tight backenType should be set
+			// the right backend type should be set
 			assert.Equal(t, deployment.ObjectMeta.Labels[BackendLabelKey], tc.givenBackend)
 			assert.Equal(t, deployment.ObjectMeta.Labels[AppLabelKey], PublisherName)
 
-			// check the container properties were set properly
+			// check that the container properties were set properly
 			container := findPublisherContainer(*deployment)
 			assert.NotNil(t, container)
 
@@ -146,6 +149,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 		})
 	}
 }
+
 func Test_GetLogEnvVars(t *testing.T) {
 	testCases := []struct {
 		name      string
