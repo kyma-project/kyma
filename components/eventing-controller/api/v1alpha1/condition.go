@@ -32,6 +32,7 @@ type Condition struct {
 type ConditionReason string
 
 const (
+	// BEB Conditions
 	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
 	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
 	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
@@ -39,10 +40,14 @@ const (
 	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
-	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
-	ConditionReasonNATSSubscriptionNotActive  ConditionReason = "NATS Subscription not active"
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
+	ConditionReasonOauth2ClientSyncFailed     ConditionReason = "Failed to sync OAuth2 Client Credentials"
 
+	// NATS Conditions
+	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
+	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
+
+	// Common backend Conditions
 	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription controller started"
 	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription controller not ready"
 	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
@@ -51,7 +56,6 @@ const (
 	ConditionReasonPublisherProxySyncFailed       ConditionReason = "Publisher Proxy deployment sync failed"
 	ConditionReasonControllerStartFailed          ConditionReason = "Starting the controller failed"
 	ConditionReasonControllerStopFailed           ConditionReason = "Stopping the controller failed"
-	ConditionReasonOauth2ClientSyncFailed         ConditionReason = "Failed to sync OAuth2 Client Credentials"
 	ConditionReasonPublisherProxySecretError      ConditionReason = "Publisher proxy secret sync failed"
 	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
