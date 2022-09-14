@@ -19,6 +19,8 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -26,12 +28,13 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -43,7 +46,7 @@ type Config struct {
 	SectionsConfigMap types.NamespacedName
 	FilesConfigMap    types.NamespacedName
 	EnvSecret         types.NamespacedName
-	PipelineDefaults  builder.PipelineDefaults
+	PipelineDefaults  configbuilder.PipelineDefaults
 }
 
 // Reconciler reconciles a LogPipeline object
@@ -80,9 +83,24 @@ func NewReconciler(
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
+		//Watches(
+		//	&source.Kind{Type: &corev1.Secret{}},
+		//	handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
+		//).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
+			builder.WithPredicates(predicate.Funcs{
+				CreateFunc: func(event event.CreateEvent) bool {
+					return true
+				},
+				DeleteFunc: nil,
+				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
+					fmt.Printf("event.UpdateEvent: %s", updateEvent.ObjectNew.GetName())
+					return true
+				},
+				GenericFunc: nil,
+			}),
 		).
 		Complete(r)
 }
