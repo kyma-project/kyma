@@ -93,7 +93,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
 			builder.WithPredicates(predicate.Funcs{
 				CreateFunc: func(event event.CreateEvent) bool {
-					fmt.Printf("event.CreateEvent: %s", event.ObjectNew.GetName())
+					fmt.Printf("event.CreateEvent: %s", event.Object.GetName())
 					return true
 				},
 				DeleteFunc: nil,
