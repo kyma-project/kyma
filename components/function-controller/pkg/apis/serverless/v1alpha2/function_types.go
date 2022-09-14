@@ -168,7 +168,6 @@ const (
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
 	ConditionReasonSourceUpdated                  ConditionReason = "SourceUpdated"
 	ConditionReasonSourceUpdateFailed             ConditionReason = "SourceUpdateFailed"
-	ConditionReasonGitAuthorizationFailed         ConditionReason = "GitAuthorizationFailed"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
 	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
@@ -284,4 +283,17 @@ func (c *Condition) IsTrue() bool {
 	return c.Status == v1.ConditionTrue
 }
 
-func (f *Function) Hub() {}
+func (l *Condition) Equal(r *Condition) bool {
+	if l == nil && r == nil {
+		return true
+	}
+
+	if l.Type != r.Type ||
+		l.Status != r.Status ||
+		l.Reason != r.Reason ||
+		l.Message != r.Message ||
+		!l.LastTransitionTime.Equal(&r.LastTransitionTime) {
+		return false
+	}
+	return true
+}

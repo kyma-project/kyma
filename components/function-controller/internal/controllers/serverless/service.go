@@ -64,7 +64,7 @@ func buildStateFnUpdateService(newService corev1.Service) stateFn {
 			Message:            fmt.Sprintf("Service %s updated", svc.GetName()),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
@@ -85,7 +85,7 @@ func buildStateFnCreateNewService(svc corev1.Service) stateFn {
 			Message:            fmt.Sprintf("Service %s created", svc.GetName()),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
