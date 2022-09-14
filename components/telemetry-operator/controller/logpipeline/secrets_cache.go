@@ -21,6 +21,7 @@ func newSecretsCache() secretsCache {
 }
 
 func (s *secretsCache) add(key types.NamespacedName, name pipelineName) error {
+	s.contexts[key] = append(s.contexts[key], name)
 	return nil
 }
 

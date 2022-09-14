@@ -93,16 +93,16 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
 			builder.WithPredicates(predicate.Funcs{
 				CreateFunc: func(event event.CreateEvent) bool {
-					fmt.Printf("event.CreateEvent: %s", event.Object.GetName())
+					ctrl.Log.Info(fmt.Sprintf("event.CreateEvent: %s", event.Object.GetName()))
 					return true
 				},
 				DeleteFunc: nil,
 				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-					fmt.Printf("event.UpdateEvent: %s", updateEvent.ObjectNew.GetName())
+					ctrl.Log.Info(fmt.Sprintf("event.UpdateEvent: %s", updateEvent.ObjectNew.GetName()))
 					return true
 				},
 				GenericFunc: func(genericEvent event.GenericEvent) bool {
-					fmt.Printf("event.GenericEvent: %s", genericEvent.Object.GetName())
+					ctrl.Log.Info(fmt.Sprintf("event.GenericEvent: %s", genericEvent.Object.GetName()))
 					return true
 				},
 			}),
@@ -113,18 +113,18 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) createReconReqs(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
 
-	fmt.Printf("Secret changed event: Handling Secret with name: %s\n", secret.Name)
+	ctrl.Log.Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
 
 	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
 	pipelines := r.secrets.get(secretName)
 	var requests []reconcile.Request
 	for _, p := range pipelines {
 		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: string(p)}}
-		fmt.Printf("Secret changed event: Creating Reconciliation request for pipeline: %s\n", string(p))
+		ctrl.Log.Info(fmt.Sprintf("Secret changed event: Creating Reconciliation request for pipeline: %s\n", string(p)))
 		requests = append(requests, request)
 	}
 
-	fmt.Printf("Secret changed event: Created %d new Reconciliation requests.\n", len(requests))
+	ctrl.Log.Info(fmt.Sprintf("Secret changed event: Created %d new Reconciliation requests.\n", len(requests)))
 	return requests
 }
 
@@ -138,10 +138,8 @@ func (r *Reconciler) createReconReqs(object client.Object) []reconcile.Request {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	fmt.Print("Reconcile METHOD ENTRY")
 	log := logf.FromContext(ctx)
-
-	fmt.Print("Reconcile METHOD after logger ctx")
+	log.Info("Reconcile called")
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {

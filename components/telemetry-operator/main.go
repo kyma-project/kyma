@@ -19,7 +19,6 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -127,8 +126,6 @@ func main() {
 		setupLog.Error(err, "Invalid flag provided")
 		os.Exit(1)
 	}
-
-	fmt.Print("MAIN METHOD ENTRY")
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
