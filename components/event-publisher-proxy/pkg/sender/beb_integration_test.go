@@ -13,7 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	sender "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
 
 const (

@@ -12,7 +12,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
+	receiver "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 )
 
 // a mocked http.Handler
@@ -70,6 +70,6 @@ func TestStartListener(t *testing.T) {
 	}
 }
 
-func fixtureReceiver() *sut.HTTPMessageReceiver {
-	return sut.NewHTTPMessageReceiver(0)
+func fixtureReceiver() *receiver.HTTPMessageReceiver {
+	return receiver.NewHTTPMessageReceiver(0)
 }

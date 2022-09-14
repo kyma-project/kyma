@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	legacy "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 )
 
 func TestParseApplicationNameFromPath(t *testing.T) {
@@ -31,7 +31,7 @@ func TestParseApplicationNameFromPath(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			gotAppName := sut.ParseApplicationNameFromPath(tc.givenInputPath)
+			gotAppName := legacy.ParseApplicationNameFromPath(tc.givenInputPath)
 			assert.Equal(t, tc.wantAppName, gotAppName)
 		})
 	}

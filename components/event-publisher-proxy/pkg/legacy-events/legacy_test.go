@@ -18,7 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	legacy "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 )
 
 const (
@@ -103,7 +103,7 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			writer := httptest.NewRecorder()
 			app := applicationtest.NewApplication(tc.givenApplication, applicationTypeLabel(tc.givenTypeLabel))
 			appLister := fake.NewApplicationListerOrDie(ctx, app)
-			transformer := sut.NewTransformer("test", tc.givenPrefix, appLister)
+			transformer := legacy.NewTransformer("test", tc.givenPrefix, appLister)
 			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, request)
 			wantEventType := fmt.Sprintf("%s.%s.%s.%s", tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
 			assert.Equal(t, wantEventType, gotEventType)

@@ -15,7 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
+	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 )
 
 func TestWriteRequestWithHeaders(t *testing.T) {
@@ -36,7 +36,7 @@ func TestWriteRequestWithHeaders(t *testing.T) {
 	additionalHeadersCopy := copyHeaders(additionalHeaders)
 
 	ctx := context.Background()
-	err := sut.WriteRequestWithHeaders(ctx, message, req, additionalHeaders)
+	err := cloudevents.WriteRequestWithHeaders(ctx, message, req, additionalHeaders)
 	if err != nil {
 		t.Fatal(err)
 	}

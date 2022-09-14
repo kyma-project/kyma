@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
+	health "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 )
 
 func TestChecker(t *testing.T) {
@@ -32,8 +32,8 @@ func TestChecker(t *testing.T) {
 			name:                    "should report default health checks status-codes",
 			useCustomLivenessCheck:  false,
 			useCustomReadinessCheck: false,
-			wantLivenessStatusCode:  sut.StatusCodeHealthy,
-			wantReadinessStatusCode: sut.StatusCodeHealthy,
+			wantLivenessStatusCode:  health.StatusCodeHealthy,
+			wantReadinessStatusCode: health.StatusCodeHealthy,
 		},
 		{
 			name:                      "should report default health checks and next handler status-codes",
@@ -41,8 +41,8 @@ func TestChecker(t *testing.T) {
 			useCustomReadinessCheck:   false,
 			givenNextHandler:          handlerWithStatusCode(http.StatusNoContent),
 			givenNextHandlerEndpoint:  "/endpoint",
-			wantLivenessStatusCode:    sut.StatusCodeHealthy,
-			wantReadinessStatusCode:   sut.StatusCodeHealthy,
+			wantLivenessStatusCode:    health.StatusCodeHealthy,
+			wantReadinessStatusCode:   health.StatusCodeHealthy,
 			wantNextHandlerStatusCode: http.StatusNoContent,
 		},
 		{
@@ -86,25 +86,25 @@ func TestChecker(t *testing.T) {
 				}
 			}()
 
-			var opts []sut.CheckerOpt
+			var opts []health.CheckerOpt
 			if tc.useCustomLivenessCheck {
-				opts = append(opts, sut.WithLivenessCheck(tc.givenCustomLivenessCheck))
+				opts = append(opts, health.WithLivenessCheck(tc.givenCustomLivenessCheck))
 			}
 			if tc.useCustomReadinessCheck {
-				opts = append(opts, sut.WithReadinessCheck(tc.givenCustomReadinessCheck))
+				opts = append(opts, health.WithReadinessCheck(tc.givenCustomReadinessCheck))
 			}
-			checker := sut.NewChecker(opts...)
+			checker := health.NewChecker(opts...)
 
 			if tc.useCustomLivenessCheck {
-				assertResponseStatusCode(t, sut.LivenessURI, checker, tc.givenCustomLivenessCheck, tc.wantLivenessStatusCode)
+				assertResponseStatusCode(t, health.LivenessURI, checker, tc.givenCustomLivenessCheck, tc.wantLivenessStatusCode)
 			} else {
-				assertResponseStatusCode(t, sut.LivenessURI, checker, http.HandlerFunc(sut.DefaultCheck), sut.StatusCodeHealthy)
+				assertResponseStatusCode(t, health.LivenessURI, checker, http.HandlerFunc(health.DefaultCheck), health.StatusCodeHealthy)
 			}
 
 			if tc.useCustomReadinessCheck {
-				assertResponseStatusCode(t, sut.ReadinessURI, checker, tc.givenCustomReadinessCheck, tc.wantReadinessStatusCode)
+				assertResponseStatusCode(t, health.ReadinessURI, checker, tc.givenCustomReadinessCheck, tc.wantReadinessStatusCode)
 			} else {
-				assertResponseStatusCode(t, sut.ReadinessURI, checker, http.HandlerFunc(sut.DefaultCheck), sut.StatusCodeHealthy)
+				assertResponseStatusCode(t, health.ReadinessURI, checker, http.HandlerFunc(health.DefaultCheck), health.StatusCodeHealthy)
 			}
 
 			if tc.givenNextHandler != nil {
@@ -114,7 +114,7 @@ func TestChecker(t *testing.T) {
 	}
 }
 
-func assertResponseStatusCode(t *testing.T, endpoint string, checker *sut.Checker, handler http.Handler, statusCode int) {
+func assertResponseStatusCode(t *testing.T, endpoint string, checker *health.Checker, handler http.Handler, statusCode int) {
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, endpoint, nil)
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
+	oauth "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 )
 
 func TestConfig(t *testing.T) {
