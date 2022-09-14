@@ -1,0 +1,65 @@
+{{ if .Values.dashboardExtension.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: logparsers.telemetry.kyma-project.io
+    busola.io/extension: resource
+    busola.io/extension-version: "0.5"
+  name: logparsers.telemetry.kyma-project.io
+  namespace: kube-public
+data:
+  details: |-
+    {
+      "header": [
+        {
+          "source": "status.conditions[-1].type",
+          "name": "Status",
+          "widget": "Badge"
+        }
+      ],
+      "body": [
+        {
+          "source": "spec.parser",
+          "widget": "CodeViewer"
+        }
+      ]
+    }
+  form: |-
+    [
+      {
+        "widget": "CodeEditor",
+        "path": "spec.parser",
+        "simple": true
+      }
+    ]
+  general: |-
+    {
+      "resource": {
+        "kind": "LogParser",
+        "group": "telemetry.kyma-project.io",
+        "version": "v1alpha1"
+      },
+      "name": "Log Parsers",
+      "category": "Observability",
+      "urlPath": "logparsers",
+      "scope": "cluster",
+      "description": "Configure custom Log Parsers",
+    }
+  list: |-
+    [
+      {
+        "source": "status.conditions[-1].type",
+        "name": "Status",
+        "widget": "Badge"
+      }
+    ]
+  translations: |-
+    {
+      "en": {
+        "metadata.annotations": "Annotations",
+        "metadata.labels": "Labels",
+        "metadata.creationTimestamp": "Created at"
+      }
+    }
+{{ end }}

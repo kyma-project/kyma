@@ -12,13 +12,13 @@ const (
 	NatsBackendType BackendType = "NATS"
 )
 
-// EventingBackendSpec defines the desired state of EventingBackend
+// EventingBackendSpec defines the desired state of EventingBackend.
 type EventingBackendSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-// EventingBackendStatus defines the observed state of EventingBackend
+// EventingBackendStatus defines the observed state of EventingBackend.
 type EventingBackendStatus struct {
 	// Specifies the backend type used. Allowed values are "BEB" and "NATS"
 	// +optional
@@ -46,7 +46,7 @@ type EventingBackendStatus struct {
 // +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
 // +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=string,JSONPath=`.status.conditions[?(@.type=="Subscription Controller Ready")].status`
 // +kubebuilder:printcolumn:name="PublisherProxyReady",type=string,JSONPath=`.status.conditions[?(@.type=="Publisher Proxy Ready")].status`
-// EventingBackend is the Schema for the eventingbackends API
+// EventingBackend is the Schema for the eventingbackends API.
 type EventingBackend struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -57,7 +57,7 @@ type EventingBackend struct {
 
 // +kubebuilder:object:root=true
 
-// EventingBackendList contains a list of EventingBackend
+// EventingBackendList contains a list of EventingBackend.
 type EventingBackendList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

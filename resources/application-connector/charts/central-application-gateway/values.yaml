@@ -12,10 +12,10 @@ deployment:
     requestLogging: false
   resources:
     limits:
-      cpu: 100m
+      cpu: 500m
       memory: 128Mi
     requests:
-      cpu: 10m
+      cpu: 20m
       memory: 64Mi
 
 service:
@@ -27,6 +27,6 @@ service:
 
 autoscaling:
   enable: true
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 10
-  cpuUsagePercent: 40
+  cpuUsagePercent: 80

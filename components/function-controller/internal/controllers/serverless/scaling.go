@@ -86,7 +86,7 @@ func buildStateFnCreateHorizontalPodAutoscaler(hpa autoscalingv1.HorizontalPodAu
 			Message:            fmt.Sprintf("HorizontalPodAutoscaler %s created", hpa.GetName()),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
@@ -126,6 +126,6 @@ func buildStateFnUpdateHorizontalPodAutoscaler(expectd autoscalingv1.HorizontalP
 			Message:            fmt.Sprintf("HorizontalPodAutoscaler %s updated", hpaName),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func systemNamespaces() []string {
-	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system"}
+	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system", "compass-system"}
 }
 
 // CreateRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
