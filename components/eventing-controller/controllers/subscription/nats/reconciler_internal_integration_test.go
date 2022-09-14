@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 // This file contains unit tests for the NATS subscription reconciler.
 // It uses the testing.T and stretchr/testify libraries to perform assertions.
 // testEnvironment struct mocks the required resources.
