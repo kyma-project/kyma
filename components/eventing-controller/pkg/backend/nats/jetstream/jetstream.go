@@ -460,9 +460,6 @@ func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha1.
 			return errors.Errorf(MissingNATSSubscriptionMsgWithInfo, subject)
 		}
 	}
-	if len(js.subscriptions) < len(subscription.Status.CleanEventTypes) {
-		return errors.New(MissingNATSSubscriptionMsg)
-	}
 	return nil
 }
 
