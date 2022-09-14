@@ -167,6 +167,10 @@ func applyV1Alpha1ToV1Alpha2Annotations(in *serverlessv1alpha1.Function, out *se
 	}
 }
 
+func convertResourcesV1Alpha1toV1Alpha2(inResources serverlessv1alpha2.FunctionSpec) {
+
+}
+
 func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
 	out.Spec.Env = in.Spec.Env
 	if in.Spec.MinReplicas != nil || in.Spec.MaxReplicas != nil {
@@ -179,7 +183,26 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
 	//TODO: out.Profile
-	//v1BuildEmpty := corev1.ResourceRequirements{}
+	convertResourcesV1Alpha1ToV1Alpha2(in, out)
+	convertTemplateLabelsV1alpha1ToV1Alpha2(in, out)
+
+	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
+		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
+	}
+	return nil
+}
+
+func convertTemplateLabelsV1alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
+	if len(in.Spec.Labels) != 0 {
+		if out.Spec.Template == nil {
+			out.Spec.Template = &serverlessv1alpha2.Template{
+				Labels: in.Spec.Labels,
+			}
+		}
+	}
+}
+
+func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
 	if len(in.Spec.BuildResources.Limits) != 0 || len(in.Spec.BuildResources.Requests) != 0 {
 		if out.Spec.ResourceConfiguration == nil {
 			out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
@@ -198,19 +221,6 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 		}
 		out.Spec.ResourceConfiguration.Function.Resources = &in.Spec.Resources
 	}
-
-	if len(in.Spec.Labels) != 0 {
-		if out.Spec.Template == nil {
-			out.Spec.Template = &serverlessv1alpha2.Template{
-				Labels: in.Spec.Labels,
-			}
-		}
-	}
-
-	if err := w.convertSourceV1Alpha1ToV1Alpha2(in, out); err != nil {
-		return fmt.Errorf("failed to convert source from v1alpha1 to v1alpha2: %v", err)
-	}
-	return nil
 }
 
 func (w *ConvertingWebhook) convertSourceV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {

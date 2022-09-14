@@ -100,6 +100,11 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 	}
 	defaultingConfig := config.Function.Resources
 	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
+
+	setFunctionResources(resources, resourcesPreset, spec)
+}
+
+func setFunctionResources(resources *corev1.ResourceRequirements, resourcesPreset ResourcesPreset, spec *FunctionSpec) {
 	calculatedResources := defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 
 	if spec.ResourceConfiguration == nil {
@@ -114,24 +119,24 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 }
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
-
 	// if build resources are not set by the user we don't default them.
 	// However, if only a part is set or the preset label is set, we should correctly set missing defaults.
 	if shouldSkipBuildResourcesDefault(fn) {
 		return
 	}
 
-	var buildResourceCfg *ResourceRequirements
+	var buildResourceCfg ResourceRequirements
 	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Build != nil {
-		buildResourceCfg = spec.ResourceConfiguration.Build
-	} else {
-		buildResourceCfg = &ResourceRequirements{}
-		buildResourceCfg.Resources = &corev1.ResourceRequirements{}
+		buildResourceCfg = *spec.ResourceConfiguration.Build
 	}
 
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 
+	setBuildResources(&buildResourceCfg, resourcesPreset, spec)
+}
+
+func setBuildResources(buildResourceCfg *ResourceRequirements, resourcesPreset ResourcesPreset, spec *FunctionSpec) {
 	calculatedResources := defaultResources(buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 
 	if spec.ResourceConfiguration == nil {

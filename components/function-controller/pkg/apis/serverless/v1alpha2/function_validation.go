@@ -196,7 +196,7 @@ func (spec *FunctionSpec) validateFunctionResources(vc *ValidationConfig) error 
 	minMemory := resource.MustParse(vc.Function.Resources.MinRequestMemory)
 	minCPU := resource.MustParse(vc.Function.Resources.MinRequestCPU)
 	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil && spec.ResourceConfiguration.Function.Resources != nil {
-		return validateResources(spec.ResourceConfiguration.Function.Resources, minMemory, minCPU, "spec.resourceConfiguration.function.resources")
+		return validateResources(*spec.ResourceConfiguration.Function.Resources, minMemory, minCPU, "spec.resourceConfiguration.function.resources")
 	}
 	return nil
 }
@@ -205,7 +205,7 @@ func (spec *FunctionSpec) validateBuildResources(vc *ValidationConfig) error {
 	minMemory := resource.MustParse(vc.BuildJob.Resources.MinRequestMemory)
 	minCPU := resource.MustParse(vc.BuildJob.Resources.MinRequestCPU)
 	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Build != nil && spec.ResourceConfiguration.Build.Resources != nil {
-		return validateResources(spec.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.build.resources")
+		return validateResources(*spec.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.build.resources")
 	}
 	return nil
 }
@@ -225,7 +225,7 @@ func (spec *FunctionSpec) validateSources(vc *ValidationConfig) error {
 	return errors.Errorf("spec.source should contains only 1 configuration of function")
 }
 
-func validateResources(resources *corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) error {
+func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) error {
 	limits := resources.Limits
 	requests := resources.Requests
 	allErrs := []string{}
@@ -235,12 +235,12 @@ func validateResources(resources *corev1.ResourceRequirements, minMemory, minCPU
 	}
 
 	if limits != nil {
-		allErrs = append(allErrs, validateLimites(resources, minMemory, minCPU, parent)...)
+		allErrs = append(allErrs, validateLimites(&resources, minMemory, minCPU, parent)...)
 	}
 	return returnAllErrs("invalid function resources", allErrs)
 }
 
-func validateRequests(resources *corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
 	limits := resources.Limits
 	requests := resources.Requests
 	allErrs := []string{}
