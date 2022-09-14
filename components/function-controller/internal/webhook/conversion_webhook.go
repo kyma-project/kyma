@@ -312,16 +312,22 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 		out.Spec.MaxReplicas = in.Spec.ScaleConfig.MaxReplicas
 		out.Spec.MinReplicas = in.Spec.ScaleConfig.MinReplicas
 	}
+
+	convertResourcesV1Alpha2ToV1Alpha1(in, out)
+
+	if in.Spec.Template != nil && in.Spec.Template.Labels != nil {
+		out.Spec.Labels = in.Spec.Template.Labels
+	}
+	return w.convertSourceV1Alpha2ToV1Alpha1(in, out)
+}
+
+func convertResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
 	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil && in.Spec.ResourceConfiguration.Build.Resources != nil {
 		out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
 	}
 	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Function != nil && in.Spec.ResourceConfiguration.Function.Resources != nil {
 		out.Spec.Resources = *in.Spec.ResourceConfiguration.Function.Resources
 	}
-	if in.Spec.Template != nil && in.Spec.Template.Labels != nil {
-		out.Spec.Labels = in.Spec.Template.Labels
-	}
-	return w.convertSourceV1Alpha2ToV1Alpha1(in, out)
 }
 
 func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
