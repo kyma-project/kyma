@@ -1,5 +1,5 @@
-//go:build unit
-// +build unit
+//go:build integration
+// +build integration
 
 package sender
 
@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
-func TestJetstreamMessageSender(t *testing.T) {
+func TestJetStreamMessageSender(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
@@ -79,9 +79,9 @@ func TestJetstreamMessageSender(t *testing.T) {
 				connection.Close()
 			}
 
-			// then
 			status, err := sender.Send(ctx, ce)
 
+			// then
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 			assert.Equal(t, tc.wantError, err != nil)
 			assert.Equal(t, tc.wantStatusCode, status)
