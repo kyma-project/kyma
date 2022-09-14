@@ -57,8 +57,10 @@ import (
 )
 
 var (
-	scheme                     = runtime.NewScheme()
-	setupLog                   = ctrl.Log.WithName("setup")
+	certDir                    string
+	deniedFilterPlugins        string
+	deniedOutputPlugins        string
+	enableLeaderElection       bool
 	fluentBitConfigMap         string
 	fluentBitSectionsConfigMap string
 	fluentBitParsersConfigMap  string
@@ -74,10 +76,12 @@ var (
 	fluentBitFsBufferLimit     string
 	logFormat                  string
 	logLevel                   string
-	certDir                    string
-	deniedFilterPlugins        string
-	deniedOutputPlugins        string
 	maxPipelines               int
+	metricsAddr                string
+	probeAddr                  string
+	scheme                     = runtime.NewScheme()
+	setupLog                   = ctrl.Log.WithName("setup")
+	syncPeriod                 time.Duration
 )
 
 //nolint:gochecknoinits
@@ -96,10 +100,6 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
-	var probeAddr string
-	var syncPeriod time.Duration
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.DurationVar(&syncPeriod, "sync-period", 1*time.Hour, "minimum frequency at which watched resources are reconciled")

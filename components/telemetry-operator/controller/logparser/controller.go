@@ -58,49 +58,10 @@ func NewReconciler(client client.Client, config Config) *Reconciler {
 	return &r
 }
 
-//func filterReqSecrets() predicate.Predicate {
-//	secname := []string{"mysecret", "mysecret-1"}
-//	return predicate.Funcs{
-//		CreateFunc: func(e event.CreateEvent) bool {
-//			// Evaluates to false if the object has been confirmed deleted.
-//			if slices.Contains(secname, e.Object.GetName()) {
-//				return true
-//			}
-//			return false
-//		},
-//		UpdateFunc: func(e event.UpdateEvent) bool {
-//			// Ignore updates to CR status in which case metadata.Generation does not change
-//			if slices.Contains(secname, e.ObjectNew.GetName()) {
-//				return true
-//			}
-//			return false
-//		},
-//		DeleteFunc: func(e event.DeleteEvent) bool {
-//			// Evaluates to false if the object has been confirmed deleted.
-//			if slices.Contains(secname, e.Object.GetName()) {
-//				return true
-//			}
-//			return false
-//		},
-//		GenericFunc: func(e event.GenericEvent) bool {
-//			// Evaluates to false if the object has been confirmed deleted.
-//			if slices.Contains(secname, e.Object.GetName()) {
-//				return true
-//			}
-//			return false
-//		},
-//	}
-//}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogParser{}).
-		//WithEventFilter(filterReqSecrets()).
-		//Watches(
-		//	&source.Kind{Type: &corev1.Secret{}},
-		//	&handler.EnqueueRequestForObject{},
-		//).
 		Complete(r)
 }
 

@@ -27,7 +27,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/strings/slices"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -58,7 +57,7 @@ type Reconciler struct {
 	daemonSetHelper         *kubernetes.DaemonSetHelper
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
-	secrets                 []string
+	secrets                 secretsCache
 }
 
 // NewReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
@@ -67,109 +66,92 @@ func NewReconciler(
 	config Config,
 ) *Reconciler {
 	var r Reconciler
-
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
-	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "telemetry_all_logpipelines",
-		Help: "Number of log pipelines.",
-	})
-	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "telemetry_unsupported_logpipelines",
-		Help: "Number of log pipelines with custom filters or outputs.",
-	})
 	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
-
+	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
+	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
+	r.secrets = newSecretsCache()
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	controllermetrics.RegisterMetrics()
 
 	return &r
 }
 
-func (r *Reconciler) getDesiredSecrets() []string {
-	return r.secrets
-}
-
-func (r *Reconciler) checkSecrets() predicate.Predicate {
-	return predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			desiredSecrets := r.getDesiredSecrets()
-			_, ok := e.ObjectNew.(*corev1.Secret)
-			if !ok {
-				return true
-			}
-
-			// Ignore updates to CR status in which case metadata.Generation does not change
-			if slices.Contains(desiredSecrets, e.ObjectNew.GetName()) {
-				fmt.Printf("Update event ALLOW: %s", e.ObjectNew.GetName())
-				return true
-			} else {
-				//fmt.Printf("Update event DENY: %s", e.ObjectNew.GetName())
-				return false
-			}
-		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			_, ok := e.Object.(*corev1.Secret)
-			if !ok {
-				return true
-			}
-			// Evaluates to false if the object has been confirmed deleted.
-			if slices.Contains(r.secrets, e.Object.GetName()) {
-				fmt.Printf("Delete event ALLOW: %s", e.Object.GetName())
-				return true
-			} else {
-				//fmt.Printf("Delete event DENY: %s", e.Object.GetName())
-				return false
-			}
-		},
-		CreateFunc: func(e event.CreateEvent) bool {
-			// Evaluates to false if the object has been confirmed deleted.
-			_, ok := e.Object.(*corev1.Secret)
-			if !ok {
-				return true
-			}
-			if slices.Contains(r.secrets, e.Object.GetName()) {
-				fmt.Printf("Create event ALLOW: %s", e.Object.GetName())
-				return true
-			} else {
-				//fmt.Printf("Create event DENY: %s", e.Object.GetName())
-				return false
-			}
-		},
-	}
-}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
-		WithEventFilter(r.checkSecrets()).
+		WithEventFilter(r.filterSecrets()).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.prepareReconciliationsForSecret),
+			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
 		).
 		Complete(r)
 }
-func (r *Reconciler) prepareReconciliationsForSecret(secret client.Object) []reconcile.Request {
-	fmt.Printf("secret Name: %s\n", secret.GetName())
 
-	if slices.Contains(r.secrets, secret.GetName()) {
-		fmt.Printf("It contains: %s\n", secret.GetName())
-	} else {
-		fmt.Printf("not present: %s\n", secret.GetName())
+func (r *Reconciler) filterSecrets() predicate.Predicate {
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			_, ok := e.ObjectNew.(*corev1.Secret)
+			if ok {
+				fmt.Printf("UpdateEvent: It's a secret!")
+				return true
+			}
+			// TODO
+			// maybe filter by labels and annotations
+			return false
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			_, ok := e.Object.(*corev1.Secret)
+			if ok {
+				fmt.Printf("DeleteEvent: It's a secret!")
+				return true
+			}
+			// TODO
+			// maybe filter by labels and annotations
+			return false
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			_, ok := e.Object.(*corev1.Secret)
+			if ok {
+				fmt.Printf("DeleteEvent: It's a secret!")
+				return true
+			}
+			// TODO
+			// maybe filter by labels and annotations
+			fmt.Printf("CreateEvent: It's a secret!")
+			return false
+		},
+		GenericFunc: func(e event.GenericEvent) bool {
+			_, ok := e.Object.(*corev1.Secret)
+			if ok {
+				fmt.Printf("DeleteEvent: It's a secret!")
+				return true
+			}
+			// TODO
+			// maybe filter by labels and annotations
+			return false
+		},
+	}
+}
 
+func (r *Reconciler) createReconReqs(object client.Object) []reconcile.Request {
+	secret := object.(*corev1.Secret)
+
+	fmt.Printf("Secret changed event: Handling Secret with name: %s\n", secret.Name)
+
+	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
+	pipelines := r.secrets.get(secretName)
+	var requests []reconcile.Request
+	for _, p := range pipelines {
+		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: string(p)}}
+		fmt.Printf("Secret changed event: Creating Reconciliation request for pipeline: %s\n", string(p))
+		requests = append(requests, request)
 	}
 
-	//pipelines := r.findLogPipelinesForSecret(secret)
-	requests := make([]reconcile.Request, 0)
-	//for i := range pipelines.Items {
-	//	requests[i] = reconcile.Request{
-	//		NamespacedName: types.NamespacedName{
-	//			Name: pipelines.Items[i].GetName(),
-	//		},
-	//	}
-	//}
+	fmt.Printf("Secret changed event: Created %d new Reconciliation requests.\n", len(requests))
 	return requests
 }
 
@@ -185,8 +167,6 @@ func (r *Reconciler) prepareReconciliationsForSecret(secret client.Object) []rec
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 
-	log.Info("RECON")
-
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
 		log.Error(err, "Failed to get all log pipelines")
@@ -200,7 +180,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// Ignore not-found errors since we can get them on deleted requests
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	r.secrets = []string{"mysecret"}
+
 	secretsOK := r.syncer.secretHelper.ValidatePipelineSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
