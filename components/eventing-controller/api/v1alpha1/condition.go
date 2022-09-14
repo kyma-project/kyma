@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -350,4 +351,15 @@ func ConditionEquals(existing, expected Condition) bool {
 	}
 
 	return true
+}
+
+// ConditionToAlpha2Version //todo
+func ConditionToAlpha2Version(condition Condition) v1alpha2.Condition {
+	return v1alpha2.Condition{
+		Type:               v1alpha2.ConditionType(condition.Type),
+		Status:             condition.Status,
+		LastTransitionTime: condition.LastTransitionTime,
+		Reason:             v1alpha2.ConditionReason(condition.Reason),
+		Message:            condition.Message,
+	}
 }

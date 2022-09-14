@@ -6,91 +6,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type TypeMatching string
-
-const (
-	STANDARD TypeMatching = "standard"
-	EXACT    TypeMatching = "exact"
-)
-
-type EventType struct {
-	OriginalType string `json:"originalType"`
-	CleanType    string `json:"cleanType"`
-	ConsumerName string `json:"consumerName"`
-}
-
-type Backend struct {
-	// BEB-specific fields
-
-	// Ev2hash defines the hash for the Subscription custom resource
-	// +optional
-	Ev2hash int64 `json:"ev2hash,omitempty"`
-
-	// Emshash defines the hash for the Subscription in BEB
-	// +optional
-	Emshash int64 `json:"emshash,omitempty"`
-
-	// ExternalSink defines the webhook URL which is used by BEB to trigger subscribers
-	// +optional
-	ExternalSink string `json:"externalSink,omitempty"`
-
-	// FailedActivation defines the reason if a Subscription had failed activation in BEB
-	// +optional
-	FailedActivation string `json:"failedActivation,omitempty"`
-
-	// APIRuleName defines the name of the APIRule which is used by the Subscription
-	// +optional
-	APIRuleName string `json:"apiRuleName,omitempty"`
-
-	// EmsSubscriptionStatus defines the status of Subscription in BEB
-	// +optional
-	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
-
-	// NATS-specific fields
-
-}
-
-// WebhookAuth defines the Webhook called by an active subscription in BEB
-type WebhookAuth struct {
-	// Type defines type of authentication
-	// +optional
-	Type string `json:"type,omitempty"`
-
-	// GrantType defines grant type for OAuth2
-	GrantType string `json:"grantType"`
-
-	// ClientID defines clientID for OAuth2
-	ClientID string `json:"clientId"`
-
-	// ClientSecret defines client secret for OAuth2
-	ClientSecret string `json:"clientSecret"`
-
-	// TokenURL defines token URL for OAuth2
-	TokenURL string `json:"tokenUrl"`
-
-	// Scope defines scope for OAuth2
-	Scope []string `json:"scope,omitempty"`
-}
-
-// ProtocolSettings defines the CE protocol setting specification implementation
-type ProtocolSettings struct {
-	// ContentMode defines content mode for eventing based on BEB
-	// +optional
-	ContentMode *string `json:"contentMode,omitempty"`
-
-	// ExemptHandshake defines whether exempt handshake for eventing based on BEB
-	// +optional
-	ExemptHandshake *bool `json:"exemptHandshake,omitempty"`
-
-	// Qos defines quality of service for eventing based on BEB
-	// +optional
-	Qos *string `json:"qos,omitempty"`
-
-	// WebhookAuth defines the Webhook called by an active subscription in BEB
-	// +optional
-	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
-}
-
 type ConditionType string
 
 const (
@@ -138,7 +53,8 @@ const (
 	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
-func ConditionVersion2toVersion1(condition Condition) v1alpha1.Condition {
+// ConditionToAlpha1Version //todo
+func ConditionToAlpha1Version(condition Condition) v1alpha1.Condition {
 	return v1alpha1.Condition{
 		Type:               v1alpha1.ConditionType(condition.Type),
 		Status:             condition.Status,
@@ -148,14 +64,47 @@ func ConditionVersion2toVersion1(condition Condition) v1alpha1.Condition {
 	}
 }
 
-func ConditionVersion1toVersion2(condition v1alpha1.Condition) Condition {
-	return Condition{
-		Type:               ConditionType(condition.Type),
-		Status:             condition.Status,
-		LastTransitionTime: condition.LastTransitionTime,
-		Reason:             ConditionReason(condition.Reason),
-		Message:            condition.Message,
-	}
+type EventType struct {
+	OriginalType string `json:"originalType"`
+	CleanType    string `json:"cleanType"`
+}
+
+// Backend contains Backend-specific fields
+type Backend struct {
+	// BEB-specific fields
+
+	// Ev2hash defines the hash for the Subscription custom resource
+	// +optional
+	Ev2hash int64 `json:"ev2hash,omitempty"`
+
+	// Emshash defines the hash for the Subscription in BEB
+	// +optional
+	Emshash int64 `json:"emshash,omitempty"`
+
+	// ExternalSink defines the webhook URL which is used by BEB to trigger subscribers
+	// +optional
+	ExternalSink string `json:"externalSink,omitempty"`
+
+	// FailedActivation defines the reason if a Subscription had failed activation in BEB
+	// +optional
+	FailedActivation string `json:"failedActivation,omitempty"`
+
+	// APIRuleName defines the name of the APIRule which is used by the Subscription
+	// +optional
+	APIRuleName string `json:"apiRuleName,omitempty"`
+
+	// EmsSubscriptionStatus defines the status of Subscription in BEB
+	// +optional
+	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+
+	// NATS-specific fields
+
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	MaxInFlightMessages int `json:"maxInFlightMessages,omitempty"`
+
+	// +optional
+	Types []JetStreamTypes `json:"types,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
@@ -178,4 +127,31 @@ type EmsSubscriptionStatus struct {
 	// LastFailedDeliveryReason defines the reason of failed delivery
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
+}
+
+// WebhookAuth defines the Webhook called by an active subscription in BEB
+type WebhookAuth struct {
+	// Type defines type of authentication
+	// +optional
+	Type string `json:"type,omitempty"`
+
+	// GrantType defines grant type for OAuth2
+	GrantType string `json:"grantType"`
+
+	// ClientID defines clientID for OAuth2
+	ClientID string `json:"clientId"`
+
+	// ClientSecret defines client secret for OAuth2
+	ClientSecret string `json:"clientSecret"`
+
+	// TokenURL defines token URL for OAuth2
+	TokenURL string `json:"tokenUrl"`
+
+	// Scope defines scope for OAuth2
+	Scope []string `json:"scope,omitempty"`
+}
+
+type JetStreamTypes struct {
+	OriginalType string `json:"originalType"`
+	ConsumerName string `json:"consumerName"`
 }
