@@ -28,19 +28,20 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Input     Input               `json:"input,omitempty"`
-	Filters   []Filter            `json:"filters,omitempty"`
-	Output    Output              `json:"output,omitempty"`
-	Files     []FileMount         `json:"files,omitempty"`
-	Variables []VariableReference `json:"variables,omitempty"`
+	Input     Input         `json:"input,omitempty"`
+	Filters   []Filter      `json:"filters,omitempty"`
+	Output    Output        `json:"output,omitempty"`
+	Files     []FileMount   `json:"files,omitempty"`
+	Variables []VariableRef `json:"variables,omitempty"`
 }
 
-// Input describes a Fluent Bit input configuration section
+// Input describes a log input for a LogPipeline
 type Input struct {
+	// Application configures in more detail from which containers application logs are enabled as input
 	Application ApplicationInput `json:"application,omitempty"`
 }
 
-// ApplicationInput is the default type of Input that handles application logs
+// ApplicationInput is the default type of Input that handles application logs from runtime containers. It configures in more detail from which containers logs are selected as input
 type ApplicationInput struct {
 	Namespaces InputNamespaces `json:"namespaces,omitempty"`
 	Containers InputContainers `json:"containers,omitempty"`
@@ -50,30 +51,38 @@ type ApplicationInput struct {
 	DropLabels bool `json:"dropLabels,omitempty"`
 }
 
+// InputNamespaces describes whether application logs from specific Namespaces are selected. The options are mutually exclusive. System Namespaces are excluded by default from the collection
 type InputNamespaces struct {
+	// Include describes to include only the container logs of the specified Namespace names
 	Include []string `json:"include,omitempty"`
+	// Exclude describes to exclude only the container logs of the specified Namespace names
 	Exclude []string `json:"exclude,omitempty"`
-	System  bool     `json:"system,omitempty"`
+	// System describes to include the container logs of the system Namespaces like kube-system, istio-system, and kyma-system
+	System bool `json:"system,omitempty"`
 }
 
+// InputContainers describes whether application logs from specific containers are selected. The options are mutually exclusive.
 type InputContainers struct {
+	// Include describes to include only the container logs with the specified container names
 	Include []string `json:"include,omitempty"`
+	// Exclude describes to exclude only the container logs with the specified container names
 	Exclude []string `json:"exclude,omitempty"`
 }
 
-// Filter describes a Fluent Bit filter configuration
+// Filter describes a filtering option on the logs of the pipeline
 type Filter struct {
+	// Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode
 	Custom string `json:"custom,omitempty"`
 }
 
-// LokiOutput describes a Fluent Bit Loki output configuration
+// LokiOutput configures an output to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead.
 type LokiOutput struct {
 	URL        ValueType         `json:"url,omitempty"`
 	Labels     map[string]string `json:"labels,omitempty"`
 	RemoveKeys []string          `json:"removeKeys,omitempty"`
 }
 
-// HttpOutput describes a Fluent Bit HTTP output configuration
+// HttpOutput configures an HTTP-based output compatible with the Fluent Bit HTTP output plugin
 type HTTPOutput struct {
 	Host      ValueType `json:"host,omitempty"`
 	User      ValueType `json:"user,omitempty"`
@@ -93,6 +102,7 @@ type TLSConfig struct {
 
 // Output describes a Fluent Bit output configuration section
 type Output struct {
+	// Custom output definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode
 	Custom string      `json:"custom,omitempty"`
 	HTTP   *HTTPOutput `json:"http,omitempty"`
 	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
@@ -138,27 +148,31 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// VariableReference references a Kubernetes secret that should be provided as environment variable to Fluent Bit
-type VariableReference struct {
-	Name      string        `json:"name,omitempty"`
-	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+// VariableRef references a Kubernetes secret that should be provided as environment variable to Fluent Bit
+type VariableRef struct {
+	Name      string          `json:"name,omitempty"`
+	ValueFrom ValueFromSource `json:"valueFrom,omitempty"`
 }
 
 type ValueType struct {
-	Value     string        `json:"value,omitempty"`
-	ValueFrom ValueFromType `json:"valueFrom,omitempty"`
+	Value     string           `json:"value,omitempty"`
+	ValueFrom *ValueFromSource `json:"valueFrom,omitempty"`
 }
 
 func (v *ValueType) IsDefined() bool {
-	return v.Value != "" || v.ValueFrom.IsSecretRef()
+	if v.Value != "" {
+		return true
+	}
+
+	return v.ValueFrom != nil && v.ValueFrom.IsSecretKeyRef()
 }
 
-func (v *ValueFromType) IsSecretRef() bool {
-	return v.SecretKey.Name != "" && v.SecretKey.Key != ""
+type ValueFromSource struct {
+	SecretKeyRef *SecretKeyRef `json:"secretKeyRef,omitempty"`
 }
 
-type ValueFromType struct {
-	SecretKey SecretKeyRef `json:"secretKeyRef,omitempty"`
+func (v *ValueFromSource) IsSecretKeyRef() bool {
+	return v.SecretKeyRef != nil && v.SecretKeyRef.Name != "" && v.SecretKeyRef.Key != ""
 }
 
 type SecretKeyRef struct {

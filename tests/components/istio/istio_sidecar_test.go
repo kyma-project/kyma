@@ -15,7 +15,7 @@ import (
 )
 
 func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
-	installedCase := istioInstallledCase{}
+	installedCase := istioInstalledCase{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		err := installedCase.getIstioPods()
 		return ctx, err
@@ -26,30 +26,32 @@ func InitializeScenarioTargetNamespaceSidecar(ctx *godog.ScenarioContext) {
 	ctx.Step(`^"([^"]*)" namespace is labeled with "([^"]*)" "([^"]*)"$`, installedCase.labelTargetNamespace)
 	ctx.Step(`^Httpbin deployment is created in "([^"]*)" namespace$`, installedCase.deployHttpBinInTargetNamespace)
 	ctx.Step(`^Httpbin deployment is deployed and ready in "([^"]*)" namespace$`, installedCase.waitForHttpBinInTargetNamespace)
-	ctx.Step(`^there should be no pods with istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldNotHaveSidecar)
-	ctx.Step(`^there should be some pods with istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldHaveSidecar)
-	ctx.Step(`^there should be istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
+	ctx.Step(`^there should be no pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldNotHaveSidecar)
+	ctx.Step(`^there should be some pods with Istio sidecar in "([^"]*)" namespace$`, installedCase.targetNamespacePodsShouldHaveSidecar)
+	ctx.Step(`^there is (\d+) Httpbin deployment in "([^"]*)" namespace$`, installedCase.thereIsNHttpbinPod)
+	ctx.Step(`^there "([^"]*)" be Istio sidecar in httpbin pod in "([^"]*)" namespace$`, installedCase.httpBinPodShouldHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from "([^"]*)" namespace$`, installedCase.deleteHttpBinInTargetNamespace)
 	ctx.Step(`^"([^"]*)" namespace is deleted$`, installedCase.deleteTargetNamespace)
 }
 
-func (i *istioInstallledCase) httpBinPodShouldHaveSidecar(targetNamespace string) error {
+func (i *istioInstalledCase) httpBinPodShouldHaveSidecar(shouldHave string, targetNamespace string) error {
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{
 		LabelSelector: "app=httpbin",
 	})
 	if err != nil {
 		return err
 	}
+
 	for _, pod := range pods.Items {
-		if !hasIstioProxy(pod.Spec.Containers) {
-			return fmt.Errorf("istio sidecars should be deployed in %s", targetNamespace)
+		if (shouldHave == "should") != hasIstioProxy(pod.Spec.Containers) {
+			return fmt.Errorf("istio sidecars %s be deployed in %s", shouldHave, targetNamespace)
 		}
 	}
 
 	return nil
 }
 
-func (i *istioInstallledCase) targetNamespacePodsShouldHaveSidecar(targetNamespace string) error {
+func (i *istioInstalledCase) targetNamespacePodsShouldHaveSidecar(targetNamespace string) error {
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -70,7 +72,7 @@ func (i *istioInstallledCase) targetNamespacePodsShouldHaveSidecar(targetNamespa
 	return nil
 }
 
-func (i *istioInstallledCase) targetNamespacePodsShouldNotHaveSidecar(targetNamespace string) error {
+func (i *istioInstalledCase) targetNamespacePodsShouldNotHaveSidecar(targetNamespace string) error {
 	pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -84,7 +86,7 @@ func (i *istioInstallledCase) targetNamespacePodsShouldNotHaveSidecar(targetName
 	return nil
 }
 
-func (i *istioInstallledCase) deployHttpBinInTargetNamespace(targetNamespaceName string) error {
+func (i *istioInstalledCase) deployHttpBinInTargetNamespace(targetNamespaceName string) error {
 	resources, err := readManifestToUnstructured()
 	if err != nil {
 		return err
@@ -99,7 +101,7 @@ func (i *istioInstallledCase) deployHttpBinInTargetNamespace(targetNamespaceName
 	return nil
 }
 
-func (i *istioInstallledCase) waitForHttpBinInTargetNamespace(targetNamespace string) error {
+func (i *istioInstalledCase) waitForHttpBinInTargetNamespace(targetNamespace string) error {
 	err := wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		pods, err := k8sClient.CoreV1().Pods(targetNamespace).List(context.Background(), metav1.ListOptions{
 			LabelSelector: "app=httpbin",
@@ -119,7 +121,7 @@ func (i *istioInstallledCase) waitForHttpBinInTargetNamespace(targetNamespace st
 	return nil
 }
 
-func (i *istioInstallledCase) deleteTargetNamespace(targetNamespace string) error {
+func (i *istioInstalledCase) deleteTargetNamespace(targetNamespace string) error {
 	err := k8sClient.CoreV1().Namespaces().Delete(context.Background(), targetNamespace, metav1.DeleteOptions{})
 
 	if err != nil {
@@ -129,7 +131,7 @@ func (i *istioInstallledCase) deleteTargetNamespace(targetNamespace string) erro
 	return nil
 }
 
-func (i *istioInstallledCase) deleteHttpBinInTargetNamespace(targetNamespace string) error {
+func (i *istioInstalledCase) deleteHttpBinInTargetNamespace(targetNamespace string) error {
 	resources, err := readManifestToUnstructured()
 	if err != nil {
 		return err
@@ -144,7 +146,7 @@ func (i *istioInstallledCase) deleteHttpBinInTargetNamespace(targetNamespace str
 	return nil
 }
 
-func (i *istioInstallledCase) createTargetNamespace(targetNamespaceName string) error {
+func (i *istioInstalledCase) createTargetNamespace(targetNamespaceName string) error {
 	namespace := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: targetNamespaceName,
@@ -157,7 +159,7 @@ func (i *istioInstallledCase) createTargetNamespace(targetNamespaceName string) 
 	return nil
 }
 
-func (i *istioInstallledCase) labelTargetNamespace(targetNamespace string, labelName string, labelValue string) error {
+func (i *istioInstalledCase) labelTargetNamespace(targetNamespace string, labelName string, labelValue string) error {
 	namespace, err := k8sClient.CoreV1().Namespaces().Get(context.Background(), targetNamespace, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("could not get namespace %s", targetNamespace)
@@ -171,5 +173,24 @@ func (i *istioInstallledCase) labelTargetNamespace(targetNamespace string, label
 		return fmt.Errorf("could not label namespace %s", targetNamespace)
 	}
 
+	return nil
+}
+
+func (i *istioInstalledCase) thereIsNHttpbinPod(n int, namespace string) error {
+	err := wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+		pods, err := k8sClient.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: "app=httpbin",
+		})
+		if err != nil {
+			return false, err
+		}
+		if len(pods.Items) > 1 {
+			return false, err
+		}
+		return true, nil
+	})
+	if err != nil {
+		return fmt.Errorf("there is more than one httpbin pod: %s", err)
+	}
 	return nil
 }

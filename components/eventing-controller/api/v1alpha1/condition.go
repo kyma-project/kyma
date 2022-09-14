@@ -56,7 +56,7 @@ const (
 	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
-// initializeConditions sets unset conditions to Unknown
+// initializeConditions sets unset conditions to Unknown.
 func initializeConditions(initialConditions, currentConditions []Condition) []Condition {
 	givenConditions := make(map[ConditionType]Condition)
 
@@ -76,13 +76,13 @@ func initializeConditions(initialConditions, currentConditions []Condition) []Co
 	return finalConditions
 }
 
-// InitializeConditions sets unset Subscription conditions to Unknown
+// InitializeConditions sets unset Subscription conditions to Unknown.
 func (s *SubscriptionStatus) InitializeConditions() {
 	initialConditions := MakeSubscriptionConditions()
 	s.Conditions = initializeConditions(initialConditions, s.Conditions)
 }
 
-// InitializeConditions sets all the Backend conditions to true
+// InitializeConditions sets all the Backend conditions to true.
 func (b *EventingBackendStatus) InitializeConditions() {
 	initialConditions := makeBackendConditions()
 	b.Conditions = initializeConditions(initialConditions, b.Conditions)
@@ -121,7 +121,7 @@ func (b EventingBackendStatus) FindCondition(conditionType ConditionType) *Condi
 }
 
 // ShouldUpdateReadyStatus checks if there is a mismatch between the
-// subscription Ready Status and the Ready status of all the conditions
+// subscription Ready Status and the Ready status of all the conditions.
 func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
 	if !s.Ready && s.IsReady() || s.Ready && !s.IsReady() {
 		return true

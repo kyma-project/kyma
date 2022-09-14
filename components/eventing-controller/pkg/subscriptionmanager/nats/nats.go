@@ -4,12 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -19,15 +15,16 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
+	subscriptionnats "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
@@ -52,15 +49,15 @@ type SubscriptionManager struct {
 	envCfg           env.NatsConfig
 	restCfg          *rest.Config
 	metricsAddr      string
-	metricsCollector *pkgmetrics.Collector
+	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
-	backend          handlers.NatsBackend
+	backend          core.Backend
 	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
 		envCfg:           natsConfig,
 		restCfg:          restCfg,
@@ -88,9 +85,9 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-nats")
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
+	natsHandler := core.NewNats(c.envCfg, defaultSubsConfig, c.metricsCollector, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
-	natsReconciler := subscription.NewReconciler(
+	natsReconciler := subscriptionnats.NewReconciler(
 		ctx,
 		client,
 		natsHandler,
@@ -119,26 +116,26 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all NATS artifacts.
-func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend core.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var ok bool
 
-	var natsBackend *handlers.Nats
-	if natsBackend, ok = backend.(*handlers.Nats); !ok {
+	var natsBackend *core.Nats
+	if natsBackend, ok = backend.(*core.Nats); !ok {
 		err := errors.New("convert backend handler to NATS handler failed")
 		logger.Errorw("No NATS backend exists", "error", err)
 		return err
 	}
 
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
 
-	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	subs, err := utils.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
 		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
 	}
@@ -150,8 +147,8 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
 		log := logger.With("key", subKey.String())
 
-		desiredSub := handlers.ResetStatusToDefaults(sub)
-		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		desiredSub := utils.ResetStatusToDefaults(sub)
+		if err := utils.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			log.Errorw("Failed to update NATS subscription status", "error", err)
 		}

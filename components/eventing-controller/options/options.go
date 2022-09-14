@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// args
+	// All the available arguments.
 	argNameMaxReconnects   = "max-reconnects"
 	argNameMetricsAddr     = "metrics-addr"
 	argNameReconnectWait   = "reconnect-wait"
@@ -18,7 +18,7 @@ const (
 	argNameReadyEndpoint   = "ready-check-endpoint"
 	argNameHealthEndpoint  = "health-check-endpoint"
 
-	// env
+	// All the available environment variables.
 	envNameLogFormat          = "APP_LOG_FORMAT"
 	envNameLogLevel           = "APP_LOG_LEVEL"
 	envEnableJetStreamBackend = "ENABLE_JETSTREAM_BACKEND"

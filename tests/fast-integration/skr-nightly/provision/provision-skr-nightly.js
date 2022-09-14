@@ -3,11 +3,6 @@ const {
   deprovisionSKR,
 } = require('../../kyma-environment-broker');
 const {
-  unregisterKymaFromCompass,
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-} = require('../../compass');
-const {
   initializeK8sClient,
 } = require('../../utils');
 const {
@@ -20,9 +15,7 @@ const {
   withScenarioName,
   gardener,
   keb,
-  director,
   oidcE2ETest,
-  commerceMockTest,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -68,7 +61,6 @@ describe('SKR nightly', function() {
       if (runtime) {
         console.log('Deprovision last SKR.');
         await deprovisionSKR(keb, kcp, runtime.instanceID, deprovisioningTimeout);
-        await unregisterKymaFromCompass(director, options.scenarioName);
       } else {
         console.log('Deprovisioning not needed - no previous SKR found.');
       }
@@ -92,13 +84,11 @@ describe('SKR nightly', function() {
       console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
 
       shoot = skr.shoot;
-      await addScenarioInCompass(director, options.scenarioName);
-      await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
       initializeK8sClient({kubeconfig: shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
+
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
-  commerceMockTest(options);
 });

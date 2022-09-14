@@ -6,16 +6,22 @@ import (
 	_ "embed"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 
+	"github.com/cucumber/godog"
 	"github.com/tidwall/pretty"
 	"gitlab.com/rodrigoodhin/gocure/models"
 	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
 	"gitlab.com/rodrigoodhin/gocure/report/html"
+
+	"github.com/mitchellh/mapstructure"
+	istioOperator "istio.io/istio/operator/pkg/apis/istio/v1alpha1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -177,5 +183,89 @@ func generateHTMLReport() {
 	err := html.Generate()
 	if err != nil {
 		log.Fatalf(err.Error())
+	}
+}
+
+func getIstioOperatorFromCluster() (*istioOperator.IstioOperator, error) {
+	item, err := dynamicClient.Resource(schema.GroupVersionResource{Group: "install.istio.io", Version: "v1alpha1", Resource: "istiooperators"}).Namespace("istio-system").Get(context.Background(), "installed-state-default-operator", metav1.GetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("default Kyma IstioOperator CR wasn't found err=%s", err)
+	}
+
+	jsonSlice, err := json.Marshal(item)
+	if err != nil {
+		return nil, err
+	}
+	operator := istioOperator.IstioOperator{}
+
+	json.Unmarshal(jsonSlice, &operator)
+	return &operator, nil
+}
+
+type ResourceStruct struct {
+	Cpu    string
+	Memory string
+}
+
+func getResourcesForComponent(operator *istioOperator.IstioOperator, component, resourceType string) (*ResourceStruct, error) {
+	res := ResourceStruct{}
+
+	switch component {
+	case "proxy_init":
+		fallthrough
+	case "proxy":
+		jsonResources, err := json.Marshal(operator.Spec.Values.Fields["global"].GetStructValue().Fields[component].GetStructValue().
+			Fields["resources"].GetStructValue().Fields[resourceType].GetStructValue())
+
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(jsonResources, &res)
+		if err != nil {
+			return nil, err
+		}
+		return &res, nil
+	case "ingress-gateway":
+		if resourceType == "limits" {
+			err := mapstructure.Decode(operator.Spec.Components.IngressGateways[0].K8S.Resources.Limits, &res)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			err := mapstructure.Decode(operator.Spec.Components.IngressGateways[0].K8S.Resources.Requests, &res)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return &res, nil
+	case "egress-gateway":
+		if resourceType == "limits" {
+			err := mapstructure.Decode(operator.Spec.Components.EgressGateways[0].K8S.Resources.Limits, &res)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			err := mapstructure.Decode(operator.Spec.Components.EgressGateways[0].K8S.Resources.Requests, &res)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &res, nil
+	case "pilot":
+		if resourceType == "limits" {
+			err := mapstructure.Decode(operator.Spec.Components.Pilot.K8S.Resources.Limits, &res)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			err := mapstructure.Decode(operator.Spec.Components.Pilot.K8S.Resources.Requests, &res)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &res, nil
+	default:
+		return nil, godog.ErrPending
 	}
 }

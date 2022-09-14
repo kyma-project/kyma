@@ -13,8 +13,8 @@ This tutorial shows only one possible use case. There are many more use cases on
 
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
-- Kyma installed locally or on a cluster
-
+- [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) locally or on a cluster
+- [Istio sidecar injection enabled](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md) in the Namespace in which you want to deploy the Functions
 ## Steps
 
 1. Export the `KUBECONFIG` variable:

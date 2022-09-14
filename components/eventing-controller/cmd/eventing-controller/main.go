@@ -4,23 +4,21 @@ import (
 	"context"
 	"log"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
 	"github.com/go-logr/zapr"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
+	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/nats"
 )
 
@@ -50,7 +48,7 @@ func main() {
 	restCfg := ctrl.GetConfigOrDie()
 	scheme := runtime.NewScheme()
 
-	metricsCollector := pkgmetrics.NewCollector()
+	metricsCollector := backendmetrics.NewCollector()
 	metricsCollector.RegisterMetrics()
 
 	var natsSubMgr subscriptionmanager.Manager

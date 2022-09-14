@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/pkg/errors"
@@ -16,7 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
@@ -25,7 +25,7 @@ type ConvertingWebhook struct {
 	scheme  *runtime.Scheme
 	client  ctrlclient.Client
 	decoder *conversion.Decoder
-	log     logr.Logger
+	log     *zap.SugaredLogger
 }
 
 const (
@@ -34,10 +34,9 @@ const (
 
 var _ http.Handler = &ConvertingWebhook{}
 
-func NewConvertingWebhook(client ctrlclient.Client, scheme *runtime.Scheme) *ConvertingWebhook {
+func NewConvertingWebhook(client ctrlclient.Client, scheme *runtime.Scheme, log *zap.SugaredLogger) *ConvertingWebhook {
 	//TODO: change signature of method scheme -> decoder
 	decoder, _ := conversion.NewDecoder(scheme)
-	log := controllerruntime.Log.WithName("Converting webhook")
 	return &ConvertingWebhook{
 		client:  client,
 		scheme:  scheme,

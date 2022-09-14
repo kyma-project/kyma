@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"go.uber.org/zap"
+
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
@@ -37,7 +39,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 	_ = serverlessv1alpha2.AddToScheme(scheme)
 
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepo).Build()
-	w := NewConvertingWebhook(client, scheme)
+	fakeLogger := zap.NewNop().Sugar()
+	w := NewConvertingWebhook(client, scheme, fakeLogger)
 	tests := []struct {
 		name        string
 		src         runtime.Object
@@ -394,7 +397,8 @@ func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
 	_ = serverlessv1alpha2.AddToScheme(scheme)
 
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepoNoAuth).Build()
-	w := NewConvertingWebhook(client, scheme)
+	fakeLogger := zap.NewNop().Sugar()
+	w := NewConvertingWebhook(client, scheme, fakeLogger)
 	tests := []struct {
 		name        string
 		src         runtime.Object
