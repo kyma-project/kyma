@@ -3,11 +3,19 @@ package compassruntimeagentinit
 import (
 	"context"
 	"fmt"
+	"github.com/avast/retry-go"
+	v12 "k8s.io/api/apps/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	v13 "k8s.io/client-go/kubernetes/typed/apps/v1"
+	"time"
 )
 
-const ConfigurationSecretEnvName = "APP_AGENT_CONFIGURATION_SECRET"
+const (
+	configurationSecretEnvName = "APP_AGENT_CONFIGURATION_SECRET"
+	RetryAttempts              = 6
+	RetrySeconds               = 5
+)
 
 type RollbackDeploymentFunc func() error
 
@@ -21,11 +29,10 @@ func newDeploymentConfiguration(kubernetesInterface kubernetes.Interface) deploy
 	}
 }
 
-// TODO: Consider adding retries to the k8s operations
-func (d deploymentConfiguration) Do(deploymentName, secretName, namespace string) (RollbackDeploymentFunc, error) {
-	deploymentInterface := d.kubernetesInterface.AppsV1().Deployments(namespace)
+func (dc deploymentConfiguration) Do(deploymentName, secretName, namespace string) (RollbackDeploymentFunc, error) {
+	deploymentInterface := dc.kubernetesInterface.AppsV1().Deployments(namespace)
 
-	deployment, err := deploymentInterface.Get(context.TODO(), deploymentName, v1.GetOptions{})
+	deployment, err := retryGetDeployment(deploymentName, deploymentInterface)
 	if err != nil {
 		return nil, err
 	}
@@ -35,56 +42,83 @@ func (d deploymentConfiguration) Do(deploymentName, secretName, namespace string
 	}
 	envs := deployment.Spec.Template.Spec.Containers[0].Env
 	previousSecretNamespacedName := ""
-	for _, env := range envs {
-		if env.Name == ConfigurationSecretEnvName {
-			previousSecretNamespacedName = env.Value
-			env.Value = fmt.Sprintf("%s/%s", namespace, secretName)
+	for i := range envs {
+		if envs[i].Name == configurationSecretEnvName {
+			previousSecretNamespacedName = envs[i].Value
+			envs[i].Value = fmt.Sprintf("%s/%s", namespace, secretName)
 			break
 		}
 	}
 	if previousSecretNamespacedName == "" {
-		return nil, fmt.Errorf("no %s environment variable found in %s/%s deployment", ConfigurationSecretEnvName, namespace, name)
+		return nil, fmt.Errorf("no %s environment variable found in %s/%s deployment", configurationSecretEnvName, namespace, deploymentName)
 	}
 	deployment.Spec.Template.Spec.Containers[0].Env = envs
 
-	if _, err = deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{}); err != nil {
+	if err := retry.Do(func() error {
+		_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
+		return err
+	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second)); err != nil {
 		return nil, err
 	}
 
-	// TODO: Wait until the deployment is rolled out
-	return d.newRollbackDeploymentFunc(deploymentName, namespace, previousSecretNamespacedName), nil
+	err = waitForRollout(deploymentName, deploymentInterface)
+	rollbackDeploymentFunc := newRollbackDeploymentFunc(deploymentName, previousSecretNamespacedName, deploymentInterface)
+
+	return rollbackDeploymentFunc, err
 }
 
-func (d deploymentConfiguration) newRollbackDeploymentFunc(name, namespace, previousSecretNamespacedName string) RollbackDeploymentFunc {
-	return func() error {
-		deploymentInterface := d.kubernetesInterface.AppsV1().Deployments(namespace)
+func retryGetDeployment(name string, deploymentInterface v13.DeploymentInterface) (*v12.Deployment, error) {
+	var deployment *v12.Deployment
+	return deployment, retry.Do(func() error {
+		var err error
+		deployment, err = deploymentInterface.Get(context.TODO(), name, v1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
+}
 
+func waitForRollout(name string, deploymentInterface v13.DeploymentInterface) error {
+	return retry.Do(func() error {
 		deployment, err := deploymentInterface.Get(context.TODO(), name, v1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		if deployment.Status.AvailableReplicas == 0 || deployment.Status.UnavailableReplicas != 0 {
+			return fmt.Errorf("deployment %s is not yet ready", name)
+		}
+		return nil
+	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
+}
+
+func newRollbackDeploymentFunc(name, previousSecretNamespacedName string, deploymentInterface v13.DeploymentInterface) RollbackDeploymentFunc {
+	return func() error {
+		deployment, err := retryGetDeployment(name, deploymentInterface)
 		if err != nil {
 			return err
 		}
 
 		if len(deployment.Spec.Template.Spec.Containers) < 1 {
-			return fmt.Errorf("no containers found in %s/%s deployment", namespace, name)
+			return fmt.Errorf("no containers found in %s deployment", name)
 		}
 		envs := deployment.Spec.Template.Spec.Containers[0].Env
 		foundEnv := false
-		for _, env := range envs {
-			if env.Name == ConfigurationSecretEnvName {
+		for i := range envs {
+			if envs[i].Name == configurationSecretEnvName {
 				foundEnv = true
-				env.Value = previousSecretNamespacedName
+				envs[i].Value = previousSecretNamespacedName
 				break
 			}
 		}
 		if foundEnv == false {
-			return fmt.Errorf("no %s environment variable found in %s/%s deployment", ConfigurationSecretEnvName, namespace, name)
+			return fmt.Errorf("no %s environment variable found in %s deployment", configurationSecretEnvName, name)
 		}
-
 		deployment.Spec.Template.Spec.Containers[0].Env = envs
-		if _, err = deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{}); err != nil {
-			return err
-		}
 
-		return nil
+		return retry.Do(func() error {
+			_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
+			return err
+		}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 	}
 }

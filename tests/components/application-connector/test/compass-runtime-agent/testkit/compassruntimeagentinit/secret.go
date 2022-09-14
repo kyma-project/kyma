@@ -43,8 +43,6 @@ func (s secretCreator) Do(name, namespace string, config CompassRuntimeAgentConf
 		},
 	}
 
-	// TODO: Adjust retry functionality (attempts count, etc.). Maybe it would be good to make it configurable
-	// TODO: consider if we need to add retry at this point
 	err := retry.Do(func() error {
 		_, err := s.kubernetesInterface.CoreV1().Secrets(namespace).Create(context.Background(), &secret, metav1.CreateOptions{})
 		if err != nil {
@@ -52,7 +50,7 @@ func (s secretCreator) Do(name, namespace string, config CompassRuntimeAgentConf
 		}
 
 		return nil
-	}, retry.Attempts(3), retry.MaxDelay(5*time.Second))
+	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 
 	if err != nil {
 		return nil, err
@@ -65,6 +63,6 @@ func (s secretCreator) newRollbackSecretFunc(name, namespace string) RollbackSec
 	return func() error {
 		return retry.Do(func() error {
 			return s.kubernetesInterface.CoreV1().Secrets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
-		}, retry.Attempts(3), retry.MaxDelay(5*time.Second))
+		}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 	}
 }

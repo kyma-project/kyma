@@ -2,22 +2,18 @@ package compassruntimeagentinit
 
 type RollbackFunc func() error
 
-// TODO: Consider changing this interface to the following, as it would be more convenient
-// func aggregate(funcs ...RollbackFunc) RollbackFunc
-
-func newRollbackFunc(runtimeID string, directorClient DirectorClient, secretRollback RollbackSecretFunc, deploymentRollback RollbackDeploymentFunc) RollbackFunc {
+func newRollbackFunc(runtimeID string, directorClient DirectorClient, rollbackFunctions ...RollbackFunc) RollbackFunc {
 	return func() error {
-		err := directorClient.UnregisterRuntime(runtimeID)
-		if err != nil {
+		if err := directorClient.UnregisterRuntime(runtimeID); err != nil {
 			return err
 		}
 
-		if secretRollback != nil {
-			return secretRollback()
-		}
-
-		if deploymentRollback != nil {
-			return deploymentRollback()
+		for _, f := range rollbackFunctions {
+			if f != nil {
+				if err := f(); err != nil {
+					return err
+				}
+			}
 		}
 
 		return nil

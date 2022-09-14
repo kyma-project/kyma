@@ -63,12 +63,12 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 
 	secretRollbackFunc, err := newSecretCreator(crc.kubernetesInterface).Do(NewCompassRuntimeConfigName, CompassSystemNamespace, config)
 	if err != nil {
-		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret", runtimeID, nil, nil)
+		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret", runtimeID, secretRollbackFunc, nil)
 	}
 
 	deploymentRollbackFunc, err := newDeploymentConfiguration(crc.kubernetesInterface).Do(CompassRuntimeAgentDeployment, NewCompassRuntimeConfigName, CompassSystemNamespace)
 	if err != nil {
-		return nil, crc.rollbackOnError(err, "failed to modify deployment", runtimeID, nil, nil)
+		return nil, crc.rollbackOnError(err, "failed to modify deployment", runtimeID, secretRollbackFunc, deploymentRollbackFunc)
 	}
 
 	return newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc), nil
