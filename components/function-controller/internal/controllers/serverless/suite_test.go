@@ -54,9 +54,7 @@ func tearDownTestEnv(g *gomega.GomegaWithT, testEnv *envtest.Environment) {
 }
 
 func setUpControllerConfig(g *gomega.GomegaWithT) FunctionConfig {
-	testCfg := FunctionConfig{
-		Build: BuildConfig{},
-	}
+	var testCfg FunctionConfig
 	err := envconfig.InitWithPrefix(&testCfg, "TEST")
 	g.Expect(err).To(gomega.BeNil())
 	return testCfg

@@ -543,11 +543,6 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 					Spec: serverlessv1alpha2.FunctionSpec{
 						Runtime: testCase.Runtime,
 						Source:  serverlessv1alpha2.Source{Inline: &serverlessv1alpha2.InlineSource{}},
-						ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
-							Build: &serverlessv1alpha2.ResourceRequirements{
-								Resources: &corev1.ResourceRequirements{},
-							},
-						},
 					},
 				},
 			}

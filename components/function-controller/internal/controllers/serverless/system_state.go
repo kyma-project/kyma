@@ -136,6 +136,16 @@ var (
 	optionalTrue = true
 )
 
+func (s *systemState) getResourceRequirements() corev1.ResourceRequirements {
+	var resourceRequirements corev1.ResourceRequirements
+	if s.instance.Spec.ResourceConfiguration != nil &&
+		s.instance.Spec.ResourceConfiguration.Build != nil &&
+		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
+		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
+	}
+	return resourceRequirements
+}
+
 func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 
@@ -143,12 +153,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	if s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
-	var resourceRequirements corev1.ResourceRequirements
-	if s.instance.Spec.ResourceConfiguration != nil &&
-		s.instance.Spec.ResourceConfiguration.Build != nil &&
-		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
-		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
-	}
+	resourceRequirements := s.getResourceRequirements()
 
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
@@ -252,12 +257,8 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	var resourceRequirements corev1.ResourceRequirements
-	if s.instance.Spec.ResourceConfiguration != nil &&
-		s.instance.Spec.ResourceConfiguration.Build != nil &&
-		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
-		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
-	}
+	resourceRequirements := s.getResourceRequirements()
+
 	labels := s.functionLabels()
 
 	return batchv1.Job{
