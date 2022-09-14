@@ -84,25 +84,17 @@ func NewReconciler(
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
-		//Watches(
-		//	&source.Kind{Type: &corev1.Secret{}},
-		//	handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
-		//).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
+			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
 			builder.WithPredicates(predicate.Funcs{
 				CreateFunc: func(event event.CreateEvent) bool {
-					ctrl.Log.Info(fmt.Sprintf("event.CreateEvent: %s", event.Object.GetName()))
+					return false // ignore creation
+				},
+				DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
 					return true
 				},
-				DeleteFunc: nil,
 				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-					ctrl.Log.Info(fmt.Sprintf("event.UpdateEvent: %s", updateEvent.ObjectNew.GetName()))
-					return true
-				},
-				GenericFunc: func(genericEvent event.GenericEvent) bool {
-					ctrl.Log.Info(fmt.Sprintf("event.GenericEvent: %s", genericEvent.Object.GetName()))
 					return true
 				},
 			}),
@@ -110,21 +102,18 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *Reconciler) createReconReqs(object client.Object) []reconcile.Request {
+func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
-
 	ctrl.Log.Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
-
 	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
 	pipelines := r.secrets.get(secretName)
 	var requests []reconcile.Request
-	for _, p := range pipelines {
+	for p := range pipelines {
 		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: string(p)}}
-		ctrl.Log.Info(fmt.Sprintf("Secret changed event: Creating Reconciliation request for pipeline: %s\n", string(p)))
+		ctrl.Log.Info(fmt.Sprintf("Secret changed event: Creating reconciliation request for pipeline: %s\n", string(p)))
 		requests = append(requests, request)
 	}
-
-	ctrl.Log.Info(fmt.Sprintf("Secret changed event: Created %d new Reconciliation requests.\n", len(requests)))
+	ctrl.Log.Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
 	return requests
 }
 
