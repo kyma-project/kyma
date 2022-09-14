@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -951,7 +951,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 func createFakeClientBuilder(t *testing.T) *fake.ClientBuilder {
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
-	err = apigatewayv1alpha1.AddToScheme(scheme.Scheme)
+	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
 	return fake.NewClientBuilder().WithScheme(scheme.Scheme)
 }

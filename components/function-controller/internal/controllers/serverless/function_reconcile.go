@@ -4,9 +4,8 @@ import (
 	"context"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -51,7 +50,7 @@ type FunctionReconciler struct {
 	initStateFunction stateFn
 }
 
-func NewFunction(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitFactory GitClientFactory, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
+func NewFunctionReconciler(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitFactory GitClientFactory, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
 		Log:               log.Named("controllers").Named("function"),
 		client:            client,

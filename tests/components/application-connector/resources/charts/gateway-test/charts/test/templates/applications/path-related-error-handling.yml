@@ -2,7 +2,7 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
   name: path-related-error-handling
-  namespace: "{{ .Values.namespace }}"
+  namespace: "{{ .Values.global.namespace }}"
 spec:
   description: Path handling
   skipVerify: true
@@ -16,7 +16,7 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080"
     - displayName: missing-srv
       name: missing-srv
@@ -25,5 +25,5 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/path-related-error-handling"
