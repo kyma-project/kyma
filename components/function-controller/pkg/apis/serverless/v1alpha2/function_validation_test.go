@@ -159,6 +159,24 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
+		"Should return error on empty runtime name": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.runtime",
+				),
+			),
+		},
 		"Should return error when more than one source is filled": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
