@@ -1,5 +1,5 @@
-//go:build unit
-// +build unit
+//go:build integration
+// +build integration
 
 package oauth_test
 
@@ -21,7 +21,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	t.Parallel()
-
+	// given
 	const (
 		maxIdleConns        = 100
 		maxIdleConnsPerHost = 200
@@ -30,21 +30,26 @@ func TestNewClient(t *testing.T) {
 	client := NewClient(context.Background(), &env.BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
+	// when
 	ocTransport, ok := client.Transport.(*ochttp.Transport)
+	// then
 	if !ok {
 		t.Errorf("Failed to convert to OpenCensus transport")
 	}
 
+	// when
 	secTransport, ok := ocTransport.Base.(*oauth2.Transport)
+	// then
 	if !ok {
 		t.Errorf("Failed to convert to oauth2 transport")
 	}
 
+	// when
 	httpTransport, ok := secTransport.Base.(*http.Transport)
+	// then
 	if !ok {
 		t.Errorf("Failed to convert to HTTP transport")
 	}
-
 	if httpTransport.MaxIdleConns != maxIdleConns {
 		t.Errorf("HTTP Client Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConns, httpTransport.MaxIdleConns)
 	}

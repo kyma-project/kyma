@@ -1,5 +1,5 @@
-//go:build unit
-// +build unit
+//go:build integration
+// +build integration
 
 package sender
 
@@ -79,9 +79,9 @@ func TestJetStreamMessageSender(t *testing.T) {
 				connection.Close()
 			}
 
-			// then
 			status, err := sender.Send(ctx, ce)
 
+			// then
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 			assert.Equal(t, tc.wantError, err != nil)
 			assert.Equal(t, tc.wantStatusCode, status)

@@ -22,6 +22,7 @@ const (
 )
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
+	// given
 	givenEventID := EventID
 	givenApplicationName := ApplicationName
 	givenEventTypePrefix := MessagingEventTypePrefix
@@ -43,8 +44,11 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	wantTimeNowFormatted, _ := time.Parse(time.RFC3339, givenTimeNow)
 	wantDataContentType := internal.ContentTypeApplicationJSON
 
+	// when
 	legacyTransformer := NewTransformer(wantBebNs, givenEventTypePrefix, nil)
 	gotEvent, err := legacyTransformer.convertPublishRequestToCloudEvent(givenApplicationName, givenPublishReqParams)
+
+	// then
 	require.NoError(t, err)
 	assert.Equal(t, wantBebNs, gotEvent.Context.GetSource())
 	assert.Equal(t, wantEventID, gotEvent.Context.GetID())
@@ -52,8 +56,11 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	assert.Equal(t, wantTimeNowFormatted, gotEvent.Context.GetTime())
 	assert.Equal(t, wantDataContentType, gotEvent.Context.GetDataContentType())
 
+	// when
 	wantLegacyEventVersion := givenLegacyEventVersion
 	gotExtension, err := gotEvent.Context.GetExtension(eventTypeVersionExtensionKey)
+
+	// then
 	assert.NoError(t, err)
 	assert.Equal(t, wantLegacyEventVersion, gotExtension)
 }

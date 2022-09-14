@@ -1,5 +1,5 @@
-//go:build integration
-// +build integration
+//go:build unit
+// +build unit
 
 package beb_test
 

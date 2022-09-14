@@ -54,6 +54,7 @@ func TestFormatEventType(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		eventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventType, tc.givenVersion)
 		assert.Equal(t, tc.wantEventType, eventType)
 	}
