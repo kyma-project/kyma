@@ -93,6 +93,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
 			builder.WithPredicates(predicate.Funcs{
 				CreateFunc: func(event event.CreateEvent) bool {
+					fmt.Printf("event.CreateEvent: %s", event.ObjectNew.GetName())
 					return true
 				},
 				DeleteFunc: nil,
@@ -100,7 +101,10 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 					fmt.Printf("event.UpdateEvent: %s", updateEvent.ObjectNew.GetName())
 					return true
 				},
-				GenericFunc: nil,
+				GenericFunc: func(genericEvent event.GenericEvent) bool {
+					fmt.Printf("event.GenericEvent: %s", genericEvent.Object.GetName())
+					return true
+				},
 			}),
 		).
 		Complete(r)
@@ -134,7 +138,10 @@ func (r *Reconciler) createReconReqs(object client.Object) []reconcile.Request {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	fmt.Print("Reconcile METHOD ENTRY")
 	log := logf.FromContext(ctx)
+
+	fmt.Print("Reconcile METHOD after logger ctx")
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
