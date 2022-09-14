@@ -1,9 +1,14 @@
-package env
+//go:build unit
+// +build unit
+
+package env_test
 
 import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 func Test_GetBackendConfig(t *testing.T) {
@@ -18,7 +23,7 @@ func Test_GetBackendConfig(t *testing.T) {
 	for k, v := range envs {
 		t.Setenv(k, v)
 	}
-	backendConfig := GetBackendConfig()
+	backendConfig := env.GetBackendConfig()
 	// Ensure optional variables can be set
 	g.Expect(backendConfig.PublisherConfig.RequestsCPU).To(Equal(envs["PUBLISHER_REQUESTS_CPU"]))
 	g.Expect(backendConfig.PublisherConfig.RequestsMemory).To(Equal(envs["PUBLISHER_REQUESTS_MEMORY"]))

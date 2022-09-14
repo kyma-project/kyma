@@ -1,4 +1,6 @@
-package env
+// +build unit
+
+package env_test
 
 import (
 	"fmt"
@@ -6,6 +8,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 func Test_GetNatsConfig(t *testing.T) {
@@ -31,7 +35,7 @@ func Test_GetNatsConfig(t *testing.T) {
 	}
 
 	maxReconnects, reconnectWait := 1, time.Second
-	config := GetNatsConfig(maxReconnects, reconnectWait)
+	config := env.GetNatsConfig(maxReconnects, reconnectWait)
 
 	require.Equal(t, config.MaxReconnects, maxReconnects)
 	require.Equal(t, config.ReconnectWait, reconnectWait)

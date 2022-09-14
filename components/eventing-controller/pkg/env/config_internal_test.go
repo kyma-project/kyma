@@ -1,10 +1,15 @@
-package env
+//go:build unit
+// +build unit
+
+package env_test
 
 import (
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 func Test_GetConfig(t *testing.T) {
@@ -26,7 +31,7 @@ func Test_GetConfig(t *testing.T) {
 	for k, v := range envs {
 		t.Setenv(k, v)
 	}
-	config := GetConfig()
+	config := env.GetConfig()
 	// Ensure required variables can be set
 	g.Expect(config.ClientID).To(Equal(envs["CLIENT_ID"]))
 	g.Expect(config.ClientSecret).To(Equal(envs["CLIENT_SECRET"]))
