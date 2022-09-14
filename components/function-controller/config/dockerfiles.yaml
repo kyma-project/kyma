@@ -6,7 +6,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-nodejs-12
+  name: dockerfile-nodejs12
   labels:
     function: serverless-function-controller
 data:

@@ -656,7 +656,7 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// getCurrentBackendType gets the backend type depending on the beb secret
+// getCurrentBackendType gets the backend type depending on the beb secret.
 func getCurrentBackendType(ctx context.Context) string {
 	backendType := eventingv1alpha1.NatsBackendType
 	if bebSecretExists(ctx) {

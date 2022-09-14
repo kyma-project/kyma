@@ -339,7 +339,7 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 				},
 			},
 		},
-		// Jetstream-specific config
+		// JetStream-specific config
 		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(natsConfig.EnableJetStreamBackend)},
 		{Name: "JS_STREAM_NAME", Value: natsConfig.JSStreamName},
 	}

@@ -5,14 +5,15 @@ title: Useful links
 If you're interested in learning more about API Exposure in Kyma, follow these links to:
 
 - Perform some simple and more advanced tasks:
-  - [Use a custom domain to expose a service](../../../03-tutorials/00-api-exposure/apix-01-own-domain.md)
-  - [Create a workload](../../../03-tutorials/00-api-exposure/apix-02-create-workload.md)
-  - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-02-expose-workload-apigateway.md)
-  - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md)
-  - [Expose and secure a workload with Istio](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-istio.md)
-  - [Expose and secure a workload with JWT](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md)
-  - [Get a JWT](../../../03-tutorials/00-api-exposure/apix-04-get-jwt.md)
-  
+  - [Create a workload](../../../03-tutorials/00-api-exposure/apix-01-create-workload.md)
+  - [Set up a custom domain for a workload](../../../03-tutorials/00-api-exposure/apix-02-setup-custom-domain-for-workload.md)
+  - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-03-expose-workload-apigateway.md)
+  - [Expose multiple workloads on the same host](../../../03-tutorials/00-api-exposure/apix-04-expose-multiple-workloads.md)
+  - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-oauth2.md)
+  - [Get a JWT](../../../03-tutorials/00-api-exposure/apix-06-get-jwt.md)
+  - [Expose and secure a workload with Istio](../../../03-tutorials/00-api-exposure/apix-07-expose-and-secure-workload-istio.md)
+  - [Expose and secure a workload with JWT](../../../03-tutorials/00-api-exposure/apix-08-expose-and-secure-workload-jwt.md)
+
 - Troubleshoot API Exposure-related issues when:
 
   - You [cannot connect to a service exposed by an APIRule](../../../04-operation-guides/troubleshooting/api-exposure/apix-01-apigateway-connect-api-rule.md)

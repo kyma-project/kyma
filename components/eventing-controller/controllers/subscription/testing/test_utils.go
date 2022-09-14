@@ -108,7 +108,7 @@ func NewCleanEventType(ending string) string {
 	return fmt.Sprintf("%s%s", reconcilertesting.OrderCreatedEventType, ending)
 }
 
-// IsSubscriptionDeletedOnK8s checks a subscription is deleted and allows making assertions on it
+// IsSubscriptionDeletedOnK8s checks a subscription is deleted and allows making assertions on it.
 func IsSubscriptionDeletedOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription) gomega.AsyncAssertion {
 	g := ens.G
 

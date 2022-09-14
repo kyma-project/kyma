@@ -180,7 +180,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99999, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace=\"kyma-system\"}[5m])) by (le,pod,namespace,service))",
+              "expr": "histogram_quantile(0.99999, sum(rate(eventing_epp_messaging_server_latency_duration_milliseconds_bucket{namespace=\"kyma-system\"}[5m])) by (le,pod,namespace,service))",
               "hide": false,
               "interval": "",
               "legendFormat": "{{ `{{namespace}}/{{pod}} -> Messaging Server (99.999%)`}}",

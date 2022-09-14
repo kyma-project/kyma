@@ -154,7 +154,8 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 				tr.url,
 				tr.baseDir,
 				tr.reference,
-				tr.runtime),
+				tr.runtime,
+				tr.auth),
 		),
 		teststep.NewHTTPCheck(
 			genericContainer.Log,

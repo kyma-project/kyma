@@ -3,10 +3,11 @@ package jetstream
 import (
 	"context"
 	"reflect"
+	"strings"
 
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/xerrors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -19,10 +20,11 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -30,12 +32,10 @@ const (
 	reconcilerName = "jetstream-subscription-reconciler"
 )
 
-var Finalizer = eventingv1alpha1.GroupVersion.Group
-
 type Reconciler struct {
 	client.Client
 	ctx                 context.Context
-	Backend             handlers.JetStreamBackend
+	Backend             jetstream.Backend
 	recorder            record.EventRecorder
 	logger              *logger.Logger
 	eventTypeCleaner    eventtype.Cleaner
@@ -44,7 +44,7 @@ type Reconciler struct {
 	customEventsChannel chan event.GenericEvent
 }
 
-func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers.JetStreamBackend, logger *logger.Logger,
+func NewReconciler(ctx context.Context, client client.Client, jsHandler jetstream.Backend, logger *logger.Logger,
 	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
@@ -127,9 +127,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// update the cleanEventTypes and config values in the subscription status, if changed
-	statusChanged, err := r.syncInitialStatus(desiredSubscription, log)
+	statusChanged, err := r.syncInitialStatus(desiredSubscription)
 	if err != nil {
-		log.Errorw("Failed to sync initial status", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
@@ -138,7 +137,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
-		log.Errorw("Failed to validate sink URL", "error", err)
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
@@ -148,11 +146,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Synchronize Kyma subscription to JetStream backend
 	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
-		log.Errorw("Failed to sync subscription", "error", err)
+		result := ctrl.Result{}
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
+			return result, syncErr
 		}
-		return ctrl.Result{}, err
+		// Requeue the Request to reconcile it again if there are no NATS Subscriptions synced
+		if missingSubscriptionErr(err) {
+			result = ctrl.Result{RequeueAfter: jetstream.RequeueDuration}
+			err = nil
+		}
+		return result, err
 	}
 
 	// Update Subscription status
@@ -195,7 +198,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
 		if err != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
-			return errors.Wrapf(err, "update subscription status failed")
+			return xerrors.Errorf("failed to update subscription status: %v", err)
 		}
 		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
 	}
@@ -204,20 +207,18 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 
 // handleSubscriptionDeletion deletes the JetStream subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
+	if utils.ContainsString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer) {
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
-			log.Errorw("Failed to delete JetStream subscription", "error", err)
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
-			return err
+			return xerrors.Errorf("failed to delete JetStream subscription: %v", err)
 		}
 
 		// remove our finalizer from the list and update it.
-		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, Finalizer)
+		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
-			log.Errorw("Failed to remove finalizer from subscription", "error", err)
-			return err
+			return xerrors.Errorf("failed to remove finalizer from subscription: %v", err)
 		}
 		log.Debug("Removed finalizer from subscription")
 	}
@@ -225,25 +226,23 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 }
 
 // addFinalizerToSubscription appends the eventing finalizer to the subscription.
-func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
-	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
-	if err := r.Update(context.Background(), subscription); err != nil {
-		log.Errorw("Failed to add finalizer to subscription", "error", err)
-		return err
+	if err := r.Update(context.Background(), sub); err != nil {
+		return xerrors.Errorf("failed to add finalizer to subscription: %v", err)
 	}
 	log.Debug("Added finalizer to subscription")
 	return nil
 }
 
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription.
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	statusChanged := false
-	cleanedSubjects, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	cleanedSubjects, err := backendnats.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
-		log.Errorw("Failed to get clean subjects", "error", err)
 		subscription.Status.InitializeCleanEventTypes()
-		return true, err
+		return true, xerrors.Errorf("failed to get clean subjects: %v", err)
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanedSubjects) {
 		subscription.Status.CleanEventTypes = cleanedSubjects
@@ -308,8 +307,13 @@ func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 }
 
 // containsFinalizer checks if the subscription contains our Finalizer.
-func containsFinalizer(subscription *eventingv1alpha1.Subscription) bool {
-	return utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer)
+func containsFinalizer(sub *eventingv1alpha1.Subscription) bool {
+	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+}
+
+// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map.
+func missingSubscriptionErr(err error) bool {
+	return strings.Contains(err.Error(), jetstream.MissingNATSSubscriptionMsg)
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

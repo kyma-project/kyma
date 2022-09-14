@@ -9,18 +9,18 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 )
 
-func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, config PipelineConfig) string {
+func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
 	output := &pipeline.Spec.Output
 	if output.IsCustomDefined() {
-		return generateCustomOutput(output, config.FsBufferLimit, pipeline.Name)
+		return generateCustomOutput(output, defaults.FsBufferLimit, pipeline.Name)
 	}
 
 	if output.IsHTTPDefined() {
-		return generateHTTPOutput(output.HTTP, config.FsBufferLimit, pipeline.Name)
+		return generateHTTPOutput(output.HTTP, defaults.FsBufferLimit, pipeline.Name)
 	}
 
 	if output.IsLokiDefined() {
-		return generateLokiOutput(output.Loki, config.FsBufferLimit, pipeline.Name)
+		return generateLokiOutput(output.Loki, defaults.FsBufferLimit, pipeline.Name)
 	}
 
 	return ""
@@ -108,8 +108,8 @@ func resolveValue(value telemetryv1alpha1.ValueType, logPipeline string) string 
 	if value.Value != "" {
 		return value.Value
 	}
-	if value.ValueFrom.IsSecretRef() {
-		return fmt.Sprintf("${%s}", envvar.GenerateName(logPipeline, value.ValueFrom.SecretKey))
+	if value.ValueFrom != nil && value.ValueFrom.IsSecretKeyRef() {
+		return fmt.Sprintf("${%s}", envvar.GenerateName(logPipeline, *value.ValueFrom.SecretKeyRef))
 	}
 	return ""
 }

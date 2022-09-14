@@ -6,14 +6,7 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
-	"github.com/spf13/pflag"
-	corev1 "k8s.io/api/core/v1"
 )
-
-type istioInstallledCase struct {
-	pilotPods     *corev1.PodList
-	ingressGwPods *corev1.PodList
-}
 
 var t *testing.T
 var goDogOpts = godog.Options{
@@ -23,18 +16,16 @@ var goDogOpts = godog.Options{
 	Concurrency: 1,
 }
 
-func init() {
-	godog.BindCommandLineFlags("godog.", &goDogOpts)
-}
-
-func TestMain(m *testing.M) {
-	pflag.Parse()
-	goDogOpts.Paths = pflag.Args()
+func InitTest() {
+	if os.Getenv(exportResultVar) == "true" {
+		goDogOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
+	}
 	k8sClient, dynamicClient, mapper = initK8sClient()
-	os.Exit(m.Run())
 }
 
 func TestIstioInstalledEvaluation(t *testing.T) {
+	InitTest()
+
 	evalOpts := goDogOpts
 	evalOpts.Paths = []string{"features/istio_evaluation.feature", "features/sidecar_injection.feature"}
 
@@ -59,6 +50,8 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 }
 
 func TestIstioInstalledProduction(t *testing.T) {
+	InitTest()
+
 	prodOpts := goDogOpts
 	prodOpts.Paths = []string{"features/istio_production.feature", "features/sidecar_injection.feature"}
 
@@ -70,6 +63,29 @@ func TestIstioInstalledProduction(t *testing.T) {
 
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
 		t.Skip()
+	}
+
+	suiteExitCode := suite.Run()
+
+	if os.Getenv(exportResultVar) == "true" {
+		generateHTMLReport()
+	}
+
+	if suiteExitCode != 0 {
+		t.Fatal("non-zero status returned, failed to run feature tests")
+	}
+}
+
+func TestIstioReconcilation(t *testing.T) {
+	InitTest()
+
+	opts := goDogOpts
+	opts.Paths = []string{"features/istio_reconcilation.feature"}
+
+	suite := godog.TestSuite{
+		Name:                "reconcilation-tests",
+		ScenarioInitializer: InitializeScenarioReconcilation,
+		Options:             &opts,
 	}
 
 	suiteExitCode := suite.Run()
