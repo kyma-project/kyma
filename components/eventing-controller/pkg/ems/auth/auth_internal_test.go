@@ -1,4 +1,7 @@
-package auth
+//go:build unit
+// +build unit
+
+package auth_test
 
 import (
 	"net/http"
@@ -7,6 +10,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	"golang.org/x/oauth2"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 )
 
 const (
@@ -21,7 +26,7 @@ func TestAuthenticator(t *testing.T) {
 	t.Setenv("TOKEN_ENDPOINT", "foo")
 	cfg := env.Config{}
 	// authenticate
-	client := NewAuthenticatedClient(cfg)
+	client := auth.NewAuthenticatedClient(cfg)
 
 	secTransport, ok := client.Transport.(*oauth2.Transport)
 	if !ok {
