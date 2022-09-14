@@ -176,9 +176,7 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 		}
 	}
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
-	if in.Spec.RuntimeImageOverride != "" {
-		out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
-	}
+	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
 	//TODO: out.Profile
 	//v1BuildEmpty := corev1.ResourceRequirements{}
