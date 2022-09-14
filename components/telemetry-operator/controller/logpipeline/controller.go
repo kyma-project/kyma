@@ -19,26 +19,22 @@ package logpipeline
 import (
 	"context"
 	"fmt"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
 	"github.com/prometheus/client_golang/prometheus"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 type Config struct {
@@ -83,58 +79,11 @@ func NewReconciler(
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
-		WithEventFilter(r.filterSecrets()).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.createReconReqs),
 		).
 		Complete(r)
-}
-
-func (r *Reconciler) filterSecrets() predicate.Predicate {
-	return predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			_, ok := e.ObjectNew.(*corev1.Secret)
-			if ok {
-				fmt.Printf("UpdateEvent: It's a secret!")
-				return true
-			}
-			// TODO
-			// maybe filter by labels and annotations
-			return false
-		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			_, ok := e.Object.(*corev1.Secret)
-			if ok {
-				fmt.Printf("DeleteEvent: It's a secret!")
-				return true
-			}
-			// TODO
-			// maybe filter by labels and annotations
-			return false
-		},
-		CreateFunc: func(e event.CreateEvent) bool {
-			_, ok := e.Object.(*corev1.Secret)
-			if ok {
-				fmt.Printf("DeleteEvent: It's a secret!")
-				return true
-			}
-			// TODO
-			// maybe filter by labels and annotations
-			fmt.Printf("CreateEvent: It's a secret!")
-			return false
-		},
-		GenericFunc: func(e event.GenericEvent) bool {
-			_, ok := e.Object.(*corev1.Secret)
-			if ok {
-				fmt.Printf("DeleteEvent: It's a secret!")
-				return true
-			}
-			// TODO
-			// maybe filter by labels and annotations
-			return false
-		},
-	}
 }
 
 func (r *Reconciler) createReconReqs(object client.Object) []reconcile.Request {
