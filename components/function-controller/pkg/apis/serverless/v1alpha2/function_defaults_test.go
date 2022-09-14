@@ -228,7 +228,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should change empty runtime type to default NodeJs14": {
+		"Should not change empty runtime type to default": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: &ResourceConfiguration{
