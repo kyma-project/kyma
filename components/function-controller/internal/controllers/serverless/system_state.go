@@ -144,7 +144,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := getResourceRequiremenets(s)
+	resourceRequirements := getBuildResourceRequiremenets(s)
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
 	return batchv1.Job{
@@ -247,7 +247,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := getResourceRequiremenets(s)
+	resourceRequirements := getBuildResourceRequiremenets(s)
 	labels := s.functionLabels()
 
 	return batchv1.Job{
@@ -341,7 +341,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 	)
 }
 
-func getResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
+func getBuildResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
 	var resourceRequirements corev1.ResourceRequirements
 	if s.instance.Spec.ResourceConfiguration != nil &&
 		s.instance.Spec.ResourceConfiguration.Build != nil &&
