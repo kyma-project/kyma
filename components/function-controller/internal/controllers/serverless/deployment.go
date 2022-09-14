@@ -83,7 +83,7 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 			Message:            fmt.Sprintf("Deployment %s created", d.GetName()),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
@@ -119,7 +119,7 @@ func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLa
 			Message:            fmt.Sprintf("Deployment %s updated", deploymentName),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
@@ -146,7 +146,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			RequeueAfter: r.cfg.fn.FunctionReadyRequeueDuration,
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 
 	// unhealthy deployment
@@ -161,7 +161,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deploymentName),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 
 	// deployment not ready
@@ -176,7 +176,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			Message:            fmt.Sprintf("Deployment %s is not ready yet", deploymentName),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 
 	// deployment failed
@@ -199,5 +199,5 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 		Message:            msg,
 	}
 
-	return buildStateFnUpdateStateFnFunctionCondition(condition)
+	return buildStatusUpdateStateFnWithCondition(condition)
 }

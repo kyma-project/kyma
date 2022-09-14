@@ -2,7 +2,7 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
   name: complex-cases
-  namespace: "{{ .Values.namespace }}"
+  namespace: "{{ .Values.global.namespace }}"
 spec:
   description: Endpoints for complex tests
   skipVerify: true
@@ -16,8 +16,8 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          targetUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace }}.svc.cluster.local:8080/v1/api/oauth/ok"
           credentials:
             secretName: oauth-test
-            authenticationUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace }}.svc.cluster.local:8080/v1/api/oauth/token?token_lifetime=5s"
+            authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace }}.svc.cluster.local:8080/v1/api/oauth/token?token_lifetime=5s"
             type: OAuth

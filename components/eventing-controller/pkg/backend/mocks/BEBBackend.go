@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	apiv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apiv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"

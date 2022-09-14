@@ -7,7 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
@@ -21,7 +21,7 @@ var Semantic = conversion.EqualitiesOrDie(
 )
 
 // apiRuleEqual asserts the equality of two APIRule objects.
-func apiRuleEqual(a1, a2 *apigatewayv1alpha1.APIRule) bool {
+func apiRuleEqual(a1, a2 *apigatewayv1beta1.APIRule) bool {
 	if a1 == nil || a2 == nil {
 		return false
 	}

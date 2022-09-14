@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,7 +38,9 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
+	OrderCreatedV2Event                      = "order.created.v2"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -80,7 +82,7 @@ func CloudEvent() (*ce.Event, error) {
 	)
 }
 
-type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+type APIRuleOption func(r *apigatewayv1beta1.APIRule)
 
 // GetFreePort determines a free port on the host. It does so by delegating the job to net.ListenTCP.
 // Then providing a port of 0 to net.ListenTCP, it will automatically choose a port for us.
@@ -98,8 +100,8 @@ func GetFreePort() (port int, err error) {
 }
 
 // NewAPIRule returns a valid APIRule.
-func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
-	apiRule := &apigatewayv1alpha1.APIRule{
+func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1beta1.APIRule {
+	apiRule := &apigatewayv1beta1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "foo",
 			OwnerReferences: []metav1.OwnerReference{
@@ -120,35 +122,35 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 }
 
 func WithService(name, host string) APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
+	return func(r *apigatewayv1beta1.APIRule) {
 		port := uint32(443)
 		isExternal := true
-		r.Spec.Service = &apigatewayv1alpha1.Service{
+		r.Spec.Host = &host
+		r.Spec.Service = &apigatewayv1beta1.Service{
 			Name:       &name,
 			Port:       &port,
-			Host:       &host,
 			IsExternal: &isExternal,
 		}
 	}
 }
 
 func WithPath() APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
+	return func(r *apigatewayv1beta1.APIRule) {
 		handlerOAuth := object.OAuthHandlerName
-		handler := apigatewayv1alpha1.Handler{
+		handler := apigatewayv1beta1.Handler{
 			Name: handlerOAuth,
 		}
-		authenticator := &apigatewayv1alpha1.Authenticator{
+		authenticator := &apigatewayv1beta1.Authenticator{
 			Handler: &handler,
 		}
-		r.Spec.Rules = []apigatewayv1alpha1.Rule{
+		r.Spec.Rules = []apigatewayv1beta1.Rule{
 			{
 				Path: "/path",
 				Methods: []string{
 					http.MethodPost,
 					http.MethodOptions,
 				},
-				AccessStrategies: []*apigatewayv1alpha1.Authenticator{
+				AccessStrategies: []*apigatewayv1beta1.Authenticator{
 					authenticator,
 				},
 			},
@@ -156,13 +158,13 @@ func WithPath() APIRuleOption {
 	}
 }
 
-func MarkReady(r *apigatewayv1alpha1.APIRule) {
-	statusOK := &apigatewayv1alpha1.APIRuleResourceStatus{
-		Code:        apigatewayv1alpha1.StatusOK,
+func MarkReady(r *apigatewayv1beta1.APIRule) {
+	statusOK := &apigatewayv1beta1.APIRuleResourceStatus{
+		Code:        apigatewayv1beta1.StatusOK,
 		Description: "",
 	}
 
-	r.Status = apigatewayv1alpha1.APIRuleStatus{
+	r.Status = apigatewayv1beta1.APIRuleStatus{
 		APIRuleStatus:        statusOK,
 		VirtualServiceStatus: statusOK,
 		AccessRuleStatus:     statusOK,
