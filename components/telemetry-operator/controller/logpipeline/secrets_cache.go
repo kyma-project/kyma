@@ -1,8 +1,9 @@
 package logpipeline
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"sync"
+
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type pipelineName string
