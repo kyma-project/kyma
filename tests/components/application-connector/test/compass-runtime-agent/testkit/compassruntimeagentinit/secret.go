@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-type RollbackSecretFunc func() error
-
 const (
 	connectorURLConfigKey = "CONNECTOR_URL"
 	tokenConfigKey        = "TOKEN"
@@ -28,7 +26,7 @@ func newSecretCreator(kubernetesInterface kubernetes.Interface) secretCreator {
 	}
 }
 
-func (s secretCreator) Do(name, namespace string, config CompassRuntimeAgentConfig) (RollbackSecretFunc, error) {
+func (s secretCreator) Do(name, namespace string, config CompassRuntimeAgentConfig) (RollbackFunc, error) {
 
 	secret := v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -59,7 +57,7 @@ func (s secretCreator) Do(name, namespace string, config CompassRuntimeAgentConf
 	return s.newRollbackSecretFunc(name, namespace), nil
 }
 
-func (s secretCreator) newRollbackSecretFunc(name, namespace string) RollbackSecretFunc {
+func (s secretCreator) newRollbackSecretFunc(name, namespace string) RollbackFunc {
 	return func() error {
 		return retry.Do(func() error {
 			return s.kubernetesInterface.CoreV1().Secrets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})

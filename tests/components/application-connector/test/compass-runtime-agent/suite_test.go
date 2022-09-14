@@ -2,6 +2,7 @@ package compass_runtime_agent
 
 import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"net/http"
 	"testing"
@@ -18,40 +19,50 @@ type CompassRuntimeAgentSuite struct {
 	coreClientSet         *kubernetes.Clientset
 	directorClient        director.Client
 	appComparator         applications.Comparator
+	cleanupFunction       compassruntimeagentinit.RollbackFunc
 }
 
 func initDirectorClient() director.Client {
 	return nil
 }
 
-func (gs *CompassRuntimeAgentSuite) SetupSuite() {
+func (ts *CompassRuntimeAgentSuite) SetupSuite() {
 	cfg, err := rest.InClusterConfig()
-	gs.Require().Nil(err)
+	ts.Require().Nil(err)
 
-	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
-	gs.Require().Nil(err)
+	ts.applicationsClientSet, err = cli.NewForConfig(cfg)
+	ts.Require().Nil(err)
 
-	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
-	gs.Require().Nil(err)
+	ts.coreClientSet, err = kubernetes.NewForConfig(cfg)
+	ts.Require().Nil(err)
 
 	// TODO Init client
-	gs.directorClient = director.NewDirectorClient(nil, nil)
-	gs.Require().Nil(err)
+	ts.directorClient = director.NewDirectorClient(nil, nil)
+	ts.Require().Nil(err)
 
 	// TODO: Pass namespaces names
-	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, "", "")
-	gs.Require().Nil(err)
+	secretComparator, err := applications.NewSecretComparator(ts.Require(), ts.coreClientSet, "", "")
+	ts.Require().Nil(err)
 
-	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
-	gs.Require().Nil(err)
+	applicationGetter := ts.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
+	ts.appComparator, err = applications.NewComparator(ts.Require(), secretComparator, applicationGetter, "", "")
+	ts.Require().Nil(err)
+
+	// TODO: Uncomment when directorClient satisfies the needed interface
+	//ts.cleanupFunction, err = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(ts.directorClient, ts.coreClientSet, "tenant").Do("runtimeName")
+	//ts.Require().Nil(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
+func (ts *CompassRuntimeAgentSuite) TearDownSuite() {
+	if ts.cleanupFunction != nil {
+		err := ts.cleanupFunction()
+		ts.Nil(err)
+	}
+
 	_, err := http.Post("http://localhost:15000/quitquitquit", "", nil)
-	gs.Nil(err)
+	ts.Nil(err)
 	_, err = http.Post("http://localhost:15020/quitquitquit", "", nil)
-	gs.Nil(err)
+	ts.Nil(err)
 }
 
 func TestCompassRuntimeAgentSuite(t *testing.T) {

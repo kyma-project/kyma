@@ -74,7 +74,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 	return newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc), nil
 }
 
-func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID string, secretRollbackFunc RollbackSecretFunc, deploymentRollbackFunc RollbackDeploymentFunc) error {
+func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID string, secretRollbackFunc, deploymentRollbackFunc RollbackFunc) error {
 	err := newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc)()
 	if err != nil {
 		initialWrapped := errors.Wrap(initialError, wrapMsgString)
