@@ -4,8 +4,6 @@ import "fmt"
 
 type queryProvider struct{}
 
-// at the moment just register application
-// scenario will be added later
 func (qp queryProvider) registerApplicationMutation(appName, _ string) string {
 	return fmt.Sprintf(`mutation {
 	result: registerApplication(in: {
@@ -13,7 +11,6 @@ func (qp queryProvider) registerApplicationMutation(appName, _ string) string {
 	}) { id } }`, appName)
 }
 
-// from template
 func (qp queryProvider) registerApplicationFromTemplateMutation(appName, displayName string) string {
 	return fmt.Sprintf(`mutation {
 	result: registerApplicationFromTemplate(in: {
@@ -32,6 +29,15 @@ func (qp queryProvider) assignFormationForAppMutation(applicationId, formationNa
 		objectType: APPLICATION
 		formation: { name: "%s" }
 	) { id } }`, applicationId, formationName)
+}
+
+func (qp queryProvider) assignFormationForRuntimeMutation(runtimeId, formationName string) string {
+	return fmt.Sprintf(`mutation {
+	result: assignFormation(
+		objectID: "%s"
+		objectType: RUNTIME
+		formation: { name: "%s" }
+	) { id } }`, runtimeId, formationName)
 }
 
 func (qp queryProvider) unregisterApplicationMutation(applicationID string) string {
@@ -55,16 +61,9 @@ func (qp queryProvider) registerRuntimeMutation(runtimeName string) string {
 	}) { id } }`, runtimeName)
 }
 
-func (qp queryProvider) getRuntimeQuery(runtimeID string) string {
-	return fmt.Sprintf(`query {
-    result: runtime(id: "%s") {
-         id name description labels
-}}`, runtimeID)
-}
-
-func (qp queryProvider) updateRuntimeMutation(runtimeID, runtimeInput string) string {
+func (qp queryProvider) requestOneTimeTokenMutation(runtimeID string) string {
 	return fmt.Sprintf(`mutation {
-    result: updateRuntime(id: "%s" in: %s) {
-		id
-}}`, runtimeID, runtimeInput)
+	result: requestOneTimeTokenForRuntime(id: "%s") {
+		token connectorURL
+	}}`, runtimeID)
 }

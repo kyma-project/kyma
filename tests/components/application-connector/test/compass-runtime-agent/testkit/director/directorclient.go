@@ -2,6 +2,7 @@ package director
 
 import (
 	"fmt"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	gql "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
@@ -22,8 +23,8 @@ type Client interface {
 	UnregisterApplication(id string) error
 	RegisterRuntime(runtimeName string) (string, error)
 	UnregisterRuntime(id string) error
-	//AssignRuntimeToFormation(runtimeId, formationName string) error
-	//GetConnectionToken(runtimeID string) (string, string, error)
+	AssignRuntimeToFormation(runtimeId, formationName string) error
+	GetConnectionToken(runtimeID string) (graphql.OneTimeTokenForRuntimeExt, error)
 }
 
 type directorClient struct {
@@ -105,6 +106,25 @@ func (cc *directorClient) UnregisterRuntime(id string) error {
 	return nil
 }
 
+func (cc *directorClient) GetConnectionToken(runtimeId string) (graphql.OneTimeTokenForRuntimeExt, error) {
+	log.Infof("Requesting one time token for Runtime from Director service")
+	runtimeQuery := cc.queryProvider.requestOneTimeTokenMutation(runtimeId)
+
+	var response OneTimeTokenResponse
+	err := cc.executeDirectorGraphQLCall(runtimeQuery, cc.tenant, &response)
+	if err != nil {
+		return graphql.OneTimeTokenForRuntimeExt{}, errors.Wrap(err, "Failed to get OneTimeToken for Runtime in Director. Request failed")
+	}
+
+	if response.Result == nil {
+		return graphql.OneTimeTokenForRuntimeExt{}, fmt.Errorf("Failed to get OneTimeToken for Runtime %s in Director: received nil response.", runtimeId)
+	}
+
+	log.Infof("Received OneTimeToken for Runtime %s in Director for tenant %s", runtimeId, cc.tenant)
+
+	return *response.Result, nil
+}
+
 func (cc *directorClient) RegisterApplication(appName, displayName string) (string, error) {
 	log.Infof("Registering Application on Director service")
 	registerAppQuery := cc.queryProvider.registerApplicationFromTemplateMutation(appName, displayName)
@@ -142,6 +162,27 @@ func (cc *directorClient) AssignApplicationToFormation(appId, formationName stri
 	}
 
 	log.Infof("Successfully assigned application %s to Formation %s in Director for tenant %s", appId, formationName, cc.tenant)
+
+	return nil
+}
+
+func (cc *directorClient) AssignRuntimeToFormation(runtimeId, formationName string) error {
+	log.Infof("Registering Application on Director service")
+	assignFormationQuery := cc.queryProvider.assignFormationForRuntimeMutation(runtimeId, formationName)
+
+	var response AssignFormationResponse
+	appErr := cc.executeDirectorGraphQLCall(assignFormationQuery, cc.tenant, &response)
+
+	if appErr != nil {
+		return errors.Wrap(appErr, "Failed to assign application to Formation in Director. Request failed")
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return errors.New("Failed to assign runtime to Formation in Director: Received nil response.")
+	}
+
+	log.Infof("Successfully assigned runtime %s to Formation %s in Director for tenant %s", runtimeId, formationName, cc.tenant)
 
 	return nil
 }

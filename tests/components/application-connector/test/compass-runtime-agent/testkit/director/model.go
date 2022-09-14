@@ -24,9 +24,8 @@ type AssignFormationResponse struct {
 	Result *graphql.Formation `json:"result"`
 }
 
-// not sure if this will be needed
 type OneTimeTokenResponse struct {
-	Result *graphql.OneTimeTokenForApplicationExt `json:"result"`
+	Result *graphql.OneTimeTokenForRuntimeExt `json:"result"`
 }
 
 type ApplicationInput struct {
