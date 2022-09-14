@@ -18,7 +18,12 @@ const (
 //go:generate mockery --name=Client
 type Client interface {
 	RegisterApplication(appName, scenario string) (string, error)
+	AssignApplicationToFormation(appId, formationName string) error
 	UnregisterApplication(id string) error
+	RegisterRuntime(runtimeName string) (string, error)
+	UnregisterRuntime(id string) error
+	//AssignRuntimeToFormation(runtimeId, formationName string) error
+	//GetConnectionToken(runtimeID string) (string, string, error)
 }
 
 type directorClient struct {
@@ -56,29 +61,53 @@ func (cc *directorClient) getToken() error {
 	return nil
 }
 
-func (cc *directorClient) RegisterApplication(appName, scenario string) (string, error) {
+func (cc *directorClient) RegisterRuntime(runtimeName string) (string, error) {
+	log.Infof("Registering Runtime on Director service")
+
+	registerRuntimeQuery := cc.queryProvider.registerRuntimeMutation(runtimeName)
+
+	var response CreateRuntimeResponse
+	appErr := cc.executeDirectorGraphQLCall(registerRuntimeQuery, cc.tenant, &response)
+	if appErr != nil {
+		return "", errors.Wrap(appErr, "Failed to register runtime in Director. Request failed")
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return "", errors.New("Failed to register application in Director: Received nil response.")
+	}
+
+	log.Infof("Successfully registered Runtime %s in Director for tenant %s", runtimeName, cc.tenant)
+
+	return response.Result.ID, nil
+}
+
+func (cc *directorClient) UnregisterRuntime(id string) error {
+	log.Infof("Unregistering Runtime on Director service")
+	runtimeQuery := cc.queryProvider.deleteRuntimeMutation(id)
+
+	var response DeleteRuntimeResponse
+	err := cc.executeDirectorGraphQLCall(runtimeQuery, cc.tenant, &response)
+	if err != nil {
+		return errors.Wrap(err, "Failed to unregister runtime in Director. Request failed")
+	}
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return errors.New("Failed to unregister runtime in Director: Received nil response.")
+	}
+
+	if response.Result.ID != id {
+		return fmt.Errorf("Failed to unregister runtime %s in Director: received unexpected RuntimeID.", id)
+	}
+
+	log.Infof("Successfully unregistered Runtime %s in Director for tenant %s", id, cc.tenant)
+
+	return nil
+}
+
+func (cc *directorClient) RegisterApplication(appName, displayName string) (string, error) {
 	log.Infof("Registering Application on Director service")
-
-	//var labels graphql.Labels
-	//if config.Labels != nil {
-	//	l := graphql.Labels(config.Labels)
-	//	labels = l
-	//}
-	//
-	//
-	//directorInput := graphql.ApplicationRegisterInput{
-	//	Name: appName,
-	//	//Labels:      labels,
-	//}
-	//appInput, err := cc.graphqlizer.ApplicationRegisterInputToGQL(directorInput)
-	//if err != nil {
-	//	log.Infof("Failed to create graphQLized Runtime input")
-	//	return "", fmt.Errorf("Failed to create graphQLized Runtime input: %s", err.Error())
-	//}
-
-	displayName := "testing display name"
-
-	registerAppQuery := cc.queryProvider.registerApplicationNewMutation(appName, scenario)
+	registerAppQuery := cc.queryProvider.registerApplicationFromTemplateMutation(appName, displayName)
 
 	var response CreateApplicationResponse
 	appErr := cc.executeDirectorGraphQLCall(registerAppQuery, cc.tenant, &response)
@@ -96,11 +125,32 @@ func (cc *directorClient) RegisterApplication(appName, scenario string) (string,
 	return response.Result.ID, nil
 }
 
+func (cc *directorClient) AssignApplicationToFormation(appId, formationName string) error {
+	log.Infof("Registering Application on Director service")
+	assignFormationQuery := cc.queryProvider.assignFormationForAppMutation(appId, formationName)
+
+	var response AssignFormationResponse
+	appErr := cc.executeDirectorGraphQLCall(assignFormationQuery, cc.tenant, &response)
+
+	if appErr != nil {
+		return errors.Wrap(appErr, "Failed to assign application to Formation in Director. Request failed")
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return errors.New("Failed to assign application to Formation in Director: Received nil response.")
+	}
+
+	log.Infof("Successfully assigned application %s to Formation %s in Director for tenant %s", appId, formationName, cc.tenant)
+
+	return nil
+}
+
 func (cc *directorClient) UnregisterApplication(appID string) error {
-	runtimeQuery := cc.queryProvider.unregisterApplicationMutation(appID)
+	applicationQuery := cc.queryProvider.unregisterApplicationMutation(appID)
 
 	var response DeleteApplicationResponse
-	err := cc.executeDirectorGraphQLCall(runtimeQuery, cc.tenant, &response)
+	err := cc.executeDirectorGraphQLCall(applicationQuery, cc.tenant, &response)
 	if err != nil {
 		return fmt.Errorf("Failed to unregister application %s in Director", appID)
 	}

@@ -57,16 +57,27 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
 	//gs.T().Log("Attempt to unregister application in compass")
-	appID, err := gs.directorClient.RegisterApplication("oko2", "auto-testing")
-	gs.Require().Nil(err)
-
-	gs.T().Logf("Sucessfully registered application %s in compass", appID)
-
-	//err = directorClient.UnregisterApplication(appID)
+	//appID, err := gs.directorClient.RegisterApplication("oko2", "displayname")
+	//gs.Require().Nil(err)
+	//
+	//gs.T().Logf("Sucessfully registered application %s in compass", appID)
+	//
+	//gs.directorClient.AssignApplicationToFormation(appID, "auto-testing")
+	//
+	//err = gs.directorClient.UnregisterApplication(appID)
 	//gs.Require().Nil(err)
 	//gs.T().Logf("Sucessfully unregistered application %s in compass", appID)
 
+	id, err := gs.directorClient.RegisterRuntime("oko")
 	gs.Require().Nil(err)
+
+	gs.T().Logf("Sucessfully registered runtime %s in compass", id)
+
+	err = gs.directorClient.UnregisterRuntime(id)
+
+	gs.Require().Nil(err)
+
+	gs.T().Logf("Sucessfully unregistered runtime %s in compass", id)
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
