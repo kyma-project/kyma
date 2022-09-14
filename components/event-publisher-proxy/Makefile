@@ -66,3 +66,21 @@ $(cmds_images_push): %.push: %
 	@echo "+ Pushing container image $($@_img_name)"
 	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
 	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
+
+ test-local: ## Run tests
+	mkdir -p /tmp/artifacts
+	go test -coverprofile=/tmp/artifacts/cover.out --tags="unit integration" ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+ 
+ test-unit-local: ## Run tests
+	mkdir -p /tmp/artifacts
+	go test -coverprofile=/tmp/artifacts/cover.out --tags="unit" ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+ 
+ test-int-local: ## Run tests
+	mkdir -p /tmp/artifacts
+	go test -coverprofile=/tmp/artifacts/cover.out --tags="integration" ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
