@@ -1,51 +1,56 @@
-package httpclient
+//go:build unit
+// +build unit
+
+package httpclient_test
 
 import (
 	"errors"
 	"fmt"
 	"net/url"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 )
 
 func TestErrorDescription(t *testing.T) {
 	tableTests := []struct {
 		name            string
-		giveErr         *Error
+		giveErr         *httpclient.Error
 		wantDescription string
 	}{
 		{
 			name: "all arguments given",
-			giveErr: func() *Error {
-				wrapped := NewError(fmt.Errorf("my error"), WithStatusCode(500), WithMessage("this is the http response"))
+			giveErr: func() *httpclient.Error {
+				wrapped := httpclient.NewError(fmt.Errorf("my error"), httpclient.WithStatusCode(500), httpclient.WithMessage("this is the http response"))
 				return wrapped
 			}(),
 			wantDescription: `message: this is the http response; status code: 500; cause: my error`,
 		},
 		{
 			name: "cause only",
-			giveErr: func() *Error {
+			giveErr: func() *httpclient.Error {
 				existing := url.Error{
 					Op:  "Delete",
 					URL: "/foo/bar",
 					Err: errors.New("unsupported protocol scheme"),
 				}
-				wrapped := NewError(&existing)
+				wrapped := httpclient.NewError(&existing)
 				return wrapped
 			}(),
 			wantDescription: `cause: Delete "/foo/bar": unsupported protocol scheme`,
 		},
 		{
 			name: "message only",
-			giveErr: func() *Error {
-				wrapped := NewError(nil, WithMessage("message"))
+			giveErr: func() *httpclient.Error {
+				wrapped := httpclient.NewError(nil, httpclient.WithMessage("message"))
 				return wrapped
 			}(),
 			wantDescription: `message: message`,
 		},
 		{
 			name: "status code only",
-			giveErr: func() *Error {
-				wrapped := NewError(nil, WithStatusCode(200))
+			giveErr: func() *httpclient.Error {
+				wrapped := httpclient.NewError(nil, httpclient.WithStatusCode(200))
 				return wrapped
 			}(),
 			wantDescription: `status code: 200`,
