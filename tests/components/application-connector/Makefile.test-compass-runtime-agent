@@ -4,9 +4,9 @@ GOPATH ?= $(shell go env GOPATH)
 COMPASS_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/compass-runtime-agent-test:$(DOCKER_TAG)"
 TEST_TIMEOUT = "3m"
 
-OAUTH_COMPASS_CLIENT_ID="c9bf6a0a-0124-4d8b-b342-a77001f818a6"
-OAUTH_COMPASS_CLIENT_SECRET="iAubGUsWzfb5"
-OAUTH_COMPASS_TOKENS_ENDPOINT="https://oauth2.mps.dev.kyma.cloud.sap/oauth2/token"
+OAUTH_COMPASS_CLIENT_ID="aaa"
+OAUTH_COMPASS_CLIENT_SECRET="bbb"
+OAUTH_COMPASS_TOKENS_ENDPOINT="ccc"
 
 .PHONY: release test image clean
 .PHONY: test-compass-runtime-agent test-compass-runtime-agent-debug clean-compass-runtime-agent-test image-compass-runtime-agent-test publish-compass-runtime-agent-test
