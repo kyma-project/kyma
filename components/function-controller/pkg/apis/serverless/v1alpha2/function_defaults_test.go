@@ -228,7 +228,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should change empty runtime type to default NodeJs14": {
+		"Should not change empty runtime type to default": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: ResourceConfiguration{
@@ -265,7 +265,6 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{
@@ -303,7 +302,6 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{
@@ -351,7 +349,6 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{
@@ -410,7 +407,6 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
 						Function: ResourceRequirements{
 							Resources: corev1.ResourceRequirements{
