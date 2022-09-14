@@ -7,8 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -28,6 +26,7 @@ type proxy struct {
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
 	extractPathFunc              pathExtractorFunc
+	extractGatewayFunc           gatewayURLExtractorFunc
 	apiExtractor                 APIExtractor
 }
 
@@ -50,7 +49,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gwUrl, err := ExtractGatewatURL(r.URL)
+	gwUrl, err := p.extractGatewayFunc(r.URL)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -79,49 +78,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheEntry.Proxy.ModifyResponse = func(resp *http.Response) error {
-		if resp.StatusCode < 300 || resp.StatusCode >= 400 {
-			return nil
-		}
-
-		const locationHeader = "Location"
-
-		locRaw := resp.Header.Get(locationHeader)
-		if err != nil {
-			return nil
-		}
-
-		loc, err := resp.Request.URL.Parse(locRaw)
-		if err != nil {
-			return nil
-		}
-
-		target, err := url.Parse(serviceAPI.TargetUrl)
-		if err != nil {
-			return nil
-		}
-
-		switch loc.Scheme {
-		case "http", "https":
-			// Good
-		default:
-			return nil
-		}
-
-		if loc.Hostname() != target.Hostname() || (loc.Port() != "" && loc.Port() != "80") || !strings.HasPrefix(loc.Path, target.Path) {
-			return nil
-		}
-
-		stripped := strings.TrimPrefix(loc.Path, target.Path)
-		gwUrl = gwUrl.JoinPath(stripped)
-		gwUrl.RawQuery = loc.RawQuery
-		gwUrl.Fragment = loc.Fragment
-
-		resp.Header.Set(locationHeader, gwUrl.String())
-
-		return nil
-	}
-
+	cacheEntry.Proxy.ModifyResponse = responseModifier(gwUrl, serviceAPI.TargetUrl)
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 

@@ -6,13 +6,14 @@ import (
 	"net/url"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
-	log "github.com/sirupsen/logrus"
 )
 
 func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipTLSVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
@@ -82,4 +83,46 @@ func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string
 	}
 
 	httptools.SetHeaders(reqHeaders, customHeaders)
+}
+
+func responseModifier(gatewayURL *url.URL, targetURL string) func(*http.Response) error {
+	return func(resp *http.Response) error {
+		if resp.StatusCode < 300 || resp.StatusCode >= 400 {
+			return nil
+		}
+
+		const locationHeader = "Location"
+
+		locRaw := resp.Header.Get(locationHeader)
+
+		loc, err := resp.Request.URL.Parse(locRaw)
+		if err != nil {
+			return nil
+		}
+
+		target, err := url.Parse(targetURL)
+		if err != nil {
+			return nil
+		}
+
+		switch loc.Scheme {
+		case "http", "https":
+			// Good
+		default:
+			return nil
+		}
+
+		if loc.Hostname() != target.Hostname() || !strings.HasPrefix(loc.Path, target.Path) {
+			return nil
+		}
+
+		stripped := strings.TrimPrefix(loc.Path, target.Path)
+		gatewayURL = gatewayURL.JoinPath(stripped)
+		gatewayURL.RawQuery = loc.RawQuery
+		gatewayURL.Fragment = loc.Fragment
+
+		resp.Header.Set(locationHeader, gatewayURL.String())
+
+		return nil
+	}
 }
