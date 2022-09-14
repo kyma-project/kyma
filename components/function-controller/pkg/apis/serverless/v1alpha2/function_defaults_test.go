@@ -40,9 +40,9 @@ func TestSetDefaults(t *testing.T) {
 }
 `
 
-	LRuntimeResources := CreateCoreV1ResourceRequirements("200m", "256Mi", "100m", "128Mi")
+	LRuntimeResources := ResourceRequirementsBuilder{}.Limits("200m", "256Mi").Requests("100m", "128Mi").BuildCoreV1()
 
-	MRuntimeResources := CreateCoreV1ResourceRequirements("100m", "128Mi", "50m", "64Mi")
+	MRuntimeResources := ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").BuildCoreV1()
 
 	buildResources := `
 {
@@ -52,7 +52,7 @@ func TestSetDefaults(t *testing.T) {
 }
 `
 
-	fastBuildResources := CreateCoreV1ResourceRequirements("1800m", "1800Mi", "1100m", "1100Mi")
+	fastBuildResources := ResourceRequirementsBuilder{}.Limits("1800m", "1800Mi").Requests("1100m", "1100Mi").BuildCoreV1()
 
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
@@ -63,8 +63,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("150m", "158Mi", "90m", "84Mi"),
-						Build:    CreateResourceRequirements("400m", "321Mi", "374m", "300Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -75,8 +75,8 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{Spec: FunctionSpec{
 				Runtime: NodeJs14,
 				ResourceConfiguration: ResourceConfiguration{
-					Function: CreateResourceRequirements("150m", "158Mi", "90m", "84Mi"),
-					Build:    CreateResourceRequirements("400m", "321Mi", "374m", "300Mi"),
+					Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
+					Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
 				},
 				ScaleConfig: &ScaleConfig{
 					MinReplicas: &two,
@@ -90,8 +90,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: Python39,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("150m", "158Mi", "90m", "84Mi"),
-						Build:    CreateResourceRequirements("400m", "321Mi", "374m", "300Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -103,8 +103,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: Python39,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("150m", "158Mi", "90m", "84Mi"),
-						Build:    CreateResourceRequirements("400m", "321Mi", "374m", "300Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -117,8 +117,8 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("150m", "158Mi", "90m", "84Mi"),
-						Build:    CreateResourceRequirements("400m", "321Mi", "374m", "300Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -130,8 +130,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("150m", "158Mi", "90m", "84Mi"),
-						Build:    CreateResourceRequirements("400m", "321Mi", "374m", "300Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("150m", "158Mi").Requests("90m", "84Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("400m", "321Mi").Requests("374m", "300Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -146,7 +146,7 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("100m", "128Mi", "50m", "64Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &one,
@@ -159,8 +159,8 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("", "", "150m", "150Mi"),
-						Build:    CreateResourceRequirements("", "", "1200m", "12000Mi"),
+						Function: ResourceRequirementsBuilder{}.Requests("150m", "150Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Requests("1200m", "12000Mi").Build(),
 					},
 					Replicas: &two,
 				},
@@ -169,8 +169,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("150m", "150Mi", "150m", "150Mi"),
-						Build:    CreateResourceRequirements("1200m", "12000Mi", "1200m", "12000Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("150m", "150Mi").Requests("150m", "150Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("1200m", "12000Mi").Requests("1200m", "12000Mi").Build(),
 					},
 					Replicas: &two,
 				},
@@ -180,8 +180,8 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("15m", "15Mi", "", ""),
-						Build:    CreateResourceRequirements("800m", "800Mi", "", ""),
+						Function: ResourceRequirementsBuilder{}.Limits("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("800m", "800Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MaxReplicas: &zero,
@@ -192,8 +192,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("15m", "15Mi", "15m", "15Mi"),
-						Build:    CreateResourceRequirements("800m", "800Mi", "700m", "700Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("15m", "15Mi").Requests("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("800m", "800Mi").Requests("700m", "700Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &zero,
@@ -246,8 +246,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("", "", "15m", "15Mi"),
-						Build:    CreateResourceRequirements("", "", "250m", "250Mi"),
+						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Requests("250m", "250Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -264,8 +264,8 @@ func TestSetDefaults(t *testing.T) {
 				}, Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("50m", "64Mi", "15m", "15Mi"),
-						Build:    CreateResourceRequirements("700m", "700Mi", "250m", "250Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("250m", "250Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -350,8 +350,8 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("", "", "15m", "15Mi"),
-						Build:    CreateResourceRequirements("700m", "700Mi", "", ""),
+						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -368,8 +368,8 @@ func TestSetDefaults(t *testing.T) {
 				}, Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: ResourceConfiguration{
-						Function: CreateResourceRequirements("50m", "64Mi", "15m", "15Mi"),
-						Build:    CreateResourceRequirements("700m", "700Mi", "350m", "350Mi"),
+						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
@@ -413,23 +413,37 @@ func TestSetDefaults(t *testing.T) {
 	}
 }
 
-func CreateCoreV1ResourceRequirements(limitsCpu, limitsMemory, requestsCpu, requestsMemory string) corev1.ResourceRequirements {
+type ResourceRequirementsBuilder struct {
+	limitsCpu, limitsMemory, requestsCpu, requestsMemory string
+}
+
+func (b ResourceRequirementsBuilder) Limits(cpu, memory string) ResourceRequirementsBuilder {
+	b.limitsCpu = cpu
+	b.limitsMemory = memory
+	return b
+}
+func (b ResourceRequirementsBuilder) Requests(cpu, memory string) ResourceRequirementsBuilder {
+	b.requestsCpu = cpu
+	b.requestsMemory = memory
+	return b
+}
+func (b ResourceRequirementsBuilder) BuildCoreV1() corev1.ResourceRequirements {
 	limits := corev1.ResourceList{}
-	if limitsCpu != "" {
-		limits[corev1.ResourceCPU] = resource.MustParse(limitsCpu)
+	if b.limitsCpu != "" {
+		limits[corev1.ResourceCPU] = resource.MustParse(b.limitsCpu)
 	}
-	if limitsMemory != "" {
-		limits[corev1.ResourceMemory] = resource.MustParse(limitsMemory)
+	if b.limitsMemory != "" {
+		limits[corev1.ResourceMemory] = resource.MustParse(b.limitsMemory)
 	}
 	if len(limits) == 0 {
 		limits = nil
 	}
 	requests := corev1.ResourceList{}
-	if requestsCpu != "" {
-		requests[corev1.ResourceCPU] = resource.MustParse(requestsCpu)
+	if b.requestsCpu != "" {
+		requests[corev1.ResourceCPU] = resource.MustParse(b.requestsCpu)
 	}
-	if requestsMemory != "" {
-		requests[corev1.ResourceMemory] = resource.MustParse(requestsMemory)
+	if b.requestsMemory != "" {
+		requests[corev1.ResourceMemory] = resource.MustParse(b.requestsMemory)
 	}
 	if len(requests) == 0 {
 		requests = nil
@@ -439,9 +453,8 @@ func CreateCoreV1ResourceRequirements(limitsCpu, limitsMemory, requestsCpu, requ
 		Requests: requests,
 	}
 }
-
-func CreateResourceRequirements(limitsCpu, limitsMemory, requestsCpu, requestsMemory string) ResourceRequirements {
+func (b ResourceRequirementsBuilder) Build() ResourceRequirements {
 	return ResourceRequirements{
-		Resources: CreateCoreV1ResourceRequirements(limitsCpu, limitsMemory, requestsCpu, requestsMemory),
+		Resources: b.BuildCoreV1(),
 	}
 }
