@@ -2,27 +2,21 @@ package v1alpha2
 
 import (
 	"encoding/json"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-type TypeMatching string
-
-const (
-	STANDARD TypeMatching = "standard"
-	EXACT    TypeMatching = "exact"
 )
 
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
-	// ID is the unique identifier of Subscription, read-only.
+	// ID is the unique identifier of Subscription, read-only
 	// +optional
 	ID string `json:"id,omitempty"`
 
+	// todo check if we still need it or move it to config
 	// Protocol defines the CE protocol specification implementation
 	// +optional
 	Protocol string `json:"protocol,omitempty"`
 
+	// todo check if we still need it or move it to config
 	// ProtocolSettings defines the CE protocol setting specification implementation
 	// +optional
 	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
@@ -30,13 +24,16 @@ type SubscriptionSpec struct {
 	// Sink defines endpoint of the subscriber
 	Sink string `json:"sink"`
 
+	// TypeMatching defines the type of matching to be done for the event types
 	TypeMatching TypeMatching `json:"typeMatching,omitempty"`
 
+	// Source Defines the source of the event originated from
 	Source string `json:"source,omitempty"`
 
+	// Types defines the list of event names for the topics we need to subscribe for messages
 	Types []string `json:"types,omitempty"`
 
-	// Config defines the configurations that can be applied to the eventing backend when creating this subscription
+	// Config defines the configurations that can be applied to the eventing backend
 	// +optional
 	Config map[string]string `json:"config,omitempty"`
 }
@@ -52,31 +49,10 @@ type SubscriptionStatus struct {
 	Ready bool `json:"ready"`
 
 	// Types defines the filter's event types after cleanup for use with the configured backend
-	Types []string `json:"types"`
+	Types []EventType `json:"types"`
 
-	// Ev2hash defines the hash for the Subscription custom resource
-	// +optional
-	Ev2hash int64 `json:"ev2hash,omitempty"`
-
-	// Emshash defines the hash for the Subscription in BEB
-	// +optional
-	Emshash int64 `json:"emshash,omitempty"`
-
-	// ExternalSink defines the webhook URL which is used by BEB to trigger subscribers
-	// +optional
-	ExternalSink string `json:"externalSink,omitempty"`
-
-	// FailedActivation defines the reason if a Subscription had failed activation in BEB
-	// +optional
-	FailedActivation string `json:"failedActivation,omitempty"`
-
-	// APIRuleName defines the name of the APIRule which is used by the Subscription
-	// +optional
-	APIRuleName string `json:"apiRuleName,omitempty"`
-
-	// EmsSubscriptionStatus defines the status of Subscription in BEB
-	// +optional
-	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	// Backend contains backend specific status which are only applicable to the active backend
+	Backend Backend `json:"backend,omitempty"`
 }
 
 //+kubebuilder:storageversion
@@ -110,7 +86,7 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 
 // InitializeCleanEventTypes initializes the SubscriptionStatus.CleanEventTypes with an empty slice of strings.
 func (s *SubscriptionStatus) InitializeCleanEventTypes() {
-	s.Types = []string{}
+	s.Types = []EventType{}
 }
 
 //+kubebuilder:object:root=true
