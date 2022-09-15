@@ -124,7 +124,7 @@ func (s *JetstreamMessageSender) eventToNatsMsg(event *event.Event) (*nats.Msg, 
 
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *JetstreamMessageSender) getJsSubjectToPublish(subject string) string {
-	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
+	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 
 func (s *JetstreamMessageSender) namedLogger() *zap.SugaredLogger {

@@ -8,7 +8,7 @@ import (
 // compile time check
 var _ fmt.Stringer = &NatsConfig{}
 
-const JetstreamSubjectPrefix = "kyma"
+const JetStreamSubjectPrefix = "kyma"
 
 // NatsConfig represents the environment config for the Event Publisher to NATS.
 type NatsConfig struct {

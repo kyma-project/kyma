@@ -213,7 +213,7 @@ func createCloudEvent(t *testing.T) *event.Event {
 func getStreamConfig() *nats.StreamConfig {
 	return &nats.StreamConfig{
 		Name:      testingutils.StreamName,
-		Subjects:  []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
+		Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 		Storage:   nats.MemoryStorage,
 		Retention: nats.InterestPolicy,
 	}
