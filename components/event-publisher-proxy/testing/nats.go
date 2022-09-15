@@ -41,7 +41,7 @@ func StartNATSServer(enableJetStream bool) *server.Server {
 
 	log, _ := logger.New("json", "info")
 	if enableJetStream {
-		log.WithContext().Info("Starting test NATS Server in Jetstream mode")
+		log.WithContext().Info("Starting test NATS Server in JetStream mode")
 	} else {
 		log.WithContext().Info("Starting test NATS Server in default mode")
 	}

@@ -21,8 +21,8 @@ type Config struct {
 	// Backend used for Eventing. It could be "nats" or "beb".
 	Backend string `envconfig:"BACKEND" required:"true"`
 
-	// JetstreamModeEnabled indicates whether NATS backend will be used in default or jetstream mode.
-	JetstreamModeEnabled bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
+	// JetStreamModeEnabled indicates whether NATS backend will be used in default or jetstream mode.
+	JetStreamModeEnabled bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
 
 	// AppLogFormat defines the log format.
 	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
@@ -62,7 +62,7 @@ func main() {
 			golog.Printf("Failed to flush logger, error: %v", err)
 		}
 	}()
-	setupLogger := logger.WithContext().With("backend", cfg.Backend, "jetstream mode", cfg.JetstreamModeEnabled)
+	setupLogger := logger.WithContext().With("backend", cfg.Backend, "jetstream mode", cfg.JetStreamModeEnabled)
 
 	// metrics collector
 	metricsCollector := metrics.NewCollector()
@@ -74,7 +74,7 @@ func main() {
 	case backendBEB:
 		commander = beb.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
-		commander = nats.NewCommander(opts, metricsCollector, logger, cfg.JetstreamModeEnabled)
+		commander = nats.NewCommander(opts, metricsCollector, logger, cfg.JetStreamModeEnabled)
 	default:
 		setupLogger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
 	}

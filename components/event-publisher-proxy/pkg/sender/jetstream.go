@@ -44,16 +44,16 @@ func (s *JetStreamMessageSender) URL() string {
 	return s.connection.ConnectedUrl()
 }
 
-// ConnectionStatus returns nats.Status for the NATS connection used by the JetstreamMessageSender.
+// ConnectionStatus returns nats.Status for the NATS connection used by the JetStreamMessageSender.
 func (s *JetStreamMessageSender) ConnectionStatus() nats.Status {
 	return s.connection.Status()
 }
 
-// Send dispatches the event to the NATS backend in Jetstream mode.
+// Send dispatches the event to the NATS backend in JetStream mode.
 // If the NATS connection is not open, it returns an error.
 func (s *JetStreamMessageSender) Send(_ context.Context, event *event.Event) (int, error) {
 	if s.ConnectionStatus() != nats.CONNECTED {
-		return http.StatusBadGateway, errors.New("connection status: no connection to NATS Jetstream server")
+		return http.StatusBadGateway, errors.New("connection status: no connection to NATS JetStream server")
 	}
 	// ensure the stream exists
 	streamExists, err := s.streamExists(s.connection)
