@@ -27,27 +27,27 @@ func TestJetstreamMessageSender(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
-		givenNatsConnectionClosed bool
+		givenNATSConnectionClosed bool
 		wantError                 bool
 		wantStatusCode            int
 	}{
 		{
 			name:                      "send in jetstream mode should not succeed if stream doesn't exist",
 			givenStream:               false,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantError:                 true,
 			wantStatusCode:            http.StatusNotFound,
 		},
 		{
 			name:                      "send in jetstream mode should succeed if NATS connection is open and the stream exists",
 			givenStream:               true,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantError:                 false,
 			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send in jetstream mode should fail if NATS connection is not open",
-			givenNatsConnectionClosed: true,
+			givenNATSConnectionClosed: true,
 			wantError:                 true,
 			wantStatusCode:            http.StatusBadGateway,
 		},
@@ -75,7 +75,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 			ctx := context.Background()
 			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
-			if tc.givenNatsConnectionClosed {
+			if tc.givenNATSConnectionClosed {
 				connection.Close()
 			}
 
