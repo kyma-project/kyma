@@ -15,7 +15,7 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestNatsMessageSender(t *testing.T) {
+func TestNATSMessageSender(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
