@@ -68,7 +68,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", port, health.ReadinessURI),
 		logger:              mockedLogger,
-		natsConfig:          newNatsConfig(port),
+		natsConfig:          newNATSConfig(port),
 		collector:           metrics.NewCollector(),
 		legacyTransformer:   &legacy.Transformer{},
 		subscribedProcessor: &subscribed.Processor{},
@@ -195,7 +195,7 @@ func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
 	}
 }
 
-func newNatsConfig(port int) *env.NATSConfig {
+func newNATSConfig(port int) *env.NATSConfig {
 	return &env.NATSConfig{
 		Port:            port,
 		LegacyNamespace: testingutils.MessagingNamespace,
