@@ -61,8 +61,8 @@ type BEBHandlerMock struct {
 	eventTypeCleaner    eventtype.Cleaner
 }
 
-// BebHandlerMockOpt represents a BebHandlerMock option.
-type BebHandlerMockOpt func(*BEBHandlerMock)
+// BEBHandlerMockOpt represents a BebHandlerMock option.
+type BEBHandlerMockOpt func(*BEBHandlerMock)
 
 // GetPort returns the port used by the BebHandlerMock.
 func (m *BEBHandlerMock) GetPort() int {
@@ -92,7 +92,7 @@ func (m *BEBHandlerMock) GetReadinessEndpoint() string {
 // StartOrDie starts a new BebHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) beb.Handler started without errors.
 func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePrefix, eventsEndpoint string,
-	requestTimeout, serverResponseTime time.Duration, opts ...BebHandlerMockOpt) *BEBHandlerMock {
+	requestTimeout, serverResponseTime time.Duration, opts ...BEBHandlerMockOpt) *BEBHandlerMock {
 	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
 	mockServer.Start(t, defaultTokenEndpoint, defaultEventsEndpoint, defaultEventsHTTP400Endpoint)
 
@@ -186,14 +186,14 @@ func extractEventTypeFromRequest(r *http.Request) (string, error) {
 }
 
 // WithEventTypePrefix returns BebHandlerMockOpt which sets the eventTypePrefix for the given BebHandlerMock.
-func WithEventTypePrefix(eventTypePrefix string) BebHandlerMockOpt {
+func WithEventTypePrefix(eventTypePrefix string) BEBHandlerMockOpt {
 	return func(m *BEBHandlerMock) {
 		m.cfg.EventTypePrefix = eventTypePrefix
 	}
 }
 
 // WithApplication returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
-func WithApplication(applicationNameToCreate, applicationNameToValidate string) BebHandlerMockOpt {
+func WithApplication(applicationNameToCreate, applicationNameToValidate string) BEBHandlerMockOpt {
 	return func(m *BEBHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationNameToCreate)
 		m.legacyTransformer = legacy.NewTransformer(m.cfg.BEBNamespace, m.cfg.EventTypePrefix, applicationLister)
@@ -204,7 +204,7 @@ func WithApplication(applicationNameToCreate, applicationNameToValidate string) 
 }
 
 // WithSubscription returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
-func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) BebHandlerMockOpt {
+func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) BEBHandlerMockOpt {
 	return func(m *BEBHandlerMock) {
 		dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		informerFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicClient, time.Second, v1.NamespaceAll, nil)
