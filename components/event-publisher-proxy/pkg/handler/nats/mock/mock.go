@@ -34,8 +34,8 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// NatsHandlerMock represents a mock for the nats.Handler.
-type NatsHandlerMock struct {
+// NATSHandlerMock represents a mock for the nats.Handler.
+type NATSHandlerMock struct {
 	ctx                 context.Context
 	handler             *nats.Handler
 	livenessEndpoint    string
@@ -53,17 +53,17 @@ type NatsHandlerMock struct {
 }
 
 // NatsHandlerMockOpt represents a NatsHandlerMock option.
-type NatsHandlerMockOpt func(*NatsHandlerMock)
+type NatsHandlerMockOpt func(*NATSHandlerMock)
 
 // StartOrDie starts a new NatsHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) NATS connection and 2) nats.Handler started without errors.
-func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *NatsHandlerMock {
+func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *NATSHandlerMock {
 	port := testingutils.GeneratePortOrDie()
 
 	mockedLogger, err := logger.New("json", "info")
 	require.NoError(t, err)
 
-	mock := &NatsHandlerMock{
+	mock := &NATSHandlerMock{
 		ctx:                 ctx,
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", port, health.ReadinessURI),
@@ -109,57 +109,57 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 }
 
 // Stop closes the sender.NatsMessageSender connection and calls the NatsHandlerMock.ShutdownNatsServerAndWait.
-func (m *NatsHandlerMock) Stop() {
+func (m *NATSHandlerMock) Stop() {
 	m.connection.Close()
 	m.ShutdownNatsServerAndWait()
 }
 
 // ShutdownNatsServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
-func (m *NatsHandlerMock) ShutdownNatsServerAndWait() {
+func (m *NATSHandlerMock) ShutdownNatsServerAndWait() {
 	m.natsServer.Shutdown()
 	m.natsServer.WaitForShutdown()
 }
 
 // GetNatsURL returns the NATS server URL used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetNatsURL() string {
+func (m *NATSHandlerMock) GetNatsURL() string {
 	return m.natsServer.ClientURL()
 }
 
 // GetLivenessEndpoint returns the liveness endpoint used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetLivenessEndpoint() string {
+func (m *NATSHandlerMock) GetLivenessEndpoint() string {
 	return m.livenessEndpoint
 }
 
 // GetReadinessEndpoint returns the readiness endpoint used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetReadinessEndpoint() string {
+func (m *NATSHandlerMock) GetReadinessEndpoint() string {
 	return m.readinessEndpoint
 }
 
 // GetHandler returns the nats.Handler used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetHandler() *nats.Handler {
+func (m *NATSHandlerMock) GetHandler() *nats.Handler {
 	return m.handler
 }
 
 // GetMetricsCollector returns the metrics.Collector used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetMetricsCollector() *metrics.Collector {
+func (m *NATSHandlerMock) GetMetricsCollector() *metrics.Collector {
 	return m.collector
 }
 
 // GetNatsConfig returns the env.NatsConfig used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetNatsConfig() *env.NATSConfig {
+func (m *NATSHandlerMock) GetNatsConfig() *env.NATSConfig {
 	return m.natsConfig
 }
 
 // WithEventTypePrefix returns NatsHandlerMockOpt which sets the eventTypePrefix for the given NatsHandlerMock.
 func WithEventTypePrefix(eventTypePrefix string) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+	return func(m *NATSHandlerMock) {
 		m.eventTypePrefix = eventTypePrefix
 	}
 }
 
 // WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
 func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+	return func(m *NATSHandlerMock) {
 		m.natsConfig.EventTypePrefix = m.eventTypePrefix
 		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
@@ -177,7 +177,7 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 
 // WithApplication returns NatsHandlerMockOpt which sets the legacy.Transformer for the given NatsHandlerMock.
 func WithApplication(applicationName string) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+	return func(m *NATSHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationName)
 		m.legacyTransformer = legacy.NewTransformer(
 			m.natsConfig.ToConfig().BEBNamespace,
@@ -190,7 +190,7 @@ func WithApplication(applicationName string) NatsHandlerMockOpt {
 
 // WithJetstream returns NatsHandlerMockOpt which starts the NATS server in the jetstream mode for the given NatsHandlerMock.
 func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+	return func(m *NATSHandlerMock) {
 		m.jetstreamMode = jsEnabled
 	}
 }
