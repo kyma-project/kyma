@@ -396,7 +396,7 @@ func (r *Reconciler) updateStatusAndEmitEvent(ctx context.Context, currentBacken
 	return nil
 }
 
-// emitConditionEvents check each condition, if the condition is modified then emit an event
+// emitConditionEvents check each condition, if the condition is modified then emit an event.
 func (r *Reconciler) emitConditionEvents(currentBackend, newBackend *eventingv1alpha1.EventingBackend) {
 	for _, newCondition := range newBackend.Status.Conditions {
 		currentCondition := currentBackend.Status.FindCondition(newCondition.Type)
@@ -408,7 +408,7 @@ func (r *Reconciler) emitConditionEvents(currentBackend, newBackend *eventingv1a
 	}
 }
 
-// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status
+// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status.
 func (r *Reconciler) emitConditionEvent(backend *eventingv1alpha1.EventingBackend, condition eventingv1alpha1.Condition) {
 	eventType := v1.EventTypeNormal
 	if condition.Status == v1.ConditionFalse {
@@ -417,7 +417,7 @@ func (r *Reconciler) emitConditionEvent(backend *eventingv1alpha1.EventingBacken
 	r.record.Event(backend, eventType, string(condition.Reason), condition.Message)
 }
 
-// check if the publisher deployment's pods are ready
+// check if the publisher deployment's pods are ready.
 func (r *Reconciler) isPublisherDeploymentReady(publisher *appsv1.Deployment) bool {
 	result := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
 	if !result {
@@ -430,7 +430,7 @@ func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1
 	return currentBackendStatus.Backend != desiredBackendStatus.Backend
 }
 
-// getDefaultBackendStatus sets all the conditions and the eventingReady status to true
+// getDefaultBackendStatus sets all the conditions and the eventingReady status to true.
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	defaultStatus := eventingv1alpha1.EventingBackendStatus{}
 	defaultStatus.InitializeConditions()

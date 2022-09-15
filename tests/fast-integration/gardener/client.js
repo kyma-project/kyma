@@ -1,7 +1,7 @@
 const k8s = require('@kubernetes/client-node');
-const {fromBase64, getEnvOrThrow} = require('../utils');
+const {fromBase64, getEnvOrThrow, debug} = require('../utils');
 
-const GARDENER_PROJECT = 'garden-kyma-dev';
+const GARDENER_PROJECT = process.env.KCP_GARDENER_NAMESPACE || 'garden-kyma-dev';
 const COMPASS_ID_ANNOTATION_KEY = 'compass.provisioner.kyma-project.io/runtime-id';
 
 class GardenerConfig {
@@ -41,6 +41,7 @@ class GardenerClient {
   }
 
   async getShoot(shootName) {
+    debug(`Fetching shoot: ${shootName} from gardener namespace: ${GARDENER_PROJECT}`);
     const secretResp = await this.coreV1API.readNamespacedSecret(
         `${shootName}.kubeconfig`,
         GARDENER_PROJECT,

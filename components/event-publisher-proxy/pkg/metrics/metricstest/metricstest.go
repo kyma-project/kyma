@@ -10,12 +10,12 @@ import (
 
 // EnsureMetricErrors ensures metric errors exists
 func EnsureMetricErrors(t *testing.T, collector *metrics.Collector) {
-	ensureMetricCount(t, collector, metrics.Errors, 1)
+	ensureMetricCount(t, collector, metrics.ErrorsKey, 1)
 }
 
 // EnsureMetricLatency ensures metric latency exists
 func EnsureMetricLatency(t *testing.T, collector *metrics.Collector) {
-	ensureMetricCount(t, collector, metrics.Latency, 1)
+	ensureMetricCount(t, collector, metrics.LatencyKey, 1)
 }
 
 // EnsureMetricEventTypePublished ensures metric eventType exists

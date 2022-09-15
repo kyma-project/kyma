@@ -61,7 +61,7 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 				Reason:             serverlessv1alpha2.ConditionReasonJobFailed,
 				Message:            fmt.Sprintf("Job %s failed, it will be re-run", s.jobs.Items[0].Name),
 			}
-			return buildStateFnUpdateStateFnFunctionCondition(condition)
+			return buildStatusUpdateStateFnWithCondition(condition)
 		}
 
 		s.image = s.buildImageAddress(r.cfg.docker.PullAddress)
@@ -118,8 +118,7 @@ func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
 			Message:            fmt.Sprintf("Job %s created", expectedJob.GetName()),
 		}
 
-		result := buildStateFnUpdateStateFnFunctionCondition(condition)
-		return result
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
@@ -142,8 +141,7 @@ func stateFnInlineDeleteJobs(ctx context.Context, r *reconciler, s *systemState)
 		Message:            "Old Jobs deleted",
 	}
 
-	result := buildStateFnUpdateStateFnFunctionCondition(condition)
-	return result
+	return buildStatusUpdateStateFnWithCondition(condition)
 }
 
 func buildStateFnInlineUpdateJobLabels(m map[string]string) stateFn {
@@ -167,7 +165,7 @@ func buildStateFnInlineUpdateJobLabels(m map[string]string) stateFn {
 			Message:            fmt.Sprintf("Job %s updated", jobName),
 		}
 
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 }
 
@@ -188,7 +186,7 @@ func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) 
 			Reason:             serverlessv1alpha2.ConditionReasonJobFinished,
 			Message:            fmt.Sprintf("Job %s finished", jobName),
 		}
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 
 	if job.Status.Failed < 1 {
@@ -200,7 +198,7 @@ func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) 
 			Reason:             serverlessv1alpha2.ConditionReasonJobRunning,
 			Message:            fmt.Sprintf("Job %s is still in progress", jobName),
 		}
-		return buildStateFnUpdateStateFnFunctionCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition)
 	}
 
 	return nil

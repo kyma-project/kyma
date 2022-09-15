@@ -794,6 +794,7 @@ kyma:
       passHostHeader: false
       cookieExpire: 24h
       cookieRefresh: 1h
+      upstreamTimeout: 1m
     env: {}
     nodeSelector: {}
     securityContext:
