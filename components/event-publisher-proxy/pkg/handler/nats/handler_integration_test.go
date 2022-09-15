@@ -121,7 +121,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 							// validator to check NATS received events
 							notify := make(chan bool)
 							defer close(notify)
-							validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantEventType, notify)
+							validator := testingutils.ValidateNATSSubjectOrFail(t, tc.wantEventType, notify)
 							testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
 
 							body, headers := testCase.ProvideMessage(tc.wantEventType)
@@ -242,7 +242,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 							// publish a message to NATS and validate it
 							notify := make(chan bool)
 							defer close(notify)
-							validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantEventType, notify)
+							validator := testingutils.ValidateNATSSubjectOrFail(t, tc.wantEventType, notify)
 							testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
 
 							body, headers := testCase.ProvideMessage()

@@ -64,7 +64,7 @@ func SubscribeToEventOrFail(t *testing.T, connection *nats.Conn, eventType strin
 	}
 }
 
-func ValidateNatsSubjectOrFail(t *testing.T, subject string, notify ...chan bool) nats.MsgHandler {
+func ValidateNATSSubjectOrFail(t *testing.T, subject string, notify ...chan bool) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		for _, n := range notify {
 			n <- true
