@@ -101,7 +101,7 @@ func TestCreateRewriteTagFilterIncludeContainers(t *testing.T) {
     emitter_name          logpipeline1
     emitter_storage.type  filesystem
     rule                  $kubernetes['container_name'] "^(container1|container2)$" logpipeline1.$TAG true
-    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$|compass-system$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
@@ -134,7 +134,7 @@ func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
     emitter_name          logpipeline1
     emitter_storage.type  filesystem
     rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" logpipeline1.$TAG true
-    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" logpipeline1.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$|compass-system$).*" logpipeline1.$TAG true
 
 `
 	actual := createRewriteTagFilterSection(logPipeline, pipelineConfig)
