@@ -108,7 +108,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 					defer handlerMock.Stop()
 
 					// run the tests for publishing cloudevents
-					publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNatsConfig().Port)
+					publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNATSConfig().Port)
 					for _, testCase := range handlertest.TestCasesForCloudEvents {
 						testCase := testCase
 						t.Run(testCase.Name, func(t *testing.T) {
@@ -229,7 +229,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 					defer handlerMock.Stop()
 
 					// run the tests for publishing legacy events
-					publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNatsConfig().Port, tc.givenApplicationName)
+					publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNATSConfig().Port, tc.givenApplicationName)
 					for _, testCase := range handlertest.TestCasesForLegacyEvents {
 						testCase := testCase
 						t.Run(testCase.Name, func(t *testing.T) {
@@ -319,7 +319,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 					for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
 						testCase := testCase
 						t.Run(testCase.Name, func(t *testing.T) {
-							subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNatsConfig().Port, testCase.AppName)
+							subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNATSConfig().Port, testCase.AppName)
 							resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
 							require.NoError(t, err)
 							require.Equal(t, testCase.WantStatusCode, resp.StatusCode)

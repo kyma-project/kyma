@@ -145,8 +145,8 @@ func (m *NATSHandlerMock) GetMetricsCollector() *metrics.Collector {
 	return m.collector
 }
 
-// GetNatsConfig returns the env.NatsConfig used by the NatsHandlerMock.
-func (m *NATSHandlerMock) GetNatsConfig() *env.NATSConfig {
+// GetNATSConfig returns the env.NatsConfig used by the NatsHandlerMock.
+func (m *NATSHandlerMock) GetNATSConfig() *env.NATSConfig {
 	return m.natsConfig
 }
 
