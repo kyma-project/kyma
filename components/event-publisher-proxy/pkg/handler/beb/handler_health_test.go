@@ -13,6 +13,14 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
+const (
+	// mock server endpoints
+	defaultEventsEndpoint = "/events"
+
+	// request size
+	bigRequestSize = 65536
+)
+
 func TestHandlerHealth(t *testing.T) {
 	var (
 		requestSize        = bigRequestSize
