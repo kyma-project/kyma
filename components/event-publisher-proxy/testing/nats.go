@@ -34,13 +34,13 @@ var NATSServerModes = []struct {
 	},
 }
 
-func StartNATSServer(enableJetstream bool) *server.Server {
+func StartNATSServer(enableJetStream bool) *server.Server {
 	opts := test.DefaultTestOptions
 	opts.Port = server.RANDOM_PORT
-	opts.JetStream = enableJetstream
+	opts.JetStream = enableJetStream
 
 	log, _ := logger.New("json", "info")
-	if enableJetstream {
+	if enableJetStream {
 		log.WithContext().Info("Starting test NATS Server in Jetstream mode")
 	} else {
 		log.WithContext().Info("Starting test NATS Server in default mode")
