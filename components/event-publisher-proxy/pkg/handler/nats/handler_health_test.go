@@ -36,7 +36,7 @@ func TestHandlerHealth(t *testing.T) {
 			// test in both default and jetstream NATS modes
 			for _, serverMode := range testingutils.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
-					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetstreamEnabled))
+					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetStreamEnabled))
 					defer handlerMock.Stop()
 
 					if tc.givenNATSServerShutdown {

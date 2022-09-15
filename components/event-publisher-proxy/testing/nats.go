@@ -22,15 +22,15 @@ const (
 
 var NATSServerModes = []struct {
 	Name             string
-	JetstreamEnabled bool
+	JetStreamEnabled bool
 }{
 	{
 		Name:             "jetstream disabled",
-		JetstreamEnabled: false,
+		JetStreamEnabled: false,
 	},
 	{
 		Name:             "jetstream enabled",
-		JetstreamEnabled: true,
+		JetStreamEnabled: true,
 	},
 }
 

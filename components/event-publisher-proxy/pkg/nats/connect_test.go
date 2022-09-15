@@ -41,7 +41,7 @@ func TestConnect(t *testing.T) {
 				t.Run(serverMode.Name, func(t *testing.T) {
 					tc := tc
 					// given
-					natsServer := publishertesting.StartNATSServer(serverMode.JetstreamEnabled)
+					natsServer := publishertesting.StartNATSServer(serverMode.JetStreamEnabled)
 					assert.NotNil(t, natsServer)
 					defer natsServer.Shutdown()
 

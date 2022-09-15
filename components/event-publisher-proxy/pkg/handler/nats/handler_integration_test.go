@@ -103,7 +103,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 					handlerMock := mock.StartOrDie(ctx, t,
 						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 						mock.WithApplication(tc.givenApplicationName),
-						mock.WithJetstream(serverMode.JetstreamEnabled),
+						mock.WithJetstream(serverMode.JetStreamEnabled),
 					)
 					defer handlerMock.Stop()
 
@@ -224,7 +224,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 					handlerMock := mock.StartOrDie(ctx, t,
 						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 						mock.WithApplication(tc.givenApplicationName),
-						mock.WithJetstream(serverMode.JetstreamEnabled),
+						mock.WithJetstream(serverMode.JetStreamEnabled),
 					)
 					defer handlerMock.Stop()
 
@@ -311,7 +311,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 						mock.WithSubscription(scheme, subscription),
 						mock.WithApplication(testingutils.ApplicationName),
-						mock.WithJetstream(serverMode.JetstreamEnabled),
+						mock.WithJetstream(serverMode.JetStreamEnabled),
 					)
 					defer handlerMock.Stop()
 

@@ -50,7 +50,7 @@ func TestReadinessCheck(t *testing.T) {
 						}
 					}()
 
-					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetstreamEnabled))
+					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetStreamEnabled))
 					defer handlerMock.Stop()
 
 					var handler http.HandlerFunc
