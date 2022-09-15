@@ -89,20 +89,16 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
 			builder.WithPredicates(predicate.Funcs{
 				CreateFunc: func(event event.CreateEvent) bool {
-					ctrl.Log.Info("Secret created")
-					return false // ignore creation
+					return false
 				},
 				DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-					ctrl.Log.Info("Secret deleted")
-					return true
+					return false
 				},
 				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-					ctrl.Log.Info("Secret updated")
-					return true
+					return true // only handle updates
 				},
 				GenericFunc: func(genericEvent event.GenericEvent) bool {
-					ctrl.Log.Info("Secret generic")
-					return true
+					return false
 				},
 			}),
 		).
@@ -150,6 +146,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// Ignore not-found errors since we can get them on deleted requests
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	r.syncSecretsCache(&logPipeline)
 
 	secretsOK := r.syncer.secretHelper.ValidatePipelineSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
@@ -220,6 +218,23 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) syncSecretsCache(pipeline *telemetryv1alpha1.LogPipeline) {
+	fields := lookupSecretRefFields(pipeline)
+
+	if pipeline.DeletionTimestamp != nil {
+		for _, f := range fields {
+			ctrl.Log.Info(fmt.Sprintf("Remove secret referenced by %s from cache: %s", pipeline.Name, f.secretKeyRef.Name))
+			r.secrets.delete(f.secretKeyRef.NamespacedName(), pipeline.Name)
+		}
+		return
+	}
+
+	for _, f := range fields {
+		ctrl.Log.Info(fmt.Sprintf("Add secret referenced by %s to cache: %s", pipeline.Name, f.secretKeyRef.Name))
+		r.secrets.set(f.secretKeyRef.NamespacedName(), pipeline.Name)
+	}
 }
 
 func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition, unSupported bool) error {
