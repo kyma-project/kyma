@@ -61,35 +61,35 @@ type BEBHandlerMock struct {
 	eventTypeCleaner    eventtype.Cleaner
 }
 
-// BEBHandlerMockOpt represents a BebHandlerMock option.
+// BEBHandlerMockOpt represents a BEBHandlerMock option.
 type BEBHandlerMockOpt func(*BEBHandlerMock)
 
-// GetPort returns the port used by the BebHandlerMock.
+// GetPort returns the port used by the BEBHandlerMock.
 func (m *BEBHandlerMock) GetPort() int {
 	return m.cfg.Port
 }
 
-// GetMetricsCollector returns the metrics.Collector used by the BebHandlerMock.
+// GetMetricsCollector returns the metrics.Collector used by the BEBHandlerMock.
 func (m *BEBHandlerMock) GetMetricsCollector() *metrics.Collector {
 	return m.collector
 }
 
-// Close closes the testing.MockServer used by the BebHandlerMock.
+// Close closes the testing.MockServer used by the BEBHandlerMock.
 func (m *BEBHandlerMock) Close() {
 	m.mockServer.Close()
 }
 
-// GetLivenessEndpoint returns the liveness endpoint used by the BebHandlerMock.
+// GetLivenessEndpoint returns the liveness endpoint used by the BEBHandlerMock.
 func (m *BEBHandlerMock) GetLivenessEndpoint() string {
 	return m.livenessEndpoint
 }
 
-// GetReadinessEndpoint returns the readiness endpoint used by the BebHandlerMock.
+// GetReadinessEndpoint returns the readiness endpoint used by the BEBHandlerMock.
 func (m *BEBHandlerMock) GetReadinessEndpoint() string {
 	return m.readinessEndpoint
 }
 
-// StartOrDie starts a new BebHandlerMock instance or die if a precondition fails.
+// StartOrDie starts a new BEBHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) beb.Handler started without errors.
 func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePrefix, eventsEndpoint string,
 	requestTimeout, serverResponseTime time.Duration, opts ...BEBHandlerMockOpt) *BEBHandlerMock {
@@ -185,14 +185,14 @@ func extractEventTypeFromRequest(r *http.Request) (string, error) {
 	return eventType, nil
 }
 
-// WithEventTypePrefix returns BebHandlerMockOpt which sets the eventTypePrefix for the given BebHandlerMock.
+// WithEventTypePrefix returns BEBHandlerMockOpt which sets the eventTypePrefix for the given BEBHandlerMock.
 func WithEventTypePrefix(eventTypePrefix string) BEBHandlerMockOpt {
 	return func(m *BEBHandlerMock) {
 		m.cfg.EventTypePrefix = eventTypePrefix
 	}
 }
 
-// WithApplication returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
+// WithApplication returns BEBHandlerMockOpt which sets the subscribed.Processor for the given BEBHandlerMock.
 func WithApplication(applicationNameToCreate, applicationNameToValidate string) BEBHandlerMockOpt {
 	return func(m *BEBHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationNameToCreate)
@@ -203,7 +203,7 @@ func WithApplication(applicationNameToCreate, applicationNameToValidate string) 
 	}
 }
 
-// WithSubscription returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
+// WithSubscription returns BEBHandlerMockOpt which sets the subscribed.Processor for the given BEBHandlerMock.
 func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) BEBHandlerMockOpt {
 	return func(m *BEBHandlerMock) {
 		dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)

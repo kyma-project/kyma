@@ -11,7 +11,7 @@ type BEBMessageSender struct {
 	Target string
 }
 
-// NewBEBMessageSender returns a new BebMessageSender instance with the given target and client.
+// NewBEBMessageSender returns a new BEBMessageSender instance with the given target and client.
 func NewBEBMessageSender(target string, client *http.Client) *BEBMessageSender {
 	return &BEBMessageSender{Client: client, Target: target}
 }

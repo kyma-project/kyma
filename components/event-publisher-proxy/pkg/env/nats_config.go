@@ -29,7 +29,7 @@ type NatsConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 }
 
-// ToConfig converts to a default BEB BebConfig
+// ToConfig converts to a default BEB BEBConfig
 func (c *NatsConfig) ToConfig() *BEBConfig {
 	cfg := &BEBConfig{
 		BEBNamespace:    c.LegacyNamespace,
