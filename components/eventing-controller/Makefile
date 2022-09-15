@@ -67,20 +67,23 @@ set-up-local-env:
     export DOMAIN ?= example-domain.com
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
 
+# Run all tests
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
-test-local: ## Run tests
+test-local: manifests-local generate-local setup-envtest
 	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out --tags="unit integration" ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
-test-unit-local: ## Run tests
+# Run unit tests only
+test-local-unit: manifests-local generate-local setup-envtest
 	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out --tags="unit" ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
-test-int-local: ## Run tests
+# Run integration tests only
+test-local-integration: manifests-local generate-local setup-envtest
 	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out --tags="integration" ./...
 	@echo -n "Total coverage: "
