@@ -73,7 +73,7 @@ func TestJetStreamMessageSender(t *testing.T) {
 
 			// when
 			ctx := context.Background()
-			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
+			sender := NewJetStreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
 			if tc.givenNATSConnectionClosed {
 				connection.Close()

@@ -87,7 +87,7 @@ func (c *Commander) Start() error {
 	// configure the message sender
 	var messageSenderToNATS sender.GenericSender
 	if c.jetstreamMode {
-		messageSenderToNATS = sender.NewJetstreamMessageSender(ctx, connection, c.envCfg, c.logger)
+		messageSenderToNATS = sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
 	} else {
 		messageSenderToNATS = sender.NewNATSMessageSender(ctx, connection, c.logger)
 	}
