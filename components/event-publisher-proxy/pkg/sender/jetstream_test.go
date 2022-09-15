@@ -23,7 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJetstreamMessageSender(t *testing.T) {
+func TestJetStreamMessageSender(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
