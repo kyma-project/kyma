@@ -24,8 +24,8 @@ async function lokiSecretData() {
   return secretData['loki.yaml'];
 }
 
-async function logsPresentInLoki(query, startTimestamp) {
-  for (let i = 0; i < 20; i++) {
+async function logsPresentInLoki(query, startTimestamp, iterations = 20) {
+  for (let i = 0; i < iterations; i++) {
     const responseBody = await queryLoki(query, startTimestamp);
     if (responseBody.data.result.length > 0) {
       return true;
