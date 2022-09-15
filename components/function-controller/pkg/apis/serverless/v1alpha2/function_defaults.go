@@ -99,12 +99,11 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 	}
 	defaultingConfig := config.Function.Resources
 	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
-
-	setFunctionResources(resources, resourcesPreset, spec)
+	calculatedResources := defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	setFunctionResources(spec, calculatedResources)
 }
 
-func setFunctionResources(resources *corev1.ResourceRequirements, resourcesPreset ResourcesPreset, spec *FunctionSpec) {
-	calculatedResources := defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+func setFunctionResources(spec *FunctionSpec, resources *corev1.ResourceRequirements) {
 
 	if spec.ResourceConfiguration == nil {
 		spec.ResourceConfiguration = &ResourceConfiguration{}
@@ -114,7 +113,7 @@ func setFunctionResources(resources *corev1.ResourceRequirements, resourcesPrese
 		spec.ResourceConfiguration.Function = &ResourceRequirements{}
 	}
 
-	spec.ResourceConfiguration.Function.Resources = calculatedResources
+	spec.ResourceConfiguration.Function.Resources = resources
 }
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
@@ -131,12 +130,12 @@ func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Fu
 
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
+	calculatedResources := defaultResources(buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 
-	setBuildResources(&buildResourceCfg, resourcesPreset, spec)
+	setBuildResources(spec, calculatedResources)
 }
 
-func setBuildResources(buildResourceCfg *ResourceRequirements, resourcesPreset ResourcesPreset, spec *FunctionSpec) {
-	calculatedResources := defaultResources(buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+func setBuildResources(spec *FunctionSpec, resources *corev1.ResourceRequirements) {
 
 	if spec.ResourceConfiguration == nil {
 		spec.ResourceConfiguration = &ResourceConfiguration{}
@@ -146,7 +145,7 @@ func setBuildResources(buildResourceCfg *ResourceRequirements, resourcesPreset R
 		spec.ResourceConfiguration.Build = &ResourceRequirements{}
 	}
 
-	spec.ResourceConfiguration.Build.Resources = calculatedResources
+	spec.ResourceConfiguration.Build.Resources = resources
 }
 
 func shouldSkipBuildResourcesDefault(fn *Function) bool {
