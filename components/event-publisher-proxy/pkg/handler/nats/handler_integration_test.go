@@ -113,7 +113,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 						testCase := testCase
 						t.Run(testCase.Name, func(t *testing.T) {
 							// connect to nats
-							connection, err := testingutils.ConnectToNATSServer(handlerMock.GetNatsURL())
+							connection, err := testingutils.ConnectToNATSServer(handlerMock.GetNATSURL())
 							assert.Nil(t, err)
 							assert.NotNil(t, connection)
 							defer connection.Close()
@@ -234,7 +234,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 						testCase := testCase
 						t.Run(testCase.Name, func(t *testing.T) {
 							// connect to nats
-							connection, err := testingutils.ConnectToNATSServer(handlerMock.GetNatsURL())
+							connection, err := testingutils.ConnectToNATSServer(handlerMock.GetNATSURL())
 							assert.Nil(t, err)
 							assert.NotNil(t, connection)
 							defer connection.Close()

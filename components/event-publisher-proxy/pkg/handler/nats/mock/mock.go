@@ -82,7 +82,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
-	connection, err := testingutils.ConnectToNATSServer(mock.GetNatsURL())
+	connection, err := testingutils.ConnectToNATSServer(mock.GetNATSURL())
 	require.NoError(t, err)
 	mock.connection = connection
 
@@ -120,8 +120,8 @@ func (m *NATSHandlerMock) ShutdownNATSServerAndWait() {
 	m.natsServer.WaitForShutdown()
 }
 
-// GetNatsURL returns the NATS server URL used by the NatsHandlerMock.
-func (m *NATSHandlerMock) GetNatsURL() string {
+// GetNATSURL returns the NATS server URL used by the NatsHandlerMock.
+func (m *NATSHandlerMock) GetNATSURL() string {
 	return m.natsServer.ClientURL()
 }
 
