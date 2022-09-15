@@ -75,7 +75,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := sender.NewBebMessageSender(c.envCfg.EmsPublishURL, client)
+	messageSender := sender.NewBEBMessageSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

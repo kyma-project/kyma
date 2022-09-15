@@ -129,7 +129,7 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 	defer client.CloseIdleConnections()
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.cfg.Port)
-	msgSender := sender.NewBebMessageSender(mock.cfg.EmsPublishURL, client)
+	msgSender := sender.NewBEBMessageSender(mock.cfg.EmsPublishURL, client)
 	msgHandlerOpts := &options.Options{MaxRequestSize: int64(requestSize)}
 	msgHandler := beb.NewHandler(
 		msgReceiver,

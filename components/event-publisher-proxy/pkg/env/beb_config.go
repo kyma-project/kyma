@@ -34,7 +34,7 @@ func (c *BEBConfig) ConfigureTransport(transport *http.Transport) {
 
 // String implements the fmt.Stringer interface
 func (c *BEBConfig) String() string {
-	return fmt.Sprintf("BebConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
+	return fmt.Sprintf("BEBConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
 		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",
 		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns, c.MaxIdleConnsPerHost, c.RequestTimeout, c.BEBNamespace, c.EventTypePrefix)
 }

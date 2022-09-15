@@ -28,7 +28,7 @@ func TestNewHttpMessageSender(t *testing.T) {
 	client := oauth.NewClient(context.Background(), &env.BEBConfig{})
 	defer client.CloseIdleConnections()
 
-	msgSender := NewBebMessageSender(eventsEndpoint, client)
+	msgSender := NewBEBMessageSender(eventsEndpoint, client)
 	if msgSender.Target != eventsEndpoint {
 		t.Errorf("Message sender target is misconfigured want: %s but got: %s", eventsEndpoint, msgSender.Target)
 	}
@@ -43,7 +43,7 @@ func TestNewRequestWithTarget(t *testing.T) {
 	client := oauth.NewClient(context.Background(), &env.BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
-	msgSender := NewBebMessageSender(eventsEndpoint, client)
+	msgSender := NewBEBMessageSender(eventsEndpoint, client)
 
 	type ctxKey struct{}
 	const ctxValue = "testValue"
@@ -91,7 +91,7 @@ func TestSend(t *testing.T) {
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender := NewBebMessageSender(emsCEURL, client)
+	msgSender := NewBEBMessageSender(emsCEURL, client)
 
 	request, err := msgSender.NewRequestWithTarget(ctx, msgSender.Target)
 	if err != nil {
