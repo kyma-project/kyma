@@ -33,12 +33,16 @@ const keepLabelsLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/loki-k8s-metadata-filter-keep-labels-logpipeline.yaml');
 const kubernetesCustomFilterLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/kubernetes-custom-filter-logpipeline.yaml');
+const excludeIstioProxyLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/exclude-istio-proxy-logpipeline.yaml');
+
 const parserLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/regex-logparser.yaml');
 
 // CR names
 const httpLogPipelineName = 'http-mockserver';
 const dropLabelsLogPipelineName = 'loki-keep-annotations-drop-labels';
 const keepLabelsLogPipelineName = 'loki-drop-annotations-keep-labels';
+const excludeIstioProxyLogPipelineName = 'exclude-istio-proxy';
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -219,6 +223,29 @@ describe('Telemetry Operator tests', function() {
 
     it(`Should delete Loki LogPipeline '${dropLabelsLogPipelineName}'`, async () =>{
       await k8sDelete(dropLabelsLogPipelineCR, telemetryNamespace);
+    });
+  });
+
+  context('Should verify istio-proxy container and system logs are excluded', async () => {
+    it(`Should create Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
+      await k8sApply(excludeIstioProxyLogPipelineCR, telemetryNamespace);
+      await waitForLogPipelineStatusCondition(excludeIstioProxyLogPipelineName, 'Running', 180000);
+    });
+
+    it(`Should verify no system logs are pushed to Loki`, async () =>{
+      const labels = '{namespace="kyma-system"}';
+      const responseBody = await queryLoki(labels, testStartTimestamp);
+      assert.isTrue(responseBody.data.result.length == 0, `No logs must present in Loki for labels: ${labels}`);
+    });
+
+    it(`Should verify no istio-proxy logs are pushed to Loki`, async () =>{
+      const labels = '{container="istio-proxy"}';
+      const responseBody = await queryLoki(labels, testStartTimestamp);
+      assert.isTrue(responseBody.data.result.length == 0, `No logs must present in Loki for labels: ${labels}`);
+    });
+
+    it(`Should delete Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
+      await k8sDelete(excludeIstioProxyLogPipelineCR, telemetryNamespace);
     });
   });
 });
