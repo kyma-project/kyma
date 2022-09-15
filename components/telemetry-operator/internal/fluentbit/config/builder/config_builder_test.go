@@ -160,17 +160,12 @@ func TestMergeSectionsConfigCustomOutput(t *testing.T) {
     emitter_mem_buf_limit 10M
     emitter_name          foo-stdout
     emitter_storage.type  filesystem
-    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$).*" foo.$TAG true
+    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$|compass-system$).*" foo.$TAG true
 
 [FILTER]
     name   record_modifier
     match  foo.*
     record cluster_identifier ${KUBERNETES_SERVICE_HOST}
-
-[FILTER]
-    name  grep
-    match foo.*
-    regex log aa
 
 [OUTPUT]
     name                     stdout
@@ -185,14 +180,6 @@ func TestMergeSectionsConfigCustomOutput(t *testing.T) {
 				Application: telemetryv1alpha1.ApplicationInput{
 					KeepAnnotations: true,
 					DropLabels:      false,
-				},
-			},
-			Filters: []telemetryv1alpha1.Filter{
-				{
-					Custom: `
-						name grep
-						regex log aa
-					`,
 				},
 			},
 			Output: telemetryv1alpha1.Output{
