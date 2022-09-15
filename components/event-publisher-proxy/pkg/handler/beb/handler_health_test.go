@@ -15,16 +15,16 @@ import (
 
 const (
 	// mock server endpoints
-	defaultEventsEndpoint = "/events"
+	defaultEndpoint = "/events"
 
 	// request size
-	bigRequestSize = 65536
+	bigBigRequestSize = 65536
 )
 
 func TestHandlerHealth(t *testing.T) {
 	var (
-		requestSize        = bigRequestSize
-		eventsEndpoint     = defaultEventsEndpoint
+		requestSize        = bigBigRequestSize
+		eventsEndpoint     = defaultEndpoint
 		requestTimeout     = time.Second
 		serverResponseTime = time.Nanosecond
 	)
