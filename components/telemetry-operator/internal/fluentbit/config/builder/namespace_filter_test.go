@@ -9,10 +9,6 @@ import (
 )
 
 func TestCreateNamespaceGrepFilterIncludeNamespaces(t *testing.T) {
-	pipelineConfig := PipelineDefaults{
-		InputTag: "kube",
-	}
-
 	logPipeline := &v1alpha1.LogPipeline{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "logpipeline1",
@@ -28,19 +24,15 @@ func TestCreateNamespaceGrepFilterIncludeNamespaces(t *testing.T) {
 
 	expected := `[FILTER]
     name  grep
-    match kube.*
-    regex $kubernetes['namespace_name'] "^(namespace1|namespace2)$"
+    match logpipeline1.*
+    regex $kubernetes['namespace_name'] namespace1|namespace2
 
 `
-	actual := createNamespaceGrepFilter(logPipeline, pipelineConfig)
+	actual := createNamespaceGrepFilter(logPipeline)
 	require.Equal(t, expected, actual)
 }
 
 func TestCreateNamespaceGrepFilterExcludeNamespaces(t *testing.T) {
-	pipelineConfig := PipelineDefaults{
-		InputTag: "kube",
-	}
-
 	logPipeline := &v1alpha1.LogPipeline{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "logpipeline1",
@@ -55,36 +47,28 @@ func TestCreateNamespaceGrepFilterExcludeNamespaces(t *testing.T) {
 
 	expected := `[FILTER]
     name    grep
-    match   kube.*
-    exclude $kubernetes['namespace_name'] "^(namespace1|namespace2)$"
+    match   logpipeline1.*
+    exclude $kubernetes['namespace_name'] namespace1|namespace2
 
 `
-	actual := createNamespaceGrepFilter(logPipeline, pipelineConfig)
+	actual := createNamespaceGrepFilter(logPipeline)
 	require.Equal(t, expected, actual)
 }
 
 func TestCreateNamespaceGrepFilterSystemNamespacesExcluded(t *testing.T) {
-	pipelineConfig := PipelineDefaults{
-		InputTag: "kube",
-	}
-
 	logPipeline := &v1alpha1.LogPipeline{ObjectMeta: metav1.ObjectMeta{Name: "logpipeline1"}}
 
 	expected := `[FILTER]
     name    grep
-    match   kube.*
-    exclude $kubernetes['namespace_name'] "^(kyma-system|kyma-integration|kube-system|istio-system|compass-system)$"
+    match   logpipeline1.*
+    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
 
 `
-	actual := createNamespaceGrepFilter(logPipeline, pipelineConfig)
+	actual := createNamespaceGrepFilter(logPipeline)
 	require.Equal(t, expected, actual)
 }
 
 func TestCreateNamespaceGrepFilterSystemNamespacesIncluded(t *testing.T) {
-	pipelineConfig := PipelineDefaults{
-		InputTag: "kube",
-	}
-
 	logPipeline := &v1alpha1.LogPipeline{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "logpipeline1",
@@ -97,6 +81,6 @@ func TestCreateNamespaceGrepFilterSystemNamespacesIncluded(t *testing.T) {
 		},
 	}
 
-	actual := createNamespaceGrepFilter(logPipeline, pipelineConfig)
+	actual := createNamespaceGrepFilter(logPipeline)
 	require.Equal(t, "", actual)
 }
