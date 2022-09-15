@@ -68,7 +68,7 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	if jsError != nil {
 		return http.StatusInternalServerError, jsError
 	}
-	msg, err := s.eventToNatsMsg(event)
+	msg, err := s.eventToNATSMsg(event)
 	if err != nil {
 		return http.StatusUnprocessableEntity, err
 	}
@@ -101,8 +101,8 @@ func (s *JetstreamMessageSender) streamExists(connection *nats.Conn) (bool, erro
 	return false, nats.ErrStreamNotFound
 }
 
-// eventToNatsMsg translates cloud event into the NATS Msg.
-func (s *JetstreamMessageSender) eventToNatsMsg(event *event.Event) (*nats.Msg, error) {
+// eventToNATSMsg translates cloud event into the NATS Msg.
+func (s *JetstreamMessageSender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
 	header := make(nats.Header)
 	header.Set(internal.HeaderContentType, event.DataContentType())
 	header.Set(internal.CeSpecVersionHeader, event.SpecVersion())
