@@ -366,6 +366,7 @@ config:
   inputs: |
     [INPUT]
         Name tail
+        Alias tail-tele
         Path /var/log/containers/*.log
         multiline.parser docker, cri, go, python, java
         Tag tele.*
@@ -374,7 +375,7 @@ config:
         Refresh_Interval 10
         DB /data/flb_kube.db
         storage.type  filesystem
-
+ 
     [INPUT]
         Name tail
         Path /null.log
