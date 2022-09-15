@@ -44,7 +44,7 @@ type NatsHandlerMock struct {
 	logger              *logger.Logger
 	natsServer          *server.Server
 	jetstreamMode       bool
-	natsConfig          *env.NatsConfig
+	natsConfig          *env.NATSConfig
 	collector           *metrics.Collector
 	legacyTransformer   *legacy.Transformer
 	subscribedProcessor *subscribed.Processor
@@ -146,7 +146,7 @@ func (m *NatsHandlerMock) GetMetricsCollector() *metrics.Collector {
 }
 
 // GetNatsConfig returns the env.NatsConfig used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetNatsConfig() *env.NatsConfig {
+func (m *NatsHandlerMock) GetNatsConfig() *env.NATSConfig {
 	return m.natsConfig
 }
 
@@ -195,8 +195,8 @@ func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
 	}
 }
 
-func newNatsConfig(port int) *env.NatsConfig {
-	return &env.NatsConfig{
+func newNatsConfig(port int) *env.NATSConfig {
+	return &env.NATSConfig{
 		Port:            port,
 		LegacyNamespace: testingutils.MessagingNamespace,
 		EventTypePrefix: testingutils.MessagingEventTypePrefix,

@@ -38,7 +38,7 @@ type Commander struct {
 	cancel           context.CancelFunc
 	metricsCollector *metrics.Collector
 	logger           *logger.Logger
-	envCfg           *env.NatsConfig
+	envCfg           *env.NATSConfig
 	opts             *options.Options
 	jetstreamMode    bool
 }
@@ -46,7 +46,7 @@ type Commander struct {
 // NewCommander creates the Commander for publisher to NATS.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger, jetstreamMode bool) *Commander {
 	return &Commander{
-		envCfg:           new(env.NatsConfig),
+		envCfg:           new(env.NATSConfig),
 		logger:           logger,
 		metricsCollector: metricsCollector,
 		opts:             opts,

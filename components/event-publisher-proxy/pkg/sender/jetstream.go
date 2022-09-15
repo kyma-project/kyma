@@ -31,11 +31,11 @@ type JetstreamMessageSender struct {
 	ctx        context.Context
 	logger     *logger.Logger
 	connection *nats.Conn
-	envCfg     *env.NatsConfig
+	envCfg     *env.NATSConfig
 }
 
 // NewJetstreamMessageSender returns a new NewJetstreamMessageSender instance with the given nats connection.
-func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NatsConfig, logger *logger.Logger) *JetstreamMessageSender {
+func NewJetstreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *JetstreamMessageSender {
 	return &JetstreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 

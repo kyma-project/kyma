@@ -155,7 +155,7 @@ func TestStreamExists(t *testing.T) {
 
 type TestEnvironment struct {
 	Connection *nats.Conn
-	Config     *env.NatsConfig
+	Config     *env.NATSConfig
 	Logger     *logger.Logger
 	Sender     *JetstreamMessageSender
 	Server     *server.Server
@@ -227,8 +227,8 @@ func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 	assert.NoError(t, err)
 }
 
-func CreateNatsJsConfig(url string) *env.NatsConfig {
-	return &env.NatsConfig{
+func CreateNatsJsConfig(url string) *env.NATSConfig {
+	return &env.NATSConfig{
 		JSStreamName:  testingutils.StreamName,
 		URL:           url,
 		ReconnectWait: time.Second,
