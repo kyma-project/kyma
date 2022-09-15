@@ -28,7 +28,7 @@ func RunNatsServerOnPort(opts ...NatsServerOpt) *server.Server {
 	return natstestserver.RunServer(serverOpts)
 }
 
-// ShutDownNATSServer shuts down test NATS server and waits until shutdown is complete
+// ShutDownNATSServer shuts down test NATS server and waits until shutdown is complete.
 func ShutDownNATSServer(natsServer *server.Server) {
 	natsServer.Shutdown()
 	natsServer.WaitForShutdown()

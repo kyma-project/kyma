@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	// default value in httpTransport implementation
+	// default value in httpTransport implementation.
 	maxIdleConns        = 100
 	maxIdleConnsPerHost = 0
 )

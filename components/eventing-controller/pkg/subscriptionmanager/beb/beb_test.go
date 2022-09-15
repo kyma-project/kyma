@@ -6,10 +6,13 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/onsi/gomega"
@@ -20,7 +23,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -30,7 +32,7 @@ const (
 
 type bebSubMgrMock struct {
 	Client  dynamic.Interface
-	Backend handlers.BEBBackend
+	Backend beb.Backend
 }
 
 func (c *bebSubMgrMock) Init(_ manager.Manager) error {
@@ -82,7 +84,7 @@ func TestCleanup(t *testing.T) {
 		BEBNamespace:             "/default/ns",
 		Qos:                      string(types.QosAtLeastOnce),
 	}
-	credentials := &handlers.OAuth2ClientCredentials{
+	credentials := &beb.OAuth2ClientCredentials{
 		ClientID:     "webhook_client_id",
 		ClientSecret: "webhook_client_secret",
 	}
@@ -91,8 +93,8 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	// create a BEB handler to connect to BEB Mock
-	nameMapper := handlers.NewBEBSubscriptionNameMapper("mydomain.com", handlers.MaxBEBSubscriptionNameLength)
-	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
+	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", beb.MaxBEBSubscriptionNameLength)
+	bebHandler := beb.NewBEB(credentials, nameMapper, defaultLogger)
 	err = bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
 	bebSubMgr.Backend = bebHandler
@@ -105,7 +107,7 @@ func TestCleanup(t *testing.T) {
 	// Create APIRule
 	unstructuredAPIRule, err := controllertesting.ToUnstructuredAPIRule(apiRule)
 	g.Expect(err).To(gomega.BeNil())
-	unstructuredAPIRuleBeforeCleanup, err := bebSubMgr.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
+	unstructuredAPIRuleBeforeCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace("test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(unstructuredAPIRuleBeforeCleanup).ToNot(gomega.BeNil())
 
@@ -130,7 +132,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	// check that the APIRule exists
-	unstructuredAPIRuleBeforeCleanup, err = bebSubMgr.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
+	unstructuredAPIRuleBeforeCleanup, err = bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(unstructuredAPIRuleBeforeCleanup).ToNot(gomega.BeNil())
 
@@ -153,7 +155,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(expectedSubStatus).To(gomega.Equal(gotSub.Status))
 
 	// the associated APIRule should be deleted
-	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
+	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(utils.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	g.Expect(err).ToNot(gomega.BeNil())
 	g.Expect(unstructuredAPIRuleAfterCleanup).To(gomega.BeNil())
 	bebMock.Stop()
@@ -163,7 +165,7 @@ func startBEBMock() *controllertesting.BEBMock {
 	// TODO(k15r): FIX THIS HACK
 	// this is a very evil hack for the time being, until we refactored the config properly
 	// it sets the URLs to relative paths, that can easily be used in the mux.
-	beb := controllertesting.NewBEBMock()
-	beb.Start()
-	return beb
+	b := controllertesting.NewBEBMock()
+	b.Start()
+	return b
 }

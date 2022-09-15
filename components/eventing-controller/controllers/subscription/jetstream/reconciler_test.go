@@ -1,4 +1,4 @@
-package jetstream
+package jetstream_test
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	natsserver "github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
@@ -19,15 +18,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	subscriptionjetstream "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 )
@@ -39,8 +40,8 @@ const (
 )
 
 type jetStreamTestEnsemble struct {
-	reconciler       *Reconciler
-	jetStreamBackend *handlers.JetStream
+	reconciler       *subscriptionjetstream.Reconciler
+	jetStreamBackend *backendjetstream.JetStream
 	*utils.TestEnsemble
 }
 
@@ -54,24 +55,24 @@ func TestUnavailableNATSServer(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 	defer utils.StopTestEnv(ens.TestEnsemble)
 
-	subscription := utils.CreateSubscription(ens.TestEnsemble,
+	sub := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, utils.NewUncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{utils.NewCleanEventType("")}),
 	)
 
 	ens.NatsServer.Shutdown()
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
 	ens.NatsServer = startJetStream(natsPort)
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, reconcilertesting.HaveSubscriptionReady())
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.Cancel)
 }
@@ -104,7 +105,7 @@ func TestCreateSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
+					reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer),
 				},
 				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
 					reconcilertesting.OrderCreatedEventType: {
@@ -152,7 +153,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("not able to parse sink url with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
+						utils.ConditionInvalidSink("failed to parse subscription sink URL: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")},
@@ -168,7 +169,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink does not contain suffix: svc.cluster.local in the URL")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It does not contain suffix: svc.cluster.local")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not contain suffix: svc.cluster.local")},
@@ -184,7 +185,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")},
@@ -217,7 +218,7 @@ func TestCreateSubscription(t *testing.T) {
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
-						utils.ConditionInvalidSink("sink is not a valid cluster local svc, failed with error: Service \"testapp\" not found")),
+						utils.ConditionInvalidSink("failed to validate subscription sink URL. It is not a valid cluster local svc: Service \"testapp\" not found")),
 				},
 				K8sEvents: []v1.Event{
 					utils.EventInvalidSink("Sink does not correspond to a valid cluster local svc")},
@@ -290,24 +291,24 @@ func TestCreateSubscription(t *testing.T) {
 			ens.G = gomega.NewGomegaWithT(t)
 
 			t.Log("creating the k8s subscription")
-			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 			t.Log("testing the k8s subscription")
-			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.want.K8sSubscription...)
+			utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.want.K8sSubscription...)
 
 			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.want.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.want.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
 			}
 
 			t.Log("testing the deletion of the subscription")
-			testSubscriptionDeletion(ens, subscription)
+			testSubscriptionDeletion(ens, sub)
 
 			t.Log("testing the deletion of the NATS subscription(s)")
-			for _, filter := range subscription.Spec.Filter.Filters {
-				ensureNATSSubscriptionIsDeleted(ens, subscription, filter.EventType.Value)
+			for _, filter := range sub.Spec.Filter.Filters {
+				ensureNATSSubscriptionIsDeleted(ens, sub, filter.EventType.Value)
 			}
 		})
 	}
@@ -595,44 +596,44 @@ func TestChangeSubscription(t *testing.T) {
 
 			// given
 			t.Log("creating the k8s subscription")
-			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			t.Log("testing the k8s subscription")
-			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantBefore.K8sSubscription...)
+			utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.wantBefore.K8sSubscription...)
 
 			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantBefore.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
 			}
 
 			// when
 			t.Log("change and update the subscription")
-			utils.EventuallyUpdateSubscriptionOnK8s(ctx, ens.TestEnsemble, subscription, func(sub *eventingv1alpha1.Subscription) error {
+			utils.EventuallyUpdateSubscriptionOnK8s(ctx, ens.TestEnsemble, sub, func(sub *eventingv1alpha1.Subscription) error {
 				tc.changeSubscription(sub)
-				return ens.K8sClient.Update(ens.Ctx, subscription)
+				return ens.K8sClient.Update(ens.Ctx, sub)
 			})
 
 			// then
 			t.Log("testing the k8s subscription")
-			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantAfter.K8sSubscription...)
+			utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub, tc.wantAfter.K8sSubscription...)
 
 			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantAfter.K8sEvents...)
 
 			t.Log("testing the nats subscriptions")
 			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
-				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+				testSubscriptionOnNATS(ens, sub, eventType, matchers...)
 			}
 
 			t.Log("testing the deletion of the subscription")
-			testSubscriptionDeletion(ens, subscription)
+			testSubscriptionDeletion(ens, sub)
 
 			t.Log("testing the deletion of the NATS subscription(s)")
-			for _, filter := range subscription.Spec.Filter.Filters {
-				ensureNATSSubscriptionIsDeleted(ens, subscription, filter.EventType.Value)
+			for _, filter := range sub.Spec.Filter.Filters {
+				ensureNATSSubscriptionIsDeleted(ens, sub, filter.EventType.Value)
 			}
 		})
 	}
@@ -650,13 +651,13 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	defer utils.StopTestEnv(ens.TestEnsemble)
 
 	// when
-	subscription := utils.CreateSubscription(ens.TestEnsemble,
+	sub := utils.CreateSubscription(ens.TestEnsemble,
 		reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
 		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
 	// then
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, sub,
 		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
@@ -669,17 +670,17 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
 	}
 
-	testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
+	testSubscriptionOnNATS(ens, sub, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
 
-	testSubscriptionDeletion(ens, subscription)
-	ensureNATSSubscriptionIsDeleted(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
+	testSubscriptionDeletion(ens, sub)
+	ensureNATSSubscriptionIsDeleted(ens, sub, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
 
 	t.Cleanup(ens.Cancel)
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
 	description := "Failed to match nats subscriptions"
-	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...), description)
+	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetStreamSubject(subject)).Should(gomega.And(expectations...), description)
 }
 
 // testSubscriptionDeletion deletes the subscription and ensures it is not found anymore on the apiserver.
@@ -779,13 +780,13 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	jetStreamHandler := handlers.NewJetStream(envConf, metricsCollector, defaultLogger)
+	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-nats")
 
-	ens.reconciler = NewReconciler(
+	ens.reconciler = subscriptionjetstream.NewReconciler(
 		ctx,
 		k8sClient,
 		jetStreamHandler,
@@ -799,7 +800,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	ens.jetStreamBackend = ens.reconciler.Backend.(*handlers.JetStream)
+	ens.jetStreamBackend = ens.reconciler.Backend.(*backendjetstream.JetStream)
 
 	go func() {
 		err = k8sManager.Start(ctx)
@@ -814,13 +815,13 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 
 // getSubscriptionFromJetStream returns a NATS subscription for a given subscription and subject.
 // NOTE: We need to give the controller enough time to react on the changes. Otherwise, the returned NATS subscription could have the wrong state.
-//       For this reason Eventually is used here.
+// For this reason Eventually is used here.
 func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 
-	return g.Eventually(func() *nats.Subscription {
+	return g.Eventually(func() nats.Subscriber {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
-		subscriptionSubject := handlers.NewSubscriptionSubjectIdentifier(subscription, subject)
+		subscriptionSubject := backendjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
 			if key.ConsumerName() == subscriptionSubject.ConsumerName() {
 				return sub

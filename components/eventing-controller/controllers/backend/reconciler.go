@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 
+	"golang.org/x/xerrors"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -271,8 +273,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	// CreateOrUpdate status of the CR
 	err = r.syncBackendStatus(ctx, backendStatus, publisherDeploy)
 	if err != nil {
-		r.namedLogger().Errorw("Failed to create/update EventingBackend status", "backend", r.backendType, "error", err)
-		return ctrl.Result{}, err
+		return ctrl.Result{}, xerrors.Errorf("failed to create/update %s EventingBackend status: %v", r.backendType, err)
 	}
 
 	return ctrl.Result{}, nil
@@ -386,8 +387,7 @@ func (r *Reconciler) updateStatusAndEmitEvent(ctx context.Context, currentBacken
 	desiredBackend.Status = *newBackendStatus
 
 	if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-		r.namedLogger().Errorw("Failed to update EventingBackend status", "error", err)
-		return err
+		return xerrors.Errorf("failed to update %s EventingBackend status: %v", r.backendType, err)
 	}
 
 	// emit event
@@ -396,7 +396,7 @@ func (r *Reconciler) updateStatusAndEmitEvent(ctx context.Context, currentBacken
 	return nil
 }
 
-// emitConditionEvents check each condition, if the condition is modified then emit an event
+// emitConditionEvents check each condition, if the condition is modified then emit an event.
 func (r *Reconciler) emitConditionEvents(currentBackend, newBackend *eventingv1alpha1.EventingBackend) {
 	for _, newCondition := range newBackend.Status.Conditions {
 		currentCondition := currentBackend.Status.FindCondition(newCondition.Type)
@@ -408,7 +408,7 @@ func (r *Reconciler) emitConditionEvents(currentBackend, newBackend *eventingv1a
 	}
 }
 
-// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status
+// emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status.
 func (r *Reconciler) emitConditionEvent(backend *eventingv1alpha1.EventingBackend, condition eventingv1alpha1.Condition) {
 	eventType := v1.EventTypeNormal
 	if condition.Status == v1.ConditionFalse {
@@ -417,7 +417,7 @@ func (r *Reconciler) emitConditionEvent(backend *eventingv1alpha1.EventingBacken
 	r.record.Event(backend, eventType, string(condition.Reason), condition.Message)
 }
 
-// check if the publisher deployment's pods are ready
+// check if the publisher deployment's pods are ready.
 func (r *Reconciler) isPublisherDeploymentReady(publisher *appsv1.Deployment) bool {
 	result := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
 	if !result {
@@ -430,7 +430,7 @@ func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1
 	return currentBackendStatus.Backend != desiredBackendStatus.Backend
 }
 
-// getDefaultBackendStatus sets all the conditions and the eventingReady status to true
+// getDefaultBackendStatus sets all the conditions and the eventingReady status to true.
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	defaultStatus := eventingv1alpha1.EventingBackendStatus{}
 	defaultStatus.InitializeConditions()
@@ -494,8 +494,7 @@ func (r *Reconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Se
 	// Update secret
 	desiredSecret.ResourceVersion = currentSecret.ResourceVersion
 	if err := r.Update(ctx, desiredSecret); err != nil {
-		r.namedLogger().Errorw("Failed to update Event Publisher secret", "error", err)
-		return nil, err
+		return nil, xerrors.Errorf("failed to update Event Publisher secret: %v", err)
 	}
 
 	return desiredSecret, nil
@@ -722,8 +721,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) startNATSController() error {
 	if !r.natsSubMgrStarted {
 		if err := r.natsSubMgr.Start(r.cfg.DefaultSubscriptionConfig, subscriptionmanager.Params{}); err != nil {
-			r.namedLogger().Errorw("Failed to start NATS subscription manager", "error", err)
-			return err
+			return xerrors.Errorf("failed to start NATS subscription manager: %v", err)
 		}
 		r.natsSubMgrStarted = true
 		r.namedLogger().Info("NATS subscription manager was started")
@@ -734,8 +732,7 @@ func (r *Reconciler) startNATSController() error {
 func (r *Reconciler) stopNATSController() error {
 	if r.natsSubMgrStarted {
 		if err := r.natsSubMgr.Stop(true); err != nil {
-			r.namedLogger().Errorw("Failed to stop NATS subscription manager", "error", err)
-			return err
+			return xerrors.Errorf("failed to stop NATS subscription manager: %v", err)
 		}
 		r.natsSubMgrStarted = false
 		r.namedLogger().Info("NATS subscription manager was stopped")
@@ -747,8 +744,7 @@ func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
 	if !r.bebSubMgrStarted {
 		bebSubMgrParams := subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
 		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
-			r.namedLogger().Errorw("Failed to start BEB subscription manager", "error", err)
-			return err
+			return xerrors.Errorf("failed to start BEB subscription manager: %v", err)
 		}
 		r.bebSubMgrStarted = true
 		r.namedLogger().Info("BEB subscription manager was started")
@@ -759,8 +755,7 @@ func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
 func (r *Reconciler) stopBEBController() error {
 	if r.bebSubMgrStarted {
 		if err := r.bebSubMgr.Stop(true); err != nil {
-			r.namedLogger().Errorw("Failed to stop BEB subscription manager", "error", err)
-			return err
+			return xerrors.Errorf("failed to stop BEB subscription manager: %v", err)
 		}
 		r.bebSubMgrStarted = false
 		r.namedLogger().Info("BEB subscription manager was stopped")

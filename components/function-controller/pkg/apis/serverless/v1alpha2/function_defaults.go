@@ -61,7 +61,6 @@ func (fn *Function) Default(config *DefaultingConfig) {
 	fn.Spec.defaultReplicas(config, fn)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
-	fn.Spec.defaultRuntime(config)
 }
 
 func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
@@ -112,12 +111,6 @@ func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Fu
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 	spec.ResourceConfiguration.Build.Resources = defaultResources(&buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
-}
-
-func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
-	if spec.Runtime == "" {
-		spec.Runtime = config.Runtime
-	}
 }
 
 func shouldSkipBuildResourcesDefault(fn *Function) bool {
