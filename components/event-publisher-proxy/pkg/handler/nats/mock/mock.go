@@ -82,7 +82,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
-	connection, err := testingutils.ConnectToNatsServer(mock.GetNatsURL())
+	connection, err := testingutils.ConnectToNATSServer(mock.GetNatsURL())
 	require.NoError(t, err)
 	mock.connection = connection
 

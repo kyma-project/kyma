@@ -167,7 +167,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer := testingutils.StartNATSServer(true)
 	require.NotNil(t, natsServer)
 
-	connection, err := testingutils.ConnectToNatsServer(natsServer.ClientURL())
+	connection, err := testingutils.ConnectToNATSServer(natsServer.ClientURL())
 	require.NotNil(t, connection)
 	require.NoError(t, err)
 

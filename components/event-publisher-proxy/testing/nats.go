@@ -48,7 +48,7 @@ func StartNATSServer(enableJetstream bool) *server.Server {
 	return test.RunServer(&opts)
 }
 
-func ConnectToNatsServer(url string) (*nats.Conn, error) {
+func ConnectToNATSServer(url string) (*nats.Conn, error) {
 	return pkgnats.Connect(url,
 		pkgnats.WithRetryOnFailedConnect(true),
 		pkgnats.WithMaxReconnects(3),
