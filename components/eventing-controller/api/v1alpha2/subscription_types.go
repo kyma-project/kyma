@@ -5,6 +5,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+var Finalizer = GroupVersion.Group
+
+const ProtocolSettingsContentModeBinary string = "BINARY"
+
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only
@@ -28,7 +32,7 @@ type SubscriptionSpec struct {
 	TypeMatching TypeMatching `json:"typeMatching,omitempty"`
 
 	// Source Defines the source of the event originated from
-	Source string `json:"source,omitempty"`
+	Source string `json:"source"`
 
 	// Types defines the list of event names for the topics we need to subscribe for messages
 	Types []string `json:"types,omitempty"`
