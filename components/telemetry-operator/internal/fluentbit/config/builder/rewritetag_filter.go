@@ -7,10 +7,6 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
-func systemNamespaces() []string {
-	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system", "compass-system"}
-}
-
 // createRewriteTagFilterSection creates the Fluent Bit Rewrite Tag Filter section
 func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
 	var sectionBuilder = NewFilterSectionBuilder().
