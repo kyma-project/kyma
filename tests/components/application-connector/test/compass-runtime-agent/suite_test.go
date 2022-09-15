@@ -56,41 +56,6 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
-	//gs.T().Log("Attempt to unregister application in compass")
-	//appID, err := gs.directorClient.RegisterApplication("ucho", "displayname")
-	//gs.Require().Nil(err)
-	////
-	//gs.T().Logf("Sucessfully registered application %s in compass", appID)
-	////
-	//err = gs.directorClient.AssignApplicationToFormation(appID, "auto-testing")
-
-	// gs.Require().Nil(err)
-	// gs.T().Logf("Sucessfully assigned application %s to formation auto-testing", appID)
-	//
-	//err = gs.directorClient.UnregisterApplication(appID)
-	//gs.Require().Nil(err)
-	//gs.T().Logf("Sucessfully unregistered application %s in compass", appID)
-
-	//runtimeId, err := gs.directorClient.RegisterRuntime("oko")
-	//gs.Require().Nil(err)
-	//
-	//gs.T().Logf("Sucessfully registered runtime %s in compass", runtimeId)
-	//
-	//err = gs.directorClient.AssignRuntimeToFormation(runtimeId, "auto-testing")
-	//
-	//gs.Require().Nil(err)
-	//
-	//gs.T().Logf("Sucessfully assigned runtime %s to formation auto-testing", runtimeId)
-	//
-	//response, err := gs.directorClient.GetConnectionToken(runtimeId)
-	//
-	//gs.T().Logf("Token: %v", response.Token)
-
-	//err = gs.directorClient.UnregisterRuntime(id)
-
-	//gs.Require().Nil(err)
-
-	//gs.T().Logf("Sucessfully unregistered runtime %s in compass", id)
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
