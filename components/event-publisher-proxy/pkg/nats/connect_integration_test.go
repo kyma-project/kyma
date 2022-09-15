@@ -10,7 +10,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 
-	eppnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	publishertesting "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -52,10 +52,10 @@ func TestConnect(t *testing.T) {
 					assert.NotEmpty(t, clientURL)
 
 					// when
-					connection, err := eppnats.Connect(clientURL,
-						eppnats.WithRetryOnFailedConnect(tc.givenRetryOnFailedConnect),
-						eppnats.WithMaxReconnects(tc.givenMaxReconnect),
-						eppnats.WithReconnectWait(tc.givenReconnectWait),
+					connection, err := pkgnats.Connect(clientURL,
+						pkgnats.WithRetryOnFailedConnect(tc.givenRetryOnFailedConnect),
+						pkgnats.WithMaxReconnects(tc.givenMaxReconnect),
+						pkgnats.WithReconnectWait(tc.givenReconnectWait),
 					)
 					assert.Nil(t, err)
 					assert.NotNil(t, connection)

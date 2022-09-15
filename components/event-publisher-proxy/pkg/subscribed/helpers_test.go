@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"testing"
 
-	subscribed "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	eventing "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
