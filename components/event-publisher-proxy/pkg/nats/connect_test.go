@@ -37,7 +37,7 @@ func TestConnect(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			// test in both default and jetstream NATS modes
-			for _, serverMode := range publishertesting.NatsServerModes {
+			for _, serverMode := range publishertesting.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
 					tc := tc
 					// given

@@ -98,7 +98,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 			defer cancel()
 
 			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
+			for _, serverMode := range testingutils.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
 					handlerMock := mock.StartOrDie(ctx, t,
 						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
@@ -219,7 +219,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 			defer cancel()
 
 			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
+			for _, serverMode := range testingutils.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
 					handlerMock := mock.StartOrDie(ctx, t,
 						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
@@ -305,7 +305,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 			)
 
 			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
+			for _, serverMode := range testingutils.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
 					handlerMock := mock.StartOrDie(ctx, t,
 						mock.WithEventTypePrefix(tc.givenEventTypePrefix),

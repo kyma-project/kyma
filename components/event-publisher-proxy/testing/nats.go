@@ -20,7 +20,7 @@ const (
 	StreamName = "kyma"
 )
 
-var NatsServerModes = []struct {
+var NATSServerModes = []struct {
 	Name             string
 	JetstreamEnabled bool
 }{

@@ -41,7 +41,7 @@ func TestReadinessCheck(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
+			for _, serverMode := range testingutils.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
 					defer func() {
 						r := recover()
