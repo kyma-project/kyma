@@ -235,7 +235,7 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 	}
 
 	if limits != nil {
-		allErrs = append(allErrs, validateLimites(&resources, minMemory, minCPU, parent)...)
+		allErrs = append(allErrs, validateLimites(resources, minMemory, minCPU, parent)...)
 	}
 	return returnAllErrs("invalid function resources", allErrs)
 }
@@ -270,7 +270,7 @@ func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU r
 	return allErrs
 }
 
-func validateLimites(resources *corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
 	limits := resources.Limits
 	allErrs := []string{}
 

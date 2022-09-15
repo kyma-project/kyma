@@ -67,7 +67,7 @@ global:
   dockerServicePort: 5000
   ingress:
     domainName:
-  containerRegistry:g
+  containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
     k8s_tools:

@@ -166,10 +166,6 @@ func applyV1Alpha1ToV1Alpha2Annotations(in *serverlessv1alpha1.Function, out *se
 	}
 }
 
-func convertResourcesV1Alpha1toV1Alpha2(inResources serverlessv1alpha2.FunctionSpec) {
-
-}
-
 func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
 	out.Spec.Env = in.Spec.Env
 	if in.Spec.MinReplicas != nil || in.Spec.MaxReplicas != nil {
