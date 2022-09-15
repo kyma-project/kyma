@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	utils "github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 func Test_GetPortNumberFromURL(t *testing.T) {

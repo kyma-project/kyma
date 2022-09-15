@@ -10,7 +10,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 
-	pkgapplication "github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 )
 
 func TestCleanName(t *testing.T) {
@@ -37,26 +37,26 @@ func TestCleanName(t *testing.T) {
 		},
 		// application type label is available, then use it instead of the application name
 		{
-			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{pkgapplication.TypeLabel: "apptype"}),
+			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{application.TypeLabel: "apptype"}),
 			wantName:         "apptype",
 		},
 		{
-			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{pkgapplication.TypeLabel: "apptype"}),
+			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{application.TypeLabel: "apptype"}),
 			wantName:         "apptype",
 		},
 		{
-			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{pkgapplication.TypeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
+			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{application.TypeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
 			wantName:         "apptypewithnonealphanumericcharacters",
 		},
 		{
-			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{pkgapplication.TypeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
+			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{application.TypeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
 			wantName:         "apptypewithnonealphanumericcharacters",
 		},
 	}
 
 	for _, tc := range testCases {
-		if gotName := pkgapplication.GetCleanTypeOrName(tc.givenApplication); tc.wantName != gotName {
-			t.Errorf("clean pkgapplication name:[%s] failed, want:[%v] but got:[%v]", tc.givenApplication.Name, tc.wantName, gotName)
+		if gotName := application.GetCleanTypeOrName(tc.givenApplication); tc.wantName != gotName {
+			t.Errorf("clean application name:[%s] failed, want:[%v] but got:[%v]", tc.givenApplication.Name, tc.wantName, gotName)
 		}
 	}
 }

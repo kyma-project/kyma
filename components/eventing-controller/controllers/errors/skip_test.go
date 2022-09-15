@@ -8,21 +8,21 @@ import (
 	"fmt"
 	"testing"
 
-	ecerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
+	ctrlserrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 )
 
 func Test_NewSkippable(t *testing.T) {
 	testCases := []struct {
 		error error
 	}{
-		{error: ecerrors.NewSkippable(nil)},
-		{error: ecerrors.NewSkippable(ecerrors.NewSkippable(nil))},
-		{error: ecerrors.NewSkippable(fmt.Errorf("some error"))},
-		{error: ecerrors.NewSkippable(ecerrors.NewSkippable(fmt.Errorf("some error")))},
+		{error: ctrlserrors.NewSkippable(nil)},
+		{error: ctrlserrors.NewSkippable(ctrlserrors.NewSkippable(nil))},
+		{error: ctrlserrors.NewSkippable(fmt.Errorf("some error"))},
+		{error: ctrlserrors.NewSkippable(ctrlserrors.NewSkippable(fmt.Errorf("some error")))},
 	}
 
 	for _, tc := range testCases {
-		skippableErr := ecerrors.NewSkippable(tc.error)
+		skippableErr := ctrlserrors.NewSkippable(tc.error)
 
 		if skippableErr == nil {
 			t.Errorf("test NewSkippable retuned nil error")
@@ -47,7 +47,7 @@ func Test_IsSkippable(t *testing.T) {
 		},
 		{
 			name:          "skippable error, should be skipped",
-			givenError:    ecerrors.NewSkippable(fmt.Errorf("some errore")),
+			givenError:    ctrlserrors.NewSkippable(fmt.Errorf("some errore")),
 			wantSkippable: true,
 		},
 		{
@@ -57,14 +57,14 @@ func Test_IsSkippable(t *testing.T) {
 		},
 		{
 			name:          "not-skippable error which wraps a skippable error, should not be skipped",
-			givenError:    fmt.Errorf("some error %w", ecerrors.NewSkippable(fmt.Errorf("some error"))),
+			givenError:    fmt.Errorf("some error %w", ctrlserrors.NewSkippable(fmt.Errorf("some error"))),
 			wantSkippable: false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if gotSkippable := ecerrors.IsSkippable(tc.givenError); tc.wantSkippable != gotSkippable {
+			if gotSkippable := ctrlserrors.IsSkippable(tc.givenError); tc.wantSkippable != gotSkippable {
 				t.Errorf("test skippable failed, want: %v but got: %v", tc.wantSkippable, gotSkippable)
 			}
 		})
