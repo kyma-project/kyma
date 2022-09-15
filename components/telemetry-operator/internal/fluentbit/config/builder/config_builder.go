@@ -29,7 +29,7 @@ func BuildFluentBitConfig(pipeline *telemetryv1alpha1.LogPipeline, defaults Pipe
 	}
 
 	var sb strings.Builder
-	sb.WriteString(createRewriteTagFilterSection(pipeline, defaults))
+	sb.WriteString(createRewriteTagFilter(pipeline, defaults))
 	sb.WriteString(createNamespaceGrepFilter(pipeline, defaults))
 	sb.WriteString(createRecordModifierFilter(pipeline))
 	sb.WriteString(createCustomFilters(pipeline))
