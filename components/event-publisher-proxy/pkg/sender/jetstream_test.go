@@ -93,28 +93,28 @@ func TestStreamExists(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
-		givenNatsConnectionClosed bool
+		givenNATSConnectionClosed bool
 		wantResult                bool
 		wantError                 error
 	}{
 		{
 			name:                      "Stream doesn't exist and should return false",
 			givenStream:               false,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantResult:                false,
 			wantError:                 nats.ErrStreamNotFound,
 		},
 		{
 			name:                      "Stream exists and should return true",
 			givenStream:               true,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantResult:                true,
 			wantError:                 nil,
 		},
 		{
 			name:                      "Connection closed and error should happen",
 			givenStream:               true,
-			givenNatsConnectionClosed: true,
+			givenNATSConnectionClosed: true,
 			wantResult:                false,
 			wantError:                 nats.ErrConnectionClosed,
 		},
@@ -137,7 +137,7 @@ func TestStreamExists(t *testing.T) {
 			}
 
 			// close the connection to provoke the error
-			if tc.givenNatsConnectionClosed {
+			if tc.givenNATSConnectionClosed {
 				connection.Close()
 			}
 
