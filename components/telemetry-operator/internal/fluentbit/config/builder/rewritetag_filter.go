@@ -7,7 +7,6 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
-// createRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
 func createRewriteTagFilter(logPipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
 	var sectionBuilder = NewFilterSectionBuilder().
 		AddConfigParam("Name", "rewrite_tag").

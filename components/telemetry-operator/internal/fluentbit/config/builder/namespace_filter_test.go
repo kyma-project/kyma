@@ -16,11 +16,7 @@ func TestCreateNamespaceGrepFilterIncludeNamespaces(t *testing.T) {
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
 				Namespaces: v1alpha1.InputNamespaces{
-					Include: []string{"namespace1", "namespace2"},
-				},
-			}},
-		},
-	}
+					Include: []string{"namespace1", "namespace2"}}}}}}
 
 	expected := `[FILTER]
     name  grep
@@ -40,10 +36,7 @@ func TestCreateNamespaceGrepFilterExcludeNamespaces(t *testing.T) {
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
 				Namespaces: v1alpha1.InputNamespaces{
-					Exclude: []string{"namespace1", "namespace2"}},
-			}},
-		},
-	}
+					Exclude: []string{"namespace1", "namespace2"}}}}}}
 
 	expected := `[FILTER]
     name    grep
@@ -76,10 +69,7 @@ func TestCreateNamespaceGrepFilterSystemNamespacesIncluded(t *testing.T) {
 		Spec: v1alpha1.LogPipelineSpec{
 			Input: v1alpha1.Input{Application: v1alpha1.ApplicationInput{
 				Namespaces: v1alpha1.InputNamespaces{
-					System: true},
-			}},
-		},
-	}
+					System: true}}}}}
 
 	actual := createNamespaceGrepFilter(logPipeline)
 	require.Equal(t, "", actual)
