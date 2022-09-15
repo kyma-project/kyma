@@ -20,19 +20,19 @@ func TestNATSMessageSender(t *testing.T) {
 
 	testCases := []struct {
 		name                      string
-		givenNatsConnectionClosed bool
+		givenNATSConnectionClosed bool
 		wantError                 bool
 		wantStatusCode            int
 	}{
 		{
 			name:                      "send should succeed if NATS connection is open",
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantError:                 false,
 			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send should fail if NATS connection is not open",
-			givenNatsConnectionClosed: true,
+			givenNATSConnectionClosed: true,
 			wantError:                 true,
 			wantStatusCode:            http.StatusBadGateway,
 		},
@@ -66,7 +66,7 @@ func TestNATSMessageSender(t *testing.T) {
 			ctx := context.Background()
 			sender := NewNATSMessageSender(context.Background(), connection, mockedLogger)
 
-			if tc.givenNatsConnectionClosed {
+			if tc.givenNATSConnectionClosed {
 				connection.Close()
 			}
 
