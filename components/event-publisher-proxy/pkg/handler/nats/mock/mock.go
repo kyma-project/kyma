@@ -188,8 +188,8 @@ func WithApplication(applicationName string) NATSHandlerMockOpt {
 	}
 }
 
-// WithJetstream returns NATSHandlerMockOpt which starts the NATS server in the jetstream mode for the given NATSHandlerMock.
-func WithJetstream(jsEnabled bool) NATSHandlerMockOpt {
+// WithJetStream returns NATSHandlerMockOpt which starts the NATS server in the jetstream mode for the given NATSHandlerMock.
+func WithJetStream(jsEnabled bool) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.jetstreamMode = jsEnabled
 	}
