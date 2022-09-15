@@ -89,12 +89,19 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
 			builder.WithPredicates(predicate.Funcs{
 				CreateFunc: func(event event.CreateEvent) bool {
+					ctrl.Log.Info("Secret created")
 					return false // ignore creation
 				},
 				DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
+					ctrl.Log.Info("Secret deleted")
 					return true
 				},
 				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
+					ctrl.Log.Info("Secret updated")
+					return true
+				},
+				GenericFunc: func(genericEvent event.GenericEvent) bool {
+					ctrl.Log.Info("Secret generic")
 					return true
 				},
 			}),
