@@ -40,7 +40,7 @@ func TestHandlerHealth(t *testing.T) {
 					defer handlerMock.Stop()
 
 					if tc.givenNATSServerShutdown {
-						handlerMock.ShutdownNatsServerAndWait()
+						handlerMock.ShutdownNATSServerAndWait()
 					}
 
 					testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)

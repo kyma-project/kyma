@@ -111,11 +111,11 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *
 // Stop closes the sender.NatsMessageSender connection and calls the NatsHandlerMock.ShutdownNatsServerAndWait.
 func (m *NATSHandlerMock) Stop() {
 	m.connection.Close()
-	m.ShutdownNatsServerAndWait()
+	m.ShutdownNATSServerAndWait()
 }
 
-// ShutdownNatsServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
-func (m *NATSHandlerMock) ShutdownNatsServerAndWait() {
+// ShutdownNATSServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
+func (m *NATSHandlerMock) ShutdownNATSServerAndWait() {
 	m.natsServer.Shutdown()
 	m.natsServer.WaitForShutdown()
 }
