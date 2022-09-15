@@ -245,7 +245,7 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 
 	// update condition in subscription status
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
-	r.replaceStatusCondition(subscription, condition)
+	_ = r.replaceStatusCondition(subscription, condition)
 
 	// remove finalizers from subscription
 	r.removeFinalizer(subscription)
