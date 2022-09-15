@@ -1,7 +1,8 @@
 loki:
   resources:
     limits:
-      memory: 512Mi
+      cput: 300m
+      memory: 2.5Gi
   extraArgs:
     log.level: warn
 
