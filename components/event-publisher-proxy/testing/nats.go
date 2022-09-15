@@ -34,7 +34,7 @@ var NATSServerModes = []struct {
 	},
 }
 
-func StartNatsServer(enableJetstream bool) *server.Server {
+func StartNATSServer(enableJetstream bool) *server.Server {
 	opts := test.DefaultTestOptions
 	opts.Port = server.RANDOM_PORT
 	opts.JetStream = enableJetstream

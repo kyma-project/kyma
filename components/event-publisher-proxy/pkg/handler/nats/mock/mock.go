@@ -78,7 +78,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 	for _, opt := range opts {
 		opt(mock)
 	}
-	mock.natsServer = testingutils.StartNatsServer(mock.jetstreamMode)
+	mock.natsServer = testingutils.StartNATSServer(mock.jetstreamMode)
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 

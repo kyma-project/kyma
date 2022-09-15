@@ -164,7 +164,7 @@ type TestEnvironment struct {
 
 // setupTestEnvironment sets up the resources and mocks required for testing.
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	natsServer := testingutils.StartNatsServer(true)
+	natsServer := testingutils.StartNATSServer(true)
 	require.NotNil(t, natsServer)
 
 	connection, err := testingutils.ConnectToNatsServer(natsServer.ClientURL())

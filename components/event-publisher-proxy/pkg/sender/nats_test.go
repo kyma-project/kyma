@@ -42,7 +42,7 @@ func TestNatsMessageSender(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			natsServer := testingutils.StartNatsServer(false)
+			natsServer := testingutils.StartNATSServer(false)
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
 
