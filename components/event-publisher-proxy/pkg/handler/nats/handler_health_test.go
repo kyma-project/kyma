@@ -12,19 +12,19 @@ import (
 func TestHandlerHealth(t *testing.T) {
 	testCases := []struct {
 		name                    string
-		givenNatsServerShutdown bool
+		givenNATSServerShutdown bool
 		wantLivenessStatusCode  int
 		wantReadinessStatusCode int
 	}{
 		{
 			name:                    "NATS handler is healthy",
-			givenNatsServerShutdown: false,
+			givenNATSServerShutdown: false,
 			wantLivenessStatusCode:  health.StatusCodeHealthy,
 			wantReadinessStatusCode: health.StatusCodeHealthy,
 		},
 		{
 			name:                    "NATS handler is unhealthy",
-			givenNatsServerShutdown: true,
+			givenNATSServerShutdown: true,
 			wantLivenessStatusCode:  health.StatusCodeHealthy,
 			wantReadinessStatusCode: health.StatusCodeNotHealthy,
 		},
@@ -39,7 +39,7 @@ func TestHandlerHealth(t *testing.T) {
 					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetstreamEnabled))
 					defer handlerMock.Stop()
 
-					if tc.givenNatsServerShutdown {
+					if tc.givenNATSServerShutdown {
 						handlerMock.ShutdownNatsServerAndWait()
 					}
 
