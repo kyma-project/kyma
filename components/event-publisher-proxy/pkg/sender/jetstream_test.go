@@ -157,7 +157,7 @@ type TestEnvironment struct {
 	Connection *nats.Conn
 	Config     *env.NATSConfig
 	Logger     *logger.Logger
-	Sender     *JetstreamMessageSender
+	Sender     *JetStreamMessageSender
 	Server     *server.Server
 	JsContext  *nats.JetStreamContext
 }
@@ -179,7 +179,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	jsCtx, err := connection.JetStream()
 	require.NoError(t, err)
 
-	sender := &JetstreamMessageSender{
+	sender := &JetStreamMessageSender{
 		connection: connection,
 		envCfg:     natsConfig,
 		logger:     mockedLogger,

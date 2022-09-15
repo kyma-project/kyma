@@ -24,10 +24,10 @@ const (
 )
 
 // compile time check
-var _ GenericSender = &JetstreamMessageSender{}
+var _ GenericSender = &JetStreamMessageSender{}
 
-// JetstreamMessageSender is responsible for sending messages over HTTP.
-type JetstreamMessageSender struct {
+// JetStreamMessageSender is responsible for sending messages over HTTP.
+type JetStreamMessageSender struct {
 	ctx        context.Context
 	logger     *logger.Logger
 	connection *nats.Conn
@@ -35,23 +35,23 @@ type JetstreamMessageSender struct {
 }
 
 // NewJetStreamMessageSender returns a new NewJetStreamMessageSender instance with the given nats connection.
-func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *JetstreamMessageSender {
-	return &JetstreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
+func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *JetStreamMessageSender {
+	return &JetStreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 
 // URL returns the URL of the Sender's connection.
-func (s *JetstreamMessageSender) URL() string {
+func (s *JetStreamMessageSender) URL() string {
 	return s.connection.ConnectedUrl()
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the JetstreamMessageSender.
-func (s *JetstreamMessageSender) ConnectionStatus() nats.Status {
+func (s *JetStreamMessageSender) ConnectionStatus() nats.Status {
 	return s.connection.Status()
 }
 
 // Send dispatches the event to the NATS backend in Jetstream mode.
 // If the NATS connection is not open, it returns an error.
-func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (int, error) {
+func (s *JetStreamMessageSender) Send(_ context.Context, event *event.Event) (int, error) {
 	if s.ConnectionStatus() != nats.CONNECTED {
 		return http.StatusBadGateway, errors.New("connection status: no connection to NATS Jetstream server")
 	}
@@ -86,7 +86,7 @@ func (s *JetstreamMessageSender) Send(_ context.Context, event *event.Event) (in
 }
 
 // streamExists checks if the stream with the expected name exists.
-func (s *JetstreamMessageSender) streamExists(connection *nats.Conn) (bool, error) {
+func (s *JetStreamMessageSender) streamExists(connection *nats.Conn) (bool, error) {
 	jsCtx, err := connection.JetStream()
 	if err != nil {
 		return false, err
@@ -102,7 +102,7 @@ func (s *JetstreamMessageSender) streamExists(connection *nats.Conn) (bool, erro
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
-func (s *JetstreamMessageSender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
+func (s *JetStreamMessageSender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
 	header := make(nats.Header)
 	header.Set(internal.HeaderContentType, event.DataContentType())
 	header.Set(internal.CeSpecVersionHeader, event.SpecVersion())
@@ -123,10 +123,10 @@ func (s *JetstreamMessageSender) eventToNATSMsg(event *event.Event) (*nats.Msg, 
 }
 
 // getJsSubjectToPublish appends stream name to subject if needed.
-func (s *JetstreamMessageSender) getJsSubjectToPublish(subject string) string {
+func (s *JetStreamMessageSender) getJsSubjectToPublish(subject string) string {
 	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 
-func (s *JetstreamMessageSender) namedLogger() *zap.SugaredLogger {
+func (s *JetStreamMessageSender) namedLogger() *zap.SugaredLogger {
 	return s.logger.WithContext().Named(jestreamHandlerName).With("backend", natsBackend, "jetstream enabled", true)
 }
