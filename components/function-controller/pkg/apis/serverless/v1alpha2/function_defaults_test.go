@@ -302,7 +302,6 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{
@@ -350,7 +349,6 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{
@@ -409,7 +407,6 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: &ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{
