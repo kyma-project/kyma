@@ -68,7 +68,23 @@ set-up-local-env:
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
-test-local: go-test; ## Run tests.
+test-local: ## Run tests
+	mkdir -p /tmp/artifacts
+	go test -coverprofile=/tmp/artifacts/cover.out --tags="unit integration" ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+
+test-unit-local: ## Run tests
+	mkdir -p /tmp/artifacts
+	go test -coverprofile=/tmp/artifacts/cover.out --tags="unit" ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+
+test-int-local: ## Run tests
+	mkdir -p /tmp/artifacts
+	go test -coverprofile=/tmp/artifacts/cover.out --tags="integration" ./...
+	@echo -n "Total coverage: "
+	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
 setup-envtest:
 	mkdir -p ${ENVTEST_ASSETS_DIR}
