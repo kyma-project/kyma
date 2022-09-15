@@ -7,10 +7,10 @@ import (
 )
 
 // compile time check
-var _ fmt.Stringer = &BebConfig{}
+var _ fmt.Stringer = &BEBConfig{}
 
-// BebConfig represents the environment config for the Event Publisher to BEB.
-type BebConfig struct {
+// BEBConfig represents the environment config for the Event Publisher to BEB.
+type BEBConfig struct {
 	Port                int           `envconfig:"INGRESS_PORT" default:"8080"`
 	ClientID            string        `envconfig:"CLIENT_ID" required:"true"`
 	ClientSecret        string        `envconfig:"CLIENT_SECRET" required:"true"`
@@ -27,13 +27,13 @@ type BebConfig struct {
 }
 
 // ConfigureTransport receives an HTTP transport and configure its max idle connection properties.
-func (c *BebConfig) ConfigureTransport(transport *http.Transport) {
+func (c *BEBConfig) ConfigureTransport(transport *http.Transport) {
 	transport.MaxIdleConns = c.MaxIdleConns
 	transport.MaxIdleConnsPerHost = c.MaxIdleConnsPerHost
 }
 
 // String implements the fmt.Stringer interface
-func (c *BebConfig) String() string {
+func (c *BEBConfig) String() string {
 	return fmt.Sprintf("BebConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
 		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",
 		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns, c.MaxIdleConnsPerHost, c.RequestTimeout, c.BEBNamespace, c.EventTypePrefix)

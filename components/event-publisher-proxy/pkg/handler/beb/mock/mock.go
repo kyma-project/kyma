@@ -50,7 +50,7 @@ const (
 // BebHandlerMock represents a mock for the beb.Handler.
 type BebHandlerMock struct {
 	ctx                 context.Context
-	cfg                 *env.BebConfig
+	cfg                 *env.BEBConfig
 	logger              *logger.Logger
 	collector           *metrics.Collector
 	livenessEndpoint    string
