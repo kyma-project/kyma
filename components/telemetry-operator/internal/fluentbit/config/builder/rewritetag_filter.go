@@ -11,27 +11,37 @@ func systemNamespaces() []string {
 	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system"}
 }
 
+func getEmitterPostfixByOutput(output *telemetryv1alpha1.Output) string {
+	if output.IsHTTPDefined() {
+		return "http"
+	}
+
+	if output.IsLokiDefined() {
+		return "grafana-loki"
+	}
+
+	if !output.IsCustomDefined() {
+		return ""
+	}
+
+	customOutputParams := parseMultiline(output.Custom)
+	postfix := customOutputParams.GetByKey("name")
+
+	if postfix == nil {
+		return ""
+	}
+
+	return postfix.Value
+}
+
 // CreateRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
 func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
 	emitterName := logPipeline.Name
 	output := &logPipeline.Spec.Output
+	emitterPostfix := getEmitterPostfixByOutput(output)
 
-	if output.IsCustomDefined() {
-		customOutputParams := parseMultiline(output.Custom)
-		for _, p := range customOutputParams {
-			if p.Key == "name" {
-				emitterName += ("-" + p.Value)
-				break
-			}
-		}
-	}
-
-	if output.IsHTTPDefined() {
-		emitterName += "-http"
-	}
-
-	if output.IsLokiDefined() {
-		emitterName += "-grafana-loki"
+	if emitterPostfix != "" {
+		emitterName += ("-" + emitterPostfix)
 	}
 
 	var sectionBuilder = NewFilterSectionBuilder().
