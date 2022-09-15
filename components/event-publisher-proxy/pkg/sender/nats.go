@@ -39,7 +39,7 @@ func (s *NATSMessageSender) URL() string {
 	return s.connection.ConnectedUrl()
 }
 
-// ConnectionStatus returns nats.Status for the NATS connection used by the NatsMessageSender.
+// ConnectionStatus returns nats.Status for the NATS connection used by the NATSMessageSender.
 func (s *NATSMessageSender) ConnectionStatus() nats.Status {
 	return s.connection.Status()
 }

@@ -52,10 +52,10 @@ type NATSHandlerMock struct {
 	connection          *natsio.Conn
 }
 
-// NATSHandlerMockOpt represents a NatsHandlerMock option.
+// NATSHandlerMockOpt represents a NATSHandlerMock option.
 type NATSHandlerMockOpt func(*NATSHandlerMock)
 
-// StartOrDie starts a new NatsHandlerMock instance or die if a precondition fails.
+// StartOrDie starts a new NATSHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) NATS connection and 2) nats.Handler started without errors.
 func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *NATSHandlerMock {
 	port := testingutils.GeneratePortOrDie()
@@ -108,56 +108,56 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *
 	return mock
 }
 
-// Stop closes the sender.NatsMessageSender connection and calls the NatsHandlerMock.ShutdownNatsServerAndWait.
+// Stop closes the sender.NATSMessageSender connection and calls the NATSHandlerMock.ShutdownNATSServerAndWait.
 func (m *NATSHandlerMock) Stop() {
 	m.connection.Close()
 	m.ShutdownNATSServerAndWait()
 }
 
-// ShutdownNATSServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
+// ShutdownNATSServerAndWait shuts down the NATS server used by the NATSHandlerMock and waits for the shutdown.
 func (m *NATSHandlerMock) ShutdownNATSServerAndWait() {
 	m.natsServer.Shutdown()
 	m.natsServer.WaitForShutdown()
 }
 
-// GetNATSURL returns the NATS server URL used by the NatsHandlerMock.
+// GetNATSURL returns the NATS server URL used by the NATSHandlerMock.
 func (m *NATSHandlerMock) GetNATSURL() string {
 	return m.natsServer.ClientURL()
 }
 
-// GetLivenessEndpoint returns the liveness endpoint used by the NatsHandlerMock.
+// GetLivenessEndpoint returns the liveness endpoint used by the NATSHandlerMock.
 func (m *NATSHandlerMock) GetLivenessEndpoint() string {
 	return m.livenessEndpoint
 }
 
-// GetReadinessEndpoint returns the readiness endpoint used by the NatsHandlerMock.
+// GetReadinessEndpoint returns the readiness endpoint used by the NATSHandlerMock.
 func (m *NATSHandlerMock) GetReadinessEndpoint() string {
 	return m.readinessEndpoint
 }
 
-// GetHandler returns the nats.Handler used by the NatsHandlerMock.
+// GetHandler returns the nats.Handler used by the NATSHandlerMock.
 func (m *NATSHandlerMock) GetHandler() *nats.Handler {
 	return m.handler
 }
 
-// GetMetricsCollector returns the metrics.Collector used by the NatsHandlerMock.
+// GetMetricsCollector returns the metrics.Collector used by the NATSHandlerMock.
 func (m *NATSHandlerMock) GetMetricsCollector() *metrics.Collector {
 	return m.collector
 }
 
-// GetNATSConfig returns the env.NatsConfig used by the NatsHandlerMock.
+// GetNATSConfig returns the env.NATSConfig used by the NATSHandlerMock.
 func (m *NATSHandlerMock) GetNATSConfig() *env.NATSConfig {
 	return m.natsConfig
 }
 
-// WithEventTypePrefix returns NatsHandlerMockOpt which sets the eventTypePrefix for the given NatsHandlerMock.
+// WithEventTypePrefix returns NATSHandlerMockOpt which sets the eventTypePrefix for the given NATSHandlerMock.
 func WithEventTypePrefix(eventTypePrefix string) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.eventTypePrefix = eventTypePrefix
 	}
 }
 
-// WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
+// WithSubscription returns NATSHandlerMockOpt which sets the subscribed.Processor for the given NATSHandlerMock.
 func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.natsConfig.EventTypePrefix = m.eventTypePrefix
@@ -175,7 +175,7 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 	}
 }
 
-// WithApplication returns NatsHandlerMockOpt which sets the legacy.Transformer for the given NatsHandlerMock.
+// WithApplication returns NATSHandlerMockOpt which sets the legacy.Transformer for the given NATSHandlerMock.
 func WithApplication(applicationName string) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationName)
@@ -188,7 +188,7 @@ func WithApplication(applicationName string) NATSHandlerMockOpt {
 	}
 }
 
-// WithJetstream returns NatsHandlerMockOpt which starts the NATS server in the jetstream mode for the given NatsHandlerMock.
+// WithJetstream returns NATSHandlerMockOpt which starts the NATS server in the jetstream mode for the given NATSHandlerMock.
 func WithJetstream(jsEnabled bool) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.jetstreamMode = jsEnabled
