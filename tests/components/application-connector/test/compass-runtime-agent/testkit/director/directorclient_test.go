@@ -878,13 +878,13 @@ func TestDirectorClient_GetConnectionToken(t *testing.T) {
 		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedOneTimeToken, err := configClient.GetConnectionToken(runtimeTestingID)
+		receivedOneTimeToken, receivedConnectorURL, err := configClient.GetConnectionToken(runtimeTestingID)
 
 		// then
 		require.NoError(t, err)
 		require.NotEmpty(t, receivedOneTimeToken)
-		assert.Equal(t, oneTimeToken, receivedOneTimeToken.Token)
-		assert.Equal(t, connectorURL, receivedOneTimeToken.ConnectorURL)
+		assert.Equal(t, oneTimeToken, receivedOneTimeToken)
+		assert.Equal(t, connectorURL, receivedConnectorURL)
 	})
 
 	t.Run("Should return error when Oauth Token is empty", func(t *testing.T) {
@@ -900,10 +900,11 @@ func TestDirectorClient_GetConnectionToken(t *testing.T) {
 		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedOneTimeToken, err := configClient.GetConnectionToken(runtimeTestingID)
+		receivedOneTimeToken, receivedConnectorURL, err := configClient.GetConnectionToken(runtimeTestingID)
 
 		// then
 		require.Error(t, err)
+		require.Empty(t, receivedConnectorURL)
 		require.Empty(t, receivedOneTimeToken)
 	})
 
@@ -920,10 +921,11 @@ func TestDirectorClient_GetConnectionToken(t *testing.T) {
 		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedOneTimeToken, err := configClient.GetConnectionToken(runtimeTestingID)
+		receivedOneTimeToken, receivedConnectorURL, err := configClient.GetConnectionToken(runtimeTestingID)
 
 		// then
 		require.Error(t, err)
+		require.Empty(t, receivedConnectorURL)
 		require.Empty(t, receivedOneTimeToken)
 	})
 
@@ -946,10 +948,11 @@ func TestDirectorClient_GetConnectionToken(t *testing.T) {
 		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
 
 		// when
-		receivedOneTimeToken, err := configClient.GetConnectionToken(runtimeTestingID)
+		receivedOneTimeToken, receivedConnectorURL, err := configClient.GetConnectionToken(runtimeTestingID)
 
 		// then
 		require.Error(t, err)
+		require.Empty(t, receivedConnectorURL)
 		require.Empty(t, receivedOneTimeToken)
 	})
 }

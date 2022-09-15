@@ -2,7 +2,6 @@ package director
 
 import (
 	"fmt"
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	gql "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
@@ -24,7 +23,7 @@ type Client interface {
 	RegisterRuntime(runtimeName string) (string, error)
 	UnregisterRuntime(id string) error
 	AssignRuntimeToFormation(runtimeId, formationName string) error
-	GetConnectionToken(runtimeID string) (graphql.OneTimeTokenForRuntimeExt, error)
+	GetConnectionToken(runtimeID string) (string, string, error)
 }
 
 type directorClient struct {
@@ -106,23 +105,23 @@ func (cc *directorClient) UnregisterRuntime(id string) error {
 	return nil
 }
 
-func (cc *directorClient) GetConnectionToken(runtimeId string) (graphql.OneTimeTokenForRuntimeExt, error) {
+func (cc *directorClient) GetConnectionToken(runtimeId string) (string, string, error) {
 	log.Infof("Requesting one time token for Runtime from Director service")
 	runtimeQuery := cc.queryProvider.requestOneTimeTokenMutation(runtimeId)
 
 	var response OneTimeTokenResponse
 	err := cc.executeDirectorGraphQLCall(runtimeQuery, cc.tenant, &response)
 	if err != nil {
-		return graphql.OneTimeTokenForRuntimeExt{}, errors.Wrap(err, "Failed to get OneTimeToken for Runtime in Director. Request failed")
+		return "", "", errors.Wrap(err, "Failed to get OneTimeToken for Runtime in Director. Request failed")
 	}
 
 	if response.Result == nil {
-		return graphql.OneTimeTokenForRuntimeExt{}, fmt.Errorf("Failed to get OneTimeToken for Runtime %s in Director: received nil response.", runtimeId)
+		return "", "", fmt.Errorf("Failed to get OneTimeToken for Runtime %s in Director: received nil response.", runtimeId)
 	}
 
 	log.Infof("Received OneTimeToken for Runtime %s in Director for tenant %s", runtimeId, cc.tenant)
 
-	return *response.Result, nil
+	return response.Result.Token, response.Result.ConnectorURL, nil
 }
 
 func (cc *directorClient) RegisterApplication(appName, displayName string) (string, error) {
