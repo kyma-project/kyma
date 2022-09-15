@@ -52,12 +52,12 @@ type NATSHandlerMock struct {
 	connection          *natsio.Conn
 }
 
-// NatsHandlerMockOpt represents a NatsHandlerMock option.
-type NatsHandlerMockOpt func(*NATSHandlerMock)
+// NATSHandlerMockOpt represents a NatsHandlerMock option.
+type NATSHandlerMockOpt func(*NATSHandlerMock)
 
 // StartOrDie starts a new NatsHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) NATS connection and 2) nats.Handler started without errors.
-func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *NATSHandlerMock {
+func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *NATSHandlerMock {
 	port := testingutils.GeneratePortOrDie()
 
 	mockedLogger, err := logger.New("json", "info")
@@ -151,14 +151,14 @@ func (m *NATSHandlerMock) GetNatsConfig() *env.NATSConfig {
 }
 
 // WithEventTypePrefix returns NatsHandlerMockOpt which sets the eventTypePrefix for the given NatsHandlerMock.
-func WithEventTypePrefix(eventTypePrefix string) NatsHandlerMockOpt {
+func WithEventTypePrefix(eventTypePrefix string) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.eventTypePrefix = eventTypePrefix
 	}
 }
 
 // WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
-func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NatsHandlerMockOpt {
+func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.natsConfig.EventTypePrefix = m.eventTypePrefix
 		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
@@ -176,7 +176,7 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 }
 
 // WithApplication returns NatsHandlerMockOpt which sets the legacy.Transformer for the given NatsHandlerMock.
-func WithApplication(applicationName string) NatsHandlerMockOpt {
+func WithApplication(applicationName string) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationName)
 		m.legacyTransformer = legacy.NewTransformer(
@@ -189,7 +189,7 @@ func WithApplication(applicationName string) NatsHandlerMockOpt {
 }
 
 // WithJetstream returns NatsHandlerMockOpt which starts the NATS server in the jetstream mode for the given NatsHandlerMock.
-func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
+func WithJetstream(jsEnabled bool) NATSHandlerMockOpt {
 	return func(m *NATSHandlerMock) {
 		m.jetstreamMode = jsEnabled
 	}
