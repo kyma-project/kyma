@@ -12,9 +12,8 @@ import (
 )
 
 const (
+	CRAContainerNumber         = 0
 	ConfigurationSecretEnvName = "APP_AGENT_CONFIGURATION_SECRET"
-	RetryAttempts              = 6
-	RetrySeconds               = 5
 )
 
 type deploymentConfiguration struct {
@@ -38,7 +37,7 @@ func (dc deploymentConfiguration) Do(deploymentName, secretName, namespace strin
 	if len(deployment.Spec.Template.Spec.Containers) < 1 {
 		return nil, fmt.Errorf("no containers found in %s/%s deployment", namespace, deploymentName)
 	}
-	envs := deployment.Spec.Template.Spec.Containers[0].Env
+	envs := deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env
 	previousSecretNamespacedName := ""
 	for i := range envs {
 		if envs[i].Name == ConfigurationSecretEnvName {
@@ -50,7 +49,7 @@ func (dc deploymentConfiguration) Do(deploymentName, secretName, namespace strin
 	if previousSecretNamespacedName == "" {
 		return nil, fmt.Errorf("no %s environment variable found in %s/%s deployment", ConfigurationSecretEnvName, namespace, deploymentName)
 	}
-	deployment.Spec.Template.Spec.Containers[0].Env = envs
+	deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env = envs
 
 	if err := retry.Do(func() error {
 		_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
@@ -84,8 +83,7 @@ func waitForRollout(name string, deploymentInterface v13.DeploymentInterface) er
 			return err
 		}
 		if deployment.Status.AvailableReplicas == 0 || deployment.Status.UnavailableReplicas != 0 {
-			// TODO: Remove status from the error
-			return fmt.Errorf("deployment %s is not yet ready, deployment.Status.AvailableReplicas: %d, deployment.Status.UnavailableReplicas: %d", name, deployment.Status.AvailableReplicas, deployment.Status.UnavailableReplicas)
+			return fmt.Errorf("deployment %s is not yet ready", name)
 		}
 		return nil
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
@@ -101,7 +99,7 @@ func newRollbackDeploymentFunc(name, previousSecretNamespacedName string, deploy
 		if len(deployment.Spec.Template.Spec.Containers) < 1 {
 			return fmt.Errorf("no containers found in %s deployment", name)
 		}
-		envs := deployment.Spec.Template.Spec.Containers[0].Env
+		envs := deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env
 		foundEnv := false
 		for i := range envs {
 			if envs[i].Name == ConfigurationSecretEnvName {
@@ -113,7 +111,7 @@ func newRollbackDeploymentFunc(name, previousSecretNamespacedName string, deploy
 		if foundEnv == false {
 			return fmt.Errorf("no %s environment variable found in %s deployment", ConfigurationSecretEnvName, name)
 		}
-		deployment.Spec.Template.Spec.Containers[0].Env = envs
+		deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env = envs
 
 		return retry.Do(func() error {
 			_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})

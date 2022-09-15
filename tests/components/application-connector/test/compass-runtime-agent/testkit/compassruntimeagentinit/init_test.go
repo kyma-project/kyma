@@ -27,28 +27,7 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		directorMock.On("GetConnectionToken", runtimeID).Return(token, connectorURL, nil)
 		directorMock.On("UnregisterRuntime", runtimeID).Return(nil)
 
-		deployment := v12.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      CompassRuntimeAgentDeployment,
-				Namespace: CompassSystemNamespace,
-			},
-			Spec: v12.DeploymentSpec{
-				Template: v1.PodTemplateSpec{
-					Spec: v1.PodSpec{
-						Containers: []v1.Container{{
-							Env: []v1.EnvVar{{
-								Name:  ConfigurationSecretEnvName,
-								Value: "defaultnamespace/defaultsecretname",
-							}},
-						}},
-					},
-				},
-			},
-			Status: v12.DeploymentStatus{
-				AvailableReplicas: 1,
-			},
-		}
-		_, err := fakeClientSet.AppsV1().Deployments(CompassSystemNamespace).Create(context.Background(), &deployment, metav1.CreateOptions{})
+		err := createCRADeployment(fakeClientSet)
 		require.NoError(t, err)
 
 		configurator := NewCompassRuntimeAgentConfigurator(directorMock, fakeClientSet, "tenant")
@@ -141,7 +120,6 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 	})
 
 	t.Run("should fail if failed to modify deployment", func(t *testing.T) {
-		// TODO
 		// given
 		runtimeName := "newRuntime"
 		runtimeID := "runtimeID"
@@ -155,6 +133,28 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		directorMock.On("GetConnectionToken", runtimeID).Return(token, connectorURL, nil)
 		directorMock.On("UnregisterRuntime", runtimeID).Return(nil)
 
+		deployment := v12.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      CompassRuntimeAgentDeployment,
+				Namespace: CompassSystemNamespace,
+				Annotations: map[string]string{
+					"note": "no envs in the container",
+				},
+			},
+			Spec: v12.DeploymentSpec{
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{{}},
+					},
+				},
+			},
+			Status: v12.DeploymentStatus{
+				AvailableReplicas: 1,
+			},
+		}
+		_, err := fakeClientSet.AppsV1().Deployments(CompassSystemNamespace).Create(context.Background(), &deployment, metav1.CreateOptions{})
+		require.NoError(t, err)
+
 		configurator := NewCompassRuntimeAgentConfigurator(directorMock, fakeClientSet, "tenant")
 
 		// when
@@ -163,33 +163,6 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		// then
 		require.Nil(t, rollbackFunc)
 		require.Error(t, err)
-		//
-		//// given
-		//runtimeName := "newRuntime"
-		//runtimeID := "runtimeID"
-		//token := "token"
-		//connectorURL := "www.someurl.com"
-		//
-		//directorMock := &mocks.DirectorClient{}
-		//fakeClientSet := fake.NewSimpleClientset()
-		//
-		//directorMock.On("RegisterRuntime", runtimeName).Return(runtimeID, nil)
-		//directorMock.On("GetConnectionToken", runtimeID).Return(token, connectorURL, nil)
-		//directorMock.On("UnregisterRuntime", runtimeID).Return(nil)
-		//
-		//configurator := NewCompassRuntimeAgentConfigurator(directorMock, fakeClientSet, "tenant")
-		//
-		//// when
-		//rollbackFunc, err := configurator.Do(runtimeName)
-		//
-		//// then
-		//require.NoError(t, err)
-		//
-		//// when
-		//err = rollbackFunc()
-		//
-		//// then
-		//require.NoError(t, err)
 	})
 
 	t.Run("rollback function should fail if failed to unregister Runtime", func(t *testing.T) {
@@ -205,6 +178,9 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		directorMock.On("RegisterRuntime", runtimeName).Return(runtimeID, nil)
 		directorMock.On("GetConnectionToken", runtimeID).Return(token, connectorURL, nil)
 		directorMock.On("UnregisterRuntime", runtimeID).Return(errors.New("some error"))
+
+		err := createCRADeployment(fakeClientSet)
+		require.NoError(t, err)
 
 		configurator := NewCompassRuntimeAgentConfigurator(directorMock, fakeClientSet, "tenant")
 
@@ -235,6 +211,9 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		directorMock.On("GetConnectionToken", runtimeID).Return(token, connectorURL, nil)
 		directorMock.On("UnregisterRuntime", runtimeID).Return(nil)
 
+		err := createCRADeployment(fakeClientSet)
+		require.NoError(t, err)
+
 		configurator := NewCompassRuntimeAgentConfigurator(directorMock, fakeClientSet, "tenant")
 
 		// when
@@ -255,4 +234,30 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		// then
 		require.Error(t, err)
 	})
+}
+
+func createCRADeployment(fakeClientSet *fake.Clientset) error {
+	deployment := v12.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      CompassRuntimeAgentDeployment,
+			Namespace: CompassSystemNamespace,
+		},
+		Spec: v12.DeploymentSpec{
+			Template: v1.PodTemplateSpec{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{{
+						Env: []v1.EnvVar{{
+							Name:  ConfigurationSecretEnvName,
+							Value: "defaultnamespace/defaultsecretname",
+						}},
+					}},
+				},
+			},
+		},
+		Status: v12.DeploymentStatus{
+			AvailableReplicas: 1,
+		},
+	}
+	_, err := fakeClientSet.AppsV1().Deployments(CompassSystemNamespace).Create(context.Background(), &deployment, metav1.CreateOptions{})
+	return err
 }

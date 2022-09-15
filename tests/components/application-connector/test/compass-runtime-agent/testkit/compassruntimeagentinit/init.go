@@ -9,6 +9,8 @@ const (
 	CompassSystemNamespace        = "compass-system"
 	CompassRuntimeAgentDeployment = "compass-runtime-agent"
 	NewCompassRuntimeConfigName   = "test-compass-runtime-agent-config"
+	RetryAttempts                 = 6
+	RetrySeconds                  = 5
 )
 
 type CompassRuntimeAgentConfigurator interface {
