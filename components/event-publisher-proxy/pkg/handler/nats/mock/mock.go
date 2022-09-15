@@ -88,7 +88,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 
 	//nolint:gosimple
 	var msgSender sender.GenericSender
-	msgSender = sender.NewNatsMessageSender(ctx, mock.connection, mock.logger)
+	msgSender = sender.NewNATSMessageSender(ctx, mock.connection, mock.logger)
 
 	mock.handler = nats.NewHandler(
 		msgReceiver,

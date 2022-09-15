@@ -89,7 +89,7 @@ func (c *Commander) Start() error {
 	if c.jetstreamMode {
 		messageSenderToNats = sender.NewJetstreamMessageSender(ctx, connection, c.envCfg, c.logger)
 	} else {
-		messageSenderToNats = sender.NewNatsMessageSender(ctx, connection, c.logger)
+		messageSenderToNats = sender.NewNATSMessageSender(ctx, connection, c.logger)
 	}
 
 	// cluster config

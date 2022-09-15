@@ -29,8 +29,8 @@ type NATSMessageSender struct {
 	connection *nats.Conn
 }
 
-// NewNatsMessageSender returns a new NewNatsMessageSender instance with the given nats connection.
-func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logger.Logger) *NATSMessageSender {
+// NewNATSMessageSender returns a new NewNATSMessageSender instance with the given nats connection.
+func NewNATSMessageSender(ctx context.Context, connection *nats.Conn, logger *logger.Logger) *NATSMessageSender {
 	return &NATSMessageSender{ctx: ctx, connection: connection, logger: logger}
 }
 

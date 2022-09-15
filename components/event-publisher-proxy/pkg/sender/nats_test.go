@@ -64,7 +64,7 @@ func TestNatsMessageSender(t *testing.T) {
 			mockedLogger, _ := logger.New("json", "info")
 
 			ctx := context.Background()
-			sender := NewNatsMessageSender(context.Background(), connection, mockedLogger)
+			sender := NewNATSMessageSender(context.Background(), connection, mockedLogger)
 
 			if tc.givenNatsConnectionClosed {
 				connection.Close()
