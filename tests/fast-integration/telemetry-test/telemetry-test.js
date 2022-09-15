@@ -22,7 +22,7 @@ const testStartTimestamp = new Date().toISOString();
 // Load Deployments
 const regexFilterDeployment = loadResourceFromFile('./resources/deployments/regex-filter-deployment.yaml');
 const mockserverDeployment = loadResourceFromFile('./resources/deployments/mockserver.yaml');
-const spammerWorkloadPod = loadResourceFromFile('./resources/deployments/spammer-workload.yaml');
+const spammerWorkloadPod = loadResourceFromFile('./resources/deployments/logs-workload.yaml');
 
 // Load Telemetry CR's
 const httpLogPipelineCR = loadResourceFromFile(
