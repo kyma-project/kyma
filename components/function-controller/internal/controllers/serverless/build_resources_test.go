@@ -313,7 +313,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				UID:  "fn-uuid",
 			},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: serverlessv1alpha2.Template{
+					Template: &serverlessv1alpha2.Template{
 						Labels: map[string]string{
 							"test-some": "test-label",
 						},
@@ -334,7 +334,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				UID:  "fn-uuid",
 			},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: serverlessv1alpha2.Template{
+					Template: &serverlessv1alpha2.Template{
 						Labels: map[string]string{
 							"test-some":                              "test-label",
 							serverlessv1alpha2.FunctionResourceLabel: "job",
