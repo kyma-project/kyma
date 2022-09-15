@@ -14,7 +14,7 @@ import (
 )
 
 // compile time check
-var _ GenericSender = &NatsMessageSender{}
+var _ GenericSender = &NATSMessageSender{}
 
 type GenericSender interface {
 	Send(context.Context, *event.Event) (int, error)
@@ -22,31 +22,31 @@ type GenericSender interface {
 	URL() string
 }
 
-// NatsMessageSender is responsible for sending messages over HTTP.
-type NatsMessageSender struct {
+// NATSMessageSender is responsible for sending messages over HTTP.
+type NATSMessageSender struct {
 	ctx        context.Context
 	logger     *logger.Logger
 	connection *nats.Conn
 }
 
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given nats connection.
-func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logger.Logger) *NatsMessageSender {
-	return &NatsMessageSender{ctx: ctx, connection: connection, logger: logger}
+func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logger.Logger) *NATSMessageSender {
+	return &NATSMessageSender{ctx: ctx, connection: connection, logger: logger}
 }
 
 // URL returns the URL of the Sender's connection.
-func (s *NatsMessageSender) URL() string {
+func (s *NATSMessageSender) URL() string {
 	return s.connection.ConnectedUrl()
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the NatsMessageSender.
-func (s *NatsMessageSender) ConnectionStatus() nats.Status {
+func (s *NATSMessageSender) ConnectionStatus() nats.Status {
 	return s.connection.Status()
 }
 
 // Send dispatches the event.Event to NATS server.
 // If the NATS connection is not open, it returns an error.
-func (s *NatsMessageSender) Send(ctx context.Context, event *event.Event) (int, error) {
+func (s *NATSMessageSender) Send(ctx context.Context, event *event.Event) (int, error) {
 	if s.ConnectionStatus() != nats.CONNECTED {
 		return http.StatusBadGateway, errors.New("connection status: no connection to NATS server")
 	}
