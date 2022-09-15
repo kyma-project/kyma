@@ -46,7 +46,7 @@ var _ = Describe("LogPipeline controller", func() {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          log-pipeline-blabla
+    emitter_name          log-pipeline-stdout
     emitter_storage.type  filesystem
     rule                  $log "^.*$" log-pipeline.$TAG true
 

@@ -13,10 +13,31 @@ func systemNamespaces() []string {
 
 // CreateRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
 func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
+	emitterName := logPipeline.Name
+	output := &logPipeline.Spec.Output
+
+	if output.IsCustomDefined() {
+		customOutputParams := parseMultiline(output.Custom)
+		for _, p := range customOutputParams {
+			if p.Key == "name" {
+				emitterName += ("-" + p.Value)
+				break
+			}
+		}
+	}
+
+	if output.IsHTTPDefined() {
+		emitterName += "-http"
+	}
+
+	if output.IsLokiDefined() {
+		emitterName += "-grafana-loki"
+	}
+
 	var sectionBuilder = NewFilterSectionBuilder().
 		AddConfigParam("Name", "rewrite_tag").
 		AddConfigParam("Match", fmt.Sprintf("%s.*", defaults.InputTag)).
-		AddConfigParam("Emitter_Name", logPipeline.Name+"-blabla").
+		AddConfigParam("Emitter_Name", emitterName).
 		AddConfigParam("Emitter_Storage.type", defaults.StorageType).
 		AddConfigParam("Emitter_Mem_Buf_Limit", defaults.MemoryBufferLimit)
 
