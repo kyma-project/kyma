@@ -47,7 +47,7 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 			g := NewGomegaWithT(t)
 			s := api.SubscriptionStatus{}
 			s.Conditions = tt.givenConditions
-			wantConditionTypes := []api.ConditionType{api.ConditionSubscribed, api.ConditionSubscriptionActive, api.ConditionAPIRuleStatus, ConditionWebhookCallStatus}
+			wantConditionTypes := []api.ConditionType{api.ConditionSubscribed, api.ConditionSubscriptionActive, api.ConditionAPIRuleStatus, api.ConditionWebhookCallStatus}
 
 			// when
 			s.InitializeConditions()
