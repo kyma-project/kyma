@@ -56,7 +56,7 @@ func TestNatsMessageSender(t *testing.T) {
 			defer func() { connection.Close() }()
 
 			receive := make(chan bool, 1)
-			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
+			validator := testingutils.ValidateNATSMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
 			testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
 			ce := createCloudEvent(t)

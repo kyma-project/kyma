@@ -75,10 +75,10 @@ func ValidateNATSSubjectOrFail(t *testing.T, subject string, notify ...chan bool
 	}
 }
 
-// ValidateNatsMessageDataOrFail returns a function which can be used to validate a nats.Msg.
+// ValidateNATSMessageDataOrFail returns a function which can be used to validate a nats.Msg.
 // It reads the data from nats.Msg and unmarshalls it as a CloudEvent.
 // The data section of the CloudEvent is then checked against the value provided in data.
-func ValidateNatsMessageDataOrFail(t *testing.T, data string, notify ...chan bool) nats.MsgHandler {
+func ValidateNATSMessageDataOrFail(t *testing.T, data string, notify ...chan bool) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		for _, n := range notify {
 			n <- true
