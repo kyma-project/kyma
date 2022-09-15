@@ -13,7 +13,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
-	. "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 const (
@@ -23,22 +23,22 @@ const (
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	// given
-	givenEventID := EventID
-	givenApplicationName := ApplicationName
-	givenEventTypePrefix := MessagingEventTypePrefix
+	givenEventID := testingutils.EventID
+	givenApplicationName := testingutils.ApplicationName
+	givenEventTypePrefix := testingutils.MessagingEventTypePrefix
 	givenTimeNow := time.Now().Format(time.RFC3339)
-	givenLegacyEventVersion := EventVersion
+	givenLegacyEventVersion := testingutils.EventVersion
 	givenPublishReqParams := &legacyapi.PublishEventParametersV1{
 		PublishrequestV1: legacyapi.PublishRequestV1{
 			EventID:          givenEventID,
 			EventType:        eventTypeMultiSegment,
 			EventTime:        givenTimeNow,
 			EventTypeVersion: givenLegacyEventVersion,
-			Data:             EventData,
+			Data:             testingutils.EventData,
 		},
 	}
 
-	wantBebNs := MessagingNamespace
+	wantBebNs := testingutils.MessagingNamespace
 	wantEventID := givenEventID
 	wantEventType := fmt.Sprintf("%s.%s.%s.%s", givenEventTypePrefix, givenApplicationName, eventTypeMultiSegmentCombined, givenLegacyEventVersion)
 	wantTimeNowFormatted, _ := time.Parse(time.RFC3339, givenTimeNow)
@@ -73,8 +73,8 @@ func TestCombineEventTypeSegments(t *testing.T) {
 	}{
 		{
 			name:           "event-type with two segments",
-			givenEventType: EventName,
-			wantEventType:  EventName,
+			givenEventType: testingutils.EventName,
+			wantEventType:  testingutils.EventName,
 		},
 		{
 			name:           "event-type with more than two segments",

@@ -8,14 +8,13 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 
-	sut "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 )
 
 func TestCleaner(t *testing.T) {
@@ -173,7 +172,7 @@ func TestCleaner(t *testing.T) {
 			// Given
 			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
 			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-			cleaner := sut.NewCleaner(tc.givenEventTypePrefix, appLister, mockedLogger)
+			cleaner := eventtype.NewCleaner(tc.givenEventTypePrefix, appLister, mockedLogger)
 
 			// When
 			eventType, err := cleaner.Clean(tc.givenEventType)

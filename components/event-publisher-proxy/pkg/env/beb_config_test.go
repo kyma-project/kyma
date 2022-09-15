@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	env "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 )
 
 func TestConfigureTransport(t *testing.T) {

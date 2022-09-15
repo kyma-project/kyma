@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	handler "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 )
 
 func TestIsARequestWithLegacyEvent(t *testing.T) {

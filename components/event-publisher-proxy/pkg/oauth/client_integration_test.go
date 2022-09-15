@@ -16,7 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 
-	oauth "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 )
 
 func TestNewClient(t *testing.T) {

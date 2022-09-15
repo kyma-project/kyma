@@ -12,7 +12,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 
-	receiver "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 )
 
 // a mocked http.Handler

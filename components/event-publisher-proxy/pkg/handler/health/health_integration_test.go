@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	health "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 )
 
 func TestChecker(t *testing.T) {
