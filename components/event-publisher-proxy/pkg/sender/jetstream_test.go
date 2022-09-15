@@ -171,7 +171,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	require.NotNil(t, connection)
 	require.NoError(t, err)
 
-	natsConfig := CreateNatsJsConfig(natsServer.ClientURL())
+	natsConfig := CreateNATSJsConfig(natsServer.ClientURL())
 
 	mockedLogger, err := logger.New("json", "info")
 	require.NoError(t, err)
@@ -227,7 +227,7 @@ func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 	assert.NoError(t, err)
 }
 
-func CreateNatsJsConfig(url string) *env.NATSConfig {
+func CreateNATSJsConfig(url string) *env.NATSConfig {
 	return &env.NATSConfig{
 		JSStreamName:  testingutils.StreamName,
 		URL:           url,
