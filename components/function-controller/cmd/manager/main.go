@@ -13,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,7 +38,6 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	_ = serverlessv1alpha2.AddToScheme(scheme)
-	_ = serverlessv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
