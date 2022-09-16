@@ -24,11 +24,10 @@ const (
 	applicationTestingID = "test-application-ID-12345"
 	testAppScenario      = "Testing-scenario"
 	testAppDisplayName   = "Testing-app-display-name"
-
-	validTokenValue = "12345"
-	tenantValue     = "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae"
-	oneTimeToken    = "54321"
-	connectorURL    = "https://kyma.cx/connector/graphql"
+	validTokenValue      = "12345"
+	tenantValue          = "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae"
+	oneTimeToken         = "54321"
+	connectorURL         = "https://kyma.cx/connector/graphql"
 
 	expectedRegisterApplicationQuery = `mutation {
 	result: registerApplicationFromTemplate(in: {
@@ -72,6 +71,16 @@ const (
 	result: requestOneTimeTokenForRuntime(id: "test-runtime-ID-12345") {
 		token connectorURL
 	}}`
+
+	expectedRegisterFormationQuery = `mutation {
+	result: createFormation(formation: {
+		name: "Testing-scenario"
+	}) { id } }`
+
+	expectedDeleteFormationQuery = `mutation {
+	result: deleteFormation(formation: {
+		name: "Testing-scenario"
+	}) { id } }`
 )
 
 var (
@@ -402,6 +411,286 @@ func TestDirectorClient_RuntimeUnregistering(t *testing.T) {
 
 		// when
 		err := configClient.UnregisterRuntime(runtimeTestingID)
+
+		// then
+		assert.Error(t, err)
+	})
+}
+
+func TestDirectorClient_FormationRegistering(t *testing.T) {
+	expectedRequest := gcli.NewRequest(expectedRegisterFormationQuery)
+	expectedRequest.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", validTokenValue))
+	expectedRequest.Header.Set(TenantHeader, tenantValue)
+
+	t.Run("Should register Formation and return no error when the Director access token is valid", func(t *testing.T) {
+		// given
+		expectedResponse := &graphql.Formation{
+			Name: testAppScenario,
+		}
+
+		gqlClient := gql.NewQueryAssertClient(t, nil, []*gcli.Request{expectedRequest}, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*CreateFormationResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = expectedResponse
+		})
+
+		token := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(token, nil)
+
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.RegisterFormation(testAppScenario)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("Should not register Formation and return an error when the Director access token is empty", func(t *testing.T) {
+		// given
+		token := oauth.Token{
+			AccessToken: "",
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(token, nil)
+
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.RegisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should not register Formation and return an error when the Director access token is expired", func(t *testing.T) {
+		// given
+		expiredToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  passedExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(expiredToken, nil)
+
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.RegisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should not register Formation and return error when the client fails to get an access token for Director", func(t *testing.T) {
+		// given
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(oauth.Token{}, errors.New("Failed token error"))
+
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.RegisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should return error when the result of the call to Director service is nil", func(t *testing.T) {
+		// given
+		validToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
+
+		gqlClient := gql.NewQueryAssertClient(t, nil, []*gcli.Request{expectedRequest}, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*CreateFormationResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = nil
+		})
+
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.RegisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should return error when Director fails to register Formation ", func(t *testing.T) {
+		// given
+		validToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
+
+		gqlClient := gql.NewQueryAssertClient(t, errors.New("error"), []*gcli.Request{expectedRequest}, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*CreateFormationResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = nil
+		})
+
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.RegisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+}
+
+func TestDirectorClient_FormationUnregistering(t *testing.T) {
+	expectedRequest := gcli.NewRequest(expectedDeleteFormationQuery)
+	expectedRequest.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", validTokenValue))
+	expectedRequest.Header.Set(TenantHeader, tenantValue)
+
+	t.Run("Should unregister Formation of given name and return no error when the Director access token is valid", func(t *testing.T) {
+		// given
+		expectedResponse := &graphql.Formation{
+			Name: testAppScenario,
+		}
+
+		gqlClient := gql.NewQueryAssertClient(t, nil, []*gcli.Request{expectedRequest}, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*DeleteFormationResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = expectedResponse
+		})
+
+		validToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
+
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.UnregisterFormation(testAppScenario)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("Should not unregister Formation and return an error when the Director access token is empty", func(t *testing.T) {
+		// given
+		emptyToken := oauth.Token{
+			AccessToken: "",
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(emptyToken, nil)
+
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.UnregisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should not unregister register Formation and return an error when the Director access token is expired", func(t *testing.T) {
+		// given
+		expiredToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  passedExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(expiredToken, nil)
+
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.UnregisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should not unregister Formation and return error when the client fails to get an access token for Director", func(t *testing.T) {
+		// given
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(oauth.Token{}, errors.New("Failed token error"))
+
+		configClient := NewDirectorClient(nil, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.UnregisterFormation(testAppScenario)
+
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should return error when the result of the call to Director service is nil", func(t *testing.T) {
+		// given
+		validToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
+
+		// given
+		gqlClient := gql.NewQueryAssertClient(t, nil, []*gcli.Request{expectedRequest}, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*DeleteFormationResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = nil
+		})
+
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.UnregisterFormation(testAppScenario)
+		// then
+		assert.Error(t, err)
+	})
+
+	t.Run("Should return error when Director fails to delete Formation", func(t *testing.T) {
+		// given
+		gqlClient := gql.NewQueryAssertClient(t, errors.New("error"), []*gcli.Request{expectedRequest}, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*DeleteFormationResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = nil
+		})
+
+		validToken := oauth.Token{
+			AccessToken: validTokenValue,
+			Expiration:  futureExpirationTime,
+		}
+
+		mockedOAuthClient := &oauthmocks.Client{}
+		mockedOAuthClient.On("GetAuthorizationToken").Return(validToken, nil)
+
+		configClient := NewDirectorClient(gqlClient, mockedOAuthClient, tenantValue)
+
+		// when
+		err := configClient.UnregisterFormation(testAppScenario)
 
 		// then
 		assert.Error(t, err)

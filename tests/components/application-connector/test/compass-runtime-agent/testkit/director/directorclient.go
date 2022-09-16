@@ -22,6 +22,8 @@ type Client interface {
 	UnregisterApplication(id string) error
 	RegisterRuntime(runtimeName string) (string, error)
 	UnregisterRuntime(id string) error
+	RegisterFormation(formationName string) error
+	UnregisterFormation(formationName string) error
 	AssignRuntimeToFormation(runtimeId, formationName string) error
 	GetConnectionToken(runtimeID string) (string, string, error)
 }
@@ -58,6 +60,48 @@ func (cc *directorClient) getToken() error {
 	}
 
 	cc.token = token
+	return nil
+}
+
+func (cc *directorClient) RegisterFormation(formationName string) error {
+	log.Infof("Registering Formation on Director service")
+
+	registerFormationQuery := cc.queryProvider.createFormation(formationName)
+
+	var response CreateFormationResponse
+	appErr := cc.executeDirectorGraphQLCall(registerFormationQuery, cc.tenant, &response)
+	if appErr != nil {
+		return errors.Wrap(appErr, "Failed to register formation in Director. Request failed")
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return errors.New("Failed to register formation in Director: Received nil response.")
+	}
+
+	log.Infof("Successfully registered Formation %s in Director for tenant %s", formationName, cc.tenant)
+
+	return nil
+}
+
+func (cc *directorClient) UnregisterFormation(formationName string) error {
+	log.Infof("Unregistering Formation in Director service")
+
+	deleteFormationQuery := cc.queryProvider.deleteFormation(formationName)
+
+	var response DeleteFormationResponse
+	appErr := cc.executeDirectorGraphQLCall(deleteFormationQuery, cc.tenant, &response)
+	if appErr != nil {
+		return errors.Wrap(appErr, "Failed to unregister formation in Director. Request failed")
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return errors.New("Failed to unregister formation in Director: Received nil response.")
+	}
+
+	log.Infof("Successfully unregistered Formation %s in Director for tenant %s", formationName, cc.tenant)
+
 	return nil
 }
 

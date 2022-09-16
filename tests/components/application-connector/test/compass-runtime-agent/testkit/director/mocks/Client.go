@@ -86,6 +86,20 @@ func (_m *Client) RegisterApplication(appName string, scenario string) (string, 
 	return r0, r1
 }
 
+// RegisterFormation provides a mock function with given fields: formationName
+func (_m *Client) RegisterFormation(formationName string) error {
+	ret := _m.Called(formationName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(formationName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // RegisterRuntime provides a mock function with given fields: runtimeName
 func (_m *Client) RegisterRuntime(runtimeName string) (string, error) {
 	ret := _m.Called(runtimeName)
@@ -114,6 +128,20 @@ func (_m *Client) UnregisterApplication(id string) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string) error); ok {
 		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UnregisterFormation provides a mock function with given fields: formationName
+func (_m *Client) UnregisterFormation(formationName string) error {
+	ret := _m.Called(formationName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(formationName)
 	} else {
 		r0 = ret.Error(0)
 	}

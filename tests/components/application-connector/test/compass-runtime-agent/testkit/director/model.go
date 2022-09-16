@@ -20,6 +20,14 @@ type DeleteApplicationResponse struct {
 	Result *graphql.Application `json:"result"`
 }
 
+type CreateFormationResponse struct {
+	Result *graphql.Formation `json:"result"`
+}
+
+type DeleteFormationResponse struct {
+	Result *graphql.Formation `json:"result"`
+}
+
 type AssignFormationResponse struct {
 	Result *graphql.Formation `json:"result"`
 }

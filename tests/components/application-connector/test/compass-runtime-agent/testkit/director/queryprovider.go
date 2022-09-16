@@ -4,11 +4,18 @@ import "fmt"
 
 type queryProvider struct{}
 
-func (qp queryProvider) registerApplicationMutation(appName, _ string) string {
+func (qp queryProvider) createFormation(formationName string) string {
 	return fmt.Sprintf(`mutation {
-	result: registerApplication(in: {
+	result: createFormation(formation: {
 		name: "%s"
-	}) { id } }`, appName)
+	}) { id } }`, formationName)
+}
+
+func (qp queryProvider) deleteFormation(formationName string) string {
+	return fmt.Sprintf(`mutation {
+	result: deleteFormation(formation: {
+		name: "%s"
+	}) { id } }`, formationName)
 }
 
 func (qp queryProvider) registerApplicationFromTemplateMutation(appName, displayName string) string {
