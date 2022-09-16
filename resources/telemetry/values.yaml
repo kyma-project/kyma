@@ -7,7 +7,7 @@ global:
       version: "5f79928b"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "16fd1f4c"
+      version: "PR-15523"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.7-248e790f"
