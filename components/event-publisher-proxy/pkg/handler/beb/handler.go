@@ -49,7 +49,7 @@ type Handler struct {
 	// Receiver receives incoming HTTP requests
 	Receiver *receiver.HTTPMessageReceiver
 	// Sender sends requests to the broker
-	Sender *sender.BebMessageSender
+	Sender *sender.BEBMessageSender
 	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
 	// LegacyTransformer handles transformations needed to handle legacy events
@@ -69,7 +69,7 @@ type Handler struct {
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BEBMessageSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
 	return &Handler{
