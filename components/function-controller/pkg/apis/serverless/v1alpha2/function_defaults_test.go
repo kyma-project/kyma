@@ -283,27 +283,29 @@ func TestSetDefaults(t *testing.T) {
 					Runtime: NodeJs14,
 				},
 			},
-			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
-				Labels: map[string]string{
-					ReplicasPresetLabel:          "L",
-					FunctionResourcesPresetLabel: "L",
-					BuildResourcesPresetLabel:    "fast",
-				},
-			}, Spec: FunctionSpec{
-				Runtime: NodeJs14,
-				ResourceConfiguration: &ResourceConfiguration{
-					Function: &ResourceRequirements{
-						Resources: &LRuntimeResources,
-					},
-					Build: &ResourceRequirements{
-						Resources: &fastBuildResources,
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel:          "L",
+						FunctionResourcesPresetLabel: "L",
+						BuildResourcesPresetLabel:    "fast",
 					},
 				},
-				ScaleConfig: &ScaleConfig{
-					MinReplicas: &two,
-					MaxReplicas: &two,
+				Spec: FunctionSpec{
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &LRuntimeResources,
+						},
+						Build: &ResourceRequirements{
+							Resources: &fastBuildResources,
+						},
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
-			},
 			},
 		},
 		"Should set function profile to function presets M instead of default L value": {
@@ -317,22 +319,24 @@ func TestSetDefaults(t *testing.T) {
 					Runtime: Python39,
 				},
 			},
-			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
-				Labels: map[string]string{
-					FunctionResourcesPresetLabel: "M",
-				},
-			}, Spec: FunctionSpec{
-				Runtime: Python39,
-				ResourceConfiguration: &ResourceConfiguration{
-					Function: &ResourceRequirements{
-						Resources: &MRuntimeResources,
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						FunctionResourcesPresetLabel: "M",
 					},
 				},
-				ScaleConfig: &ScaleConfig{
-					MinReplicas: &one,
-					MaxReplicas: &one,
-				},
-			}},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &MRuntimeResources,
+						},
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
+					},
+				}},
 		},
 		"Should properly merge resources presets - case with missing buildResources Requests": {
 			givenFunc: Function{
