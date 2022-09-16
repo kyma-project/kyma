@@ -183,7 +183,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition, unSupported bool) error {
 	log := logf.FromContext(ctx)
-
+	print(r.allLogPipelines)
+	print(r.allLogPipelines.Desc().String())
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, name, &logPipeline); err != nil {
 		log.Error(err, "Failed to get LogPipeline")
