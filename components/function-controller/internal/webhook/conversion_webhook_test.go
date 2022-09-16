@@ -142,9 +142,9 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -155,8 +155,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 								},
 							},
 						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -194,9 +194,9 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-						Build: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -207,8 +207,8 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 								},
 							},
 						},
-						Function: serverlessv1alpha2.ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -362,6 +362,69 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
+		{
+			name: "v1alpha1 to v1alpha2 - with function-resources-preset label",
+			src: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.FunctionResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantDst: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Profile: "some-preset-value",
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+		},
+		//TODO(#15288): "v1alpha2 to v1alpha1 - with function-resources-preset label",
+		//TODO(#15288): "v1alpha2 to v1alpha1 - with Spec.ResourceConfiguration.Function.Profile",
+		//TODO(#15288): "v1alpha1 to v1alpha2 - with function-resources-preset label and partially filled Spec.Resources",
+		//TODO(#15288): "v1alpha2 to v1alpha1 - with function-resources-preset label and Spec.ResourceConfiguration.Function.Profile",
+		//TODO(#15288): "v1alpha2 to v1alpha1 - with function-resources-preset label and partially filled Spec.ResourceConfiguration.Function.Resources",
+		//TODO(#15288): check validation for "v1alpha2 - with Spec.ResourceConfiguration.Function.Profile and Spec.ResourceConfiguration.Function.Resources"
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
