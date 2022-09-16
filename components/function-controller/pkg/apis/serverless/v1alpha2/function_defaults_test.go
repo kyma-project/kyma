@@ -15,6 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
+const v1alpha1ReplicasPresetLabel = "serverless.kyma-project.io/replicas-preset"
+
 func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
@@ -266,7 +268,6 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -285,7 +286,6 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -306,7 +306,6 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "L",
 						BuildResourcesPresetLabel:    "fast",
 					},
@@ -318,7 +317,6 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "L",
 						BuildResourcesPresetLabel:    "fast",
 					},
@@ -374,7 +372,6 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -393,7 +390,6 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -414,7 +410,7 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel: "XL",
+						v1alpha1ReplicasPresetLabel: "XL",
 					},
 				},
 				Spec: FunctionSpec{
@@ -424,7 +420,7 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel: "XL",
+						v1alpha1ReplicasPresetLabel: "XL",
 					},
 				}, Spec: FunctionSpec{
 					Runtime: NodeJs14,
