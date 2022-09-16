@@ -20,26 +20,26 @@ func newSecretsCache() secretsCache {
 
 func (s *secretsCache) set(key types.NamespacedName, name string) {
 	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if _, found := s.cache[key]; !found {
 		s.cache[key] = make(map[string]struct{})
 	}
 	s.cache[key][name] = struct{}{}
-	s.mutex.Unlock()
 }
 
 func (s *secretsCache) get(key types.NamespacedName) map[string]struct{} {
 	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if pipelines, found := s.cache[key]; found {
 		return pipelines
 	}
-	s.mutex.RUnlock()
 	return nil
 }
 
 func (s *secretsCache) delete(key types.NamespacedName, name string) {
 	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if pipelines, found := s.cache[key]; found {
 		delete(pipelines, name)
 	}
-	s.mutex.Unlock()
 }
