@@ -29,10 +29,7 @@ func TestSetDefaults(t *testing.T) {
 `
 	functionReplicas := `
 {
-"S":{"min": 1,"max": 1},
-"M":{"min": 1,"max": 2},
-"L":{"min": 2},
-"XL":{"min": 3,"max": 6}
+"S":{"min": 1,"max": 1}
 }
 `
 	functionResources := `
