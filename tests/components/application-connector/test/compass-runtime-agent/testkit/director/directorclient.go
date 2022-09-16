@@ -17,7 +17,7 @@ const (
 
 //go:generate mockery --name=Client
 type Client interface {
-	RegisterApplication(appName, scenario string) (string, error)
+	RegisterApplication(appName, displayName string) (string, error)
 	AssignApplicationToFormation(appId, formationName string) error
 	UnregisterApplication(id string) error
 	RegisterRuntime(runtimeName string) (string, error)
