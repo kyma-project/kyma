@@ -1,0 +1,56 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cert-init
+  labels:
+    app: cert-init
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: init-certificates
+        image: init-certificates:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: CRD_NAME
+          value: subscriptions.eventing.kyma-project.io
+        - name: SECRET_NAME
+          value: subscriptions-webhook-server-cert
+      serviceAccountName: certificates-account
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cert-init
+  labels:
+    app: cert-init
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  # Run cronjob two times per week on Sunday and on Thursday
+  schedule: "0 0 * * 0,4"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: init-certificates
+            image: init-certificates:latest
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: CRD_NAME
+              value: subscriptions.eventing.kyma-project.io
+            - name: SECRET_NAME
+              value: subscriptions-webhook-server-cert
+          serviceAccountName: certificates-account

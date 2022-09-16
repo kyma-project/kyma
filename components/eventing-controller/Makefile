@@ -3,6 +3,11 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20220407-4da6c929
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
+# Webhook Certificate Handler Vars
+CERTIFICATES_APP_NAME = subscriptions-webhook-certificates
+CERTIFICATES_IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(CERTIFICATES_APP_NAME)
+CERTIFICATES_TAG = $(DOCKER_TAG)
+
 override ENTRYPOINT = cmd/eventing-controller/main.go
 override IGNORE_LINTING_ISSUES =
 override ADDITIONAL_LINTERS="gocognit"
@@ -104,8 +109,12 @@ test: copy-external-crds ## It will also run overridden `test` target from gener
 ##@ Release
 
 ##release: resolve-local generate-local verify-local build-image push-image copy-external-crds ## Job used by our CI to release a binary
-release:
+release-eventing-controller:
 	$(MAKE) gomod-release-local
+
+## releases eventing controller and webhook cert handler
+release: CERTIFICATES_TAG=${shell git describe --abbrev=0 --tags}
+release: release-eventing-controller docker-build-certificates docker-push-certificates
 
 ##@ Deployment
 
@@ -147,3 +156,20 @@ resolve_clean:
 
 lint-thoroughly:
 	golangci-lint run
+
+##@ Webhook Certificate Handler Targets
+.PHONY: docker-build-certificates
+docker-build-certificates: ## Build docker image for certificates management
+	docker build -f Dockerfile-certificates -t $(CERTIFICATES_APP_NAME):latest .
+
+.PHONY: docker-push-certificates
+docker-push-certificates:
+	docker tag $(CERTIFICATES_APP_NAME) $(CERTIFICATES_IMG):$(CERTIFICATES_TAG)
+	docker push $(CERTIFICATES_IMG):$(CERTIFICATES_TAG)
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(CERTIFICATES_IMG):$(CERTIFICATES_TAG)
+else
+	@echo "Image signing skipped"
+endif
