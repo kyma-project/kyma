@@ -19,8 +19,6 @@ func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
 	two := int32(2)
-	three := int32(3)
-	six := int32(6)
 
 	functionProfiles := `
 {
@@ -237,7 +235,6 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "XL",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -249,7 +246,6 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "XL",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -260,8 +256,8 @@ func TestSetDefaults(t *testing.T) {
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
-						MinReplicas: &three,
-						MaxReplicas: &six,
+						MinReplicas: &one,
+						MaxReplicas: &one,
 					},
 				},
 			},
@@ -338,8 +334,8 @@ func TestSetDefaults(t *testing.T) {
 						},
 					},
 					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
+						MinReplicas: &one,
+						MaxReplicas: &one,
 					},
 				},
 			},
@@ -436,8 +432,8 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
-						MinReplicas: &zero,
-						MaxReplicas: &zero,
+						MinReplicas: &one,
+						MaxReplicas: &one,
 					},
 				},
 			},
