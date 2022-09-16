@@ -26,9 +26,9 @@ func ValidV1Alpha2Function(t *testing.T) string {
 			Namespace: "default",
 		},
 		Spec: serverlessv1alpha2.FunctionSpec{
-			ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-				Build: serverlessv1alpha2.ResourceRequirements{
-					Resources: corev1.ResourceRequirements{
+			ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+				Build: &serverlessv1alpha2.ResourceRequirements{
+					Resources: &corev1.ResourceRequirements{
 						Limits: map[corev1.ResourceName]resource.Quantity{
 							"cpu":    resource.MustParse("700m"),
 							"memory": resource.MustParse("700Mi"),
@@ -39,8 +39,8 @@ func ValidV1Alpha2Function(t *testing.T) string {
 						},
 					},
 				},
-				Function: serverlessv1alpha2.ResourceRequirements{
-					Resources: corev1.ResourceRequirements{
+				Function: &serverlessv1alpha2.ResourceRequirements{
+					Resources: &corev1.ResourceRequirements{
 						Limits: map[corev1.ResourceName]resource.Quantity{
 							"cpu":    resource.MustParse("400m"),
 							"memory": resource.MustParse("512Mi"),

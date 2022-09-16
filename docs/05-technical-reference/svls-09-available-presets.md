@@ -44,7 +44,7 @@ To apply values ​​from a given preset, use the **serverless.kyma-project.io/
 | Preset | Request CPU | Request memory | Limit CPU | Limit memory |
 | - | - | - | - | - |
 | `local-dev` | `200m` | `200Mi` | `400m` | `400Mi` |
-| `slow` | `400m` | `400Mi` | `700m` | `700Mi` |
+| `slow` | `200m` | `200Mi` | `700m` | `700Mi` |
 | `normal` | `700m` | `700Mi` | `1100m` | `1100Mi`|
 | `fast` | `1100m` | `1100Mi` | `1700m` | `1100Mi`|
 
