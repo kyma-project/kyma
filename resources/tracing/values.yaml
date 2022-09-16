@@ -155,7 +155,7 @@ global:
   images:
     jaeger_operator:
       name: "jaeger-operator"
-      version: "1.37.0-PR-258"
+      version: "1.37.0-51d9079"
       directory: "tpi"
     jaeger_all_in_one:
       name: "all-in-one"
