@@ -186,7 +186,7 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 	var logPipeline telemetryv1alpha1.LogPipeline
 
 	if err := r.Get(ctx, name, &logPipeline); err != nil {
-		println(logPipeline)
+		fmt.Println(logPipeline)
 		log.Error(err, "Failed to get LogPipeline")
 		return err
 	}
