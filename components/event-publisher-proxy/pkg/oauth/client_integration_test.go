@@ -27,7 +27,7 @@ func TestNewClient(t *testing.T) {
 		maxIdleConnsPerHost = 200
 	)
 
-	client := NewClient(context.Background(), &env.BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	client := oauth.NewClient(context.Background(), &env.BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
 	// when

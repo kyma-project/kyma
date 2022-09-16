@@ -35,7 +35,7 @@ type JetStreamMessageSender struct {
 }
 
 // NewJetStreamMessageSender returns a new NewJetStreamMessageSender instance with the given NATS connection.
-func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NatsConfig, logger *logger.Logger) *JetStreamMessageSender {
+func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *JetStreamMessageSender {
 	return &JetStreamMessageSender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}
 }
 
@@ -128,5 +128,5 @@ func (s *JetStreamMessageSender) getJsSubjectToPublish(subject string) string {
 }
 
 func (s *JetStreamMessageSender) namedLogger() *zap.SugaredLogger {
-	return s.logger.WithContext().Named(jestreamHandlerName).With("backend", natsBackend, "jetstream enabled", true)
+	return s.logger.WithContext().Named(jetStreamHandlerName).With("backend", natsBackend, "jetstream enabled", true)
 }

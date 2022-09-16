@@ -19,7 +19,7 @@ func TestConfigureTransport(t *testing.T) {
 	)
 
 	transport := &http.Transport{}
-	cfg := BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	cfg := env.BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
 	cfg.ConfigureTransport(transport)
 
 	if transport.MaxIdleConns != maxIdleConns {

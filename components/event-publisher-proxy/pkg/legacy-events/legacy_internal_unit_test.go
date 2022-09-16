@@ -38,19 +38,19 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 		},
 	}
 
-	wantBebNs := testingutils.MessagingNamespace
+	wantBEBNamespace := testingutils.MessagingNamespace
 	wantEventID := givenEventID
 	wantEventType := fmt.Sprintf("%s.%s.%s.%s", givenEventTypePrefix, givenApplicationName, eventTypeMultiSegmentCombined, givenLegacyEventVersion)
 	wantTimeNowFormatted, _ := time.Parse(time.RFC3339, givenTimeNow)
 	wantDataContentType := internal.ContentTypeApplicationJSON
 
 	// when
-	legacyTransformer := NewTransformer(wantBebNs, givenEventTypePrefix, nil)
+	legacyTransformer := NewTransformer(wantBEBNamespace, givenEventTypePrefix, nil)
 	gotEvent, err := legacyTransformer.convertPublishRequestToCloudEvent(givenApplicationName, givenPublishReqParams)
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, wantBebNs, gotEvent.Context.GetSource())
+	assert.Equal(t, wantBEBNamespace, gotEvent.Context.GetSource())
 	assert.Equal(t, wantEventID, gotEvent.Context.GetID())
 	assert.Equal(t, wantEventType, gotEvent.Context.GetType())
 	assert.Equal(t, wantTimeNowFormatted, gotEvent.Context.GetTime())
