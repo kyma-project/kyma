@@ -9,6 +9,8 @@ spec:
   tag: {{ .Values.global.images.istio_pilot.version }}
   profile: default
   components:
+    cni:
+      enabled: true
     egressGateways:
     - enabled: {{ .Values.components.egressGateways.enabled }}
       k8s:
