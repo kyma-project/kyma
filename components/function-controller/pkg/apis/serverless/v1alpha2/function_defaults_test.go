@@ -19,6 +19,8 @@ func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
 	two := int32(2)
+	three := int32(3)
+	six := int32(6)
 
 	functionProfiles := `
 {
@@ -29,7 +31,8 @@ func TestSetDefaults(t *testing.T) {
 {
 "S":{"min": 1,"max": 1},
 "M":{"min": 1,"max": 2},
-"L":{"min": 2}
+"L":{"min": 2},
+"XL":{"min": 3,"max": 6}
 }
 `
 	functionResources := `
@@ -230,7 +233,40 @@ func TestSetDefaults(t *testing.T) {
 		givenFunc    Function
 		expectedFunc Function
 	}{
-		"Should properly merge resources presets - case with all fields": {
+		"Should properly set resources presets (using labels) - case with all fields": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel:          "XL",
+						FunctionResourcesPresetLabel: "S",
+						BuildResourcesPresetLabel:    "slow",
+					},
+				},
+				Spec: FunctionSpec{
+					Runtime: NodeJs14,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel:          "XL",
+						FunctionResourcesPresetLabel: "S",
+						BuildResourcesPresetLabel:    "slow",
+					},
+				}, Spec: FunctionSpec{
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &three,
+						MaxReplicas: &six,
+					},
+				},
+			},
+		},
+		"Should properly merge resources presets (using labels) - case with all fields": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
@@ -270,7 +306,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should properly merge resources presets - case with concatenating missing values with default preset": {
+		"Should properly merge resources presets (using labels) - case with concatenating missing values with default preset": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
@@ -308,7 +344,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should set function profile to function presets M instead of default L value": {
+		"Should set function profile to function presets M instead of default L value (using labels)": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
@@ -338,7 +374,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				}},
 		},
-		"Should properly merge resources presets - case with missing buildResources Requests": {
+		"Should properly merge resources presets (using labels) - case with missing buildResources Requests": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
