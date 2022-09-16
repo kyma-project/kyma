@@ -414,6 +414,34 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
+		"Should ignore label replicas-preset": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel: "XL",
+					},
+				},
+				Spec: FunctionSpec{
+					Runtime: NodeJs14,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel: "XL",
+					},
+				}, Spec: FunctionSpec{
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &zero,
+						MaxReplicas: &zero,
+					},
+				},
+			},
+		},
 	}
 
 	for testName, testData := range testCases {
