@@ -16,8 +16,8 @@ Before you start, you must set up [`kyma-mtls-gateway`](../00-security/sec-02-se
 
 Follow the instruction to expose and access your instance of the HttpBin service or your sample Function.
   > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
-<div tabs>
 
+<div tabs>
   <details>
   <summary>
   HttpBin
