@@ -56,3 +56,4 @@ Once you have your workload deployed, you can continue by choosing one of the fo
 - [Expose and secure a workload with OAuth2](./apix-05-expose-and-secure-workload-oauth2.md)
 - [Expose and secure a workload with Istio](./apix-07-expose-and-secure-workload-istio.md)
 - [Expose and secure a workload with JWT](./apix-08-expose-and-secure-workload-jwt.md)
+- [Expose and secure a workload with a certificate](./apix-09-expose-and-secure-workload-with-certificate.md)
