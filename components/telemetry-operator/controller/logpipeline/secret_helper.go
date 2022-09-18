@@ -1,7 +1,6 @@
 package logpipeline
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 
@@ -68,18 +67,6 @@ func (s *secretHelper) get(ctx context.Context, from telemetryv1alpha1.SecretKey
 	}
 
 	return &secret, nil
-}
-
-func SecretHasChanged(oldSecret, newSecret map[string][]byte) bool {
-	if len(newSecret) != len(oldSecret) {
-		return true
-	}
-	for k, newSecretVal := range newSecret {
-		if oldSecretVal, ok := oldSecret[k]; !ok || !bytes.Equal(newSecretVal, oldSecretVal) {
-			return true
-		}
-	}
-	return false
 }
 
 func GetSecretData(secret corev1.Secret, from telemetryv1alpha1.SecretKeyRef, targetKey string) (map[string][]byte, error) {

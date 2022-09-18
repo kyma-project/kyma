@@ -1,6 +1,7 @@
 package logpipeline
 
 import (
+	"bytes"
 	"context"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
@@ -64,7 +65,6 @@ func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.Log
 
 // Synchronize LogPipeline with ConfigMap of daemonSetHelper sections (Input, Filter and Output).
 func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := logf.FromContext(ctx)
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.SectionsConfigMap)
 	if err != nil {
 		return false, err
@@ -110,7 +110,6 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := logf.FromContext(ctx)
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.FilesConfigMap)
 	if err != nil {
 		return false, err
@@ -166,14 +165,14 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
 			err := s.secretHelper.CopySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data)
 			if err != nil {
-				log.Error(err, "unable to find secret for http host")
+				log.Error(err, "Unable to find secret for http host")
 				return false, err
 			}
 		}
 	}
 
-	secretHasChanged := SecretHasChanged(oldSecret.Data, newSecret.Data)
-	if !secretHasChanged {
+	secretChanged := secretDataEqual(oldSecret.Data, newSecret.Data)
+	if !secretChanged {
 		return false, nil
 	}
 
@@ -181,5 +180,17 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 		log.Error(err, err.Error())
 		return false, err
 	}
-	return secretHasChanged, nil
+	return secretChanged, nil
+}
+
+func secretDataEqual(oldSecret, newSecret map[string][]byte) bool {
+	if len(newSecret) != len(oldSecret) {
+		return true
+	}
+	for k, newSecretVal := range newSecret {
+		if oldSecretVal, ok := oldSecret[k]; !ok || !bytes.Equal(newSecretVal, oldSecretVal) {
+			return true
+		}
+	}
+	return false
 }
