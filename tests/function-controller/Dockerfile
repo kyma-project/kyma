@@ -10,7 +10,7 @@ WORKDIR ${BASE_APP_DIR}
 COPY ./go.mod ${BASE_APP_DIR}
 COPY ./go.sum ${BASE_APP_DIR}
 
-RUN apk add git
+RUN apk add --no-cache git
 RUN GO111MODULE=on go mod download
 
 
