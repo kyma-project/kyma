@@ -74,7 +74,6 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 	cmKey := logPipeline.Name + ".conf"
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
-			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
 			changed = true
@@ -94,7 +93,6 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 			changed = true
 		}
 		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
-			log.Info("Adding finalizer")
 			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
 			changed = true
 		}
@@ -137,7 +135,6 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 				changed = true
 			}
 			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
-				log.Info("Adding finalizer")
 				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
 				changed = true
 			}
