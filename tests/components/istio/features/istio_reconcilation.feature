@@ -14,5 +14,6 @@ Feature: Istio reconciler works as expected
     And there "shouldn't" be Istio sidecar in httpbin pod in "sidecar-recovery" namespace
     When a reconcilation takes place
     Then reconciler restarts the faulty deployment
+    And Httpbin deployment is deployed and ready in "sidecar-recovery" namespace
     And there "should" be Istio sidecar in httpbin pod in "sidecar-recovery" namespace
     And "sidecar-recovery" namespace is deleted
