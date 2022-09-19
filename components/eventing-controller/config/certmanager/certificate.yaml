@@ -17,8 +17,8 @@ metadata:
 spec:
   # $(SERVICE_NAME) and $(SERVICE_NAMESPACE) will be substituted by kustomize
   dnsNames:
-    - eventing-webhook-service.kyma-system.svc
-    - eventing-webhook-service.kyma-system.svc.cluster.local
+    - eventing-controller-webhook-service.kyma-system.svc
+    - eventing-controller-webhook-service.kyma-system.svc.cluster.local
   issuerRef:
     kind: Issuer
     name: eventing-selfsigned-issuer

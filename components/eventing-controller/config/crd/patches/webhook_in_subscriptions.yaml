@@ -10,7 +10,7 @@ spec:
       clientConfig:
         service:
           namespace: system
-          name: eventing-webhook-service
+          name: eventing-controller-webhook-service
           path: /convert
       conversionReviewVersions:
       - v1
