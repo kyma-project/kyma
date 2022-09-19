@@ -7,21 +7,21 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.11.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220903121145-690b76935712
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220903121145-690b76935712
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220916200355-ee173ea1bf9c
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220916200355-ee173ea1bf9c
 	github.com/nats-io/nats-server/v2 v2.8.4
-	github.com/nats-io/nats.go v1.16.0
+	github.com/nats-io/nats.go v1.17.0
 	github.com/onsi/gomega v1.20.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.23.0
-	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
-	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
-	k8s.io/api v0.25.0
-	k8s.io/apimachinery v0.25.0
-	k8s.io/client-go v0.25.0
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
+	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
+	k8s.io/api v0.25.1
+	k8s.io/apimachinery v0.25.1
+	k8s.io/client-go v0.25.1
 	sigs.k8s.io/controller-runtime v0.13.0
 )
 
@@ -49,7 +49,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.14.4 // indirect
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220826051949-4ed4d5883dce // indirect
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220903121145-690b76935712 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
