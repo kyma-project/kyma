@@ -37,6 +37,9 @@ spec:
 {{- tpl (toYaml .Values.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
 
   values:
+    cni:
+      repair:
+        enabled: true
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}
     pilot:
