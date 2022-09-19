@@ -17,7 +17,13 @@ VERIFY_IGNORE := /vendor\|/mocks
 # Image URL to use all building/pushing image targets
 IMG ?= eventing-controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+ifeq ($(shell echo $(ENABLE_NEW_CRD_VERSION)), true)
 CRD_OPTIONS ?= "crd"
+MANIFEST_PATH ?= "./..."
+else
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+MANIFEST_PATH ?= "./api/v1alpha1"
+endif
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -57,7 +63,7 @@ deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ##
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths=$(MANIFEST_PATH) output:crd:artifacts:config=config/crd/bases
 
 generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -66,6 +72,7 @@ set-up-local-env:
     export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
     export DOMAIN ?= example-domain.com
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
+    export ENABLE_NEW_CRD_VERSION ?= "false"
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
 test-local: go-test; ## Run tests.
@@ -75,7 +82,7 @@ setup-envtest:
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR)
 
-go-test: generate-local setup-envtest
+go-test: manifests-local generate-local setup-envtest
 	KUBEBUILDER_ASSETS=${ENVTEST_ASSETS_DIR}/bin go test ./... -coverprofile cover.out
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
