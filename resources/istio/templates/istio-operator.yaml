@@ -38,9 +38,9 @@ spec:
 
   values:
     cni:
-      chained: false
+      chained: true
       repair:
-        enabled: false
+        enabled: true
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}
     pilot:
