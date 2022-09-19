@@ -22,7 +22,7 @@ import (
 )
 
 func TestSyncSectionsConfigMap(t *testing.T) {
-	sectionsCmName := types.NamespacedName{Name: "cm", Namespace: "kyma-system"}
+	sectionsCmName := types.NamespacedName{Name: "sections", Namespace: "kyma-system"}
 	fakeClient := fake.NewClientBuilder().WithObjects(
 		&corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
@@ -36,12 +36,12 @@ func TestSyncSectionsConfigMap(t *testing.T) {
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "dummy",
+				Name: "noop",
 			},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
 				Output: telemetryv1alpha1.Output{
 					Custom: `
-name  dummy
+name  null
 alias foo`,
 				},
 			},
@@ -49,13 +49,13 @@ alias foo`,
 		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, result)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsConfigMapFinalizer))
+		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
 		require.NoError(t, err)
-		require.Contains(t, sectionsCm.Data, "dummy.conf")
-		require.Contains(t, sectionsCm.Data["dummy.conf"], "foo")
+		require.Contains(t, sectionsCm.Data, "noop.conf")
+		require.Contains(t, sectionsCm.Data["noop.conf"], "foo")
 	})
 
 	t.Run("should update section during subsequent sync", func(t *testing.T) {
@@ -63,12 +63,12 @@ alias foo`,
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "dummy",
+				Name: "noop",
 			},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
 				Output: telemetryv1alpha1.Output{
 					Custom: `
-name  dummy
+name  null
 alias foo`,
 				},
 			},
@@ -78,19 +78,19 @@ alias foo`,
 		require.NoError(t, err)
 
 		pipeline.Spec.Output.Custom = `
-name  dummy
+name  null
 alias bar`
 		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, result)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsConfigMapFinalizer))
+		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
 		require.NoError(t, err)
-		require.Contains(t, sectionsCm.Data, "dummy.conf")
-		require.NotContains(t, sectionsCm.Data["dummy.conf"], "foo")
-		require.Contains(t, sectionsCm.Data["dummy.conf"], "bar")
+		require.Contains(t, sectionsCm.Data, "noop.conf")
+		require.NotContains(t, sectionsCm.Data["noop.conf"], "foo")
+		require.Contains(t, sectionsCm.Data["noop.conf"], "bar")
 	})
 
 	t.Run("should remove section if marked for deletion", func(t *testing.T) {
@@ -98,12 +98,12 @@ alias bar`
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "dummy",
+				Name: "noop",
 			},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
 				Output: telemetryv1alpha1.Output{
 					Custom: `
-name  dummy
+name  null
 alias foo`,
 				},
 			},
@@ -117,12 +117,139 @@ alias foo`,
 		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, result)
-		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsConfigMapFinalizer))
+		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
 		require.NoError(t, err)
-		require.NotContains(t, sectionsCm.Data, "dummy.conf")
+		require.NotContains(t, sectionsCm.Data, "noop.conf")
+	})
+
+	t.Run("should fail if client fails", func(t *testing.T) {
+		badReqClient := &mocks.Client{}
+		badReqErr := errors.NewBadRequest("")
+		badReqClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
+		sut := newSyncer(badReqClient, testConfig)
+
+		lp := telemetryv1alpha1.LogPipeline{}
+		result, err := sut.syncFilesConfigMap(context.Background(), &lp)
+
+		require.Error(t, err)
+		require.Equal(t, result, false)
+	})
+}
+
+func TestSyncFilesConfigMap(t *testing.T) {
+	filesCmName := types.NamespacedName{Name: "files", Namespace: "kyma-system"}
+	fakeClient := fake.NewClientBuilder().WithObjects(
+		&corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      filesCmName.Name,
+				Namespace: filesCmName.Namespace,
+			},
+		}).Build()
+
+	t.Run("should add files during first sync", func(t *testing.T) {
+		sut := newSyncer(fakeClient, Config{FilesConfigMap: filesCmName})
+
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "noop",
+			},
+			Spec: telemetryv1alpha1.LogPipelineSpec{
+				Files: []telemetryv1alpha1.FileMount{
+					{Name: "lua-script", Content: "here comes some lua code"},
+					{Name: "js-script", Content: "here comes some js code"},
+				},
+				Output: telemetryv1alpha1.Output{
+					Custom: `
+name  null
+alias foo`,
+				},
+			},
+		}
+		result, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+		require.True(t, result)
+		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
+
+		var filesCm corev1.ConfigMap
+		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
+		require.NoError(t, err)
+		require.Contains(t, filesCm.Data, "lua-script")
+		require.Contains(t, filesCm.Data["lua-script"], "here comes some lua code")
+		require.Contains(t, filesCm.Data, "js-script")
+		require.Contains(t, filesCm.Data["js-script"], "here comes some js code")
+	})
+
+	t.Run("should update files during subsequent sync", func(t *testing.T) {
+		sut := newSyncer(fakeClient, Config{FilesConfigMap: filesCmName})
+
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "noop",
+			},
+			Spec: telemetryv1alpha1.LogPipelineSpec{
+				Files: []telemetryv1alpha1.FileMount{
+					{Name: "lua-script", Content: "here comes some lua code"},
+				},
+				Output: telemetryv1alpha1.Output{
+					Custom: `
+name  null
+alias foo`,
+				},
+			},
+		}
+
+		_, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+
+		pipeline.Spec.Files[0].Content = "here comes some more lua code"
+		result, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+		require.True(t, result)
+		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
+
+		var filesCm corev1.ConfigMap
+		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
+		require.NoError(t, err)
+		require.Contains(t, filesCm.Data, "lua-script")
+		require.Contains(t, filesCm.Data["lua-script"], "here comes some more lua code")
+	})
+
+	t.Run("should remove files if marked for deletion", func(t *testing.T) {
+		sut := newSyncer(fakeClient, Config{FilesConfigMap: filesCmName})
+
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "noop",
+			},
+			Spec: telemetryv1alpha1.LogPipelineSpec{
+				Files: []telemetryv1alpha1.FileMount{
+					{Name: "lua-script", Content: "here comes some lua code"},
+				},
+				Output: telemetryv1alpha1.Output{
+					Custom: `
+name  null
+alias foo`,
+				},
+			},
+		}
+
+		_, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+
+		now := metav1.Now()
+		pipeline.SetDeletionTimestamp(&now)
+		result, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+		require.True(t, result)
+		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
+
+		var filesCm corev1.ConfigMap
+		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
+		require.NoError(t, err)
+		require.NotContains(t, filesCm.Data, "lua-script")
 	})
 
 	t.Run("should fail if client fails", func(t *testing.T) {

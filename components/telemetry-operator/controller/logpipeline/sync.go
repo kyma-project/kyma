@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
-	filesFinalizer             = "FLUENT_BIT_FILES"
+	sectionsFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
+	filesFinalizer    = "FLUENT_BIT_FILES"
 )
 
 type syncer struct {
@@ -73,9 +73,9 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 	changed := false
 	cmKey := logPipeline.Name + ".conf"
 	if logPipeline.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
+		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, sectionsFinalizer) {
 			delete(cm.Data, cmKey)
-			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
+			controllerutil.RemoveFinalizer(logPipeline, sectionsFinalizer)
 			changed = true
 		}
 	} else {
@@ -90,8 +90,8 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 			cm.Data[cmKey] = newConfig
 			changed = true
 		}
-		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
-			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
+		if !controllerutil.ContainsFinalizer(logPipeline, sectionsFinalizer) {
+			controllerutil.AddFinalizer(logPipeline, sectionsFinalizer)
 			changed = true
 		}
 	}
