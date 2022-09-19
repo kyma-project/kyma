@@ -44,6 +44,10 @@ metrics:
     nameSuffix: "-metrics"
     interval: 30s
 
+webhook:
+  port: 443
+  targetPort: 9443
+
 clusterRoleBindingSuffix: ""
 
 eventingBackend:

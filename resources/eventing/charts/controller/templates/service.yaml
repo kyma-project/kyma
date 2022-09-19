@@ -26,15 +26,17 @@ spec:
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}
 ---
+{{- if .Values.enableNewCRDVersion }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: eventing-webhook-service
+  name: {{ include "controller.fullname" . }}-webhook-service
   labels: {{- include "controller.labels" . | nindent 4 }}
 spec:
   selector: {{- include "controller.selectorLabels" . | nindent 4 }}
   ports:
     - name:  {{ .Values.global.ports.namePrefix }}convert
-      port: 443
+      port: {{ .Values.webhook.port }}
       protocol: TCP
-      targetPort: 9443
+      targetPort: {{ .Values.webhook.targetPort }}
+{{- end }}

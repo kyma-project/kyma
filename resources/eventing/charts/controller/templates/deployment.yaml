@@ -12,8 +12,10 @@ spec:
   template:
     metadata:
       labels: {{- include "controller.selectorLabels" . | nindent 8 }}
+      {{- if .Values.enableNewCRDVersion }}
       annotations:
-        traffic.sidecar.istio.io/excludeInboundPorts: "9443"
+        traffic.sidecar.istio.io/excludeInboundPorts: {{ .Values.webhook.targetPort | quote }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "controller.fullname" . }}
       terminationGracePeriodSeconds: 10
@@ -116,18 +118,24 @@ spec:
             - containerPort: {{ .Values.metrics.config.port }}
               name: {{ .Values.global.ports.namePrefix }}{{ .Values.metrics.config.portName }}
               protocol: TCP
-            - containerPort: 9443
+            {{- if .Values.enableNewCRDVersion }}
+            - containerPort: {{ .Values.webhook.targetPort }}
               name: webhook-server
               protocol: TCP
+            {{- end }}
+          {{- if .Values.enableNewCRDVersion }}
           volumeMounts:
             - mountPath: /tmp/k8s-webhook-server/serving-certs
               name: cert
               readOnly: true
+          {{- end }}
+      {{- if .Values.enableNewCRDVersion }}
       volumes:
         - name: cert
           secret:
             defaultMode: 420
             secretName: eventing-webhook-server-cert
+      {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
