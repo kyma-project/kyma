@@ -158,10 +158,9 @@ global:
       version: "1.37.0-51d9079f"
       directory: "tpi"
     jaeger_all_in_one:
-      name: "all-in-one"
+      name: "jaegertracing/all-in-one"
       version: "1.37.0"
-      directory: "jaegertracing"
-      containerRegistryPath: "docker.io"
+      directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
       version: "7.3.0-4256edd8"
