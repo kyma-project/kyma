@@ -75,7 +75,7 @@ setup-envtest:
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR)
 
-go-test: manifests-local generate-local setup-envtest
+go-test: generate-local setup-envtest
 	KUBEBUILDER_ASSETS=${ENVTEST_ASSETS_DIR}/bin go test ./... -coverprofile cover.out
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing

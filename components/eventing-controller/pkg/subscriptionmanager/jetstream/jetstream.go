@@ -20,11 +20,13 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
+	jetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	backendjetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/natsv2/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -43,6 +45,11 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
 		return err
 	}
+	return nil
+}
+
+// AddV1Alpha2ToScheme adds v1alpha2 scheme into the given scheme.
+func AddV1Alpha2ToScheme(scheme *runtime.Scheme) error {
 	if err := eventingv1alpha2.AddToScheme(scheme); err != nil {
 		return err
 	}
@@ -87,28 +94,46 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	client := sm.mgr.GetClient()
 	recorder := sm.mgr.GetEventRecorderFor("eventing-controller-jetstream")
-	jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
 
-	jetStreamReconciler := jetstream.NewReconciler(
-		ctx,
-		client,
-		jetStreamHandler,
-		sm.logger,
-		recorder,
-		cleaner,
-		defaultSubsConfig,
-		sink.NewValidator(ctx, client, recorder, sm.logger),
-	)
-	// TODO: this could be refactored (also in other backends), so that the backend is created here and passed to
-	//  the reconciler, not the other way around.
-	sm.backend = jetStreamReconciler.Backend
-	if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
-		return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
+	if sm.envCfg.EnableNewCRDVersion {
+		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
+		jetStreamReconciler := jetstreamv2.NewReconciler(
+			ctx,
+			client,
+			jetStreamHandler,
+			sm.logger,
+			recorder,
+			cleaner,
+			defaultSubsConfig,
+			sink.NewValidator(ctx, client, recorder, sm.logger),
+		)
+		// TODO: fix this
+		// sm.backend = jetStreamReconciler.Backend
+		if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
+			return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
+		}
+		sm.namedLogger().Info("Started v1alpha2 JetStream subscription manager")
+	} else {
+		jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
+		jetStreamReconciler := jetstream.NewReconciler(
+			ctx,
+			client,
+			jetStreamHandler,
+			sm.logger,
+			recorder,
+			cleaner,
+			defaultSubsConfig,
+			sink.NewValidator(ctx, client, recorder, sm.logger),
+		)
+		sm.backend = jetStreamReconciler.Backend
+		if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
+			return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
+		}
+		sm.namedLogger().Info("Started JetStream subscription manager")
 	}
-	sm.namedLogger().Info("Started JetStream subscription manager")
 	return nil
 }
 

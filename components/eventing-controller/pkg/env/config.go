@@ -58,6 +58,8 @@ type Config struct {
 	// EventTypePrefix prefix for the EventType
 	// note: eventType format is <prefix>.<application>.<event>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" required:"true"`
+
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
 func GetConfig() Config {

@@ -2,9 +2,10 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
-	"strconv"
 )
 
 // ConvertTo converts this Subscription to the Hub version (v2).

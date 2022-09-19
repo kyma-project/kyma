@@ -50,6 +50,8 @@ type NatsConfig struct {
 	// - new: When first consuming messages, the consumer starts receiving messages that were created
 	//   after the consumer was created.
 	JSConsumerDeliverPolicy string `envconfig:"JS_CONSUMER_DELIVER_POLICY" default:"new"`
+
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
 func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {
