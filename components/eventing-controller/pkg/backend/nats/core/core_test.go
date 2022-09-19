@@ -178,7 +178,7 @@ func TestSubscription(t *testing.T) {
 
 // TestNatsSubAfterSync_NoChange tests the SyncSubscription method
 // when there is no change in the subscription then the method should
-// not re-create NATS subjects on nats-server
+// not re-create NATS subjects on nats-server.
 func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	g := NewWithT(t)
 
@@ -261,7 +261,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 
 // TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
 // when only the sink is changed in subscription, then it should not re-create
-// NATS subjects on nats-server
+// NATS subjects on nats-server.
 func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _, err := natstesting.StartNATSServer()
@@ -347,7 +347,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_FiltersChange tests the SyncSubscription method
-// when the filters are changed in subscription
+// when the filters are changed in subscription.
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _, err := natstesting.StartNATSServer()
@@ -440,7 +440,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_FilterAdded tests the SyncSubscription method
-// when a new filter is added in subscription
+// when a new filter is added in subscription.
 func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _, err := natstesting.StartNATSServer()
@@ -538,7 +538,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_FilterRemoved tests the SyncSubscription method
-// when a filter is removed from subscription
+// when a filter is removed from subscription.
 func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _, err := natstesting.StartNATSServer()
@@ -640,7 +640,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 
 // TestNatsSubAfterSync_MultipleSubs tests the SyncSubscription method
 // when there are two subscriptions and the filter is changed in one subscription
-// it should not affect the NATS subscriptions of other Kyma subscriptions
+// it should not affect the NATS subscriptions of other Kyma subscriptions.
 func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _, err := natstesting.StartNATSServer()
@@ -747,7 +747,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	}
 }
 
-// Test_isNatsSubAssociatedWithKymaSub tests the isNatsSubAssociatedWithKymaSub method
+// Test_isNatsSubAssociatedWithKymaSub tests the isNatsSubAssociatedWithKymaSub method.
 func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	g := NewWithT(t)
 
@@ -756,16 +756,20 @@ func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	cleanSubject1 := "subOne"
 	sub1 := eventingtesting.NewSubscription(cleanSubject1, "foo", eventingtesting.WithNotCleanFilter())
 	natsSub1Key := backendnats.CreateKey(sub1, cleanSubject1, 0)
-	natsSub1 := &nats.Subscription{
-		Subject: cleanSubject1,
+	natsSub1 := &backendnats.Subscription{
+		Subscription: &nats.Subscription{
+			Subject: cleanSubject1,
+		},
 	}
 
 	// create subscription 2 and its nats subscription
 	cleanSubject2 := "subOneTwo"
 	sub2 := eventingtesting.NewSubscription(cleanSubject2, "foo", eventingtesting.WithNotCleanFilter())
 	natsSub2Key := backendnats.CreateKey(sub2, cleanSubject2, 0)
-	natsSub2 := &nats.Subscription{
-		Subject: cleanSubject2,
+	natsSub2 := &backendnats.Subscription{
+		Subscription: &nats.Subscription{
+			Subject: cleanSubject2,
+		},
 	}
 
 	// // ###### Test logic ######
@@ -911,7 +915,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	// get internal key
 	var key string
-	var natsSub *nats.Subscription
+	var natsSub backendnats.Subscriber
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
 		key = backendnats.CreateKey(sub, subject, i)
 		natsSub = natsBackend.subscriptions[key]
@@ -978,7 +982,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// get internal key
 	var key string
-	var natsSub *nats.Subscription
+	var natsSub backendnats.Subscriber
 	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
 		key = backendnats.CreateKey(sub, subject, i)
 		g.Expect(key).To(Not(BeEmpty()))
@@ -1172,11 +1176,11 @@ func getLogger(g *GomegaWithT, level kymalogger.Level) *logger.Logger { //nolint
 	return l
 }
 
-func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
+func checkIsNotValid(sub backendnats.Subscriber, t *testing.T) error {
 	return checkValidity(sub, false, t)
 }
 
-func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) error {
+func checkValidity(sub backendnats.Subscriber, toCheckIsValid bool, t *testing.T) error {
 	maxAttempts := uint(5)
 	delay := time.Second
 	err := retry.Do(

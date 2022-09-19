@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: log-spammer
+spec:
+  containers:
+    - image: mingrammer/flog
+      args:
+        - -n=10
+        - -f=json
+        - -l
+      name: flog
+      resources:
+        requests:
+          cpu: 10m
+          memory: 50Mi
+        limits:
+          cpu: 50m
+          memory: 200Mi
+status: {}

@@ -132,7 +132,7 @@ global:
       sha: ""
     prometheus:
       name: "prometheus"
-      version: "v2.36.2"
+      version: "v2.38.0"
       directory: "external/quay.io/prometheus"
       sha: ""
     pushgateway:
@@ -197,6 +197,9 @@ global:
   ##
   imagePullSecrets: []
   # - name: "image-pull-secret"
+  # or
+  # - "image-pull-secret"
+
 
   highPriorityClassName: "kyma-system-priority"
 
@@ -815,6 +818,14 @@ grafana:
   enabled: true
   namespaceOverride: ""
 
+  ## Image and version of grafana. If not provided (left commented out) default values from grafana charts will be used.
+  ##
+  # image:
+  #   repository: docker.io/grafana/grafana
+  #   tag: 9.0.6
+  #   sha: ""
+  #   pullPolicy: IfNotPresent
+
   ## ForceDeployDatasources Create datasource configmap even if grafana deployment has been disabled
   ##
   forceDeployDatasources: false
@@ -878,6 +889,13 @@ grafana:
     #   - grafana.example.com
 
   sidecar:
+    ## Image and version of sidecar. If not provided (left commented out) default values from grafana charts will be used.
+    ##
+    # image:
+    #   repository: quay.io/kiwigrid/k8s-sidecar
+    #   tag: 1.19.2
+    #   sha: ""
+
     dashboards:
       enabled: true
       label: grafana_dashboard
@@ -1560,6 +1578,14 @@ kubeStateMetrics:
 ## Configuration for kube-state-metrics subchart
 ##
 kube-state-metrics:
+  ##
+  ##
+  # image:
+  #  repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+  #  tag: v2.5.0
+  #  sha: ""
+  #  pullPolicy: IfNotPresent
+
   namespaceOverride: ""
   rbac:
     create: true
@@ -1615,6 +1641,13 @@ nodeExporter:
 ## Configuration for prometheus-node-exporter subchart
 ##
 prometheus-node-exporter:
+  ## Image and version of prometheus-node-exporter. If not provided (left commented out) default values from grafana charts will be used.
+  ##
+  # image:
+  #   repository: quay.io/prometheus/node-exporter
+  #   tag: v1.3.1
+  #   pullPolicy: IfNotPresent
+
   namespaceOverride: ""
   podLabels:
     ## Add the 'node-exporter' label to be used by serviceMonitor to match standard common usage in rules and grafana dashboards
@@ -1719,6 +1752,14 @@ prometheusOperator:
         runAsGroup: 2000
         runAsNonRoot: true
         runAsUser: 2000
+
+    # Security context for create job container
+    createSecretJob:
+      securityContext: {}
+
+      # Security context for patch job container
+    patchWebhookJob:
+      securityContext: {}
 
     # Use certmanager to generate webhook certs
     certManager:

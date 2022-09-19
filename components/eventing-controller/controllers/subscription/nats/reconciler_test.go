@@ -11,7 +11,6 @@ import (
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	natsserver "github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
@@ -27,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	natscore "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -702,7 +702,7 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 func getSubscriptionFromNATS(ens *natsTestEnsemble, subscriptionName string) gomega.Assertion {
 	g := ens.G
 
-	return g.Expect(func() *nats.Subscription {
+	return g.Expect(func() backendnats.Subscriber {
 		subscriptions := ens.natsBackend.GetAllSubscriptions()
 		for key, subscription := range subscriptions {
 			// the key does NOT ONLY contain the subscription name

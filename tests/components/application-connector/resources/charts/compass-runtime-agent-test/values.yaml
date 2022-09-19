@@ -8,6 +8,7 @@ serviceAccountName: "test-compass-runtime-agent"
 
 containerRegistry:
   path: "eu.gcr.io/kyma-project"
+
 images:
   compassTest:
     name: "compass-runtime-agent-test"

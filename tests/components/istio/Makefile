@@ -19,12 +19,11 @@ RESET  := $(shell tput -Txterm sgr0)
 all: help
 
 ## Test:
-
 test: ## Run the tests of the project
-ifeq ($(EXPORT_RESULT), true)
-	$(GOTEST) -v -race ./... --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
+ifeq ($(RECONCILATION_TEST), true)
+	$(GOTEST) -run "^TestIstioReconcilation$$" github.com/kyma-project/kyma/tests/components/istio -v -race
 else
-	$(GOTEST) -v -race ./...
+	$(GOTEST) -run TestIstioInstalled github.com/kyma-project/kyma/tests/components/istio -v -race
 endif
 
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster

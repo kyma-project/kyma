@@ -7,7 +7,7 @@ import (
 
 	"go.uber.org/zap"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -44,7 +44,7 @@ func (e *HTTPStatusError) Is(target error) bool {
 	return e.StatusCode == t.StatusCode
 }
 
-// compile time check
+// Perform a compile time check.
 var _ Backend = &BEB{}
 
 type Backend interface {
@@ -53,7 +53,7 @@ type Backend interface {
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
-	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error)
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error)
 
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -118,8 +118,8 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 	}
 }
 
-// SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
+// SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed.
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
 
@@ -195,7 +195,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	return statusChanged, nil
 }
 
-// DeleteSubscription deletes the corresponding EMS subscription
+// DeleteSubscription deletes the corresponding EMS subscription.
 func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
@@ -280,7 +280,7 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 	return nil
 }
 
-// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
+// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription.
 func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus == nil {

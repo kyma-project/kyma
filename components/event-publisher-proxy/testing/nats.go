@@ -20,35 +20,35 @@ const (
 	StreamName = "kyma"
 )
 
-var NatsServerModes = []struct {
+var NATSServerModes = []struct {
 	Name             string
-	JetstreamEnabled bool
+	JetStreamEnabled bool
 }{
 	{
 		Name:             "jetstream disabled",
-		JetstreamEnabled: false,
+		JetStreamEnabled: false,
 	},
 	{
 		Name:             "jetstream enabled",
-		JetstreamEnabled: true,
+		JetStreamEnabled: true,
 	},
 }
 
-func StartNatsServer(enableJetstream bool) *server.Server {
+func StartNATSServer(enableJetStream bool) *server.Server {
 	opts := test.DefaultTestOptions
 	opts.Port = server.RANDOM_PORT
-	opts.JetStream = enableJetstream
+	opts.JetStream = enableJetStream
 
 	log, _ := logger.New("json", "info")
-	if enableJetstream {
-		log.WithContext().Info("Starting test NATS Server in Jetstream mode")
+	if enableJetStream {
+		log.WithContext().Info("Starting test NATS Server in JetStream mode")
 	} else {
 		log.WithContext().Info("Starting test NATS Server in default mode")
 	}
 	return test.RunServer(&opts)
 }
 
-func ConnectToNatsServer(url string) (*nats.Conn, error) {
+func ConnectToNATSServer(url string) (*nats.Conn, error) {
 	return pkgnats.Connect(url,
 		pkgnats.WithRetryOnFailedConnect(true),
 		pkgnats.WithMaxReconnects(3),
@@ -64,7 +64,7 @@ func SubscribeToEventOrFail(t *testing.T, connection *nats.Conn, eventType strin
 	}
 }
 
-func ValidateNatsSubjectOrFail(t *testing.T, subject string, notify ...chan bool) nats.MsgHandler {
+func ValidateNATSSubjectOrFail(t *testing.T, subject string, notify ...chan bool) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		for _, n := range notify {
 			n <- true
@@ -75,10 +75,10 @@ func ValidateNatsSubjectOrFail(t *testing.T, subject string, notify ...chan bool
 	}
 }
 
-// ValidateNatsMessageDataOrFail returns a function which can be used to validate a nats.Msg.
+// ValidateNATSMessageDataOrFail returns a function which can be used to validate a nats.Msg.
 // It reads the data from nats.Msg and unmarshalls it as a CloudEvent.
 // The data section of the CloudEvent is then checked against the value provided in data.
-func ValidateNatsMessageDataOrFail(t *testing.T, data string, notify ...chan bool) nats.MsgHandler {
+func ValidateNATSMessageDataOrFail(t *testing.T, data string, notify ...chan bool) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		for _, n := range notify {
 			n <- true

@@ -447,7 +447,7 @@ type testEnvironment struct {
 	recorder      *record.FakeRecorder
 }
 
-// setupTestEnvironment is a testEnvironment constructor
+// setupTestEnvironment is a testEnvironment constructor.
 func setupTestEnvironment(t *testing.T) *testEnvironment {
 	mockedBackend := &mocks.NatsBackend{}
 	ctx := context.Background()
@@ -489,7 +489,7 @@ func createFakeClientBuilder(t *testing.T) *fake.ClientBuilder {
 	return fake.NewClientBuilder().WithScheme(scheme.Scheme)
 }
 
-// NewTestSubscription creates a test subscription
+// NewTestSubscription creates a test subscription.
 func NewTestSubscription(opts ...controllertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {
 	return controllertesting.NewSubscription(subscriptionName, namespaceName, opts...)
 }

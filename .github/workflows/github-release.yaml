@@ -7,10 +7,12 @@ jobs:
     environment:
       name: release
     container:
-      image: eu.gcr.io/kyma-project/test-infra/kyma-integration:v20211027-f0dd11ca
+      image: eu.gcr.io/kyma-project/test-infra/githubrelease:v20220916-ba91989d
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Check if not in master
         id: check_if_master
         shell: bash
@@ -33,14 +35,28 @@ jobs:
               echo "The ${NEXT_RELEASE} is already published on github. Stopping."
               exit 1
           fi
+      - name: Generate changelog
+        id: changelog
+        shell: bash
+        env:
+          CONFIG_FILE: .github/package.json
+          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global --add safe.directory '*'
+          git config --global user.email "kyma-bot@kyma-project.io"
+          git config --global user.name "Kyma Bot"
+          export NEW_RELEASE_TITLE="$(cat "VERSION")"
+          export FROM_TAG=$(git describe --tags $(git rev-list --tags) --always | grep -F . | grep -v "-" | head -1)
+          /app/generate-release-changelog.sh
       - name: Make Kyma release
         id: make_release
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           GOOGLE_APPLICATION_CREDENTIALS: 'creds.json'
         run: |
-          echo $GOOGLE_APPLICATION_CREDENTIALS_JSON | base64 --decode > creds.json
-          /prow-tools/githubrelease -targetCommit=${{ github.ref }} \
+          echo $GOOGLE_APPLICATION_CREDENTIALS_JSON | base64 -d > creds.json
+          /githubrelease -targetCommit=${{ github.ref }} \
+                                    -kymaChangelog=.changelog/release-changelog.md \
                                     -githubRepoOwner=${{ github.event.repository.owner.login }} \
                                     -githubRepoName=${{ github.event.repository.name }} \
                                     -githubAccessToken=${{ secrets.GITHUB_TOKEN }} \

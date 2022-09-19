@@ -48,7 +48,7 @@ type Source struct {
 type InlineSource struct {
 	Source string `json:"source"`
 	//+optional
-	Dependencies string `json:"dependencies"`
+	Dependencies string `json:"dependencies,omitempty"`
 }
 
 type GitRepositorySource struct {
@@ -100,7 +100,7 @@ type ResourceRequirements struct {
 	// +optional
 	Profile string `json:"profile,omitempty"`
 	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type ScaleConfig struct {
@@ -113,9 +113,9 @@ type ScaleConfig struct {
 
 type ResourceConfiguration struct {
 	// +optional
-	Build ResourceRequirements `json:"build"`
+	Build *ResourceRequirements `json:"build,omitempty"`
 	// +optional
-	Function ResourceRequirements `json:"function"`
+	Function *ResourceRequirements `json:"function,omitempty"`
 }
 
 const (
@@ -140,7 +140,7 @@ type FunctionSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
-	ResourceConfiguration ResourceConfiguration `json:"resourceConfiguration,omitempty"`
+	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
 	// +optional
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
@@ -149,10 +149,10 @@ type FunctionSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
-	Template Template `json:"template,omitempty"`
+	Template *Template `json:"template,omitempty"`
 }
 
-//TODO: Status related things needs to be developed.
+// TODO: Status related things needs to be developed.
 type ConditionType string
 
 const (
@@ -168,7 +168,6 @@ const (
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
 	ConditionReasonSourceUpdated                  ConditionReason = "SourceUpdated"
 	ConditionReasonSourceUpdateFailed             ConditionReason = "SourceUpdateFailed"
-	ConditionReasonGitAuthorizationFailed         ConditionReason = "GitAuthorizationFailed"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
 	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
@@ -263,7 +262,7 @@ type FunctionList struct {
 	Items           []Function `json:"items"`
 }
 
-//nolint
+// nolint
 func init() {
 	SchemeBuilder.Register(
 		&Function{},
@@ -284,4 +283,17 @@ func (c *Condition) IsTrue() bool {
 	return c.Status == v1.ConditionTrue
 }
 
-func (f *Function) Hub() {}
+func (l *Condition) Equal(r *Condition) bool {
+	if l == nil && r == nil {
+		return true
+	}
+
+	if l.Type != r.Type ||
+		l.Status != r.Status ||
+		l.Reason != r.Reason ||
+		l.Message != r.Message ||
+		!l.LastTransitionTime.Equal(&r.LastTransitionTime) {
+		return false
+	}
+	return true
+}

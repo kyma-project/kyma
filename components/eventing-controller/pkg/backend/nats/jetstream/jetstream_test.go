@@ -1,16 +1,17 @@
 package jetstream
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -203,7 +204,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetstreamSubject(subject)
+	jsSubject := jsBackend.GetJetStreamSubject(subject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -294,7 +295,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetstreamSubject(subject)
+	jsSubject := jsBackend.GetJetStreamSubject(subject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -388,7 +389,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetstreamSubject(newSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(newSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -481,7 +482,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	// Because we have two filters (i.e. two subjects)
 	require.Len(t, jsBackend.subscriptions, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
-	jsSubject := jsBackend.GetJetstreamSubject(firstSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(firstSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -581,7 +582,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// Check if total existing NATS subscriptions are correct
 	require.Len(t, jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
-	jsSubject := jsBackend.GetJetstreamSubject(firstSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(firstSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -691,7 +692,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 
 	// check if the NATS subscription are NOT the same after sync for subscription 1
 	// because the subscriptions should have being re-created for new subject
-	jsSubject := jsBackend.GetJetstreamSubject(newSubject)
+	jsSubject := jsBackend.GetJetStreamSubject(newSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -712,7 +713,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// check if the NATS subscription are same after sync for subscription 2
 	// because the subscriptions should NOT have being re-created as
 	// subscription 2 was not modified
-	jsSubject = jsBackend.GetJetstreamSubject(cleanSubjectSub2)
+	jsSubject = jsBackend.GetJetStreamSubject(cleanSubjectSub2)
 	jsSubKey = NewSubscriptionSubjectIdentifier(sub2, jsSubject)
 	jsSub = jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -922,7 +923,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 	// then
 	require.Eventually(t, func() bool {
 		// fetch consumer info from JetStream
-		consumerName := NewSubscriptionSubjectIdentifier(sub, jsBackend.GetJetstreamSubject(sub.Status.CleanEventTypes[0])).ConsumerName()
+		consumerName := NewSubscriptionSubjectIdentifier(sub, jsBackend.GetJetStreamSubject(sub.Status.CleanEventTypes[0])).ConsumerName()
 		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, consumerName)
 		require.NoError(t, err)
 
@@ -1019,9 +1020,9 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, err)
 
 	subject := evtesting.CloudEventType
-	require.NoError(t, SendBinaryCloudEventToJetStream(jsBackend, jsBackend.GetJetstreamSubject(subject), evtesting.CloudEventData))
+	require.NoError(t, SendBinaryCloudEventToJetStream(jsBackend, jsBackend.GetJetStreamSubject(subject), evtesting.CloudEventData))
 	require.NoError(t, subscriber.CheckEvent(evtesting.CloudEventData))
-	require.NoError(t, SendStructuredCloudEventToJetStream(jsBackend, jsBackend.GetJetstreamSubject(subject), evtesting.StructuredCloudEvent))
+	require.NoError(t, SendStructuredCloudEventToJetStream(jsBackend, jsBackend.GetJetStreamSubject(subject), evtesting.StructuredCloudEvent))
 	require.NoError(t, subscriber.CheckEvent("\""+evtesting.EventData+"\""))
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
@@ -1284,7 +1285,7 @@ type TestEnvironment struct {
 	natsPort   int
 }
 
-// setupTestEnvironment is a TestEnvironment constructor
+// setupTestEnvironment is a TestEnvironment constructor.
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
@@ -1473,6 +1474,106 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.wantNamespacedName, tc.givenIdentifier.NamespacedName())
+		})
+	}
+}
+
+// TestJetStream_NoNATSSubscription tests if the error is being triggered
+// when expected entries in js.subscriptions map are missing.
+func TestJetStream_NATSSubscriptionCount(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	require.True(t, subscriber.IsRunning())
+
+	testCases := []struct {
+		name                            string
+		subOpts                         []evtesting.SubscriptionOpt
+		givenManuallyDeleteSubscription bool
+		givenFilterToDelete             string
+		wantNatsSubsLen                 int
+		wantErr                         bool
+		wantErrText                     string
+	}{
+		{
+			name: "No error should happen, when there are no filters",
+			subOpts: []evtesting.SubscriptionOpt{
+				evtesting.WithSinkURL(subscriber.SinkURL),
+				evtesting.WithEmptyFilter(),
+				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
+			},
+			givenManuallyDeleteSubscription: false,
+			wantNatsSubsLen:                 0,
+			wantErr:                         false,
+		},
+		{
+			name: "No error expected when js.subscriptions map has entries for all the eventTypes",
+			subOpts: []evtesting.SubscriptionOpt{
+				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
+				evtesting.WithFilter("", evtesting.NewOrderCreatedEventType),
+				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
+			},
+			givenManuallyDeleteSubscription: false,
+			wantNatsSubsLen:                 2,
+			wantErr:                         false,
+		},
+		{
+			name: "An error is expected, when we manually delete a subscription from js.subscriptions map",
+			subOpts: []evtesting.SubscriptionOpt{
+				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
+				evtesting.WithFilter("", evtesting.NewOrderCreatedEventType),
+				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
+			},
+			givenManuallyDeleteSubscription: true,
+			givenFilterToDelete:             evtesting.NewOrderCreatedEventType,
+			wantNatsSubsLen:                 2,
+			wantErr:                         true,
+			wantErrText:                     fmt.Sprintf(MissingNATSSubscriptionMsgWithInfo, evtesting.NewOrderCreatedEventType),
+		},
+	}
+	for i, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// create a new subscription with no filters
+			sub := evtesting.NewSubscription("sub"+fmt.Sprint(i), "foo",
+				tc.subOpts...,
+			)
+			require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+
+			// when
+			err := jsBackend.SyncSubscription(sub)
+			require.NoError(t, err)
+			assert.Equal(t, len(jsBackend.subscriptions), tc.wantNatsSubsLen)
+
+			if tc.givenManuallyDeleteSubscription {
+				// manually delete the subscription from map
+				jsSubject := jsBackend.GetJetStreamSubject(tc.givenFilterToDelete)
+				jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+				delete(jsBackend.subscriptions, jsSubKey)
+			}
+
+			err = jsBackend.SyncSubscription(sub)
+			testEnvironment.logger.WithContext().Error(err)
+			require.Equal(t, err != nil, tc.wantErr)
+
+			if tc.wantErr {
+				// the createConsumer function won't create a new Subscription,
+				// because the subscription was manually deleted from the js.subscriptions map
+				// hence the consumer will be shown in the NATS Backend as still bound
+				err = jsBackend.SyncSubscription(sub)
+				require.True(t, strings.Contains(err.Error(), tc.wantErrText))
+			}
+
+			// empty the js.subscriptions map
+			require.NoError(t, jsBackend.DeleteSubscription(sub))
 		})
 	}
 }

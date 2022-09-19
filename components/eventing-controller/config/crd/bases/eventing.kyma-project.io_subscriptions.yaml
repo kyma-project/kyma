@@ -29,7 +29,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Subscription is the Schema for the subscriptions API
+        description: Subscription is the Schema for the subscriptions API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -44,7 +44,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: SubscriptionSpec defines the desired state of Subscription
+            description: SubscriptionSpec defines the desired state of Subscription.
             properties:
               config:
                 description: Config defines the configurations that can be applied
@@ -62,7 +62,7 @@ spec:
                   filters:
                     items:
                       description: BEBFilter defines the BEB filter element as a combination
-                        of two CE filter elements
+                        of two CE filter elements.
                       properties:
                         eventSource:
                           description: EventSource defines the source of CE filter
@@ -116,19 +116,19 @@ spec:
                 properties:
                   contentMode:
                     description: ContentMode defines content mode for eventing based
-                      on BEB
+                      on BEB.
                     type: string
                   exemptHandshake:
                     description: ExemptHandshake defines whether exempt handshake
-                      for eventing based on BEB
+                      for eventing based on BEB.
                     type: boolean
                   qos:
                     description: Qos defines quality of service for eventing based
-                      on BEB
+                      on BEB.
                     type: string
                   webhookAuth:
                     description: WebhookAuth defines the Webhook called by an active
-                      subscription in BEB
+                      subscription in BEB.
                     properties:
                       clientId:
                         description: ClientID defines clientID for OAuth2

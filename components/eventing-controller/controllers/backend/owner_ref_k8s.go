@@ -13,7 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 )
 
-// sets this reconciler as owner of obj
+// setAsOwnerReference sets this reconciler as owner of obj.
 func (r *Reconciler) setAsOwnerReference(ctx context.Context, obj metav1.Object) error {
 	controllerNamespacedName := types.NamespacedName{
 		Namespace: deployment.ControllerNamespace,
