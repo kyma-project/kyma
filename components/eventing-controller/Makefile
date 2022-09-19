@@ -72,7 +72,7 @@ set-up-local-env:
     export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
     export DOMAIN ?= example-domain.com
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
-    export ENABLE_NEW_CRD_VERSION ?= "false"
+    export ENABLE_NEW_CRD_VERSION ?= false
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
 test-local: go-test; ## Run tests.
