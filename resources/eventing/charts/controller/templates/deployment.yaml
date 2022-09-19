@@ -80,6 +80,8 @@ spec:
             value: {{ .Values.jetstream.maxMessages | quote }}
           - name: JS_STREAM_MAX_BYTES
             value: {{ .Values.jetstream.maxBytes | quote }}
+          - name: ENABLE_NEW_CRD_VERSION
+            value: {{ .Values.enableNewCRDVersion | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

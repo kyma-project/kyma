@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
 	corev1 "k8s.io/api/core/v1"

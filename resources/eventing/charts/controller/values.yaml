@@ -93,3 +93,5 @@ jetstream:
   consumerDeliverPolicy: new
   maxMessages: -1 # no limit
   maxBytes: -1
+
+enableNewCRDVersion: false

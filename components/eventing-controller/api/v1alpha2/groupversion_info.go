@@ -1,6 +1,6 @@
 // Package v1alpha2 contains API Schema definitions for the eventing v1alpha2 API group
-//+kubebuilder:object:generate=true
-//+groupName=eventing.kyma-project.io
+// +kubebuilder:object:generate=true
+// +groupName=eventing.kyma-project.io
 package v1alpha2
 
 import (
