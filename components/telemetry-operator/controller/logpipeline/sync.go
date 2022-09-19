@@ -79,17 +79,15 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 			changed = true
 		}
 	} else {
-		fluentBitConfig, err := builder.BuildFluentBitConfig(logPipeline, s.config.PipelineDefaults)
+		newConfig, err := builder.BuildFluentBitConfig(logPipeline, s.config.PipelineDefaults)
 		if err != nil {
 			return false, err
 		}
 		if cm.Data == nil {
-			data := make(map[string]string)
-			data[cmKey] = fluentBitConfig
-			cm.Data = data
+			cm.Data = map[string]string{cmKey: newConfig}
 			changed = true
-		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != fluentBitConfig {
-			cm.Data[cmKey] = fluentBitConfig
+		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != newConfig {
+			cm.Data[cmKey] = newConfig
 			changed = true
 		}
 		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
@@ -125,9 +123,7 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 			}
 		} else {
 			if cm.Data == nil {
-				data := make(map[string]string)
-				data[file.Name] = file.Content
-				cm.Data = data
+				cm.Data = map[string]string{file.Name: file.Content}
 				changed = true
 			} else if oldContent, hasKey := cm.Data[file.Name]; !hasKey || oldContent != file.Content {
 				cm.Data[file.Name] = file.Content
@@ -163,9 +159,8 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 
 	for i := range logPipelines.Items {
 		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
-			err := s.secretHelper.CopySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data)
-			if err != nil {
-				log.Error(err, "Unable to find secret for http host")
+			if err := s.secretHelper.CopySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data); err != nil {
+				log.Error(err, "Failed to find secret for http host")
 				return false, err
 			}
 		}

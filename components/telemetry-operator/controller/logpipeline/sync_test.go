@@ -9,6 +9,7 @@ import (
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -20,30 +21,122 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
-func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
-	mockClient := &mocks.Client{}
-	badReqErr := errors.NewBadRequest("")
-	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := newSyncer(mockClient, testConfig)
+func TestSyncSectionsConfigMap(t *testing.T) {
+	sectionsCmName := types.NamespacedName{Name: "cm", Namespace: "kyma-system"}
+	fakeClient := fake.NewClientBuilder().WithObjects(
+		&corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      sectionsCmName.Name,
+				Namespace: sectionsCmName.Namespace,
+			},
+		}).Build()
 
-	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
+	t.Run("should add section during first sync", func(t *testing.T) {
+		sut := newSyncer(fakeClient, Config{SectionsConfigMap: sectionsCmName})
 
-	require.Error(t, err)
-	require.Equal(t, result, false)
-}
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "dummy",
+			},
+			Spec: telemetryv1alpha1.LogPipelineSpec{
+				Output: telemetryv1alpha1.Output{
+					Custom: `
+name  dummy
+alias foo`,
+				},
+			},
+		}
+		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+		require.True(t, result)
+		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsConfigMapFinalizer))
 
-func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
-	mockClient := &mocks.Client{}
-	badReqErr := errors.NewBadRequest("")
-	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := newSyncer(mockClient, testConfig)
+		var sectionsCm corev1.ConfigMap
+		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
+		require.NoError(t, err)
+		require.Contains(t, sectionsCm.Data, "dummy.conf")
+		require.Contains(t, sectionsCm.Data["dummy.conf"], "foo")
+	})
 
-	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
+	t.Run("should update section during subsequent sync", func(t *testing.T) {
+		sut := newSyncer(fakeClient, Config{SectionsConfigMap: sectionsCmName})
 
-	require.Error(t, err)
-	require.Equal(t, result, false)
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "dummy",
+			},
+			Spec: telemetryv1alpha1.LogPipelineSpec{
+				Output: telemetryv1alpha1.Output{
+					Custom: `
+name  dummy
+alias foo`,
+				},
+			},
+		}
+
+		_, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+
+		pipeline.Spec.Output.Custom = `
+name  dummy
+alias bar`
+		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+		require.True(t, result)
+		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsConfigMapFinalizer))
+
+		var sectionsCm corev1.ConfigMap
+		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
+		require.NoError(t, err)
+		require.Contains(t, sectionsCm.Data, "dummy.conf")
+		require.NotContains(t, sectionsCm.Data["dummy.conf"], "foo")
+		require.Contains(t, sectionsCm.Data["dummy.conf"], "bar")
+	})
+
+	t.Run("should remove section if marked for deletion", func(t *testing.T) {
+		sut := newSyncer(fakeClient, Config{SectionsConfigMap: sectionsCmName})
+
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "dummy",
+			},
+			Spec: telemetryv1alpha1.LogPipelineSpec{
+				Output: telemetryv1alpha1.Output{
+					Custom: `
+name  dummy
+alias foo`,
+				},
+			},
+		}
+
+		_, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+
+		now := metav1.Now()
+		pipeline.SetDeletionTimestamp(&now)
+		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		require.NoError(t, err)
+		require.True(t, result)
+		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsConfigMapFinalizer))
+
+		var sectionsCm corev1.ConfigMap
+		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
+		require.NoError(t, err)
+		require.NotContains(t, sectionsCm.Data, "dummy.conf")
+	})
+
+	t.Run("should fail if client fails", func(t *testing.T) {
+		badReqClient := &mocks.Client{}
+		badReqErr := errors.NewBadRequest("")
+		badReqClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
+		sut := newSyncer(badReqClient, testConfig)
+
+		lp := telemetryv1alpha1.LogPipeline{}
+		result, err := sut.syncFilesConfigMap(context.Background(), &lp)
+
+		require.Error(t, err)
+		require.Equal(t, result, false)
+	})
 }
 
 func TestSyncVariablesFromHttpOutput(t *testing.T) {
