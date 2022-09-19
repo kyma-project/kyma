@@ -5,9 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes/mocks"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/utils/envvar"
 
-	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
@@ -46,9 +44,9 @@ alias foo`,
 				},
 			},
 		}
-		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, result)
+		require.True(t, changed)
 		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
@@ -80,9 +78,9 @@ alias foo`,
 		pipeline.Spec.Output.Custom = `
 name  null
 alias bar`
-		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, result)
+		require.True(t, changed)
 		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
@@ -114,9 +112,9 @@ alias foo`,
 
 		now := metav1.Now()
 		pipeline.SetDeletionTimestamp(&now)
-		result, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, result)
+		require.True(t, changed)
 		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
@@ -132,10 +130,10 @@ alias foo`,
 		sut := newSyncer(badReqClient, testConfig)
 
 		lp := telemetryv1alpha1.LogPipeline{}
-		result, err := sut.syncFilesConfigMap(context.Background(), &lp)
+		changed, err := sut.syncFilesConfigMap(context.Background(), &lp)
 
 		require.Error(t, err)
-		require.Equal(t, result, false)
+		require.Equal(t, changed, false)
 	})
 }
 
@@ -168,9 +166,9 @@ alias foo`,
 				},
 			},
 		}
-		result, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, result)
+		require.True(t, changed)
 		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
 
 		var filesCm corev1.ConfigMap
@@ -205,9 +203,9 @@ alias foo`,
 		require.NoError(t, err)
 
 		pipeline.Spec.Files[0].Content = "here comes some more lua code"
-		result, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, result)
+		require.True(t, changed)
 		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
 
 		var filesCm corev1.ConfigMap
@@ -241,9 +239,9 @@ alias foo`,
 
 		now := metav1.Now()
 		pipeline.SetDeletionTimestamp(&now)
-		result, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, result)
+		require.True(t, changed)
 		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var filesCm corev1.ConfigMap
@@ -259,62 +257,116 @@ alias foo`,
 		sut := newSyncer(badReqClient, testConfig)
 
 		lp := telemetryv1alpha1.LogPipeline{}
-		result, err := sut.syncFilesConfigMap(context.Background(), &lp)
+		changed, err := sut.syncFilesConfigMap(context.Background(), &lp)
 
 		require.Error(t, err)
-		require.Equal(t, result, false)
+		require.Equal(t, changed, false)
 	})
 }
 
-func TestSyncVariablesFromHttpOutput(t *testing.T) {
-	s := scheme.Scheme
-	err := telemetryv1alpha1.AddToScheme(s)
-	require.NoError(t, err)
-
-	secretData := map[string][]byte{
-		"host": []byte("my-host"),
-	}
-	referencedSecret := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "referenced-secret",
-			Namespace: "default",
-		},
-		Data: secretData,
-	}
-	require.NoError(t, err)
-
-	secretKeyRef := telemetryv1alpha1.SecretKeyRef{
-		Name:      "referenced-secret",
-		Key:       "host",
-		Namespace: "default",
-	}
-	lp := telemetryv1alpha1.LogPipeline{
-		ObjectMeta: metav1.ObjectMeta{Name: "my-pipeline"},
-		Spec: telemetryv1alpha1.LogPipelineSpec{
-			Output: telemetryv1alpha1.Output{
-				HTTP: &telemetryv1alpha1.HTTPOutput{
-					Host: telemetryv1alpha1.ValueType{
-						ValueFrom: &telemetryv1alpha1.ValueFromSource{
-							SecretKeyRef: &secretKeyRef,
+func TestSyncReferencedSecrets(t *testing.T) {
+	allPipelines := telemetryv1alpha1.LogPipelineList{
+		Items: []telemetryv1alpha1.LogPipeline{
+			{
+				ObjectMeta: metav1.ObjectMeta{Name: "http"},
+				Spec: telemetryv1alpha1.LogPipelineSpec{
+					Output: telemetryv1alpha1.Output{
+						HTTP: &telemetryv1alpha1.HTTPOutput{
+							Host: telemetryv1alpha1.ValueType{Value: "localhost"},
+							User: telemetryv1alpha1.ValueType{Value: "admin"},
+							Password: telemetryv1alpha1.ValueType{
+								ValueFrom: &telemetryv1alpha1.ValueFromSource{
+									SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+										Name:      "creds",
+										Namespace: "default",
+										Key:       "password",
+									},
+								},
+							},
 						},
 					},
 				},
 			},
 		},
 	}
-	logPipelines := telemetryv1alpha1.LogPipelineList{
-		Items: []telemetryv1alpha1.LogPipeline{lp},
-	}
-	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(&referencedSecret).Build()
 
-	sut := newSyncer(mockClient, testConfig)
-	restartRequired, err := sut.syncReferencedSecrets(context.Background(), &logPipelines)
-	require.NoError(t, err)
-	require.True(t, restartRequired)
+	t.Run("should add value to env secret during first sync", func(t *testing.T) {
+		credsSecret := corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "creds",
+				Namespace: "default",
+			},
+			Data: map[string][]byte{"password": []byte("qwerty")},
+		}
+		fakeClient := fake.NewClientBuilder().WithObjects(&credsSecret).Build()
 
-	var envSecret corev1.Secret
-	err = mockClient.Get(context.Background(), types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"}, &envSecret)
-	require.NoError(t, err)
-	targetSecretKey := envvar.GenerateName("my-pipeline", secretKeyRef)
-	require.Equal(t, []byte("my-host"), envSecret.Data[targetSecretKey])
+		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
+		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
+		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		require.NoError(t, err)
+		require.True(t, changed)
+
+		var envSecret corev1.Secret
+		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
+		require.NoError(t, err)
+		require.Contains(t, envSecret.Data, "HTTP_DEFAULT_CREDS_PASSWORD")
+		require.Equal(t, []byte("qwerty"), envSecret.Data["HTTP_DEFAULT_CREDS_PASSWORD"])
+	})
+
+	t.Run("should update value in env secret during subsequent sync", func(t *testing.T) {
+		passwordSecret := corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "creds",
+				Namespace: "default",
+			},
+			Data: map[string][]byte{"password": []byte("qwerty")},
+		}
+		fakeClient := fake.NewClientBuilder().WithObjects(&passwordSecret).Build()
+
+		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
+		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
+		_, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		require.NoError(t, err)
+
+		passwordSecret.Data["password"] = []byte("qwertz")
+		err = fakeClient.Update(context.Background(), &passwordSecret)
+		require.NoError(t, err)
+
+		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		require.NoError(t, err)
+		require.True(t, changed)
+
+		var envSecret corev1.Secret
+		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
+		require.NoError(t, err)
+		require.Contains(t, envSecret.Data, "HTTP_DEFAULT_CREDS_PASSWORD")
+		require.Equal(t, []byte("qwertz"), envSecret.Data["HTTP_DEFAULT_CREDS_PASSWORD"])
+	})
+
+	t.Run("should delete value in env secret if marked for deletion", func(t *testing.T) {
+		passwordSecret := corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "creds",
+				Namespace: "default",
+			},
+			Data: map[string][]byte{"password": []byte("qwerty")},
+		}
+		fakeClient := fake.NewClientBuilder().WithObjects(&passwordSecret).Build()
+
+		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
+		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
+		_, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		require.NoError(t, err)
+
+		now := metav1.Now()
+		allPipelines.Items[0].SetDeletionTimestamp(&now)
+		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		require.NoError(t, err)
+		require.True(t, changed)
+
+		var envSecret corev1.Secret
+		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
+		require.NoError(t, err)
+		require.NotContains(t, envSecret.Data, "HTTP_DEFAULT_CREDS_PASSWORD")
+	})
 }

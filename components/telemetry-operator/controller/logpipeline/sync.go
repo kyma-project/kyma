@@ -158,6 +158,10 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 	newSecret.Data = make(map[string][]byte)
 
 	for i := range logPipelines.Items {
+		if !logPipelines.Items[i].DeletionTimestamp.IsZero() {
+			continue
+		}
+
 		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
 			if err := s.secretHelper.CopySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data); err != nil {
 				log.Error(err, "Failed to find secret for http host")
