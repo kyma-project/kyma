@@ -5,7 +5,7 @@ MOCK_APP_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/mock-app:$(D
 
 .PHONY: release image
 
-release: publish-compass-runtime-agent-test
+release: publish-gateway-test publish-mock-app publish-validator-test publish-compass-runtime-agent-test
 image: image-gateway-test image-validator-test image-compass-runtime-agent-test
 
 publish-gateway-test: image-gateway-test
