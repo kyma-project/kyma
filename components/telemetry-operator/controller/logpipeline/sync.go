@@ -3,8 +3,11 @@ package logpipeline
 import (
 	"bytes"
 	"context"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
@@ -23,7 +26,6 @@ const (
 type syncer struct {
 	client.Client
 	config             Config
-	secretHelper       *secretHelper
 	k8sGetterOrCreator *kubernetes.GetterOrCreator
 }
 
@@ -34,7 +36,6 @@ func newSyncer(
 	var s syncer
 	s.Client = client
 	s.config = config
-	s.secretHelper = newSecretHelper(client)
 	s.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
 	return &s
 }
@@ -148,7 +149,6 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 
 // syncReferencedSecrets copies referenced secrets to global Fluent Bit environment secret.
 func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
-	log := logf.FromContext(ctx)
 	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.config.EnvSecret)
 	if err != nil {
 		return false, err
@@ -163,8 +163,7 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 		}
 
 		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
-			if err := s.secretHelper.CopySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data); err != nil {
-				log.Error(err, "Failed to find secret for http host")
+			if err := s.copySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data); err != nil {
 				return false, err
 			}
 		}
@@ -176,10 +175,26 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 	}
 
 	if err = s.Update(ctx, &newSecret); err != nil {
-		log.Error(err, err.Error())
 		return false, err
 	}
 	return secretChanged, nil
+}
+
+func (s *syncer) copySecretData(ctx context.Context, sourceRef telemetryv1alpha1.SecretKeyRef, targetKey string, target map[string][]byte) error {
+	var source corev1.Secret
+	if err := s.Get(ctx, types.NamespacedName{Name: sourceRef.Name, Namespace: sourceRef.Namespace}, &source); err != nil {
+		return fmt.Errorf("unable to read secret '%s' from namespace '%s': %w", sourceRef.Name, sourceRef.Namespace, err)
+	}
+
+	if val, found := source.Data[sourceRef.Key]; found {
+		target[targetKey] = val
+		return nil
+	}
+
+	return fmt.Errorf("unable to find key '%s' in secret '%s' from namespace '%s'",
+		sourceRef.Key,
+		sourceRef.Name,
+		sourceRef.Namespace)
 }
 
 func secretDataEqual(oldSecret, newSecret map[string][]byte) bool {
