@@ -87,7 +87,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.rules** | **YES** | Specifies the array of Oathkeeper access rules. |
 | **spec.rules.service** | **NO** | Services definitions at this level have higher precedence than the service definition at the **spec.service** level.|
 | **spec.rules.service.name** | **NO** | Specifies the name of the exposed service. |
-| **spec.rules.service.namespace** | **NO** | Specifies the namespace of the exposed service. |
+| **spec.rules.service.namespace** | **NO** | Specifies the Namespace of the exposed service. |
 | **spec.rules.service.port** | **NO** | Specifies the communication port of the exposed service. |
 | **spec.rules.path** | **YES** | Specifies the path of the exposed service. |
 | **spec.rules.methods** | **NO** | Specifies the list of HTTP request methods available for **spec.rules.path**. |
