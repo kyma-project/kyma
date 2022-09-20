@@ -34,7 +34,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 2. Enable [Istio sidecar injection](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md) in the Namespace:
    ```bash
-   kubectl label $NAMESPACE default istio-injection=enabled
+   kubectl label namespace $NAMESPACE istio-injection=enabled
    ```
 
 ## Register a service
