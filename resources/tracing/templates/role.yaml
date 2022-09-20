@@ -7,41 +7,13 @@ metadata:
   labels:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 rules:
-## our own custom resources
-- apiGroups:
-  - jaegertracing.io
-  resources:
-  - '*'
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-
-## for the operator's own deployment
 - apiGroups:
   - apps
-  resourceNames:
-  - jaeger-operator
   resources:
-  - deployments/finalizers
-  verbs:
-  - update
-
-## regular things the operator manages for an instance, as the result of processing CRs
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - persistentvolumeclaims
-  - pods
-  - secrets
-  - serviceaccounts
-  - services
-  - services/finalizers
+  - daemonsets
+  - deployments
+  - replicasets
+  - statefulsets
   verbs:
   - create
   - delete
@@ -54,9 +26,6 @@ rules:
   - apps
   resources:
   - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
   verbs:
   - create
   - delete
@@ -66,22 +35,17 @@ rules:
   - update
   - watch
 - apiGroups:
-  - extensions
+  - apps
   resources:
-  - ingresses
+  - deployments/status
   verbs:
-  - create
-  - delete
   - get
-  - list
   - patch
   - update
-  - watch
-# Ingress for kubernetes 1.14 or higher
 - apiGroups:
-  - networking.k8s.io
+  - autoscaling
   resources:
-  - ingresses
+  - horizontalpodautoscalers
   verbs:
   - create
   - delete
@@ -93,20 +57,8 @@ rules:
 - apiGroups:
   - batch
   resources:
-  - jobs
   - cronjobs
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - route.openshift.io
-  resources:
-  - routes
+  - jobs
   verbs:
   - create
   - delete
@@ -128,23 +80,24 @@ rules:
   - update
   - watch
 - apiGroups:
-  - autoscaling
+  - coordination.k8s.io
   resources:
-  - horizontalpodautoscalers
+  - leases
   verbs:
   - create
-  - delete
   - get
   - list
-  - patch
   - update
-  - watch
-
-## needed if you want the operator to create service monitors for the Jaeger instances
 - apiGroups:
-  - monitoring.coreos.com
+  - ""
   resources:
-  - servicemonitors
+  - configmaps
+  - persistentvolumeclaims
+  - pods
+  - secrets
+  - serviceaccounts
+  - services
+  - services/finalizers
   verbs:
   - create
   - delete
@@ -153,12 +106,10 @@ rules:
   - patch
   - update
   - watch
-
-## for the Elasticsearch auto-provisioning
 - apiGroups:
-  - logging.openshift.io
+  - ""
   resources:
-  - elasticsearches
+  - namespaces
   verbs:
   - create
   - delete
@@ -167,8 +118,60 @@ rules:
   - patch
   - update
   - watch
-
-## for the Kafka auto-provisioning
+- apiGroups:
+  - ""
+  resources:
+  - namespaces/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreams
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - jaegertracing.io
+  resources:
+  - jaegers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - jaegertracing.io
+  resources:
+  - jaegers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - jaegertracing.io
+  resources:
+  - jaegers/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - kafka.strimzi.io
   resources:
@@ -182,37 +185,70 @@ rules:
   - patch
   - update
   - watch
-
-## Extra permissions
-## This is an extra set of permissions that the Jaeger Operator might make use of if granted
-
-## needed if support for injecting sidecars based on namespace annotation is required
 - apiGroups:
-  - ""
+  - logging.openshift.io
   resources:
-  - namespaces
+  - elasticsearch
   verbs:
-  - 'get'
-  - 'list'
-  - 'watch'
-
-## needed if support for injecting sidecars based on deployment annotation is required, across all namespaces
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
+  - create
+  - delete
   - get
   - list
   - patch
   - update
   - watch
-
-## needed only when .Spec.Ingress.Openshift.DelegateUrls is used
+- apiGroups:
+  - logging.openshift.io
+  resources:
+  - elasticsearches
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterrolebindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
   verbs:
   - create
   - delete
