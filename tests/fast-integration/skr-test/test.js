@@ -33,7 +33,7 @@ describe('SKR test', function() {
     options = skr.options;
   });
 
-  // Run the OIDC tests
+  // Run the OIDC tests.
   oidcE2ETest(getShootOptionsFunc, getShootInfoFunc);
 
   after('Cleanup the resources', async function() {
