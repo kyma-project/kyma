@@ -29,6 +29,7 @@ spec:
   host: foo.bar
   service:
     name: foo-service
+    namespace: foo-namespace
     port: 8080
   rules:
     - path: /.*
@@ -46,7 +47,7 @@ spec:
   v1alpha1
   </summary>
 
->**NOTE:** Since Kyma 2.5 the `v1alpha1` resource has been deprecated. However, you can still create it. It is stored as `v1beta1`. 
+>**NOTE:** Since Kyma 2.5 the `v1alpha1` resource has been deprecated. However, you can still create it. It is stored as `v1beta1`.
 
 ```yaml
 apiVersion: gateway.kyma-project.io/v1alpha1
@@ -81,17 +82,19 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.gateway** | **YES** | Specifies the Istio Gateway. |
 | **spec.host** | **YES** | Specifies the service's communication address for inbound external traffic. If only the leftmost label is provided, the default domain name will be used. |
 | **spec.service.name** | **NO** | Specifies the name of the exposed service. |
+| **spec.service.namespace** | **NO** | Specifies the namespace of the exposed service. |
 | **spec.service.port** | **NO** | Specifies the communication port of the exposed service. |
 | **spec.rules** | **YES** | Specifies the array of Oathkeeper access rules. |
 | **spec.rules.service** | **NO** | Services definitions at this level have higher precedence than the service definition at the **spec.service** level.|
 | **spec.rules.service.name** | **NO** | Specifies the name of the exposed service. |
+| **spec.rules.service.namespace** | **NO** | Specifies the namespace of the exposed service. |
 | **spec.rules.service.port** | **NO** | Specifies the communication port of the exposed service. |
 | **spec.rules.path** | **YES** | Specifies the path of the exposed service. |
 | **spec.rules.methods** | **NO** | Specifies the list of HTTP request methods available for **spec.rules.path**. |
 | **spec.rules.mutators** | **NO** | Specifies the array of [Oathkeeper mutators](https://www.ory.sh/docs/next/oathkeeper/pipeline/mutator). |
 | **spec.rules.accessStrategies** | **YES** | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/docs/next/oathkeeper/pipeline/authn). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, `allow`. |
 
->**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails. 
+>**CAUTION:** If `service` is not defined at **spec.service** level, all defined rules must have `service` defined at **spec.rules.service** level, otherwise the validation fails.
 
 ## Additional information
 
