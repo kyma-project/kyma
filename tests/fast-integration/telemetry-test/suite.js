@@ -6,7 +6,6 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
-  debug,
 } = require('../utils');
 const {
   logsPresentInLoki,

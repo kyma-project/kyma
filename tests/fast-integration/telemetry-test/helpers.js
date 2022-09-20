@@ -1,12 +1,19 @@
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {
-  waitForK8sObject,
-} = require('../utils');
+const {waitForK8sObject} = require('../utils');
+
+module.exports = {
+  loadTestData,
+  waitForLogPipelineStatusRunning,
+};
 
 function loadTestData(fileName) {
   return loadResourceFromFile(`./testdata/${fileName}`);
+}
+
+function waitForLogPipelineStatusRunning(name) {
+  return waitForLogPipelineStatusCondition(name, 'Running', 180000);
 }
 
 function loadResourceFromFile(file) {
@@ -14,15 +21,6 @@ function loadResourceFromFile(file) {
     encoding: 'utf8',
   });
   return k8s.loadAllYaml(yaml);
-}
-
-function checkLastCondition(logPipeline, conditionType) {
-  const conditions = logPipeline.status.conditions;
-  if (conditions.length === 0) {
-    return false;
-  }
-  const lastCondition = conditions[conditions.length - 1];
-  return lastCondition.type === conditionType;
 }
 
 function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
@@ -39,11 +37,11 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-function waitForLogPipelineStatusRunning(name) {
-  return waitForLogPipelineStatusCondition(name, 'Running', 180000);
+function checkLastCondition(logPipeline, conditionType) {
+  const conditions = logPipeline.status.conditions;
+  if (conditions.length === 0) {
+    return false;
+  }
+  const lastCondition = conditions[conditions.length - 1];
+  return lastCondition.type === conditionType;
 }
-
-module.exports = {
-  loadTestData,
-  waitForLogPipelineStatusRunning,
-};
