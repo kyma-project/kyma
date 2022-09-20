@@ -143,6 +143,8 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	if s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
+
+	resourceRequirements := getBuildResourceRequiremenets(s)
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
 	return batchv1.Job{
@@ -218,7 +220,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       resourceRequirements,
 							VolumeMounts:    s.getGitBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -244,6 +246,8 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 	if s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
+
+	resourceRequirements := getBuildResourceRequiremenets(s)
 	labels := s.functionLabels()
 
 	return batchv1.Job{
@@ -309,7 +313,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       resourceRequirements,
 							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -337,9 +341,23 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 	)
 }
 
+func getBuildResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
+	var resourceRequirements corev1.ResourceRequirements
+	if s.instance.Spec.ResourceConfiguration != nil &&
+		s.instance.Spec.ResourceConfiguration.Build != nil &&
+		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
+		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
+	}
+	return resourceRequirements
+}
+
 func (s *systemState) podLabels() map[string]string {
 	selectorLabels := s.deploymentSelectorLabels()
-	return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
+	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
+		return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
+	} else {
+		return selectorLabels
+	}
 }
 
 type buildDeploymentArgs struct {
@@ -403,7 +421,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 							Name:      functionContainerName,
 							Image:     imageName,
 							Env:       envs,
-							Resources: s.instance.Spec.ResourceConfiguration.Function.Resources,
+							Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name: volumeName,
 								/* needed in order to have python functions working:
@@ -487,7 +505,7 @@ func (s *systemState) getReplicas(defaultVal int32) *int32 {
 	return &defaultVal
 }
 
-//TODO do not negate
+// TODO do not negate
 func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
 	return len(s.deployments.Items) == 1 &&
 		equalDeployments(s.deployments.Items[0], d, isScalingEnabled(&s.instance))

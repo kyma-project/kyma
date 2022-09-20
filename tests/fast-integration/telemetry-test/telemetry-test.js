@@ -22,23 +22,29 @@ const testStartTimestamp = new Date().toISOString();
 // Load Deployments
 const regexFilterDeployment = loadResourceFromFile('./resources/deployments/regex-filter-deployment.yaml');
 const mockserverDeployment = loadResourceFromFile('./resources/deployments/mockserver.yaml');
+const spammerWorkloadPod = loadResourceFromFile('./resources/deployments/logs-workload.yaml');
 
 // Load Telemetry CR's
-const httpLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/http-logpipeline.yaml');
+const httpLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/http-logpipeline.yaml');
 const unknownPluginLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/unknown-plugin-logpipeline.yaml');
 const dropLabelsLogPipelineCR = loadResourceFromFile(
-    './resources/telemetry-custom-resources/loki-k8s-metadata-filter-drop-labels-logpipeline.yaml');
+    './resources/telemetry-custom-resources/loki-metadata-filter-drop-labels-logpipeline.yaml');
 const keepLabelsLogPipelineCR = loadResourceFromFile(
-    './resources/telemetry-custom-resources/loki-k8s-metadata-filter-keep-labels-logpipeline.yaml');
+    './resources/telemetry-custom-resources/loki-metadata-filter-keep-labels-logpipeline.yaml');
 const kubernetesCustomFilterLogPipelineCR = loadResourceFromFile(
     './resources/telemetry-custom-resources/kubernetes-custom-filter-logpipeline.yaml');
-const parserLogPipelineCR = loadResourceFromFile('./resources/telemetry-custom-resources/regex-logparser.yaml');
+const excludeIstioProxyLogPipelineCR = loadResourceFromFile(
+    './resources/telemetry-custom-resources/loki-exclude-istio-proxy-logpipeline.yaml');
+const regexParser = loadResourceFromFile(
+    './resources/telemetry-custom-resources/regex-logparser.yaml');
 
 // CR names
 const httpLogPipelineName = 'http-mockserver';
 const dropLabelsLogPipelineName = 'loki-keep-annotations-drop-labels';
 const keepLabelsLogPipelineName = 'loki-drop-annotations-keep-labels';
+const excludeIstioProxyLogPipelineName = 'exclude-istio-proxy';
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -71,21 +77,17 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 }
 
 async function prepareEnvironment() {
-  const lokiLogPipelinePromise = k8sApply(parserLogPipelineCR, telemetryNamespace);
-  const mockserverPromise = k8sApply(mockserverDeployment, mockserverNamespace);
-  const deploymentPromise = k8sApply(regexFilterDeployment, defaultNamespace);
-  await lokiLogPipelinePromise;
-  await mockserverPromise;
-  await deploymentPromise;
+  await k8sApply(regexParser, telemetryNamespace);
+  await k8sApply(mockserverDeployment, mockserverNamespace);
+  await k8sApply(regexFilterDeployment, defaultNamespace);
+  await k8sApply(spammerWorkloadPod, defaultNamespace);
 }
 
 async function cleanEnvironment() {
-  const logPipelinePromise = k8sDelete(parserLogPipelineCR, telemetryNamespace);
-  const mockserverPromise = k8sDelete(mockserverDeployment, mockserverNamespace);
-  const deploymentPromise = k8sDelete(regexFilterDeployment, defaultNamespace);
-  await logPipelinePromise;
-  await mockserverPromise;
-  await deploymentPromise;
+  await k8sDelete(regexParser, telemetryNamespace);
+  await k8sDelete(mockserverDeployment, mockserverNamespace);
+  await k8sDelete(regexFilterDeployment, defaultNamespace);
+  await k8sDelete(spammerWorkloadPod, defaultNamespace);
 }
 
 describe('Telemetry Operator tests', function() {
@@ -142,10 +144,10 @@ describe('Telemetry Operator tests', function() {
     }
   });
 
-  it('Should push the logs to the Loki output', async () => {
-    const labels = '{namespace="kyma-system"}';
+  it('Should push the logs from kyma-system namespace to the default Loki output', async () => {
+    const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-    assert.isTrue(logsPresent, 'No logs present in Loki');
+    assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
   });
 
   it('Should parse the logs using regex', async () => {
@@ -219,6 +221,29 @@ describe('Telemetry Operator tests', function() {
 
     it(`Should delete Loki LogPipeline '${dropLabelsLogPipelineName}'`, async () =>{
       await k8sDelete(dropLabelsLogPipelineCR, telemetryNamespace);
+    });
+  });
+
+  context('Should verify istio-proxy container and system logs are excluded', async () => {
+    it(`Should create Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
+      await k8sApply(excludeIstioProxyLogPipelineCR, telemetryNamespace);
+      await waitForLogPipelineStatusCondition(excludeIstioProxyLogPipelineName, 'Running', 180000);
+    });
+
+    it(`Should verify no system logs are pushed to Loki`, async () =>{
+      const labels = '{namespace="kyma-system", job="exclude-istio-proxy-telemetry-fluent-bit"}';
+      const logsFound = await logsPresentInLoki(labels, testStartTimestamp, 3);
+      assert.isFalse(logsFound, `No logs must present in Loki for labels: ${labels}`);
+    });
+
+    it(`Should verify no istio-proxy logs are pushed to Loki`, async () =>{
+      const labels = '{container="istio-proxy", job="exclude-istio-proxy-telemetry-fluent-bit"}';
+      const logsFound = await logsPresentInLoki(labels, testStartTimestamp, 3);
+      assert.isFalse(logsFound, `No logs must present in Loki for labels: ${labels}`);
+    });
+
+    it(`Should delete Loki LogPipeline '${keepLabelsLogPipelineName}'`, async () =>{
+      await k8sDelete(excludeIstioProxyLogPipelineCR, telemetryNamespace);
     });
   });
 });

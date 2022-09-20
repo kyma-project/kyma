@@ -27,6 +27,7 @@ import (
 	backendjetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	backendjetstreamv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/natsv2/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
