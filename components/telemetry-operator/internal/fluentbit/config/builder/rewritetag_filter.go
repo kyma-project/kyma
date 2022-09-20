@@ -44,6 +44,7 @@ func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, d
 		emitterName += ("-" + emitterPostfix)
 	}
 
+
 	var sectionBuilder = NewFilterSectionBuilder().
 		AddConfigParam("Name", "rewrite_tag").
 		AddConfigParam("Match", fmt.Sprintf("%s.*", defaults.InputTag)).
@@ -53,39 +54,20 @@ func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, d
 
 	containers := logPipeline.Spec.Input.Application.Containers
 	if len(containers.Include) > 0 {
-		sectionBuilder.AddConfigParam("Rule",
-			fmt.Sprintf("$kubernetes['container_name'] \"^(%s)$\" %s.$TAG true",
-				strings.Join(containers.Include, "|"), logPipeline.Name))
+		return sectionBuilder.
+			AddConfigParam("Rule", fmt.Sprintf("$kubernetes['container_name'] \"^(%s)$\" %s.$TAG true",
+				strings.Join(containers.Include, "|"), logPipeline.Name)).
+			Build()
 	}
 
 	if len(containers.Exclude) > 0 {
-		sectionBuilder.AddConfigParam("Rule",
-			fmt.Sprintf("$kubernetes['container_name'] \"^(?!%s$).*\" %s.$TAG true",
-				strings.Join(containers.Exclude, "$|"), logPipeline.Name))
+		return sectionBuilder.
+			AddConfigParam("Rule", fmt.Sprintf("$kubernetes['container_name'] \"^(?!%s$).*\" %s.$TAG true",
+				strings.Join(containers.Exclude, "$|"), logPipeline.Name)).
+			Build()
 	}
 
-	namespaces := logPipeline.Spec.Input.Application.Namespaces
-	if len(namespaces.Include) > 0 {
-		sectionBuilder.AddConfigParam("Rule",
-			fmt.Sprintf("$kubernetes['namespace_name'] \"^(%s)$\" %s.$TAG true",
-				strings.Join(namespaces.Include, "|"), logPipeline.Name))
-		return sectionBuilder.Build()
-	}
-
-	if len(namespaces.Exclude) > 0 {
-		sectionBuilder.AddConfigParam("Rule",
-			fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!%s$).*\" %s.$TAG true",
-				strings.Join(namespaces.Exclude, "$|"), logPipeline.Name))
-		return sectionBuilder.Build()
-	}
-
-	if namespaces.System {
-		sectionBuilder.AddConfigParam("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name))
-	} else {
-		sectionBuilder.AddConfigParam("Rule",
-			fmt.Sprintf("$kubernetes['namespace_name'] \"^(?!%s$).*\" %s.$TAG true",
-				strings.Join(systemNamespaces(), "$|"), logPipeline.Name))
-	}
-
-	return sectionBuilder.Build()
+	return sectionBuilder.
+		AddConfigParam("Rule", fmt.Sprintf("$log \"^.*$\" %s.$TAG true", logPipeline.Name)).
+		Build()
 }

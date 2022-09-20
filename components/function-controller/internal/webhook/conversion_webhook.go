@@ -177,7 +177,6 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 
-	//TODO: out.Profile
 	convertResourcesV1Alpha1ToV1Alpha2(in, out)
 	convertTemplateLabelsV1alpha1ToV1Alpha2(in, out)
 
@@ -198,23 +197,30 @@ func convertTemplateLabelsV1alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, ou
 }
 
 func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
-	if len(in.Spec.BuildResources.Limits) != 0 || len(in.Spec.BuildResources.Requests) != 0 {
-		if out.Spec.ResourceConfiguration == nil {
-			out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
-		}
-		if out.Spec.ResourceConfiguration.Build == nil {
-			out.Spec.ResourceConfiguration.Build = &serverlessv1alpha2.ResourceRequirements{}
-		}
+	functionResourcesPresetValue, functionResourcesPresetExists := in.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel]
+	buildResourcesExists := len(in.Spec.BuildResources.Limits) != 0 || len(in.Spec.BuildResources.Requests) != 0
+	functionResourcesExists := len(in.Spec.Resources.Limits) != 0 || len(in.Spec.Resources.Requests) != 0
+
+	buildResourcesNeeded := buildResourcesExists
+	functionResourcesNeeded := functionResourcesExists || functionResourcesPresetExists
+	if (functionResourcesNeeded || buildResourcesNeeded) && out.Spec.ResourceConfiguration == nil {
+		out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
+	}
+	if functionResourcesNeeded && out.Spec.ResourceConfiguration.Function == nil {
+		out.Spec.ResourceConfiguration.Function = &serverlessv1alpha2.ResourceRequirements{}
+	}
+	if buildResourcesNeeded && out.Spec.ResourceConfiguration.Build == nil {
+		out.Spec.ResourceConfiguration.Build = &serverlessv1alpha2.ResourceRequirements{}
+	}
+
+	if buildResourcesExists {
 		out.Spec.ResourceConfiguration.Build.Resources = &in.Spec.BuildResources
 	}
-	if len(in.Spec.Resources.Limits) != 0 || len(in.Spec.Resources.Requests) != 0 {
-		if out.Spec.ResourceConfiguration == nil {
-			out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
-		}
-		if out.Spec.ResourceConfiguration.Function == nil {
-			out.Spec.ResourceConfiguration.Function = &serverlessv1alpha2.ResourceRequirements{}
-		}
+	if functionResourcesExists {
 		out.Spec.ResourceConfiguration.Function.Resources = &in.Spec.Resources
+	}
+	if functionResourcesPresetExists {
+		out.Spec.ResourceConfiguration.Function.Profile = functionResourcesPresetValue
 	}
 }
 

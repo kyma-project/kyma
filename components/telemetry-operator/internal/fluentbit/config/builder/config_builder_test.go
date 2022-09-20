@@ -83,7 +83,12 @@ func TestMergeSectionsConfig(t *testing.T) {
     emitter_mem_buf_limit 10M
     emitter_name          foo-http
     emitter_storage.type  filesystem
-    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$|compass-system$).*" foo.$TAG true
+    rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" foo.$TAG true
+
+[FILTER]
+    name    grep
+    match   foo.*
+    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
 
 [FILTER]
     name   record_modifier
@@ -118,6 +123,9 @@ func TestMergeSectionsConfig(t *testing.T) {
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Input: telemetryv1alpha1.Input{
 				Application: telemetryv1alpha1.ApplicationInput{
+					Containers: telemetryv1alpha1.InputContainers{
+						Exclude: []string{"container1", "container2"},
+					},
 					KeepAnnotations: true,
 					DropLabels:      false,
 				},
