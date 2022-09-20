@@ -1,25 +1,14 @@
 package jetstreamv2
 
 import (
-	"sync"
-
-	cev2 "github.com/cloudevents/sdk-go/v2"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/nats-io/nats.go"
-	"go.uber.org/zap"
 )
 
 var _ Backend = &JetStream{}
-
-const (
-	jsHandlerName                      = "jetstream-handler"
-	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
-	MissingNATSSubscriptionMsgWithInfo = MissingNATSSubscriptionMsg + " for subject: %v"
-)
 
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
@@ -35,21 +24,9 @@ type Backend interface {
 	GetJetStreamSubjects(subjects []string) []string
 }
 
-// SubscriptionSubjectIdentifier is used to uniquely identify a Subscription subject.
-// It should be used only with JetStream backend.
-type SubscriptionSubjectIdentifier struct {
-	consumerName, namespacedSubjectName string
-}
-
 type JetStream struct {
 	Config        env.NatsConfig
-	conn          *nats.Conn
-	jsCtx         nats.JetStreamContext
-	client        cev2.Client
-	subscriptions map[SubscriptionSubjectIdentifier]backendnats.Subscriber
-	sinks         sync.Map
-	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
-	connClosedHandler backendnats.ConnClosedHandler
+	subscriptions map[string]backendnats.Subscriber
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector
 }
@@ -58,7 +35,7 @@ func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collec
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
-		subscriptions:    make(map[SubscriptionSubjectIdentifier]backendnats.Subscriber),
+		subscriptions:    make(map[string]backendnats.Subscriber),
 		metricsCollector: metricsCollector,
 	}
 }
@@ -79,8 +56,4 @@ func (js *JetStream) DeleteSubscription(_ *eventingv1alpha2.Subscription) error 
 func (js *JetStream) GetJetStreamSubjects(_ []string) []string {
 	var result []string
 	return result
-}
-
-func (js *JetStream) namedLogger() *zap.SugaredLogger {
-	return js.logger.WithContext().Named(jsHandlerName)
 }

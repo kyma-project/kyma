@@ -3,8 +3,6 @@ package bebv2
 import (
 	"fmt"
 
-	"go.uber.org/zap"
-
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -18,7 +16,6 @@ import (
 
 const (
 	bebHandlerName               = "beb-handler"
-	MaxBEBSubscriptionNameLength = 50
 )
 
 type HTTPStatusError struct {
@@ -92,8 +89,4 @@ func (b *BEB) SyncSubscription(_ *eventingv1alpha2.Subscription, _ eventtype.Cle
 // DeleteSubscription deletes the corresponding EMS subscription.
 func (b *BEB) DeleteSubscription(subscription *eventingv1alpha2.Subscription) error {
 	return nil
-}
-
-func (b *BEB) namedLogger() *zap.SugaredLogger {
-	return b.logger.WithContext().Named(bebHandlerName)
 }

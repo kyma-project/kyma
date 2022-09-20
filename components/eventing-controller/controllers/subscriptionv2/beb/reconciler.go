@@ -2,7 +2,6 @@ package beb
 
 import (
 	"context"
-	"time"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -43,7 +42,6 @@ type Reconciler struct {
 
 const (
 	reconcilerName       = "beb-subscription-reconciler"
-	requeueAfterDuration = time.Second * 2
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
