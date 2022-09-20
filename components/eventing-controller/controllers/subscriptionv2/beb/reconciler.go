@@ -41,7 +41,7 @@ type Reconciler struct {
 }
 
 const (
-	reconcilerName       = "beb-subscription-reconciler"
+	reconcilerName = "beb-subscription-reconciler"
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,

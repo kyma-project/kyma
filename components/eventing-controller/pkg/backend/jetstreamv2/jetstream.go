@@ -25,10 +25,10 @@ type Backend interface {
 }
 
 type JetStream struct {
-	Config        env.NatsConfig
-	subscriptions map[string]backendnats.Subscriber
-	logger            *logger.Logger
-	metricsCollector  *backendmetrics.Collector
+	Config           env.NatsConfig
+	subscriptions    map[string]backendnats.Subscriber
+	logger           *logger.Logger
+	metricsCollector *backendmetrics.Collector
 }
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *JetStream {

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	bebHandlerName               = "beb-handler"
+	bebHandlerName = "beb-handler"
 )
 
 type HTTPStatusError struct {

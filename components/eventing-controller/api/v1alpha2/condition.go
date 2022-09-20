@@ -30,10 +30,10 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
-	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
-	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
-	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
+	ConditionReasonSubscriptionActive    ConditionReason = "BEB Subscription active"
+	ConditionReasonSubscriptionDeleted   ConditionReason = "BEB Subscription deleted"
+	ConditionReasonAPIRuleStatusReady    ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady ConditionReason = "APIRule status not ready"
 )
 
 // initializeConditions sets unset conditions to Unknown.
