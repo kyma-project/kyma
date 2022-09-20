@@ -1,0 +1,113 @@
+# Compass Runtime Agent
+
+**Table of Contents**
+
+- [Design and architecture](#design-and-architecture)
+- [Building](#building)
+- [Running](#running)
+  - [Deploy a Kyma cluster locally](#deploy-a-kyma-cluster-locally)
+  - [Test setup](#test-setup---compass-runtime-agent-configuration)
+  - [Run the tests](#run-the-tests)
+- [Debugging](#debugging)
+  - [Running without cleanup](#running-without-cleanup)
+
+## Design and architecture
+
+The tests consist of:
+- [Test resources](../resources/charts/compass-runtime-agent-test/) used to perform the test
+- [Test runner](../test/application-connectivity-validator/) with all the test cases
+
+The tests are executed as a Kubernetes Job on a Kyma cluster where the tested Compass Runtime Agent is installed. The test Job is deployed in the `test` Namespace.
+
+![Compass Runtime Agent tests architecture](assets/compass-runtime-agent-tests-architecture.svg)
+
+The interactions between components are the following:
+
+1. Compass Runtime Agent periodically fetches certificates from Compass Connector.
+2. Compass Runtime Agent periodically fetches applications from Compass Director.
+3. Compass Runtime Agent Test sends GraphQL mutations to Compass Director to create, modify, or delete Applications.
+4. Compass Runtime Agent Test verifies whether corresponding Application CRs were created, modified, or deleted.
+5. Compass Runtime Agent Test verifies whether secret with certificates used for communication with Director was created.
+6. Compass Runtime Agent Test verifies whether secret with CA root certificate used by Istio Gateway was created.
+7. Compass Runtime Agent Test verifies CompassConnection CR contents.
+
+## Building
+
+Pipelines build the Compass Runtime Agent test using the **release** target from the `Makefile`.
+
+To build **and push** the Docker images of the tests, run:
+
+``` sh
+./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
+```
+
+This will build the following images:
+- `{DOCKER_PUSH_REPOSITORY}/compass-runtime-agent-test:{DOCKER_TAG}`
+
+## Running
+
+Tests can be run on any Kyma cluster with Compass Runtime Agent.
+
+Pipelines run the tests using the **test-compass-runtime-agent** target from the `Makefile`.
+
+### Deploy a Kyma cluster locally
+
+1. Provision a local Kubernetes cluster with k3d:
+   ```sh
+   kyma provision k3d
+   ```
+
+2. Install the minimal set of components required to run Compass Runtime Agent **for Kyma SKR (Compass mode)**:
+
+    ```bash
+    kyma deploy --components-file ./resources/installation-config/mini-kyma-skr.yaml --value global.disableLegacyConnectivity=true
+    ```
+
+   >**TIP:** Read more about Kyma installation in the [official Kyma documentation](https://kyma-project.io/docs/kyma/latest/02-get-started/01-quick-install/#install-kyma).
+
+### Test setup - Compass Runtime Agent configuration
+
+[The values.yaml](../resources/charts/compass-runtime-agent-test/values.yaml) file contains environment variables that are used in Compass tests. These values can be modified as needed.
+
+
+- APP_DIRECTOR_URL - Compass Director URL
+- APP_TESTING_TENANT - Tenant used in GraphQL calls
+- APP_SKIP_DIRECTOR_CERT_VERIFICATION - Sk
+- APP_OAUTH_CREDENTIALS_SECRET_NAME - Secret name for Compass OAuth credentials
+- APP_OAUTH_CREDENTIALS_NAMESPACE - Namespace for Compass OAuth credentials
+
+===============
+
+Compass Runtime Agent reads configuration from a Secret passed in the APP_AGENT_CONFIGURATION_SECRET environment variable. The Secret contains the following properties:
+- CONNECTOR_URL - Compass Connector URL
+- TOKEN - Token for authenticating GraphQL calls to Compass Connector
+- RUNTIME_ID - Identifier of the Runtime
+- TENANT - Tenant used in GraphQL calls to Compass Connector
+
+### Run the tests
+
+``` sh
+make test-compass-runtime-agent
+```
+
+By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.
+
+> **CAUTION:** If the names of your existing resources are the same as the names used in the tests, running this command overrides or removes the existing resources.
+
+## Debugging
+
+### Running without cleanup
+
+To run the tests without removing all the created resources afterwards, run them in the debugging mode.
+
+1. To start the tests in the debugging mode, run:
+
+   ``` shell
+   make test-compass-runtime-agent-debug
+   ```
+
+2. Once you've finished debugging, run:
+
+   ``` shell
+   make clean-test-compass-runtime-agent-test
+   ```
