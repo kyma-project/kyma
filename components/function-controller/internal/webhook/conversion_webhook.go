@@ -153,6 +153,7 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha1ToV1Alpha2(src, dst runtime.O
 	}
 
 	w.convertStatusV1Alpha1ToV1Alpha2(&in.Status, &out.Status)
+	cleanEmptyLabelsAndAnnotations(&out.ObjectMeta)
 	return nil
 }
 
@@ -222,9 +223,6 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 	if functionResourcesPresetExists {
 		out.Spec.ResourceConfiguration.Function.Profile = functionResourcesPresetValue
 		delete(out.ObjectMeta.Labels, serverlessv1alpha2.FunctionResourcesPresetLabel)
-		if len(out.ObjectMeta.Labels) == 0 {
-			out.ObjectMeta.Labels = nil
-		}
 	}
 }
 
@@ -306,7 +304,17 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 	}
 
 	w.convertStatusV1Alpha2ToV1Alpha1(&in.Status, out.Spec.Source, &out.Status)
+	cleanEmptyLabelsAndAnnotations(&out.ObjectMeta)
 	return nil
+}
+
+func cleanEmptyLabelsAndAnnotations(out *metav1.ObjectMeta) {
+	if len(out.Annotations) == 0 {
+		out.Annotations = nil
+	}
+	if len(out.Labels) == 0 {
+		out.Labels = nil
+	}
 }
 
 func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
@@ -358,9 +366,6 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
 		delete(out.ObjectMeta.Annotations, v1alpha1GitRepoNameAnnotation)
-		if len(out.ObjectMeta.Annotations) == 0 {
-			out.ObjectMeta.Annotations = nil
-		}
 	}
 
 	out.Spec.Source = repoName
