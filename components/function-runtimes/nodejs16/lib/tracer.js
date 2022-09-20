@@ -5,7 +5,7 @@ const { ParentBasedSampler,  AlwaysOnSampler, CompositePropagator, W3CTraceConte
 const { registerInstrumentations } = require( '@opentelemetry/instrumentation');
 const { NodeTracerProvider } = require( '@opentelemetry/sdk-trace-node');
 const { SimpleSpanProcessor } = require( '@opentelemetry/sdk-trace-base');
-const { JaegerExporter } = require( '@opentelemetry/exporter-jaeger');
+const { OTLPTraceExporter } =  require('@opentelemetry/exporter-trace-otlp-grpc');
 const { Resource } = require( '@opentelemetry/resources');
 const { SemanticResourceAttributes } = require( '@opentelemetry/semantic-conventions');
 const { B3Propagator, B3InjectEncoding } = require("@opentelemetry/propagator-b3");
@@ -27,10 +27,11 @@ function setupTracer(serviceName){
     return;
   }
 
-  const exporter = new JaegerExporter({
-    serviceName,
-    endpoint: jaegerServiceEndpoint,
-  });
+  const collectorOptions = {
+    url: jaegerServiceEndpoint
+  }
+
+  const exporter = new OTLPTraceExporter(collectorOptions);
 
   const provider = new NodeTracerProvider({
     resource: new Resource({

@@ -10,7 +10,7 @@
   "homepage": "https://github.com/serverless/serverless-kubeless#readme",
   "dependencies": {
     "@opentelemetry/api": "^0.18.0",
-    "@opentelemetry/exporter-jaeger": "^0.18.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.33.0",
     "@opentelemetry/instrumentation": "^0.18.0",
     "@opentelemetry/instrumentation-http": "^0.18.2",
     "@opentelemetry/node": "^0.18.0",
