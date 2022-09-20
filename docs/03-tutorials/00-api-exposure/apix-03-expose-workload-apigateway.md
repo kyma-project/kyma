@@ -25,7 +25,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/httpbin-gateway
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
@@ -43,6 +43,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: httpbin
+       namespace: $NAMESPACE
        port: 8000
      gateway: $GATEWAY
      rules:
@@ -62,6 +63,8 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
    ```
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
+
+   >**NOTE:** You may specify a Namespace for your service. If you omit it, the default is then the APIRule Namespace.
 
 3. Call the endpoint by sending a `GET` request to the HttpBin service:
 
@@ -102,10 +105,11 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      name: function
      namespace: $NAMESPACE
    spec:
-     gateway: $GATEWAY 
+     gateway: $GATEWAY
      host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      service:
        name: function
+       namespace: $NAMESPACE
        port: 80
      rules:
        - path: /function
@@ -116,6 +120,8 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
    ```
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
+
+   >**NOTE:** You may specify a Namespace for your service. If you omit it, the default is then the APIRule Namespace.
 
 3. Send a `GET` request to the Function:
 
