@@ -7,7 +7,7 @@ jobs:
     environment:
       name: release
     container:
-      image: eu.gcr.io/kyma-project/test-infra/kyma-integration:v20211027-f0dd11ca
+      image: eu.gcr.io/kyma-project/test-infra/githubrelease:v20220916-ba91989d
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -33,6 +33,17 @@ jobs:
               echo "The ${NEXT_RELEASE} is already published on github. Stopping."
               exit 1
           fi
+      - name: Generate changelog
+        id: changelog
+        env:
+          CONFIG_FILE: .github/package.json
+          GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export NEW_RELEASE_TITLE=$(cat "VERSION")
+          TAG_LIST_STRING=$(git describe --tags $(git rev-list --tags) --always | grep -F . | grep -v "-")
+          IFS=" " read -r -a TAG_LIST <<< "${TAG_LIST_STRING}"
+          export FROM_TAG=${TAG_LIST[0]}
+          /app/generate-release-changelog.sh
       - name: Make Kyma release
         id: make_release
         env:
@@ -40,7 +51,8 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: 'creds.json'
         run: |
           echo $GOOGLE_APPLICATION_CREDENTIALS_JSON | base64 --decode > creds.json
-          /prow-tools/githubrelease -targetCommit=${{ github.ref }} \
+          /githubrelease -targetCommit=${{ github.ref }} \
+                                    -kymaChangelog=.changelog/release-changelog.md \
                                     -githubRepoOwner=${{ github.event.repository.owner.login }} \
                                     -githubRepoName=${{ github.event.repository.name }} \
                                     -githubAccessToken=${{ secrets.GITHUB_TOKEN }} \
