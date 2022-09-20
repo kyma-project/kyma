@@ -307,7 +307,6 @@ spec:
                           type: string
                         namespace:
                           description: Namespace of the service, if you omit it, the default changes to APIRule Namespace 
-                            to APIRule namespace
                           type: string
                         port:
                           description: Port of the service to expose
