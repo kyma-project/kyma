@@ -37,9 +37,11 @@ spec:
 {{- tpl (toYaml .Values.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
 
   values:
+{{- if .Capabilities.APIVersions.Has "k3s.cattle.io/v1/Addon" }}
     cni:
       cniConfDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
       cniBinDir: /bin
+{{- end }}
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}
     pilot:
