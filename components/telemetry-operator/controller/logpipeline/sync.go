@@ -45,7 +45,7 @@ func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.Log
 
 	sectionsChanged, err := s.syncSectionsConfigMap(ctx, newPipeline)
 	if err != nil {
-		log.Error(err, "Failed to sync Sections ConfigMap")
+		log.Error(err, "Failed to sync sections")
 		return false, err
 	}
 
@@ -57,32 +57,31 @@ func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.Log
 
 	variablesChanged, err := s.syncReferencedSecrets(ctx, allPipelines)
 	if err != nil {
-		log.Error(err, "Failed to sync variables")
+		log.Error(err, "Failed to sync referenced secrets")
 		return false, err
 	}
 
 	return sectionsChanged || filesChanged || variablesChanged, nil
 }
 
-// Synchronize LogPipeline with ConfigMap of daemonSetHelper sections (Input, Filter and Output).
-func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *syncer) syncSectionsConfigMap(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.SectionsConfigMap)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to get section configmap: %w", err)
 	}
 
 	changed := false
-	cmKey := logPipeline.Name + ".conf"
-	if logPipeline.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, sectionsFinalizer) {
+	cmKey := pipeline.Name + ".conf"
+	if pipeline.DeletionTimestamp != nil {
+		if cm.Data != nil && controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer) {
 			delete(cm.Data, cmKey)
-			controllerutil.RemoveFinalizer(logPipeline, sectionsFinalizer)
+			controllerutil.RemoveFinalizer(pipeline, sectionsFinalizer)
 			changed = true
 		}
 	} else {
-		newConfig, err := builder.BuildFluentBitConfig(logPipeline, s.config.PipelineDefaults)
+		newConfig, err := builder.BuildFluentBitConfig(pipeline, s.config.PipelineDefaults)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("unable to build section: %w", err)
 		}
 		if cm.Data == nil {
 			cm.Data = map[string]string{cmKey: newConfig}
@@ -91,8 +90,8 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 			cm.Data[cmKey] = newConfig
 			changed = true
 		}
-		if !controllerutil.ContainsFinalizer(logPipeline, sectionsFinalizer) {
-			controllerutil.AddFinalizer(logPipeline, sectionsFinalizer)
+		if !controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer) {
+			controllerutil.AddFinalizer(pipeline, sectionsFinalizer)
 			changed = true
 		}
 	}
@@ -101,25 +100,24 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemet
 		return false, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to update section configmap: %w", err)
 	}
 
 	return changed, nil
 }
 
-// Synchronize file references with Fluent Bit files ConfigMap.
-func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *syncer) syncFilesConfigMap(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.FilesConfigMap)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to get files configmap: %w", err)
 	}
 
 	changed := false
-	for _, file := range logPipeline.Spec.Files {
-		if logPipeline.DeletionTimestamp != nil {
+	for _, file := range pipeline.Spec.Files {
+		if pipeline.DeletionTimestamp != nil {
 			if _, hasKey := cm.Data[file.Name]; hasKey {
 				delete(cm.Data, file.Name)
-				controllerutil.RemoveFinalizer(logPipeline, filesFinalizer)
+				controllerutil.RemoveFinalizer(pipeline, filesFinalizer)
 				changed = true
 			}
 		} else {
@@ -130,8 +128,8 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 				cm.Data[file.Name] = file.Content
 				changed = true
 			}
-			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
-				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
+			if !controllerutil.ContainsFinalizer(pipeline, filesFinalizer) {
+				controllerutil.AddFinalizer(pipeline, filesFinalizer)
 				changed = true
 			}
 		}
@@ -141,17 +139,16 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv
 		return false, nil
 	}
 	if err = s.Update(ctx, &cm); err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to update files configmap: %w", err)
 	}
 
 	return changed, nil
 }
 
-// syncReferencedSecrets copies referenced secrets to global Fluent Bit environment secret.
 func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, error) {
 	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.config.EnvSecret)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to get env secret: %w", err)
 	}
 
 	newSecret := oldSecret
@@ -163,8 +160,8 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 		}
 
 		for _, field := range lookupSecretRefFields(&logPipelines.Items[i]) {
-			if err := s.copySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data); err != nil {
-				return false, err
+			if copyErr := s.copySecretData(ctx, field.secretKeyRef, field.targetSecretKey, newSecret.Data); copyErr != nil {
+				return false, fmt.Errorf("unable to copy secret data: %w", copyErr)
 			}
 		}
 	}
@@ -175,7 +172,7 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 	}
 
 	if err = s.Update(ctx, &newSecret); err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to update env secret: %w", err)
 	}
 	return secretChanged, nil
 }
