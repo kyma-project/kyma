@@ -38,9 +38,8 @@ spec:
 
   values:
     cni:
-      chained: false
-      repair:
-        enabled: false
+      cniConfDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
+      cniBinDir: /bin
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}
     pilot:
