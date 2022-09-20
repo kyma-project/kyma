@@ -168,7 +168,12 @@ func TestMergeSectionsConfigCustomOutput(t *testing.T) {
     emitter_mem_buf_limit 10M
     emitter_name          foo-stdout
     emitter_storage.type  filesystem
-    rule                  $kubernetes['namespace_name'] "^(?!kyma-system$|kyma-integration$|kube-system$|istio-system$|compass-system$).*" foo.$TAG true
+    rule                  $log "^.*$" foo.$TAG true
+
+[FILTER]
+    name    grep
+    match   foo.*
+    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
 
 [FILTER]
     name   record_modifier

@@ -7,10 +7,6 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
-func systemNamespaces() []string {
-	return []string{"kyma-system", "kyma-integration", "kube-system", "istio-system", "compass-system"}
-}
-
 func getEmitterPostfixByOutput(output *telemetryv1alpha1.Output) string {
 	if output.IsHTTPDefined() {
 		return "http"
@@ -34,8 +30,7 @@ func getEmitterPostfixByOutput(output *telemetryv1alpha1.Output) string {
 	return postfix.Value
 }
 
-// CreateRewriteTagFilter creates the Fluent Bit Rewrite Tag Filter section
-func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
+func createRewriteTagFilter(logPipeline *telemetryv1alpha1.LogPipeline, defaults PipelineDefaults) string {
 	emitterName := logPipeline.Name
 	output := &logPipeline.Spec.Output
 	emitterPostfix := getEmitterPostfixByOutput(output)
@@ -43,7 +38,6 @@ func createRewriteTagFilterSection(logPipeline *telemetryv1alpha1.LogPipeline, d
 	if emitterPostfix != "" {
 		emitterName += ("-" + emitterPostfix)
 	}
-
 
 	var sectionBuilder = NewFilterSectionBuilder().
 		AddConfigParam("Name", "rewrite_tag").
