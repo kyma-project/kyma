@@ -6,12 +6,12 @@ import (
 )
 
 // compile time check
-var _ fmt.Stringer = &NatsConfig{}
+var _ fmt.Stringer = &NATSConfig{}
 
-const JetstreamSubjectPrefix = "kyma"
+const JetStreamSubjectPrefix = "kyma"
 
-// NatsConfig represents the environment config for the Event Publisher to NATS.
-type NatsConfig struct {
+// NATSConfig represents the environment config for the Event Publisher to NATS.
+type NATSConfig struct {
 	Port                 int           `envconfig:"INGRESS_PORT" default:"8080"`
 	URL                  string        `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
 	RetryOnFailedConnect bool          `envconfig:"RETRY_ON_FAILED_CONNECT" default:"true"`
@@ -29,9 +29,9 @@ type NatsConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 }
 
-// ToConfig converts to a default BEB BebConfig
-func (c *NatsConfig) ToConfig() *BebConfig {
-	cfg := &BebConfig{
+// ToConfig converts to a default BEB BEBConfig
+func (c *NATSConfig) ToConfig() *BEBConfig {
+	cfg := &BEBConfig{
 		BEBNamespace:    c.LegacyNamespace,
 		EventTypePrefix: c.EventTypePrefix,
 	}
@@ -39,6 +39,6 @@ func (c *NatsConfig) ToConfig() *BebConfig {
 }
 
 // String implements the fmt.Stringer interface
-func (c *NatsConfig) String() string {
+func (c *NATSConfig) String() string {
 	return fmt.Sprintf("%#v", c)
 }

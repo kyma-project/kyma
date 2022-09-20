@@ -38,7 +38,7 @@ type Commander struct {
 	cancel           context.CancelFunc
 	metricsCollector *metrics.Collector
 	logger           *logger.Logger
-	envCfg           *env.NatsConfig
+	envCfg           *env.NATSConfig
 	opts             *options.Options
 	jetstreamMode    bool
 }
@@ -46,7 +46,7 @@ type Commander struct {
 // NewCommander creates the Commander for publisher to NATS.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger, jetstreamMode bool) *Commander {
 	return &Commander{
-		envCfg:           new(env.NatsConfig),
+		envCfg:           new(env.NATSConfig),
 		logger:           logger,
 		metricsCollector: metricsCollector,
 		opts:             opts,
@@ -85,11 +85,11 @@ func (c *Commander) Start() error {
 	defer connection.Close()
 
 	// configure the message sender
-	var messageSenderToNats sender.GenericSender
+	var messageSenderToNATS sender.GenericSender
 	if c.jetstreamMode {
-		messageSenderToNats = sender.NewJetstreamMessageSender(ctx, connection, c.envCfg, c.logger)
+		messageSenderToNATS = sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
 	} else {
-		messageSenderToNats = sender.NewNatsMessageSender(ctx, connection, c.logger)
+		messageSenderToNATS = sender.NewNATSMessageSender(ctx, connection, c.logger)
 	}
 
 	// cluster config
@@ -124,7 +124,7 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewHandler(messageReceiver, &messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := nats.NewHandler(messageReceiver, &messageSenderToNATS, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}

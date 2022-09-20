@@ -94,7 +94,7 @@ components:
           cpu: 2000m
           memory: 1024Mi
         requests:
-          cpu: 10m
+          cpu: 100m
           memory: 128Mi
       strategy:
         rollingUpdate:
@@ -112,7 +112,7 @@ components:
           cpu: 500m
           memory: 1024Mi
         requests:
-          cpu: 10m
+          cpu: 100m
           memory: 512Mi
       securityContext:
         runAsUser: 65534
