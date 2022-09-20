@@ -366,7 +366,7 @@ config:
   inputs: |
     [INPUT]
         Name tail
-        Alias tail-tele
+        Alias tele-tail
         Path /var/log/containers/*.log
         multiline.parser docker, cri, go, python, java
         Tag tele.*
@@ -380,7 +380,7 @@ config:
         Name tail
         Path /null.log
         Tag null.*
-        Alias tail-dummy
+        Alias null-dummy
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
