@@ -336,19 +336,31 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 }
 
 func convertResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	convertBuildResourcesV1Alpha2ToV1Alpha1(in, out)
+	convertFunctionResourcesV1Alpha2ToV1Alpha1(in, out)
+}
+
+func convertBuildResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
 	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil && in.Spec.ResourceConfiguration.Build.Resources != nil {
 		out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
 	}
+}
+
+func convertFunctionResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
 	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Function != nil {
 		if in.Spec.ResourceConfiguration.Function.Resources != nil {
 			out.Spec.Resources = *in.Spec.ResourceConfiguration.Function.Resources
 		}
-		if in.Spec.ResourceConfiguration.Function.Profile != "" {
-			if out.ObjectMeta.Labels == nil {
-				out.ObjectMeta.Labels = map[string]string{}
-			}
-			out.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel] = in.Spec.ResourceConfiguration.Function.Profile
+		convertFunctionResourcesProfileV1Alpha2ToV1Alpha1(in, out)
+	}
+}
+
+func convertFunctionResourcesProfileV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	if in.Spec.ResourceConfiguration.Function.Profile != "" {
+		if out.ObjectMeta.Labels == nil {
+			out.ObjectMeta.Labels = map[string]string{}
 		}
+		out.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel] = in.Spec.ResourceConfiguration.Function.Profile
 	}
 }
 
