@@ -1,4 +1,4 @@
-package jetstream
+package jetstreamv2
 
 import (
 	"sync"
@@ -7,7 +7,7 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	backendnatsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/natsv2"
+	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -23,7 +23,7 @@ const (
 
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
-	Initialize(connCloseHandler backendnatsv2.ConnClosedHandler) error
+	Initialize(connCloseHandler backendnats.ConnClosedHandler) error
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of JetStream.
 	SyncSubscription(subscription *eventingv1alpha2.Subscription) error
@@ -46,10 +46,10 @@ type JetStream struct {
 	conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client
-	subscriptions map[SubscriptionSubjectIdentifier]backendnatsv2.Subscriber
+	subscriptions map[SubscriptionSubjectIdentifier]backendnats.Subscriber
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
-	connClosedHandler backendnatsv2.ConnClosedHandler
+	connClosedHandler backendnats.ConnClosedHandler
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector
 }
@@ -58,12 +58,12 @@ func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collec
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
-		subscriptions:    make(map[SubscriptionSubjectIdentifier]backendnatsv2.Subscriber),
+		subscriptions:    make(map[SubscriptionSubjectIdentifier]backendnats.Subscriber),
 		metricsCollector: metricsCollector,
 	}
 }
 
-func (js *JetStream) Initialize(connCloseHandler backendnatsv2.ConnClosedHandler) error {
+func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) error {
 	return nil
 }
 

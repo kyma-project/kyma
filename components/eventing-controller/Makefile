@@ -21,6 +21,8 @@ ifeq ($(shell echo $(ENABLE_NEW_CRD_VERSION)), true)
 CRD_OPTIONS ?= "crd"
 MANIFEST_PATH ?= "./..."
 else
+# If new ENABLE_NEW_CRD_VERSION is disabled then do not generate changes
+# for v1alpha2 in yaml files
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 MANIFEST_PATH ?= "./api/v1alpha1"
 endif
