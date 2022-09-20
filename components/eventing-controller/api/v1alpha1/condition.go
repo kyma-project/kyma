@@ -334,7 +334,7 @@ func ConditionsEquals(existing, expected []Condition) bool {
 	return true
 }
 
-// ConditionsEquals checks if two conditions are equal.
+// ConditionEquals checks if two conditions are equal.
 func ConditionEquals(existing, expected Condition) bool {
 	isTypeEqual := existing.Type == expected.Type
 	isStatusEqual := existing.Status == expected.Status

@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/nats"
 )
 
 func main() {
@@ -52,17 +51,13 @@ func main() {
 	metricsCollector.RegisterMetrics()
 
 	var natsSubMgr subscriptionmanager.Manager
-	natsConfig := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
-	if opts.EnableJetStreamBackend {
-		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
-		if err := jetstream.AddToScheme(scheme); err != nil {
-			setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "jetstream mode", opts.EnableJetStreamBackend, "error", err)
-		}
-	} else {
-		natsSubMgr = nats.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
-		if err := nats.AddToScheme(scheme); err != nil {
-			setupLogger.Fatalw("Failed to start subscription manager", "backend", "jetstream mode", opts.EnableJetStreamBackend, v1alpha1.NatsBackendType, "error", err)
-		}
+	natsConfig, err := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
+	if err != nil {
+		setupLogger.Fatalw("Failed to load configuration", "error", err)
+	}
+	natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
+	if err := jetstream.AddToScheme(scheme); err != nil {
+		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
 	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
@@ -83,7 +78,7 @@ func main() {
 	}
 
 	if err := natsSubMgr.Init(mgr); err != nil {
-		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NatsBackendType, "jetstream mode", opts.EnableJetStreamBackend, "error", err)
+		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
 	if err := bebSubMgr.Init(mgr); err != nil {

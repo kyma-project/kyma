@@ -19,9 +19,8 @@ const (
 	argNameHealthEndpoint  = "health-check-endpoint"
 
 	// All the available environment variables.
-	envNameLogFormat          = "APP_LOG_FORMAT"
-	envNameLogLevel           = "APP_LOG_LEVEL"
-	envEnableJetStreamBackend = "ENABLE_JETSTREAM_BACKEND"
+	envNameLogFormat = "APP_LOG_FORMAT"
+	envNameLogLevel  = "APP_LOG_LEVEL"
 )
 
 // Options represents the controller options.
@@ -43,9 +42,8 @@ type Args struct {
 
 // Env represents the controller environment variables.
 type Env struct {
-	LogFormat              string `envconfig:"APP_LOG_FORMAT" default:"json"`
-	LogLevel               string `envconfig:"APP_LOG_LEVEL" default:"warn"`
-	EnableJetStreamBackend bool   `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
+	LogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
+	LogLevel  string `envconfig:"APP_LOG_LEVEL" default:"warn"`
 }
 
 // New returns a new Options instance.
@@ -73,7 +71,7 @@ func (o *Options) Parse() error {
 
 // String implements the fmt.Stringer interface.
 func (o Options) String() string {
-	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v %s=%v",
+	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v",
 		argNameMaxReconnects, o.MaxReconnects,
 		argNameMetricsAddr, o.MetricsAddr,
 		argNameReconnectWait, o.ReconnectWait,
@@ -81,7 +79,6 @@ func (o Options) String() string {
 		argNameProbeAddr, o.ProbeAddr,
 		argNameReadyEndpoint, o.ReadyEndpoint,
 		argNameHealthEndpoint, o.HealthEndpoint,
-		envEnableJetStreamBackend, o.EnableJetStreamBackend,
 		envNameLogFormat, o.LogFormat,
 		envNameLogLevel, o.LogLevel,
 	)

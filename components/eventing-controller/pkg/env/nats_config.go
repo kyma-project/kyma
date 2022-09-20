@@ -27,7 +27,6 @@ type NatsConfig struct {
 	IdleConnTimeout     time.Duration `envconfig:"IDLE_CONN_TIMEOUT" default:"10s"`
 
 	// JetStream-specific configs
-	EnableJetStreamBackend bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
 	// Name of the JetStream stream where all events are stored.
 	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
 	// Storage type of the stream, memory or file.
@@ -52,13 +51,14 @@ type NatsConfig struct {
 	JSConsumerDeliverPolicy string `envconfig:"JS_CONSUMER_DELIVER_POLICY" default:"new"`
 }
 
-func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {
+func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (NatsConfig, error) {
 	cfg := NatsConfig{
 		MaxReconnects: maxReconnects,
 		ReconnectWait: reconnectWait,
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
+		return NatsConfig{}, err
 		log.Fatalf("Invalid configuration: %v", err)
 	}
-	return cfg
+	return cfg, nil
 }
