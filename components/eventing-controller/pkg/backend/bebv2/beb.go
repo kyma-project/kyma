@@ -14,10 +14,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
-const (
-	bebHandlerName = "beb-handler"
-)
-
 type HTTPStatusError struct {
 	StatusCode int
 }
