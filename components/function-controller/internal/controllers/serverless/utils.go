@@ -218,7 +218,7 @@ func mapsEqual(existing, expected map[string]string) bool {
 	return true
 }
 
-//TODO refactor to make this code more readable
+// TODO refactor to make this code more readable
 func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
 	return len(existing.Spec.Template.Spec.Containers) == 1 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&

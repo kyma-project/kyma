@@ -34,7 +34,7 @@ var (
 	setupLog = ctrlzap.New().WithName("setup")
 )
 
-//nolint
+// nolint
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
