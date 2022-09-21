@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -107,12 +106,10 @@ func main() {
 
 		if err = (&v1alpha1.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLogger.Fatalw("Failed to create webhook", "error", err)
-			os.Exit(1)
 		}
 
 		if err = (&v1alpha2.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLogger.Fatalw("Failed to create webhook", "error", err)
-			os.Exit(1)
 		}
 	}
 

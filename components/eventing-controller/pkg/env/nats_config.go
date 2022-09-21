@@ -51,6 +51,9 @@ type NatsConfig struct {
 	//   after the consumer was created.
 	JSConsumerDeliverPolicy string `envconfig:"JS_CONSUMER_DELIVER_POLICY" default:"new"`
 
+	// EnableNewCRDVersion changes the Subscription CRD to v1alpha2
+	// Redefining the flag to re-use ENV:ENABLE_NEW_CRD_VERSION instead of updated interfaces to pass the
+	// flag from config.go to NATS instance.
 	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
