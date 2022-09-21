@@ -155,17 +155,3 @@ data:
     {{- with .Values.nats.limits.lameDuckDuration }}
     lame_duck_duration: {{ . }}
     {{- end }}
-
-    {{- if .Values.auth.enabled }}
-    ##################
-    #                #
-    # Authorization  #
-    #                #
-    ##################
-    {{- if .Values.auth.resolver }}
-    {{- if eq .Values.auth.resolver.type "memory" }}
-    resolver: MEMORY
-    include "accounts/{{ .Values.auth.resolver.secret.key }}"
-    {{- end }}
-    {{- end }}
-    {{- end }}
