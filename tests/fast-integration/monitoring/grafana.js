@@ -77,7 +77,6 @@ async function setGrafanaProxy() {
   info('Checking grafana redirect to grafana URL');
   const res = await checkGrafanaRedirect('https://grafana.', 200);
   assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
- 
 }
 
 async function resetGrafanaProxy(isSkr) {
