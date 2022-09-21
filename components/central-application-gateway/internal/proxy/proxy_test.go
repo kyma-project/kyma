@@ -258,7 +258,12 @@ func TestProxyRequest(t *testing.T) {
 					Service:     "service",
 					Entry:       "entry",
 				}, path, nil
-			}, createProxyConfig(10))
+			},
+				func(url *url.URL) (*url.URL, apperrors.AppError) {
+					return url, nil
+				},
+				createProxyConfig(10))
+
 			rr := httptest.NewRecorder()
 
 			// when
@@ -297,6 +302,10 @@ func TestProxy(t *testing.T) {
 		return apiIdentifier, path, nil
 	}
 
+	fakeGwExtractor := func(url *url.URL) (*url.URL, apperrors.AppError) {
+		return url, nil
+	}
+
 	t.Run("should fail with Bad Gateway error when failed to get OAuth token", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
@@ -331,7 +340,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, fakeGwExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -381,7 +390,7 @@ func TestProxy(t *testing.T) {
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
 		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock)
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, fakePathExtractor, fakeGwExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -445,6 +454,7 @@ func newProxyForTest(
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	pathExtractorFunc pathExtractorFunc,
+	extractGatewayFunc gatewayURLExtractorFunc,
 	proxyConfig Config) http.Handler {
 
 	return &proxy{
@@ -453,6 +463,7 @@ func newProxyForTest(
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		extractPathFunc:              pathExtractorFunc,
+		extractGatewayFunc:           extractGatewayFunc,
 		apiExtractor:                 apiExtractor,
 	}
 }
