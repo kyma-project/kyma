@@ -1,7 +1,6 @@
 package env
 
 import (
-	"log"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -57,7 +56,6 @@ func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (NatsConfig, 
 		ReconnectWait: reconnectWait,
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
-		log.Fatalf("Invalid configuration: %v", err)
 		return NatsConfig{}, err
 	}
 	return cfg, nil
