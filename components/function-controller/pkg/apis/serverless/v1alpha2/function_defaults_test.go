@@ -170,6 +170,10 @@ func TestSetDefaults(t *testing.T) {
 						Build:    ResourceRequirementsBuilder{}.Limits("1200m", "12000Mi").Requests("1200m", "12000Mi").Build(),
 					},
 					Replicas: &two,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &two,
+					},
 				},
 			},
 		},
