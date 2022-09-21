@@ -15,24 +15,24 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestNatsMessageSender(t *testing.T) {
+func TestNATSMessageSender(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
 		name                      string
-		givenNatsConnectionClosed bool
+		givenNATSConnectionClosed bool
 		wantError                 bool
 		wantStatusCode            int
 	}{
 		{
 			name:                      "send should succeed if NATS connection is open",
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantError:                 false,
 			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send should fail if NATS connection is not open",
-			givenNatsConnectionClosed: true,
+			givenNATSConnectionClosed: true,
 			wantError:                 true,
 			wantStatusCode:            http.StatusBadGateway,
 		},
@@ -42,7 +42,7 @@ func TestNatsMessageSender(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			natsServer := testingutils.StartNatsServer(false)
+			natsServer := testingutils.StartNATSServer(false)
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
 
@@ -56,7 +56,7 @@ func TestNatsMessageSender(t *testing.T) {
 			defer func() { connection.Close() }()
 
 			receive := make(chan bool, 1)
-			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
+			validator := testingutils.ValidateNATSMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
 			testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
 			ce := createCloudEvent(t)
@@ -64,9 +64,9 @@ func TestNatsMessageSender(t *testing.T) {
 			mockedLogger, _ := logger.New("json", "info")
 
 			ctx := context.Background()
-			sender := NewNatsMessageSender(context.Background(), connection, mockedLogger)
+			sender := NewNATSMessageSender(context.Background(), connection, mockedLogger)
 
-			if tc.givenNatsConnectionClosed {
+			if tc.givenNATSConnectionClosed {
 				connection.Close()
 			}
 

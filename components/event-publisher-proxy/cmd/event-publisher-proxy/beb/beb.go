@@ -35,7 +35,7 @@ const (
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
-	envCfg           *env.BebConfig
+	envCfg           *env.BEBConfig
 	logger           *logger.Logger
 	metricsCollector *metrics.Collector
 	opts             *options.Options
@@ -46,7 +46,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 	return &Commander{
 		metricsCollector: metricsCollector,
 		logger:           logger,
-		envCfg:           new(env.BebConfig),
+		envCfg:           new(env.BEBConfig),
 		opts:             opts,
 	}
 }
@@ -75,7 +75,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := sender.NewBebMessageSender(c.envCfg.EmsPublishURL, client)
+	messageSender := sender.NewBEBMessageSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

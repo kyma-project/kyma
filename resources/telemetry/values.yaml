@@ -4,7 +4,7 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "PR-15382"
+      version: "5f79928b"
     telemetry_operator:
       name: "telemetry-operator"
       version: "PR-15428"

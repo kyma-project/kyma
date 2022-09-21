@@ -58,16 +58,10 @@ spec:
 {{- end }}
       # Common volumes for the containers.
       volumes:
-      ### the secret that holds account data ###
-      {{- if and .Values.auth.enabled .Values.auth.resolver }}
-      - name: resolver-volume
-        secret:
-          secretName: {{ .Values.auth.resolver.secret.name }}
-      {{- end }}
-
       - name: config-volume
         configMap:
           name: {{ include "nats.fullname" . }}-config
+
       # Local volume shared with the reloader.
       - name: pid
         emptyDir: {}
@@ -138,11 +132,6 @@ spec:
           - containerPort: 7777
             name: metrics
       {{- end }}
-      ###################
-      #                 #
-      #   NATS Server   #
-      #                 #
-      ###################
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
@@ -205,14 +194,6 @@ spec:
         {{- end }}
         {{- end }}
         volumeMounts:
-        ### the secret that holds account data ###
-          {{- if and .Values.auth.enabled .Values.auth.resolver }}
-          {{- if eq .Values.auth.resolver.type "memory" }}
-          - name: resolver-volume
-            mountPath: /etc/nats-config/accounts
-          {{- end }}
-          {{- end }}
-
           - name: config-volume
             mountPath: /etc/nats-config
           - name: pid

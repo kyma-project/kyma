@@ -1,13 +1,11 @@
 const {
   getEnvOrDefault,
-  info,
 } = require('../utils');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
@@ -60,7 +58,6 @@ function monitoringTests() {
 
 async function exposeGrafana() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping setting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
@@ -69,7 +66,6 @@ async function exposeGrafana() {
 
 async function unexposeGrafana(isSkr = false) {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 

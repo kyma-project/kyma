@@ -171,7 +171,7 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 	}
 
 	var result *unstructured.Unstructured
-	err = retry.WithIgnoreOnConflict(retry.DefaultBackoff, func() error {
+	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		var errUpdate error
 		result, errUpdate = r.ResCli.Update(context.Background(), unstructuredObj, metav1.UpdateOptions{})
 		return errUpdate

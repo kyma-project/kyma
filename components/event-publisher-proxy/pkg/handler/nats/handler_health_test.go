@@ -12,19 +12,19 @@ import (
 func TestHandlerHealth(t *testing.T) {
 	testCases := []struct {
 		name                    string
-		givenNatsServerShutdown bool
+		givenNATSServerShutdown bool
 		wantLivenessStatusCode  int
 		wantReadinessStatusCode int
 	}{
 		{
 			name:                    "NATS handler is healthy",
-			givenNatsServerShutdown: false,
+			givenNATSServerShutdown: false,
 			wantLivenessStatusCode:  health.StatusCodeHealthy,
 			wantReadinessStatusCode: health.StatusCodeHealthy,
 		},
 		{
 			name:                    "NATS handler is unhealthy",
-			givenNatsServerShutdown: true,
+			givenNATSServerShutdown: true,
 			wantLivenessStatusCode:  health.StatusCodeHealthy,
 			wantReadinessStatusCode: health.StatusCodeNotHealthy,
 		},
@@ -34,13 +34,13 @@ func TestHandlerHealth(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
+			for _, serverMode := range testingutils.NATSServerModes {
 				t.Run(serverMode.Name, func(t *testing.T) {
-					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetstreamEnabled))
+					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetStream(serverMode.JetStreamEnabled))
 					defer handlerMock.Stop()
 
-					if tc.givenNatsServerShutdown {
-						handlerMock.ShutdownNatsServerAndWait()
+					if tc.givenNATSServerShutdown {
+						handlerMock.ShutdownNATSServerAndWait()
 					}
 
 					testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)
