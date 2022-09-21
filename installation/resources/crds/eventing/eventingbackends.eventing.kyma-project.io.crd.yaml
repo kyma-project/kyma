@@ -32,7 +32,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: EventingBackend is the Schema for the eventingbackends API
+        description: EventingBackend is the Schema for the eventingbackends API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -47,10 +47,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: EventingBackendSpec defines the desired state of EventingBackend
+            description: EventingBackendSpec defines the desired state of EventingBackend.
             type: object
           status:
-            description: EventingBackendStatus defines the observed state of EventingBackend
+            description: EventingBackendStatus defines the observed state of EventingBackend.
             properties:
               backendType:
                 description: Specifies the backend type used. Allowed values are "BEB"
