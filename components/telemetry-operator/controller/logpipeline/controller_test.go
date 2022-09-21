@@ -19,7 +19,6 @@ package logpipeline
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -318,8 +317,6 @@ var _ = Describe("LogPipeline controller", func() {
 				if err != nil {
 					return 0
 				}
-				fmt.Println(fluentBitDaemonSet.Generation)
-				fmt.Println(fluentBitDaemonSet.Status)
 				return int(fluentBitDaemonSet.Generation)
 			}, timeout, interval).Should(Equal(2))
 

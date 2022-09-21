@@ -29,19 +29,16 @@ func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, defaults Pipel
 func generateCustomOutput(output *telemetryv1alpha1.Output, fsBufferLimit string, name string) string {
 	sb := NewOutputSectionBuilder()
 	customOutputParams := parseMultiline(output.Custom)
-	var pipelineName string
-	var aliasPresent bool
+	var outputName string
+	if customOutputParams.GetByKey("name") != nil {
+		outputName = customOutputParams.GetByKey("name").Value
+	}
+	aliasPresent := customOutputParams.ContainsKey("alias")
 	for _, p := range customOutputParams {
-		if p.Key == "name" {
-			pipelineName = p.Value
-		}
-		if p.Key == "alias" {
-			aliasPresent = true
-		}
 		sb.AddConfigParam(p.Key, p.Value)
 	}
 	if !aliasPresent {
-		sb.AddConfigParam("alias", fmt.Sprintf("%s-%s", name, pipelineName))
+		sb.AddConfigParam("alias", fmt.Sprintf("%s-%s", name, outputName))
 	}
 	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
 	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
