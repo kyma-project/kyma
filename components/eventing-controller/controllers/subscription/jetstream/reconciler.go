@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -111,7 +113,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Handle only the new subscription
 	desiredSubscription := actualSubscription.DeepCopy()
 	// Bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
+	log := backendutils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
 
 	if isInDeletion(desiredSubscription) {
 		// The object is being deleted

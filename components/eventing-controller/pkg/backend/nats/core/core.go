@@ -18,6 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -112,7 +113,7 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	// Format logger
-	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
+	log := backendutils.LoggerWithSubscription(n.namedLogger(), sub)
 	subKeyPrefix := backendnats.CreateKeyPrefix(sub)
 
 	err := n.cleanupNATSSubscriptions(sub, log)
