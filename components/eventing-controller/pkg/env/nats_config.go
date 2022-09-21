@@ -57,8 +57,8 @@ func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (NatsConfig, 
 		ReconnectWait: reconnectWait,
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
-		return NatsConfig{}, err
 		log.Fatalf("Invalid configuration: %v", err)
+		return NatsConfig{}, err
 	}
 	return cfg, nil
 }
