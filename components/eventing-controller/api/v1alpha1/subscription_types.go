@@ -263,6 +263,6 @@ func (s *SubscriptionStatus) InitializeCleanEventTypes() {
 	s.CleanEventTypes = []string{}
 }
 
-func init() { //nolint:gochecknoinits
+func init() { //nolint
 	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})
 }

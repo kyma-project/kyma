@@ -6,25 +6,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var Finalizer = GroupVersion.Group
+type TypeMatching string
 
-const ProtocolSettingsContentModeBinary string = "BINARY"
+var Finalizer = GroupVersion.Group
 
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only
 	// +optional
 	ID string `json:"id,omitempty"`
-
-	// todo check if we still need it or move it to config
-	// Protocol defines the CE protocol specification implementation
-	// +optional
-	Protocol string `json:"protocol,omitempty"`
-
-	// todo check if we still need it or move it to config
-	// ProtocolSettings defines the CE protocol setting specification implementation
-	// +optional
-	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
 	// Sink defines endpoint of the subscriber
 	Sink string `json:"sink"`
@@ -36,7 +26,7 @@ type SubscriptionSpec struct {
 	Source string `json:"source"`
 
 	// Types defines the list of event names for the topics we need to subscribe for messages
-	Types []string `json:"types,omitempty"`
+	Types []string `json:"types"`
 
 	// Config defines the configurations that can be applied to the eventing backend
 	// +optional
@@ -84,13 +74,13 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	type Alias Subscription
 	a := Alias(s)
 	if a.Status.Types == nil {
-		a.Status.InitializeCleanEventTypes()
+		a.Status.InitializeEventTypes()
 	}
 	return json.Marshal(a)
 }
 
-// InitializeCleanEventTypes initializes the SubscriptionStatus.CleanEventTypes with an empty slice of strings.
-func (s *SubscriptionStatus) InitializeCleanEventTypes() {
+// InitializeEventTypes initializes the SubscriptionStatus.EventTypes with an empty slice of EventType.
+func (s *SubscriptionStatus) InitializeEventTypes() {
 	s.Types = []EventType{}
 }
 
@@ -103,7 +93,7 @@ type SubscriptionList struct {
 	Items           []Subscription `json:"items"`
 }
 
-func init() { //nolint:gochecknoinits
+func init() {
 	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})
 }
 
