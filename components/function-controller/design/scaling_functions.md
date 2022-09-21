@@ -1,4 +1,4 @@
-# Serverless Functions as scaled resources
+# Serverless Functions Scaling Modes
 
 ## Summary
 Initially, the Serverless API supported the `spec.ScaleConfig` field only. The work flow was as follow:
