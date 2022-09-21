@@ -5,19 +5,24 @@ image:
   pullPolicy: IfNotPresent
   imagePullSecrets: []
 
-securityContext:
-  allowPrivilegeEscalation: false
-  privileged: false
+certs:
+  issuer:
+    create: false
+    name: ""
+  certificate:
+    create: false
+    namespace: ""
+    secretName: ""
 
-resources:
-  limits:
-    cpu: 50m
-    memory: 100Mi
-  requests:
-    cpu: 10m
-    memory: 40Mi
-
-nodeSelector: {}
+webhooks:
+  mutatingWebhook:
+    create: false
+  validatingWebhook:
+    create: false
+  service:
+    annotations: {}
+    create: false
+    name: ""
 
 crd:
   install: false
@@ -25,6 +30,7 @@ crd:
 jaeger:
   # Specifies whether Jaeger instance should be created
   create: true
+  # namespace where Jaeger resource should be created default to .Release.Namespace
   kyma:
     uiPort: 16686
     zipkinPort: 9411
@@ -40,6 +46,7 @@ jaeger:
       image: '{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_all_in_one) }}'
       options:
         log-level: info
+        collector.otlp.enabled: "true"
     storage:
       type: memory
       options:
@@ -49,6 +56,7 @@ jaeger:
       options:
         dependencies:
           menuEnabled: true
+        monitor.menuEnabled: false
         menu:
           - label: "About Jaeger"
             items:
@@ -83,12 +91,51 @@ rbac:
   pspEnabled: false
   clusterRole: true
 
+service:
+  type: ClusterIP
+  # Specify a specific node port when type is NodePort
+  # nodePort: 32500
+  # Annotations for service
+  annotations: {}
+
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
   create: true
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
   name:
+  # Annotations for serviceAccount
+  annotations: {}
+
+# Specifies extra environment variables passed to the operator:
+extraEnv: []
+  # Specifies log-level for the operator:
+  # - name: LOG-LEVEL
+  #   value: debug
+
+extraLabels: {}
+  # Specifies extra labels for the operator deployment:
+  # foo: bar
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 100Mi
+  requests:
+    cpu: 10m
+    memory: 40Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+
+priorityClassName:
 
 global:
   domainName: "kyma.example.com"
@@ -108,11 +155,11 @@ global:
   images:
     jaeger_operator:
       name: "jaeger-operator"
-      version: "1.30.0-bc31ec4c"
+      version: "1.37.0-51d9079f"
       directory: "tpi"
     jaeger_all_in_one:
       name: "jaegertracing/all-in-one"
-      version: "1.30.0"
+      version: "1.37.0"
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"

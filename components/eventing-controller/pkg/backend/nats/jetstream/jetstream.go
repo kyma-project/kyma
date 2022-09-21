@@ -29,12 +29,15 @@ import (
 var _ Backend = &JetStream{}
 
 const (
-	jsHandlerName          = "jetstream-handler"
-	idleHeartBeatDuration  = 1 * time.Minute
-	jsConsumerMaxRedeliver = 100
-	jsConsumerAcKWait      = 30 * time.Second
-	jsMaxStreamNameLength  = 32
-	separator              = "/"
+	jsHandlerName                      = "jetstream-handler"
+	idleHeartBeatDuration              = 1 * time.Minute
+	jsConsumerMaxRedeliver             = 100
+	jsConsumerAcKWait                  = 30 * time.Second
+	jsMaxStreamNameLength              = 32
+	separator                          = "/"
+	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
+	MissingNATSSubscriptionMsgWithInfo = MissingNATSSubscriptionMsg + " for subject: %v"
+	RequeueDuration                    = 10 * time.Second
 )
 
 type Backend interface {
@@ -171,6 +174,11 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	if err := js.createConsumer(subscription, asyncCallback, log); err != nil {
 		return err
 	}
+
+	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -415,6 +423,18 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			continue
 		}
 
+		// TODO: optimize this call of ConsumerInfo
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get consumer info", "error", err)
+			return err
+		}
+
+		// skip the subject, in case there is a bound consumer on NATS
+		if consumerInfo != nil && consumerInfo.PushBound {
+			continue
+		}
+
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
@@ -427,6 +447,18 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 		js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
 		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
 		log.Debugw("Created subscription on JetStream")
+	}
+	return nil
+}
+
+// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters
+func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha1.Subscription) error {
+	for _, subject := range subscription.Status.CleanEventTypes {
+		jsSubject := js.GetJetStreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		if _, ok := js.subscriptions[jsSubKey]; !ok {
+			return errors.Errorf(MissingNATSSubscriptionMsgWithInfo, subject)
+		}
 	}
 	return nil
 }

@@ -13,7 +13,7 @@ import (
 
 	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -576,7 +576,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
 
 			By("Updating APIRule")
-			apiRule := &apigatewayv1alpha1.APIRule{
+			apiRule := &apigatewayv1beta1.APIRule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      givenSubscription.Status.APIRuleName,
 					Namespace: givenSubscription.Namespace,
@@ -625,7 +625,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			updateSubscription(ctx, readySubscription).Should(reconcilertesting.HaveSubscriptionReady())
 			getSubscription(ctx, readySubscription).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
 
-			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription.Status.APIRuleName, Namespace: namespaceName}}
+			apiRuleNew := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(ctx, apiRuleNew).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
@@ -639,7 +639,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
 						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription)),
-						"WebhookURL": ContainSubstring(*apiRuleNew.Spec.Service.Host),
+						"WebhookURL": ContainSubstring(*apiRuleNew.Spec.Host),
 					},
 				))))
 
@@ -683,7 +683,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, readySubscription1).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
 
 			By("Get the reused APIRule (from subscription 2)")
-			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
+			apiRuleNew := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(ctx, apiRuleNew).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
@@ -1096,7 +1096,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				Name:      apiRule.Name,
 			}
 			Eventually(func() bool {
-				apiRule := new(apigatewayv1alpha1.APIRule)
+				apiRule := new(apigatewayv1beta1.APIRule)
 				err := k8sClient.Get(ctx, apiRuleKey, apiRule)
 				return k8serrors.IsNotFound(err)
 			}).Should(BeTrue())
@@ -1145,7 +1145,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	)
 })
 
-func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
+func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
 	return Eventually(func() error {
 		return k8sClient.Status().Update(ctx, apiRule)
 	}, bigTimeOut, bigPollingInterval)
@@ -1181,7 +1181,7 @@ func getK8sEvents(eventList *corev1.EventList, namespace string) AsyncAssertion 
 }
 
 // ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller).
-func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
+func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
 	By(fmt.Sprintf("Ensuring the APIRule %q is updated", apiRule.Name))
 
 	return Eventually(func() error {
@@ -1299,33 +1299,33 @@ func printSubscriptions(namespace string) error {
 	return nil
 }
 
-func getAPIRule(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
-	return Eventually(func() apigatewayv1alpha1.APIRule {
+func getAPIRule(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
+	return Eventually(func() apigatewayv1beta1.APIRule {
 		lookUpKey := types.NamespacedName{
 			Namespace: apiRule.Namespace,
 			Name:      apiRule.Name,
 		}
 		if err := k8sClient.Get(ctx, lookUpKey, apiRule); err != nil {
 			log.Printf("fetch APIRule %s failed: %v", lookUpKey.String(), err)
-			return apigatewayv1alpha1.APIRule{}
+			return apigatewayv1beta1.APIRule{}
 		}
 		return *apiRule
 	}, bigTimeOut, bigPollingInterval)
 }
 
-func filterAPIRulesForASvc(apiRules *apigatewayv1alpha1.APIRuleList, svc *corev1.Service) apigatewayv1alpha1.APIRule {
+func filterAPIRulesForASvc(apiRules *apigatewayv1beta1.APIRuleList, svc *corev1.Service) apigatewayv1beta1.APIRule {
 	if len(apiRules.Items) == 1 && *apiRules.Items[0].Spec.Service.Name == svc.Name {
 		return apiRules.Items[0]
 	}
-	return apigatewayv1alpha1.APIRule{}
+	return apigatewayv1beta1.APIRule{}
 }
 
-func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.APIRuleList {
+func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1beta1.APIRuleList {
 	labels := map[string]string{
 		constants.ControllerServiceLabelKey:  svc.Name,
 		constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 	}
-	apiRules := &apigatewayv1alpha1.APIRuleList{}
+	apiRules := &apigatewayv1beta1.APIRuleList{}
 	err := k8sClient.List(ctx, apiRules, &client.ListOptions{
 		LabelSelector: k8slabels.SelectorFromSet(labels),
 		Namespace:     svc.Namespace,
@@ -1335,7 +1335,7 @@ func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.A
 }
 
 func getAPIRuleForASvc(ctx context.Context, svc *corev1.Service) AsyncAssertion {
-	return Eventually(func() apigatewayv1alpha1.APIRule {
+	return Eventually(func() apigatewayv1beta1.APIRule {
 		apiRules := getAPIRules(ctx, svc)
 		return filterAPIRulesForASvc(apiRules, svc)
 	}, smallTimeOut, smallPollingInterval)
@@ -1425,7 +1425,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = apigatewayv1alpha1.AddToScheme(scheme.Scheme)
+	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
@@ -1507,7 +1507,7 @@ func startBEBMock() *reconcilertesting.BEBMock {
 // - mark the APIRule as ready
 // - wait until the Subscription is ready
 // - as soon as both the APIRule and Subscription are ready, the function returns both objects.
-func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubscription *eventingv1alpha1.Subscription, service *corev1.Service) (*eventingv1alpha1.Subscription, *apigatewayv1alpha1.APIRule) {
+func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubscription *eventingv1alpha1.Subscription, service *corev1.Service) (*eventingv1alpha1.Subscription, *apigatewayv1beta1.APIRule) {
 	ensureSubscriberSvcCreated(ctx, service)
 	ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -1515,7 +1515,7 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	sub := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
 	// wait for APIRule to be set in Subscription
 	getSubscription(ctx, sub).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
-	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.APIRuleName, Namespace: sub.Namespace}}
+	apiRule := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.APIRuleName, Namespace: sub.Namespace}}
 	getAPIRule(ctx, apiRule).Should(reconcilertesting.HaveNotEmptyAPIRule())
 	reconcilertesting.MarkReady(apiRule)
 	updateAPIRuleStatus(ctx, apiRule).ShouldNot(HaveOccurred())

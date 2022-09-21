@@ -9,7 +9,7 @@ import (
 func TestConfig(t *testing.T) {
 	t.Parallel()
 
-	cfg := &env.BebConfig{ClientID: "someID", ClientSecret: "someSecret", TokenEndpoint: "someEndpoint"}
+	cfg := &env.BEBConfig{ClientID: "someID", ClientSecret: "someSecret", TokenEndpoint: "someEndpoint"}
 	conf := Config(cfg)
 
 	if cfg.ClientID != conf.ClientID {

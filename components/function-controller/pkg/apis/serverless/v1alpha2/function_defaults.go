@@ -61,7 +61,6 @@ func (fn *Function) Default(config *DefaultingConfig) {
 	fn.Spec.defaultReplicas(config, fn)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
-	fn.Spec.defaultRuntime(config)
 }
 
 func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
@@ -94,44 +93,79 @@ func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function
 }
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {
-	resources := spec.ResourceConfiguration.Function.Resources
+	var resources *corev1.ResourceRequirements
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil && spec.ResourceConfiguration.Function.Resources != nil {
+		resources = spec.ResourceConfiguration.Function.Resources
+	}
 	defaultingConfig := config.Function.Resources
 	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
+	calculatedResources := defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	setFunctionResources(spec, calculatedResources)
+}
 
-	spec.ResourceConfiguration.Function.Resources = defaultResources(&resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+func setFunctionResources(spec *FunctionSpec, resources *corev1.ResourceRequirements) {
+
+	if spec.ResourceConfiguration == nil {
+		spec.ResourceConfiguration = &ResourceConfiguration{}
+	}
+
+	if spec.ResourceConfiguration.Function == nil {
+		spec.ResourceConfiguration.Function = &ResourceRequirements{}
+	}
+
+	spec.ResourceConfiguration.Function.Resources = resources
 }
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
-	buildResourceCfg := spec.ResourceConfiguration.Build
 	// if build resources are not set by the user we don't default them.
 	// However, if only a part is set or the preset label is set, we should correctly set missing defaults.
 	if shouldSkipBuildResourcesDefault(fn) {
 		return
 	}
 
+	var buildResourceCfg ResourceRequirements
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Build != nil {
+		buildResourceCfg = *spec.ResourceConfiguration.Build
+	}
+
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
-	spec.ResourceConfiguration.Build.Resources = defaultResources(&buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	calculatedResources := defaultResources(buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+
+	setBuildResources(spec, calculatedResources)
 }
 
-func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
-	if spec.Runtime == "" {
-		spec.Runtime = config.Runtime
+func setBuildResources(spec *FunctionSpec, resources *corev1.ResourceRequirements) {
+
+	if spec.ResourceConfiguration == nil {
+		spec.ResourceConfiguration = &ResourceConfiguration{}
 	}
+
+	if spec.ResourceConfiguration.Build == nil {
+		spec.ResourceConfiguration.Build = &ResourceRequirements{}
+	}
+
+	spec.ResourceConfiguration.Build.Resources = resources
 }
 
 func shouldSkipBuildResourcesDefault(fn *Function) bool {
 	resourceCfg := fn.Spec.ResourceConfiguration.Build
 	_, hasPresetLabel := fn.Labels[BuildResourcesPresetLabel]
-
-	if resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil && !hasPresetLabel {
-		return true
+	if hasPresetLabel {
+		return false
 	}
-	return false
+
+	if resourceCfg != nil && resourceCfg.Resources != nil {
+		return resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil
+	}
+	return true
 }
 
-func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {
-	copiedRes := res.DeepCopy()
+func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) *corev1.ResourceRequirements {
+	copiedRes := &corev1.ResourceRequirements{}
+	if res != nil {
+		copiedRes = (res).DeepCopy()
+	}
 
 	if copiedRes.Requests == nil {
 		copiedRes.Requests = corev1.ResourceList{}
@@ -173,7 +207,7 @@ func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCP
 		copiedRes.Limits[corev1.ResourceCPU] = newResource
 	}
 
-	return *copiedRes
+	return copiedRes
 }
 
 func mergeReplicasPreset(fn *Function, presets map[string]ReplicasPreset, defaultPreset string) ReplicasPreset {
