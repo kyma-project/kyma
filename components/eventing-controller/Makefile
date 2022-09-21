@@ -49,6 +49,7 @@ help-generic:
 
 ##@ Development
 HELM_TEMPLATE_ASSETS_DIR=./config/helm/manifests
+HELM_TEMPLATE_CRD_PATCHES_DIR=./config/helm/localcrd
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development using helm templates.
 deploy: manifests-local copy-crds copy-external-crds set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
 	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
@@ -124,10 +125,10 @@ path-to-referenced-charts:
 ##@ CRD
 
 copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
-	rm -rf localcopy; mkdir localcopy; kustomize build config/crd -o localcopy
-	cp ./localcopy/apiextensions.k8s.io_v1_customresourcedefinition_subscriptions.eventing.kyma-project.io.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
+	rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR); mkdir $(HELM_TEMPLATE_CRD_PATCHES_DIR); kustomize build config/crd -o $(HELM_TEMPLATE_CRD_PATCHES_DIR)
+	cp ./$(HELM_TEMPLATE_CRD_PATCHES_DIR)/apiextensions.k8s.io_v1_customresourcedefinition_subscriptions.eventing.kyma-project.io.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
-	rm -rf localcopy
+	rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR)
 copy-external-crds: ## copy external CRDs to config/crd/external
 	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
