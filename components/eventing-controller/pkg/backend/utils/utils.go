@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
@@ -297,4 +299,14 @@ func APIRuleGroupVersionResource() schema.GroupVersionResource {
 		Group:    apigatewayv1beta1.GroupVersion.Group,
 		Resource: "apirules",
 	}
+}
+
+// LoggerWithSubscription returns a logger with the given subscription details.
+func LoggerWithSubscription(log *zap.SugaredLogger, subscription *eventingv1alpha1.Subscription) *zap.SugaredLogger {
+	return log.With(
+		"kind", subscription.GetObjectKind().GroupVersionKind().Kind,
+		"version", subscription.GetGeneration(),
+		"namespace", subscription.GetNamespace(),
+		"name", subscription.GetName(),
+	)
 }
