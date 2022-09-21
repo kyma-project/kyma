@@ -24,6 +24,7 @@ func Test_GetNatsConfig(t *testing.T) {
 		"MAX_CONNS_PER_HOST":      fmt.Sprintf("%d", maxConnsPerHost),
 		"MAX_IDLE_CONNS_PER_HOST": fmt.Sprintf("%d", maxIdleConnsPerHost),
 		"IDLE_CONN_TIMEOUT":       fmt.Sprintf("%v", idleConnTimeout),
+		"ENABLE_NEW_CRD_VERSION":  "true",
 	}
 
 	for k, v := range envs {
@@ -46,4 +47,5 @@ func Test_GetNatsConfig(t *testing.T) {
 
 	require.Equal(t, config.JSStreamName, envs["JS_STREAM_NAME"])
 	require.Equal(t, config.JSStreamReplicas, jsStreamReplicas)
+	require.Equal(t, config.EnableNewCRDVersion, true)
 }

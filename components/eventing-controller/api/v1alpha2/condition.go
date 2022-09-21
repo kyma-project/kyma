@@ -1,10 +1,6 @@
-package v1alpha1
+package v1alpha2
 
 import (
-	"fmt"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -34,32 +30,10 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	// BEB Conditions
-	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
-	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
-	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
-	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
-	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
-	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
-	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
-	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
-	ConditionReasonOauth2ClientSyncFailed     ConditionReason = "Failed to sync OAuth2 Client Credentials"
-
-	// NATS Conditions
-	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
-	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
-
-	// Common backend Conditions
-	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription controller started"
-	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription controller not ready"
-	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
-	ConditionReasonPublisherDeploymentNotReady    ConditionReason = "Publisher proxy deployment not ready"
-	ConditionReasonBackendCRSyncFailed            ConditionReason = "Backend CR sync failed"
-	ConditionReasonPublisherProxySyncFailed       ConditionReason = "Publisher Proxy deployment sync failed"
-	ConditionReasonControllerStartFailed          ConditionReason = "Starting the controller failed"
-	ConditionReasonControllerStopFailed           ConditionReason = "Stopping the controller failed"
-	ConditionReasonPublisherProxySecretError      ConditionReason = "Publisher proxy secret sync failed"
-	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
+	ConditionReasonSubscriptionActive    ConditionReason = "BEB Subscription active"
+	ConditionReasonSubscriptionDeleted   ConditionReason = "BEB Subscription deleted"
+	ConditionReasonAPIRuleStatusReady    ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady ConditionReason = "APIRule status not ready"
 )
 
 // initializeConditions sets unset conditions to Unknown.
@@ -88,12 +62,6 @@ func (s *SubscriptionStatus) InitializeConditions() {
 	s.Conditions = initializeConditions(initialConditions, s.Conditions)
 }
 
-// InitializeConditions sets all the Backend conditions to true.
-func (b *EventingBackendStatus) InitializeConditions() {
-	initialConditions := makeBackendConditions()
-	b.Conditions = initializeConditions(initialConditions, b.Conditions)
-}
-
 func (s SubscriptionStatus) IsReady() bool {
 	if !ContainSameConditionTypes(allSubscriptionConditions, s.Conditions) {
 		return false
@@ -110,15 +78,6 @@ func (s SubscriptionStatus) IsReady() bool {
 
 func (s SubscriptionStatus) FindCondition(conditionType ConditionType) *Condition {
 	for _, condition := range s.Conditions {
-		if conditionType == condition.Type {
-			return &condition
-		}
-	}
-	return nil
-}
-
-func (b EventingBackendStatus) FindCondition(conditionType ConditionType) *Condition {
-	for _, condition := range b.Conditions {
 		if conditionType == condition.Type {
 			return &condition
 		}
@@ -245,79 +204,6 @@ func (s *SubscriptionStatus) SetConditionAPIRuleStatus(err error) {
 	s.Conditions = newConditions
 }
 
-func CreateMessageForConditionReasonSubscriptionCreated(bebName string) string {
-	return fmt.Sprintf("BEB-subscription-name=%s", bebName)
-}
-
-// makeBackendConditions creates a map of all conditions which the Backend should have.
-func makeBackendConditions() []Condition {
-	conditions := []Condition{
-		{
-			Type:               ConditionPublisherProxyReady,
-			LastTransitionTime: metav1.Now(),
-			Status:             corev1.ConditionTrue,
-			Reason:             ConditionReasonPublisherDeploymentReady,
-		},
-		{
-			Type:               ConditionControllerReady,
-			LastTransitionTime: metav1.Now(),
-			Status:             corev1.ConditionTrue,
-			Reason:             ConditionReasonSubscriptionControllerReady,
-		},
-	}
-	return conditions
-}
-
-func (b *EventingBackendStatus) SetSubscriptionControllerReadyCondition(ready bool, reason ConditionReason, message string) {
-	status := corev1.ConditionFalse
-	if ready {
-		status = corev1.ConditionTrue
-	}
-
-	newConditions := []Condition{MakeCondition(ConditionControllerReady, reason, status, message)}
-	for _, condition := range b.Conditions {
-		if condition.Type == ConditionControllerReady {
-			continue
-		}
-		newConditions = append(newConditions, condition)
-	}
-	b.Conditions = newConditions
-}
-
-func (b *EventingBackendStatus) SetPublisherReadyCondition(ready bool, reason ConditionReason, message string) {
-	status := corev1.ConditionFalse
-	if ready {
-		status = corev1.ConditionTrue
-	}
-
-	newConditions := []Condition{MakeCondition(ConditionPublisherProxyReady, reason, status, message)}
-	for _, condition := range b.Conditions {
-		if condition.Type == ConditionPublisherProxyReady {
-			continue
-		}
-		newConditions = append(newConditions, condition)
-	}
-	b.Conditions = newConditions
-}
-
-func (b *EventingBackendStatus) IsSubscriptionControllerStatusReady() bool {
-	for _, condition := range b.Conditions {
-		if condition.Type == ConditionControllerReady {
-			return condition.Status == corev1.ConditionTrue
-		}
-	}
-	return false
-}
-
-func (b *EventingBackendStatus) IsPublisherStatusReady() bool {
-	for _, condition := range b.Conditions {
-		if condition.Type == ConditionPublisherProxyReady {
-			return condition.Status == corev1.ConditionTrue
-		}
-	}
-	return false
-}
-
 // ConditionsEquals checks if two list of conditions are equal.
 func ConditionsEquals(existing, expected []Condition) bool {
 	// not equal if length is different
@@ -352,15 +238,4 @@ func ConditionEquals(existing, expected Condition) bool {
 	}
 
 	return true
-}
-
-// ConditionToAlpha2Version //todo
-func ConditionToAlpha2Version(condition Condition) v1alpha2.Condition {
-	return v1alpha2.Condition{
-		Type:               v1alpha2.ConditionType(condition.Type),
-		Status:             condition.Status,
-		LastTransitionTime: condition.LastTransitionTime,
-		Reason:             v1alpha2.ConditionReason(condition.Reason),
-		Message:            condition.Message,
-	}
 }
