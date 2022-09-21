@@ -4,7 +4,6 @@ const {
 } = require('chai');
 
 const {
-  getEnvOrDefault,
   toBase64,
   k8sApply,
   k8sDelete,
