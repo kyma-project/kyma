@@ -69,20 +69,11 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 
 [The values.yaml](../resources/charts/compass-runtime-agent-test/values.yaml) file contains environment variables that are used in Compass tests. These values can be modified as needed.
 
-
 - APP_DIRECTOR_URL - Compass Director URL
 - APP_TESTING_TENANT - Tenant used in GraphQL calls
-- APP_SKIP_DIRECTOR_CERT_VERIFICATION - Sk
+- APP_SKIP_DIRECTOR_CERT_VERIFICATION - Skip certificate verification on the Director side
 - APP_OAUTH_CREDENTIALS_SECRET_NAME - Secret name for Compass OAuth credentials
 - APP_OAUTH_CREDENTIALS_NAMESPACE - Namespace for Compass OAuth credentials
-
-===============
-
-Compass Runtime Agent reads configuration from a Secret passed in the APP_AGENT_CONFIGURATION_SECRET environment variable. The Secret contains the following properties:
-- CONNECTOR_URL - Compass Connector URL
-- TOKEN - Token for authenticating GraphQL calls to Compass Connector
-- RUNTIME_ID - Identifier of the Runtime
-- TENANT - Tenant used in GraphQL calls to Compass Connector
 
 ### Run the tests
 
