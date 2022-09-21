@@ -83,8 +83,7 @@ func (c *Commander) Start() error {
 	defer connection.Close()
 
 	// configure the message sender
-	var messageSenderToNATS sender.GenericSender
-	messageSenderToNATS = sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
+	messageSenderToNATS := sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

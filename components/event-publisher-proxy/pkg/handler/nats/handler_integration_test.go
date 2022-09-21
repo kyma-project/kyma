@@ -4,18 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats/mock"
@@ -308,7 +306,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
-					respBodyBytes, err := ioutil.ReadAll(resp.Body)
+					respBodyBytes, err := io.ReadAll(resp.Body)
 					require.NoError(t, err)
 					require.NoError(t, resp.Body.Close())
 

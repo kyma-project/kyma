@@ -53,11 +53,13 @@ func GetStreamSubject(eventType string) string {
 
 func ValidateNATSSubjectOrFail(t *testing.T, subject string, notify ...chan bool) nats.MsgHandler {
 	return func(msg *nats.Msg) {
-		t.Logf("%v", string(msg.Data))
+		if msg == nil {
+			return
+		}
 		for _, n := range notify {
 			n <- true
 		}
-		if msg != nil && msg.Subject != GetStreamSubject(subject) {
+		if msg.Subject != GetStreamSubject(subject) {
 			t.Errorf("invalid NATS subject, expected [%s] but found [%s]", subject, msg.Subject)
 		}
 	}

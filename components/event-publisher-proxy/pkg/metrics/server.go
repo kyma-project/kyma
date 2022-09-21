@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
@@ -12,7 +13,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const metricsServerLoggerName = "metrics-server"
+const (
+	metricsServerLoggerName = "metrics-server"
+	defaultReadTimeout      = 5 * time.Second
+)
 
 type Server struct {
 	srv    http.Server
@@ -25,7 +29,10 @@ func NewServer(logger *logger.Logger) *Server {
 
 func (s *Server) Start(address string) error {
 	if len(strings.TrimSpace(address)) > 0 {
-		s.srv = http.Server{Handler: promhttp.Handler()}
+		s.srv = http.Server{
+			Handler:     promhttp.Handler(),
+			ReadTimeout: defaultReadTimeout,
+		}
 
 		listener, err := net.Listen("tcp", address)
 		if err != nil {
