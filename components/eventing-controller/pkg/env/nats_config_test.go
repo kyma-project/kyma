@@ -101,7 +101,7 @@ func TestGetNatsConfig(t *testing.T) {
 					os.Setenv(s[0], s[1])
 				}
 			})
-		
+
 			// Clean the environment to make this test reliable.
 			os.Clearenv()
 			for k, v := range tt.args.envs {

@@ -40,17 +40,15 @@ type Commander struct {
 	logger           *logger.Logger
 	envCfg           *env.NATSConfig
 	opts             *options.Options
-	jetstreamMode    bool
 }
 
 // NewCommander creates the Commander for publisher to NATS.
-func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger, jetstreamMode bool) *Commander {
+func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
 		envCfg:           new(env.NATSConfig),
 		logger:           logger,
 		metricsCollector: metricsCollector,
 		opts:             opts,
-		jetstreamMode:    jetstreamMode,
 	}
 }
 
@@ -86,11 +84,7 @@ func (c *Commander) Start() error {
 
 	// configure the message sender
 	var messageSenderToNATS sender.GenericSender
-	if c.jetstreamMode {
-		messageSenderToNATS = sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
-	} else {
-		messageSenderToNATS = sender.NewNATSMessageSender(ctx, connection, c.logger)
-	}
+	messageSenderToNATS = sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -124,7 +118,7 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewHandler(messageReceiver, &messageSenderToNATS, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := nats.NewHandler(messageReceiver, messageSenderToNATS, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
@@ -141,5 +135,5 @@ func (c *Commander) Stop() error {
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(natsCommanderName).With("backend", natsBackend, "jestream mode", c.jetstreamMode)
+	return c.logger.WithContext().Named(natsCommanderName).With("backend", natsBackend)
 }
