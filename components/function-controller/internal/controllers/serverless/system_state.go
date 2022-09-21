@@ -495,11 +495,11 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 }
 
 func (s *systemState) getReplicas(defaultVal int32) *int32 {
-	if s.instance.Spec.ScaleConfig != nil {
-		return s.instance.Spec.ScaleConfig.MinReplicas
-	}
 	if s.instance.Spec.Replicas != nil {
 		return s.instance.Spec.Replicas
+	}
+	if s.instance.Spec.ScaleConfig != nil {
+		return s.instance.Spec.ScaleConfig.MinReplicas
 	}
 
 	return &defaultVal

@@ -297,9 +297,7 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 	maxReplicas = spec.ScaleConfig.MaxReplicas
 	minReplicas = spec.ScaleConfig.MinReplicas
 	allErrs := []string{}
-	if spec.Replicas != nil && spec.ScaleConfig != nil {
-		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are use at the same time")
-	}
+
 	if spec.Replicas == nil && spec.ScaleConfig == nil {
 		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are empty at the same time")
 	}

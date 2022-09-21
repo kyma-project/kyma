@@ -65,6 +65,11 @@ func (fn *Function) Default(config *DefaultingConfig) {
 
 func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig) {
 	if spec.Replicas != nil {
+		if spec.ScaleConfig == nil {
+			spec.ScaleConfig = &ScaleConfig{}
+		}
+		spec.ScaleConfig.MinReplicas = spec.Replicas
+		spec.ScaleConfig.MaxReplicas = spec.Replicas
 		return
 	}
 
