@@ -20,3 +20,16 @@ spec:
               value: $WEBHOOK_TOKEN_ENDPOINT
             - name: PUBLISHER_IMAGE
               value: $KO_DOCKER_REPO/event-publisher-proxy
+          ports:
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: eventing-webhook-server-cert

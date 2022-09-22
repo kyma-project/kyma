@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
@@ -29,19 +31,22 @@ import (
 var _ Backend = &JetStream{}
 
 const (
-	jsHandlerName          = "jetstream-handler"
-	idleHeartBeatDuration  = 1 * time.Minute
-	jsConsumerMaxRedeliver = 100
-	jsConsumerAcKWait      = 30 * time.Second
-	jsMaxStreamNameLength  = 32
-	separator              = "/"
+	jsHandlerName                      = "jetstream-handler"
+	idleHeartBeatDuration              = 1 * time.Minute
+	jsConsumerMaxRedeliver             = 100
+	jsConsumerAcKWait                  = 30 * time.Second
+	jsMaxStreamNameLength              = 32
+	separator                          = "/"
+	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
+	MissingNATSSubscriptionMsgWithInfo = MissingNATSSubscriptionMsg + " for subject: %v"
+	RequeueDuration                    = 10 * time.Second
 )
 
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(connCloseHandler backendnats.ConnClosedHandler) error
 
-	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of Jetstream.
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of JetStream.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
 
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
@@ -93,7 +98,7 @@ type JetStream struct {
 	conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client
-	subscriptions map[SubscriptionSubjectIdentifier]*nats.Subscription
+	subscriptions map[SubscriptionSubjectIdentifier]backendnats.Subscriber
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
 	connClosedHandler backendnats.ConnClosedHandler
@@ -105,7 +110,7 @@ func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collec
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
-		subscriptions:    make(map[SubscriptionSubjectIdentifier]*nats.Subscription),
+		subscriptions:    make(map[SubscriptionSubjectIdentifier]backendnats.Subscriber),
 		metricsCollector: metricsCollector,
 	}
 }
@@ -146,7 +151,7 @@ func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) 
 }
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
-	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+	log := backendutils.LoggerWithSubscription(js.namedLogger(), subscription)
 	subKeyPrefix := backendnats.CreateKeyPrefix(subscription)
 	if err := js.checkJetStreamConnection(); err != nil {
 		return err
@@ -171,11 +176,16 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	if err := js.createConsumer(subscription, asyncCallback, log); err != nil {
 		return err
 	}
+
+	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+	log := backendutils.LoggerWithSubscription(js.namedLogger(), subscription)
 
 	// loop over the global list of subscriptions
 	// and delete any related JetStream subscription
@@ -191,7 +201,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetstreamSubject(subject)
+		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
 			return err
@@ -204,18 +214,18 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	return nil
 }
 
-// GetJetStreamSubjects returns a list of subjects appended with prefix if needed
+// GetJetStreamSubjects returns a list of subjects appended with prefix if needed.
 func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 	var result []string
 	for _, subject := range subjects {
-		result = append(result, js.GetJetstreamSubject(subject))
+		result = append(result, js.GetJetStreamSubject(subject))
 	}
 	return result
 }
 
-// GetJetstreamSubject appends the prefix to subject.
-func (js *JetStream) GetJetstreamSubject(subject string) string {
-	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
+// GetJetStreamSubject appends the prefix to subject.
+func (js *JetStream) GetJetStreamSubject(subject string) string {
+	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 
 func (js *JetStream) validateConfig() error {
@@ -313,7 +323,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
 		// configured stream's subject prefix.
-		Subjects: []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
+		Subjects: []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 	}
 	return streamConfig, nil
 }
@@ -321,37 +331,51 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 // syncSubscriptionFilters syncs the Kyma subscription filters with NATS subscriptions.
 func (js *JetStream) syncSubscriptionFilters(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
 	for key, jsSub := range js.subscriptions {
-		if !js.isJsSubAssociatedWithKymaSub(key, subscription) || !jsSub.IsValid() {
-			continue
-		}
-
-		// TODO: optimize this call of ConsumerInfo
-		// as jsSub.ConsumerInfo() will send an REST call to nats-server for each subject
-		info, err := jsSub.ConsumerInfo()
+		err := js.syncSubscriptionFilter(key, subscription, jsSub, log)
 		if err != nil {
-			if err == nats.ErrConsumerNotFound {
-				log.Infow("Deleting invalid Consumer!")
-				if err := js.deleteConsumerFromJetStream(key.ConsumerName()); err != nil {
-					return err
-				}
-				delete(js.subscriptions, key)
-				continue
-			}
 			return err
-		}
-
-		if !utils.ContainsString(js.GetJetStreamSubjects(subscription.Status.CleanEventTypes), info.Config.FilterSubject) {
-			if err := js.deleteSubscriptionFromJetStream(jsSub, key, log); err != nil {
-				return err
-			}
-			log.Infow(
-				"Deleted JetStream subscription because it was deleted from subscription filters",
-				"subscriptionSubject", key,
-				"jetStreamSubject", jsSub.Subject,
-			)
 		}
 	}
 	return nil
+}
+
+func (js *JetStream) syncSubscriptionFilter(key SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription, subscriber backendnats.Subscriber, log *zap.SugaredLogger) error {
+	if !js.isJsSubAssociatedWithKymaSub(key, subscription) || !subscriber.IsValid() {
+		return nil
+	}
+
+	// TODO: optimize this call of ConsumerInfo
+	// as jsSub.ConsumerInfo() will send an REST call to nats-server for each subject
+	info, err := subscriber.ConsumerInfo()
+	if err != nil {
+		if errors.Is(err, nats.ErrConsumerNotFound) {
+			log.Infow("Deleting invalid Consumer!")
+			if err = js.deleteConsumerFromJetStream(key.ConsumerName()); err != nil {
+				return err
+			}
+			delete(js.subscriptions, key)
+			return nil
+		}
+		return err
+	}
+
+	err = js.cleanupUnnecessaryJetStreamSubscribers(subscriber, subscription, log, info, key)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub backendnats.Subscriber, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger, info *nats.ConsumerInfo, key SubscriptionSubjectIdentifier) error {
+	if utils.ContainsString(js.GetJetStreamSubjects(subscription.Status.CleanEventTypes), info.Config.FilterSubject) {
+		return nil
+	}
+	log.Infow(
+		"Deleting JetStream subscription because it was deleted from subscription filters",
+		"subscriptionSubject", key,
+		"jetStreamSubject", jsSub.SubscriptionSubject(),
+	)
+	return js.deleteSubscriptionFromJetStream(jsSub, key, log)
 }
 
 // bindConsumersForInvalidNATSSubscriptions attempts to bind an existing consumer to a new NATS subscription,
@@ -359,7 +383,7 @@ func (js *JetStream) syncSubscriptionFilters(subscription *eventingv1alpha1.Subs
 // we will delete the subscription from our internal subscriptions map.
 func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) {
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetstreamSubject(subject)
+		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		log := log.With("subject", subject)
 
@@ -383,7 +407,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 			delete(js.subscriptions, jsSubKey)
 		} else {
 			// save recreated JetStream subscription in storage
-			js.subscriptions[jsSubKey] = jsSubscription
+			js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
 			log.Debugw("Recreated subscription on JetStream")
 		}
 	}
@@ -393,11 +417,23 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 // when there is no NATS subscription associated with the CleanEventType.
 func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetstreamSubject(subject)
+		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		log := log.With("subject", subject)
 
 		if _, ok := js.subscriptions[jsSubKey]; ok {
+			continue
+		}
+
+		// TODO: optimize this call of ConsumerInfo
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get consumer info", "error", err)
+			return err
+		}
+
+		// skip the subject, in case there is a bound consumer on NATS
+		if consumerInfo != nil && consumerInfo.PushBound {
 			continue
 		}
 
@@ -410,9 +446,21 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription,
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
 		}
 		// save created JetStream subscription in storage
-		js.subscriptions[jsSubKey] = jsSubscription
+		js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
 		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
 		log.Debugw("Created subscription on JetStream")
+	}
+	return nil
+}
+
+// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters
+func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha1.Subscription) error {
+	for _, subject := range subscription.Status.CleanEventTypes {
+		jsSubject := js.GetJetStreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		if _, ok := js.subscriptions[jsSubKey]; !ok {
+			return errors.Errorf(MissingNATSSubscriptionMsgWithInfo, subject)
+		}
 	}
 	return nil
 }
@@ -493,7 +541,7 @@ func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectId
 }
 
 // deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db.
-func (js *JetStream) deleteSubscriptionFromJetStream(jsSub *nats.Subscription, jsSubKey SubscriptionSubjectIdentifier, log *zap.SugaredLogger) error {
+func (js *JetStream) deleteSubscriptionFromJetStream(jsSub backendnats.Subscriber, jsSubKey SubscriptionSubjectIdentifier, log *zap.SugaredLogger) error {
 	// unsubscribe call to JetStream is async hence checking the status of the connection is important
 	if err := js.checkJetStreamConnection(); err != nil {
 		return err
@@ -544,7 +592,7 @@ func (js *JetStream) checkJetStreamConnection() error {
 
 // GetAllSubscriptions returns the map which contains details of all subscriptions and consumers.
 // Use this only for testing purposes.
-func (js *JetStream) GetAllSubscriptions() map[SubscriptionSubjectIdentifier]*nats.Subscription {
+func (js *JetStream) GetAllSubscriptions() map[SubscriptionSubjectIdentifier]backendnats.Subscriber {
 	return js.subscriptions
 }
 

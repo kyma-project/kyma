@@ -13,14 +13,13 @@ import (
 
 	"github.com/avast/retry-go/v3"
 	"github.com/go-logr/zapr"
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
@@ -127,7 +126,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
-							v1.ConditionTrue, "")),
+							corev1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypesEmpty(),
 					))
 				})
@@ -157,7 +156,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
-							v1.ConditionTrue, "")),
+							corev1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(publishToSubjects),
 					))
 				})
@@ -183,7 +182,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
-							v1.ConditionTrue, "")),
+							corev1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
 					))
 				})
@@ -205,7 +204,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
-							v1.ConditionTrue, "")),
+							corev1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
 					))
 				})
@@ -223,7 +222,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscribed,
 							eventingv1alpha1.ConditionReasonSubscriptionCreationFailed,
-							v1.ConditionFalse, "prefix not found")),
+							corev1.ConditionFalse, "prefix not found")),
 						reconcilertesting.HaveCleanEventTypesEmpty(),
 					))
 				})
@@ -242,7 +241,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscribed,
 							eventingv1alpha1.ConditionReasonSubscriptionCreated,
-							v1.ConditionTrue, fmt.Sprintf("BEB-subscription-name=%s", bebSubscriptionName))),
+							corev1.ConditionTrue, fmt.Sprintf("BEB-subscription-name=%s", bebSubscriptionName))),
 						reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
 					))
 				})
@@ -269,7 +268,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionAPIRuleStatus,
 				eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady,
-				v1.ConditionFalse,
+				corev1.ConditionFalse,
 				sink.MissingSchemeErrMsg,
 			)
 			getSubscription(ctx, givenSubscription).Should(And(
@@ -300,7 +299,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
 				eventingv1alpha1.ConditionReasonSubscriptionActive,
-				v1.ConditionTrue,
+				corev1.ConditionTrue,
 				"",
 			)
 
@@ -308,7 +307,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionAPIRuleStatus,
 				eventingv1alpha1.ConditionReasonAPIRuleStatusReady,
-				v1.ConditionTrue,
+				corev1.ConditionTrue,
 				"",
 			)
 			getSubscription(ctx, givenSubscription).Should(And(
@@ -354,7 +353,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting APIRule status in Subscription to Ready")
-			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue, "")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
@@ -368,33 +367,33 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscribed condition")
 			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
-			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, message)
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
 			))
 
 			By("Emitting a subscription created event")
-			var subscriptionEvents = v1.EventList{}
-			subscriptionCreatedEvent := v1.Event{
+			var subscriptionEvents = corev1.EventList{}
+			subscriptionCreatedEvent := corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
 				Message: message,
-				Type:    v1.EventTypeNormal,
+				Type:    corev1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
 
 			By("Setting a subscription active condition")
-			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionActiveCondition),
 			))
 
 			By("Emitting a subscription active event")
-			subscriptionActiveEvent := v1.Event{
+			subscriptionActiveEvent := corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionActive),
 				Message: "",
-				Type:    v1.EventTypeNormal,
+				Type:    corev1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionActiveEvent))
 
@@ -455,11 +454,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, subscription1).Should(reconcilertesting.IsAnEmptySubscription())
 
 			By("Emitting a k8s Subscription deleted event")
-			var subscriptionEvents = v1.EventList{}
-			subscriptionDeletedEvent := v1.Event{
+			var subscriptionEvents = corev1.EventList{}
+			subscriptionDeletedEvent := corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
-				Type:    v1.EventTypeWarning,
+				Type:    corev1.EventTypeWarning,
 			}
 			getK8sEvents(&subscriptionEvents, subscription1.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
@@ -484,10 +483,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, subscription2).Should(reconcilertesting.IsAnEmptySubscription())
 
 			By("Emitting a k8s Subscription deleted event")
-			subscriptionDeletedEvent = v1.Event{
+			subscriptionDeletedEvent = corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
-				Type:    v1.EventTypeWarning,
+				Type:    corev1.EventTypeWarning,
 			}
 			getK8sEvents(&subscriptionEvents, subscription2.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
@@ -529,7 +528,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting APIRule status in Subscription to Ready")
-			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue, "")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
@@ -543,33 +542,33 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscribed condition")
 			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
-			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, message)
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
 			))
 
 			By("Emitting a subscription created event")
-			var subscriptionEvents = v1.EventList{}
-			subscriptionCreatedEvent := v1.Event{
+			var subscriptionEvents = corev1.EventList{}
+			subscriptionCreatedEvent := corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
 				Message: message,
-				Type:    v1.EventTypeNormal,
+				Type:    corev1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
 
 			By("Setting a subscription active condition")
-			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionActiveCondition),
 			))
 
 			By("Emitting a subscription active event")
-			subscriptionActiveEvent := v1.Event{
+			subscriptionActiveEvent := corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionActive),
 				Message: "",
-				Type:    v1.EventTypeNormal,
+				Type:    corev1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionActiveEvent))
 
@@ -577,7 +576,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
 
 			By("Updating APIRule")
-			apiRule := &apigatewayv1alpha1.APIRule{
+			apiRule := &apigatewayv1beta1.APIRule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      givenSubscription.Status.APIRuleName,
 					Namespace: givenSubscription.Namespace,
@@ -626,7 +625,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			updateSubscription(ctx, readySubscription).Should(reconcilertesting.HaveSubscriptionReady())
 			getSubscription(ctx, readySubscription).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
 
-			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription.Status.APIRuleName, Namespace: namespaceName}}
+			apiRuleNew := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(ctx, apiRuleNew).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
@@ -640,7 +639,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
 						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription)),
-						"WebhookURL": ContainSubstring(*apiRuleNew.Spec.Service.Host),
+						"WebhookURL": ContainSubstring(*apiRuleNew.Spec.Host),
 					},
 				))))
 
@@ -684,7 +683,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, readySubscription1).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
 
 			By("Get the reused APIRule (from subscription 2)")
-			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
+			apiRuleNew := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(ctx, apiRuleNew).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
@@ -747,7 +746,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscription not created condition")
 			message := "create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a BEB subscription\"}\n"
-			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, v1.ConditionFalse, message)
+			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotCreatedCondition),
@@ -818,7 +817,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting APIRule status to Ready")
-			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue, "")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
@@ -826,7 +825,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscription not active condition")
 			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-				eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse, "Waiting for subscription to be active")
+				eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, "Waiting for subscription to be active")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotActiveCondition),
@@ -900,21 +899,21 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting APIRule status to Ready")
-			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue, "")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
 			))
 
 			By("Setting a subscription active condition")
-			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionActiveCondition),
 			))
 
 			By("Setting a subscription webhook failed condition")
-			subscriptionWebhookCallFailedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionWebhookCallStatus, eventingv1alpha1.ConditionReasonWebhookCallStatus, v1.ConditionFalse, lastFailedDeliveryReason)
+			subscriptionWebhookCallFailedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionWebhookCallStatus, eventingv1alpha1.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, lastFailedDeliveryReason)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionWebhookCallFailedCondition),
@@ -982,11 +981,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Emitting some k8s events")
-			var subscriptionEvents = v1.EventList{}
-			subscriptionDeletedEvent := v1.Event{
+			var subscriptionEvents = corev1.EventList{}
+			subscriptionDeletedEvent := corev1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
-				Type:    v1.EventTypeWarning,
+				Type:    corev1.EventTypeWarning,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
@@ -1004,7 +1003,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			kymaSubscriptionName := "test-subscription"
 
 			By("Setup Kyma Subscription required resources", func() {
-				var svc *v1.Service
+				var svc *corev1.Service
 				By("Creating Subscriber service", func() {
 					svc = reconcilertesting.NewSubscriberSvc("test-service", namespaceName)
 					ensureSubscriberSvcCreated(ctx, svc)
@@ -1097,7 +1096,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				Name:      apiRule.Name,
 			}
 			Eventually(func() bool {
-				apiRule := new(apigatewayv1alpha1.APIRule)
+				apiRule := new(apigatewayv1beta1.APIRule)
 				err := k8sClient.Get(ctx, apiRuleKey, apiRule)
 				return k8serrors.IsNotFound(err)
 			}).Should(BeTrue())
@@ -1146,13 +1145,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	)
 })
 
-func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
+func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
 	return Eventually(func() error {
 		return k8sClient.Status().Update(ctx, apiRule)
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// getSubscription fetches a subscription using the lookupKey and allows making assertions on it
+// getSubscription fetches a subscription using the lookupKey and allows making assertions on it.
 func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
@@ -1170,19 +1169,19 @@ func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscri
 
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
-func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
+func getK8sEvents(eventList *corev1.EventList, namespace string) AsyncAssertion {
 	ctx := context.TODO()
-	return Eventually(func() v1.EventList {
+	return Eventually(func() corev1.EventList {
 		err := k8sClient.List(ctx, eventList, client.InNamespace(namespace))
 		if err != nil {
-			return v1.EventList{}
+			return corev1.EventList{}
 		}
 		return *eventList
 	})
 }
 
-// ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller)
-func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
+// ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller).
+func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
 	By(fmt.Sprintf("Ensuring the APIRule %q is updated", apiRule.Name))
 
 	return Eventually(func() error {
@@ -1228,7 +1227,7 @@ func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alph
 }
 
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
-func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
+func ensureSubscriberSvcCreated(ctx context.Context, svc *corev1.Service) {
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", svc.Namespace))
 	if svc.Namespace != "default " {
 		// create testing namespace
@@ -1243,7 +1242,7 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 	Expect(k8sClient.Create(ctx, svc)).Should(Succeed())
 }
 
-// getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
+// getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions.
 func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
 	return Eventually(func() []bebtypes.Subscription {
 		for req, sub := range beb.Requests.GetSubscriptions() {
@@ -1255,7 +1254,7 @@ func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema
+// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema.
 func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	if subscription.Namespace != "default " {
 		namespace := fixtureNamespace(subscription.Namespace)
@@ -1270,8 +1269,8 @@ func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventing
 	)
 }
 
-func fixtureNamespace(name string) *v1.Namespace {
-	namespace := v1.Namespace{
+func fixtureNamespace(name string) *corev1.Namespace {
+	namespace := corev1.Namespace{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",
@@ -1283,7 +1282,7 @@ func fixtureNamespace(name string) *v1.Namespace {
 	return &namespace
 }
 
-// printSubscriptions prints all subscriptions in the given namespace
+// printSubscriptions prints all subscriptions in the given namespace.
 func printSubscriptions(namespace string) error {
 	// print subscription details
 	ctx := context.TODO()
@@ -1300,33 +1299,33 @@ func printSubscriptions(namespace string) error {
 	return nil
 }
 
-func getAPIRule(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncAssertion {
-	return Eventually(func() apigatewayv1alpha1.APIRule {
+func getAPIRule(ctx context.Context, apiRule *apigatewayv1beta1.APIRule) AsyncAssertion {
+	return Eventually(func() apigatewayv1beta1.APIRule {
 		lookUpKey := types.NamespacedName{
 			Namespace: apiRule.Namespace,
 			Name:      apiRule.Name,
 		}
 		if err := k8sClient.Get(ctx, lookUpKey, apiRule); err != nil {
 			log.Printf("fetch APIRule %s failed: %v", lookUpKey.String(), err)
-			return apigatewayv1alpha1.APIRule{}
+			return apigatewayv1beta1.APIRule{}
 		}
 		return *apiRule
 	}, bigTimeOut, bigPollingInterval)
 }
 
-func filterAPIRulesForASvc(apiRules *apigatewayv1alpha1.APIRuleList, svc *corev1.Service) apigatewayv1alpha1.APIRule {
+func filterAPIRulesForASvc(apiRules *apigatewayv1beta1.APIRuleList, svc *corev1.Service) apigatewayv1beta1.APIRule {
 	if len(apiRules.Items) == 1 && *apiRules.Items[0].Spec.Service.Name == svc.Name {
 		return apiRules.Items[0]
 	}
-	return apigatewayv1alpha1.APIRule{}
+	return apigatewayv1beta1.APIRule{}
 }
 
-func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.APIRuleList {
+func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1beta1.APIRuleList {
 	labels := map[string]string{
 		constants.ControllerServiceLabelKey:  svc.Name,
 		constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 	}
-	apiRules := &apigatewayv1alpha1.APIRuleList{}
+	apiRules := &apigatewayv1beta1.APIRuleList{}
 	err := k8sClient.List(ctx, apiRules, &client.ListOptions{
 		LabelSelector: k8slabels.SelectorFromSet(labels),
 		Namespace:     svc.Namespace,
@@ -1335,8 +1334,8 @@ func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.A
 	return apiRules
 }
 
-func getAPIRuleForASvc(ctx context.Context, svc *v1.Service) AsyncAssertion {
-	return Eventually(func() apigatewayv1alpha1.APIRule {
+func getAPIRuleForASvc(ctx context.Context, svc *corev1.Service) AsyncAssertion {
+	return Eventually(func() apigatewayv1beta1.APIRule {
 		apiRules := getAPIRules(ctx, svc)
 		return filterAPIRulesForASvc(apiRules, svc)
 	}, smallTimeOut, smallPollingInterval)
@@ -1426,7 +1425,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = apigatewayv1alpha1.AddToScheme(scheme.Scheme)
+	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
@@ -1495,7 +1494,7 @@ var _ = AfterSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 })
 
-// startBEBMock starts the beb mock and configures the controller process to use it
+// startBEBMock starts the beb mock and configures the controller process to use it.
 func startBEBMock() *reconcilertesting.BEBMock {
 	By("Preparing BEB Mock")
 	beb = reconcilertesting.NewBEBMock()
@@ -1507,8 +1506,8 @@ func startBEBMock() *reconcilertesting.BEBMock {
 // - wait until an APIRule is linked in the Subscription
 // - mark the APIRule as ready
 // - wait until the Subscription is ready
-// - as soon as both the APIRule and Subscription are ready, the function returns both objects
-func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubscription *eventingv1alpha1.Subscription, service *v1.Service) (*eventingv1alpha1.Subscription, *apigatewayv1alpha1.APIRule) {
+// - as soon as both the APIRule and Subscription are ready, the function returns both objects.
+func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubscription *eventingv1alpha1.Subscription, service *corev1.Service) (*eventingv1alpha1.Subscription, *apigatewayv1beta1.APIRule) {
 	ensureSubscriberSvcCreated(ctx, service)
 	ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -1516,7 +1515,7 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	sub := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
 	// wait for APIRule to be set in Subscription
 	getSubscription(ctx, sub).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
-	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.APIRuleName, Namespace: sub.Namespace}}
+	apiRule := &apigatewayv1beta1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: sub.Status.APIRuleName, Namespace: sub.Namespace}}
 	getAPIRule(ctx, apiRule).Should(reconcilertesting.HaveNotEmptyAPIRule())
 	reconcilertesting.MarkReady(apiRule)
 	updateAPIRuleStatus(ctx, apiRule).ShouldNot(HaveOccurred())

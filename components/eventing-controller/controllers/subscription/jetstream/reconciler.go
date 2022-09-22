@@ -3,6 +3,9 @@ package jetstream
 import (
 	"context"
 	"reflect"
+	"strings"
+
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -110,18 +113,31 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Handle only the new subscription
 	desiredSubscription := actualSubscription.DeepCopy()
 	// Bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
+	log := backendutils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
 
 	if isInDeletion(desiredSubscription) {
 		// The object is being deleted
 		err := r.handleSubscriptionDeletion(ctx, desiredSubscription, log)
-		return ctrl.Result{}, err
+		if err != nil {
+			log.Errorw("Failed to delete the Subscription", "error", err)
+			if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err); syncErr != nil {
+				return ctrl.Result{}, syncErr
+			}
+			return ctrl.Result{}, err
+		}
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object.
 	if !containsFinalizer(desiredSubscription) {
 		err := r.addFinalizerToSubscription(desiredSubscription, log)
+		if err != nil {
+			log.Errorw("Failed to add finalizer to Subscription", "error", err)
+			if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err); syncErr != nil {
+				return ctrl.Result{}, syncErr
+			}
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -145,10 +161,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Synchronize Kyma subscription to JetStream backend
 	if err := r.Backend.SyncSubscription(desiredSubscription); err != nil {
+		result := ctrl.Result{}
 		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
+			return result, syncErr
 		}
-		return ctrl.Result{}, err
+		// Requeue the Request to reconcile it again if there are no NATS Subscriptions synced
+		if missingSubscriptionErr(err) {
+			result = ctrl.Result{RequeueAfter: jetstream.RequeueDuration}
+			err = nil
+		}
+		return result, err
 	}
 
 	// Update Subscription status
@@ -302,6 +324,11 @@ func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 // containsFinalizer checks if the subscription contains our Finalizer.
 func containsFinalizer(sub *eventingv1alpha1.Subscription) bool {
 	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha1.Finalizer)
+}
+
+// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map.
+func missingSubscriptionErr(err error) bool {
+	return strings.Contains(err.Error(), jetstream.MissingNATSSubscriptionMsg)
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

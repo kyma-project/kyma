@@ -65,12 +65,12 @@ func equalConditions(existing, expected []serverlessv1alpha2.Condition) bool {
 		existingMap[value.Type] = value
 	}
 
-	for _, value := range expected {
-		if existingMap[value.Type].Status != value.Status || existingMap[value.Type].Reason != value.Reason || existingMap[value.Type].Message != value.Message {
+	for _, expectedCondition := range expected {
+		existingCondition := existingMap[expectedCondition.Type]
+		if !existingCondition.Equal(&expectedCondition) {
 			return false
 		}
 	}
-
 	return true
 }
 

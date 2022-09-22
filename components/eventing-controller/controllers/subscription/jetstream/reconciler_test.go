@@ -10,7 +10,6 @@ import (
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	natsserver "github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	v1 "k8s.io/api/core/v1"
@@ -26,6 +25,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -680,7 +680,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
 	description := "Failed to match nats subscriptions"
-	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...), description)
+	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetStreamSubject(subject)).Should(gomega.And(expectations...), description)
 }
 
 // testSubscriptionDeletion deletes the subscription and ensures it is not found anymore on the apiserver.
@@ -819,7 +819,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 
-	return g.Eventually(func() *nats.Subscription {
+	return g.Eventually(func() nats.Subscriber {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
 		subscriptionSubject := backendjetstream.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {

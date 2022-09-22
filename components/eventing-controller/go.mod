@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/eventing-controller
 
-go 1.18
+go 1.19
 
 require (
 	github.com/avast/retry-go/v3 v3.1.1

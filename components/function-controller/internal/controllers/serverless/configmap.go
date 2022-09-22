@@ -77,7 +77,7 @@ func stateFnInlineCreateConfigMap(ctx context.Context, r *reconciler, s *systemS
 		Message:            fmt.Sprintf("ConfigMap %s created", configMap.GetName()),
 	}
 
-	return buildStateFnUpdateStateFnFunctionCondition(currentCondition)
+	return buildStatusUpdateStateFnWithCondition(currentCondition)
 }
 
 func stateFnInlineUpdateConfigMap(ctx context.Context, r *reconciler, s *systemState) stateFn {
@@ -103,5 +103,5 @@ func stateFnInlineUpdateConfigMap(ctx context.Context, r *reconciler, s *systemS
 		Message:            fmt.Sprintf("Updated ConfigMap: %q", cmName),
 	}
 
-	return buildStateFnUpdateStateFnFunctionCondition(condition)
+	return buildStatusUpdateStateFnWithCondition(condition)
 }

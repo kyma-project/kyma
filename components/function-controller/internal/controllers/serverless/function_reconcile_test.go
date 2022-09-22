@@ -49,7 +49,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 
 	gitFactory := &automock.GitClientFactory{}
 	gitFactory.On("GetGitClient", mock.Anything).Return(nil)
-	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+	reconciler := NewFunctionReconciler(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -290,7 +290,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 	gitFactory := &automock.GitClientFactory{}
 	gitFactory.On("GetGitClient", mock.Anything).Return(nil)
-	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+	reconciler := NewFunctionReconciler(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -748,7 +748,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		gitFactory := &automock.GitClientFactory{}
 		gitFactory.On("GetGitClient", mock.Anything).Return(nil)
 
-		reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+		reconciler := NewFunctionReconciler(resourceClient, zap.NewNop().Sugar(), testCfg, gitFactory, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 		reconciler.config.Build.MaxSimultaneousJobs = 1
 
 		s := systemState{
