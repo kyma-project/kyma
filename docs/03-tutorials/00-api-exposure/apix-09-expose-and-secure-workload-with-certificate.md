@@ -32,11 +32,11 @@ Follow the instruction to expose and access your instance of the HttpBin service
      name: httpbin-mtls-gw-unsecured
      namespace: ${MTLS_TEST_NAMESPACE}
    spec:
-     host: httpbin.${CUSTOM_DOMAIN}
+     host: httpbin-vs.${CUSTOM_DOMAIN}
      service:
        name: httpbin
        port: 8000
-     gateway: ${MTLS_GATEWAY_NAME}.${MTLS_TEST_NAMESPACE}.svc.cluster.local
+     gateway: ${MTLS_TEST_NAMESPACE}/${MTLS_GATEWAY_NAME}
      rules:
        - path: /.*
          methods: ["GET"]
