@@ -10,19 +10,10 @@ import (
 	. "github.com/onsi/gomega"
 	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
-
-func TestGetHash(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	bebSubscription := types.Subscription{}
-	hash, err := GetHash(&bebSubscription)
-	g.Expect(err).ShouldNot(HaveOccurred())
-	g.Expect(hash).To(BeNumerically(">", 0))
-}
 
 //func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 //	defaultProtocolSettings := &eventingv1alpha2.ProtocolSettings{
@@ -255,41 +246,41 @@ func TestGetCleanedEventMeshSubscription(t *testing.T) {
 	g.Expect(eventMeshSubscription)
 }
 
-func TestBEBSubscriptionNameMapper(t *testing.T) {
+func TestEventMeshSubscriptionNameMapper(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	s1 := &eventingv1alpha1.Subscription{
+	s1 := &eventingv1alpha2.Subscription{
 		ObjectMeta: v1meta.ObjectMeta{
 			Name:      "subscription1",
 			Namespace: "my-namespace",
 		},
 	}
-	s2 := &eventingv1alpha1.Subscription{
+	s2 := &eventingv1alpha2.Subscription{
 		ObjectMeta: v1meta.ObjectMeta{
 			Name:      "mysub",
 			Namespace: "another-namespace",
 		},
 	}
 
-	s3 := &eventingv1alpha1.Subscription{
+	s3 := &eventingv1alpha2.Subscription{
 		ObjectMeta: v1meta.ObjectMeta{
 			Name:      "name1",
 			Namespace: "name2",
 		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
+		Spec: eventingv1alpha2.SubscriptionSpec{
 			Sink: "sub3-sink",
 		},
 	}
-	s4 := &eventingv1alpha1.Subscription{
+	s4 := &eventingv1alpha2.Subscription{
 		ObjectMeta: v1meta.ObjectMeta{
 			Name:      "name1",
 			Namespace: "name2",
 		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
+		Spec: eventingv1alpha2.SubscriptionSpec{
 			Sink: "sub4-sink",
 		},
 	}
-	s5 := &eventingv1alpha1.Subscription{
+	s5 := &eventingv1alpha2.Subscription{
 		ObjectMeta: v1meta.ObjectMeta{
 			Name:      "name2",
 			Namespace: "name1",
@@ -304,7 +295,7 @@ func TestBEBSubscriptionNameMapper(t *testing.T) {
 	tests := []struct {
 		domainName string
 		maxLen     int
-		inputSub   *eventingv1alpha1.Subscription
+		inputSub   *eventingv1alpha2.Subscription
 		outputHash string
 	}{
 		{
@@ -392,4 +383,92 @@ func TestShortenNameAndAppendHash(t *testing.T) {
 		g.Expect(recover()).ToNot(BeNil())
 	}()
 	shortenNameAndAppendHash("panic-much", fakeHash, len(fakeHash)-1)
+}
+
+func TestGetHash(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	eventMeshSubscription := types.Subscription{}
+	hash, err := GetHash(&eventMeshSubscription)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(hash).To(BeNumerically(">", 0))
+}
+
+func TestHashSubscriptionFullName(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	tests := []struct {
+		name      string
+		namespace string
+		domain    string
+		output    string
+	}{
+		{
+			name:      "mysubscription1",
+			namespace: "namespace1",
+			domain:    "domain1",
+			output:    "b1a19286307c4cb7e5acfa2e644c7af33ea2aeb8",
+		},
+		{
+			name:      "mysubscription2",
+			namespace: "namespace2",
+			domain:    "domain2",
+			output:    "521aea24c2d4861973f592af744aa2732161a6e0",
+		},
+	}
+	for _, test := range tests {
+		nameWithHash := hashSubscriptionFullName(test.domain, test.namespace, test.name)
+		g.Expect(nameWithHash).To(Equal(test.output))
+	}
+}
+
+func TestIsEventMeshSubModified(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	// given
+	// define first sub
+	eventMeshSubscription1 := types.Subscription{
+		Name:            "Name1",
+		ContentMode:     "ContentMode",
+		ExemptHandshake: true,
+		Qos:             types.QosAtLeastOnce,
+		WebhookURL:      "www.kyma-project.io",
+	}
+	eventMeshSubscription1.Events = append(eventMeshSubscription1.Events, types.Event{Source: "kyma", Type: "event1"})
+
+	// get hash for sub
+	hash, err := GetHash(&eventMeshSubscription1)
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	// define second sub with modified info
+	eventMeshSubscription2 := eventMeshSubscription1
+	eventMeshSubscription2.WebhookURL = "www.github.com"
+
+	tests := []struct {
+		sub    types.Subscription
+		hash   int64
+		output bool
+	}{
+		{
+			sub:    eventMeshSubscription1,
+			hash:   hash,
+			output: false,
+		},
+		{
+			sub:    eventMeshSubscription2,
+			hash:   hash,
+			output: true,
+		},
+	}
+	for _, test := range tests {
+		g.Expect(err).ShouldNot(HaveOccurred())
+
+		// then
+		result, err := IsEventMeshSubModified(&test.sub, test.hash)
+
+		// when
+		g.Expect(err).ShouldNot(HaveOccurred())
+		g.Expect(result).To(Equal(test.output))
+
+	}
 }
