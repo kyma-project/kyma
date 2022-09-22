@@ -53,7 +53,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 
 	token, compassConnectorUrl, err := crc.directorClient.GetConnectionToken(runtimeID)
 	if err != nil {
-		return nil, crc.rollbackOnError(err, "failed to get token URL", runtimeID, nil, nil)
+		return nil, crc.rollbackOnError(err, "failed to get token URL", runtimeID)
 	}
 
 	config := CompassRuntimeAgentConfig{
@@ -65,7 +65,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 
 	secretRollbackFunc, err := newSecretCreator(crc.kubernetesInterface).Do(NewCompassRuntimeConfigName, CompassSystemNamespace, config)
 	if err != nil {
-		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret", runtimeID, secretRollbackFunc, nil)
+		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret", runtimeID, secretRollbackFunc)
 	}
 
 	deploymentRollbackFunc, err := newDeploymentConfiguration(crc.kubernetesInterface).Do(CompassRuntimeAgentDeployment, NewCompassRuntimeConfigName, CompassSystemNamespace)
@@ -76,8 +76,8 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (RollbackFunc,
 	return newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc), nil
 }
 
-func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID string, secretRollbackFunc, deploymentRollbackFunc RollbackFunc) error {
-	err := newRollbackFunc(runtimeID, crc.directorClient, secretRollbackFunc, deploymentRollbackFunc)()
+func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID string, rollbackFunctions ...RollbackFunc) error {
+	err := newRollbackFunc(runtimeID, crc.directorClient, rollbackFunctions...)()
 	if err != nil {
 		initialWrapped := errors.Wrap(initialError, wrapMsgString)
 		errorWrapped := errors.Wrap(err, "failed to rollback changes after configuring Compass Runtime Agent error")
