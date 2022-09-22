@@ -4,8 +4,6 @@ title: Expose and secure a workload with a certificate
 
 This tutorial shows how to expose a workload with mutual authentication using Kyma's mutual TLS Gateway. 
 
-The tutorial may be a follow-up to the [Set up a custom domain for a workload](./apix-02-setup-custom-domain-for-workload.md) tutorial.
-
 ## Prerequisites
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
