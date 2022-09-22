@@ -419,8 +419,121 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			},
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
 		},
-		//TODO(#15288): "v1alpha2 to v1alpha1 - with function-resources-preset label",
-		//TODO(#15288): "v1alpha2 to v1alpha1 - with Spec.ResourceConfiguration.Function.Profile",
+		{
+			name: "v1alpha2 to v1alpha1 - with function-resources-preset label",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha2.FunctionResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.FunctionResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 - with Spec.ResourceConfiguration.Function.Profile",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Profile: "another-preset-value",
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.FunctionResourcesPresetLabel: "another-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
 		//TODO(#15288): "v1alpha1 to v1alpha2 - with function-resources-preset label and partially filled Spec.Resources",
 		//TODO(#15288): "v1alpha2 to v1alpha1 - with function-resources-preset label and Spec.ResourceConfiguration.Function.Profile",
 		//TODO(#15288): "v1alpha2 to v1alpha1 - with function-resources-preset label and partially filled Spec.ResourceConfiguration.Function.Resources",
@@ -435,9 +548,10 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			}
 			if _, ok := tt.wantDst.(*serverlessv1alpha1.Function); ok {
 				require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).Spec, dst.(*serverlessv1alpha1.Function).Spec)
-
+				require.Equal(t, tt.wantDst.(*serverlessv1alpha1.Function).ObjectMeta, dst.(*serverlessv1alpha1.Function).ObjectMeta)
 			} else if _, ok := tt.wantDst.(*serverlessv1alpha2.Function); ok {
 				require.Equal(t, tt.wantDst.(*serverlessv1alpha2.Function).Spec, dst.(*serverlessv1alpha2.Function).Spec)
+				require.Equal(t, tt.wantDst.(*serverlessv1alpha2.Function).ObjectMeta, dst.(*serverlessv1alpha2.Function).ObjectMeta)
 
 				require.NoError(t, checkGitRepoAnnotation(dst.(*serverlessv1alpha2.Function), testRepoName))
 
