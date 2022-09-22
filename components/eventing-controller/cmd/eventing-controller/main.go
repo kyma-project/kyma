@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/go-logr/zapr"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -58,6 +59,11 @@ func main() {
 		if err := jetstream.AddToScheme(scheme); err != nil {
 			setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "jetstream mode", opts.EnableJetStreamBackend, "error", err)
 		}
+		if opts.EnableNewCRDVersion {
+			if err := jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
+				setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "jetstream mode", opts.EnableJetStreamBackend, "error", err)
+			}
+		}
 	} else {
 		natsSubMgr = nats.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 		if err := nats.AddToScheme(scheme); err != nil {
@@ -68,6 +74,11 @@ func main() {
 	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err := beb.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+	}
+	if opts.EnableNewCRDVersion {
+		if err := beb.AddV1Alpha2ToScheme(scheme); err != nil {
+			setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+		}
 	}
 
 	// Init the manager.
@@ -88,6 +99,18 @@ func main() {
 
 	if err := bebSubMgr.Init(mgr); err != nil {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
+	}
+
+	if opts.EnableNewCRDVersion {
+		setupLogger.Infow("Starting the webhook server")
+
+		if err = (&v1alpha1.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLogger.Fatalw("Failed to create webhook", "error", err)
+		}
+
+		if err = (&v1alpha2.Subscription{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLogger.Fatalw("Failed to create webhook", "error", err)
+		}
 	}
 
 	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {

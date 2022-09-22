@@ -1,11 +1,2 @@
-prometheus/.*
-rbac/auth_proxy_.*
-rbac/leader_election.*
-rbac/subscription_.*role.*
-certmanager/.*
-webhook/.*
-default/manager_auth.*
-default/webhook.*
-crd/patches/cainjection_in_subscriptions.yaml
-crd/patches/webhook_in_subscriptions.yaml
 helm/manifests
+helm/localcrd

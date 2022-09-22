@@ -60,7 +60,7 @@ type GitRepositoryList struct {
 	Items           []GitRepository `json:"items"`
 }
 
-//nolint
+// nolint
 func init() {
 	SchemeBuilder.Register(&GitRepository{}, &GitRepositoryList{})
 }
