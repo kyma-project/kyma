@@ -239,9 +239,3 @@ This call returns the code `200` response. If you call the Function without with
 </div>
 
 
-
-# Related links
-- https://istio.io/latest/docs/reference/config/security/conditions/
-- https://istio.io/latest/docs/reference/config/security/authorization-policy/#Condition
-- https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers.html?highlight=forward_client_cert
-- https://istio.io/latest/docs/ops/configuration/traffic-management/network-topologies/
