@@ -129,3 +129,16 @@ func Test_RemoveString(t *testing.T) {
 		}
 	}
 }
+
+func TestGetRandSuffix(t *testing.T) {
+	totalExecutions := 10
+	lengthOfRandomSuffix := 6
+	results := make(map[string]bool)
+	for i := 0; i < totalExecutions; i++ {
+		result := GetRandString(lengthOfRandomSuffix)
+		if _, ok := results[result]; ok {
+			t.Fatalf("generated string already exists: %s", result)
+		}
+		results[result] = true
+	}
+}

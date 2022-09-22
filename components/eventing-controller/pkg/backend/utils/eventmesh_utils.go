@@ -31,6 +31,24 @@ func (m *eventMeshSubscriptionNameMapper) MapSubscriptionName(subscriptionName, 
 	return shortenNameAndAppendHash(subscriptionName, hash, m.maxLength)
 }
 
+// produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
+// Requires maxLength >= len(hash).
+func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
+	if len(hash) > maxLength {
+		// This shouldn't happen!
+		panic(fmt.Sprintf("max name length (%d) used for EventMesh subscription mapper is not large enough to hold the hash (%s)", maxLength, hash))
+	}
+	maxNameLen := maxLength - len(hash)
+	// keep the first maxNameLen characters of the name
+	if maxNameLen <= 0 {
+		return hash
+	}
+	if len(name) > maxNameLen {
+		name = name[:maxNameLen]
+	}
+	return name + hash
+}
+
 func GetHash(subscription *types.Subscription) (int64, error) {
 	hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil)
 	if err != nil {
