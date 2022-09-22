@@ -35,7 +35,7 @@ var (
 	scheme = runtime.NewScheme()
 )
 
-//nolint
+// nolint
 func init() {
 	_ = serverlessv1alpha2.AddToScheme(scheme)
 	_ = serverlessv1alpha1.AddToScheme(scheme)
