@@ -20,7 +20,15 @@ Follow the instruction to expose and access your instance of the HttpBin service
   HttpBin
   </summary>
 
-1. Expose unsecured workload on mTLS Gateway
+1. Export the following value as an environment variable:
+
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
+   ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
+
+2. Expose the instance of the HttpBin service on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
    ```bash
    cat <<EOF | kubectl apply -f -
    ---
@@ -28,13 +36,13 @@ Follow the instruction to expose and access your instance of the HttpBin service
    kind: APIRule
    metadata:
      name: httpbin-mtls-gw-unsecured
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
-     host: httpbin-vs.${CUSTOM_DOMAIN}
+     host: httpbin-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}
      service:
        name: httpbin
        port: 8000
-     gateway: ${MTLS_TEST_NAMESPACE}/${MTLS_GATEWAY_NAME}
+     gateway: ${GATEWAY}
      rules:
        - path: /.*
          methods: ["GET"]
@@ -50,26 +58,28 @@ Follow the instruction to expose and access your instance of the HttpBin service
            - handler: noop
    EOF
    ```
-2. Verify if the workload is accessible
+3.  Call the endpoint by sending a `GET` request with client certificates to the HttpBin service:
    ```bash
    curl --key ${CLIENT_CERT_KEY_FILE} \
         --cert ${CLIENT_CERT_CRT_FILE} \
         --cacert ${CLIENT_ROOT_CA_CRT_FILE} \
-        -ik -X GET https://httpbin.${CUSTOM_DOMAIN}/ip
+        -ik -X GET https://httpbin.${DOMAIN_TO_EXPOSE_WORKLOADS}/ip
    ```
-3. Create Virtual service
+   This call should return the code `200` response.
+
+4. Create Virtual service that will add X-CLIENT-SSL headers to incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
    kind: VirtualService
    metadata:
      name: httpbin-vs
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
      hosts:
-     - "httpbin-vs.${CUSTOM_DOMAIN}"
+     - "httpbin-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}"
      gateways:
-     - ${MTLS_TEST_NAMESPACE}/${MTLS_GATEWAY_NAME}
+     - ${GATEWAY}
      http:
      - route:
        - destination:
@@ -84,20 +94,20 @@ Follow the instruction to expose and access your instance of the HttpBin service
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-4. Create AuthorizationPolicy
+5. Create AuthorizationPolicy
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
    kind: AuthorizationPolicy
    metadata:
      name: test-authz-policy
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
      action: ALLOW
      rules:
      - to:
        - operation:
-           hosts: ["httpbin-vs.mtls-gw.goat.build.kyma-project.io"]
+           hosts: ["httpbin-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}"]
        when:
        - key: request.headers[X-Client-Ssl-Cn]
          values: ["O=example,CN=client2.example.com"]
@@ -108,8 +118,16 @@ Follow the instruction to expose and access your instance of the HttpBin service
   <summary>
   Function
   </summary>
+  
+1. Export the following value as an environment variable:
 
-1. Expose unsecured workload on mTLS Gateway
+   ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
+   ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
+
+2. Expose the sample Function on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
    ```bash
    cat <<EOF | kubectl apply -f -
    ---
@@ -117,13 +135,13 @@ Follow the instruction to expose and access your instance of the HttpBin service
    kind: APIRule
    metadata:
      name: function-mtls-gw-unsecured
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
-     host: function-example.${CUSTOM_DOMAIN}
+     host: function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}
      service:
        name: function
        port: 80
-     gateway: ${MTLS_TEST_NAMESPACE}/${MTLS_GATEWAY_NAME}
+     gateway: ${GATEWAY}
      rules:
        - path: /.*
          methods: ["GET"]
@@ -139,26 +157,28 @@ Follow the instruction to expose and access your instance of the HttpBin service
            - handler: noop
    EOF
    ```
-2. Verify if the workload is accessible
+3. Call the endpoint by sending a `GET` request with client certificates to the Function:
    ```bash
    curl --key ${CLIENT_CERT_KEY_FILE} \
         --cert ${CLIENT_CERT_CRT_FILE} \
         --cacert ${CLIENT_ROOT_CA_CRT_FILE} \
-        -ik -X GET https://function-example.${CUSTOM_DOMAIN}/function
+        -ik -X GET https://function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}/function
    ```
-3. Create Virtual service
+   This call should return the code `200` response.
+
+4. Create Virtual service that will add X-CLIENT-SSL headers to incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
    kind: VirtualService
    metadata:
      name: function-vs
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
      hosts:
-     - "function-example.${CUSTOM_DOMAIN}"
+     - "function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}"
      gateways:
-     - ${MTLS_TEST_NAMESPACE}/${MTLS_GATEWAY_NAME}
+     - ${GATEWAY}
      http:
      - route:
        - destination:
@@ -173,20 +193,20 @@ Follow the instruction to expose and access your instance of the HttpBin service
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-4. Create AuthorizationPolicy
+5. Create AuthorizationPolicy that will verify if the request contains client certificate
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
    kind: AuthorizationPolicy
    metadata:
      name: test-authz-policy
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
      action: ALLOW
      rules:
      - to:
        - operation:
-           hosts: ["function-example.${CUSTOM_DOMAIN}"]
+           hosts: ["function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}"]
        when:
        - key: request.headers[X-Client-Ssl-Cn]
          values: ["O=example,CN=client2.example.com"]

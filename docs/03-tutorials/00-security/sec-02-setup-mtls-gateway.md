@@ -8,96 +8,36 @@ This tutorial shows how to set up mutual TLS Gateway and configure authenticatio
 
 To follow this tutorial, use Kyma 2.6 or higher.
 
-If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
+Before you start, Set up [`custom-domain`](../00-api-exposure/apix-02-setup-custom-domain-for-workload.md) to set up your custom domain and prepare a certificate for exposing a workload.
 
 ## Steps
 
 1. Export the following values as environment variables:
 
    ```bash
-   # CLIENT Certificates
-   export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
-   export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
-   export CLIENT_CERT_CRT_FILE=client.example.com.crt
-   export CLIENT_CERT_CSR_FILE=client.example.com.csr
-   export CLIENT_CERT_KEY_FILE=client.example.com.key 
-   # Domain
-   export DOMAIN=goat.build.kyma-project.io
-   export CUSTOM_DOMAIN=mtls-gw.$DOMAIN
-   # CRDs variables 
-   export MTLS_CERT_SECRET_NAME=mtls-gw-cert
-   export MTLS_GATEWAY_NAME=mtls-gateway
-   export MTLS_TEST_NAMESPACE=mtls-test
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
    ```
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
 
-2. Create Namespace
-
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Namespace
-    metadata:
-      name: ${MTLS_TEST_NAMESPACE}
-      labels: 
-        istio-injection: enabled
-    EOF
-    ```
-   
-3. Manage DNS
-    ```bash
-    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-    ```
-    
-4. Check if loadbalancer uses IP
-    
-    ```bash
-    echo "IP: <<" $IP ">> if empty use HOSTNAME instead of IP"
-    ```
-       >**NOTE:** If the previous output is empty, use HOSTNAME instead of IP
+2. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
 
     ```bash
-    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+    export NAMESPACE={NAMESPACE_NAME}
+	  kubectl create ns $NAMESPACE
+	  kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
     ```
-    
-5. Create DNSEntry for CUSTOM_DOMAIN
-    ```bash
-    cat <<EOF | kubectl apply -f -  
-    --- 
-    apiVersion: dns.gardener.cloud/v1alpha1
-    kind: DNSEntry
-    metadata:
-      name: dns-entry
-      namespace: ${MTLS_TEST_NAMESPACE}
-      annotations:
-        dns.gardener.cloud/class: garden
-    spec:
-      dnsName: "*.${CUSTOM_DOMAIN}"
-      ttl: 600
-      targets:
-        - $IP
-   EOF
-   ```
-   
-6. Manage server TLS
+
+3. Create Client Root CA and CLient certificate signed by Client Root CA
+
+  - Export the following values as environment variables and run the command provided:  
    ```bash
-   cat <<EOF | kubectl apply -f -  
-   --- 
-   apiVersion: cert.gardener.cloud/v1alpha1
-   kind: Certificate
-   metadata:
-     name: ${MTLS_CERT_SECRET_NAME}
-     namespace: istio-system
-   spec:
-     commonName: "*.${CUSTOM_DOMAIN}"
-     issuerRef:
-       name: garden
-     secretRef:
-       name: ${MTLS_CERT_SECRET_NAME} 
-       namespace: istio-system
-   EOF
+    export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
+	  export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
+	  export CLIENT_CERT_CRT_FILE=client.example.com.crt
+	  export CLIENT_CERT_CSR_FILE=client.example.com.csr
+	  export CLIENT_CERT_KEY_FILE=client.example.com.key 
    ```
-7. Manage Client TLS
-   Create Client Root CA and CLient certificate signed by Client Root CA
+
    ```bash
    # Create root ca key and cert (valid for 5 years) - will be used for validation
    openssl req -x509 -sha256 -nodes -days 1825 -newkey rsa:2048 -subj '/O=example Inc./CN=ClientRootCA' -keyout ${CLIENT_ROOT_CA_KEY_FILE} -out ${CLIENT_ROOT_CA_CRT_FILE}
@@ -112,7 +52,14 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
    
    ```
 
-8. Add Client Root CA to cacert bundle secret for mTLS Gateway
+4. Add Client Root CA to cacert bundle secret for mTLS Gateway
+
+  - Export the following values as environment variables and run the command provided:
+
+    ```bash
+    export MTLS_GATEWAY_NAME=mtls-gateway
+    ```
+
    ```bash
    # Add CA Cert to kyma-mtls-gateway
    export CLIENT_ROOT_CA_CRT_ENCODED=$(cat ${CLIENT_ROOT_CA_CRT_FILE}| base64)
@@ -121,7 +68,7 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
    apiVersion: v1
    kind: Secret
    metadata:
-     name: ${MTLS_CERT_SECRET_NAME}-cacert
+     name: ${TLS_SECRET}-cacert
      namespace: istio-system
    type: Opaque
    data:
@@ -129,7 +76,7 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
    EOF
    ```
 
-9. Create mTLS Gateway (mode: MUTUAL)
+5. Create mTLS Gateway (mode: MUTUAL)
    ```bash
    cat <<EOF | kubectl apply -f -
    ---
@@ -137,7 +84,7 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
    kind: Gateway
    metadata:
      name: ${MTLS_GATEWAY_NAME}
-     namespace: ${MTLS_TEST_NAMESPACE}
+     namespace: ${NAMESPACE}
    spec:
      selector:
        istio: ingressgateway
@@ -149,7 +96,7 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
            protocol: HTTPS
          tls:
            mode: MUTUAL
-           credentialName: ${MTLS_CERT_SECRET_NAME}
+           credentialName: ${TLS_SECRET}
            minProtocolVersion: TLSV1_2
            cipherSuites:
            - ECDHE-RSA-CHACHA20-POLY1305
@@ -158,7 +105,7 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
            - ECDHE-RSA-AES128-GCM-SHA256
            - ECDHE-RSA-AES128-SHA
          hosts:
-           - '*.${CUSTOM_DOMAIN}'
+           - '*.${DOMAIN_TO_EXPOSE_WORKLOADS}'
        - port:
            number: 80
            name: http
@@ -166,6 +113,6 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
          tls:
            httpsRedirect: true
          hosts:
-           - '*.${CUSTOM_DOMAIN}'
+           - '*.${DOMAIN_TO_EXPOSE_WORKLOADS}'
    EOF
    ```
