@@ -20,18 +20,22 @@ const {
   waitForLogPipelineStatusRunning,
 } = require('./helpers');
 
+const httpBackendNamespaces = loadTestData('http-backend-namespaces.yaml');
+const httpBackendDeployment = loadTestData('http-backend.yaml');
 const regexFilterDeployment = loadTestData('regex-filter-deployment.yaml');
-const mockserverDeployment = loadTestData('mockserver.yaml');
 const spammerWorkloadPod = loadTestData('logs-workload.yaml');
 
 async function prepareEnvironment() {
-  await k8sApply(mockserverDeployment, 'mockserver');
+  await k8sApply(httpBackendNamespaces);
+  await k8sApply(structuredClone(httpBackendDeployment), 'http-backend-1');
+  await k8sApply(structuredClone(httpBackendDeployment), 'http-backend-2');
   await k8sApply(regexFilterDeployment, 'default');
   await k8sApply(spammerWorkloadPod, 'default');
 }
 
 async function cleanEnvironment() {
-  await k8sDelete(mockserverDeployment, 'mockserver');
+  await k8sDelete(structuredClone(httpBackendDeployment), 'http-backend-1');
+  await k8sDelete(structuredClone(httpBackendNamespaces), 'http-backend-2');
   await k8sDelete(regexFilterDeployment, 'default');
   await k8sDelete(spammerWorkloadPod, 'default');
 }
@@ -132,6 +136,15 @@ describe('Telemetry Operator', function() {
 
     context('LogPipeline', function() {
       context('HTTP Output', function() {
+        const backend1Secret = loadTestData('http-backend-1-secret.yaml');
+        const backend1Host = backend1Secret[0].stringData.host;
+        const backend2Secret = loadTestData('http-backend-2-secret.yaml');
+        const backend2Host = backend2Secret[0].stringData.host;
+
+        it(`Should create host secret with host set to '${backend1Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-1-secret.yaml'));
+        });
+
         const pipeline = loadTestData('logpipeline-output-http.yaml');
         const pipelineName = pipeline[0].metadata.name;
 
@@ -140,14 +153,28 @@ describe('Telemetry Operator', function() {
           await waitForLogPipelineStatusRunning(pipelineName);
         });
 
-        it('Should push logs to the HTTP mockserver', async function() {
-          const labels = '{namespace="mockserver"}';
+        it(`Should push logs to '${backend1Host}'`, async function() {
+          const labels = '{namespace="http-backend-1"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should update host secret with host set to '${backend2Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-2-secret.yaml'));
+        });
+
+        it(`Should detect secret update and push logs to '${backend2Host}'`, async function() {
+          const labels = '{namespace="http-backend-2"}';
           const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
           assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
         });
 
         it(`Should delete LogPipeline '${pipelineName}'`, async function() {
           await k8sDelete(pipeline);
+        });
+
+        it(`Should delete host secret`, async function() {
+          await k8sDelete(backend2Secret);
         });
       });
 
