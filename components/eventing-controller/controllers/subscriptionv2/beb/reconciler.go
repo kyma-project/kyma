@@ -6,7 +6,7 @@ import (
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/bebv2"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"golang.org/x/xerrors"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -31,7 +31,7 @@ type Reconciler struct {
 	client.Client
 	logger            *logger.Logger
 	recorder          record.EventRecorder
-	Backend           bebv2.Backend
+	Backend           eventmesh.Backend
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *beb.OAuth2ClientCredentials
@@ -45,7 +45,7 @@ const (
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
-	cfg env.Config, cleaner eventtype.Cleaner, bebBackend bebv2.Backend, credential *beb.OAuth2ClientCredentials,
+	cfg env.Config, cleaner eventtype.Cleaner, bebBackend eventmesh.Backend, credential *beb.OAuth2ClientCredentials,
 	mapper backendutils.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)

@@ -3,6 +3,11 @@ package v1alpha2
 import (
 	"encoding/json"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -92,6 +97,32 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 // InitializeCleanEventTypes initializes the SubscriptionStatus.CleanEventTypes with an empty slice of strings.
 func (s *SubscriptionStatus) InitializeCleanEventTypes() {
 	s.Types = []EventType{}
+}
+
+// GetUniqueTypes returns the de-duplicated types from subscription spec.
+func (s *Subscription) GetUniqueTypes() []string {
+	result := make([]string, 0, len(s.Spec.Types))
+	for _, t := range s.Spec.Types {
+		if !utils.ContainsString(result, t) {
+			result = append(result, t)
+		}
+	}
+
+	return result
+}
+
+func (s *Subscription) DuplicateWithStatusDefaults() *Subscription {
+	desiredSub := s.DeepCopy()
+	desiredSub.Status = SubscriptionStatus{}
+	return desiredSub
+}
+
+func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
+	object, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&s)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: object}, nil
 }
 
 //+kubebuilder:object:root=true
