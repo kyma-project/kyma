@@ -12,7 +12,7 @@ func TestSecretsCache(t *testing.T) {
 
 	require.Empty(t, cache.get(types.NamespacedName{Name: "dummy"}))
 
-	cache.set(types.NamespacedName{Name: "dummy"}, "references-dummy")
+	cache.addOrUpdate(types.NamespacedName{Name: "dummy"}, "references-dummy")
 
 	require.Len(t, cache.get(types.NamespacedName{Name: "dummy"}), 1)
 	require.Contains(t, cache.get(types.NamespacedName{Name: "dummy"}), "references-dummy")

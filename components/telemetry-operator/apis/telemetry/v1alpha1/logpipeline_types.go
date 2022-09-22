@@ -182,7 +182,7 @@ type SecretKeyRef struct {
 	Key       string `json:"key,omitempty"`
 }
 
-func (skr SecretKeyRef) NamespacedName() types.NamespacedName {
+func (skr *SecretKeyRef) NamespacedName() types.NamespacedName {
 	return types.NamespacedName{Name: skr.Name, Namespace: skr.Namespace}
 }
 
@@ -270,6 +270,15 @@ type LogPipeline struct {
 
 // ContainsCustomPlugin returns true if the pipeline contains any custom filters or outputs
 func (l *LogPipeline) ContainsCustomPlugin() bool {
+	for _, filter := range l.Spec.Filters {
+		if filter.Custom != "" {
+			return true
+		}
+	}
+	return l.Spec.Output.IsCustomDefined()
+}
+
+func ContainsCustomPlugin(l *LogPipeline) bool {
 	for _, filter := range l.Spec.Filters {
 		if filter.Custom != "" {
 			return true

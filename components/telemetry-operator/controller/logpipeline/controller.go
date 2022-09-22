@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -108,16 +109,16 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
-	ctrl.Log.Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
 	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
 	pipelines := r.secrets.get(secretName)
 	var requests []reconcile.Request
-	for p := range pipelines {
-		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: string(p)}}
-		ctrl.Log.Info(fmt.Sprintf("Secret changed event: Creating reconciliation request for pipeline: %s\n", string(p)))
+	for _, p := range pipelines {
+		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p}}
+		ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Creating reconciliation request for pipeline: %s\n", p))
 		requests = append(requests, request)
 	}
-	ctrl.Log.Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
 	return requests
 }
 
@@ -132,19 +133,18 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 // move the current state of the cluster closer to the desired state.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
-	log.Info("Reconcile called")
+	log.Info("Reconciliation triggered")
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
-		log.Error(err, "Failed to get all log pipelines")
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to get all log pipelines: %v", err)
 	}
+
 	r.updateMetrics(&allPipelines)
 
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
-		log.Info("Ignoring deleted LogPipeline")
-		// Ignore not-found errors since we can get them on deleted requests
+		log.V(1).Info("Ignoring deleted LogPipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -170,16 +170,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if changed {
-		log.V(1).Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
+		log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
 
 		if err = r.Update(ctx, &logPipeline); err != nil {
-			log.Error(err, "Failed to update log pipeline")
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to update LogPipeline: %v", err)
 		}
 
 		if err = r.daemonSetHelper.Restart(ctx, r.config.DaemonSet); err != nil {
-			log.Error(err, "Failed to restart Fluent Bit DaemonSet")
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
 		}
 
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
@@ -198,8 +196,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		var ready bool
 		ready, err = r.daemonSetHelper.IsReady(ctx, r.config.DaemonSet)
 		if err != nil {
-			log.Error(err, "Failed to check Fluent Bit readiness")
-			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
+			return ctrl.Result{RequeueAfter: controller.RequeueTime}, fmt.Errorf("failed to check Fluent Bit readiness: %v", err)
 		}
 		if !ready {
 			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
@@ -226,15 +223,15 @@ func (r *Reconciler) syncSecretsCache(pipeline *telemetryv1alpha1.LogPipeline) {
 
 	if pipeline.DeletionTimestamp != nil {
 		for _, f := range fields {
-			ctrl.Log.Info(fmt.Sprintf("Remove secret referenced by %s from cache: %s", pipeline.Name, f.secretKeyRef.Name))
+			ctrl.Log.V(1).Info(fmt.Sprintf("Remove secret referenced by %s from cache: %s", pipeline.Name, f.secretKeyRef.Name))
 			r.secrets.delete(f.secretKeyRef.NamespacedName(), pipeline.Name)
 		}
 		return
 	}
 
 	for _, f := range fields {
-		ctrl.Log.Info(fmt.Sprintf("Add secret referenced by %s to cache: %s", pipeline.Name, f.secretKeyRef.Name))
-		r.secrets.set(f.secretKeyRef.NamespacedName(), pipeline.Name)
+		ctrl.Log.V(1).Info(fmt.Sprintf("Add secret referenced by %s to cache: %s", pipeline.Name, f.secretKeyRef.Name))
+		r.secrets.addOrUpdate(f.secretKeyRef.NamespacedName(), pipeline.Name)
 	}
 }
 
@@ -243,8 +240,10 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, name, &logPipeline); err != nil {
-		log.Error(err, "Failed to get LogPipeline")
-		return err
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		return fmt.Errorf("failed get LogPipeline: %v", err)
 	}
 
 	// Do not update status if the log pipeline is being deleted
@@ -266,8 +265,7 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 	logPipeline.Status.UnsupportedMode = unSupported
 
 	if err := r.Status().Update(ctx, &logPipeline); err != nil {
-		log.Error(err, fmt.Sprintf("Failed to update LogPipeline status to %s", condition.Type))
-		return err
+		return fmt.Errorf("failed to update LogPipeline status to %s: %v", condition.Type, err)
 	}
 	return nil
 }
@@ -289,11 +287,11 @@ func (r *Reconciler) ensureSecretHasKey(ctx context.Context, from telemetryv1alp
 
 	var secret corev1.Secret
 	if err := r.Get(ctx, types.NamespacedName{Name: from.Name, Namespace: from.Namespace}, &secret); err != nil {
-		log.Info(fmt.Sprintf("Unable to get secret '%s' from namespace '%s'", from.Name, from.Namespace))
+		log.V(1).Info(fmt.Sprintf("Unable to get secret '%s' from namespace '%s'", from.Name, from.Namespace))
 		return false
 	}
 	if _, ok := secret.Data[from.Key]; !ok {
-		log.Info(fmt.Sprintf("Unable to find key '%s' in secret '%s'", from.Key, from.Name))
+		log.V(1).Info(fmt.Sprintf("Unable to find key '%s' in secret '%s'", from.Key, from.Name))
 		return false
 	}
 
@@ -308,13 +306,13 @@ func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineLi
 type keepFunc func(*telemetryv1alpha1.LogPipeline) bool
 
 func count(pipelines *telemetryv1alpha1.LogPipelineList, keep keepFunc) int {
-	count := 0
+	c := 0
 	for i := range pipelines.Items {
 		if keep(&pipelines.Items[i]) {
-			count++
+			c++
 		}
 	}
-	return count
+	return c
 }
 
 func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
