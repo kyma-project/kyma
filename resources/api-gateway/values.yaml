@@ -110,7 +110,7 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "a8b416b"
+      version: "a8b416bf"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "a8b416b"
+      version: "a8b416bf"
