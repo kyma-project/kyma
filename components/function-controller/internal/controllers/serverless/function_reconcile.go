@@ -103,7 +103,10 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	r.Log.Debugf("starting pre-reconciliation steps for function '%s' in namespace '%s'", request.Name, request.Namespace)
+	r.Log.With(
+		"name", request.Name,
+		"namespace", request.Namespace).
+		Debug("starting pre-reconciliation steps")
 
 	var instance serverlessv1alpha2.Function
 
