@@ -58,18 +58,18 @@ type DefaultingConfig struct {
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
-	fn.Spec.defaultReplicas(config, fn)
+	fn.Spec.defaultReplicas(config)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
 }
 
-func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
+func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig) {
 	if spec.Replicas != nil {
 		return
 	}
 
 	defaultingConfig := config.Function.Replicas
-	replicasPreset := mergeReplicasPreset(fn, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
+	replicasPreset := defaultingConfig.Presets[defaultingConfig.DefaultPreset]
 
 	if spec.ScaleConfig == nil {
 		spec.ScaleConfig = &ScaleConfig{}
@@ -208,30 +208,6 @@ func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCP
 	}
 
 	return copiedRes
-}
-
-func mergeReplicasPreset(fn *Function, presets map[string]ReplicasPreset, defaultPreset string) ReplicasPreset {
-	replicas := ReplicasPreset{}
-
-	preset := fn.GetLabels()[ReplicasPresetLabel]
-	if preset == "" {
-		return presets[defaultPreset]
-	}
-
-	replicasPreset := presets[preset]
-	replicasDefaultPreset := presets[defaultPreset]
-
-	replicas.Min = replicasPreset.Min
-	if replicas.Min == 0 {
-		replicas.Min = replicasDefaultPreset.Min
-	}
-
-	replicas.Max = replicasPreset.Max
-	if replicas.Max == 0 {
-		replicas.Max = replicasDefaultPreset.Max
-	}
-
-	return replicas
 }
 
 func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) ResourcesPreset {
