@@ -9,12 +9,11 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
-	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"testing"
 	"time"
@@ -35,7 +34,7 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	err := envconfig.InitWithPrefix(&gs.testConfig, "APP")
 	gs.Require().Nil(err)
 
-	cfg, err := rest.InClusterConfig()
+	cfg, err := clientcmd.BuildConfigFromFlags("", gs.testConfig.KubeconfigPath)
 	gs.Require().Nil(err)
 
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
@@ -55,13 +54,11 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 
 	craConfigurator := compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient, gs.coreClientSet, gs.testConfig.TestingTenant)
 
-	runtimeName := "cratest" + random.RandomString(5)
-
-	gs.rollbackTestFunc, err = craConfigurator.Do(runtimeName)
+	gs.rollbackTestFunc, err = craConfigurator.Do("cratest")
 	gs.Require().Nil(err)
 
 	// TODO: Pass namespaces names
-	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, "", "")
+	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, gs.testConfig.TestCredentialsNamespace, gs.testConfig.IntegrationNamespace)
 	gs.Require().Nil(err)
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()

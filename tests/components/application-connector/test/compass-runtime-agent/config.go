@@ -6,8 +6,10 @@ type config struct {
 	DirectorURL                  string `envconfig:"default=http://compass-director.compass-system.svc.cluster.local:3000/graphql"`
 	SkipDirectorCertVerification bool   `envconfig:"default=false"`
 	TestCredentialsNamespace     string `envconfig:"default=test"`
+	IntegrationNamespace         string `envconfig:"default=kyma-integration"`
 	OauthCredentialsSecretName   string `envconfig:"default=oauth-compass-credentials"`
 	TestingTenant                string `envconfig:"default=tenant"`
+	KubeconfigPath               string `envconfig:"default=~/.kube/config"`
 }
 
 func (c *config) String() string {

@@ -189,7 +189,7 @@ func (cc *directorClient) RegisterApplication(appName, displayName string) (stri
 }
 
 func (cc *directorClient) AssignApplicationToFormation(appId, formationName string) error {
-	log.Infof("Registering Application on Director service")
+	log.Infof("Assigning Application to formation")
 	assignFormationQuery := cc.queryProvider.assignFormationForAppMutation(appId, formationName)
 
 	var response AssignFormationResponse
@@ -210,7 +210,7 @@ func (cc *directorClient) AssignApplicationToFormation(appId, formationName stri
 }
 
 func (cc *directorClient) AssignRuntimeToFormation(runtimeId, formationName string) error {
-	log.Infof("Registering Application on Director service")
+	log.Infof("Assigning Runtime to formation")
 	assignFormationQuery := cc.queryProvider.assignFormationForRuntimeMutation(runtimeId, formationName)
 
 	var response AssignFormationResponse
