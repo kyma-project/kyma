@@ -12,7 +12,7 @@ global:
       version: PR-15560
     nats:
       name: nats
-      version: 2.8.4-alpine
+      version: 2.9.0-alpine3.16
       directory: external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader

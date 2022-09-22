@@ -30,7 +30,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -545,7 +544,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			sub := tc.givenSubscription
-			log := utils.LoggerWithSubscription(r.namedLogger(), sub)
+			log := backendutils.LoggerWithSubscription(r.namedLogger(), sub)
 
 			// when
 			r.syncConditionSubscriptionActive(sub, tc.givenIsSubscribed, log)
