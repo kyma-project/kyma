@@ -10,7 +10,7 @@ The tutorial may be a follow-up to the [Set up a custom domain for a workload](.
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
-Before you start, you must set up [`mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma. 
+Before you start, Set up [`kyma-mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma, and make sure that you exported the bundle certificates. 
 
 ## Expose and access your workload
 
