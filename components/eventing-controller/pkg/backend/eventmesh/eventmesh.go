@@ -56,6 +56,7 @@ type EventMesh struct {
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha2.ProtocolSettings
 	Namespace        string
+	EventMeshPrefix  string
 	OAth2credentials *backendbebv1.OAuth2ClientCredentials
 	SubNameMapper    backendutils.NameMapper
 	logger           *logger.Logger
@@ -76,6 +77,7 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 			Qos:             &cfg.Qos,
 		}
 		em.Namespace = cfg.BEBNamespace
+		em.EventMeshPrefix = cfg.EventTypePrefix
 	}
 	return nil
 }
@@ -233,8 +235,7 @@ func (em *EventMesh) GetProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 
 // GetEventMeshSubject appends the prefix to subject.
 func (em *EventMesh) GetEventMeshSubject(source, subject string) string {
-	// @TODO: Update it to use event type prefix and source
-	return fmt.Sprintf("%s.%s.%s", "sap.kyma.custom", source, subject)
+	return fmt.Sprintf("%s.%s.%s", em.EventMeshPrefix, source, subject)
 }
 
 func (em *EventMesh) updateHashesInStatus(kymaSubscription *eventingv1alpha2.Subscription, eventMeshLocalSubscription *types.Subscription, eventMeshServerSubscription *types.Subscription) error {
