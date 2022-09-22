@@ -93,7 +93,7 @@ type SubscriptionList struct {
 	Items           []Subscription `json:"items"`
 }
 
-func init() {
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})
 }
 
