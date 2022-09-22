@@ -29,7 +29,7 @@ data:
          ]
        },
        "description": "NATS JetStream Dashboard",
-       "editable": true,
+       "editable": false,
        "graphTooltip": 1,
        "links": [],
        "panels": [

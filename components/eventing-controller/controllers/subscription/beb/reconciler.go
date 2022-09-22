@@ -106,7 +106,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	sub := currentSubscription.DeepCopy()
 
 	// bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), sub)
+	log := backendutils.LoggerWithSubscription(r.namedLogger(), sub)
 	log.Debugw("Received new reconcile request")
 
 	// instantiate a return object

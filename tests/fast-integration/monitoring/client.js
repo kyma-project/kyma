@@ -107,7 +107,6 @@ async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
       if (err.response.status === httpErrorCode && err.response.data.includes(redirectURL)) {
         return true;
       }
-      error(msg + err.response.status + ' : ' + err.response.data);
     } else {
       error(`${msg}: ${err.toString()}`);
     }

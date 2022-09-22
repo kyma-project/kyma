@@ -25,6 +25,7 @@ import (
 	backendnats "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/core"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -171,7 +172,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	sub := cachedSubscription.DeepCopy()
 
 	// Bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), sub)
+	log := backendutils.LoggerWithSubscription(r.namedLogger(), sub)
 
 	if !sub.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted

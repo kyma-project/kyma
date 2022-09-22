@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Check if not in master
         id: check_if_master
         shell: bash
@@ -35,14 +37,16 @@ jobs:
           fi
       - name: Generate changelog
         id: changelog
+        shell: bash
         env:
           CONFIG_FILE: .github/package.json
           GITHUB_AUTH: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          export NEW_RELEASE_TITLE=$(cat "VERSION")
-          TAG_LIST_STRING=$(git describe --tags $(git rev-list --tags) --always | grep -F . | grep -v "-")
-          IFS=" " read -r -a TAG_LIST <<< "${TAG_LIST_STRING}"
-          export FROM_TAG=${TAG_LIST[0]}
+          git config --global --add safe.directory '*'
+          git config --global user.email "kyma-bot@kyma-project.io"
+          git config --global user.name "Kyma Bot"
+          export NEW_RELEASE_TITLE="$(cat "VERSION")"
+          export FROM_TAG=$(git describe --tags $(git rev-list --tags) --always | grep -F . | grep -v "-" | head -1)
           /app/generate-release-changelog.sh
       - name: Make Kyma release
         id: make_release
@@ -50,7 +54,7 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           GOOGLE_APPLICATION_CREDENTIALS: 'creds.json'
         run: |
-          echo $GOOGLE_APPLICATION_CREDENTIALS_JSON | base64 --decode > creds.json
+          echo $GOOGLE_APPLICATION_CREDENTIALS_JSON | base64 -d > creds.json
           /githubrelease -targetCommit=${{ github.ref }} \
                                     -kymaChangelog=.changelog/release-changelog.md \
                                     -githubRepoOwner=${{ github.event.repository.owner.login }} \

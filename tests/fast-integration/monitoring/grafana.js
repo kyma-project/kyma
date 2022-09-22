@@ -14,7 +14,6 @@ const {
   sleep,
   waitForDeployment,
   waitForPodWithLabel,
-  info,
   error,
 } = require('../utils');
 
@@ -50,14 +49,12 @@ async function assertGrafanaRedirectsExist() {
 }
 
 async function assertGrafanaRedirectsInKyma2() {
-  info('Checking grafana redirect for kyma docs');
   let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
   await createBasicProxySecret();
   await restartProxyPod();
 
-  info('Checking grafana redirect for google as OIDC provider');
   res = await checkGrafanaRedirect('https://accounts.google.com/signin/oauth', 200);
   assert.isTrue(res, 'Grafana redirect to google does not work!');
 
@@ -67,13 +64,11 @@ async function assertGrafanaRedirectsInKyma2() {
   await patchProxyDeployment('--reverse-proxy=true');
   await restartProxyPod();
 
-  info('Checking grafana redirect to grafana URL');
   res = await checkGrafanaRedirect('https://grafana.', 200);
   assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
 }
 
 async function assertGrafanaRedirectsInKyma1() {
-  info('Checking grafana redirect for dex');
   const res = await checkGrafanaRedirect('https://dex.', 200);
   assert.isTrue(res, 'Grafana redirect to dex does not work!');
 }
@@ -86,7 +81,6 @@ async function setGrafanaProxy() {
     await restartProxyPod();
     await patchProxyDeployment('--reverse-proxy=true');
 
-    info('Checking grafana redirect to grafana URL');
     const res = await checkGrafanaRedirect('https://grafana.', 200);
     assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
   }
@@ -97,7 +91,6 @@ async function resetGrafanaProxy(isSkr) {
     await deleteProxySecret();
     await restartProxyPod();
 
-    info('Checking grafana redirect to kyma docs');
     const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
     const res = await checkGrafanaRedirect(docsUrl, 403);
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
@@ -121,7 +114,6 @@ async function patchProxyDeployment(toRemove) {
   );
 
   if (argPosFrom === -1) {
-    info(`Skipping updating Proxy Deployment as it is already in desired state`);
     return;
   }
 
@@ -144,20 +136,16 @@ async function patchProxyDeployment(toRemove) {
 }
 
 async function createBasicProxySecret() {
-  info(`Creating secret: ${proxySecret.metadata.name}`);
   await k8sApply([proxySecret], kymaNs);
 }
 
 async function createProxySecretWithIPAllowlisting() {
-  info(`Creating secret with ip allowlisting: ${proxySecret.metadata.name}`);
-
   const secret = proxySecret;
   secret.data.OAUTH2_PROXY_TRUSTED_IPS = toBase64('0.0.0.0/0');
   await k8sApply([secret], kymaNs);
 }
 
 async function deleteProxySecret() {
-  info(`Deleting secret: ${proxySecret.metadata.name}`);
   await k8sDelete([proxySecret], kymaNs);
 }
 

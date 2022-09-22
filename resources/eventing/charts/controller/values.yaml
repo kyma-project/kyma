@@ -44,6 +44,10 @@ metrics:
     nameSuffix: "-metrics"
     interval: 30s
 
+webhook:
+  port: 443
+  targetPort: 9443
+
 clusterRoleBindingSuffix: ""
 
 eventingBackend:
@@ -93,3 +97,5 @@ jetstream:
   consumerDeliverPolicy: new
   maxMessages: -1 # no limit
   maxBytes: -1
+
+enableNewCRDVersion: false
