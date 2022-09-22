@@ -151,6 +151,26 @@ describe('Telemetry Operator', function() {
         });
       });
 
+      context('Custom Output', function() {
+        const pipeline = loadTestData('logpipeline-output-custom.yaml');
+        const pipelineName = pipeline[0].metadata.name;
+
+        it(`Should create LogPipeline '${pipelineName}'`, async function() {
+          await k8sApply(pipeline);
+          await waitForLogPipelineStatusRunning(pipelineName);
+        });
+
+        it('Should push logs to the HTTP Custom mockserver', async function() {
+          const labels = '{namespace="mockserver"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should delete LogPipeline '${pipelineName}'`, async function() {
+          await k8sDelete(pipeline);
+        });
+      });
+
       context('Input', function() {
         context('Drop annotations, keep labels', function() {
           const pipeline = loadTestData('logpipeline-input-keep-labels.yaml');

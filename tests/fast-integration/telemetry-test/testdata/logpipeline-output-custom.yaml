@@ -1,0 +1,17 @@
+kind: LogPipeline
+apiVersion: telemetry.kyma-project.io/v1alpha1
+metadata:
+  name: http-backend
+spec:
+  output:
+    custom: |
+      Name               http
+      Host               ${ENDPOINT}
+      Tls                On
+  variables:
+    - name: ENDPOINT
+      valueFrom:
+        secretKeyRef:
+        - name: mockserver-host
+          namespace: mockserver
+          key: ENDPOINT
