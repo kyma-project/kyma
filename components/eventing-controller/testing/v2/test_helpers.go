@@ -281,18 +281,6 @@ func WithFinalizers(finalizers []string) SubscriptionOpt {
 	}
 }
 
-//func WithStatusConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
-//	return func(s *eventingv1alpha2.Subscription) {
-//		s.Status.Config = eventingv1alpha2.MergeSubsConfigs(nil, &defaultConfig)
-//	}
-//}
-//
-//func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
-//	return func(s *eventingv1alpha2.Subscription) {
-//		s.Spec.Config = eventingv1alpha2.MergeSubsConfigs(nil, &defaultConfig)
-//	}
-//}
-
 func WithStatusTypes(cleanEventTypes []eventingv1alpha2.EventType) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
 		if cleanEventTypes == nil {
@@ -518,17 +506,6 @@ func NewNamespace(name string) *corev1.Namespace {
 	return &namespace
 }
 
-//func NewEventingBackend(name, namespace string) *eventingv1alpha1.EventingBackend {
-//	return &eventingv1alpha1.EventingBackend{
-//		ObjectMeta: metav1.ObjectMeta{
-//			Name:      name,
-//			Namespace: namespace,
-//		},
-//		Spec:   eventingv1alpha1.EventingBackendSpec{},
-//		Status: eventingv1alpha1.EventingBackendStatus{},
-//	}
-//}
-
 func NewEventingControllerDeployment() *appsv1.Deployment {
 	labels := map[string]string{
 		"app.kubernetes.io/name": "value",
@@ -560,31 +537,6 @@ func NewEventingControllerDeployment() *appsv1.Deployment {
 		Status: appsv1.DeploymentStatus{},
 	}
 }
-
-//// WithMultipleConditions is a SubscriptionOpt for creating Subscriptions with multiple conditions.
-//func WithMultipleConditions() SubscriptionOpt {
-//	return func(s *eventingv1alpha2.Subscription) {
-//		s.Status.Conditions = MultipleDefaultConditions()
-//	}
-//}
-//
-//func MultipleDefaultConditions() []eventingv1alpha2.Condition {
-//	return []eventingv1alpha2.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
-//}
-//
-//func CustomReadyCondition(msg string) eventingv1alpha2.Condition {
-//	return eventingv1alpha2.MakeCondition(
-//		eventingv1alpha2.ConditionSubscriptionActive,
-//		eventingv1alpha2.ConditionReasonNATSSubscriptionActive,
-//		corev1.ConditionTrue, msg)
-//}
-//
-//func DefaultReadyCondition() eventingv1alpha2.Condition {
-//	return eventingv1alpha2.MakeCondition(
-//		eventingv1alpha2.ConditionSubscriptionActive,
-//		eventingv1alpha2.ConditionReasonNATSSubscriptionActive,
-//		corev1.ConditionTrue, "")
-//}
 
 // ToSubscription converts an unstructured subscription into a typed one.
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha2.Subscription, error) {
@@ -652,53 +604,3 @@ func GetBinaryMessageHeaders() http.Header {
 	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
 	return headers
 }
-
-//func PublisherProxyDefaultReadyCondition() eventingv1alpha2.Condition {
-//	return eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionPublisherProxyReady,
-//		eventingv1alpha2.ConditionReasonPublisherDeploymentReady,
-//		corev1.ConditionTrue, "")
-//}
-//
-//func PublisherProxyDefaultNotReadyCondition() eventingv1alpha2.Condition {
-//	return eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionPublisherProxyReady,
-//		eventingv1alpha2.ConditionReasonPublisherDeploymentNotReady,
-//		corev1.ConditionFalse, "")
-//}
-//
-//func SubscriptionControllerDefaultReadyCondition() eventingv1alpha2.Condition {
-//	return eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionControllerReady,
-//		eventingv1alpha2.ConditionReasonSubscriptionControllerReady,
-//		corev1.ConditionTrue, "")
-//}
-//
-//func SubscriptionControllerReadyConditionWith(ready corev1.ConditionStatus, reason eventingv1alpha2.ConditionReason) eventingv1alpha2.Condition {
-//	return eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionControllerReady, reason, ready, "")
-//}
-
-//func SubscriptionControllerReadyEvent() corev1.Event {
-//	return corev1.Event{
-//		Reason: string(eventingv1alpha2.ConditionReasonSubscriptionControllerReady),
-//		Type:   corev1.EventTypeNormal,
-//	}
-//}
-//
-//func SubscriptionControllerNotReadyEvent() corev1.Event {
-//	return corev1.Event{
-//		Reason: string(eventingv1alpha2.ConditionReasonSubscriptionControllerNotReady),
-//		Type:   corev1.EventTypeWarning,
-//	}
-//}
-//
-//func PublisherDeploymentReadyEvent() corev1.Event {
-//	return corev1.Event{
-//		Reason: string(eventingv1alpha2.ConditionReasonPublisherDeploymentReady),
-//		Type:   corev1.EventTypeNormal,
-//	}
-//}
-//
-//func PublisherDeploymentNotReadyEvent() corev1.Event {
-//	return corev1.Event{
-//		Reason: string(eventingv1alpha2.ConditionReasonPublisherDeploymentNotReady),
-//		Type:   corev1.EventTypeWarning,
-//	}
-//}
