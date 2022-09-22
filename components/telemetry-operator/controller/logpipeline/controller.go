@@ -26,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/prometheus/client_golang/prometheus"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -110,7 +111,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	secretsOK := r.syncer.secretHelper.ValidatePipelineSecretsExist(ctx, &logPipeline)
+	secretsOK := r.ensureReferencedSecretsExist(ctx, &logPipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.SecretsNotPresent,
@@ -214,6 +215,34 @@ func (r *Reconciler) updateLogPipelineStatus(ctx context.Context, name types.Nam
 		return err
 	}
 	return nil
+}
+
+func (r *Reconciler) ensureReferencedSecretsExist(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) bool {
+	secretRefFields := lookupSecretRefFields(pipeline)
+	for _, field := range secretRefFields {
+		hasKey := r.ensureSecretHasKey(ctx, field.secretKeyRef)
+		if !hasKey {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (r *Reconciler) ensureSecretHasKey(ctx context.Context, from telemetryv1alpha1.SecretKeyRef) bool {
+	log := logf.FromContext(ctx)
+
+	var secret corev1.Secret
+	if err := r.Get(ctx, types.NamespacedName{Name: from.Name, Namespace: from.Namespace}, &secret); err != nil {
+		log.Info(fmt.Sprintf("Unable to get secret '%s' from namespace '%s'", from.Name, from.Namespace))
+		return false
+	}
+	if _, ok := secret.Data[from.Key]; !ok {
+		log.Info(fmt.Sprintf("Unable to find key '%s' in secret '%s'", from.Key, from.Name))
+		return false
+	}
+
+	return true
 }
 
 func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineList) {

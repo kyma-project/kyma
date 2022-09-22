@@ -1,7 +1,7 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LogPipeline
 metadata:
-  name: http-mockserver
+  name: output-http
 spec:
   output:
     http:

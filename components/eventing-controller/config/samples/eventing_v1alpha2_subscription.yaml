@@ -1,0 +1,14 @@
+apiVersion: eventing.kyma-project.io/v1alpha2
+kind: Subscription
+metadata:
+  name: subscription-sample
+  namespace: tunas-testing
+spec:
+  sink: http://test.tunas-testing.svc.cluster.local
+  typeMatching: exact
+  source: ""
+  types:
+    - sap.kyma.custom.noapp.order.created.v1
+    - sap.kyma.custom.noapp.order.created.v2
+  config:
+    "maxInFlightMessages": "10"

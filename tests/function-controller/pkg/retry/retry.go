@@ -33,7 +33,10 @@ func fnWithIgnore(fn func() error, ignoreErr func(error) bool, log *logrus.Entry
 
 func errorFn(log *logrus.Entry) func(error) bool {
 	return func(err error) bool {
-		if errors.IsTimeout(err) || errors.IsServerTimeout(err) || errors.IsTooManyRequests(err) {
+		if errors.IsTimeout(err) ||
+			errors.IsServerTimeout(err) ||
+			errors.IsTooManyRequests(err) ||
+			errors.IsConflict(err) {
 			log.Infof("retrying due to: %s", err)
 			return true
 		}
@@ -50,5 +53,9 @@ func WithIgnoreOnConflict(backoff wait.Backoff, fn func() error, log *logrus.Ent
 }
 
 func OnTimeout(backoff wait.Backoff, fn func() error, log *logrus.Entry) error {
+	return retry.OnError(backoff, errorFn(log), fn)
+}
+
+func RetryOnConflict(backoff wait.Backoff, fn func() error, log *logrus.Entry) error {
 	return retry.OnError(backoff, errorFn(log), fn)
 }

@@ -7,7 +7,7 @@ metadata:
     prometheus: monitoring
 spec:
   endpoints:
-  - port: http-jaeger-operator-metrics
+  - port: http-metrics
     scheme: https
     tlsConfig:
       caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
@@ -27,6 +27,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}
+      app.kubernetes.io/component: jaeger-operator
 
 {{- if eq .Values.jaeger.spec.strategy "allInOne" }}
 ---
@@ -48,14 +49,8 @@ spec:
       insecureSkipVerify: true
     metricRelabelings:
     - action: keep
-      regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
+      regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|jaeger_.+)$
       sourceLabels: [ __name__ ]
-    - action: drop
-      regex: ^rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)$ # drop buckets to reduce metric footprint
-      sourceLabels: [__name__,le]
-    - action: keep
-      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|jaegertracing.io).+)$ # allow metrics from core, apps and jaeger API group 
-      sourceLabels: [__name__,url]
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
