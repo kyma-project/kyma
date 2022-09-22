@@ -380,7 +380,7 @@ config:
         Name tail
         Path /null.log
         Tag null.*
-        Alias null-dummy
+        Alias null-tail
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
@@ -397,7 +397,7 @@ config:
     [OUTPUT]
         Name null
         Match null.*
-        Alias null-dummy
+        Alias null-null
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]
