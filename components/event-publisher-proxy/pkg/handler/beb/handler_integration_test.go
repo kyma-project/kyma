@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -429,7 +429,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 					defer func() { require.NoError(t, resp.Body.Close()) }()
-					respBodyBytes, err := ioutil.ReadAll(resp.Body)
+					respBodyBytes, err := io.ReadAll(resp.Body)
 					require.NoError(t, err)
 					gotEventsResponse := subscribed.Events{}
 					err = json.Unmarshal(respBodyBytes, &gotEventsResponse)
