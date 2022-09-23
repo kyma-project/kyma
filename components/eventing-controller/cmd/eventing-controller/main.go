@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("Failed to initialize logger, error: %v", err)
 	}
 	defer func() {
-		if err := ctrLogger.WithContext().Sync(); err != nil {
+		if err = ctrLogger.WithContext().Sync(); err != nil {
 			log.Printf("Failed to flush logger, error: %v", err)
 		}
 	}()
@@ -57,21 +57,21 @@ func main() {
 		setupLogger.Fatalw("Failed to load configuration", "error", err)
 	}
 	natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
-	if err := jetstream.AddToScheme(scheme); err != nil {
+	if err = jetstream.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 	if opts.EnableNewCRDVersion {
-		if err := jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
+		if err = jetstream.AddV1Alpha2ToScheme(scheme); err != nil {
 			setupLogger.Fatalw("Failed to start manager", "backend", v1alpha1.NatsBackendType, "error", err)
 		}
 	}
 
 	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
-	if err := beb.AddToScheme(scheme); err != nil {
+	if err = beb.AddToScheme(scheme); err != nil {
 		setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 	if opts.EnableNewCRDVersion {
-		if err := beb.AddV1Alpha2ToScheme(scheme); err != nil {
+		if err = beb.AddV1Alpha2ToScheme(scheme); err != nil {
 			setupLogger.Fatalw("Failed to start subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 		}
 	}
@@ -88,11 +88,11 @@ func main() {
 		setupLogger.Fatalw("Failed to start manager", "error", err)
 	}
 
-	if err := natsSubMgr.Init(mgr); err != nil {
+	if err = natsSubMgr.Init(mgr); err != nil {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.NatsBackendType, "error", err)
 	}
 
-	if err := bebSubMgr.Init(mgr); err != nil {
+	if err = bebSubMgr.Init(mgr); err != nil {
 		setupLogger.Fatalw("Failed to initialize subscription manager", "backend", v1alpha1.BEBBackendType, "error", err)
 	}
 
@@ -108,10 +108,10 @@ func main() {
 		}
 	}
 
-	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
+	if err = mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
 		setupLogger.Fatalw("Failed to setup health check", "error", err)
 	}
-	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
+	if err = mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
 		setupLogger.Fatalw("Failed to setup ready check", "error", err)
 	}
 
@@ -119,13 +119,13 @@ func main() {
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
 	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, natsConfig, bebSubMgr, mgr.GetClient(), ctrLogger, recorder)
-	if err := backendReconciler.SetupWithManager(mgr); err != nil {
+	if err = backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Fatalw("Failed to start backend controller", "error", err)
 	}
 
 	// Start the controller manager.
 	ctrLogger.WithContext().With("options", opts).Info("start controller manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err = mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLogger.Fatalw("Failed to start controller manager", "error", err)
 	}
 }
