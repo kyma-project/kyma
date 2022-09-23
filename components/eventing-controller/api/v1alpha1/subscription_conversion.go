@@ -11,20 +11,20 @@ import (
 )
 
 const (
-	hubVersionErrMsg     = "hub version is not the expected v1alpha2 version"
-	multipleSourceErrMsg = "subscription contains more than 1 eventSource"
+	errorHubVersionMsg     = "hub version is not the expected v1alpha2 version"
+	errorMultipleSourceMsg = "subscription contains more than 1 eventSource"
 )
 
-// ConvertTo converts this Subscription to the Hub version (v2).
-func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error { // nolint
+// ConvertTo converts this Subscription in version v1 to the Hub version v2.
+func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
 	dst, ok := dstRaw.(*v1alpha2.Subscription)
 	if !ok {
-		return errors.Errorf(hubVersionErrMsg)
+		return errors.Errorf(errorHubVersionMsg)
 	}
 	return v1ToV2(src, dst)
 }
 
-// v1ToV2 copies the v1alpha1-type field values into v1alpha2-type field values
+// v1ToV2 copies the v1alpha1-type field values into v1alpha2-type field values.
 func v1ToV2(src *Subscription, dst *v1alpha2.Subscription) error {
 
 	// ObjectMeta
@@ -73,16 +73,16 @@ func v1ToV2(src *Subscription, dst *v1alpha2.Subscription) error {
 	return nil
 }
 
-// ConvertFrom converts this Subscription from the Hub version (v2).
-func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error { // nolint
+// ConvertFrom converts this Subscription from the Hub version (v2) to v1.
+func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error {
 	src, ok := srcRaw.(*v1alpha2.Subscription)
 	if !ok {
-		return errors.Errorf(hubVersionErrMsg)
+		return errors.Errorf(errorHubVersionMsg)
 	}
 	return v2ToV1(dst, src)
 }
 
-// v2ToV1 copies the v1alpha2-type field values into v1alpha1-type field values
+// v2ToV1 copies the v1alpha2-type field values into v1alpha1-type field values.
 func v2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 
 	// ObjectMeta
@@ -101,11 +101,11 @@ func v2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 		filter := &BEBFilter{
 			EventSource: &Filter{
 				Property: "source",
-				Type:     fmt.Sprint(v1alpha2.EXACT),
+				Type:     fmt.Sprint(v1alpha2.TypeMatchingExact),
 				Value:    src.Spec.Source,
 			},
 			EventType: &Filter{
-				Type:     fmt.Sprint(v1alpha2.EXACT),
+				Type:     fmt.Sprint(v1alpha2.TypeMatchingExact),
 				Property: "type",
 				Value:    eventType,
 			},
@@ -114,7 +114,9 @@ func v2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 	}
 
 	if src.Spec.Config != nil {
-		dst.natsSpecConfigToV1(src)
+		if err := dst.natsSpecConfigToV1(src); err != nil {
+			return err
+		}
 	}
 
 	// Conditions
@@ -131,12 +133,12 @@ func v2ToV1(dst *Subscription, src *v1alpha2.Subscription) error {
 	return nil
 }
 
-// setV2TypeMatching sets the default typeMatching on the v1alpha2 Subscription version
+// setV2TypeMatching sets the default typeMatching on the v1alpha2 Subscription version.
 func (src *Subscription) setV2TypeMatching(dst *v1alpha2.Subscription) {
-	dst.Spec.TypeMatching = v1alpha2.EXACT
+	dst.Spec.TypeMatching = v1alpha2.TypeMatchingExact
 }
 
-// setV2ProtocolFields converts the protocol-related fields from v1alpha1 to v1alpha2 Subscription version
+// setV2ProtocolFields converts the protocol-related fields from v1alpha1 to v1alpha2 Subscription version.
 func (src *Subscription) setV2ProtocolFields(dst *v1alpha2.Subscription) {
 	dst.Spec.Config = map[string]string{}
 	if src.Spec.Protocol != "" {
@@ -163,7 +165,7 @@ func (src *Subscription) setV2ProtocolFields(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setV1ProtocolFields converts the protocol-related fields from v1alpha1 to v1alpha2 Subscription version
+// setV1ProtocolFields converts the protocol-related fields from v1alpha1 to v1alpha2 Subscription version.
 func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 	if protocol, ok := dst.Spec.Config[v1alpha2.Protocol]; ok {
 		src.Spec.Protocol = protocol
@@ -206,14 +208,14 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way
+// setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way.
 func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
 	for _, filter := range src.Spec.Filter.Filters {
 		if dst.Spec.Source == "" {
 			dst.Spec.Source = filter.EventSource.Value
 		}
 		if dst.Spec.Source != "" && filter.EventSource.Value != dst.Spec.Source {
-			return errors.New(multipleSourceErrMsg)
+			return errors.New(errorMultipleSourceMsg)
 		}
 		dst.Spec.Types = append(dst.Spec.Types, filter.EventType.Value)
 	}
@@ -221,18 +223,22 @@ func (src *Subscription) setV2SpecTypes(dst *v1alpha2.Subscription) error {
 }
 
 // natsSpecConfigToV2 converts the v1alpha2 Spec config to v1alpha1
-func (src *Subscription) natsSpecConfigToV1(dst *v1alpha2.Subscription) {
+func (src *Subscription) natsSpecConfigToV1(dst *v1alpha2.Subscription) error {
 	if maxInFlightMessages, ok := dst.Spec.Config[v1alpha2.MaxInFlightMessages]; ok {
 		intVal, err := strconv.Atoi(maxInFlightMessages)
+		if err != nil {
+			return err
+		}
 		if err == nil {
 			src.Spec.Config = &SubscriptionConfig{
 				MaxInFlightMessages: intVal,
 			}
 		}
 	}
+	return nil
 }
 
-// natsSpecConfigToV2 converts the hardcoded v1alpha1 Spec config to v1alpha2 generic config version
+// natsSpecConfigToV2 converts the hardcoded v1alpha1 Spec config to v1alpha2 generic config version.
 func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 	if src.Spec.Config != nil {
 		dst.Spec.Config = map[string]string{
@@ -241,7 +247,7 @@ func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setV2StatusTypes sets the original/clean event types mapping to the Subscription's Status v1alpha2 version
+// setV2StatusTypes sets the original/clean event types mapping to the Subscription's Status v1alpha2 version.
 func (src *Subscription) setV2StatusTypes(dst *v1alpha2.Subscription) {
 	for i, cleanEventType := range dst.Spec.Types {
 		originalType := cleanEventType
@@ -253,7 +259,7 @@ func (src *Subscription) setV2StatusTypes(dst *v1alpha2.Subscription) {
 	}
 }
 
-// bebBackendStatusToV2 moves the BEB-related to Backend fields of the Status in the v1alpha2
+// bebBackendStatusToV2 moves the BEB-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) bebBackendStatusToV2(dst *v1alpha2.Subscription) {
 	dst.Status.Backend.Ev2hash = src.Status.Ev2hash
 	dst.Status.Backend.Emshash = src.Status.Emshash
@@ -271,7 +277,7 @@ func (src *Subscription) bebBackendStatusToV2(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setBEBBackendStatus moves the BEB-related to Backend fields of the Status in the v1alpha2
+// setBEBBackendStatus moves the BEB-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) bebBackendStatusToV1(dst *v1alpha2.Subscription) {
 	src.Status.Ev2hash = dst.Status.Backend.Ev2hash
 	src.Status.Emshash = dst.Status.Backend.Emshash
@@ -289,7 +295,7 @@ func (src *Subscription) bebBackendStatusToV1(dst *v1alpha2.Subscription) {
 	}
 }
 
-// natsBackendStatusToV1 moves the NATS-related to Backend fields of the Status in the v1alpha2
+// natsBackendStatusToV1 moves the NATS-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) natsBackendStatusToV1(dst *v1alpha2.Subscription) {
 	if maxInFlightMessages, ok := dst.Spec.Config[v1alpha2.MaxInFlightMessages]; ok {
 		intVal, err := strconv.Atoi(maxInFlightMessages)
@@ -300,7 +306,7 @@ func (src *Subscription) natsBackendStatusToV1(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setBEBBackendStatus moves the NATS-related to Backend fields of the Status in the v1alpha2
+// setBEBBackendStatus moves the NATS-related to Backend fields of the Status in the v1alpha2.
 func (src *Subscription) natsBackendStatusToV2(dst *v1alpha2.Subscription) {
 	if src.Status.EmsSubscriptionStatus == nil {
 		for _, eventType := range dst.Spec.Types {
@@ -309,7 +315,7 @@ func (src *Subscription) natsBackendStatusToV2(dst *v1alpha2.Subscription) {
 	}
 }
 
-// setV1CleanEvenTypes sets the clean event types to v1alpha1 Subscription Status
+// setV1CleanEvenTypes sets the clean event types to v1alpha1 Subscription Status.
 func (src *Subscription) setV1CleanEvenTypes(dst *v1alpha2.Subscription) {
 	src.Status.InitializeCleanEventTypes()
 	for _, eventType := range dst.Status.Types {
@@ -317,7 +323,7 @@ func (src *Subscription) setV1CleanEvenTypes(dst *v1alpha2.Subscription) {
 	}
 }
 
-// ConditionV1ToV2 converts the v1alpha1 Condition to v1alpha2 version
+// ConditionV1ToV2 converts the v1alpha1 Condition to v1alpha2 version.
 func ConditionV1ToV2(condition Condition) v1alpha2.Condition {
 	return v1alpha2.Condition{
 		Type:               v1alpha2.ConditionType(condition.Type),
@@ -328,7 +334,7 @@ func ConditionV1ToV2(condition Condition) v1alpha2.Condition {
 	}
 }
 
-// ConditionV2ToV1 converts the v1alpha2 Condition to v1alpha1 version
+// ConditionV2ToV1 converts the v1alpha2 Condition to v1alpha1 version.
 func ConditionV2ToV1(condition v1alpha2.Condition) Condition {
 	return Condition{
 		Type:               ConditionType(condition.Type),

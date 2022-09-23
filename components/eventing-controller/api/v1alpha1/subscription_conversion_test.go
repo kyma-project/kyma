@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"log"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -11,10 +10,11 @@ import (
 
 func Test_Conversion(t *testing.T) {
 	type TestCase struct {
-		name       string
-		alpha1Sub  *Subscription
-		alpha2Sub  *v1alpha2.Subscription
-		wantErrMsg string
+		name             string
+		alpha1Sub        *Subscription
+		alpha2Sub        *v1alpha2.Subscription
+		wantErrMsgV1toV2 string
+		wantErrMsgV2toV1 string
 	}
 
 	testCases := []TestCase{
@@ -31,8 +31,18 @@ func Test_Conversion(t *testing.T) {
 				WithFilter("app", OrderUpdatedEventType),
 				WithFilter("", OrderDeletedEventTypeNonClean),
 			),
-			alpha2Sub:  v1alpha2.NewDefaultSubscription(),
-			wantErrMsg: multipleSourceErrMsg,
+			alpha2Sub:        v1alpha2.NewDefaultSubscription(),
+			wantErrMsgV1toV2: errorMultipleSourceMsg,
+		},
+		{
+			name: "Converting NATS Subscription with non-convertable maxInFlight in the config which should result in a conversion error",
+			alpha1Sub: NewDefaultSubscription(
+				WithFilter("", OrderUpdatedEventType),
+			),
+			alpha2Sub: v1alpha2.NewDefaultSubscription(
+				v1alpha2.WithMaxInFlight("nonint"),
+			),
+			wantErrMsgV2toV1: "strconv.Atoi: parsing \"nonint\": invalid syntax",
 		},
 		{
 			name: "Converting NATS Subscription with Filters",
@@ -129,27 +139,37 @@ func Test_Conversion(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			//WHEN
-
-			// convert the v1 to v2
-			convertedV1Alpha2 := &v1alpha2.Subscription{}
-			err := v1ToV2(testCase.alpha1Sub, convertedV1Alpha2)
-			if err != nil && testCase.wantErrMsg != "" {
-				require.Equal(t, err.Error(), testCase.wantErrMsg)
-			} else {
-				require.NoError(t, err)
-				v1ToV2Assertions(t, testCase.alpha2Sub, convertedV1Alpha2)
-			}
+			t.Run("Test v1 to v2 conversion", func(t *testing.T) {
+				// skip the conversion if the backwards conversion cannot succeed
+				if testCase.wantErrMsgV2toV1 != "" {
+					return
+				}
+				convertedV1Alpha2 := &v1alpha2.Subscription{}
+				err := v1ToV2(testCase.alpha1Sub, convertedV1Alpha2)
+				if err != nil && testCase.wantErrMsgV1toV2 != "" {
+					require.Equal(t, err.Error(), testCase.wantErrMsgV1toV2)
+				} else {
+					require.NoError(t, err)
+					v1ToV2Assertions(t, testCase.alpha2Sub, convertedV1Alpha2)
+				}
+			})
 
 			// test ConvertFrom
-			log.Print("Test v2 to v1 conversion")
-			convertedV1Alpha1 := &Subscription{}
-			require.NoError(t, v2ToV1(convertedV1Alpha1, testCase.alpha2Sub))
-			if err != nil && testCase.wantErrMsg != "" {
-				require.Equal(t, err.Error(), testCase.wantErrMsg)
-			} else {
-				require.NoError(t, err)
-				v2ToV1Assertions(t, testCase.alpha1Sub, convertedV1Alpha1)
-			}
+			t.Run("Test v2 to v1 conversion", func(t *testing.T) {
+				// skip the backwards conversion if the initial one cannot succeed
+				if testCase.wantErrMsgV1toV2 != "" {
+					return
+				}
+				convertedV1Alpha1 := &Subscription{}
+				err := v2ToV1(convertedV1Alpha1, testCase.alpha2Sub)
+				if err != nil && testCase.wantErrMsgV2toV1 != "" {
+					require.Equal(t, err.Error(), testCase.wantErrMsgV2toV1)
+				} else {
+					require.NoError(t, err)
+					v2ToV1Assertions(t, testCase.alpha1Sub, convertedV1Alpha1)
+				}
+
+			})
 		})
 	}
 }

@@ -1,8 +1,8 @@
 package v1alpha2
 
 const (
-	STANDARD TypeMatching = "standard"
-	EXACT    TypeMatching = "exact"
+	TypeMatchingStandard TypeMatching = "standard"
+	TypeMatchingExact    TypeMatching = "exact"
 
 	// config fields
 	MaxInFlightMessages = "maxInFlightMessages"

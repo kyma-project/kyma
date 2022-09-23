@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -54,11 +55,6 @@ func NewDefaultSubscription(opts ...SubscriptionOpt) *Subscription {
 	return newSub
 }
 
-func exemptHandshake(val bool) *bool {
-	exemptHandshake := val
-	return &exemptHandshake
-}
-
 func WithStatus(status bool) SubscriptionOpt {
 	return func(sub *Subscription) {
 		sub.Status.Ready = status
@@ -87,7 +83,7 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 				qos := "true"
 				return &qos
 			}(),
-			ExemptHandshake: exemptHandshake(true),
+			ExemptHandshake: utils.BoolPtr(true),
 			WebhookAuth: &WebhookAuth{
 				Type:         "oauth2",
 				GrantType:    "client_credentials",

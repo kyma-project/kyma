@@ -39,7 +39,7 @@ func NewDefaultSubscription(opts ...SubscriptionOpt) *Subscription {
 			Namespace: DefaultNamespace,
 		},
 		Spec: SubscriptionSpec{
-			TypeMatching: EXACT,
+			TypeMatching: TypeMatchingExact,
 			Sink:         DefaultSink,
 			ID:           DefaultID,
 			Config: map[string]string{
@@ -56,6 +56,14 @@ func NewDefaultSubscription(opts ...SubscriptionOpt) *Subscription {
 	}
 
 	return newSub
+}
+
+func WithMaxInFlight(maxInFlight string) SubscriptionOpt {
+	return func(sub *Subscription) {
+		sub.Spec.Config = map[string]string{
+			MaxInFlightMessages: fmt.Sprint(maxInFlight),
+		}
+	}
 }
 
 func WithSource(source string) SubscriptionOpt {

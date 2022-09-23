@@ -79,7 +79,7 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-// InitializeEventTypes initializes the SubscriptionStatus.EventTypes with an empty slice of EventType.
+// InitializeEventTypes initializes the SubscriptionStatus.Types with an empty slice of EventType.
 func (s *SubscriptionStatus) InitializeEventTypes() {
 	s.Types = []EventType{}
 }
