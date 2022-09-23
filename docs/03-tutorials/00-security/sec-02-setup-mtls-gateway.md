@@ -19,21 +19,22 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
-2. Create a Namespace and export its value as an environment variable. Skip this step if you already have a Namespace. Run:
+2. Create a Namespace and export its value as an environment variable. Run:
+   >**NOTE:** Skip this step if you already have a Namespace
 
-    ```bash
-    export NAMESPACE={NAMESPACE_NAME}
-	  kubectl create ns $NAMESPACE
-	  kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
-    ```
+   ```bash
+   export NAMESPACE={NAMESPACE_NAME}
+	kubectl create ns $NAMESPACE
+	kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
+   ```
 
 3. Create Client Root CA and CLient certificate signed by Client Root CA. Export the following values as environment variables and run the command provided:  
    ```bash
-    export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
-	  export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
-	  export CLIENT_CERT_CRT_FILE=client.example.com.crt
-	  export CLIENT_CERT_CSR_FILE=client.example.com.csr
-	  export CLIENT_CERT_KEY_FILE=client.example.com.key 
+   export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
+	export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
+	export CLIENT_CERT_CRT_FILE=client.example.com.crt
+	export CLIENT_CERT_CSR_FILE=client.example.com.csr
+	export CLIENT_CERT_KEY_FILE=client.example.com.key 
    ```
 
    ```bash
@@ -47,14 +48,13 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    openssl req -out ${CLIENT_CERT_CSR_FILE}.2 -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE}.2 -subj "/CN=client2.example.com/O=example"
    # Sign the client certificate with CA cert
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE}.2 -out ${CLIENT_CERT_CRT_FILE}.2
-   
    ```
 
 4. Add Client Root CA to cacert bundle secret for mTLS Gateway. Export the following value as an environment variable and run the command provided:
 
-    ```bash
-    export MTLS_GATEWAY_NAME=mtls-gateway
-    ```
+   ```bash
+   export MTLS_GATEWAY_NAME=mtls-gateway
+   ```
 
    ```bash
    # Add CA Cert to kyma-mtls-gateway
