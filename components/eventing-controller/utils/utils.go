@@ -79,7 +79,7 @@ func BoolPtrEqual(b1, b2 *bool) bool {
 // for Random string generation
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
-var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 
 // GetRandString returns a random string of the given length.
 func GetRandString(length int) string {

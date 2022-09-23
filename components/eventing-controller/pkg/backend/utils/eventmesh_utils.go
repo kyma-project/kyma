@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec
 	"fmt"
 	"strings"
 
@@ -58,7 +58,7 @@ func GetHash(subscription *types.Subscription) (int64, error) {
 }
 
 func hashSubscriptionFullName(domainName, namespace, name string) string {
-	hash := sha1.Sum([]byte(domainName + namespace + name))
+	hash := sha1.Sum([]byte(domainName + namespace + name)) //nolint:gosec
 	return fmt.Sprintf("%x", hash)
 }
 
