@@ -244,6 +244,17 @@ func NewBEBSubscription(name, contentMode string, webhookURL string, events type
 	}
 }
 
+func NewSampleEventMeshSubscription() *types.Subscription {
+	eventType := []types.Event{
+		{
+			Source: EventSource,
+			Type:   OrderCreatedEventTypeNotClean,
+		},
+	}
+
+	return NewBEBSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com", eventType, nil)
+}
+
 func exemptHandshake(val bool) *bool {
 	exemptHandshake := val
 	return &exemptHandshake

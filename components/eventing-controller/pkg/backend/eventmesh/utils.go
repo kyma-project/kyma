@@ -68,6 +68,7 @@ func statusCleanEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1a
 }
 
 func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1alpha2.JetStreamTypes {
+	// TODO: This method will be removed once CRD implementation is completed
 	var finalEventTypes []eventingv1alpha2.JetStreamTypes
 	for _, i := range typeInfos {
 		finalEventTypes = append(finalEventTypes, eventingv1alpha2.JetStreamTypes{OriginalType: i.OriginalType, ConsumerName: i.ProcessedType})
