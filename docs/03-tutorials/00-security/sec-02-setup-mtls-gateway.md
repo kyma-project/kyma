@@ -23,18 +23,18 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    >**NOTE:** Skip this step if you already have a Namespace
 
    ```bash
-   export NAMESPACE={NAMESPACE_NAME}
-	kubectl create ns $NAMESPACE
-	kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
+    export NAMESPACE={NAMESPACE_NAME}
+	 kubectl create ns $NAMESPACE
+	 kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
 3. Create Client Root CA and CLient certificate signed by Client Root CA. Export the following values as environment variables and run the command provided:  
    ```bash
-   export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
-	export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
-	export CLIENT_CERT_CRT_FILE=client.example.com.crt
-	export CLIENT_CERT_CSR_FILE=client.example.com.csr
-	export CLIENT_CERT_KEY_FILE=client.example.com.key 
+    export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
+	 export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
+	 export CLIENT_CERT_CRT_FILE=client.example.com.crt
+	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
+	 export CLIENT_CERT_KEY_FILE=client.example.com.key 
    ```
 
    ```bash
