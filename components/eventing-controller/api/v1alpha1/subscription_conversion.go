@@ -16,7 +16,7 @@ const (
 )
 
 // ConvertTo converts this Subscription in version v1 to the Hub version v2.
-func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error {
+func (src *Subscription) ConvertTo(dstRaw conversion.Hub) error { //nolint:revive
 	dst, ok := dstRaw.(*v1alpha2.Subscription)
 	if !ok {
 		return errors.Errorf(errorHubVersionMsg)
@@ -74,7 +74,7 @@ func v1ToV2(src *Subscription, dst *v1alpha2.Subscription) error {
 }
 
 // ConvertFrom converts this Subscription from the Hub version (v2) to v1.
-func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error {
+func (dst *Subscription) ConvertFrom(srcRaw conversion.Hub) error { //nolint:revive
 	src, ok := srcRaw.(*v1alpha2.Subscription)
 	if !ok {
 		return errors.Errorf(errorHubVersionMsg)
