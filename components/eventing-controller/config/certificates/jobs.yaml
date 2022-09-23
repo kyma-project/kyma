@@ -16,7 +16,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: init-certificates
-        image: init-certificates:latest
+        image: ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/webhook-certificate-handler
         imagePullPolicy: IfNotPresent
         env:
         - name: CRD_NAME
@@ -46,7 +46,7 @@ spec:
           restartPolicy: Never
           containers:
           - name: init-certificates
-            image: init-certificates:latest
+            image: ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/webhook-certificate-handler
             imagePullPolicy: IfNotPresent
             env:
             - name: CRD_NAME

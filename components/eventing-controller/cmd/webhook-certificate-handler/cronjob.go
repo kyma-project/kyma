@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/webhook"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,7 +30,7 @@ func main() {
 
 	client, err := ctrlclient.New(ctrl.GetConfigOrDie(), ctrlclient.Options{})
 	if err != nil {
-		logger.Error(err,"setup")
+		logger.Error(err, "setup")
 		return
 	}
 

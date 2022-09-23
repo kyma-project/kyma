@@ -61,6 +61,7 @@ deploy: manifests-local copy-crds copy-external-crds set-up-local-env ## build t
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
 	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
 	kustomize build config/helm | envsubst | ko apply -f -
+	kustomize build config/certificates | ko apply -f -
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ## Dry run for deploying eventing-controller for local development using helm templates.
@@ -68,6 +69,7 @@ deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ##
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
 	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
 	kustomize build config/helm | envsubst
+	kustomize build config/certificates
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
@@ -122,6 +124,7 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
 	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
 	kustomize build config/helm | envsubst | kubectl delete -f -
+	kustomize build config/certificates | ko delete -f -
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen

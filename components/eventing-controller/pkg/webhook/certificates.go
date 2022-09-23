@@ -5,9 +5,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"golang.org/x/xerrors"
 	"strings"
 	"time"
+
+	"golang.org/x/xerrors"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
@@ -22,24 +23,24 @@ import (
 )
 
 const (
-	CertName       = "tls.crt"
-	KeyName        = "tls.key"
+	CertName = "tls.crt"
+	KeyName  = "tls.key"
 )
 
 type WebhookCertificateHandler struct {
-	crdName string
+	crdName    string
 	secretName string
 	client.Client
-	ctx context.Context
+	ctx    context.Context
 	logger *logr.Logger
 }
 
 func NewWebhookCertificateHandler(ctx context.Context, client client.Client, logger *logr.Logger, crdName string, secretName string) *WebhookCertificateHandler {
 	return &WebhookCertificateHandler{
-		ctx: ctx,
-		Client: client,
-		logger: logger,
-		crdName: crdName,
+		ctx:        ctx,
+		Client:     client,
+		logger:     logger,
+		crdName:    crdName,
 		secretName: secretName,
 	}
 }
