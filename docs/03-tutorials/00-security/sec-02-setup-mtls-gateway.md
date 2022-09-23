@@ -30,7 +30,7 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
 
 3. Create Client Root CA and CLient certificate signed by Client Root CA. Export the following values as environment variables and run the command provided:  
    ```bash
-    export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
+   export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
 	 export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
 	 export CLIENT_CERT_CRT_FILE=client.example.com.crt
 	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
@@ -44,16 +44,13 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    openssl req -out ${CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE} -subj "/CN=client.example.com/O=example"
    # Sign the client cert with CA cert
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE} -out ${CLIENT_CERT_CRT_FILE}
-   # Create a new key and CSR for the client certificate
-   openssl req -out ${CLIENT_CERT_CSR_FILE}.2 -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE}.2 -subj "/CN=client2.example.com/O=example"
-   # Sign the client certificate with CA cert
-   openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE}.2 -out ${CLIENT_CERT_CRT_FILE}.2
    ```
 
 4. Add Client Root CA to cacert bundle secret for mTLS Gateway. Export the following value as an environment variable and run the command provided:
 
    ```bash
    export MTLS_GATEWAY_NAME=mtls-gateway
+   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that was created during setup of custom domain, for example, httpbin-tls-credentials
    ```
 
    ```bash
