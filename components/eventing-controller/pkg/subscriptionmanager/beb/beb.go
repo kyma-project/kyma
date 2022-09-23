@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
@@ -100,7 +102,6 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	oauth2credential, err := getOAuth2ClientCredentials(params)
 	if err != nil {
@@ -119,13 +120,14 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	if c.envCfg.EnableNewCRDVersion {
 		// TODO: re-add the oauth2credentials so that we do not duplicate code
 		bebHandler := backendbebv2.NewBEB(nil, nameMapper, c.logger)
+		eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
 		bebReconciler := bebv2.NewReconciler(
 			ctx,
 			client,
 			c.logger,
 			recorder,
 			c.envCfg,
-			cleaner,
+			eventMeshcleaner,
 			bebHandler,
 			oauth2credential,
 			nameMapper,
@@ -139,13 +141,14 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		c.namedLogger().Info("Started v1alpha2 BEB subscription manager")
 	} else {
 		bebHandler := backendbeb.NewBEB(oauth2credential, nameMapper, c.logger)
+		eventMeshcleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 		bebReconciler := beb.NewReconciler(
 			ctx,
 			client,
 			c.logger,
 			recorder,
 			c.envCfg,
-			cleaner,
+			eventMeshcleaner,
 			bebHandler,
 			oauth2credential,
 			nameMapper,
