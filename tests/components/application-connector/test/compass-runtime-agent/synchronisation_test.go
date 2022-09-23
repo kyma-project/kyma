@@ -25,7 +25,7 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 
 	//Create Application in Director and wait until it gets created
 	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, expectedAppName)
+	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName)
 	gs.Require().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
@@ -37,7 +37,7 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	gs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
+func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName string) (string, error) {
 
 	var applicationID string
 
@@ -52,7 +52,7 @@ func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader Applicatio
 	}
 
 	verify := func() bool {
-		_, err := appReader.Get(context.Background(), expectedAppName, v1.GetOptions{})
+		_, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
 		if err != nil {
 			gs.T().Log(fmt.Sprintf("Failed to get app: %v", err))
 		}
