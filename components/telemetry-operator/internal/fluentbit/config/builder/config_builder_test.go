@@ -81,7 +81,7 @@ func TestMergeSectionsConfig(t *testing.T) {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          foo
+    emitter_name          foo-http
     emitter_storage.type  filesystem
     rule                  $kubernetes['container_name'] "^(?!container1$|container2$).*" foo.$TAG true
 
@@ -109,6 +109,7 @@ func TestMergeSectionsConfig(t *testing.T) {
 [OUTPUT]
     name                     http
     match                    foo.*
+    alias                    foo-http
     allow_duplicated_headers true
     format                   json
     host                     localhost
@@ -144,6 +145,59 @@ func TestMergeSectionsConfig(t *testing.T) {
 						Value: "localhost",
 					},
 				},
+			},
+		},
+	}
+	logPipeline.Name = "foo"
+	defaults := PipelineDefaults{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+		FsBufferLimit:     "1G",
+	}
+
+	actual, err := BuildFluentBitConfig(logPipeline, defaults)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+}
+
+func TestMergeSectionsConfigCustomOutput(t *testing.T) {
+	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          foo-stdout
+    emitter_storage.type  filesystem
+    rule                  $log "^.*$" foo.$TAG true
+
+[FILTER]
+    name    grep
+    match   foo.*
+    exclude $kubernetes['namespace_name'] kyma-system|kyma-integration|kube-system|istio-system|compass-system
+
+[FILTER]
+    name   record_modifier
+    match  foo.*
+    record cluster_identifier ${KUBERNETES_SERVICE_HOST}
+
+[OUTPUT]
+    name                     stdout
+    match                    foo.*
+    alias                    foo-stdout
+    storage.total_limit_size 1G
+
+`
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Input: telemetryv1alpha1.Input{
+				Application: telemetryv1alpha1.ApplicationInput{
+					KeepAnnotations: true,
+					DropLabels:      false,
+				},
+			},
+			Output: telemetryv1alpha1.Output{
+				Custom: `
+    name stdout`,
 			},
 		},
 	}
