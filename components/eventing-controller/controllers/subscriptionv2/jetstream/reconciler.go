@@ -3,6 +3,8 @@ package jetstream
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -14,7 +16,6 @@ import (
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	jetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -30,21 +31,21 @@ type Reconciler struct {
 	Backend             jetstream.Backend
 	recorder            record.EventRecorder
 	logger              *logger.Logger
-	eventTypeCleaner    eventtype.Cleaner
+	cleaner             cleaner.Cleaner
 	subsConfig          env.DefaultSubscriptionConfig
 	sinkValidator       sink.Validator
 	customEventsChannel chan event.GenericEvent
 }
 
 func NewReconciler(ctx context.Context, client client.Client, jsHandler jetstream.Backend, logger *logger.Logger,
-	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
+	recorder record.EventRecorder, cleaner cleaner.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		Client:              client,
 		ctx:                 ctx,
 		Backend:             jsHandler,
 		recorder:            recorder,
 		logger:              logger,
-		eventTypeCleaner:    cleaner,
+		cleaner:             cleaner,
 		subsConfig:          subsCfg,
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),

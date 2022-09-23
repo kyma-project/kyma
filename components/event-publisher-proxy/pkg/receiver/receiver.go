@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"time"
 
-	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
-
 	"go.opencensus.io/plugin/ochttp"
+
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 const (
 	// defaultShutdownTimeout is the default timeout for the receiver to shutdown.
 	defaultShutdownTimeout = 1 * time.Minute
-	defaultReadTimeout     = 10 * time.Second
+	readHeaderTimeout      = 5 * time.Second
 
 	receiverName = "receiver"
 )
@@ -42,9 +42,9 @@ func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.H
 
 	recv.handler = createHandler(handler)
 	recv.server = &http.Server{
-		Addr:        recv.listener.Addr().String(),
-		Handler:     recv.handler,
-		ReadTimeout: defaultReadTimeout,
+		Addr:              recv.listener.Addr().String(),
+		Handler:           recv.handler,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	errChan := make(chan error, 1)
