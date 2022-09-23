@@ -2,7 +2,7 @@ package beb
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -252,7 +252,7 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 	defer func() { _ = resp.Body.Close() }()
 	h.collector.RecordLatency(dispatchTime, resp.StatusCode, request.URL.Host)
 	h.collector.RecordRequests(resp.StatusCode, request.URL.Host)
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		h.namedLogger().Errorw("Failed to read response body", "error", err)
 		return http.StatusInternalServerError, dispatchTime, []byte{}
