@@ -4,209 +4,212 @@ package utils
 import (
 	"crypto/sha1"
 	"fmt"
+
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	. "github.com/onsi/gomega"
 	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	eventingtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
-//func TestConvertKymaSubToEventMeshSub(t *testing.T) {
-//	defaultProtocolSettings := &eventingv1alpha2.ProtocolSettings{
-//		ContentMode: func() *string {
-//			cm := types.ContentModeBinary
-//			return &cm
-//		}(),
-//		ExemptHandshake: func() *bool {
-//			eh := true
-//			return &eh
-//		}(),
-//		Qos: utils.StringPtr(string(types.QosAtLeastOnce)),
-//	}
-//
-//	defaultWebhookAuth := &types.WebhookAuth{
-//		Type:         types.AuthTypeClientCredentials,
-//		GrantType:    types.GrantTypeClientCredentials,
-//		ClientID:     "clientID",
-//		ClientSecret: "clientSecret",
-//		TokenURL:     "tokenURL",
-//	}
-//	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
-//
-//	bebSubEvents := types.Events{types.Event{
-//		Source: eventingtesting.EventMeshNamespace,
-//		//Type:   eventingtesting.OrderCreatedEventType,
-//		Type: "prefix.testapp1023.order.created.v1", // @TODO: update it once cleaner logic is finalized
-//	}}
-//
-//	// getProcessedEventTypes returns the processed types after cleaning and prefixing.
-//	getTypeInfos := func(types []string) []EventTypeInfo {
-//		result := make([]EventTypeInfo, 0, len(types))
-//		for _, t := range types {
-//			result = append(result, EventTypeInfo{OriginalType: t, CleanType: t, ProcessedType: t})
-//		}
-//		return result
-//	}
-//
-//	defaultNamespace := eventingtesting.EventMeshNamespace
-//	svcName := "foo-svc"
-//	host := "foo-host"
-//	scheme := "https"
-//	expectedWebhookURL := fmt.Sprintf("%s://%s", scheme, host)
-//	g := NewGomegaWithT(t)
-//
-//	t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
-//		// given
-//		subscription := eventingtesting.NewSubscription("name", "namespace",
-//			eventingtesting.WithDefaultSource(),
-//			eventingtesting.WithOrderCreatedFilter(),
-//			eventingtesting.WithValidSink("ns", svcName),
-//		)
-//
-//		subscription.Spec.ProtocolSettings = eventingtesting.NewProtocolSettings(
-//			eventingtesting.WithBinaryContentMode(),
-//			eventingtesting.WithExemptHandshake(),
-//			eventingtesting.WithAtLeastOnceQOS(),
-//			eventingtesting.WithDefaultWebhookAuth(),
-//		)
-//
-//		eventTypeInfos := getTypeInfos(subscription.Spec.Types)
-//
-//		// Values should be overridden by the given values in subscription
-//		expectedWebhookAuth := &types.WebhookAuth{
-//			Type:         types.AuthTypeClientCredentials,
-//			GrantType:    types.GrantTypeClientCredentials,
-//			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientID,
-//			ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-//			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL,
-//		}
-//		expectedBEBSubscription := eventingtesting.NewBEBSubscription(
-//			defaultNameMapper.MapSubscriptionName(subscription),
-//			*subscription.Spec.ProtocolSettings.ContentMode,
-//			expectedWebhookURL,
-//			bebSubEvents,
-//			expectedWebhookAuth,
-//		)
-//
-//		apiRule := eventingtesting.NewAPIRule(subscription,
-//			eventingtesting.WithPath(),
-//			eventingtesting.WithService(svcName, host),
-//		)
-//
-//		// then
-//		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subscription, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
-//
-//		// when
-//		g.Expect(err).To(BeNil())
-//		g.Expect(*expectedBEBSubscription).To(Equal(*gotBEBSubscription))
-//	})
-//
-//	t.Run("subscription with default setting", func(t *testing.T) {
-//		// given
-//		subscription := eventingtesting.NewSubscription("name", "namespace",
-//			eventingtesting.WithOrderCreatedFilter(),
-//			eventingtesting.WithValidSink("ns", svcName),
-//		)
-//
-//		eventTypeInfos := getTypeInfos(subscription.Spec.Types)
-//
-//		expectedBEBSubWithDefault := eventingtesting.NewBEBSubscription(
-//			defaultNameMapper.MapSubscriptionName(subscription),
-//			*defaultProtocolSettings.ContentMode,
-//			expectedWebhookURL,
-//			bebSubEvents,
-//			defaultWebhookAuth, // WebhookAuth should retain defaults
-//		)
-//
-//		apiRule := eventingtesting.NewAPIRule(subscription,
-//			eventingtesting.WithPath(),
-//			eventingtesting.WithService(svcName, host),
-//		)
-//
-//		// then
-//		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subscription, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
-//
-//		// when
-//		g.Expect(err).To(BeNil())
-//		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
-//	})
-//
-//	t.Run("subscription with custom webhookauth config followed by a subscription with default webhookauth config should not alter the default config", func(t *testing.T) {
-//		// given
-//		subWithGivenWebhookAuth := eventingtesting.NewSubscription("name", "namespace",
-//			eventingtesting.WithOrderCreatedFilter(),
-//			eventingtesting.WithValidSink("ns", svcName),
-//		)
-//
-//		subWithGivenWebhookAuth.Spec.ProtocolSettings = eventingtesting.NewProtocolSettings(
-//			eventingtesting.WithBinaryContentMode(),
-//			eventingtesting.WithExemptHandshake(),
-//			eventingtesting.WithAtLeastOnceQOS(),
-//			eventingtesting.WithDefaultWebhookAuth(),
-//		)
-//		expectedWebhookAuth := types.WebhookAuth{
-//			Type:         types.AuthTypeClientCredentials,
-//			GrantType:    types.GrantTypeClientCredentials,
-//			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientID,
-//			ClientSecret: subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-//			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenURL,
-//		}
-//
-//		expectedBEBSubWithWebhookAuth := eventingtesting.NewBEBSubscription(
-//			defaultNameMapper.MapSubscriptionName(subWithGivenWebhookAuth),
-//			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
-//			expectedWebhookURL,
-//			bebSubEvents,
-//			&expectedWebhookAuth, // WebhookAuth should retain the supplied config
-//		)
-//
-//		apiRule := eventingtesting.NewAPIRule(subWithGivenWebhookAuth,
-//			eventingtesting.WithPath(),
-//			eventingtesting.WithService(svcName, host),
-//		)
-//
-//		// then
-//		eventTypeInfos := getTypeInfos(subWithGivenWebhookAuth.Spec.Types)
-//		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subWithGivenWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
-//
-//		// when
-//		g.Expect(err).To(BeNil())
-//		g.Expect(*expectedBEBSubWithWebhookAuth).To(Equal(*gotBEBSubscription))
-//
-//		// Use another subscription without webhookAuthConfig
-//		// given
-//		subscriptionWithoutWebhookAuth := eventingtesting.NewSubscription("name", "namespace",
-//			eventingtesting.WithOrderCreatedFilter(),
-//			eventingtesting.WithValidSink("ns", svcName),
-//		)
-//
-//		expectedBEBSubWithDefault := eventingtesting.NewBEBSubscription(
-//			defaultNameMapper.MapSubscriptionName(subscriptionWithoutWebhookAuth),
-//			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
-//			expectedWebhookURL,
-//			bebSubEvents,
-//			defaultWebhookAuth, // WebhookAuth should retain defaults
-//		)
-//
-//		apiRule = eventingtesting.NewAPIRule(subscriptionWithoutWebhookAuth,
-//			eventingtesting.WithPath(),
-//			eventingtesting.WithService(svcName, host),
-//		)
-//
-//		// then
-//		gotBEBSubWithDefaultCfg, err := ConvertKymaSubToEventMeshSub(subscriptionWithoutWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
-//
-//		// when
-//		g.Expect(err).To(BeNil())
-//		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
-//		g.Expect(*expectedBEBSubWithDefault.WebhookAuth).To(Equal(*gotBEBSubWithDefaultCfg.WebhookAuth))
-//
-//	})
-//}
+func TestConvertKymaSubToEventMeshSub(t *testing.T) {
+	defaultProtocolSettings := &eventingv1alpha2.ProtocolSettings{
+		ContentMode: func() *string {
+			cm := types.ContentModeBinary
+			return &cm
+		}(),
+		ExemptHandshake: func() *bool {
+			eh := true
+			return &eh
+		}(),
+		Qos: utils.StringPtr(string(types.QosAtLeastOnce)),
+	}
+
+	defaultWebhookAuth := &types.WebhookAuth{
+		Type:         types.AuthTypeClientCredentials,
+		GrantType:    types.GrantTypeClientCredentials,
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+		TokenURL:     "tokenURL",
+	}
+	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
+
+	bebSubEvents := types.Events{types.Event{
+		Source: eventingtestingv2.EventMeshNamespace,
+		//Type:   eventingtestingv2.OrderCreatedEventType,
+		Type: "prefix.testapp1023.order.created.v1", // @TODO: update it once cleaner logic is finalized
+	}}
+
+	// getProcessedEventTypes returns the processed types after cleaning and prefixing.
+	getTypeInfos := func(types []string) []EventTypeInfo {
+		result := make([]EventTypeInfo, 0, len(types))
+		for _, t := range types {
+			result = append(result, EventTypeInfo{OriginalType: t, CleanType: t, ProcessedType: t})
+		}
+		return result
+	}
+
+	defaultNamespace := eventingtestingv2.EventMeshNamespace
+	svcName := "foo-svc"
+	host := "foo-host"
+	scheme := "https"
+	expectedWebhookURL := fmt.Sprintf("%s://%s", scheme, host)
+	g := NewGomegaWithT(t)
+
+	t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
+		// given
+		subscription := eventingtestingv2.NewSubscription("name", "namespace",
+			eventingtestingv2.WithDefaultSource(),
+			eventingtestingv2.WithOrderCreatedFilter(),
+			eventingtestingv2.WithValidSink("ns", svcName),
+		)
+
+		subscription.Spec.ProtocolSettings = eventingtestingv2.NewProtocolSettings(
+			eventingtestingv2.WithBinaryContentMode(),
+			eventingtestingv2.WithExemptHandshake(),
+			eventingtestingv2.WithAtLeastOnceQOS(),
+			eventingtestingv2.WithDefaultWebhookAuth(),
+		)
+
+		eventTypeInfos := getTypeInfos(subscription.Spec.Types)
+
+		// Values should be overridden by the given values in subscription
+		expectedWebhookAuth := &types.WebhookAuth{
+			Type:         types.AuthTypeClientCredentials,
+			GrantType:    types.GrantTypeClientCredentials,
+			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientID,
+			ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
+			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL,
+		}
+		expectedBEBSubscription := eventingtestingv2.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
+			*subscription.Spec.ProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			expectedWebhookAuth,
+		)
+
+		apiRule := eventingtestingv2.NewAPIRule(subscription,
+			eventingtestingv2.WithPath(),
+			eventingtestingv2.WithService(svcName, host),
+		)
+
+		// then
+		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subscription, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+
+		// when
+		g.Expect(err).To(BeNil())
+		g.Expect(*expectedBEBSubscription).To(Equal(*gotBEBSubscription))
+	})
+
+	t.Run("subscription with default setting", func(t *testing.T) {
+		// given
+		subscription := eventingtestingv2.NewSubscription("name", "namespace",
+			eventingtestingv2.WithOrderCreatedFilter(),
+			eventingtestingv2.WithValidSink("ns", svcName),
+		)
+
+		eventTypeInfos := getTypeInfos(subscription.Spec.Types)
+
+		expectedBEBSubWithDefault := eventingtestingv2.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
+			*defaultProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			defaultWebhookAuth, // WebhookAuth should retain defaults
+		)
+
+		apiRule := eventingtestingv2.NewAPIRule(subscription,
+			eventingtestingv2.WithPath(),
+			eventingtestingv2.WithService(svcName, host),
+		)
+
+		// then
+		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subscription, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+
+		// when
+		g.Expect(err).To(BeNil())
+		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
+	})
+
+	t.Run("subscription with custom webhookauth config followed by a subscription with default webhookauth config should not alter the default config", func(t *testing.T) {
+		// given
+		subWithGivenWebhookAuth := eventingtestingv2.NewSubscription("name", "namespace",
+			eventingtestingv2.WithOrderCreatedFilter(),
+			eventingtestingv2.WithValidSink("ns", svcName),
+		)
+
+		subWithGivenWebhookAuth.Spec.ProtocolSettings = eventingtestingv2.NewProtocolSettings(
+			eventingtestingv2.WithBinaryContentMode(),
+			eventingtestingv2.WithExemptHandshake(),
+			eventingtestingv2.WithAtLeastOnceQOS(),
+			eventingtestingv2.WithDefaultWebhookAuth(),
+		)
+		expectedWebhookAuth := types.WebhookAuth{
+			Type:         types.AuthTypeClientCredentials,
+			GrantType:    types.GrantTypeClientCredentials,
+			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientID,
+			ClientSecret: subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
+			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenURL,
+		}
+
+		expectedBEBSubWithWebhookAuth := eventingtestingv2.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subWithGivenWebhookAuth.Name, subWithGivenWebhookAuth.Namespace),
+			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			&expectedWebhookAuth, // WebhookAuth should retain the supplied config
+		)
+
+		apiRule := eventingtestingv2.NewAPIRule(subWithGivenWebhookAuth,
+			eventingtestingv2.WithPath(),
+			eventingtestingv2.WithService(svcName, host),
+		)
+
+		// then
+		eventTypeInfos := getTypeInfos(subWithGivenWebhookAuth.Spec.Types)
+		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subWithGivenWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+
+		// when
+		g.Expect(err).To(BeNil())
+		g.Expect(*expectedBEBSubWithWebhookAuth).To(Equal(*gotBEBSubscription))
+
+		// Use another subscription without webhookAuthConfig
+		// given
+		subscriptionWithoutWebhookAuth := eventingtestingv2.NewSubscription("name", "namespace",
+			eventingtestingv2.WithOrderCreatedFilter(),
+			eventingtestingv2.WithValidSink("ns", svcName),
+		)
+
+		expectedBEBSubWithDefault := eventingtestingv2.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subscriptionWithoutWebhookAuth.Name, subscriptionWithoutWebhookAuth.Namespace),
+			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			defaultWebhookAuth, // WebhookAuth should retain defaults
+		)
+
+		apiRule = eventingtestingv2.NewAPIRule(subscriptionWithoutWebhookAuth,
+			eventingtestingv2.WithPath(),
+			eventingtestingv2.WithService(svcName, host),
+		)
+
+		// then
+		gotBEBSubWithDefaultCfg, err := ConvertKymaSubToEventMeshSub(subscriptionWithoutWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+
+		// when
+		g.Expect(err).To(BeNil())
+		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
+		g.Expect(*expectedBEBSubWithDefault.WebhookAuth).To(Equal(*gotBEBSubWithDefaultCfg.WebhookAuth))
+
+	})
+}
 
 func TestGetCleanedEventMeshSubscription(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -221,8 +224,8 @@ func TestGetCleanedEventMeshSubscription(t *testing.T) {
 
 		Events: []types.Event{
 			{
-				Source: eventingtesting.EventSource,
-				Type:   eventingtesting.OrderCreatedEventTypeNotClean,
+				Source: eventingtestingv2.EventSource,
+				Type:   eventingtestingv2.OrderCreatedEventTypeNotClean,
 			},
 		},
 	}
@@ -239,8 +242,8 @@ func TestGetCleanedEventMeshSubscription(t *testing.T) {
 
 	g.Expect(eventMeshSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
-			Source: eventingtesting.EventSource,
-			Type:   eventingtesting.OrderCreatedEventTypeNotClean,
+			Source: eventingtestingv2.EventSource,
+			Type:   eventingtestingv2.OrderCreatedEventTypeNotClean,
 		},
 	}))
 	g.Expect(eventMeshSubscription)
