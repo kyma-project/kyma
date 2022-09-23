@@ -43,12 +43,19 @@ spec:
       {{- end }}
       {{- end }}
     spec:
+      volumes:
+        - name: {{ template "fullname" . }}-configuration
+          configMap:
+            name: {{ template "fullname" . }}-configuration
       serviceAccountName: {{ template "fullname" . }}-controller-manager
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
       {{- end }}
       containers:
         - name: manager
+          volumeMounts:
+            - name: {{ template "fullname" . }}-configuration
+              mountPath: /tmp/deployment
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
           imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
           command:
@@ -123,8 +130,6 @@ spec:
             {{ $function_build_init_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init) }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE" "value" (dict "value" $function_build_init_image) "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_LOG_LEVEL" "value" .Values.containers.manager.envs.logLevel "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_LOG_FORMAT" "value" .Values.containers.manager.envs.logFormat "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_HEALTHZ_LIVENESS_TIMEOUT" "value" .Values.containers.manager.envs.healthzLivenessTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}

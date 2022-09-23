@@ -171,6 +171,9 @@ containers:
     healthz:
       port: "8090"
     extraProperties: {}
+    configuration:
+      logLevel: "info"
+      logFormat: "json"
     envs:
       configMapRequeueDuration:
         value: 5m
@@ -206,10 +209,6 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildMaxSimultaneousJobs:
         value: "5"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 

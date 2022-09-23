@@ -24,17 +24,16 @@ docker-registry:
 
 containers:
   manager:
+    configuration:
+      logLevel: "warn"
+      logFormat: "json"
     envs:
       functionBuildMaxSimultaneousJobs:
         value: "1"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
     resources:
       limits:
         cpu: 400m
         memory: 160Mi
       requests:
         cpu: 10m
-        memory: 32Mi
+        memory: 32Mi Stashed changes
