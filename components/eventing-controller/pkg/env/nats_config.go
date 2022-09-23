@@ -11,7 +11,7 @@ const JetStreamSubjectPrefix = "kyma"
 // NatsConfig represents the environment config for the Eventing Controller with Nats.
 type NatsConfig struct {
 	// Following details are for eventing-controller to communicate to Nats
-	URL           string `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
+	URL           string `envconfig:"NATS_URL" required:"true"`
 	MaxReconnects int
 	ReconnectWait time.Duration
 

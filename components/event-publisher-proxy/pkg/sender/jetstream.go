@@ -48,7 +48,7 @@ func NewJetStreamMessageSender(ctx context.Context, connection *nats.Conn, envCf
 
 // URL returns the URL of the Sender's connection.
 func (s *JetStreamMessageSender) URL() string {
-	return s.connection.ConnectedUrl()
+	return s.envCfg.URL
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the JetStreamMessageSender.
