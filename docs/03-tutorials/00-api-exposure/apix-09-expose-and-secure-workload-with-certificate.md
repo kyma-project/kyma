@@ -8,7 +8,7 @@ This tutorial shows how to expose a workload with mutual authentication using Ky
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
-Before you start, Set up [`kyma-mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma, and make sure that you exported the bundle certificates. 
+Before you start, Set up [`kyma-mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the bundle certificates. 
 
 ## Expose and access your workload
 
@@ -67,7 +67,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
    ```
    This call should return the code `200` response.
 
-4. Create Virtual service that will add X-CLIENT-SSL headers to incoming requests:
+4. Create VirtualService that will add X-CLIENT-SSL headers to incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
@@ -94,7 +94,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-5. Create AuthorizationPolicy
+5. Create AuthorizationPolicy that will verify if the request contains a client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -125,7 +125,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
 2. Expose the sample Function on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
    ```bash
@@ -166,7 +166,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
    ```
    This call should return the code `200` response.
 
-4. Create Virtual service that will add X-CLIENT-SSL headers to incoming requests:
+4. Create VirtualService that will add X-CLIENT-SSL headers to incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
@@ -193,7 +193,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-5. Create AuthorizationPolicy that will verify if the request contains client certificate
+5. Create AuthorizationPolicy that will verify if the request contains a client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -218,16 +218,16 @@ Follow the instruction to expose and access your instance of the HttpBin service
 
 ## Access the secured resources
 
-Follow the instructions in the tabs to call the secured service or Functions using the certificates for the mTLS Gateway.
+Follow the instructions in the tabs to call the secured service or Function using the certificates for the mTLS Gateway.
 
 <div tabs>
 
   <details>
   <summary>
-  Call secured endpoints of a service
+  Call the secured endpoints of a service
   </summary>
 
-1. Send a `GET` request to the HttpBin service with a client certificates that were used to create mTLS Gateway:
+Send a `GET` request to the HttpBin service with the client certificates that you used to create mTLS Gateway:
 
    ```shell
    curl --key ${CLIENT_CERT_KEY_FILE} \
@@ -235,7 +235,7 @@ Follow the instructions in the tabs to call the secured service or Functions usi
         --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
    ```
 
-These calls return the code `200` response. If you call the service without proper certificates, you get the code `403` response.
+These calls return the code `200` response. If you call the service without the proper certificates, you get the code `403` response.
 
   </details>
 
@@ -252,7 +252,7 @@ Send a `GET` request with a token that has the "read" scope to the Function:
         --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function
    ```
 
-This call returns the code `200` response. If you call the Function without without proper certificates, you get the code `403` response.
+This call returns the code `200` response. If you call the Function without the proper certificates, you get the code `403` response.
   </details>
 </div>
 

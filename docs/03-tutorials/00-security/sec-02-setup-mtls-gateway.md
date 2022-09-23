@@ -2,13 +2,13 @@
 title: Set up a mutual TLS Gateway 
 ---
 
-This tutorial shows how to set up mutual TLS Gateway and configure authentication based on certificate details.
+This tutorial shows how to set up a mutual TLS Gateway and configure authentication based on certificate details.
 
 ## Prerequisites
 
 To follow this tutorial, use Kyma 2.6 or higher.
 
-Before you start, Set up [`custom-domain`](../00-api-exposure/apix-02-setup-custom-domain-for-workload.md) to set up your custom domain and prepare a certificate for exposing a workload.
+Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-custom-domain-for-workload.md) and prepare a certificate to expose a workload.
 
 ## Steps
 
@@ -17,9 +17,9 @@ Before you start, Set up [`custom-domain`](../00-api-exposure/apix-02-setup-cust
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} 
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
-2. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
+2. Create a Namespace and export its value as an environment variable. Skip this step if you already have a Namespace. Run:
 
     ```bash
     export NAMESPACE={NAMESPACE_NAME}
@@ -27,9 +27,7 @@ Before you start, Set up [`custom-domain`](../00-api-exposure/apix-02-setup-cust
 	  kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
     ```
 
-3. Create Client Root CA and CLient certificate signed by Client Root CA
-
-  - Export the following values as environment variables and run the command provided:  
+3. Create Client Root CA and CLient certificate signed by Client Root CA. Export the following values as environment variables and run the command provided:  
    ```bash
     export CLIENT_ROOT_CA_KEY_FILE=client-root-ca.key
 	  export CLIENT_ROOT_CA_CRT_FILE=client-root-ca.crt
@@ -39,22 +37,20 @@ Before you start, Set up [`custom-domain`](../00-api-exposure/apix-02-setup-cust
    ```
 
    ```bash
-   # Create root ca key and cert (valid for 5 years) - will be used for validation
+   # Create root CA key and cert (valid for 5 years) - will be used for validation
    openssl req -x509 -sha256 -nodes -days 1825 -newkey rsa:2048 -subj '/O=example Inc./CN=ClientRootCA' -keyout ${CLIENT_ROOT_CA_KEY_FILE} -out ${CLIENT_ROOT_CA_CRT_FILE}
-   # Create new key and csr for client cert
+   # Create a new key and CSR for the client certificate
    openssl req -out ${CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE} -subj "/CN=client.example.com/O=example"
-   # Sign client cert with CA cert
+   # Sign the client cert with CA cert
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE} -out ${CLIENT_CERT_CRT_FILE}
-   # Create new key and csr for client cert
+   # Create a new key and CSR for the client certificate
    openssl req -out ${CLIENT_CERT_CSR_FILE}.2 -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE}.2 -subj "/CN=client2.example.com/O=example"
-   # Sign client cert with CA cert
+   # Sign the client certificate with CA cert
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE}.2 -out ${CLIENT_CERT_CRT_FILE}.2
    
    ```
 
-4. Add Client Root CA to cacert bundle secret for mTLS Gateway
-
-  - Export the following values as environment variables and run the command provided:
+4. Add Client Root CA to cacert bundle secret for mTLS Gateway. Export the following value as an environment variable and run the command provided:
 
     ```bash
     export MTLS_GATEWAY_NAME=mtls-gateway
