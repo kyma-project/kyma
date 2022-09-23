@@ -33,6 +33,9 @@ helmValues:
       autoInject: true
       enabled: false
     rewriteAppHTTPProbe: true
+  cni:
+    cniConfDir: /etc/cni/net.d
+    cniBinDir: /opt/cni/bin
 
 meshConfig:
   accessLogFile: /dev/stdout
@@ -118,7 +121,6 @@ components:
         runAsUser: 65534
         runAsNonRoot: true
         runAsGroup: 65534
-
 monitoring:
   enabled: true
   dashboards:
