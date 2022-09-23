@@ -3,6 +3,8 @@ package beb
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
@@ -19,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -33,7 +34,7 @@ type Reconciler struct {
 	recorder          record.EventRecorder
 	Backend           eventmesh.Backend
 	Domain            string
-	eventTypeCleaner  eventtype.Cleaner
+	cleaner           cleaner.Cleaner
 	oauth2credentials *beb.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
 	nameMapper    backendutils.NameMapper
@@ -45,7 +46,7 @@ const (
 )
 
 func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
-	cfg env.Config, cleaner eventtype.Cleaner, bebBackend eventmesh.Backend, credential *beb.OAuth2ClientCredentials,
+	cfg env.Config, cleaner cleaner.Cleaner, bebBackend eventmesh.Backend, credential *beb.OAuth2ClientCredentials,
 	mapper backendutils.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("Failed to start reconciler", "name", reconcilerName, "error", err)
@@ -58,7 +59,7 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 		recorder:          recorder,
 		Backend:           bebBackend,
 		Domain:            cfg.Domain,
-		eventTypeCleaner:  cleaner,
+		cleaner:           cleaner,
 		oauth2credentials: credential,
 		nameMapper:        mapper,
 		sinkValidator:     validator,
