@@ -12,7 +12,7 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -24,6 +24,7 @@ import (
 const (
 	eventMeshHandlerName               = "event-mesh-handler"
 	MaxEventMeshSubscriptionNameLength = 50
+	EventMeshTypeSegmentsLimit         = 7
 	SubscriptionNameLogKey             = "eventMeshSubscriptionName"
 	ErrorLogKey                        = "error"
 )
@@ -37,7 +38,7 @@ type Backend interface {
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
-	SyncSubscription(subscription *eventingv1alpha2.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error)
+	SyncSubscription(subscription *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error)
 
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
@@ -95,7 +96,7 @@ func getWebHookAuth(cfg env.Config, credentials *backendbebv1.OAuth2ClientCreden
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed.
-func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error) {
+func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error) {
 	// Format logger
 	log := backendutils.LoggerWithSubscriptionV1AlphaV2(em.namedLogger(), subscription)
 
@@ -116,17 +117,14 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		return false, err
 	}
 
-	// First, check if Kyma Subscription was modified
-	// compare hashes
-	// if hashes are different --> delete and recreate EventMesh subs
-
+	// check if Kyma Subscription was modified.
 	isEventMeshSubModified, err := backendutils.IsEventMeshSubModified(eventMeshSub, subscription.Status.Backend.Ev2hash)
 	if err != nil {
 		return false, err
 	}
 
 	if isEventMeshSubModified {
-		// delete subscription from EventMesh server
+		// delete subscription from EventMesh server, so it will be re-created later.
 		if err := em.deleteSubscription(subscription.Name); err != nil {
 			log.Errorw("Failed to delete subscription on EventMesh", ErrorLogKey, err)
 			return false, err
@@ -135,6 +133,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 
 	var eventMeshServerSub *types.Subscription
 	if !isEventMeshSubModified {
+		// fetch the existing subscription from EventMesh.
 		eventMeshServerSub, err = em.getSubscription(eventMeshSub.Name)
 		if err != nil {
 			// throw error if it is not a NotFound exception.
@@ -146,8 +145,9 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		}
 	}
 
+	// check if the EventMesh subscription was modified by EventMesh server.
 	if eventMeshServerSub != nil {
-		// get the internal view for the EMS subscription
+		// get the cleaned EMS subscription for comparing the hash
 		cleanedEventMeshServerSub := backendutils.GetCleanedEventMeshSubscription(eventMeshServerSub)
 		isEventMeshServerSubModified, err := backendutils.IsEventMeshSubModified(cleanedEventMeshServerSub, subscription.Status.Backend.Emshash)
 		if err != nil {
@@ -190,13 +190,13 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	subscription.Status.Backend.Types = statusFinalEventTypes(typesInfo)
 
 	// Update hashes in status
-	if err = em.updateHashesInStatus(subscription, eventMeshSub, eventMeshServerSub); err != nil {
+	if err = updateHashesInStatus(subscription, eventMeshSub, eventMeshServerSub); err != nil {
 		log.Errorw("Failed to update hashes in subscription status", ErrorLogKey, err)
 		return false, err
 	}
 
 	// update EventMesh sub status in kyma sub status
-	statusChanged = em.setEmsSubscriptionStatus(subscription, eventMeshServerSub) || statusChanged
+	statusChanged = setEmsSubscriptionStatus(subscription, eventMeshServerSub) || statusChanged
 
 	return statusChanged, nil
 }
@@ -207,7 +207,7 @@ func (em *EventMesh) DeleteSubscription(subscription *eventingv1alpha2.Subscript
 }
 
 // GetProcessedEventTypes returns the processed types after cleaning and prefixing as required by EventMesh specifications.
-func (em *EventMesh) GetProcessedEventTypes(kymaSubscription *eventingv1alpha2.Subscription, cleaner eventtype.Cleaner) ([]backendutils.EventTypeInfo, error) {
+func (em *EventMesh) GetProcessedEventTypes(kymaSubscription *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]backendutils.EventTypeInfo, error) {
 	// deduplicate event types
 	uniqueTypes := kymaSubscription.GetUniqueTypes()
 
@@ -221,90 +221,28 @@ func (em *EventMesh) GetProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 		}
 
 		// clean type and source
-		cleanedSource := kymaSubscription.Spec.Source // @TODO: clean
-		cleanedType, err := cleaner.Clean(t)
+		cleanedSource, err := cleaner.CleanSource(kymaSubscription.Spec.Source)
 		if err != nil {
 			return nil, err
 		}
-		eventMeshSubject := em.GetEventMeshSubject(cleanedSource, cleanedType)
+
+		cleanedType, err := cleaner.CleanEventType(t)
+		if err != nil {
+			return nil, err
+		}
+		eventMeshSubject := GetEventMeshSubject(cleanedSource, cleanedType, em.EventMeshPrefix)
+
+		if IsEventTypeSegmentsOverLimit(eventMeshSubject) {
+			return nil, errors.New(fmt.Sprintf("EventMesh subject exceeds the limit of segments, max number of segements allowed: %d", EventMeshTypeSegmentsLimit))
+		}
+
 		result = append(result, backendutils.EventTypeInfo{OriginalType: t, CleanType: cleanedType, ProcessedType: eventMeshSubject})
 	}
 
 	return result, nil
 }
 
-// GetEventMeshSubject appends the prefix to subject.
-func (em *EventMesh) GetEventMeshSubject(source, subject string) string {
-	return fmt.Sprintf("%s.%s.%s", em.EventMeshPrefix, source, subject)
-}
-
-func (em *EventMesh) updateHashesInStatus(kymaSubscription *eventingv1alpha2.Subscription, eventMeshLocalSubscription *types.Subscription, eventMeshServerSubscription *types.Subscription) error {
-	if err := em.setEventMeshLocalSubHashInStatus(kymaSubscription, eventMeshLocalSubscription); err != nil {
-		return err
-	}
-	if err := em.setEventMeshServerSubHashInStatus(kymaSubscription, eventMeshServerSubscription); err != nil {
-		return err
-	}
-	return nil
-}
-
-// setEventMeshLocalSubHashInStatus sets the hash for EventMesh local sub in Kyma Sub status.
-func (em *EventMesh) setEventMeshLocalSubHashInStatus(kymaSubscription *eventingv1alpha2.Subscription, eventMeshSubscription *types.Subscription) error {
-	// generate hash
-	newHash, err := backendutils.GetHash(eventMeshSubscription)
-	if err != nil {
-		return err
-	}
-
-	// set hash in status
-	kymaSubscription.Status.Backend.Ev2hash = newHash
-	return nil
-}
-
-// setEventMeshServerSubHashInStatus sets the hash for EventMesh local sub in Kyma Sub status.
-func (em *EventMesh) setEventMeshServerSubHashInStatus(kymaSubscription *eventingv1alpha2.Subscription, eventMeshSubscription *types.Subscription) error {
-	// clean up the server sub object from extra info
-	cleanedEventMeshSub := backendutils.GetCleanedEventMeshSubscription(eventMeshSubscription)
-	// generate hash
-	newHash, err := backendutils.GetHash(cleanedEventMeshSub)
-	if err != nil {
-		return err
-	}
-
-	// set hash in status
-	kymaSubscription.Status.Backend.Emshash = newHash
-	return nil
-}
-
-// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription.
-func (em *EventMesh) setEmsSubscriptionStatus(subscription *eventingv1alpha2.Subscription, eventMeshSubscription *types.Subscription) bool {
-	var statusChanged = false
-	if subscription.Status.Backend.EmsSubscriptionStatus == nil {
-		subscription.Status.Backend.EmsSubscriptionStatus = &eventingv1alpha2.EmsSubscriptionStatus{}
-	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.Status != string(eventMeshSubscription.SubscriptionStatus) {
-		subscription.Status.Backend.EmsSubscriptionStatus.Status = string(eventMeshSubscription.SubscriptionStatus)
-		statusChanged = true
-	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.StatusReason != eventMeshSubscription.SubscriptionStatusReason {
-		subscription.Status.Backend.EmsSubscriptionStatus.StatusReason = eventMeshSubscription.SubscriptionStatusReason
-		statusChanged = true
-	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery != eventMeshSubscription.LastSuccessfulDelivery {
-		subscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery = eventMeshSubscription.LastSuccessfulDelivery
-		statusChanged = true
-	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery != eventMeshSubscription.LastFailedDelivery {
-		subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery = eventMeshSubscription.LastFailedDelivery
-		statusChanged = true
-	}
-	if subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason != eventMeshSubscription.LastFailedDeliveryReason {
-		subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason = eventMeshSubscription.LastFailedDeliveryReason
-		statusChanged = true
-	}
-	return statusChanged
-}
-
+// getSubscription fetches the subscription from EventMesh
 func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
 	bebSubscription, resp, err := em.Client.Get(name)
 	if err != nil {
@@ -316,22 +254,7 @@ func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
 	return bebSubscription, nil
 }
 
-func statusCleanEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1alpha2.EventType {
-	var cleanEventTypes []eventingv1alpha2.EventType
-	for _, i := range typeInfos {
-		cleanEventTypes = append(cleanEventTypes, eventingv1alpha2.EventType{OriginalType: i.OriginalType, CleanType: i.CleanType})
-	}
-	return cleanEventTypes
-}
-
-func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1alpha2.JetStreamTypes {
-	var finalEventTypes []eventingv1alpha2.JetStreamTypes
-	for _, i := range typeInfos {
-		finalEventTypes = append(finalEventTypes, eventingv1alpha2.JetStreamTypes{OriginalType: i.OriginalType, ConsumerName: i.ProcessedType})
-	}
-	return finalEventTypes
-}
-
+// deleteSubscription deletes the subscription on EventMesh
 func (em *EventMesh) deleteSubscription(name string) error {
 	resp, err := em.Client.Delete(name)
 	if err != nil {
@@ -343,6 +266,7 @@ func (em *EventMesh) deleteSubscription(name string) error {
 	return nil
 }
 
+// createSubscription creates a subscription on EventMesh
 func (em *EventMesh) createSubscription(subscription *types.Subscription) error {
 	createResponse, err := em.Client.Create(subscription)
 	if err != nil {
@@ -354,6 +278,7 @@ func (em *EventMesh) createSubscription(subscription *types.Subscription) error 
 	return nil
 }
 
+// createSubscription creates and returns the subscription from EventMesh
 func (em *EventMesh) createAndGetSubscription(subscription *types.Subscription) (*types.Subscription, error) {
 	// create a new EMS subscription
 	if err := em.createSubscription(subscription); err != nil {
