@@ -96,7 +96,8 @@ func TestGetNatsConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Store the current environ and restore it after this test. A wrongly set up environment would break this test otherwise.
+			// Store the current environ and restore it after this test.
+			// A wrongly set up environment would break this test otherwise.
 			env := os.Environ()
 			t.Cleanup(func() {
 				for _, e := range env {
