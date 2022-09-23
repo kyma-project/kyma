@@ -83,7 +83,7 @@ func (c *Commander) Start() error {
 	defer connection.Close()
 
 	// configure the message sender
-	messageSenderToNATS := sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
+	messageSender := sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -117,7 +117,7 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewHandler(messageReceiver, messageSenderToNATS, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := nats.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}

@@ -27,8 +27,7 @@ func StartNATSServer() *server.Server {
 
 	log, _ := logger.New("json", "info")
 	log.WithContext().Info("Starting test NATS Server in JetStream mode")
-	testserver := test.RunServer(&opts)
-	return testserver
+	return test.RunServer(&opts)
 }
 
 func ConnectToNATSServer(url string) (*nats.Conn, error) {
