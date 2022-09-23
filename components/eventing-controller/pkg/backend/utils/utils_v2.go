@@ -31,11 +31,11 @@ type NameMapper interface {
 	MapSubscriptionName(subscriptionName, subscriptionNamespace string) string
 }
 
-func getExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, targetUrl string) (string, error) {
+func getExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, targetURL string) (string, error) {
 	scheme := "https://"
 	path := ""
 
-	sURL, err := url.ParseRequestURI(targetUrl)
+	sURL, err := url.ParseRequestURI(targetURL)
 	if err != nil {
 		return "", err
 	}

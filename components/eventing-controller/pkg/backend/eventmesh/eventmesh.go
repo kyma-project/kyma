@@ -110,7 +110,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		return false, err
 	}
 
-	// convert Kyma Sub to EventMesh sub
+	// convert Kyma Subscription to EventMesh Subscription object
 	eventMeshSub, err := backendutils.ConvertKymaSubToEventMeshSub(subscription, typesInfo, apiRule, em.WebhookAuth, em.ProtocolSettings, em.Namespace, em.SubNameMapper)
 	if err != nil {
 		log.Errorw("Failed to get Kyma subscription internal view", ErrorLogKey, err)
@@ -142,6 +142,8 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 				log.Errorw("Failed to get BEB subscription", SubscriptionNameLogKey, eventMeshSub.Name, ErrorLogKey, err)
 				return false, err
 			}
+			// remove the eventMeshServerSub local instance
+			eventMeshServerSub = nil
 		}
 	}
 
@@ -233,7 +235,7 @@ func (em *EventMesh) GetProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 		eventMeshSubject := GetEventMeshSubject(cleanedSource, cleanedType, em.EventMeshPrefix)
 
 		if IsEventTypeSegmentsOverLimit(eventMeshSubject) {
-			return nil, errors.New(fmt.Sprintf("EventMesh subject exceeds the limit of segments, max number of segements allowed: %d", EventMeshTypeSegmentsLimit))
+			return nil, fmt.Errorf("EventMesh subject exceeds the limit of segments, max number of segements allowed: %d", EventMeshTypeSegmentsLimit)
 		}
 
 		result = append(result, backendutils.EventTypeInfo{OriginalType: t, CleanType: cleanedType, ProcessedType: eventMeshSubject})

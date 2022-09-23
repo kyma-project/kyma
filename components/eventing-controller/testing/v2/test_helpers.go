@@ -35,6 +35,8 @@ const (
 	EventMeshNamespace                       = "/default/kyma/id"
 	EventSource                              = "/default/kyma/id"
 	EventTypePrefix                          = "prefix"
+	EventMeshPrefix                          = "one.two.three"      // three segments
+	InvalidEventMeshPrefix                   = "one.two.three.four" // four segments
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
 	OrderCreatedV2Event                      = "order.created.v2"

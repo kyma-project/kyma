@@ -38,9 +38,7 @@ func Test_CleanEventType(t *testing.T) {
 	}
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
+	require.NoError(t, err)
 
 	for _, tc := range testCases {
 		tc := tc
@@ -85,9 +83,7 @@ func Test_CleanSource(t *testing.T) {
 	}
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
+	require.NoError(t, err)
 
 	for _, tc := range testCases {
 		tc := tc
