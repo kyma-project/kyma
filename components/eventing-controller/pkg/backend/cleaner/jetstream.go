@@ -1,6 +1,11 @@
 package cleaner
 
-import "github.com/kyma-project/kyma/components/eventing-controller/logger"
+import (
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"regexp"
+)
+
+var invalidEventTypeSegment = regexp.MustCompile("[^a-zA-Z0-9.]")
 
 // Perform a compile-time check.
 var _ Cleaner = &JetStreamCleaner{}
@@ -14,5 +19,5 @@ func (c *JetStreamCleaner) CleanSource(source string) (string, error) {
 }
 
 func (c *JetStreamCleaner) CleanEventType(eventType string) (string, error) {
-	return eventType, nil
+	return invalidEventTypeSegment.ReplaceAllString(eventType, ""), nil
 }
