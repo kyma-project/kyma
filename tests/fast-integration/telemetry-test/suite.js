@@ -6,6 +6,7 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
+  debug,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -174,7 +175,8 @@ describe('Telemetry Operator', function() {
 
             const responseBody = await queryLoki(labels, testStartTimestamp);
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-            assert.hasAnyKeys('kubernetes', entry, `No kubernetes metadata in ${entry} `);
+            debug(responseBody.data.result.length);
+            assert.hasAnyKeys(entry, 'kubernetes', `No kubernetes metadata in ${entry}`);
             const k8smeta = entry['kubernetes'];
             assert.doesNotHaveAnyKeys(k8smeta, 'annotations', `Annotations found in ${JSON.stringify(k8smeta)}`);
             assert.hasAnyKeys(k8smeta, 'labels', `No labels in ${JSON.stringify(k8smeta)}`);
@@ -201,7 +203,7 @@ describe('Telemetry Operator', function() {
 
             const responseBody = await queryLoki(labels, testStartTimestamp);
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-            assert.hasAnyKeys('kubernetes', entry, `No kubernetes metadata in ${entry} `);
+            assert.hasAnyKeys(entry, 'kubernetes', `No kubernetes metadata in ${entry}`);
             const k8smeta = entry['kubernetes'];
             assert.doesNotHaveAnyKeys(k8smeta, 'labels', `Labels found in ${JSON.stringify(k8smeta)}`);
             assert.hasAnyKeys(k8smeta, 'annotations', `No annotations in ${JSON.stringify(k8smeta)}`);
