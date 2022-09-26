@@ -19,10 +19,8 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 		givenConditions []v1alpha2.Condition
 	}{
 		{
-			name: "Conditions empty",
-			givenConditions: func() []v1alpha2.Condition {
-				return v1alpha2.MakeSubscriptionConditions()
-			}(),
+			name:            "Conditions empty",
+			givenConditions: v1alpha2.MakeSubscriptionConditions(),
 		},
 		{
 			name: "Conditions partially initialized",

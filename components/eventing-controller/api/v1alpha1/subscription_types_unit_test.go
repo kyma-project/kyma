@@ -61,21 +61,37 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			caseName:  "Only one filter",
-			input:     &v1alpha1.BEBFilters{Dialect: "beb", Filters: []*v1alpha1.BEBFilter{filter1}},
-			expected:  &v1alpha1.BEBFilters{Dialect: "beb", Filters: []*v1alpha1.BEBFilter{filter1}},
+			caseName: "Only one filter",
+			input: &v1alpha1.BEBFilters{
+				Dialect: "beb",
+				Filters: []*v1alpha1.BEBFilter{filter1},
+			},
+			expected: &v1alpha1.BEBFilters{
+				Dialect: "beb",
+				Filters: []*v1alpha1.BEBFilter{filter1},
+			},
 			expectErr: false,
 		},
 		{
-			caseName:  "Filters with duplicate",
-			input:     &v1alpha1.BEBFilters{Dialect: "nats", Filters: []*v1alpha1.BEBFilter{filter1, filter1}},
-			expected:  &v1alpha1.BEBFilters{Dialect: "nats", Filters: []*v1alpha1.BEBFilter{filter1}},
+			caseName: "Filters with duplicate",
+			input: &v1alpha1.BEBFilters{
+				Dialect: "nats",
+				Filters: []*v1alpha1.BEBFilter{filter1, filter1},
+			},
+			expected: &v1alpha1.BEBFilters{
+				Dialect: "nats",
+				Filters: []*v1alpha1.BEBFilter{filter1},
+			},
 			expectErr: false,
 		},
 		{
-			caseName:  "Filters without duplicate",
-			input:     &v1alpha1.BEBFilters{Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3}},
-			expected:  &v1alpha1.BEBFilters{Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3}},
+			caseName: "Filters without duplicate",
+			input: &v1alpha1.BEBFilters{
+				Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3},
+			},
+			expected: &v1alpha1.BEBFilters{
+				Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3},
+			},
 			expectErr: false,
 		},
 	}

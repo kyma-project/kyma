@@ -63,7 +63,10 @@ var (
 // TestAPIs prepares gingko to run the test suite.
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecsWithDefaultAndCustomReporters(t, "Eventing Backend Controller Suite", []Reporter{printer.NewlineReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Eventing Backend Controller Suite",
+		[]Reporter{printer.NewlineReporter{}},
+	)
 }
 
 // Prepare the test suite.

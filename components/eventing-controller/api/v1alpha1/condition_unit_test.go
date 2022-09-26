@@ -19,10 +19,8 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 		givenConditions []v1alpha1.Condition
 	}{
 		{
-			name: "Conditions empty",
-			givenConditions: func() []v1alpha1.Condition {
-				return v1alpha1.MakeSubscriptionConditions()
-			}(),
+			name:            "Conditions empty",
+			givenConditions: v1alpha1.MakeSubscriptionConditions(),
 		},
 		{
 			name: "Conditions partially initialized",
@@ -45,7 +43,12 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 			g := NewGomegaWithT(t)
 			s := v1alpha1.SubscriptionStatus{}
 			s.Conditions = tt.givenConditions
-			wantConditionTypes := []v1alpha1.ConditionType{v1alpha1.ConditionSubscribed, v1alpha1.ConditionSubscriptionActive, v1alpha1.ConditionAPIRuleStatus, v1alpha1.ConditionWebhookCallStatus}
+			wantConditionTypes := []v1alpha1.ConditionType{
+				v1alpha1.ConditionSubscribed,
+				v1alpha1.ConditionSubscriptionActive,
+				v1alpha1.ConditionAPIRuleStatus,
+				v1alpha1.ConditionWebhookCallStatus,
+			}
 
 			// when
 			s.InitializeConditions()
@@ -84,13 +87,19 @@ func Test_IsReady(t *testing.T) {
 			wantReadyStatus: false,
 		},
 		{
-			name:            "should not be ready if only ConditionSubscriptionActive is available and true",
-			givenConditions: []v1alpha1.Condition{{Type: v1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionTrue}},
+			name: "should not be ready if only ConditionSubscriptionActive is available and true",
+			givenConditions: []v1alpha1.Condition{{
+				Type:   v1alpha1.ConditionSubscriptionActive,
+				Status: corev1.ConditionTrue,
+			}},
 			wantReadyStatus: false,
 		},
 		{
-			name:            "should not be ready if only ConditionAPIRuleStatus is available and true",
-			givenConditions: []v1alpha1.Condition{{Type: v1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionTrue}},
+			name: "should not be ready if only ConditionAPIRuleStatus is available and true",
+			givenConditions: []v1alpha1.Condition{{
+				Type:   v1alpha1.ConditionAPIRuleStatus,
+				Status: corev1.ConditionTrue,
+			}},
 			wantReadyStatus: false,
 		},
 		{
@@ -146,21 +155,46 @@ func Test_FindCondition(t *testing.T) {
 		{
 			name: "should be able to find the present condition",
 			givenConditions: []v1alpha1.Condition{
-				{Type: v1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
-				{Type: v1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
-				{Type: v1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
-				{Type: v1alpha1.ConditionWebhookCallStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+				{
+					Type:               v1alpha1.ConditionSubscribed,
+					Status:             corev1.ConditionTrue,
+					LastTransitionTime: currentTime,
+				}, {
+					Type:               v1alpha1.ConditionSubscriptionActive,
+					Status:             corev1.ConditionTrue,
+					LastTransitionTime: currentTime,
+				}, {
+					Type:               v1alpha1.ConditionAPIRuleStatus,
+					Status:             corev1.ConditionTrue,
+					LastTransitionTime: currentTime,
+				}, {
+					Type:               v1alpha1.ConditionWebhookCallStatus,
+					Status:             corev1.ConditionTrue,
+					LastTransitionTime: currentTime,
+				},
 			},
 			findConditionType: v1alpha1.ConditionSubscriptionActive,
-			wantCondition:     &v1alpha1.Condition{Type: v1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+			wantCondition: &v1alpha1.Condition{
+				Type:               v1alpha1.ConditionSubscriptionActive,
+				Status:             corev1.ConditionTrue,
+				LastTransitionTime: currentTime,
+			},
 		},
 		{
 			name: "should not be able to find the non-present condition",
-			givenConditions: []v1alpha1.Condition{
-				{Type: v1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
-				{Type: v1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
-				{Type: v1alpha1.ConditionWebhookCallStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
-			},
+			givenConditions: []v1alpha1.Condition{{
+				Type:               v1alpha1.ConditionSubscribed,
+				Status:             corev1.ConditionTrue,
+				LastTransitionTime: currentTime,
+			}, {
+				Type:               v1alpha1.ConditionAPIRuleStatus,
+				Status:             corev1.ConditionTrue,
+				LastTransitionTime: currentTime,
+			}, {
+				Type:               v1alpha1.ConditionWebhookCallStatus,
+				Status:             corev1.ConditionTrue,
+				LastTransitionTime: currentTime,
+			}},
 			findConditionType: v1alpha1.ConditionSubscriptionActive,
 			wantCondition:     nil,
 		},
@@ -170,8 +204,9 @@ func Test_FindCondition(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			status.Conditions = tc.givenConditions
+			gotCondition := status.FindCondition(tc.findConditionType)
 
-			if gotCondition := status.FindCondition(tc.findConditionType); !reflect.DeepEqual(tc.wantCondition, gotCondition) {
+			if !reflect.DeepEqual(tc.wantCondition, gotCondition) {
 				t.Errorf("Subscription FindCondition failed, want: %v but got: %v", tc.wantCondition, gotCondition)
 			}
 		})
@@ -346,8 +381,10 @@ func Test_conditionsEquals(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if gotEqualStatus := v1alpha1.ConditionsEquals(tc.conditionsSet1, tc.conditionsSet2); tc.wantEqualStatus != gotEqualStatus {
-				t.Errorf("The list of conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
+			want := tc.wantEqualStatus
+			actual := v1alpha1.ConditionsEquals(tc.conditionsSet1, tc.conditionsSet2)
+			if actual != want {
+				t.Errorf("The list of conditions are not equal, want: %v but got: %v", want, actual)
 			}
 		})
 	}
@@ -396,11 +433,15 @@ func Test_conditionEquals(t *testing.T) {
 		{
 			name: "should not be equal if the reason fields are different",
 			condition1: v1alpha1.Condition{
-				Type: v1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue, Reason: v1alpha1.ConditionReasonSubscriptionDeleted,
+				Type:   v1alpha1.ConditionSubscribed,
+				Status: corev1.ConditionTrue,
+				Reason: v1alpha1.ConditionReasonSubscriptionDeleted,
 			},
 
 			condition2: v1alpha1.Condition{
-				Type: v1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue, Reason: v1alpha1.ConditionReasonSubscriptionActive,
+				Type:   v1alpha1.ConditionSubscribed,
+				Status: corev1.ConditionTrue,
+				Reason: v1alpha1.ConditionReasonSubscriptionActive,
 			},
 			wantEqualStatus: false,
 		},
@@ -423,8 +464,10 @@ func Test_conditionEquals(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if gotEqualStatus := v1alpha1.ConditionEquals(tc.condition1, tc.condition2); tc.wantEqualStatus != gotEqualStatus {
-				t.Errorf("The conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
+			want := tc.wantEqualStatus
+			actual := v1alpha1.ConditionEquals(tc.condition1, tc.condition2)
+			if want != actual {
+				t.Errorf("The conditions are not equal, want: %v but got: %v", want, actual)
 			}
 		})
 	}
