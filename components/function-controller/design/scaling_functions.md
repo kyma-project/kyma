@@ -17,27 +17,24 @@ However, there are some implementation conflicts between the two features. This 
 - Provide frictionless UX for the feature.
 
 ## Proposal
-Describe and implement two different scaling modes. Both modes already work to some extent. The point here is have an ergonomic UX and flow.
+Describe and implement two different scaling configuration. Both configurations already work to some extent. The point here is have an ergonomic UX and flow.
 
-### External scaling mode
-This describes the scale subresource use case. It supports:
+### External scaling configuration
+This is managed and configured using `spec.Replicas`. It describes the scale subresource use case. It supports:
 - Manually scaling the Function up/down through the API.
 - Configuring an HPA resource with the Function resources as a target.
 - Using an external scaler like KEDA.
 
-This mode requires user intervention to some extent. So, it's not enabled by default. However, it should be simple to enable by just using the scale subresource.
+### Built-in scaling configuration
+This is managed and enabled by setting `spec.ScaleConfig`. It should be configurable using Busola and it provide the most basic scaling configuration for the function.
 
-To disable this mode the user needs to edit the Function resource and remove the `spec.Replicas` field.
-
-### Built-in scaling mode
-This describes the current implementation of `spec.ScaleConfig`. It's enabled by default and should be supported by default by Busola.
-
-This mode will be disabled automatically once the external mode is enabled by setting the `spec.Replicas` field. Busola UI can be extended to allow users to remove `spec.Replica` and re-enable built-in scaling with minimal effort to the user.
+This configuration will be disabled by removing `spec.ScaleConfig`. Busola UI can be extended to allow users to add/remove `spec.ScaleConfig` to manage built-in scaling with minimal effort to the user.
 
 ## Implementation details
 
 - The controller should support and accept both `spec.Replicas` and `spec.ScaleConfig`. Current validation rule to block this will be removed.
-- `spec.Replcas` will take precedence over `spec.ScaleConfig`.
-- `spec.ScaleConfig` will be defaulted based on `spec.Replicas` if it's set (min = max = replicas).
-- The HPA resource created by the controller will still target the runtime deployment of the Function. Since the controller will only create the HPA resource if there is a difference between `spec.ScaleConfig` min and max, it will reduce the probability of conflict by having more that one HPA managing the Function and it's resources.
-- The current Function status update logic should be fixed to reflect the function current scale.
+- `spec.Replcas` is the only source of truth for scaling the function/runtime deployment.
+- `spec.ScaleConfig` is only used to configure the controller internal HPA.
+- The internal HPA is removed if `spec.ScaleConfig == nil`
+- The HPA resource created by the controller will still target the Function resources.
+- The current Function status update logic should be fixed to reflect the function current scale. 
