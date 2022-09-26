@@ -5,13 +5,13 @@ metadata:
 spec:
   output:
     custom: |
-      Name               http
-      Host               ${ENDPOINT}
-      Tls                On
+      name               http
+      port               9880
+      host               ${ENDPOINT}
   variables:
     - name: ENDPOINT
       valueFrom:
         secretKeyRef:
-        - name: mockserver-host
+          name: mockserver-host
           namespace: mockserver
-          key: ENDPOINT
+          key: host
