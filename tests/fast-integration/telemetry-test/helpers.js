@@ -1,12 +1,12 @@
-const k8s = require('@kubernetes/client-node');
-const fs = require('fs');
-const path = require('path');
-const {waitForK8sObject} = require('../utils');
-
 module.exports = {
   loadTestData,
   waitForLogPipelineStatusRunning,
 };
+
+const k8s = require('@kubernetes/client-node');
+const fs = require('fs');
+const path = require('path');
+const {waitForK8sObject} = require('../utils');
 
 function loadTestData(fileName) {
   return loadResourceFromFile(`./testdata/${fileName}`);

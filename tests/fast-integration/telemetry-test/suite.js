@@ -162,10 +162,11 @@ describe('Telemetry Operator', function() {
           });
 
           it(`Should push only labels to Loki`, async function() {
-            const labels = '{namespace="kyma-system", job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
-            const responseBody = await queryLoki(labels, testStartTimestamp);
-            assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
+            const labels = '{job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
+            const found = await logsPresentInLoki(labels, testStartTimestamp, 5);
+            assert.isTrue(found, `No logs present in Loki for labels: ${labels}`);
 
+            const responseBody = await queryLoki(labels, testStartTimestamp);
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
             assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
             expect(entry['kubernetes']).not.to.have.property('annotations');
@@ -187,7 +188,10 @@ describe('Telemetry Operator', function() {
           });
 
           it(`Should push only annotations to Loki`, async function() {
-            const labels = '{namespace="kyma-system", job="keep-annotations-drop-labels-telemetry-fluent-bit"}';
+            const labels = '{job="keep-annotations-drop-labels-telemetry-fluent-bit"}';
+            const found = await logsPresentInLoki(labels, testStartTimestamp, 5);
+            assert.isTrue(found, `No logs present in Loki for labels: ${labels}`);
+
             const responseBody = await queryLoki(labels, testStartTimestamp);
             assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
 
