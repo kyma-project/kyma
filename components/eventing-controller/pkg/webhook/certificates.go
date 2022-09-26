@@ -27,16 +27,38 @@ const (
 	KeyName  = "tls.key"
 )
 
-type WebhookCertificateHandler struct {
-	crdName    string
-	secretName string
+type WebhookHandler struct {
+	secretHandler *SecretHandler
+	crdName       string
+	secretName    string
 	client.Client
 	ctx    context.Context
 	logger *logr.Logger
 }
 
-func NewWebhookCertificateHandler(ctx context.Context, client client.Client, logger *logr.Logger, crdName string, secretName string) *WebhookCertificateHandler {
-	return &WebhookCertificateHandler{
+type SecretHandler struct {
+	certHandler *CertificateHandler
+	client.Client
+	ctx    context.Context
+	logger *logr.Logger
+}
+
+type CertificateHandler struct {
+	ctx    context.Context
+	logger *logr.Logger
+}
+
+func NewWebhookCertificateHandler(ctx context.Context, client client.Client, logger *logr.Logger, crdName string, secretName string) *WebhookHandler {
+	return &WebhookHandler{
+		secretHandler: &SecretHandler{
+			certHandler: &CertificateHandler{
+				ctx:    ctx,
+				logger: logger,
+			},
+			Client: client,
+			logger: logger,
+			ctx:    ctx,
+		},
 		ctx:        ctx,
 		Client:     client,
 		logger:     logger,
@@ -45,7 +67,7 @@ func NewWebhookCertificateHandler(ctx context.Context, client client.Client, log
 	}
 }
 
-func (r *WebhookCertificateHandler) SetupCertificates() error {
+func (r *WebhookHandler) SetupCertificates() error {
 	if err := apiextensionsv1.AddToScheme(r.Client.Scheme()); err != nil {
 		return errors.Wrap(err, "while adding apiextensions.v1 schema to k8s client")
 	}
@@ -66,7 +88,7 @@ func (r *WebhookCertificateHandler) SetupCertificates() error {
 	return r.ensureWebhookCertificate(r.secretName, webhookServiceNamespace, webhookServiceName)
 }
 
-func (r *WebhookCertificateHandler) createCABundle(webhookNamespace string, serviceName string) ([]byte, []byte, error) {
+func (r *CertificateHandler) createCABundle(webhookNamespace string, serviceName string) ([]byte, []byte, error) {
 	r.logger.Info("creating certificate for webhook")
 
 	certificate, key, err := r.createCert(webhookNamespace, serviceName)
@@ -76,7 +98,7 @@ func (r *WebhookCertificateHandler) createCABundle(webhookNamespace string, serv
 	return certificate, key, nil
 }
 
-func (r *WebhookCertificateHandler) addCertToConversionWebhook(caBundle []byte) error {
+func (r *WebhookHandler) addCertToConversionWebhook(caBundle []byte) error {
 	crd := &apiextensionsv1.CustomResourceDefinition{}
 	err := r.Client.Get(r.ctx, types.NamespacedName{Name: r.crdName}, crd)
 	if err != nil {
@@ -95,47 +117,61 @@ func (r *WebhookCertificateHandler) addCertToConversionWebhook(caBundle []byte) 
 	return nil
 }
 
-func (r *WebhookCertificateHandler) ensureWebhookCertificate(secretName, secretNamespace, serviceName string) error {
+func (r *WebhookHandler) ensureWebhookCertificate(secretName, secretNamespace, serviceName string) error {
+	r.logger.Info("ensuring webhook secret")
+
+	secret, err := r.secretHandler.ensureSecret(secretName, secretNamespace, serviceName)
+	if err != nil {
+		return err
+	}
+
+	caBundle := secret.Data[CertName]
+	if err := r.addCertToConversionWebhook(caBundle); err != nil {
+		return xerrors.Errorf("couldn't inject webhook caBundle: %w", err)
+	}
+
+	return nil
+}
+
+func (r *SecretHandler) ensureSecret(secretName, secretNamespace, serviceName string) (*corev1.Secret, error) {
 	secret := &corev1.Secret{}
 	r.logger.Info("ensuring webhook secret")
 
 	err := r.Client.Get(r.ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, secret)
 	if err != nil && !apiErrors.IsNotFound(err) {
-		return errors.Wrap(err, "failed to get webhook secret")
+		return nil, xerrors.Errorf("failed to get webhook secret: %w", err)
 	}
 
 	if apiErrors.IsNotFound(err) {
 		r.logger.Info("creating webhook secret")
-		return r.createSecret(secretName, secretNamespace, serviceName)
+		if secret, err = r.createSecret(secretName, secretNamespace, serviceName); err != nil {
+			return nil, err
+		}
 	}
 
 	r.logger.Info("updating pre-exiting webhook secret")
 	if err := r.updateSecret(secret, serviceName); err != nil {
-		return errors.Wrap(err, "failed to update secret")
+		return secret, xerrors.Errorf("failed to update secret: %w", err)
 	}
-	return nil
+	return secret, nil
 }
 
-func (r *WebhookCertificateHandler) createSecret(name, namespace, serviceName string) error {
-	certificate, key, err := r.buildCert(namespace, serviceName)
+func (r *SecretHandler) createSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
+	certificate, key, err := r.certHandler.buildCert(namespace, serviceName)
 	if err != nil {
-		return errors.Wrap(err, "failed to build cert ")
+		return nil, xerrors.Errorf("failed to build cert: %w", err)
 	}
 
-	secret := r.buildSecret(name, namespace, certificate, key)
+	secret := r.certHandler.buildSecret(name, namespace, certificate, key)
 
 	if err := r.Client.Create(r.ctx, secret); err != nil {
-		return errors.Wrap(err, "failed to create secret")
+		return nil, xerrors.Errorf("failed to create secret: %w", err)
 	}
 
-	err = r.addCertToConversionWebhook(certificate)
-	if err != nil {
-		return err
-	}
-	return nil
+	return secret, nil
 }
 
-func (r *WebhookCertificateHandler) containsConversionWebhookClientConfig(crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
+func (r *WebhookHandler) containsConversionWebhookClientConfig(crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
 	if crd.Spec.Conversion == nil {
 		return false, "conversion not found in " + r.crdName
 	}
@@ -150,7 +186,7 @@ func (r *WebhookCertificateHandler) containsConversionWebhookClientConfig(crd *a
 	return true, ""
 }
 
-func (r *WebhookCertificateHandler) createCert(webhookNamespace string, serviceName string) ([]byte, []byte, error) {
+func (r *CertificateHandler) createCert(webhookNamespace string, serviceName string) ([]byte, []byte, error) {
 
 	certificate, key, err := r.buildCert(webhookNamespace, serviceName)
 	if err != nil {
@@ -160,7 +196,7 @@ func (r *WebhookCertificateHandler) createCert(webhookNamespace string, serviceN
 	return certificate, key, nil
 }
 
-func (r *WebhookCertificateHandler) isValidSecret(s *corev1.Secret) (bool, error) {
+func (r *SecretHandler) isValidSecret(s *corev1.Secret) (bool, error) {
 	if !r.hasRequiredKeys(s.Data) {
 		return false, nil
 	}
@@ -174,7 +210,7 @@ func (r *WebhookCertificateHandler) isValidSecret(s *corev1.Secret) (bool, error
 	return true, nil
 }
 
-func (r *WebhookCertificateHandler) verifyCertificate(c []byte) error {
+func (r *SecretHandler) verifyCertificate(c []byte) error {
 	certificate, err := cert.ParseCertsPEM(c)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse certificate data")
@@ -192,7 +228,7 @@ func (r *WebhookCertificateHandler) verifyCertificate(c []byte) error {
 	return nil
 }
 
-func (r *WebhookCertificateHandler) verifyKey(k []byte) error {
+func (r *SecretHandler) verifyKey(k []byte) error {
 	b, _ := pem.Decode(k)
 	key, err := x509.ParsePKCS1PrivateKey(b.Bytes)
 	if err != nil {
@@ -204,7 +240,7 @@ func (r *WebhookCertificateHandler) verifyKey(k []byte) error {
 	return nil
 }
 
-func (r *WebhookCertificateHandler) hasRequiredKeys(data map[string][]byte) bool {
+func (r *SecretHandler) hasRequiredKeys(data map[string][]byte) bool {
 	if data == nil {
 		return false
 	}
@@ -216,8 +252,9 @@ func (r *WebhookCertificateHandler) hasRequiredKeys(data map[string][]byte) bool
 	return true
 }
 
-func (r *WebhookCertificateHandler) buildCert(namespace, serviceName string) (cert []byte, key []byte, err error) {
-	cert, key, err = r.generateWebhookCertificates(serviceName, namespace)
+func (r *CertificateHandler) buildCert(namespace, serviceName string) (cert []byte, key []byte, err error) {
+	cert, key, err = r.generateCertificates(serviceName, namespace)
+	cert, key, err = r.generateCertificates(serviceName, namespace)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to generate webhook certificates")
 	}
@@ -225,7 +262,7 @@ func (r *WebhookCertificateHandler) buildCert(namespace, serviceName string) (ce
 	return cert, key, nil
 }
 
-func (r *WebhookCertificateHandler) updateSecret(secret *corev1.Secret, serviceName string) error {
+func (r *SecretHandler) updateSecret(secret *corev1.Secret, serviceName string) error {
 	valid, err := r.isValidSecret(secret)
 	if valid {
 		return nil
@@ -234,30 +271,27 @@ func (r *WebhookCertificateHandler) updateSecret(secret *corev1.Secret, serviceN
 		r.logger.Error(err, "invalid certificate")
 	}
 
-	certificate, key, err := r.createCABundle(secret.Namespace, serviceName)
+	certificate, key, err := r.certHandler.createCABundle(secret.Namespace, serviceName)
 	if err != nil {
-		return errors.Wrap(err, "failed to ensure webhook secret")
+		return xerrors.Errorf("failed to ensure webhook secret: %w", err)
 	}
 
-	newSecret := r.buildSecret(secret.Name, secret.Namespace, certificate, key)
+	newSecret := r.certHandler.buildSecret(secret.Name, secret.Namespace, certificate, key)
 
 	secret.Data = newSecret.Data
 	if err := r.Client.Update(r.ctx, secret); err != nil {
-		return errors.Wrap(err, "failed to update secret")
+		return xerrors.Errorf("failed to update secret: %w", err)
 	}
 
-	if err := r.addCertToConversionWebhook(certificate); err != nil {
-		return errors.Wrap(err, "while adding CaBundle to Conversion Webhook for function CRD")
-	}
 	return nil
 }
 
-func (r *WebhookCertificateHandler) generateWebhookCertificates(serviceName, namespace string) ([]byte, []byte, error) {
+func (r *CertificateHandler) generateCertificates(serviceName, namespace string) ([]byte, []byte, error) {
 	altNames := r.serviceAltNames(serviceName, namespace)
 	return cert.GenerateSelfSignedCertKey(altNames[0], nil, altNames)
 }
 
-func (r *WebhookCertificateHandler) serviceAltNames(serviceName, namespace string) []string {
+func (r *CertificateHandler) serviceAltNames(serviceName, namespace string) []string {
 	namespacedServiceName := strings.Join([]string{serviceName, namespace}, ".")
 	commonName := strings.Join([]string{namespacedServiceName, "svc"}, ".")
 	serviceHostname := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
@@ -270,7 +304,7 @@ func (r *WebhookCertificateHandler) serviceAltNames(serviceName, namespace strin
 	}
 }
 
-func (r *WebhookCertificateHandler) buildSecret(name, namespace string, cert []byte, key []byte) *corev1.Secret {
+func (r *CertificateHandler) buildSecret(name, namespace string, cert []byte, key []byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
