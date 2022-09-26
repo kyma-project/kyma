@@ -20,7 +20,7 @@ COPY webhook/ webhook/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
 
 # Use the fluent-bit image because we need the fluent-bit binary
-FROM eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.7-248e790f
+FROM eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.8-ad15ce64
 
 WORKDIR /
 COPY --from=builder /workspace/manager .
