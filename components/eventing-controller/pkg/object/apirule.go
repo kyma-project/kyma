@@ -119,7 +119,7 @@ func WithRules(subs []eventingv1alpha1.Subscription, svc apigatewayv1beta1.Servi
 				paths = append(paths, hostURL.Path)
 			}
 		}
-		uniquePaths := removeDuplicateValues(paths)
+		uniquePaths := RemoveDuplicateValues(paths)
 		for _, path := range uniquePaths {
 			rule := apigatewayv1beta1.Rule{
 				Path:             path,
@@ -133,7 +133,7 @@ func WithRules(subs []eventingv1alpha1.Subscription, svc apigatewayv1beta1.Servi
 	}
 }
 
-func removeDuplicateValues(values []string) []string {
+func RemoveDuplicateValues(values []string) []string {
 	keys := make(map[string]bool)
 	list := make([]string, 0)
 

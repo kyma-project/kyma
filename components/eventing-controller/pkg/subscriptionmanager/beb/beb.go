@@ -25,13 +25,14 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
-	bebv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/beb"
+	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
@@ -121,7 +122,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	if c.envCfg.EnableNewCRDVersion {
 		eventMeshHandler := backendeventmesh.NewEventMesh(oauth2credential, nameMapper, c.logger)
 		eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
-		eventMeshReconciler := bebv2.NewReconciler(
+		eventMeshReconciler := eventmesh.NewReconciler(
 			ctx,
 			client,
 			c.logger,
@@ -131,7 +132,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 			eventMeshHandler,
 			oauth2credential,
 			nameMapper,
-			sink.NewValidator(ctx, client, recorder, c.logger),
+			sinkv2.NewValidator(ctx, client, recorder, c.logger),
 		)
 		c.eventMeshBackend = eventMeshReconciler.Backend
 		if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {
