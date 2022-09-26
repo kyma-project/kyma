@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -12,7 +14,6 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"strings"
 )
 
 const (
@@ -126,7 +127,7 @@ func getUniqueEventTypes(eventTypes []string) []string {
 func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
 	if sub.Spec.Types == nil || sub.Spec.Source == "" {
-		return []eventingv1alpha2.EventType{}, errors.New("Event source and types must be provided")
+		return []eventingv1alpha2.EventType{}, errors.New("event source and types must be provided")
 	}
 
 	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
@@ -212,6 +213,9 @@ func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 
 func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error) {
 	if len(eventType) == 0 {
+		return "", nats.ErrBadSubject
+	}
+	if segments := strings.Split(eventType, "."); len(segments) < 2 {
 		return "", nats.ErrBadSubject
 	}
 	return cleaner.CleanEventType(eventType)

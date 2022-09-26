@@ -1,10 +1,11 @@
 package cleaner
 
 import (
+	"testing"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func Test_CleanSource(t *testing.T) {

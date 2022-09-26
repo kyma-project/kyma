@@ -3,6 +3,9 @@ package jetstreamv2
 import (
 	"bytes"
 	"context"
+	"net/http"
+	"time"
+
 	nats2 "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	v2 "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/binding"
@@ -12,8 +15,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"net/http"
-	"time"
 )
 
 func sendEventToJetStream(jsClient *JetStream, data string) error {

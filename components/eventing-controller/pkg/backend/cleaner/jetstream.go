@@ -1,8 +1,9 @@
 package cleaner
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"regexp"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 var (

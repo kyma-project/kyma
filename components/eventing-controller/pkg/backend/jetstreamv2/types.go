@@ -1,6 +1,8 @@
 package jetstreamv2
 
 import (
+	"sync"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -8,7 +10,6 @@ import (
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
-	"sync"
 )
 
 const (

@@ -3,6 +3,9 @@ package jetstreamv2
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -17,8 +20,6 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
-	"net/http"
-	"time"
 )
 
 var _ Backend = &JetStream{}
