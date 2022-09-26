@@ -370,9 +370,9 @@ func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
 
-// WithNotCleanFilter initializes subscription filter with a not clean event-type
+// WithNotCleanEventType initializes subscription with a not clean event-type
 // A not clean event-type means it contains none-alphanumeric characters.
-func WithNotCleanFilter() SubscriptionOpt {
+func WithNotCleanEventType() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventTypeNotClean)
 }
 

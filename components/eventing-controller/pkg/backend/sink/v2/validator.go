@@ -17,6 +17,11 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
+const (
+	ClusterLocalURLSuffix = "svc.cluster.local"
+	MissingSchemeErrMsg   = "subscription sink URL scheme should be 'http' or 'https'"
+)
+
 type Validator interface {
 	Validate(subscription *v1alpha2.Subscription) error
 }
@@ -45,7 +50,7 @@ func NewValidator(ctx context.Context, client client.Client, recorder record.Eve
 func (s defaultSinkValidator) Validate(subscription *v1alpha2.Subscription) error {
 	if !sink.IsValidScheme(subscription.Spec.Sink) {
 		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
-		return xerrors.Errorf(sink.MissingSchemeErrMsg)
+		return xerrors.Errorf(MissingSchemeErrMsg)
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
@@ -56,9 +61,9 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha2.Subscription) erro
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
-	if !strings.HasSuffix(trimmedHost, sink.ClusterLocalURLSuffix) {
-		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", sink.ClusterLocalURLSuffix)
-		return xerrors.Errorf("failed to validate subscription sink URL. It does not contain suffix: %s", sink.ClusterLocalURLSuffix)
+	if !strings.HasSuffix(trimmedHost, ClusterLocalURLSuffix) {
+		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", ClusterLocalURLSuffix)
+		return xerrors.Errorf("failed to validate subscription sink URL. It does not contain suffix: %s", ClusterLocalURLSuffix)
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"

@@ -272,7 +272,7 @@ func (r *Reconciler) syncFinalizer(subscription *eventingv1alpha2.Subscription, 
 func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription *eventingv1alpha2.Subscription,
 	logger *zap.SugaredLogger) (ctrl.Result, error) {
 
-	// delete beb subscriptions
+	// delete EventMesh subscriptions
 	logger.Debug("Deleting subscription on EventMesh")
 	if err := r.Backend.DeleteSubscription(subscription); err != nil {
 		return ctrl.Result{}, err
@@ -296,7 +296,7 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 
 // syncEventMeshSubscription delegates the subscription synchronization to the backend client. It returns true if the subscription is ready.
 func (r *Reconciler) syncEventMeshSubscription(subscription *eventingv1alpha2.Subscription, apiRule *apigatewayv1beta1.APIRule, logger *zap.SugaredLogger) (bool, error) {
-	logger.Debug("Syncing subscription with BEB")
+	logger.Debug("Syncing subscription with EventMesh")
 
 	if apiRule == nil {
 		return false, errors.Errorf("APIRule is required")
@@ -307,7 +307,7 @@ func (r *Reconciler) syncEventMeshSubscription(subscription *eventingv1alpha2.Su
 		return false, err
 	}
 
-	// check if the beb subscription is active
+	// check if the eventMesh subscription is active
 	isActive, err := r.checkStatusActive(subscription)
 	if err != nil {
 		return false, xerrors.Errorf("reached retry timeout: %v", err)
@@ -327,40 +327,40 @@ func (r *Reconciler) syncEventMeshSubscription(subscription *eventingv1alpha2.Su
 
 // syncConditionSubscribed syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha2.Subscription, err error) {
-	// Include the BEB subscription ID in the Condition message
-	//message := eventingv1alpha2.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
-	//condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
-	//if err != nil {
-	//	message = err.Error()
-	//	condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
-	//}
-	//
-	//r.replaceStatusCondition(subscription, condition)
+	// Include the EventMesh subscription ID in the Condition message
+	message := eventingv1alpha2.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
+	if err != nil {
+		message = err.Error()
+		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
+	}
+
+	r.replaceStatusCondition(subscription, condition)
 }
 
 // syncConditionSubscriptionActive syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscriptionActive(subscription *eventingv1alpha2.Subscription, isActive bool, logger *zap.SugaredLogger) {
-	//condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
-	//if !isActive {
-	//	logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.Backend.EmsSubscriptionStatus.Status)
-	//	message := "Waiting for subscription to be active"
-	//	condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
-	//}
-	//r.replaceStatusCondition(subscription, condition)
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
+	if !isActive {
+		logger.Debugw("Waiting for subscription to be active", "name", subscription.Name, "status", subscription.Status.Backend.EmsSubscriptionStatus.Status)
+		message := "Waiting for subscription to be active"
+		condition = eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, message)
+	}
+	r.replaceStatusCondition(subscription, condition)
 }
 
 // syncConditionWebhookCallStatus syncs the condition WebhookCallStatus
 // checks if the last webhook call returned an error.
 func (r *Reconciler) syncConditionWebhookCallStatus(subscription *eventingv1alpha2.Subscription) {
-	//condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionWebhookCallStatus, eventingv1alpha2.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, "")
-	//if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
-	//	condition.Message = err.Error()
-	//} else if isWebhookCallError {
-	//	condition.Message = subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason
-	//} else {
-	//	condition.Status = corev1.ConditionTrue
-	//}
-	//r.replaceStatusCondition(subscription, condition)
+	condition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionWebhookCallStatus, eventingv1alpha2.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, "")
+	if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
+		condition.Message = err.Error()
+	} else if isWebhookCallError {
+		condition.Message = subscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason
+	} else {
+		condition.Status = corev1.ConditionTrue
+	}
+	r.replaceStatusCondition(subscription, condition)
 }
 
 // syncAPIRule validate the given subscription sink URL and sync its APIRule.
