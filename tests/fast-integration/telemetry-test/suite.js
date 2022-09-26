@@ -6,7 +6,6 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
-  debug,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -77,7 +76,7 @@ describe('Telemetry Operator', function() {
 
       it('Should push system logs to Kyma Loki', async function() {
         const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
-        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 3);
+        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 5);
         assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
       });
     });
@@ -169,13 +168,12 @@ describe('Telemetry Operator', function() {
           });
 
           it(`Should push only labels to Loki`, async function() {
-            const labels = '{job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
+            const labels = '{job="drop-annotations-keep-labels-telemetry-fluent-bit", container="flog"}';
             const found = await logsPresentInLoki(labels, testStartTimestamp);
             assert.isTrue(found, `No logs in Loki with labels: ${labels}`);
 
             const responseBody = await queryLoki(labels, testStartTimestamp);
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-            debug(responseBody.data.result.length);
             assert.hasAnyKeys(entry, 'kubernetes', `No kubernetes metadata in ${entry}`);
             const k8smeta = entry['kubernetes'];
             assert.doesNotHaveAnyKeys(k8smeta, 'annotations', `Annotations found in ${JSON.stringify(k8smeta)}`);
@@ -197,7 +195,7 @@ describe('Telemetry Operator', function() {
           });
 
           it(`Should push only annotations to Loki`, async function() {
-            const labels = '{job="keep-annotations-drop-labels-telemetry-fluent-bit"}';
+            const labels = '{job="keep-annotations-drop-labels-telemetry-fluent-bit", container="flog"}';
             const found = await logsPresentInLoki(labels, testStartTimestamp);
             assert.isTrue(found, `No logs in Loki with labels: ${labels}`);
 
