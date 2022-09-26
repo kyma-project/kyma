@@ -22,12 +22,12 @@ Follow the instruction to expose and access your instance of the HttpBin service
 
 1. Export the following values as environment variables:
 
-   ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-    export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
-    export CLIENT_CERT_CRT_FILE=client.example.com.crt
-	  export CLIENT_CERT_CSR_FILE=client.example.com.csr
-	  export CLIENT_CERT_KEY_FILE=client.example.com.key 
+     ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
+   export CLIENT_CERT_CRT_FILE=client.example.com.crt
+	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
+	 export CLIENT_CERT_KEY_FILE=client.example.com.key 
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
 
@@ -79,12 +79,12 @@ Follow the instruction to expose and access your instance of the HttpBin service
   
 1. Export the following values as environment variables:
 
-   ```bash
-    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-    export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
-    export CLIENT_CERT_CRT_FILE=client.example.com.crt
-	  export CLIENT_CERT_CSR_FILE=client.example.com.csr
-	  export CLIENT_CERT_KEY_FILE=client.example.com.key 
+     ```bash
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
+   export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
+   export CLIENT_CERT_CRT_FILE=client.example.com.crt
+	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
+	 export CLIENT_CERT_KEY_FILE=client.example.com.key 
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
@@ -181,21 +181,20 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
 
 1. Export the following values as environment variables:
 
-   ```bash
-	  export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
-	  export NEW_CLIENT_CERT_CSR_FILE=client2.example.com.csr
-	  export NEW_CLIENT_CERT_KEY_FILE=client2.example.com.key 
+     ```bash
+	export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
+	export NEW_CLIENT_CERT_CSR_FILE=client2.example.com.csr
+	export NEW_CLIENT_CERT_KEY_FILE=client2.example.com.key 
    ```
 
-2. Generate a new Client certificate signed by Client Root CA
+2. Generate a new Client certificate signed by Client Root CA:
 
-   ```bash
+     ```bash
    # Create a new key and CSR for the client certificate
    openssl req -out ${NEW_CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${NEW_CLIENT_CERT_KEY_FILE} -subj "/CN=client2.example.com/O=example"
    # Sign the client certificate with CA cert
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${NEW_CLIENT_CERT_CSR_FILE} -out ${NEW_CLIENT_CERT_CRT_FILE}
    ```
-
 
 3. Create VirtualService that adds the X-CLIENT-SSL headers to the incoming requests:
    ```bash
@@ -252,15 +251,15 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
   
 1. Export the following values as environment variables:
 
-   ```bash
+      ```bash
 	 export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
 	 export NEW_CLIENT_CERT_CSR_FILE=client2.example.com.csr
 	 export NEW_CLIENT_CERT_KEY_FILE=client2.example.com.key 
    ```
 
-2. Generate a new Client certificate signed by Client Root CA
+2. Generate a new Client certificate signed by Client Root CA:
 
-   ```bash
+     ```bash
    # Create a new key and CSR for the client certificate
    openssl req -out ${NEW_CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${NEW_CLIENT_CERT_KEY_FILE} -subj "/CN=client2.example.com/O=example"
    # Sign the client certificate with CA cert
