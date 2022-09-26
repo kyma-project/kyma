@@ -35,7 +35,7 @@ func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings)
 }
 
 // GetInternalView4Ev2 returns the BEB subscription equivalent of Kyma Subscription
-// WIll be depreciated when Subscription v1alpha2 is active
+// Will be depreciated when Subscription v1alpha2 is active.
 func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1beta1.APIRule,
 	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {

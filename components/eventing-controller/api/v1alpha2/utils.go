@@ -15,7 +15,7 @@ func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-func ConvertUnstructuredListToSubscriptionList(unstructuredList *unstructured.UnstructuredList) (*SubscriptionList, error) {
+func ConvertUnstructListToSubList(unstructuredList *unstructured.UnstructuredList) (*SubscriptionList, error) {
 	subscriptionList := new(SubscriptionList)
 	subscriptionListBytes, err := unstructuredList.MarshalJSON()
 	if err != nil {

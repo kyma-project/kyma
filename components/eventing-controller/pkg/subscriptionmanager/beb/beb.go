@@ -276,7 +276,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
-	subs, err := eventingv1alpha2.ConvertUnstructuredListToSubscriptionList(subscriptionsUnstructured)
+	subs, err := eventingv1alpha2.ConvertUnstructListToSubList(subscriptionsUnstructured)
 	if err != nil {
 		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
 	}

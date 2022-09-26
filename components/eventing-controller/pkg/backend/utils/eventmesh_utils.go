@@ -36,7 +36,8 @@ func (m *eventMeshSubscriptionNameMapper) MapSubscriptionName(subscriptionName, 
 func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 	if len(hash) > maxLength {
 		// This shouldn't happen!
-		panic(fmt.Sprintf("max name length (%d) used for EventMesh subscription mapper is not large enough to hold the hash (%s)", maxLength, hash))
+		panic(fmt.Sprintf("max name length (%d) used for EventMesh subscription mapper"+
+			" is not large enough to hold the hash (%s)", maxLength, hash))
 	}
 	maxNameLen := maxLength - len(hash)
 	// keep the first maxNameLen characters of the name
@@ -86,9 +87,10 @@ func getQos(qosStr string) (types.Qos, error) {
 	}
 }
 
-func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, typeInfos []EventTypeInfo, apiRule *apigatewayv1beta1.APIRule,
-	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha2.ProtocolSettings,
-	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
+func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, typeInfos []EventTypeInfo,
+	apiRule *apigatewayv1beta1.APIRule, defaultWebhookAuth *types.WebhookAuth,
+	defaultProtocolSettings *eventingv1alpha2.ProtocolSettings,
+	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) { //nolint:gocognit
 
 	// get default EventMesh subscription object
 	eventMeshSubscription, err := getDefaultSubscriptionV1Alpha2(defaultProtocolSettings)
@@ -100,23 +102,23 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 
 	// @TODO: Check how the protocol settings would work in new CRD
 	//// Applying protocol settings if provided in subscription CR
-	if subscription.Spec.ProtocolSettings != nil {
-		if subscription.Spec.ProtocolSettings.ContentMode != nil {
-			eventMeshSubscription.ContentMode = *subscription.Spec.ProtocolSettings.ContentMode
-		}
-		// ExemptHandshake
-		if subscription.Spec.ProtocolSettings.ExemptHandshake != nil {
-			eventMeshSubscription.ExemptHandshake = *subscription.Spec.ProtocolSettings.ExemptHandshake
-		}
-		// Qos
-		if subscription.Spec.ProtocolSettings.Qos != nil {
-			qos, err := getQos(*subscription.Spec.ProtocolSettings.Qos)
-			if err != nil {
-				return nil, err
-			}
-			eventMeshSubscription.Qos = qos
-		}
-	}
+	// if subscription.Spec.ProtocolSettings != nil {
+	//	if subscription.Spec.ProtocolSettings.ContentMode != nil {
+	//		eventMeshSubscription.ContentMode = *subscription.Spec.ProtocolSettings.ContentMode
+	//	}
+	//	// ExemptHandshake
+	//	if subscription.Spec.ProtocolSettings.ExemptHandshake != nil {
+	//		eventMeshSubscription.ExemptHandshake = *subscription.Spec.ProtocolSettings.ExemptHandshake
+	//	}
+	//	// Qos
+	//	if subscription.Spec.ProtocolSettings.Qos != nil {
+	//		qos, err := getQos(*subscription.Spec.ProtocolSettings.Qos)
+	//		if err != nil {
+	//			return nil, err
+	//		}
+	//		eventMeshSubscription.Qos = qos
+	//	}
+	// }
 
 	// Events
 	// set the event types in EventMesh subscription instance
@@ -131,7 +133,10 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 		if subscription.Spec.TypeMatching == eventingv1alpha2.EXACT {
 			eventType = typeInfo.OriginalType
 		}
-		eventMeshSubscription.Events = append(eventMeshSubscription.Events, types.Event{Source: eventMeshNamespace, Type: eventType})
+		eventMeshSubscription.Events = append(
+			eventMeshSubscription.Events,
+			types.Event{Source: eventMeshNamespace, Type: eventType},
+		)
 	}
 
 	// WebhookURL

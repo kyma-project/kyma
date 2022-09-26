@@ -76,10 +76,10 @@ func BoolPtrEqual(b1, b2 *bool) bool {
 	return false
 }
 
-// for Random string generation
+// for Random string generation.
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
-var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec,gochecknoglobals
 
 // GetRandString returns a random string of the given length.
 func GetRandString(length int) string {

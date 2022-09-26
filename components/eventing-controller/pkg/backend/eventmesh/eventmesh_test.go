@@ -25,7 +25,8 @@ func Test_GetProcessedEventTypes(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com", MaxEventMeshSubscriptionNameLength)
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+		MaxEventMeshSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -68,9 +69,10 @@ func Test_GetProcessedEventTypes(t *testing.T) {
 			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
 			wantProcessedEventTypes: []backendutils.EventTypeInfo{
 				{
-					OriginalType:  "Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
-					CleanType:     "Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
-					ProcessedType: fmt.Sprintf("%s.testSegment2.Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1", controllertestingv2.EventMeshPrefix),
+					OriginalType: "Segment1.Segment2.Segment3.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+					CleanType:    "Segment1Segment2Segment3Segment4Part1Part2.Segment5Part1Part2.v1",
+					ProcessedType: fmt.Sprintf("%s.testSegment2.Segment1Segment2Segment3Segment4Part1Part2"+
+						".Segment5Part1Part2.v1", controllertestingv2.EventMeshPrefix),
 				},
 			},
 			wantError: false,
@@ -118,7 +120,8 @@ func Test_GetProcessedEventTypes(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name: "should fail if the given subscription types and EventMeshPrefix exceeds the EventMesh segments limit",
+			name: "should fail if the given subscription types and EventMeshPrefix " +
+				"exceeds the EventMesh segments limit",
 			givenSubscription: &eventingv1alpha2.Subscription{
 				Spec: eventingv1alpha2.SubscriptionSpec{
 					Types: []string{
@@ -166,7 +169,8 @@ func Test_SyncSubscription(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com", MaxEventMeshSubscriptionNameLength)
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+		MaxEventMeshSubscriptionNameLength)
 	eventMesh := NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock

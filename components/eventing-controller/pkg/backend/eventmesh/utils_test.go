@@ -180,9 +180,14 @@ func Test_setEmsSubscriptionStatus(t *testing.T) {
 	// then
 	require.True(t, isChanged)
 	require.NotNil(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.Status, string(eventMeshSubscription.SubscriptionStatus))
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.StatusReason, eventMeshSubscription.SubscriptionStatusReason)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery, eventMeshSubscription.LastSuccessfulDelivery)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery, eventMeshSubscription.LastFailedDelivery)
-	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason, eventMeshSubscription.LastFailedDeliveryReason)
+	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.Status,
+		string(eventMeshSubscription.SubscriptionStatus))
+	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.StatusReason,
+		eventMeshSubscription.SubscriptionStatusReason)
+	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastSuccessfulDelivery,
+		eventMeshSubscription.LastSuccessfulDelivery)
+	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastFailedDelivery,
+		eventMeshSubscription.LastFailedDelivery)
+	require.Equal(t, kymaSubscription.Status.Backend.EmsSubscriptionStatus.LastFailedDeliveryReason,
+		eventMeshSubscription.LastFailedDeliveryReason)
 }

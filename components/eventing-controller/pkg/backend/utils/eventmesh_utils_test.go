@@ -101,7 +101,10 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subscription, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(
+			subscription, eventTypeInfos, apiRule, defaultWebhookAuth,
+			defaultProtocolSettings, defaultNamespace, defaultNameMapper,
+		)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -131,14 +134,18 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subscription, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(
+			subscription, eventTypeInfos, apiRule, defaultWebhookAuth,
+			defaultProtocolSettings, defaultNamespace, defaultNameMapper,
+		)
 
 		// when
 		g.Expect(err).To(BeNil())
 		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
 	})
 
-	t.Run("subscription with custom webhookauth config followed by a subscription with default webhookauth config should not alter the default config", func(t *testing.T) {
+	t.Run("subscription with custom webhookauth config followed by a subscription "+
+		"with default webhookauth config should not alter the default config", func(t *testing.T) {
 		// given
 		subWithGivenWebhookAuth := eventingtestingv2.NewSubscription("name", "namespace",
 			eventingtestingv2.WithOrderCreatedFilter(),
@@ -174,7 +181,10 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 
 		// then
 		eventTypeInfos := getTypeInfos(subWithGivenWebhookAuth.Spec.Types)
-		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(subWithGivenWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(
+			subWithGivenWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth,
+			defaultProtocolSettings, defaultNamespace, defaultNameMapper,
+		)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -188,7 +198,9 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		)
 
 		expectedBEBSubWithDefault := eventingtestingv2.NewBEBSubscription(
-			defaultNameMapper.MapSubscriptionName(subscriptionWithoutWebhookAuth.Name, subscriptionWithoutWebhookAuth.Namespace),
+			defaultNameMapper.MapSubscriptionName(
+				subscriptionWithoutWebhookAuth.Name,
+				subscriptionWithoutWebhookAuth.Namespace),
 			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
 			expectedWebhookURL,
 			bebSubEvents,
@@ -201,7 +213,10 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		)
 
 		// then
-		gotBEBSubWithDefaultCfg, err := ConvertKymaSubToEventMeshSub(subscriptionWithoutWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+		gotBEBSubWithDefaultCfg, err := ConvertKymaSubToEventMeshSub(
+			subscriptionWithoutWebhookAuth, eventTypeInfos,
+			apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper,
+		)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -341,10 +356,12 @@ func TestEventMeshSubscriptionNameMapper(t *testing.T) {
 
 	// Same domain and subscription name/namespace should map to the same name
 	mapper := NewBEBSubscriptionNameMapper(domain1, 50)
-	g.Expect(mapper.MapSubscriptionName(s3.Name, s3.Namespace)).To(Equal(mapper.MapSubscriptionName(s4.Name, s4.Namespace)))
+	g.Expect(mapper.MapSubscriptionName(s3.Name, s3.Namespace)).To(
+		Equal(mapper.MapSubscriptionName(s4.Name, s4.Namespace)))
 
 	// If the same names are used in different order, they get mapped to different names
-	g.Expect(mapper.MapSubscriptionName(s4.Name, s4.Namespace)).ToNot(Equal(mapper.MapSubscriptionName(s5.Name, s5.Namespace)))
+	g.Expect(mapper.MapSubscriptionName(s4.Name, s4.Namespace)).ToNot(
+		Equal(mapper.MapSubscriptionName(s5.Name, s5.Namespace)))
 }
 
 func TestShortenNameAndAppendHash(t *testing.T) {

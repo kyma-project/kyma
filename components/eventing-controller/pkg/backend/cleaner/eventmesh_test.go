@@ -1,4 +1,4 @@
-package cleaner
+package cleaner //nolint:testpackage
 
 import (
 	"testing"
@@ -37,8 +37,8 @@ func Test_CleanEventType(t *testing.T) {
 		},
 	}
 
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
+	defaultLogger, err1 := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err1)
 
 	for _, tc := range testCases {
 		tc := tc
@@ -82,8 +82,8 @@ func Test_CleanSource(t *testing.T) {
 		},
 	}
 
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
+	defaultLogger, err1 := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err1)
 
 	for _, tc := range testCases {
 		tc := tc
