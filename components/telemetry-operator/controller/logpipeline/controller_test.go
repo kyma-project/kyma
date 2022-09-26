@@ -46,7 +46,7 @@ var _ = Describe("LogPipeline controller", func() {
     name                  rewrite_tag
     match                 kube.*
     emitter_mem_buf_limit 10M
-    emitter_name          log-pipeline
+    emitter_name          log-pipeline-stdout
     emitter_storage.type  filesystem
     rule                  $log "^.*$" log-pipeline.$TAG true
 
@@ -83,6 +83,7 @@ var _ = Describe("LogPipeline controller", func() {
 [OUTPUT]
     name                     stdout
     match                    log-pipeline.*
+    alias                    log-pipeline-stdout
     storage.total_limit_size 1G`
 
 	var expectedSecret = make(map[string][]byte)

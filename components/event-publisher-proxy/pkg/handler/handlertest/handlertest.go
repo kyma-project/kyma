@@ -4,7 +4,7 @@ package handlertest
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -23,7 +23,7 @@ import (
 func ValidateLegacyErrorResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
 	legacyResponse := legacyapi.PublishEventResponses{}
 	legacyErrorResponse := legacyapi.Error{}
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	err = json.Unmarshal(bodyBytes, &legacyErrorResponse)
 	require.NoError(t, err)
@@ -37,7 +37,7 @@ func ValidateLegacyErrorResponse(t *testing.T, resp http.Response, wantResponse 
 func ValidateLegacyOkResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
 	legacyResponse := legacyapi.PublishEventResponses{}
 	legacyOkResponse := legacyapi.PublishResponse{}
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	err = json.Unmarshal(bodyBytes, &legacyOkResponse)
 	require.NoError(t, err)
