@@ -20,20 +20,26 @@ const {
   waitForLogPipelineStatusRunning,
 } = require('./helpers');
 
-const regexFilterDeployment = loadTestData('regex-filter-deployment.yaml');
-const mockserverDeployment = loadTestData('mockserver.yaml');
-const spammerWorkloadPod = loadTestData('logs-workload.yaml');
-
 async function prepareEnvironment() {
-  await k8sApply(mockserverDeployment, 'mockserver');
-  await k8sApply(regexFilterDeployment, 'default');
-  await k8sApply(spammerWorkloadPod, 'default');
+  async function k8sApplyFile(name, namespace) {
+    await k8sApply(loadTestData(name), namespace);
+  }
+
+  await k8sApplyFile('mockserver.yaml', 'mockserver');
+  await k8sApplyFile('regex-filter-deployment.yaml', 'default');
+  await k8sApplyFile('logs-workload.yaml', 'default');
+  await k8sApplyFile('logs-workload.yaml', 'kyma-system');
 }
 
 async function cleanEnvironment() {
-  await k8sDelete(mockserverDeployment, 'mockserver');
-  await k8sDelete(regexFilterDeployment, 'default');
-  await k8sDelete(spammerWorkloadPod, 'default');
+  async function k8sDeleteFile(name, namespace) {
+    await k8sDelete(loadTestData(name), namespace);
+  }
+
+  await k8sDeleteFile('mockserver.yaml', 'mockserver');
+  await k8sDeleteFile('regex-filter-deployment.yaml', 'default');
+  await k8sDeleteFile('logs-workload.yaml', 'default');
+  await k8sDeleteFile('logs-workload.yaml', 'kyma-system');
 }
 
 describe('Telemetry Operator', function() {
@@ -70,7 +76,7 @@ describe('Telemetry Operator', function() {
 
       it('Should push system logs to Kyma Loki', async function() {
         const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
-        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 3);
         assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
       });
     });
@@ -163,7 +169,7 @@ describe('Telemetry Operator', function() {
 
           it(`Should push only labels to Loki`, async function() {
             const labels = '{job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
-            const found = await logsPresentInLoki(labels, testStartTimestamp, 5);
+            const found = await logsPresentInLoki(labels, testStartTimestamp);
             assert.isTrue(found, `No logs present in Loki for labels: ${labels}`);
 
             const responseBody = await queryLoki(labels, testStartTimestamp);
@@ -189,7 +195,7 @@ describe('Telemetry Operator', function() {
 
           it(`Should push only annotations to Loki`, async function() {
             const labels = '{job="keep-annotations-drop-labels-telemetry-fluent-bit"}';
-            const found = await logsPresentInLoki(labels, testStartTimestamp, 5);
+            const found = await logsPresentInLoki(labels, testStartTimestamp);
             assert.isTrue(found, `No logs present in Loki for labels: ${labels}`);
 
             const responseBody = await queryLoki(labels, testStartTimestamp);
