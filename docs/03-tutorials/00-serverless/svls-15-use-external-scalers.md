@@ -204,7 +204,7 @@ Follow these steps:
     scaled-function   serverless.kyma-project.io/v1alpha2.Function   scaled-function   1     5     prometheus                    True    True     Unknown      4m15s
     ```
 
-Check out this [example](https://github.com/kyma-project/examples/tree/main/scale-to-zero-with-keda) showing how to use kyma serverless and eventing with combination with Keda to acomplish scaling to zero. 
+Check out this [example](https://github.com/kyma-project/examples/tree/main/scale-to-zero-with-keda) to see how to use Kyma Serverless and Eventing in combination with Keda to accomplish scaling to zero. 
 
 </details>
 </div>
