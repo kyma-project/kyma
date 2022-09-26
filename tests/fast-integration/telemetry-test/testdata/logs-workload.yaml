@@ -6,7 +6,7 @@ spec:
   containers:
     - image: mingrammer/flog
       args:
-        - -b=1000
+        - -b=100
         - -f=json
         - -l
       name: flog
