@@ -41,7 +41,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
 ## Next steps
 
-1. Create a Namespace for the Gateway and APIRule CRs. Skip the step if you already have a Namespace. Run:
+1. Create a Namespace for the Gateway and APIRule CRs. Skip this step if you already have a Namespace. Run:
 
    ```bash
    export NAMESPACE={NAMESPACE}
