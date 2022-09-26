@@ -8,7 +8,7 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
-Before you start, Set up [`kyma-mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the bundle certificates. 
+Before you start, Set up [`kyma-mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-02-setup-mtls-gateway#steps). 
 
 ## Expose and access your workload
 
@@ -20,7 +20,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
   HttpBin
   </summary>
 
-1. Export the following value as an environment variable:
+1. Export the following values as environment variables:
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
@@ -31,7 +31,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
 
-2. Expose the instance of the HttpBin service on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
+2. Expose an instance of the HttpBin service on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
    ```bash
    cat <<EOF | kubectl apply -f -
    ---
@@ -77,7 +77,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
   Function
   </summary>
   
-1. Export the following value as an environment variable:
+1. Export the following values as environment variables:
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
@@ -88,7 +88,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
-2. Expose the sample Function on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
+2. Expose a sample Function on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
    ```bash
    cat <<EOF | kubectl apply -f -
    ---
@@ -170,17 +170,16 @@ This call returns the code `200` response. If you call the Function without the 
   </details>
 </div>
 
-## Further secure the mTLS endpoint
+## Make you mTLS endpoint more secure
 
-Follow the instructions in the tabs to further secure the mTLS service or Function, by creating AuthorizationPolicy that will check if client's Common Name in certificate matches.
-
+Follow the instructions in the tabs to further secure the mTLS service or Function. Create AuthorizationPolicy that checks if the client's Common Name in the certificate matches.
 <div tabs>
   <details>
   <summary>
   HttpBin
   </summary>
 
-1. Export the following value as an environment variable:
+1. Export the following values as environment variables:
 
    ```bash
 	 export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
@@ -198,7 +197,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
    ```
 
 
-3. Create VirtualService that will add X-CLIENT-SSL headers to incoming requests:
+3. Create VirtualService that adds the X-CLIENT-SSL headers to the incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
@@ -226,7 +225,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
    EOF
    ```
 
-4. Create AuthorizationPolicy that will verify if the request contains a new client certificate:
+4. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -251,7 +250,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
   Function
   </summary>
   
-1. Export the following value as an environment variable:
+1. Export the following values as environment variables:
 
    ```bash
 	 export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
@@ -268,7 +267,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${NEW_CLIENT_CERT_CSR_FILE} -out ${NEW_CLIENT_CERT_CRT_FILE}
    ```
 
-3. Create VirtualService that will add X-CLIENT-SSL headers to incoming requests:
+3. Create VirtualService that adds the X-CLIENT-SSL headers to incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
@@ -295,7 +294,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-4. Create AuthorizationPolicy that will verify if the request contains a new client certificate:
+4. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -341,7 +340,7 @@ These calls return the code `200` response. If you call the service without the 
   Call the secured Function
   </summary>
 
-Send a `GET` request with a token that has the "read" scope to the Function:
+Send a `GET` request with a token that has the `read` scope to the Function:
 
    ```shell
    curl --key ${NEW_CLIENT_CERT_KEY_FILE} \

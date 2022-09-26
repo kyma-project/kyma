@@ -23,7 +23,7 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    >**NOTE:** Skip this step if you already have a Namespace
 
    ```bash
-    export NAMESPACE={NAMESPACE_NAME}
+   export NAMESPACE={NAMESPACE_NAME}
 	 kubectl create ns $NAMESPACE
 	 kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
@@ -50,7 +50,7 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
 
    ```bash
    export MTLS_GATEWAY_NAME=mtls-gateway
-   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that was created during setup of custom domain, for example, httpbin-tls-credentials
+   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that was created during the setup of the custom domain, for example, httpbin-tls-credentials
    ```
 
    ```bash
