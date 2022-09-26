@@ -204,6 +204,7 @@ describe('Telemetry Operator', function() {
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
             assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
             expect(entry['kubernetes']).not.to.have.property('labels');
+            assert.hasAnyKeys(entry['kubernetes'], 'annotations', `No annotations presend in ${JSON.stringify(entry)}`);
             expect(entry['kubernetes']).to.have.property('annotations');
           });
 
