@@ -32,13 +32,17 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
+	OrderCreatedUncleanEvent = "order.cre-ä+t*ed.v2"
+	OrderCreatedCleanEvent   = "order.cre-ä+ted.v2"
+	EventSourceUnclean       = "s>o>*u*r>c.e"
+	EventSourceClean         = "source"
+
 	EventMeshNamespace                       = "/default/kyma/id"
 	EventSource                              = "/default/kyma/id"
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
 	OrderCreatedV2Event                      = "order.created.v2"
-	OrderCreatedUncleanEvent                 = "order.cre-a+ted.v2"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
 	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -606,13 +610,12 @@ func GetBinaryMessageHeaders() http.Header {
 	return headers
 }
 
-// AddFilter creates a new Filter from eventSource and eventType and adds it to the subscription.
+// AddSource adds the source value to the subscription.
 func AddSource(source string, subscription *eventingv1alpha2.Subscription) {
 	subscription.Spec.Source = source
 }
 
-// WithFilter is a SubscriptionOpt for creating a Subscription with a specific event type filter,
-// that itself gets created from the passed eventSource and eventType.
+// WithSourceAndType is a SubscriptionOpt for creating a Subscription with a specific eventSource and eventType.
 func WithSourceAndType(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		AddSource(eventSource, subscription)
@@ -620,20 +623,33 @@ func WithSourceAndType(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-// WithNotCleanFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters.
-func WithNotCleanEventType() SubscriptionOpt {
-	return WithSourceAndType(EventSource, OrderCreatedEventTypeNotClean)
+// WithCleanEventTypeOld is a SubscriptionOpt that initializes subscription with a not clean event type from v1alpha1
+func WithCleanEventTypeOld() SubscriptionOpt {
+	return WithSourceAndType(EventSourceClean, OrderCreatedEventType)
 }
 
-// WithNotCleanFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters.
-func WithNotCleanEventTypeNew() SubscriptionOpt {
-	return WithSourceAndType(EventSource, OrderCreatedUncleanEvent)
+// WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and type
+func WithNotCleanEventSourceAndType() SubscriptionOpt {
+	return WithSourceAndType(EventSourceUnclean, OrderCreatedUncleanEvent)
 }
 
+// WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard
+func WithTypeMatchingStandard() SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Spec.TypeMatching = eventingv1alpha2.STANDARD
+	}
+}
+
+// WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact
+func WithTypeMatchingExact() SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Spec.TypeMatching = eventingv1alpha2.EXACT
+	}
+}
+
+// WithStatusMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages value
 func WithStatusMaxInFlight(maxInFlight int) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
-		subscription.Status.Backend.MaxInFlightMessages = maxInFlight
+		subscription.Status.Backend.MaxInFlightMessages = maxInFlight // TODO: change with the new version
 	}
 }

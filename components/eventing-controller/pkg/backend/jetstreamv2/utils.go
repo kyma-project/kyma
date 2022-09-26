@@ -10,6 +10,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"strings"
 )
@@ -124,16 +125,20 @@ func getUniqueEventTypes(eventTypes []string) []string {
 // getCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
 func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
-	//if sub.Spec.Types == nil || sub.Spec.Source == "" {
-	//	return []eventingv1alpha2.EventType{}, errors.New("Source and Types must be provided")
-	//}
+	if sub.Spec.Types == nil || sub.Spec.Source == "" {
+		return []eventingv1alpha2.EventType{}, errors.New("Event source and types must be provided")
+	}
 
 	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
 	var cleanEventTypes []eventingv1alpha2.EventType
 	for _, eventType := range uniqueTypes {
-		cleanType, err := getCleanEventType(eventType, cleaner)
-		if err != nil {
-			return []eventingv1alpha2.EventType{}, err
+		cleanType := eventType
+		var err error
+		if sub.Spec.TypeMatching != eventingv1alpha2.EXACT {
+			cleanType, err = getCleanEventType(eventType, cleaner)
+			if err != nil {
+				return []eventingv1alpha2.EventType{}, err
+			}
 		}
 		newEventType := eventingv1alpha2.EventType{
 			OriginalType: eventType,
@@ -148,11 +153,6 @@ func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Clea
 // have the same namespaced name, otherwise returns false.
 func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha2.Subscription) bool {
 	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
-}
-
-// getJetStreamSubject appends the prefix to subject.
-func getJetStreamSubject(subject string) string {
-	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 }
 
 //----------------------------------------
@@ -188,14 +188,6 @@ func computeConsumerName(subscription *eventingv1alpha2.Subscription, subject st
 // computeNamespacedSubjectName returns Kubernetes namespaced name of the given subscription along with the subject.
 func computeNamespacedSubjectName(subscription *eventingv1alpha2.Subscription, subject string) string {
 	return subscription.Namespace + separator + subscription.Name + separator + subject
-}
-
-//----------------------------------------
-// Subscription utils
-//----------------------------------------
-
-func (js Subscription) SubscriptionSubject() string {
-	return js.Subject
 }
 
 //----------------------------------------

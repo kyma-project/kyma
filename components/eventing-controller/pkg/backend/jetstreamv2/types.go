@@ -4,6 +4,7 @@ import (
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
@@ -24,8 +25,8 @@ type Backend interface {
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
 	DeleteSubscription(subscription *eventingv1alpha2.Subscription) error
 
-	// GetJetStreamSubjects returns a list of subjects appended with stream name as prefix if needed
-	GetJetStreamSubjects(subjects []string) []string
+	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed
+	GetJetStreamSubjects(source string, subjects []string, typeMatching eventingv1alpha2.TypeMatching) []string
 }
 
 type JetStream struct {
@@ -39,12 +40,12 @@ type JetStream struct {
 	connClosedHandler ConnClosedHandler
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector
+	cleaner           cleaner.Cleaner
 }
 
 type ConnClosedHandler func(conn *nats.Conn)
 
 type Subscriber interface {
-	SubscriptionSubject() string
 	ConsumerInfo() (*nats.ConsumerInfo, error)
 	IsValid() bool
 	Unsubscribe() error

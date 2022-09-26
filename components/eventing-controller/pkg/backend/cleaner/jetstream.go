@@ -5,7 +5,11 @@ import (
 	"regexp"
 )
 
-var invalidEventTypeSegment = regexp.MustCompile("[^a-zA-Z0-9.]")
+var (
+	invalidSourceSegment = regexp.MustCompile(`[\s.>*]`)
+
+	invalidEventTypeSegment = regexp.MustCompile(`[\s>*]`)
+)
 
 // Perform a compile-time check.
 var _ Cleaner = &JetStreamCleaner{}
@@ -15,7 +19,7 @@ func NewJetStreamCleaner(logger *logger.Logger) Cleaner {
 }
 
 func (c *JetStreamCleaner) CleanSource(source string) (string, error) {
-	return source, nil
+	return invalidSourceSegment.ReplaceAllString(source, ""), nil
 }
 
 func (c *JetStreamCleaner) CleanEventType(eventType string) (string, error) {

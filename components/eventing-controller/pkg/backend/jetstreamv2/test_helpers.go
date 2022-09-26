@@ -7,9 +7,11 @@ import (
 	v2 "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"net/http"
 	"time"
 )
@@ -17,16 +19,16 @@ import (
 func sendEventToJetStream(jsClient *JetStream, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
-	eventType := evtesting.OrderCreatedEventType
+	eventType := evtestingv2.OrderCreatedCleanEvent
 	eventTime := time.Now().Format(time.RFC3339)
-	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(getJetStreamSubject(eventType), []byte(sampleEvent))
+	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
+	return jsClient.conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, v1alpha2.STANDARD), []byte(sampleEvent))
 }
 
-func sendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string) error {
+func sendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string, typeMatching v1alpha2.TypeMatching) error {
 	eventTime := time.Now().Format(time.RFC3339)
-	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(getJetStreamSubject(eventType), []byte(sampleEvent))
+	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
+	return jsClient.conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, typeMatching), []byte(sampleEvent))
 }
 
 func sendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, cetype string) error {
