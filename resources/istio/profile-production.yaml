@@ -32,7 +32,7 @@ components:
                 - key: app
                   operator: In
                   values:
-                  - istio-cni
+                  - istio-cni-node
               topologyKey: "kubernetes.io/hostname"
 
   ingressGateways:
