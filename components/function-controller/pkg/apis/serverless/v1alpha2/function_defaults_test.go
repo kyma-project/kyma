@@ -15,6 +15,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
+const v1alpha1ReplicasPresetLabel = "serverless.kyma-project.io/replicas-preset"
+
 func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
@@ -27,9 +29,7 @@ func TestSetDefaults(t *testing.T) {
 `
 	functionReplicas := `
 {
-"S":{"min": 1,"max": 1},
-"M":{"min": 1,"max": 2},
-"L":{"min": 2}
+"S":{"min": 1,"max": 1}
 }
 `
 	functionResources := `
@@ -230,11 +230,41 @@ func TestSetDefaults(t *testing.T) {
 		givenFunc    Function
 		expectedFunc Function
 	}{
-		"Should properly merge resources presets - case with all fields": {
+		"Should properly set resources presets (using labels) - case with all fields": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
+						FunctionResourcesPresetLabel: "S",
+						BuildResourcesPresetLabel:    "slow",
+					},
+				},
+				Spec: FunctionSpec{
+					Runtime: NodeJs14,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						FunctionResourcesPresetLabel: "S",
+						BuildResourcesPresetLabel:    "slow",
+					},
+				}, Spec: FunctionSpec{
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
+					},
+				},
+			},
+		},
+		"Should properly merge resources presets (using labels) - case with all fields": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -253,7 +283,6 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -270,11 +299,10 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should properly merge resources presets - case with concatenating missing values with default preset": {
+		"Should properly merge resources presets (using labels) - case with concatenating missing values with default preset": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "L",
 						BuildResourcesPresetLabel:    "fast",
 					},
@@ -283,30 +311,31 @@ func TestSetDefaults(t *testing.T) {
 					Runtime: NodeJs14,
 				},
 			},
-			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
-				Labels: map[string]string{
-					ReplicasPresetLabel:          "L",
-					FunctionResourcesPresetLabel: "L",
-					BuildResourcesPresetLabel:    "fast",
-				},
-			}, Spec: FunctionSpec{
-				Runtime: NodeJs14,
-				ResourceConfiguration: &ResourceConfiguration{
-					Function: &ResourceRequirements{
-						Resources: &LRuntimeResources,
-					},
-					Build: &ResourceRequirements{
-						Resources: &fastBuildResources,
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						FunctionResourcesPresetLabel: "L",
+						BuildResourcesPresetLabel:    "fast",
 					},
 				},
-				ScaleConfig: &ScaleConfig{
-					MinReplicas: &two,
-					MaxReplicas: &two,
+				Spec: FunctionSpec{
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &LRuntimeResources,
+						},
+						Build: &ResourceRequirements{
+							Resources: &fastBuildResources,
+						},
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
+					},
 				},
-			},
 			},
 		},
-		"Should set function profile to function presets M instead of default L value": {
+		"Should set function profile to function presets M instead of default L value (using labels)": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
@@ -317,28 +346,29 @@ func TestSetDefaults(t *testing.T) {
 					Runtime: Python39,
 				},
 			},
-			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
-				Labels: map[string]string{
-					FunctionResourcesPresetLabel: "M",
-				},
-			}, Spec: FunctionSpec{
-				Runtime: Python39,
-				ResourceConfiguration: &ResourceConfiguration{
-					Function: &ResourceRequirements{
-						Resources: &MRuntimeResources,
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						FunctionResourcesPresetLabel: "M",
 					},
 				},
-				ScaleConfig: &ScaleConfig{
-					MinReplicas: &one,
-					MaxReplicas: &one,
-				},
-			}},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &MRuntimeResources,
+						},
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
+					},
+				}},
 		},
-		"Should properly merge resources presets - case with missing buildResources Requests": {
+		"Should properly merge resources presets (using labels) - case with missing buildResources Requests": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -357,7 +387,6 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
-						ReplicasPresetLabel:          "L",
 						FunctionResourcesPresetLabel: "S",
 						BuildResourcesPresetLabel:    "slow",
 					},
@@ -370,6 +399,34 @@ func TestSetDefaults(t *testing.T) {
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
 						MaxReplicas: &two,
+					},
+				},
+			},
+		},
+		"Should ignore label replicas-preset": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						v1alpha1ReplicasPresetLabel: "XL",
+					},
+				},
+				Spec: FunctionSpec{
+					Runtime: NodeJs14,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						v1alpha1ReplicasPresetLabel: "XL",
+					},
+				}, Spec: FunctionSpec{
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
+					},
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: &one,
+						MaxReplicas: &one,
 					},
 				},
 			},

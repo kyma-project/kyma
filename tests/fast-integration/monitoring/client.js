@@ -1,3 +1,12 @@
+module.exports = {
+  proxyGrafanaDatasource,
+  getPrometheusActiveTargets,
+  getPrometheusAlerts,
+  getPrometheusRuleGroups,
+  queryPrometheus,
+  checkIfGrafanaIsReachable,
+};
+
 const axios = require('axios');
 const https = require('https');
 const httpsAgent = new https.Agent({
@@ -13,18 +22,6 @@ const {
   error,
 } = require('../utils');
 
-async function getGrafanaUrl() {
-  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
-  const host = vs.spec.hosts[0];
-  return `https://${host}`;
-}
-
-async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
-  const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
-  const responseBody = await retryPromise(async () => await axios.get(url), 5, 1000);
-  return responseBody.data.id;
-}
-
 async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
     timeout, debugMsg = undefined) {
   const grafanaUrl = await getGrafanaUrl();
@@ -39,8 +36,16 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   }, retries, interval);
 }
 
-async function getPrometheusViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
-  return await proxyGrafanaDatasource('Prometheus', path, retries, interval, timeout);
+async function getGrafanaUrl() {
+  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
+  const host = vs.spec.hosts[0];
+  return `https://${host}`;
+}
+
+async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
+  const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
+  const responseBody = await retryPromise(async () => await axios.get(url), 5, 1000);
+  return responseBody.data.id;
 }
 
 async function getPrometheusActiveTargets() {
@@ -115,11 +120,6 @@ async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
   return false;
 }
 
-module.exports = {
-  proxyGrafanaDatasource,
-  getPrometheusActiveTargets,
-  getPrometheusAlerts,
-  getPrometheusRuleGroups,
-  queryPrometheus,
-  checkIfGrafanaIsReachable,
-};
+async function getPrometheusViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
+  return await proxyGrafanaDatasource('Prometheus', path, retries, interval, timeout);
+}

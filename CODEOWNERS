@@ -9,7 +9,7 @@
 
 /.github @kyma-project/prow
 /.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @kyma-project/prow @voigt
-/.github/ISSUE_TEMPLATE @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
+/.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 
 # Owners of the .kyma-project-io folder
@@ -19,12 +19,12 @@
 # Logging library
 /common/logging @franpog859 @dbadura @janmedrek
 
-/components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao @PK85 @dbadura
+/components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/components/application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/components/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/components/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao @PK85 @dbadura
 /components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
@@ -33,14 +33,14 @@
 /components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
 # All files and subdirectories in /docs
-/docs @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
+/docs @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 /hack @clebs
 
 /installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 /installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
@@ -49,15 +49,15 @@
 /installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
 /resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/resources/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
 /resources/cluster-essentials @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw
-/resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @barchw
@@ -70,8 +70,8 @@
 /resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
-/tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
 
 
@@ -105,10 +105,10 @@
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 # VERSION file
 VERSION @kyma-project/prow
 
 # All .md files
-*.md @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
+*.md @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  

@@ -67,3 +67,35 @@ func TestCreateRewriteTagFilterExcludeContainers(t *testing.T) {
 	actual := createRewriteTagFilter(logPipeline, pipelineConfig)
 	require.Equal(t, expected, actual)
 }
+
+func TestCreateRewriteTagFilterWithCustomOutput(t *testing.T) {
+	pipelineConfig := PipelineDefaults{
+		InputTag:          "kube",
+		MemoryBufferLimit: "10M",
+		StorageType:       "filesystem",
+	}
+
+	logPipeline := &v1alpha1.LogPipeline{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "logpipeline1",
+		},
+		Spec: v1alpha1.LogPipelineSpec{
+			Output: v1alpha1.Output{
+				Custom: `
+    name stdout`,
+			},
+		},
+	}
+
+	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    emitter_mem_buf_limit 10M
+    emitter_name          logpipeline1-stdout
+    emitter_storage.type  filesystem
+    rule                  $log "^.*$" logpipeline1.$TAG true
+
+`
+	actual := createRewriteTagFilter(logPipeline, pipelineConfig)
+	require.Equal(t, expected, actual)
+}
