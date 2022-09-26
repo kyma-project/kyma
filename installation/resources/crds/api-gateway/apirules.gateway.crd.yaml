@@ -79,8 +79,8 @@ spec:
                               trusted_issuers:
                                 type: array
                                 items:
-                                  type: string                              
-                                  pattern: ^(https://|file://).*$  
+                                  type: string
+                                  pattern: ^(https://|file://).*$
                           handler:
                             description: Name is the name of a handler
                             type: string
@@ -255,8 +255,8 @@ spec:
                               trusted_issuers:
                                 type: array
                                 items:
-                                  type: string                              
-                                  pattern: ^(https://|file://).*$ 
+                                  type: string
+                                  pattern: ^(https://|file://).*$
                           handler:
                             description: Name is the name of a handler
                             type: string
@@ -305,6 +305,9 @@ spec:
                         name:
                           description: Name of the service
                           type: string
+                        namespace:
+                          description: Namespace of the service, if you omit it, the default changes to APIRule Namespace 
+                          type: string
                         port:
                           description: Port of the service to expose
                           format: int32
@@ -331,6 +334,9 @@ spec:
                     type: boolean
                   name:
                     description: Name of the service
+                    type: string
+                  namespace:
+                    description: Namespace of the service, if you omit it, the default changes to APIRule Namespace 
                     type: string
                   port:
                     description: Port of the service to expose

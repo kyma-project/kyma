@@ -366,6 +366,7 @@ config:
   inputs: |
     [INPUT]
         Name tail
+        Alias tele-tail
         Path /var/log/containers/*.log
         multiline.parser docker, cri, go, python, java
         Tag tele.*
@@ -374,12 +375,12 @@ config:
         Refresh_Interval 10
         DB /data/flb_kube.db
         storage.type  filesystem
-
+ 
     [INPUT]
         Name tail
         Path /null.log
         Tag null.*
-        Alias dummy
+        Alias null-tail
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
@@ -396,7 +397,7 @@ config:
     [OUTPUT]
         Name null
         Match null.*
-        Alias dummy
+        Alias null-null
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]

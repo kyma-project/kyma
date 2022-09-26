@@ -29,8 +29,16 @@ func createOutputSection(pipeline *telemetryv1alpha1.LogPipeline, defaults Pipel
 func generateCustomOutput(output *telemetryv1alpha1.Output, fsBufferLimit string, name string) string {
 	sb := NewOutputSectionBuilder()
 	customOutputParams := parseMultiline(output.Custom)
+	var outputName string
+	if customOutputParams.GetByKey("name") != nil {
+		outputName = customOutputParams.GetByKey("name").Value
+	}
+	aliasPresent := customOutputParams.ContainsKey("alias")
 	for _, p := range customOutputParams {
 		sb.AddConfigParam(p.Key, p.Value)
+	}
+	if !aliasPresent {
+		sb.AddConfigParam("alias", fmt.Sprintf("%s-%s", name, outputName))
 	}
 	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
 	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
@@ -42,6 +50,7 @@ func generateHTTPOutput(httpOutput *telemetryv1alpha1.HTTPOutput, fsBufferLimit 
 	sb.AddConfigParam("name", "http")
 	sb.AddConfigParam("allow_duplicated_headers", "true")
 	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
+	sb.AddConfigParam("alias", fmt.Sprintf("%s-http", name))
 	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
 	sb.AddIfNotEmpty("uri", httpOutput.URI)
 	sb.AddIfNotEmpty("compress", httpOutput.Compress)
@@ -82,7 +91,7 @@ func generateLokiOutput(lokiOutput *telemetryv1alpha1.LokiOutput, fsBufferLimit 
 	sb.AddConfigParam("match", fmt.Sprintf("%s.*", name))
 	sb.AddConfigParam("storage.total_limit_size", fsBufferLimit)
 	sb.AddConfigParam("name", "grafana-loki")
-	sb.AddConfigParam("alias", name)
+	sb.AddConfigParam("alias", fmt.Sprintf("%s-grafana-loki", name))
 	sb.AddConfigParam("url", resolveValue(lokiOutput.URL, name))
 	if len(lokiOutput.Labels) != 0 {
 		value := concatenateLabels(lokiOutput.Labels)
