@@ -76,13 +76,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15610"
+      version: "PR-15648"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15610"
+      version: "PR-15648"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15610"
+      version: "PR-15648"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "f94d14f3"
@@ -172,9 +172,14 @@ containers:
       port: "8090"
     extraProperties: {}
     configuration:
-      logLevel: "info"
-      logFormat: "json"
+      targetDir: "/appdata"
+      filename: "config.yaml"
+      data:
+        logLevel: "info"
+        logFormat: "json"
     envs:
+      fileConfigPath:
+        value: "{{ .Values.containers.manager.configuration.targetDir }}/{{ .Values.containers.manager.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:

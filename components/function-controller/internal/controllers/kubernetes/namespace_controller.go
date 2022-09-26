@@ -29,7 +29,7 @@ func NewNamespace(client client.Client, log *zap.SugaredLogger, config Config,
 	roleService RoleService, roleBindingService RoleBindingService) *NamespaceReconciler {
 	return &NamespaceReconciler{
 		client:             client,
-		Log:                log.Named("controllers").Named("namespace"),
+		Log:                log,
 		config:             config,
 		configMapSvc:       configMapSvc,
 		secretSvc:          secretSvc,

@@ -21,8 +21,9 @@ docker-registry:
 containers:
   manager:
     configuration:
-      logLevel: "warn"
-      logFormat: "json"
+      data:
+        logLevel: "warn"
+        logFormat: "json"
     envs:
       functionBuildMaxSimultaneousJobs:
         value: "5"

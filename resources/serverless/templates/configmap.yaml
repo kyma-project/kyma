@@ -6,4 +6,4 @@ metadata:
   labels:
     {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 data:
-  config.yaml: {{ include "tplValue" ( dict "value" .Values.containers.manager.configuration "context" . ) | quote }}
+  {{ .Values.containers.manager.configuration.filename }}: {{ include "tplValue" ( dict "value" .Values.containers.manager.configuration.data "context" . ) | quote }}
