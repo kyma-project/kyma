@@ -1,5 +1,5 @@
 ---
-title: Expose a workloads in multiple namespaces
+title: Expose workloads in multiple namespaces with a single APIRule definition
 ---
 
 This tutorial shows how to expose service endpoints in multiple namespaces using API Gateway Controller.
