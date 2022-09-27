@@ -181,7 +181,8 @@ func Test_isInDeletion(t *testing.T) {
 			name: "Deletion timestamp uninitialized",
 			givenSubscription: func() *eventingv1alpha2.Subscription {
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventType())
+					reconcilertesting.WithNotCleanSource(),
+					reconcilertesting.WithNotCleanType())
 				sub.DeletionTimestamp = nil
 				return sub
 			},
@@ -192,7 +193,8 @@ func Test_isInDeletion(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha2.Subscription {
 				zero := metav1.Time{}
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventType())
+					reconcilertesting.WithNotCleanSource(),
+					reconcilertesting.WithNotCleanType())
 				sub.DeletionTimestamp = &zero
 				return sub
 			},
@@ -203,7 +205,8 @@ func Test_isInDeletion(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha2.Subscription {
 				newTime := metav1.NewTime(time.Now())
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventType())
+					reconcilertesting.WithNotCleanSource(),
+					reconcilertesting.WithNotCleanType())
 				sub.DeletionTimestamp = &newTime
 				return sub
 			},
@@ -233,7 +236,8 @@ func Test_replaceStatusCondition(t *testing.T) {
 			name: "Updating a condition marks the status as changed",
 			giveSubscription: func() *eventingv1alpha2.Subscription {
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventType())
+					reconcilertesting.WithNotCleanSource(),
+					reconcilertesting.WithNotCleanType())
 				sub.Status.InitializeConditions()
 				return sub
 			}(),
@@ -247,7 +251,8 @@ func Test_replaceStatusCondition(t *testing.T) {
 			name: "All conditions true means status is ready",
 			giveSubscription: func() *eventingv1alpha2.Subscription {
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventType(),
+					reconcilertesting.WithNotCleanSource(),
+					reconcilertesting.WithNotCleanType(),
 					reconcilertesting.WithWebhookAuthForBEB())
 				sub.Status.InitializeConditions()
 				sub.Status.Ready = false

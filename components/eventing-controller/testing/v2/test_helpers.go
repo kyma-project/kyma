@@ -32,16 +32,20 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
-	EventMeshNamespace                       = "/default/kyma/id"
-	EventSource                              = "/default/kyma/id"
-	EventTypePrefix                          = "prefix"
-	EventMeshPrefix                          = "one.two.three"      // three segments
-	InvalidEventMeshPrefix                   = "one.two.three.four" // four segments
-	EventTypePrefixEmpty                     = ""
-	OrderCreatedV1Event                      = "order.created.v1"
-	OrderCreatedV2Event                      = "order.created.v2"
-	OrderCreatedV1EventNotClean              = "order.c*r%e&a!te#d.v1"
-	OrderCreatedV2EventNotClean              = "o-r_d+e$r.created.v2"
+	EventMeshNamespace          = "/default/kyma/id"
+	EventSource                 = "/default/kyma/id"
+	EventTypePrefix             = "prefix"
+	EventMeshPrefix             = "one.two.three"      // three segments
+	InvalidEventMeshPrefix      = "one.two.three.four" // four segments
+	EventTypePrefixEmpty        = ""
+	OrderCreatedV1Event         = "order.created.v1"
+	OrderCreatedV2Event         = "order.created.v2"
+	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
+	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
+
+	EventMeshOrderCreatedV1Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	EventMeshOrderCreatedV2Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV2Event
+
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
 	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -372,10 +376,16 @@ func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
 
-// WithNotCleanEventType initializes subscription with a not clean event-type
+//// WithNotCleanEventType initializes subscription with a not clean event-type
+//// A not clean event-type means it contains none-alphanumeric characters.
+//func WithNotCleanEventType() SubscriptionOpt {
+//	return WithEventType(OrderCreatedEventTypeNotClean)
+//}
+
+// WithNotCleanType initializes subscription with a not clean event-type
 // A not clean event-type means it contains none-alphanumeric characters.
-func WithNotCleanEventType() SubscriptionOpt {
-	return WithEventType(OrderCreatedEventTypeNotClean)
+func WithNotCleanType() SubscriptionOpt {
+	return WithEventType(OrderCreatedV1EventNotClean)
 }
 
 // WithEmptyTypes is a SubscriptionOpt for creating a subscription with an empty event type filter.
@@ -390,8 +400,12 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventType)
 }
 
-func WithOrderCreatedType() SubscriptionOpt {
-	return WithEventType(OrderCreatedEventType)
+//func WithOrderCreatedType() SubscriptionOpt {
+//	return WithEventType(OrderCreatedEventType)
+//}
+
+func WithOrderCreatedV1Event() SubscriptionOpt {
+	return WithEventType(OrderCreatedV1Event)
 }
 
 func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
@@ -400,6 +414,10 @@ func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
 
 func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
+}
+
+func WithNotCleanSource() SubscriptionOpt {
+	return WithEventSource(ApplicationNameNotClean)
 }
 
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
