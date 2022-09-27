@@ -390,6 +390,10 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventType)
 }
 
+func WithOrderCreatedType() SubscriptionOpt {
+	return WithEventType(OrderCreatedEventType)
+}
+
 func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
 	return WithSinkURL(fmt.Sprintf("%s.%s.svc.cluster.local", svcName, svcNamespace))
 }
