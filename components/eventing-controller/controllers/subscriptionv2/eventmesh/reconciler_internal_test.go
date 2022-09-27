@@ -50,6 +50,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 	testSub := reconcilertesting.NewSubscription("sub1", "test",
 		reconcilertesting.WithConditions(eventingv1alpha2.MakeSubscriptionConditions()),
 		reconcilertesting.WithFinalizers([]string{eventingv1alpha2.Finalizer}),
+		reconcilertesting.WithDefaultSource(),
 		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
 		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusActive)),
@@ -58,6 +59,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 	testSubUnderDeletion := reconcilertesting.NewSubscription("sub2", "test",
 		reconcilertesting.WithNonZeroDeletionTimestamp(),
 		reconcilertesting.WithFinalizers([]string{eventingv1alpha2.Finalizer}),
+		reconcilertesting.WithDefaultSource(),
 		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
 	)
 
@@ -65,6 +67,7 @@ func TestReconciler_Reconcile(t *testing.T) {
 	testSubPaused := reconcilertesting.NewSubscription("sub3", "test",
 		reconcilertesting.WithConditions(eventingv1alpha2.MakeSubscriptionConditions()),
 		reconcilertesting.WithFinalizers([]string{eventingv1alpha2.Finalizer}),
+		reconcilertesting.WithDefaultSource(),
 		reconcilertesting.WithEventType(reconcilertesting.OrderCreatedEventType),
 		reconcilertesting.WithValidSink("test", "test-svc"),
 		reconcilertesting.WithEmsSubscriptionStatus(string(types.SubscriptionStatusPaused)),

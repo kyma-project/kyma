@@ -33,31 +33,15 @@ type ConditionReason string
 
 const (
 	// BEB Conditions
-	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
-	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
-	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
-	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
-	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
+	ConditionReasonSubscriptionCreated        ConditionReason = "EventMesh Subscription created"
+	ConditionReasonSubscriptionCreationFailed ConditionReason = "EventMesh Subscription creation failed"
+	ConditionReasonSubscriptionActive         ConditionReason = "EventMesh Subscription active"
+	ConditionReasonSubscriptionNotActive      ConditionReason = "EventMesh Subscription not active"
+	ConditionReasonSubscriptionDeleted        ConditionReason = "EventMesh Subscription deleted"
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
-	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
+	ConditionReasonWebhookCallStatus          ConditionReason = "EventMesh Subscription webhook call no errors status"
 	ConditionReasonOauth2ClientSyncFailed     ConditionReason = "Failed to sync OAuth2 Client Credentials"
-
-	// NATS Conditions
-	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
-	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
-
-	// Common backend Conditions
-	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription controller started"
-	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription controller not ready"
-	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
-	ConditionReasonPublisherDeploymentNotReady    ConditionReason = "Publisher proxy deployment not ready"
-	ConditionReasonBackendCRSyncFailed            ConditionReason = "Backend CR sync failed"
-	ConditionReasonPublisherProxySyncFailed       ConditionReason = "Publisher Proxy deployment sync failed"
-	ConditionReasonControllerStartFailed          ConditionReason = "Starting the controller failed"
-	ConditionReasonControllerStopFailed           ConditionReason = "Stopping the controller failed"
-	ConditionReasonPublisherProxySecretError      ConditionReason = "Publisher proxy secret sync failed"
-	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
 // initializeConditions sets unset conditions to Unknown.

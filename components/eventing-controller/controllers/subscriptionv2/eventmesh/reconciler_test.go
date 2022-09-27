@@ -42,7 +42,7 @@ import (
 	sink "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	eventMeshtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -78,7 +78,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	BeforeEach(func() {
 		namespaceName = fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testID)
 		// we need to reset the http requests which the mock captured
-		beb.Reset()
+		eventMeshMock.Reset()
 
 		// Context
 		ctx = context.Background()
@@ -86,11 +86,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	AfterEach(func() {
 		// detailed request logs
-		logf.Log.V(1).Info("beb requests", "number", beb.Requests.Len())
+		logf.Log.V(1).Info("eventMesh requests", "number", eventMeshMock.Requests.Len())
 
 		i := 0
 
-		beb.Requests.ReadEach(
+		eventMeshMock.Requests.ReadEach(
 			func(req *http.Request, payload interface{}) {
 				reqDescription := fmt.Sprintf("method: %q, url: %q, payload object: %+v", req.Method, req.RequestURI, payload)
 				fmt.Printf("request[%d]: %s\n", i, reqDescription)
@@ -300,7 +300,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Sending at least one creation requests for the Subscription")
-			_, postRequests, _ := countBEBRequests(
+			_, postRequests, _ := countEventMeshRequests(
 				nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
 				reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(postRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
@@ -381,7 +381,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionActiveEvent))
 
-			By("Creating a BEB Subscription")
+			By("Creating a EventMesh Subscription")
 			Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
 		})
 	})
@@ -480,14 +480,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBEBRequests(
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countEventMeshRequests(
 				nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace),
 				reconcilertesting.EventMeshOrderCreatedV1Type,
 			)
 			Expect(creationRequestsSubscription1).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription1).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 
-			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBEBRequests(
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countEventMeshRequests(
 				nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace),
 				reconcilertesting.EventMeshOrderCreatedV1Type,
 			)
@@ -565,7 +565,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionActiveEvent))
 
-			By("Creating a BEB Subscription")
+			By("Creating a EventMesh Subscription")
 			Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
 
 			By("Updating APIRule")
@@ -591,7 +591,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).Should(reconcilertesting.HaveSubscriptionReady())
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(
+			_, creationRequests, _ := countEventMeshRequests(
 				nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
 				reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
@@ -599,7 +599,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	})
 
 	When("Subscription sink name is changed", func() {
-		It("Should update the BEB subscription webhookURL by creating a new APIRule", func() {
+		It("Should update the EventMesh subscription webhookURL by creating a new APIRule", func() {
 			subscriptionName := "test-subscription-sink-name-changed"
 
 			// prepare objects
@@ -629,9 +629,9 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			reconcilertesting.MarkReady(apiRuleNew)
 			updateAPIRuleStatus(ctx, apiRuleNew).ShouldNot(HaveOccurred())
 
-			By("BEB Subscription has the same webhook URL")
-			bebCreationRequests := make([]bebtypes.Subscription, 0)
-			getBEBSubscriptionCreationRequests(bebCreationRequests).Should(And(
+			By("EventMesh Subscription has the same webhook URL")
+			eventMeshCreationRequests := make([]eventMeshtypes.Subscription, 0)
+			getEventMeshSubscriptionCreationRequests(eventMeshCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
 						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription.Name, readySubscription.Namespace)),
@@ -643,7 +643,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(ctx, apiRule).ShouldNot(reconcilertestingv1.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -698,18 +698,18 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(ctx, apiRule1).ShouldNot(reconcilertestingv1.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request for Subscription 1")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 
 			By("Sending at least one creation request for Subscription 2")
-			_, creationRequests, _ = countBEBRequests(nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, _ = countEventMeshRequests(nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
 
-	When("BEB subscription creation failed", func() {
+	When("EventMesh subscription creation failed", func() {
 		It("Should not mark the subscription as ready", func() {
-			subscriptionName := "test-subscription-beb-not-status-not-ready"
+			subscriptionName := "test-subscription-event-mesh-not-status-not-ready"
 
 			// Ensuring subscriber svc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
@@ -724,13 +724,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			By("preparing mock to simulate creation of BEB subscription failing on BEB side")
-			beb.CreateResponse = func(w http.ResponseWriter) {
+			By("preparing mock to simulate creation of EventMesh subscription failing on EventMesh side")
+			eventMeshMock.CreateResponse = func(w http.ResponseWriter) {
 				// ups ... server returns 500
 				w.WriteHeader(http.StatusInternalServerError)
-				s := bebtypes.Response{
+				s := eventMeshtypes.Response{
 					StatusCode: http.StatusInternalServerError,
-					Message:    "sorry, but this mock does not let you create a BEB subscription",
+					Message:    "sorry, but this mock does not let you create a EventMesh subscription",
 				}
 				err := json.NewEncoder(w).Encode(s)
 				Expect(err).ShouldNot(HaveOccurred())
@@ -744,7 +744,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting a subscription not created condition")
-			message := "create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a BEB subscription\"}\n"
+			message := "create subscription failed: 500; 500 Internal Server Error;{\"message\":\"sorry, but this mock does not let you create a EventMesh subscription\"}\n"
 			subscriptionNotCreatedCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -762,14 +762,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
 
-	When("BEB subscription is set to paused after creation", func() {
+	When("EventMesh subscription is set to paused after creation", func() {
 		It("Should not mark the subscription as active", func() {
-			subscriptionName := "test-subscription-beb-not-status-not-ready-2"
+			subscriptionName := "test-subscription-event-mesh-not-status-not-ready-2"
 
 			// Ensuring subscriber subscriberSvc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
@@ -782,27 +782,27 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 
-			isBEBSubscriptionCreated := false
+			isEventMeshSubscriptionCreated := false
 
-			By("preparing mock to simulate a non ready BEB subscription")
-			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
-				// until the BEB subscription creation call was performed, send successful get requests
-				if !isBEBSubscriptionCreated {
+			By("preparing mock to simulate a non ready EventMesh subscription")
+			eventMeshMock.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
+				// until the EventMesh subscription creation call was performed, send successful get requests
+				if !isEventMeshSubscriptionCreated {
 					reconcilertestingv1.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 				} else {
-					// after the BEB subscription was created, set the status to paused
+					// after the EventMesh subscription was created, set the status to paused
 					w.WriteHeader(http.StatusOK)
-					s := bebtypes.Subscription{
+					s := eventMeshtypes.Subscription{
 						Name: nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
-						// ups ... BEB Subscription status is now paused
-						SubscriptionStatus: bebtypes.SubscriptionStatusPaused,
+						// ups ... EventMesh Subscription status is now paused
+						SubscriptionStatus: eventMeshtypes.SubscriptionStatusPaused,
 					}
 					err := json.NewEncoder(w).Encode(s)
 					Expect(err).ShouldNot(HaveOccurred())
 				}
 			}
-			beb.CreateResponse = func(w http.ResponseWriter) {
-				isBEBSubscriptionCreated = true
+			eventMeshMock.CreateResponse = func(w http.ResponseWriter) {
+				isEventMeshSubscriptionCreated = true
 				reconcilertestingv1.BEBCreateSuccess(w)
 			}
 
@@ -842,14 +842,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
 
-	When("BEB subscription is set to have `lastFailedDelivery` and `lastFailedDeliveryReason`='Webhook endpoint response code: 401' after creation", func() {
+	When("EventMesh subscription is set to have `lastFailedDelivery` and `lastFailedDeliveryReason`='Webhook endpoint response code: 401' after creation", func() {
 		It("Should not mark the subscription as ready", func() {
-			subscriptionName := "test-subscription-beb-status-not-ready-3"
+			subscriptionName := "test-subscription-event-mesh-status-not-ready-3"
 			lastFailedDeliveryReason := "Webhook endpoint response code: 401"
 
 			// Ensuring subscriber subscriberSvc
@@ -863,19 +863,19 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 
-			isBEBSubscriptionCreated := false
+			isEventMeshSubscriptionCreated := false
 
-			By("preparing mock to simulate a non ready BEB subscription")
-			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
-				// until the BEB subscription creation call was performed, send successful get requests
-				if !isBEBSubscriptionCreated {
+			By("preparing mock to simulate a non ready EventMesh subscription")
+			eventMeshMock.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
+				// until the EventMesh subscription creation call was performed, send successful get requests
+				if !isEventMeshSubscriptionCreated {
 					reconcilertestingv1.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 				} else {
-					// after the BEB subscription was created, set lastFailedDelivery
+					// after the EventMesh subscription was created, set lastFailedDelivery
 					w.WriteHeader(http.StatusOK)
-					s := bebtypes.Subscription{
+					s := eventMeshtypes.Subscription{
 						Name:                     nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
-						SubscriptionStatus:       bebtypes.SubscriptionStatusActive,
+						SubscriptionStatus:       eventMeshtypes.SubscriptionStatusActive,
 						LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),                       // "now",
 						LastFailedDelivery:       time.Now().Add(10 * time.Second).Format(time.RFC3339), // "now + 10s"
 						LastFailedDeliveryReason: lastFailedDeliveryReason,
@@ -884,8 +884,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					Expect(err).ShouldNot(HaveOccurred())
 				}
 			}
-			beb.CreateResponse = func(w http.ResponseWriter) {
-				isBEBSubscriptionCreated = true
+			eventMeshMock.CreateResponse = func(w http.ResponseWriter) {
+				isEventMeshSubscriptionCreated = true
 				reconcilertestingv1.BEBCreateSuccess(w)
 			}
 
@@ -931,7 +931,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -966,7 +966,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					reconcilertesting.HaveSubscriptionReady(),
 				))
 
-				By("Creating a BEB Subscription")
+				By("Creating a EventMesh Subscription")
 				Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
 			})
 
@@ -976,7 +976,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Removing the Subscription")
 			getSubscription(ctx, givenSubscription).Should(reconcilertesting.IsAnEmptySubscription())
 
-			By("Deleting the BEB Subscription")
+			By("Deleting the EventMesh Subscription")
 			Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
 
 			By("Removing the APIRule")
@@ -992,14 +992,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionDeletedEvent))
 
 			By("Sending at least one creation and one deletion request for the Subscription")
-			_, creationRequests, deletionRequests := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+			_, creationRequests, deletionRequests := countEventMeshRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 			Expect(deletionRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
 
-	When("Deleting BEB Subscription manually", func() {
-		It("Should recreate BEB Subscription again", func() {
+	When("Deleting EventMesh Subscription manually", func() {
+		It("Should recreate EventMesh Subscription again", func() {
 
 			var kymaSubscription *eventingv1alpha2.Subscription
 			kymaSubscriptionName := "test-subscription"
@@ -1032,7 +1032,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			})
 
 			By("Check Kyma Subscription ready", func() {
-				By("Checking BEB mock server creation requests to contain Subscription creation request", func() {
+				By("Checking EventMesh mock server creation requests to contain Subscription creation request", func() {
 					Eventually(wasSubscriptionCreated(kymaSubscription)).Should(BeTrue())
 				})
 
@@ -1044,9 +1044,9 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			By("Delete BEB Subscription", func() {
-				By("Deleting its entry in BEB mock internal cache", func() {
-					beb.Subscriptions.DeleteSubscriptionsByName(nameMapper.MapSubscriptionName(kymaSubscription.Name, kymaSubscription.Namespace))
+			By("Delete EventMesh Subscription", func() {
+				By("Deleting its entry in EventMesh mock internal cache", func() {
+					eventMeshMock.Subscriptions.DeleteSubscriptionsByName(nameMapper.MapSubscriptionName(kymaSubscription.Name, kymaSubscription.Namespace))
 				})
 			})
 
@@ -1058,10 +1058,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			By("Check BEB Subscription was recreated", func() {
-				By("Checking BEB mock server received a second creation request", func() {
+			By("Check EventMesh Subscription was recreated", func() {
+				By("Checking EventMesh mock server received a second creation request", func() {
 					Eventually(func() int {
-						_, countPost, _ := countBEBRequests(nameMapper.MapSubscriptionName(kymaSubscription.Name, kymaSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
+						_, countPost, _ := countEventMeshRequests(nameMapper.MapSubscriptionName(kymaSubscription.Name, kymaSubscription.Namespace), reconcilertesting.EventMeshOrderCreatedV1Type)
 						return countPost
 					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
 				})
@@ -1248,15 +1248,15 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *corev1.Service) {
 	Expect(k8sClient.Create(ctx, svc)).Should(Succeed())
 }
 
-// getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions.
-func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
-	return Eventually(func() []bebtypes.Subscription {
-		for req, sub := range beb.Requests.GetSubscriptions() {
+// getEventMeshSubscriptionCreationRequests filters the http requests made against EventMesh and returns the EventMesh Subscriptions.
+func getEventMeshSubscriptionCreationRequests(eventMeshSubscriptions []eventMeshtypes.Subscription) AsyncAssertion {
+	return Eventually(func() []eventMeshtypes.Subscription {
+		for req, sub := range eventMeshMock.Requests.GetSubscriptions() {
 			if reconcilertestingv1.IsBEBSubscriptionCreate(req) {
-				bebSubscriptions = append(bebSubscriptions, sub)
+				eventMeshSubscriptions = append(eventMeshSubscriptions, sub)
 			}
 		}
-		return bebSubscriptions
+		return eventMeshSubscriptions
 	}, bigTimeOut, bigPollingInterval)
 }
 
@@ -1371,11 +1371,11 @@ const (
 )
 
 var (
-	k8sClient  client.Client
-	testEnv    *envtest.Environment
-	beb        *reconcilertestingv1.BEBMock
-	nameMapper utils.NameMapper
-	mock       *reconcilertestingv1.BEBMock
+	k8sClient     client.Client
+	testEnv       *envtest.Environment
+	eventMeshMock *reconcilertestingv1.BEBMock
+	nameMapper    utils.NameMapper
+	mock          *reconcilertestingv1.BEBMock
 )
 
 func TestAPIs(t *testing.T) {
@@ -1437,7 +1437,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	mock = startBEBMock()
+	mock = startEventMeshMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1457,7 +1457,7 @@ var _ = BeforeSuite(func(done Done) {
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventMeshPrefix,
 		BEBNamespace:             "/default/ns",
-		Qos:                      string(bebtypes.QosAtLeastOnce),
+		Qos:                      string(eventMeshtypes.QosAtLeastOnce),
 		EnableNewCRDVersion:      true,
 	}
 
@@ -1501,12 +1501,12 @@ var _ = AfterSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 })
 
-// startBEBMock starts the beb mock and configures the controller process to use it.
-func startBEBMock() *reconcilertestingv1.BEBMock {
-	By("Preparing BEB Mock")
-	beb = reconcilertestingv1.NewBEBMock()
-	beb.Start()
-	return beb
+// startEventMeshMock starts the EventMesh mock and configures the controller process to use it.
+func startEventMeshMock() *reconcilertestingv1.BEBMock {
+	By("Preparing EventMesh Mock")
+	eventMeshMock = reconcilertestingv1.NewBEBMock()
+	eventMeshMock.Start()
+	return eventMeshMock
 }
 
 // createSubscriptionObjectsAndWaitForReadiness creates the given Subscription and the given Service. It then performs the following steps:
@@ -1533,12 +1533,12 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	return sub, apiRule
 }
 
-// countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
+// countEventMeshRequests returns how many requests for a given subscription are sent for each HTTP method
 //
 //nolint:unparam
-func countBEBRequests(subscriptionName, eventType string) (countGet, countPost, countDelete int) {
+func countEventMeshRequests(subscriptionName, eventType string) (countGet, countPost, countDelete int) {
 	countGet, countPost, countDelete = 0, 0, 0
-	beb.Requests.ReadEach(
+	eventMeshMock.Requests.ReadEach(
 		func(request *http.Request, payload interface{}) {
 			switch method := request.Method; method {
 			case http.MethodGet:
@@ -1546,7 +1546,7 @@ func countBEBRequests(subscriptionName, eventType string) (countGet, countPost, 
 					countGet++
 				}
 			case http.MethodPost:
-				if sub, ok := payload.(bebtypes.Subscription); ok {
+				if sub, ok := payload.(eventMeshtypes.Subscription); ok {
 					if len(sub.Events) > 0 {
 						for _, event := range sub.Events {
 							if event.Type == eventType && sub.Name == subscriptionName {
@@ -1567,7 +1567,7 @@ func countBEBRequests(subscriptionName, eventType string) (countGet, countPost, 
 // wasSubscriptionCreated returns a func that determines if a given Subscription was actually created.
 func wasSubscriptionCreated(givenSubscription *eventingv1alpha2.Subscription) func() bool {
 	return func() bool {
-		for request, name := range beb.Requests.GetSubscriptionNames() {
+		for request, name := range eventMeshMock.Requests.GetSubscriptionNames() {
 			if reconcilertestingv1.IsBEBSubscriptionCreate(request) {
 				return nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace) == name
 			}
