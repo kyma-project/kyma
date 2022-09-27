@@ -5,7 +5,7 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-15606
+      version: PR-15560
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -24,7 +24,6 @@ global:
       directory: external
 
   jetstream:
-    enabled: true
     # Storage type of the stream, memory or file.
     storage: file
 
