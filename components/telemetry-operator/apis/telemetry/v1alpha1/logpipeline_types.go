@@ -278,15 +278,6 @@ func (l *LogPipeline) ContainsCustomPlugin() bool {
 	return l.Spec.Output.IsCustomDefined()
 }
 
-func ContainsCustomPlugin(l *LogPipeline) bool {
-	for _, filter := range l.Spec.Filters {
-		if filter.Custom != "" {
-			return true
-		}
-	}
-	return l.Spec.Output.IsCustomDefined()
-}
-
 // +kubebuilder:object:root=true
 // LogPipelineList contains a list of LogPipeline
 type LogPipelineList struct {
