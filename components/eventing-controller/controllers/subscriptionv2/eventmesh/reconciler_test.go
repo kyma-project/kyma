@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -1297,19 +1296,19 @@ func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 }
 
 // ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema.
-func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha2.Subscription) {
-	if subscription.Namespace != "default " {
-		namespace := fixtureNamespace(subscription.Namespace)
-		Expect(k8sClient.Create(ctx, namespace)).Should(Succeed())
-	}
-	Expect(k8sClient.Create(ctx, subscription)).Should(
-		And(
-			// prevent nil-pointer stacktrace
-			Not(BeNil()),
-			reconcilertestingv1.IsK8sUnprocessableEntity(),
-		),
-	)
-}
+//func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha2.Subscription) {
+//	if subscription.Namespace != "default " {
+//		namespace := fixtureNamespace(subscription.Namespace)
+//		Expect(k8sClient.Create(ctx, namespace)).Should(Succeed())
+//	}
+//	Expect(k8sClient.Create(ctx, subscription)).Should(
+//		And(
+//			// prevent nil-pointer stacktrace
+//			Not(BeNil()),
+//			reconcilertestingv1.IsK8sUnprocessableEntity(),
+//		),
+//	)
+//}
 
 func fixtureNamespace(name string) *corev1.Namespace {
 	namespace := corev1.Namespace{
@@ -1572,33 +1571,33 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 // countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
 //
 //nolint:unparam
-func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete int) {
-	countGet, countPost, countDelete = 0, 0, 0
-	beb.Requests.ReadEach(
-		func(request *http.Request, payload interface{}) {
-			switch method := request.Method; method {
-			case http.MethodGet:
-				if strings.Contains(request.URL.Path, subscriptionName) {
-					countGet++
-				}
-			case http.MethodPost:
-				if sub, ok := payload.(bebtypes.Subscription); ok {
-					if len(sub.Events) > 0 {
-						for _, event := range sub.Events {
-							if event.Type == reconcilertesting.OrderCreatedEventType && sub.Name == subscriptionName {
-								countPost++
-							}
-						}
-					}
-				}
-			case http.MethodDelete:
-				if strings.Contains(request.URL.Path, subscriptionName) {
-					countDelete++
-				}
-			}
-		})
-	return countGet, countPost, countDelete
-}
+//func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete int) {
+//	countGet, countPost, countDelete = 0, 0, 0
+//	beb.Requests.ReadEach(
+//		func(request *http.Request, payload interface{}) {
+//			switch method := request.Method; method {
+//			case http.MethodGet:
+//				if strings.Contains(request.URL.Path, subscriptionName) {
+//					countGet++
+//				}
+//			case http.MethodPost:
+//				if sub, ok := payload.(bebtypes.Subscription); ok {
+//					if len(sub.Events) > 0 {
+//						for _, event := range sub.Events {
+//							if event.Type == reconcilertesting.OrderCreatedEventType && sub.Name == subscriptionName {
+//								countPost++
+//							}
+//						}
+//					}
+//				}
+//			case http.MethodDelete:
+//				if strings.Contains(request.URL.Path, subscriptionName) {
+//					countDelete++
+//				}
+//			}
+//		})
+//	return countGet, countPost, countDelete
+//}
 
 // wasSubscriptionCreated returns a func that determines if a given Subscription was actually created.
 func wasSubscriptionCreated(givenSubscription *eventingv1alpha2.Subscription) func() bool {
