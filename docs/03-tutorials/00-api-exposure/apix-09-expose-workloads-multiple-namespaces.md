@@ -48,6 +48,8 @@ Follow the instructions to expose and access your unsecured instance of the Http
    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
+   >**NOTE:** Skip this step if you already have a Namespace.
+
 2. Export the following values as environment variables:
 
    ```bash
