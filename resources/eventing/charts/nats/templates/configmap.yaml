@@ -22,7 +22,6 @@ data:
     http: 8222
     server_name: $POD_NAME
 
-    {{- if .Values.global.jetstream.enabled }}
     ###################################
     #                                 #
     # NATS JetStream                  #
@@ -60,7 +59,6 @@ data:
       unique_tag: {{ .Values.nats.jetstream.uniqueTag }}
       {{- end }}
     }
-    {{- end }}
 
     {{- if .Values.cluster.enabled }}
     ###################################
@@ -71,16 +69,10 @@ data:
     cluster {
       port: 6222
 
-      {{- if .Values.global.jetstream.enabled }}
       {{- if .Values.cluster.name }}
       name: {{ .Values.cluster.name }}
       {{- else }}
       name: {{ template "nats.name" . }}
-      {{- end }}
-      {{- else }}
-      {{- with .Values.cluster.name }}
-      name: {{ . }}
-      {{- end }}
       {{- end }}
 
       routes = [
