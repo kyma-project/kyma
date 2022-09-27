@@ -182,7 +182,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				}
 
 				By("updating the Subscription types", func() {
-					for i, _ := range subscription.Spec.Types {
+					for i := range subscription.Spec.Types {
 						subscription.Spec.Types[i] = fmt.Sprintf("%salpha", subscription.Spec.Types[i])
 					}
 					ensureSubscriptionUpdated(ctx, subscription)
