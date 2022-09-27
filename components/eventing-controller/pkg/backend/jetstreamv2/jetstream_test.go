@@ -445,7 +445,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 
 	// Now, add a new filter to subscription
 	newType := sub.Spec.Types[0]
-	newType = fmt.Sprintf("%snew1", evtestingv2.OrderCreatedUncleanEvent)
+	newType = fmt.Sprintf("%snew1", newType)
 	sub.Spec.Types = append(sub.Spec.Types, newType)
 
 	// get new cleaned subject
@@ -517,7 +517,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	)
 	// add a second filter
 	newType := sub.Spec.Types[0]
-	newType = fmt.Sprintf("%snew1", evtestingv2.OrderCreatedEventTypeNotClean)
+	newType = fmt.Sprintf("%snew1", newType)
 	sub.Spec.Types = append(sub.Spec.Types, newType)
 	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 

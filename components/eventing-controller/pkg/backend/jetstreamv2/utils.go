@@ -1,7 +1,7 @@
 package jetstreamv2
 
 import (
-	"crypto/md5"
+	"crypto/md5" // #nosec
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
