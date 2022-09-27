@@ -29,40 +29,9 @@ Follow the instruction to expose and access your instance of the HttpBin service
 	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
 	 export CLIENT_CERT_KEY_FILE=client.example.com.key 
    ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com.
+   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
-2. Expose an instance of the HttpBin service on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   ---
-   apiVersion: gateway.kyma-project.io/v1beta1
-   kind: APIRule
-   metadata:
-     name: httpbin-mtls-gw-unsecured
-     namespace: ${NAMESPACE}
-   spec:
-     host: httpbin-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}
-     service:
-       name: httpbin
-       port: 8000
-     gateway: ${GATEWAY}
-     rules:
-       - path: /.*
-         methods: ["GET"]
-         accessStrategies:
-           - handler: noop
-         mutators:
-           - handler: noop
-       - path: /post
-         methods: ["POST"]
-         accessStrategies:
-           - handler: noop
-         mutators:
-           - handler: noop
-   EOF
-   ```
-
-3. Generate Client certificate signed by Client Root CA: 
+2. Generate Client certificate signed by Client Root CA: 
 
    ```bash
    # Create a new key and CSR for the client certificate
@@ -88,37 +57,7 @@ Follow the instruction to expose and access your instance of the HttpBin service
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
-2. Expose a sample Function on mTLS Gateway by creating an APIRule CR in your Namespace. Run:
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   ---
-   apiVersion: gateway.kyma-project.io/v1beta1
-   kind: APIRule
-   metadata:
-     name: function-mtls-gw-unsecured
-     namespace: ${NAMESPACE}
-   spec:
-     host: function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}
-     service:
-       name: function
-       port: 80
-     gateway: ${GATEWAY}
-     rules:
-       - path: /.*
-         methods: ["GET"]
-         accessStrategies:
-           - handler: noop
-         mutators:
-           - handler: noop
-       - path: /post
-         methods: ["POST"]
-         accessStrategies:
-           - handler: noop
-         mutators:
-           - handler: noop
-   EOF
-   ```
-3. Generate Client certificate signed by Client Root CA: 
+2. Generate Client certificate signed by Client Root CA: 
 
    ```bash
    # Create a new key and CSR for the client certificate
