@@ -346,7 +346,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// @TODO: Fix why this check is failing
 			//By("Sending at least one creation requests for the Subscription")
-			//_, postRequests, _ = countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
+			//_, postRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			//Expect(postRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		}
 		It("Should update the Subscription APIRule status from not ready to ready with sink containing port number", func() {
