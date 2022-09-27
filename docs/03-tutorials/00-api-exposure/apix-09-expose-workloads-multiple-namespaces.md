@@ -49,7 +49,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
-2. Export the following values as an environment variables:
+2. Export the following values as environment variables:
 
    ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
