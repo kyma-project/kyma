@@ -9,7 +9,7 @@ The tutorial comes with a sample HttpBin and a sample Function service deploymen
 
 ## Expose and access your workloads in multiple namespaces
 
-Follow the instruction to expose and access your unsecured instance of the HttpBin service and unsecured sample Function.
+Follow the instructions to expose and access your unsecured instance of the HttpBin service and unsecured sample Function.
 
 1. Create a Namespace for the HttpBin service and export its value as an environment variable. Run:
 
