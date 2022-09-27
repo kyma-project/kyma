@@ -1,3 +1,11 @@
+module.exports = {
+  checkCommerceMockLogs,
+  checkKymaLogs,
+  checkRetentionPeriod,
+  checkPersistentVolumeClaimSize,
+  verifyIstioAccessLogFormat,
+};
+
 const {assert} = require('chai');
 const k8s = require('@kubernetes/client-node');
 const {
@@ -64,11 +72,3 @@ async function verifyIstioAccessLogFormat(startTimestamp) {
   assert.isDefined(log['duration'], `Istio access log does not have 'duration' field: ${log}`);
   assert.isDefined(log['start_time'], `Istio access log does not have 'start_time' field: ${log}`);
 }
-
-module.exports = {
-  checkCommerceMockLogs,
-  checkKymaLogs,
-  checkRetentionPeriod,
-  checkPersistentVolumeClaimSize,
-  verifyIstioAccessLogFormat,
-};

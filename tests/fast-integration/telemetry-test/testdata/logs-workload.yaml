@@ -2,6 +2,10 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: log-spammer
+  annotations:
+    key : "value"
+  labels:
+    key : "value"
 spec:
   containers:
     - image: mingrammer/flog

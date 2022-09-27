@@ -12,9 +12,10 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/nats-io/nats.go"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/nats-io/nats.go"
 )
 
 const (
@@ -25,6 +26,12 @@ const (
 
 // compile time check
 var _ GenericSender = &JetStreamMessageSender{}
+
+type GenericSender interface {
+	Send(context.Context, *event.Event) (int, error)
+	ConnectionStatus() nats.Status
+	URL() string
+}
 
 // JetStreamMessageSender is responsible for sending messages over HTTP.
 type JetStreamMessageSender struct {

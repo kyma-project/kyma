@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	readHeaderTimeout       = time.Second * 5
 	metricsServerLoggerName = "metrics-server"
+	readHeaderTimeout       = 5 * time.Second
 )
 
 type Server struct {
@@ -30,8 +30,8 @@ func NewServer(logger *logger.Logger) *Server {
 func (s *Server) Start(address string) error {
 	if len(strings.TrimSpace(address)) > 0 {
 		s.srv = http.Server{
-			ReadHeaderTimeout: readHeaderTimeout,
 			Handler:           promhttp.Handler(),
+			ReadHeaderTimeout: readHeaderTimeout,
 		}
 
 		listener, err := net.Listen("tcp", address)

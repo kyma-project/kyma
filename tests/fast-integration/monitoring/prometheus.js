@@ -1,12 +1,20 @@
+module.exports = {
+  assertPodsExist,
+  assertAllTargetsAreHealthy,
+  assertNoCriticalAlertsExist,
+  assertScrapePoolTargetsExist,
+  assertAllRulesAreHealthy,
+  assertMetricsExist,
+  assertRulesAreRegistered,
+};
+
 const {assert} = require('chai');
 const util = require('util');
-
 const {
   listResources,
   sleep,
   waitForPodWithLabel,
 } = require('../utils');
-
 const {
   getPrometheusActiveTargets,
   getPrometheusAlerts,
@@ -25,6 +33,19 @@ async function assertPodsExist() {
   );
 }
 
+async function assertNoCriticalAlertsExist() {
+  const firingAlerts = await retry(async () => {
+    const allAlerts = await getPrometheusAlerts();
+    return allAlerts
+        .filter((a) => !shouldIgnoreAlert(a) && a.state === 'firing');
+  });
+
+  assert.isEmpty(
+      firingAlerts,
+      `Following alerts are firing: ${firingAlerts.map((a) => util.inspect(a, false, null, true)).join(', ')}`,
+  );
+}
+
 async function assertAllTargetsAreHealthy() {
   const unhealthyTargets = await retry(async () => {
     const activeTargets = await getPrometheusActiveTargets();
@@ -36,19 +57,6 @@ async function assertAllTargetsAreHealthy() {
   assert.isEmpty(
       unhealthyTargets,
       `Following targets are unhealthy: ${unhealthyTargets.join(', ')}`,
-  );
-}
-
-async function assertNoCriticalAlertsExist() {
-  const firingAlerts = await retry(async () => {
-    const allAlerts = await getPrometheusAlerts();
-    return allAlerts
-        .filter((a) => !shouldIgnoreAlert(a) && a.state === 'firing');
-  });
-
-  assert.isEmpty(
-      firingAlerts,
-      `Following alerts are firing: ${firingAlerts.map((a) => util.inspect(a, false, null, true)).join(', ')}`,
   );
 }
 
@@ -334,13 +342,3 @@ async function retry(getList, maxRetries = 20, interval = 5 * 1000) {
   }
   return list;
 }
-
-module.exports = {
-  assertPodsExist,
-  assertAllTargetsAreHealthy,
-  assertNoCriticalAlertsExist,
-  assertScrapePoolTargetsExist,
-  assertAllRulesAreHealthy,
-  assertMetricsExist,
-  assertRulesAreRegistered,
-};
