@@ -3,14 +3,13 @@ module github.com/kyma-project/kyma/components/event-publisher-proxy
 go 1.19
 
 require (
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.1
 	github.com/cloudevents/sdk-go/v2 v2.11.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220903121145-690b76935712
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220903121145-690b76935712
 	github.com/nats-io/nats-server/v2 v2.8.4
-	github.com/nats-io/nats.go v1.16.0
+	github.com/nats-io/nats.go v1.17.0
 	github.com/onsi/gomega v1.20.2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
