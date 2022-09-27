@@ -40,6 +40,8 @@ const (
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
 	OrderCreatedV2Event                      = "order.created.v2"
+	OrderCreatedV1EventNotClean              = "order.c*r%e&a!te#d.v1"
+	OrderCreatedV2EventNotClean              = "o-r_d+e$r.created.v2"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
 	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event

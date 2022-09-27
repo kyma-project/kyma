@@ -67,9 +67,16 @@ deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ##
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths=$(MANIFEST_PATH) output:crd:artifacts:config=config/crd/bases
+	@if [ $(ENABLE_NEW_CRD_VERSION) = "true" ]; then\
+		make copy-bases-v1alpha2;\
+	fi
 
 generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+copy-bases-v1alpha2:
+	mkdir -p config/crd/basesv1alpha2
+	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./config/crd/basesv1alpha2/eventing.kyma-project.io_subscriptions.yaml
 
 set-up-local-env:
     export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
