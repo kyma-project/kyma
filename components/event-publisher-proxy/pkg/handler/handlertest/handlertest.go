@@ -4,10 +4,11 @@ package handlertest
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
@@ -16,14 +17,13 @@ import (
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 // ValidateLegacyErrorResponse validates error responses for the legacy events endpoint.
 func ValidateLegacyErrorResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
 	legacyResponse := legacyapi.PublishEventResponses{}
 	legacyErrorResponse := legacyapi.Error{}
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	err = json.Unmarshal(bodyBytes, &legacyErrorResponse)
 	require.NoError(t, err)
@@ -37,7 +37,7 @@ func ValidateLegacyErrorResponse(t *testing.T, resp http.Response, wantResponse 
 func ValidateLegacyOkResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
 	legacyResponse := legacyapi.PublishEventResponses{}
 	legacyOkResponse := legacyapi.PublishResponse{}
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	err = json.Unmarshal(bodyBytes, &legacyOkResponse)
 	require.NoError(t, err)

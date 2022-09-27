@@ -141,8 +141,6 @@ nats:
     reconnectErrorReports:
 
   jetstream:
-    #enabled: JetStream can be enabled via .Values.global.jetstream.enabled
-
     # Jetstream Domain
     domain:
 
@@ -193,20 +191,6 @@ nats:
         - ReadWriteOnce
       annotations:
       # key: "value"
-
-# Authentication setup
-auth:
-  enabled: true
-  resolver:
-    ##############################
-    #                            #
-    # Memory resolver settings   #
-    #                            #
-    ##############################
-    type: memory
-    secret:
-      name: eventing-nats-secret
-      key: accountsJson
 
 nameOverride: ""
 

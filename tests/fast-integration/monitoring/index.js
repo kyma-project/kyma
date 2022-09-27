@@ -1,18 +1,22 @@
+module.exports = {
+  monitoringTests,
+  exposeGrafana,
+  unexposeGrafana,
+};
+
 const {
   getEnvOrDefault,
-  info,
 } = require('../utils');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
   describe('Grafana Tests:', async function() {
-    this.timeout(5 * 60 * 1000); // 5 min
+    this.timeout(5 * 60 * 1000);
     this.slow(5 * 1000);
 
     it('Grafana pods should be ready', async () => {
@@ -25,7 +29,7 @@ function monitoringTests() {
   });
 
   describe('Prometheus Tests:', function() {
-    this.timeout(5 * 60 * 1000); // 5 min
+    this.timeout(5 * 60 * 1000);
     this.slow(5000);
 
     it('Prometheus pods should be ready', async () => {
@@ -60,7 +64,6 @@ function monitoringTests() {
 
 async function exposeGrafana() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping setting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
@@ -69,15 +72,8 @@ async function exposeGrafana() {
 
 async function unexposeGrafana(isSkr = false) {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
   await grafana.resetGrafanaProxy(isSkr);
 }
-
-module.exports = {
-  monitoringTests,
-  exposeGrafana,
-  unexposeGrafana,
-};

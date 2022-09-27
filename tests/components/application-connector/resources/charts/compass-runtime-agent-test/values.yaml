@@ -1,6 +1,5 @@
 namespace: "test"
 testTenant: "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae"
-directorUrl: "https://compass-gateway-auth-oauth.mps.dev.kyma.cloud.sap/director/graphql"
 oauthCredentialsSecretName: "oauth-compass-credentials"
 oauthCredentialsNamespace: "test"
 skipDirectorCertVerification: true
@@ -12,8 +11,7 @@ containerRegistry:
 images:
   compassTest:
     name: "compass-runtime-agent-test"
-    version: "8eeb6dd9"
-
+    version: "PR-15119"
 
 compassCredentials:
   clientID: ""

@@ -14,7 +14,7 @@ type Config struct {
 	WebhookPort        int    `envconfig:"default=8443"`
 }
 
-//TODO: We should split configuration to seperate env or use file to pass configuration per version.
+// TODO: We should split configuration to seperate env or use file to pass configuration per version.
 func ReadDefaultingConfigV1Alpha1OrDie() *serverlessv1alpha1.DefaultingConfig {
 	defaultingCfg := &serverlessv1alpha1.DefaultingConfig{}
 	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {

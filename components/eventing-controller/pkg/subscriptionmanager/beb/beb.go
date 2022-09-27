@@ -6,7 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -21,9 +25,11 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
+	bebv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	backendbebv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/bebv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
@@ -44,6 +50,14 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := apigatewayv1beta1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	return nil
+}
+
+// AddV1Alpha2ToScheme adds v1alpha2 scheme into the given scheme.
+func AddV1Alpha2ToScheme(scheme *runtime.Scheme) error {
+	if err := eventingv1alpha2.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil
@@ -88,7 +102,6 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	oauth2credential, err := getOAuth2ClientCredentials(params)
 	if err != nil {
@@ -101,25 +114,51 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", backendbeb.MaxBEBSubscriptionNameLength)
-	bebHandler := backendbeb.NewBEB(oauth2credential, nameMapper, c.logger)
 
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
-	bebReconciler := beb.NewReconciler(
-		ctx,
-		client,
-		c.logger,
-		recorder,
-		c.envCfg,
-		cleaner,
-		bebHandler,
-		oauth2credential,
-		nameMapper,
-		sink.NewValidator(ctx, client, recorder, c.logger),
-	)
-	c.backend = bebReconciler.Backend
-	if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
-		return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
+	if c.envCfg.EnableNewCRDVersion {
+		// TODO: re-add the oauth2credentials so that we do not duplicate code
+		bebHandler := backendbebv2.NewBEB(nil, nameMapper, c.logger)
+		eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
+		bebReconciler := bebv2.NewReconciler(
+			ctx,
+			client,
+			c.logger,
+			recorder,
+			c.envCfg,
+			eventMeshcleaner,
+			bebHandler,
+			oauth2credential,
+			nameMapper,
+			sink.NewValidator(ctx, client, recorder, c.logger),
+		)
+		// TODO: fix this
+		// c.backend = bebReconciler.Backend
+		if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
+			return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
+		}
+		c.namedLogger().Info("Started v1alpha2 BEB subscription manager")
+	} else {
+		bebHandler := backendbeb.NewBEB(oauth2credential, nameMapper, c.logger)
+		eventMeshcleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+		bebReconciler := beb.NewReconciler(
+			ctx,
+			client,
+			c.logger,
+			recorder,
+			c.envCfg,
+			eventMeshcleaner,
+			bebHandler,
+			oauth2credential,
+			nameMapper,
+			sink.NewValidator(ctx, client, recorder, c.logger),
+		)
+		c.backend = bebReconciler.Backend
+		if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
+			return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
+		}
+		c.namedLogger().Info("Started BEB subscription manager")
 	}
 	return nil
 }
