@@ -1,24 +1,9 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mockserver
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mockserver-host
-  namespace: mockserver
-type: Opaque
-data:
-  host: bW9ja3NlcnZlci5tb2Nrc2VydmVyLnN2Yy5jbHVzdGVyLmxvY2Fs
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     app: mockserver
   name: mockserver
-  namespace: mockserver
 spec:
   replicas: 1
   selector:
@@ -54,7 +39,6 @@ metadata:
   labels:
     app: mockserver
   name: mockserver
-  namespace: mockserver
 spec:
   ports:
     - name: serviceport

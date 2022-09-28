@@ -61,7 +61,6 @@ func NewBEB(credentials *OAuth2ClientCredentials, mapper backendutils.NameMapper
 type BEB struct {
 	Client           client.PublisherManager
 	WebhookAuth      *types.WebhookAuth
-	ProtocolSettings *eventingv1alpha2.ProtocolSettings
 	Namespace        string
 	OAth2credentials *OAuth2ClientCredentials
 	SubNameMapper    backendutils.NameMapper

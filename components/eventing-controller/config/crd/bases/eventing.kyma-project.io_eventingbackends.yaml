@@ -55,9 +55,6 @@ spec:
               backendType:
                 description: Specifies the backend type used. Allowed values are "BEB"
                   and "NATS"
-                enum:
-                - BEB
-                - NATS
                 type: string
               bebSecretName:
                 description: The name of the secret containing BEB access tokens,

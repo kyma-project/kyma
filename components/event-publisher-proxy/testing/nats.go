@@ -20,31 +20,13 @@ const (
 	StreamName = "kyma"
 )
 
-var NATSServerModes = []struct {
-	Name             string
-	JetStreamEnabled bool
-}{
-	{
-		Name:             "jetstream disabled",
-		JetStreamEnabled: false,
-	},
-	{
-		Name:             "jetstream enabled",
-		JetStreamEnabled: true,
-	},
-}
-
-func StartNATSServer(enableJetStream bool) *server.Server {
+func StartNATSServer() *server.Server {
 	opts := test.DefaultTestOptions
 	opts.Port = server.RANDOM_PORT
-	opts.JetStream = enableJetStream
+	opts.JetStream = true
 
 	log, _ := logger.New("json", "info")
-	if enableJetStream {
-		log.WithContext().Info("Starting test NATS Server in JetStream mode")
-	} else {
-		log.WithContext().Info("Starting test NATS Server in default mode")
-	}
+	log.WithContext().Info("Starting test NATS Server in JetStream mode")
 	return test.RunServer(&opts)
 }
 
@@ -59,17 +41,24 @@ func ConnectToNATSServer(url string) (*nats.Conn, error) {
 // SubscribeToEventOrFail subscribes to the given eventType using the given NATS connection.
 // The received messages are then validated using the given validator.
 func SubscribeToEventOrFail(t *testing.T, connection *nats.Conn, eventType string, validator nats.MsgHandler) {
-	if _, err := connection.Subscribe(eventType, validator); err != nil {
+	if _, err := connection.Subscribe(GetStreamSubject(eventType), validator); err != nil {
 		t.Fatalf("Failed to subscribe to event with error: %v", err)
 	}
 }
 
+func GetStreamSubject(eventType string) string {
+	return fmt.Sprintf("%v.%v", StreamName, eventType)
+}
+
 func ValidateNATSSubjectOrFail(t *testing.T, subject string, notify ...chan bool) nats.MsgHandler {
 	return func(msg *nats.Msg) {
+		if msg == nil {
+			return
+		}
 		for _, n := range notify {
 			n <- true
 		}
-		if msg != nil && msg.Subject != subject {
+		if msg.Subject != GetStreamSubject(subject) {
 			t.Errorf("invalid NATS subject, expected [%s] but found [%s]", subject, msg.Subject)
 		}
 	}

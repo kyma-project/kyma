@@ -19,7 +19,7 @@ func ReadinessCheck(h *Handler) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, _ *http.Request) {
-		s := *h.Sender
+		s := h.Sender
 		if status := s.ConnectionStatus(); status != nats.CONNECTED {
 			h.Logger.WithContext().Named(healthCheckName).With("connection-status", status).Info("Disconnected from NATS server")
 			w.WriteHeader(health.StatusCodeNotHealthy)

@@ -70,7 +70,7 @@ This section explains how to use the Eventing Controller. It expects the followi
 |  `JS_STREAM_RETENTION_POLICY`     | The policy to delete events from the stream: `limits` or `interest`. See https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy. |
 |  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
 |  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
-|  `JS_CONSUMER_DELIVER_POLICY`     | The policy to deliver events to consumers from the stream. Supported values are: `all`, `last`, `last_per_subject`, and `new`. See https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy-optstartseq-optstarttime. |
+|  `JS_CONSUMER_DELIVER_POLICY`     | The policy to deliver events to consumers from the stream. Supported values are: `all`, `last`, `last_per_subject`, and `new`. See https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy. |
 | **For BEB**                       |                                                                                                |
 | `TOKEN_ENDPOINT`                  | The Authentication Server Endpoint to provide Access Tokens.                                   |
 | `WEBHOOK_ACTIVATION_TIMEOUT`      | The timeout duration used for webhook activation to acquire Access Tokens for Kyma.            |
