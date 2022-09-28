@@ -4,7 +4,7 @@ from typing import Iterator
 
 import requests
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.propagate import extract
 from opentelemetry.propagate import set_global_textmap
@@ -19,12 +19,12 @@ _TRACING_SAMPLE_HEADER = "x-b3-sampled"
 
 
 class ServerlessTracerProvider:
-    def __init__(self, jaeger_endpoint: str, service_name: str):
+    def __init__(self, tracecollector_endpoint: str, service_name: str):
         self.noop_tracer = trace.NoOpTracer()
-        if _is_jaeger_available(jaeger_endpoint):
-            self.tracer = _get_tracer(jaeger_endpoint, service_name)
+        if _is_tracecollector_available(tracecollector_endpoint):
+            self.tracer = _get_tracer(tracecollector_endpoint, service_name)
         else:
-            logging.info("jaeger is not available")
+            logging.info("tracecollector is not available")
             self.tracer = trace.NoOpTracer()
 
     def get_tracer(self, req):
@@ -35,7 +35,7 @@ class ServerlessTracerProvider:
         return self.noop_tracer
 
 
-def _get_tracer(jaeger_endpoint: str, service_name: str) -> trace.Tracer:
+def _get_tracer(tracecollector_endpoint: str, service_name: str) -> trace.Tracer:
     set_global_textmap(B3MultiFormat())
     RequestsInstrumentor().instrument()
 
@@ -46,7 +46,7 @@ def _get_tracer(jaeger_endpoint: str, service_name: str) -> trace.Tracer:
     )
 
     otlp_exporter = OTLPSpanExporter(
-        endpoint=jaeger_endpoint,
+        endpoint=tracecollector_endpoint,
     )
 
     span_processor = BatchSpanProcessor(otlp_exporter)
@@ -56,13 +56,10 @@ def _get_tracer(jaeger_endpoint: str, service_name: str) -> trace.Tracer:
     return trace.get_tracer(__name__)
 
 
-def _is_jaeger_available(jaegerEndpoint) -> bool:
+def _is_tracecollector_available(tracecollectorEndpoint) -> bool:
     try:
-        res = requests.get(jaegerEndpoint, timeout=2)
+        res = requests.get(tracecollectorEndpoint, timeout=2)
 
-        # 405 is the right status code for the GET method if jaeger service exists 
-        # because the only allowed method is POST and usage of other methods are not allowe
-        # https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
         if res.status_code == 405:
             return True
     except:

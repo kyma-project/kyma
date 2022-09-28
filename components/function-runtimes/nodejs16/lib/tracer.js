@@ -5,7 +5,7 @@ const { ParentBasedSampler,  AlwaysOnSampler, CompositePropagator, W3CTraceConte
 const { registerInstrumentations } = require( '@opentelemetry/instrumentation');
 const { NodeTracerProvider } = require( '@opentelemetry/sdk-trace-node');
 const { SimpleSpanProcessor } = require( '@opentelemetry/sdk-trace-base');
-const { OTLPTraceExporter } =  require('@opentelemetry/exporter-trace-otlp-grpc');
+const { OTLPTraceExporter } =  require('@opentelemetry/exporter-trace-otlp-http');
 const { Resource } = require( '@opentelemetry/resources');
 const { SemanticResourceAttributes } = require( '@opentelemetry/semantic-conventions');
 const { B3Propagator, B3InjectEncoding } = require("@opentelemetry/propagator-b3");
@@ -20,24 +20,21 @@ const ignoredTargets = [
 
 function setupTracer(serviceName){
 
-  const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT ? process.env.JAEGER_SERVICE_ENDPOINT : "http://localhost:3000"
+  const traceCollectorEndpoint = process.env.TRACE_COLLECTOR_ENDPOINT ? process.env.TRACE_COLLECTOR_ENDPOINT : "http://localhost:3000"
 
-  if(!isJeagerAvailable(jaegerServiceEndpoint)){
-    console.log("Jaeger backend not installed. Skipping tracer setup...")
+  if(!isTraceCollectorAvailable(traceCollectorEndpoint)){
+    console.log("Trace collector not installed. Skipping tracer setup...")
     return;
   }
 
-  const collectorOptions = {
-    url: jaegerServiceEndpoint
-  }
-
-  const exporter = new OTLPTraceExporter(collectorOptions);
+  const exporter = new OTLPTraceExporter({
+    url: traceCollectorEndpoint
+  });
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
     }),
-
     sampler: new ParentBasedSampler({
       root: new AlwaysOnSampler()
     }),
@@ -77,22 +74,23 @@ module.exports = {
     startNewSpan
 }
 
-async function isJeagerAvailable(endpoint){
-  let jeagerAvailable = false;
+async function isTraceCollectorAvailable(endpoint){
+  let traceCollectorAvailable = false;
+  console.log('checking availibility of trace collector', endpoint);  
   await axios(endpoint)
   .then(response => {
-     console.log('resopose from jaeger ', response);  
+     console.log('response from trace collector', response);  
   })
   .catch((err) => {
-    // 405 is the right status code for the GET method if jaeger service exists
-    // because the only allowed method is POST and usage of other methods are not allowe
-    // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
     if (err.response && err.response.status === 405) {
-       jeagerAvailable = true;
+      // TODO: resolve dependencies via serverless operator
+      // 405 is the right status code for the GET method if jaeger service exists
+      // because the only allowed method is POST and usage of other methods are not allowe
+      // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
+      traceCollectorAvailable = true;
     }
   });
-
-  return jeagerAvailable;
+  return traceCollectorAvailable;
 }
 
 function startNewSpan(name, tracer){
