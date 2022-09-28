@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/avast/retry-go"
+	types "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	v12 "k8s.io/api/apps/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -20,13 +21,13 @@ type deploymentConfiguration struct {
 	kubernetesInterface kubernetes.Interface
 }
 
-func newDeploymentConfiguration(kubernetesInterface kubernetes.Interface) deploymentConfiguration {
+func NewDeploymentConfiguration(kubernetesInterface kubernetes.Interface) deploymentConfiguration {
 	return deploymentConfiguration{
 		kubernetesInterface: kubernetesInterface,
 	}
 }
 
-func (dc deploymentConfiguration) Do(deploymentName, secretName, namespace string) (RollbackFunc, error) {
+func (dc deploymentConfiguration) Do(deploymentName, secretName, namespace string) (types.RollbackFunc, error) {
 	deploymentInterface := dc.kubernetesInterface.AppsV1().Deployments(namespace)
 
 	deployment, err := retryGetDeployment(deploymentName, deploymentInterface)
@@ -89,7 +90,7 @@ func waitForRollout(name string, deploymentInterface v13.DeploymentInterface) er
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 }
 
-func newRollbackDeploymentFunc(name, previousSecretNamespacedName string, deploymentInterface v13.DeploymentInterface) RollbackFunc {
+func newRollbackDeploymentFunc(name, previousSecretNamespacedName string, deploymentInterface v13.DeploymentInterface) types.RollbackFunc {
 	return func() error {
 		deployment, err := retryGetDeployment(name, deploymentInterface)
 		if err != nil {

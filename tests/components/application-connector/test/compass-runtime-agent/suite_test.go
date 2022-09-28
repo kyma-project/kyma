@@ -4,8 +4,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	ccclientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit"
+	compassruntimeagentinittypes "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
@@ -21,12 +23,14 @@ import (
 
 type CompassRuntimeAgentSuite struct {
 	suite.Suite
-	applicationsClientSet *cli.Clientset
-	coreClientSet         *kubernetes.Clientset
-	directorClient        director.Client
-	appComparator         applications.Comparator
-	testConfig            config
-	rollbackTestFunc      compassruntimeagentinit.RollbackFunc
+	applicationsClientSet           *cli.Clientset
+	compassConnectionClientSet      *ccclientset.Clientset
+	coreClientSet                   *kubernetes.Clientset
+	compassRuntimeAgentConfigurator compassruntimeagentinit.CompassRuntimeAgentConfigurator
+	directorClient                  director.Client
+	appComparator                   applications.Comparator
+	testConfig                      config
+	rollbackTestFunc                compassruntimeagentinittypes.RollbackFunc
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {
@@ -34,35 +38,56 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 	err := envconfig.InitWithPrefix(&gs.testConfig, "APP")
 	gs.Require().Nil(err)
 
+	gs.T().Logf("Config: %s", gs.testConfig.String())
+
+	gs.initKubernetesApis()
+	gs.initCompassRuntimeAgentConfigurator()
+	gs.initComparators()
+	gs.configureRuntimeAgent()
+}
+
+func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
 	cfg, err := clientcmd.BuildConfigFromFlags("", gs.testConfig.KubeconfigPath)
 	gs.Require().Nil(err)
 
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
+	gs.compassConnectionClientSet, err = ccclientset.NewForConfig(cfg)
+	gs.Require().Nil(err)
+
 	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)
 
 	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
 	gs.Require().Nil(err)
+}
 
-	gs.T().Logf("Config: %s", gs.testConfig.String())
-
-	gs.directorClient, err = gs.makeCompassDirectorClient()
-	gs.Require().Nil(err)
-
-	craConfigurator := compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient, gs.coreClientSet, gs.testConfig.TestingTenant)
-
-	gs.rollbackTestFunc, err = craConfigurator.Do("cratest")
-	gs.Require().Nil(err)
-
-	// TODO: Pass namespaces names
+func (gs *CompassRuntimeAgentSuite) initComparators() {
 	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, gs.testConfig.TestCredentialsNamespace, gs.testConfig.IntegrationNamespace)
 	gs.Require().Nil(err)
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
+}
+
+func (gs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
+	var err error
+	gs.rollbackTestFunc, err = gs.compassRuntimeAgentConfigurator.Do("cratest")
+	gs.Require().Nil(err)
+}
+
+func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
+	var err error
+	gs.directorClient, err = gs.makeCompassDirectorClient()
+	gs.Require().Nil(err)
+
+	certificateSecretConfigurator := compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, gs.testConfig.TestCredentialsNamespace)
+	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, gs.testConfig.TestCredentialsNamespace)
+	compassConnectionConfigurator := compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections())
+	deploymentConfigurator := compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet)
+	compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient, certificateSecretConfigurator, configurationSecretConfigurator, compassConnectionConfigurator, deploymentConfigurator, gs.testConfig.TestingTenant)
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {

@@ -37,20 +37,20 @@ func (_m *DirectorClient) GetConnectionToken(runtimeID string) (string, string, 
 	return r0, r1, r2
 }
 
-// RegisterRuntime provides a mock function with given fields: appName
-func (_m *DirectorClient) RegisterRuntime(appName string) (string, error) {
-	ret := _m.Called(appName)
+// RegisterRuntime provides a mock function with given fields: runtimeName
+func (_m *DirectorClient) RegisterRuntime(runtimeName string) (string, error) {
+	ret := _m.Called(runtimeName)
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(appName)
+		r0 = rf(runtimeName)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(appName)
+		r1 = rf(runtimeName)
 	} else {
 		r1 = ret.Error(1)
 	}
