@@ -1,4 +1,6 @@
-package beb
+// todo integration
+
+package beb_test
 
 import (
 	"testing"
@@ -12,12 +14,14 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 )
 
 func Test_SyncBEBSubscription(t *testing.T) {
 	g := NewWithT(t)
 
-	credentials := &OAuth2ClientCredentials{
+	credentials := &beb.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
@@ -25,8 +29,8 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())
 
-	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
-	beb := NewBEB(credentials, nameMapper, defaultLogger)
+	nameMapper := utils.NewBEBSubscriptionNameMapper("mydomain.com", beb.MaxBEBSubscriptionNameLength)
+	beb := beb.NewBEB(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock
 	bebMock := startBEBMock()
