@@ -19,6 +19,7 @@ const (
 	orderUpdatedEventType         = "prefix." + "app." + "order.updated.v1"
 	orderDeletedEventType         = "prefix." + "noapp." + "order.deleted.v1"
 	orderDeletedEventTypeNonClean = "prefix." + "noapp." + "order.deleted_&.v1"
+	orderProcessedEventType       = "prefix." + "noapp." + "order.processed.v1"
 )
 
 const (
