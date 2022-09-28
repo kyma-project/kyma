@@ -123,17 +123,6 @@ func v1WithBEBStatusFields() eventingtesting.SubscriptionOpt {
 	}
 }
 
-// withEmptyFilter is a subscriptionOpt for creating a subscription with an empty event type filter.
-// Note that this is different from setting Filter to nil.
-func withEmptyFilter() eventingtesting.SubscriptionOpt {
-	return func(subscription *v1alpha1.Subscription) {
-		subscription.Spec.Filter = &v1alpha1.BEBFilters{
-			Filters: []*v1alpha1.BEBFilter{},
-		}
-		subscription.Status.InitializeCleanEventTypes()
-	}
-}
-
 func newV2DefaultSubscription(opts ...v2.SubscriptionOpt) *v1alpha2.Subscription {
 	newSub := &v1alpha2.Subscription{
 		TypeMeta: metav1.TypeMeta{
