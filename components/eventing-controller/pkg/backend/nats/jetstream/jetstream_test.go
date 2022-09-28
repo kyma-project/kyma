@@ -33,6 +33,7 @@ import (
 const (
 	defaultStreamName    = "kyma"
 	defaultMaxReconnects = 10
+	defaultMaxInFlights  = 10
 
 	// maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
 	// as per https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming
@@ -973,7 +974,7 @@ func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
 	subscriber.Shutdown() // shutdown the subscriber intentionally
 	require.False(t, subscriber.IsRunning())
 
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}
 	// create a new Subscription
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
@@ -1057,7 +1058,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 	subscriber := evtesting.NewSubscriber()
 	defer subscriber.Shutdown()
 	require.True(t, subscriber.IsRunning())
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}
 
 	testCases := []struct {
 		name                  string
@@ -1144,6 +1145,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 					evtestingv2.WithNotCleanEventSourceAndType(),
 					evtestingv2.WithSinkURL(subscriber.SinkURL),
 					evtestingv2.WithTypeMatchingStandard(),
+					evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 				)
 				require.NoError(t, jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2))
 
@@ -1243,7 +1245,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			require.True(t, subscriber.IsRunning())
 			listener := subscriber.GetSubscriberListener()
 			listenerNetwork, listenerAddress := listener.Addr().Network(), listener.Addr().String()
-			defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+			defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}
 
 			testEnvironment := setupTestEnvironment(t, newCRD)
 			defer testEnvironment.natsServer.Shutdown()
@@ -1269,6 +1271,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 					evtestingv2.WithNotCleanEventSourceAndType(),
 					evtestingv2.WithSinkURL(subscriber.SinkURL),
 					evtestingv2.WithTypeMatchingStandard(),
+					evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 				)
 				require.NoError(t, jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2))
 
@@ -1649,7 +1652,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithSinkURL(subscriber.SinkURL),
 				evtesting.WithEmptyFilter(),
-				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
+				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}),
 			},
 			givenManuallyDeleteSubscription: false,
 			wantNatsSubsLen:                 0,
@@ -1660,7 +1663,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
 				evtesting.WithFilter("", evtesting.NewOrderCreatedEventType),
-				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
+				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}),
 			},
 			givenManuallyDeleteSubscription: false,
 			wantNatsSubsLen:                 2,
@@ -1671,7 +1674,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			subOpts: []evtesting.SubscriptionOpt{
 				evtesting.WithFilter("", evtesting.OrderCreatedEventType),
 				evtesting.WithFilter("", evtesting.NewOrderCreatedEventType),
-				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}),
+				evtesting.WithStatusConfig(env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}),
 			},
 			givenManuallyDeleteSubscription: true,
 			givenFilterToDelete:             evtesting.NewOrderCreatedEventType,

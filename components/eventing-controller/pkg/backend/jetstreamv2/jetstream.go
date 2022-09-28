@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -333,7 +335,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := convertMsgToCE(msg)
+		ce, err := backendutils.ConvertMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return
@@ -423,6 +425,10 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *even
 // createConsumer creates a new consumer on NATS for each CleanEventType,
 // when there is no NATS subscription associated with the CleanEventType.
 func (js *JetStream) createConsumer(subscription *eventingv1alpha2.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
+	maxInFlight, err := subscription.GetMaxInFlightMessages()
+	if err != nil {
+		return err
+	}
 	for _, subject := range subscription.Status.Types {
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
@@ -447,7 +453,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha2.Subscription,
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
-			js.getDefaultSubscriptionOptions(jsSubKey, subscription.GetMaxInFlightMessages())..., // TODO: change to the new version
+			js.getDefaultSubscriptionOptions(jsSubKey, *maxInFlight)...,
 		)
 		if err != nil {
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)

@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	invalidSourceSegment = regexp.MustCompile(`[\s.>*]`)
+	invalidSourceCharacters = regexp.MustCompile(`[\s.>*]`)
 
-	invalidEventTypeSegment = regexp.MustCompile(`[\s>*]`)
+	invalidEventTypeCharacters = regexp.MustCompile(`[\s>*]`)
 )
 
 // Perform a compile-time check.
@@ -20,9 +20,9 @@ func NewJetStreamCleaner(logger *logger.Logger) Cleaner {
 }
 
 func (c *JetStreamCleaner) CleanSource(source string) (string, error) {
-	return invalidSourceSegment.ReplaceAllString(source, ""), nil
+	return invalidSourceCharacters.ReplaceAllString(source, ""), nil
 }
 
 func (c *JetStreamCleaner) CleanEventType(eventType string) (string, error) {
-	return invalidEventTypeSegment.ReplaceAllString(eventType, ""), nil
+	return invalidEventTypeCharacters.ReplaceAllString(eventType, ""), nil
 }

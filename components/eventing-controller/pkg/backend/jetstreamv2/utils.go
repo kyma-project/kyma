@@ -3,11 +3,9 @@ package jetstreamv2
 import (
 	"crypto/md5" // #nosec
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -126,8 +124,8 @@ func getUniqueEventTypes(eventTypes []string) []string {
 // getCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
 func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
-	if sub.Spec.Types == nil || sub.Spec.Source == "" {
-		return []eventingv1alpha2.EventType{}, errors.New("event source and types must be provided")
+	if sub.Spec.Types == nil {
+		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
 	}
 
 	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
@@ -148,6 +146,16 @@ func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Clea
 		cleanEventTypes = append(cleanEventTypes, newEventType)
 	}
 	return cleanEventTypes, nil
+}
+
+func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error) {
+	if len(eventType) == 0 {
+		return "", nats.ErrBadSubject
+	}
+	if segments := strings.Split(eventType, "."); len(segments) < 2 {
+		return "", nats.ErrBadSubject
+	}
+	return cleaner.CleanEventType(eventType)
 }
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
@@ -189,34 +197,4 @@ func computeConsumerName(subscription *eventingv1alpha2.Subscription, subject st
 // computeNamespacedSubjectName returns Kubernetes namespaced name of the given subscription along with the subject.
 func computeNamespacedSubjectName(subscription *eventingv1alpha2.Subscription, subject string) string {
 	return subscription.Namespace + separator + subscription.Name + separator + subject
-}
-
-//----------------------------------------
-// CloudEvent utils
-//----------------------------------------
-
-func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
-	event := cev2event.New(cev2event.CloudEventsVersionV1)
-	err := json.Unmarshal(msg.Data, &event)
-	if err != nil {
-		return nil, err
-	}
-	if err := event.Validate(); err != nil {
-		return nil, err
-	}
-	return &event, nil
-}
-
-//----------------------------------------
-// Testing utils
-//----------------------------------------
-
-func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error) {
-	if len(eventType) == 0 {
-		return "", nats.ErrBadSubject
-	}
-	if segments := strings.Split(eventType, "."); len(segments) < 2 {
-		return "", nats.ErrBadSubject
-	}
-	return cleaner.CleanEventType(eventType)
 }

@@ -20,6 +20,4 @@ const (
 	WebhookAuthClientSecret = "clientSecret"
 	WebhookAuthTokenURL     = "tokenUrl"
 	WebhookAuthScope        = "scope"
-
-	defaultMaxInFlightMessages = 10
 )

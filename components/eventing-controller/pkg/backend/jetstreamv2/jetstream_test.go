@@ -24,6 +24,7 @@ import (
 const (
 	defaultStreamName    = "kyma"
 	defaultMaxReconnects = 10
+	defaultMaxInFlights  = 10
 )
 
 // TestJetStream_SubscriptionDeletion tests the creation and deletion
@@ -47,6 +48,7 @@ func TestJetStream_SubscriptionDeletion(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -94,6 +96,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber1.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -181,6 +184,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber1.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -266,6 +270,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -363,6 +368,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -457,6 +463,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	// add a second filter
 	newType := sub.Spec.Types[0]
@@ -556,6 +563,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -570,6 +578,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtestingv2.WithCleanEventTypeOld(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingExact(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner))
 
@@ -675,6 +684,7 @@ func TestMultipleJSSubscriptionsToSameEvent(t *testing.T) {
 			evtestingv2.WithNotCleanEventSourceAndType(),
 			evtestingv2.WithSinkURL(subscriber.SinkURL),
 			evtestingv2.WithTypeMatchingStandard(),
+			evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 		)
 		require.NoError(t, AddJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner))
 		// when
@@ -726,6 +736,7 @@ func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -812,12 +823,12 @@ func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
 	subscriber.Shutdown() // shutdown the subscriber intentionally
 	require.False(t, subscriber.IsRunning())
 
-	// defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
 	// create a new Subscription
 	sub := evtestingv2.NewSubscription("sub", "foo",
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -871,6 +882,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 		evtestingv2.WithNotCleanEventSourceAndType(),
 		evtestingv2.WithSinkURL(subscriber.SinkURL),
 		evtestingv2.WithTypeMatchingStandard(),
+		evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 	)
 	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
@@ -919,6 +931,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 				evtestingv2.WithSinkURL(subscriber.SinkURL),
 				evtestingv2.WithNotCleanEventSourceAndType(),
 				evtestingv2.WithTypeMatchingStandard(),
+				evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 			},
 			givenManuallyDeleteSubscription: false,
 			wantNatsSubsLen:                 1,
@@ -930,6 +943,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 				evtestingv2.WithNotCleanEventSourceAndType(),
 				evtestingv2.WithCleanEventTypeOld(),
 				evtestingv2.WithTypeMatchingStandard(),
+				evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 			},
 			givenManuallyDeleteSubscription: false,
 			wantNatsSubsLen:                 2,
@@ -941,6 +955,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 				evtestingv2.WithNotCleanEventSourceAndType(),
 				evtestingv2.WithCleanEventTypeOld(),
 				evtestingv2.WithTypeMatchingStandard(),
+				evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 			},
 			givenManuallyDeleteSubscription: true,
 			givenFilterToDelete:             evtestingv2.OrderCreatedEventType,

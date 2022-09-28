@@ -11,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	"github.com/nats-io/nats.go"
+
 	"go.uber.org/zap"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -299,6 +302,18 @@ func APIRuleGroupVersionResource() schema.GroupVersionResource {
 		Group:    apigatewayv1beta1.GroupVersion.Group,
 		Resource: "apirules",
 	}
+}
+
+func ConvertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
+	event := cev2event.New(cev2event.CloudEventsVersionV1)
+	err := json.Unmarshal(msg.Data, &event)
+	if err != nil {
+		return nil, err
+	}
+	if err := event.Validate(); err != nil {
+		return nil, err
+	}
+	return &event, nil
 }
 
 // LoggerWithSubscription returns a logger with the given subscription details.

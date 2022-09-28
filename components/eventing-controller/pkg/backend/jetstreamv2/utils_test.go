@@ -196,14 +196,6 @@ func TestGetCleanEventTypes(t *testing.T) {
 		wantError         bool
 	}{
 		{
-			name: "Should throw an error if the source is empty",
-			givenSubscription: evtestingv2.NewSubscription("sub", "test",
-				evtestingv2.WithEventType(evtestingv2.OrderCreatedUncleanEvent),
-			),
-			wantEventTypes: []eventingv1alpha2.EventType{},
-			wantError:      true,
-		},
-		{
 			name: "Should throw an error if the eventType is empty",
 			givenSubscription: evtestingv2.NewSubscription("sub", "test",
 				evtestingv2.WithEventSource(evtestingv2.EventSourceUnclean),
@@ -284,6 +276,46 @@ func TestGetCleanEventTypes(t *testing.T) {
 			eventTypes, err := getCleanEventTypes(tc.givenSubscription, jscleaner)
 			require.Equal(t, tc.wantError, err != nil)
 			require.Equal(t, tc.wantEventTypes, eventTypes)
+		})
+	}
+}
+
+func TestCleanEventType(t *testing.T) {
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
+	testCases := []struct {
+		name           string
+		givenEventType string
+		wantEventType  string
+		wantError      bool
+	}{
+		{
+			name:           "Should throw an error if the event type is of length zero",
+			givenEventType: "",
+			wantEventType:  "",
+			wantError:      true,
+		},
+		{
+			name:           "Should throw an error if segments are less then two",
+			givenEventType: "onesegment",
+			wantEventType:  "",
+			wantError:      true,
+		},
+		{
+			name:           "Should return valid cleaned eventType",
+			givenEventType: evtestingv2.OrderCreatedUncleanEvent,
+			wantEventType:  evtestingv2.OrderCreatedCleanEvent,
+			wantError:      false,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			cleanEventType, err := getCleanEventType(tc.givenEventType, jsCleaner)
+			require.Equal(t, tc.wantError, err != nil)
+			require.Equal(t, tc.wantEventType, cleanEventType)
 		})
 	}
 }
