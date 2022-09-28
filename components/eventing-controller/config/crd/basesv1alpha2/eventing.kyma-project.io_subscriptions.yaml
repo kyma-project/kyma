@@ -55,57 +55,6 @@ spec:
               id:
                 description: ID is the unique identifier of Subscription, read-only
                 type: string
-              protocol:
-                description: todo check if we still need it or move it to config Protocol
-                  defines the CE protocol specification implementation
-                type: string
-              protocolsettings:
-                description: todo check if we still need it or move it to config ProtocolSettings
-                  defines the CE protocol setting specification implementation
-                properties:
-                  contentMode:
-                    description: ContentMode defines content mode for eventing based
-                      on BEB
-                    type: string
-                  exemptHandshake:
-                    description: ExemptHandshake defines whether exempt handshake
-                      for eventing based on BEB
-                    type: boolean
-                  qos:
-                    description: Qos defines quality of service for eventing based
-                      on BEB
-                    type: string
-                  webhookAuth:
-                    description: WebhookAuth defines the Webhook called by an active
-                      subscription in BEB
-                    properties:
-                      clientId:
-                        description: ClientID defines clientID for OAuth2
-                        type: string
-                      clientSecret:
-                        description: ClientSecret defines client secret for OAuth2
-                        type: string
-                      grantType:
-                        description: GrantType defines grant type for OAuth2
-                        type: string
-                      scope:
-                        description: Scope defines scope for OAuth2
-                        items:
-                          type: string
-                        type: array
-                      tokenUrl:
-                        description: TokenURL defines token URL for OAuth2
-                        type: string
-                      type:
-                        description: Type defines type of authentication
-                        type: string
-                    required:
-                    - clientId
-                    - clientSecret
-                    - grantType
-                    - tokenUrl
-                    type: object
-                type: object
               sink:
                 description: Sink defines endpoint of the subscriber
                 type: string
@@ -125,6 +74,7 @@ spec:
             required:
             - sink
             - source
+            - types
             type: object
           status:
             description: SubscriptionStatus defines the observed state of Subscription
@@ -178,9 +128,6 @@ spec:
                     description: FailedActivation defines the reason if a Subscription
                       had failed activation in BEB
                     type: string
-                  maxInFlightMessages:
-                    minimum: 1
-                    type: integer
                   types:
                     items:
                       properties:
@@ -189,7 +136,6 @@ spec:
                         originalType:
                           type: string
                       required:
-                      - consumerName
                       - originalType
                       type: object
                     type: array
