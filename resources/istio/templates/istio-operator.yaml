@@ -9,10 +9,6 @@ spec:
   tag: {{ .Values.global.images.istio_pilot.version }}
   profile: default
   components:
-    cni:
-      enabled: {{ .Values.components.cni.enabled }}
-      k8s:
-{{- toYaml .Values.components.cni.config | nindent 8}}  
     egressGateways:
     - enabled: {{ .Values.components.egressGateways.enabled }}
       k8s:
@@ -41,8 +37,6 @@ spec:
   values:
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}
-    cni:
-{{- toYaml .Values.helmValues.cni | nindent 8 }}
     pilot:
 {{- toYaml .Values.helmValues.pilot | nindent 8 }}
     sidecarInjectorWebhook:

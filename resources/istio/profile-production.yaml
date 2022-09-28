@@ -16,25 +16,6 @@ helmValues:
           memory: 1024Mi
 
 components:
-  cni:
-    enabled: true
-    config:
-      hpaSpec:
-        maxReplicas: 5
-        minReplicas: 2
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - istio-cni
-              topologyKey: "kubernetes.io/hostname"
-
   ingressGateways:
     enabled: true
     config:
