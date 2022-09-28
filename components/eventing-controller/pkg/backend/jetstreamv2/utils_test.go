@@ -1,6 +1,9 @@
 package jetstreamv2
 
 import (
+	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/nats-io/nats.go"
 	"reflect"
 	"testing"
 
@@ -14,7 +17,171 @@ import (
 
 // maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
 // as per https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming
-const maxJetStreamConsumerNameLength = 32
+const (
+	subName                        = "subName"
+	subNamespace                   = "subNamespace"
+	maxJetStreamConsumerNameLength = 32
+)
+
+func TestToJetStreamStorageType(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name             string
+		givenStorageType string
+		wantStorageType  nats.StorageType
+		wantError        bool
+	}{
+		{
+			name:             "memory storage type",
+			givenStorageType: StorageTypeMemory,
+			wantStorageType:  nats.MemoryStorage,
+			wantError:        false,
+		},
+		{
+			name:             "file storage type",
+			givenStorageType: StorageTypeFile,
+			wantStorageType:  nats.FileStorage,
+			wantError:        false,
+		},
+		{
+			name:             "invalid storage type",
+			givenStorageType: "",
+			wantStorageType:  nats.MemoryStorage,
+			wantError:        true,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			storageType, err := toJetStreamStorageType(tc.givenStorageType)
+			require.Equal(t, tc.wantError, err != nil)
+			require.Equal(t, tc.wantStorageType, storageType)
+		})
+	}
+}
+
+func TestToJetStreamRetentionPolicy(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name                 string
+		givenRetentionPolicy string
+		wantSRetentionPolicy nats.RetentionPolicy
+		wantError            bool
+	}{
+		{
+			name:                 "retention policy limits",
+			givenRetentionPolicy: RetentionPolicyLimits,
+			wantSRetentionPolicy: nats.LimitsPolicy,
+			wantError:            false,
+		},
+		{
+			name:                 "retention policy interest",
+			givenRetentionPolicy: RetentionPolicyInterest,
+			wantSRetentionPolicy: nats.InterestPolicy,
+			wantError:            false,
+		},
+		{
+			name:                 "invalid retention policy",
+			givenRetentionPolicy: "",
+			wantSRetentionPolicy: nats.LimitsPolicy,
+			wantError:            true,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			retentionPolicy, err := toJetStreamRetentionPolicy(tc.givenRetentionPolicy)
+			require.Equal(t, tc.wantError, err != nil)
+			require.Equal(t, tc.wantSRetentionPolicy, retentionPolicy)
+		})
+	}
+}
+
+func TestGetStreamConfig(t *testing.T) {
+	testCases := []struct {
+		name             string
+		givenNatsConfig  env.NatsConfig
+		wantStreamConfig *nats.StreamConfig
+		wantError        bool
+	}{
+		{
+			name: "Should throw an error if storage type is invalid",
+			givenNatsConfig: env.NatsConfig{
+				JSStreamStorageType: "invalid",
+			},
+			wantStreamConfig: nil,
+			wantError:        true,
+		},
+		{
+			name: "Should throw an error if retention policy is invalid",
+			givenNatsConfig: env.NatsConfig{
+				JSStreamRetentionPolicy: "invalid",
+			},
+			wantStreamConfig: nil,
+			wantError:        true,
+		},
+		{
+			name: "Should return valid StreamConfig",
+			givenNatsConfig: env.NatsConfig{
+				JSStreamName:            defaultStreamName,
+				JSStreamStorageType:     StorageTypeMemory,
+				JSStreamRetentionPolicy: RetentionPolicyLimits,
+				JSStreamReplicas:        3,
+				JSStreamMaxMessages:     -1,
+				JSStreamMaxBytes:        -1,
+			},
+			wantStreamConfig: &nats.StreamConfig{
+				Name:      defaultStreamName,
+				Storage:   nats.MemoryStorage,
+				Replicas:  3,
+				Retention: nats.LimitsPolicy,
+				MaxMsgs:   -1,
+				MaxBytes:  -1,
+				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+			},
+			wantError: false,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			streamConfig, err := getStreamConfig(tc.givenNatsConfig)
+			require.Equal(t, tc.wantError, err != nil)
+			require.Equal(t, tc.wantStreamConfig, streamConfig)
+		})
+	}
+}
+
+func TestCreateKeyPrefix(t *testing.T) {
+	//given
+	sub := evtestingv2.NewSubscription(subName, subNamespace)
+	//when
+	keyPrefix := createKeyPrefix(sub)
+	//then
+	require.Equal(t, keyPrefix, fmt.Sprintf("%s/%s", subNamespace, subName))
+}
+
+func TestGetCleanEventTypesFromStatus(t *testing.T) {
+	//given
+	sub := evtestingv2.NewSubscription(subName, subNamespace)
+	sub.Status.Types = []eventingv1alpha2.EventType{
+		{
+			OriginalType: evtestingv2.OrderCreatedUncleanEvent,
+			CleanType:    evtestingv2.OrderCreatedCleanEvent,
+		},
+		{
+			OriginalType: evtestingv2.OrderCreatedEventTypeNotClean,
+			CleanType:    evtestingv2.OrderCreatedEventType,
+		},
+	}
+	//when
+	cleanTypes := getCleanEventTypesFromStatus(sub.Status)
+	//then
+	require.Equal(t, cleanTypes, []string{evtestingv2.OrderCreatedCleanEvent, evtestingv2.OrderCreatedEventType})
+}
 
 func TestGetCleanEventTypes(t *testing.T) {
 	t.Parallel()
