@@ -22,9 +22,13 @@ If there are issues with the Istio sidecar, you can check whether there is an [i
 
 ## Check whether your workloads have automatic Istio sidecar injection enabled
 
-You can easily check whether your workloads have automatic Istio sidecar injection enabled by running [this script](../assets/sidecar-analysis.sh). You can either pass a namespace parameter to the script or run with no parameter. If no parameter is passed execution output will contain pods in all namespaces that don't have automatic Istio sidecar injection enabled, whereas passing the parameter will result in analysis of only the given namespace.
+You can easily check whether your workloads have automatic Istio sidecar injection enabled by running [this script](../assets/sidecar-analysis.sh). You can either pass a namespace parameter to the script or run with no parameter.
 
-* Run the script
+If no parameter is passed execution output will contain pods in all namespaces that don't have automatic Istio sidecar injection enabled, whereas passing the parameter will result in analysis of only the given namespace.
+
+The script outputs the information in `{namespace}/{pod}` if run for all namespaces and in `{pod}` form for specific namespace
+
+* Running the script
 
 ```bash
 ./sidecar-analysis.sh {namespace}
@@ -32,25 +36,21 @@ You can easily check whether your workloads have automatic Istio sidecar injecti
 
 * Example output
 
-```bash
-./sidecar-analysis.sh
-```
+  * `./sidecar-analysis.sh`
 
-```yaml
-Pods out of istio mesh:
-  In namespace labeled with "istio-injection=disabled":
-    - sidecar-disabled/httpbin-74fb669cc6-kmxch
-  In namespace labeled with "istio-injection=enabled" with pod labeled with "sidecar.istio.io/inject=false":
-    - sidecar-enabled/httpbin-6cd67b48bf-88ngr
-  In not labeled ns with pod not labeled with "sidecar.istio.io inject=true":
-    - default/httpbin-74fb669cc6-vqxtw
-```
+  ```
+  Pods out of istio mesh:
+    In namespace labeled with "istio-injection=disabled":
+      - sidecar-disabled/some-pod
+    In namespace labeled with "istio-injection=enabled" with pod labeled with "sidecar.istio.io/inject=false":
+      - sidecar-enabled/some-pod
+    In not labeled ns with pod not labeled with "sidecar.istio.io inject=true":
+      - no-label/some-pod
+  ```
 
-```bash
-./sidecar-analysis.sh default
-```
+  * `./sidecar-analysis.sh some-namespace`
 
-```yaml
-Pods out of istio mesh in namespace default:
-  - httpbin-74fb669cc6-vqxtw
-```
+  ```
+  Pods out of istio mesh in namespace some-namespace:
+    - some-pod
+  ```
