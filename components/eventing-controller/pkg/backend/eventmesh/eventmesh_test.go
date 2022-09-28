@@ -610,7 +610,6 @@ func Test_SyncSubscription(t *testing.T) {
 	err = eventMesh.Initialize(envConf)
 	require.NoError(t, err)
 
-	// when
 	subscription := fixtureValidSubscription("some-name", "some-namespace")
 	subscription.Status.Backend.Emshash = 0
 	subscription.Status.Backend.Ev2hash = 0
@@ -620,10 +619,41 @@ func Test_SyncSubscription(t *testing.T) {
 		controllertestingv2.WithService("foo-svc", "foo-host"),
 	)
 
-	// then
-	changed, err := eventMesh.SyncSubscription(subscription, cleaner.NewEventMeshCleaner(defaultLogger), apiRule)
-	require.NoError(t, err)
-	require.True(t, changed)
+	// cases - reconcile same subscription multiple times
+	testCases := []struct {
+		name           string
+		givenEventType string
+		wantIsChanged  bool
+	}{
+		{
+			name:           "should be able to sync first time",
+			givenEventType: controllertestingv2.OrderCreatedEventTypeNotClean,
+			wantIsChanged:  true,
+		},
+		{
+			name:           "should be able to sync second time with same subscription",
+			givenEventType: controllertestingv2.OrderCreatedEventTypeNotClean,
+			wantIsChanged:  false,
+		},
+		{
+			name:           "should be able to sync third time with modified subscription",
+			givenEventType: controllertestingv2.OrderCreatedV2Event,
+			wantIsChanged:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// when
+			subscription.Spec.Types[0] = tc.givenEventType
+			changed, err := eventMesh.SyncSubscription(subscription, cleaner.NewEventMeshCleaner(defaultLogger), apiRule)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantIsChanged, changed)
+		})
+	}
+
+	// cleanup
 	eventMeshMock.Stop()
 }
 
