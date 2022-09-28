@@ -1,3 +1,9 @@
+module.exports = {
+  monitoringTests,
+  exposeGrafana,
+  unexposeGrafana,
+};
+
 const {
   getEnvOrDefault,
 } = require('../utils');
@@ -10,7 +16,7 @@ function monitoringTests() {
   }
 
   describe('Grafana Tests:', async function() {
-    this.timeout(5 * 60 * 1000); // 5 min
+    this.timeout(5 * 60 * 1000);
     this.slow(5 * 1000);
 
     it('Grafana pods should be ready', async () => {
@@ -23,7 +29,7 @@ function monitoringTests() {
   });
 
   describe('Prometheus Tests:', function() {
-    this.timeout(5 * 60 * 1000); // 5 min
+    this.timeout(5 * 60 * 1000);
     this.slow(5000);
 
     it('Prometheus pods should be ready', async () => {
@@ -71,9 +77,3 @@ async function unexposeGrafana(isSkr = false) {
 
   await grafana.resetGrafanaProxy(isSkr);
 }
-
-module.exports = {
-  monitoringTests,
-  exposeGrafana,
-  unexposeGrafana,
-};

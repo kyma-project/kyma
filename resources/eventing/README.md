@@ -42,18 +42,12 @@ $ helm install \
 kyma deploy --source=local --workspace <KYMA_DIR_PATH> --component=eventing
 ```
 
-To install Eventing with NATS JetStream enabled, run:
-```bash
-kyma deploy --source=local --value global.jetstream.enabled=true --workspace <KYMA_DIR_PATH> --component=eventing
-```
-
 ### Configuring NATS JetStream persistence
 
 The persistence used for the stream in the JetStream backend is configurable using the Eventing Helm chart. By default, you can use the `memory` storage type in the evaluation profile and `file` in the production profile. You can customize it further by passing different values to the `kyma deploy` command. For example, to install the production profile with the `memory` storage type of `2Gi` use:
 
 ```bash
 kyma deploy --profile production \
- --value global.jetstream.enabled=true \
  --value global.jetstream.storage=memory \
  --value eventing.nats.nats.jetstream.memStorage.size=2Gi
 ```

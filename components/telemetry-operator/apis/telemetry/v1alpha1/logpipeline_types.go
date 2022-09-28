@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -179,6 +180,10 @@ type SecretKeyRef struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 	Key       string `json:"key,omitempty"`
+}
+
+func (skr *SecretKeyRef) NamespacedName() types.NamespacedName {
+	return types.NamespacedName{Name: skr.Name, Namespace: skr.Namespace}
 }
 
 type LogPipelineConditionType string
