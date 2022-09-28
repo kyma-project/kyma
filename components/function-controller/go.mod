@@ -20,7 +20,7 @@ replace (
 require (
 	github.com/go-logr/zapr v1.2.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20220602092229-f2e29f34ed5e
-	github.com/libgit2/git2go/v31 v31.4.14
+	github.com/libgit2/git2go/v31 v31.7.9
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.1

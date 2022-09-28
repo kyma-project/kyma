@@ -198,11 +198,12 @@ func convertTemplateLabelsV1alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, ou
 }
 
 func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
+	buildResourcesPresetValue, buildResourcesPresetExists := in.ObjectMeta.Labels[serverlessv1alpha1.BuildResourcesPresetLabel]
 	functionResourcesPresetValue, functionResourcesPresetExists := in.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel]
 	buildResourcesExists := len(in.Spec.BuildResources.Limits) != 0 || len(in.Spec.BuildResources.Requests) != 0
 	functionResourcesExists := len(in.Spec.Resources.Limits) != 0 || len(in.Spec.Resources.Requests) != 0
 
-	buildResourcesNeeded := buildResourcesExists
+	buildResourcesNeeded := buildResourcesExists || buildResourcesPresetExists
 	functionResourcesNeeded := functionResourcesExists || functionResourcesPresetExists
 	if (functionResourcesNeeded || buildResourcesNeeded) && out.Spec.ResourceConfiguration == nil {
 		out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
@@ -219,6 +220,10 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 	}
 	if functionResourcesExists {
 		out.Spec.ResourceConfiguration.Function.Resources = &in.Spec.Resources
+	}
+	if buildResourcesPresetExists {
+		out.Spec.ResourceConfiguration.Build.Profile = buildResourcesPresetValue
+		delete(out.ObjectMeta.Labels, serverlessv1alpha2.BuildResourcesPresetLabel)
 	}
 	if functionResourcesPresetExists {
 		out.Spec.ResourceConfiguration.Function.Profile = functionResourcesPresetValue
@@ -341,8 +346,20 @@ func convertResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *se
 }
 
 func convertBuildResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
-	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil && in.Spec.ResourceConfiguration.Build.Resources != nil {
-		out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
+	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil {
+		if in.Spec.ResourceConfiguration.Build.Resources != nil {
+			out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
+		}
+		convertBuildResourcesProfileV1Alpha2ToV1Alpha1(in, out)
+	}
+}
+
+func convertBuildResourcesProfileV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	if in.Spec.ResourceConfiguration.Build.Profile != "" {
+		if out.ObjectMeta.Labels == nil {
+			out.ObjectMeta.Labels = map[string]string{}
+		}
+		out.ObjectMeta.Labels[serverlessv1alpha1.BuildResourcesPresetLabel] = in.Spec.ResourceConfiguration.Build.Profile
 	}
 }
 

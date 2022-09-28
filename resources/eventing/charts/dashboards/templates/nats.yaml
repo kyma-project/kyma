@@ -1,4 +1,3 @@
-{{ if .Values.global.jetstream.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -901,4 +900,3 @@ data:
        "uid": "a4aad1fcb4bc11ecb9090242ac120002",
        "version": 5
      }`}}
-{{- end }}
