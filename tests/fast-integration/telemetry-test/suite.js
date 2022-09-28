@@ -151,7 +151,7 @@ describe('Telemetry Operator', function() {
         });
       });
 
-      context('Custom HTTP Output', function() {
+      context('Custom Output', function() {
         const pipeline = loadTestData('logpipeline-output-custom.yaml');
         const pipelineName = pipeline[0].metadata.name;
 
