@@ -2,9 +2,10 @@ package v2
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"net/url"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 
 	"golang.org/x/xerrors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"

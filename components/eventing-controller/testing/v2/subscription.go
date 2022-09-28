@@ -3,17 +3,51 @@ package v2
 import (
 	"fmt"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
+func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *v1alpha2.Subscription {
+	newSub := &v1alpha2.Subscription{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1alpha2.SubscriptionSpec{},
+	}
+	for _, o := range opts {
+		o(newSub)
+	}
+	return newSub
+}
+
 type SubscriptionOpt func(subscription *v1alpha2.Subscription)
+
+func WithConditions(conditions []v1alpha2.Condition) SubscriptionOpt {
+	return func(sub *v1alpha2.Subscription) {
+		sub.Status.Conditions = conditions
+	}
+}
+
+func WithStatus(status bool) SubscriptionOpt {
+	return func(sub *v1alpha2.Subscription) {
+		sub.Status.Ready = status
+	}
+}
 
 func WithMaxInFlight(maxInFlight string) SubscriptionOpt {
 	return func(sub *v1alpha2.Subscription) {
 		sub.Spec.Config = map[string]string{
 			v1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
 		}
+	}
+}
+
+func WithSink(sink string) SubscriptionOpt {
+	return func(sub *v1alpha2.Subscription) {
+		sub.Spec.Sink = sink
 	}
 }
 
