@@ -42,13 +42,13 @@ Follow the instructions to expose and access your unsecured instance of the Http
 
 1. Create a Namespace for the Gateway and APIRule CRs. Run:
 
+   >**NOTE:** Skip this step if you already have a Namespace.
+
    ```bash
    export NAMESPACE={NAMESPACE}
    kubectl create ns $NAMESPACE
    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
-
-   >**NOTE:** Skip this step if you already have a Namespace.
 
 2. Export the following values as environment variables:
 
