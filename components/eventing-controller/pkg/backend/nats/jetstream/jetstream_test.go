@@ -1577,3 +1577,55 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 		})
 	}
 }
+
+// TestJetStream_CheckConsumerConfig that the latest Subscription Config changes will be propagated to the consumer.
+func TestJetStream_CheckConsumerConfig(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// set the initial MaxInFlight
+	initialMaxInFlight := 10
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: initialMaxInFlight}
+
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL("test.svc.local"),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+
+	// init the required strings
+	jsSubject := jsBackend.GetJetStreamSubject(sub.Status.CleanEventTypes[0])
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+
+	// when
+	require.NoError(t, jsBackend.SyncSubscription(sub))
+
+	// then
+	// check that the consumer info war created with the expected maxAckPending value
+	consumerInfo, _ := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
+	require.NotNil(t, consumerInfo)
+	require.Equal(t, consumerInfo.Config.MaxAckPending, initialMaxInFlight)
+
+	// given
+	// set the new MaxInFlight value in the Subscription
+	newMaxInFlight := 20
+	sub.Status.Config.MaxInFlightMessages = newMaxInFlight
+
+	// when
+	require.NoError(t, jsBackend.SyncSubscription(sub))
+
+	// then
+	// check that the new value was propagated dto the consumer
+	consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
+	require.NotNil(t, consumerInfo)
+	require.NoError(t, err)
+
+	require.Equal(t, consumerInfo.Config.MaxAckPending, newMaxInFlight)
+}

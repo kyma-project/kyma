@@ -177,10 +177,50 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		return err
 	}
 
+	if err := js.checkSubscriptionConfig(subscription, log); err != nil {
+		return err
+	}
+
 	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+// CheckSubscriptionConfig checks that the latest Subscription Config changes are propagated to the consumer.
+// In our case config contains only the "maxInFlightMessages" property, which is the maxAckPending on the consumer side.
+func (js *JetStream) checkSubscriptionConfig(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	for _, subject := range subscription.Status.CleanEventTypes {
+		jsSubject := js.GetJetStreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		log := log.With("subject", subject)
+
+		if _, ok := js.subscriptions[jsSubKey]; !ok {
+			continue
+		}
+
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get the consumer info", "error", err)
+			return err
+		}
+
+		// skip the up-to-date consumers
+		if consumerInfo.Config.MaxAckPending == subscription.Status.Config.MaxInFlightMessages {
+			continue
+		}
+
+		// set the new maxInFlight value
+		consumerConfig := consumerInfo.Config
+		consumerConfig.MaxAckPending = subscription.Status.Config.MaxInFlightMessages
+
+		// update the consumer
+		if _, err := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); err != nil {
+			log.Errorw("Failed to update the consumer", "error", err)
+			return err
+		}
+	}
 	return nil
 }
 
