@@ -229,10 +229,8 @@ func (src *Subscription) natsSpecConfigToV1(dst *v1alpha2.Subscription) error {
 		if err != nil {
 			return err
 		}
-		if err == nil {
-			src.Spec.Config = &SubscriptionConfig{
-				MaxInFlightMessages: intVal,
-			}
+		src.Spec.Config = &SubscriptionConfig{
+			MaxInFlightMessages: intVal,
 		}
 	}
 	return nil

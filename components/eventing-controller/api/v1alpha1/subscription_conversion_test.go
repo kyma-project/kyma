@@ -26,7 +26,7 @@ func Test_Conversion(t *testing.T) {
 			alpha2Sub: v1alpha2.NewDefaultSubscription(),
 		},
 		{
-			name: "Converting NATS Subscription with multiple source which should result in a conversion error",
+			name: "Converting NATS Subscription with multiple sources which should result in a conversion error",
 			alpha1Sub: NewDefaultSubscription(
 				WithFilter("app", OrderUpdatedEventType),
 				WithFilter("", OrderDeletedEventTypeNonClean),
