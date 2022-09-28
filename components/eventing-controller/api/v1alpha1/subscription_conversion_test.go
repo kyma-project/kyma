@@ -1,8 +1,9 @@
-package v1alpha1
+package v1alpha1_test
 
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,7 @@ import (
 func Test_Conversion(t *testing.T) {
 	type TestCase struct {
 		name             string
-		alpha1Sub        *Subscription
+		alpha1Sub        *v1alpha1.Subscription
 		alpha2Sub        *v1alpha2.Subscription
 		wantErrMsgV1toV2 string
 		wantErrMsgV2toV1 string
@@ -20,74 +21,74 @@ func Test_Conversion(t *testing.T) {
 	testCases := []TestCase{
 		{
 			name: "Converting NATS Subscription with empty Filters",
-			alpha1Sub: NewDefaultSubscription(
-				WithEmptyFilter(),
+			alpha1Sub: newDefaultSubscription(
+				withEmptyFilter(),
 			),
-			alpha2Sub: v1alpha2.NewDefaultSubscription(),
+			alpha2Sub: newV2DefaultSubscription(),
 		},
 		{
-			name: "Converting NATS Subscription with multiple sources which should result in a conversion error",
-			alpha1Sub: NewDefaultSubscription(
-				WithFilter("app", OrderUpdatedEventType),
-				WithFilter("", OrderDeletedEventTypeNonClean),
+			name: "Converting NATS Subscription with multiple source which should result in a conversion error",
+			alpha1Sub: newDefaultSubscription(
+				withFilter("app", orderUpdatedEventType),
+				withFilter("", orderDeletedEventTypeNonClean),
 			),
-			alpha2Sub:        v1alpha2.NewDefaultSubscription(),
-			wantErrMsgV1toV2: errorMultipleSourceMsg,
+			alpha2Sub:        newV2DefaultSubscription(),
+			wantErrMsgV1toV2: v1alpha1.ErrorMultipleSourceMsg,
 		},
 		{
 			name: "Converting NATS Subscription with non-convertable maxInFlight in the config which should result in a conversion error",
-			alpha1Sub: NewDefaultSubscription(
-				WithFilter("", OrderUpdatedEventType),
+			alpha1Sub: newDefaultSubscription(
+				withFilter("", orderUpdatedEventType),
 			),
-			alpha2Sub: v1alpha2.NewDefaultSubscription(
-				v1alpha2.WithMaxInFlight("nonint"),
+			alpha2Sub: newV2DefaultSubscription(
+				v2WithMaxInFlight("nonint"),
 			),
 			wantErrMsgV2toV1: "strconv.Atoi: parsing \"nonint\": invalid syntax",
 		},
 		{
 			name: "Converting NATS Subscription with Filters",
-			alpha1Sub: NewDefaultSubscription(
-				WithFilter(EventSource, OrderCreatedEventType),
-				WithFilter(EventSource, OrderUpdatedEventType),
-				WithFilter(EventSource, OrderDeletedEventTypeNonClean),
-				WithStatusCleanEventTypes([]string{
-					OrderCreatedEventType,
-					OrderUpdatedEventType,
-					OrderDeletedEventType,
+			alpha1Sub: newDefaultSubscription(
+				withFilter(eventSource, orderCreatedEventType),
+				withFilter(eventSource, orderUpdatedEventType),
+				withFilter(eventSource, orderDeletedEventTypeNonClean),
+				withStatusCleanEventTypes([]string{
+					orderCreatedEventType,
+					orderUpdatedEventType,
+					orderDeletedEventType,
 				}),
 			),
-			alpha2Sub: v1alpha2.NewDefaultSubscription(
-				v1alpha2.WithSource(EventSource),
-				v1alpha2.WithTypes([]string{
-					OrderCreatedEventType,
-					OrderUpdatedEventType,
-					OrderDeletedEventTypeNonClean,
+			alpha2Sub: newV2DefaultSubscription(
+				v2WithSource(eventSource),
+				v2WithTypes([]string{
+					orderCreatedEventType,
+					orderUpdatedEventType,
+					orderDeletedEventTypeNonClean,
 				}),
-				v1alpha2.WithStatusTypes([]v1alpha2.EventType{
+				v2WithStatusTypes([]v1alpha2.EventType{
 					{
-						OriginalType: OrderCreatedEventType,
-						CleanType:    OrderCreatedEventType,
+						OriginalType: orderCreatedEventType,
+						CleanType:    orderCreatedEventType,
 					},
 					{
-						OriginalType: OrderUpdatedEventType,
-						CleanType:    OrderUpdatedEventType,
+						OriginalType: orderUpdatedEventType,
+						CleanType:    orderUpdatedEventType,
 					},
 					{
-						OriginalType: OrderDeletedEventTypeNonClean,
-						CleanType:    OrderDeletedEventType,
+						OriginalType: orderDeletedEventTypeNonClean,
+						CleanType:    orderDeletedEventType,
 					},
 				}),
-				v1alpha2.WithStatusJetStreamTypes([]v1alpha2.JetStreamTypes{
+				v2WithStatusJetStreamTypes([]v1alpha2.JetStreamTypes{
 					{
-						OriginalType: OrderCreatedEventType,
+						OriginalType: orderCreatedEventType,
 						ConsumerName: "",
 					},
 					{
-						OriginalType: OrderUpdatedEventType,
+						OriginalType: orderUpdatedEventType,
 						ConsumerName: "",
 					},
 					{
-						OriginalType: OrderDeletedEventTypeNonClean,
+						OriginalType: orderDeletedEventTypeNonClean,
 						ConsumerName: "",
 					},
 				}),
@@ -95,43 +96,43 @@ func Test_Conversion(t *testing.T) {
 		},
 		{
 			name: "Converting BEB Subscription",
-			alpha1Sub: NewDefaultSubscription(
-				WithProtocolBEB(),
-				WithWebhookAuthForBEB(),
-				WithFilter(EventSource, OrderCreatedEventType),
-				WithFilter(EventSource, OrderUpdatedEventType),
-				WithFilter(EventSource, OrderDeletedEventTypeNonClean),
-				WithStatusCleanEventTypes([]string{
-					OrderCreatedEventType,
-					OrderUpdatedEventType,
-					OrderDeletedEventType,
+			alpha1Sub: newDefaultSubscription(
+				withProtocolBEB(),
+				withWebhookAuthForBEB(),
+				withFilter(eventSource, orderCreatedEventType),
+				withFilter(eventSource, orderUpdatedEventType),
+				withFilter(eventSource, orderDeletedEventTypeNonClean),
+				withStatusCleanEventTypes([]string{
+					orderCreatedEventType,
+					orderUpdatedEventType,
+					orderDeletedEventType,
 				}),
-				WithBEBStatusFields(),
+				withBEBStatusFields(),
 			),
-			alpha2Sub: v1alpha2.NewDefaultSubscription(
-				v1alpha2.WithSource(EventSource),
-				v1alpha2.WithTypes([]string{
-					OrderCreatedEventType,
-					OrderUpdatedEventType,
-					OrderDeletedEventTypeNonClean,
+			alpha2Sub: newV2DefaultSubscription(
+				v2WithSource(eventSource),
+				v2WithTypes([]string{
+					orderCreatedEventType,
+					orderUpdatedEventType,
+					orderDeletedEventTypeNonClean,
 				}),
-				v1alpha2.WithProtocolBEB(),
-				v1alpha2.WithWebhookAuthForBEB(),
-				v1alpha2.WithStatusTypes([]v1alpha2.EventType{
+				v2WithProtocolBEB(),
+				v2WithWebhookAuthForBEB(),
+				v2WithStatusTypes([]v1alpha2.EventType{
 					{
-						OriginalType: OrderCreatedEventType,
-						CleanType:    OrderCreatedEventType,
+						OriginalType: orderCreatedEventType,
+						CleanType:    orderCreatedEventType,
 					},
 					{
-						OriginalType: OrderUpdatedEventType,
-						CleanType:    OrderUpdatedEventType,
+						OriginalType: orderUpdatedEventType,
+						CleanType:    orderUpdatedEventType,
 					},
 					{
-						OriginalType: OrderDeletedEventTypeNonClean,
-						CleanType:    OrderDeletedEventType,
+						OriginalType: orderDeletedEventTypeNonClean,
+						CleanType:    orderDeletedEventType,
 					},
 				}),
-				v1alpha2.WithBEBStatusFields(),
+				v2WithBEBStatusFields(),
 			),
 		},
 	}
@@ -145,7 +146,7 @@ func Test_Conversion(t *testing.T) {
 					return
 				}
 				convertedV1Alpha2 := &v1alpha2.Subscription{}
-				err := v1ToV2(testCase.alpha1Sub, convertedV1Alpha2)
+				err := v1alpha1.V1ToV2(testCase.alpha1Sub, convertedV1Alpha2)
 				if err != nil && testCase.wantErrMsgV1toV2 != "" {
 					require.Equal(t, err.Error(), testCase.wantErrMsgV1toV2)
 				} else {
@@ -160,8 +161,8 @@ func Test_Conversion(t *testing.T) {
 				if testCase.wantErrMsgV1toV2 != "" {
 					return
 				}
-				convertedV1Alpha1 := &Subscription{}
-				err := v2ToV1(convertedV1Alpha1, testCase.alpha2Sub)
+				convertedV1Alpha1 := &v1alpha1.Subscription{}
+				err := v1alpha1.V2ToV1(convertedV1Alpha1, testCase.alpha2Sub)
 				if err != nil && testCase.wantErrMsgV2toV1 != "" {
 					require.Equal(t, err.Error(), testCase.wantErrMsgV2toV1)
 				} else {
@@ -193,7 +194,7 @@ func v1ToV2Assertions(t *testing.T, wantSub, convertedSub *v1alpha2.Subscription
 	assert.Equal(t, wantSub.Status.Backend, convertedSub.Status.Backend)
 }
 
-func v2ToV1Assertions(t *testing.T, wantSub, convertedSub *Subscription) {
+func v2ToV1Assertions(t *testing.T, wantSub, convertedSub *v1alpha1.Subscription) {
 	assert.Equal(t, wantSub.ObjectMeta, convertedSub.ObjectMeta)
 
 	// Spec
