@@ -58,7 +58,7 @@ Follow the instructions to expose and access your unsecured instance of the Http
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com. If you don't want to use your custom domain, replace `DOMAIN_NAME` with a Kyma domain and `$NAMESPACE/httpbin-gateway` with Kyma's default Gateway `kyma-system/kyma-gateway`
 
-3. Expose the HttpBin service and the Function service by creating an APIRule CR in their respective Namespaces. Run:
+3. Expose the HttpBin and Function services in their respective Namespaces by creating an APIRule CR which is in its own namespace. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
