@@ -67,6 +67,7 @@ deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ##
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths=$(MANIFEST_PATH) output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) crd rbac:roleName=manager-role webhook paths="./api/v1alpha2" output:crd:artifacts:config=config/crd/basesv1alpha2 # used in reconciler testing
 
 generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
