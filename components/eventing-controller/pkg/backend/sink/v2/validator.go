@@ -1,18 +1,18 @@
-package sink
+package v2
 
 import (
 	"context"
 	"net/url"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
+
 	"golang.org/x/xerrors"
-	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
@@ -23,13 +23,13 @@ const (
 )
 
 type Validator interface {
-	Validate(subscription *v1alpha1.Subscription) error
+	Validate(subscription *v1alpha2.Subscription) error
 }
 
 // ValidatorFunc implements the Validator interface.
-type ValidatorFunc func(*v1alpha1.Subscription) error
+type ValidatorFunc func(*v1alpha2.Subscription) error
 
-func (vf ValidatorFunc) Validate(sub *v1alpha1.Subscription) error {
+func (vf ValidatorFunc) Validate(sub *v1alpha2.Subscription) error {
 	return vf(sub)
 }
 
@@ -47,8 +47,8 @@ func NewValidator(ctx context.Context, client client.Client, recorder record.Eve
 	return &defaultSinkValidator{ctx: ctx, client: client, recorder: recorder, logger: logger}
 }
 
-func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) error {
-	if !IsValidScheme(subscription.Spec.Sink) {
+func (s defaultSinkValidator) Validate(subscription *v1alpha2.Subscription) error {
+	if !sink.IsValidScheme(subscription.Spec.Sink) {
 		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
 		return xerrors.Errorf(MissingSchemeErrMsg)
 	}
@@ -82,7 +82,7 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) erro
 
 	// Validate svc is a cluster-local one
 	svcName := subDomains[0]
-	if _, err := GetClusterLocalService(s.ctx, s.client, svcNs, svcName); err != nil {
+	if _, err := sink.GetClusterLocalService(s.ctx, s.client, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
 			events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
 			return xerrors.Errorf("failed to validate subscription sink URL. It is not a valid cluster local svc: %v", err)
@@ -93,18 +93,4 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) erro
 	}
 
 	return nil
-}
-
-func GetClusterLocalService(ctx context.Context, client client.Client, svcNs, svcName string) (*corev1.Service, error) {
-	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
-	svc := &corev1.Service{}
-	if err := client.Get(ctx, svcLookupKey, svc); err != nil {
-		return nil, err
-	}
-	return svc, nil
-}
-
-// IsValidScheme returns true if the sink scheme is http or https, otherwise returns false.
-func IsValidScheme(sink string) bool {
-	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }
