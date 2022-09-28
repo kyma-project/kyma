@@ -1,5 +1,3 @@
-// todo integration
-
 package beb_test
 
 import (

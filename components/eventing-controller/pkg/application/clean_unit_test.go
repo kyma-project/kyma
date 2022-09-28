@@ -1,5 +1,3 @@
-// todo unit
-
 package application_test
 
 import (
