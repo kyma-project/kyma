@@ -1,4 +1,3 @@
-// todo unit
 package v1alpha2_test
 
 import (
