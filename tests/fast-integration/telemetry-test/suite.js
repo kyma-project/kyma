@@ -160,7 +160,7 @@ describe('Telemetry Operator', function() {
           await waitForLogPipelineStatusRunning(pipelineName);
         });
 
-        it('Should push logs to the HTTP mockserver', async function() {
+        it('Should push logs to the custom HTTP mockserver', async function() {
           const labels = '{namespace="mockserver"}';
           const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
           assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
