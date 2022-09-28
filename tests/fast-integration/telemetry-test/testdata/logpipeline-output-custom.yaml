@@ -1,7 +1,7 @@
 kind: LogPipeline
 apiVersion: telemetry.kyma-project.io/v1alpha1
 metadata:
-  name: http-backend
+  name: custom-output
 spec:
   output:
     custom: |
