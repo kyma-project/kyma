@@ -9,14 +9,14 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
-// GetEventMeshSubject appends the prefix to subject.
-func GetEventMeshSubject(source, subject, eventMeshPrefix string) string {
+// getEventMeshSubject appends the prefix to subject.
+func getEventMeshSubject(source, subject, eventMeshPrefix string) string {
 	return fmt.Sprintf("%s.%s.%s", eventMeshPrefix, source, subject)
 }
 
-// IsEventTypeSegmentsOverLimit checks if the number of segments in event type
+// isEventTypeSegmentsOverLimit checks if the number of segments in event type
 // do not exceed EventMeshTypeSegmentsLimit.
-func IsEventTypeSegmentsOverLimit(eventType string) bool {
+func isEventTypeSegmentsOverLimit(eventType string) bool {
 	segments := strings.Split(eventType, ".")
 	return len(segments) > EventMeshTypeSegmentsLimit
 }
@@ -82,7 +82,7 @@ func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1a
 	return finalEventTypes
 }
 
-// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription.
+// setEmsSubscriptionStatus sets the status of EventMesh Subscription in ev2Subscription.
 func setEmsSubscriptionStatus(subscription *eventingv1alpha2.Subscription,
 	eventMeshSubscription *types.Subscription) bool {
 	var statusChanged = false

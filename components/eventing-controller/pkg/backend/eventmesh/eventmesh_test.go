@@ -28,7 +28,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -168,7 +168,7 @@ func Test_handleKymaSubModified(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -286,7 +286,7 @@ func Test_handleEventMeshSubModified(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -404,7 +404,7 @@ func Test_handleCreateEventMeshSub(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -589,7 +589,7 @@ func Test_SyncSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 	eventMesh := NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock

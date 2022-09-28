@@ -33,6 +33,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
@@ -295,7 +296,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 
 		// Clean statuses.
 		desiredSub := sub.DuplicateWithStatusDefaults()
-		if err := utils.UpdateSubscriptionV1Alpha2Status(ctx, dynamicClient, desiredSub); err != nil {
+		if err := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			logger.Errorw("Failed to update EventMesh subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 		}

@@ -17,10 +17,24 @@ import (
 	"github.com/pkg/errors"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
+
+type EventTypeInfo struct {
+	OriginalType  string
+	CleanType     string
+	ProcessedType string
+}
+
+// NameMapper is used to map Kyma-specific resource names to their corresponding name on other
+// (external) systems, e.g. on different eventing backends, the same Kyma subscription name
+// could map to a different name.
+type NameMapper interface {
+	MapSubscriptionName(subscriptionName, subscriptionNamespace string) string
+}
 
 func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
 	emsSubscription := &types.Subscription{}
@@ -66,7 +80,7 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	}
 
 	// WebhookURL
-	urlTobeRegistered, err := getExposedURLFromAPIRule(apiRule, subscription.Spec.Sink)
+	urlTobeRegistered, err := backendutilsv2.GetExposedURLFromAPIRule(apiRule, subscription.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}

@@ -33,7 +33,7 @@ func Test_IsEventTypeSegmentsOverLimit(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, tc.wantResult, IsEventTypeSegmentsOverLimit(tc.givenEventType))
+			require.Equal(t, tc.wantResult, isEventTypeSegmentsOverLimit(tc.givenEventType))
 		})
 	}
 
@@ -61,7 +61,7 @@ func Test_GetEventMeshSubject(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			require.Equal(t, tc.wantEventMeshSubject, GetEventMeshSubject(tc.givenSource, tc.givenSubject, tc.givenEventMeshPrefix))
+			require.Equal(t, tc.wantEventMeshSubject, getEventMeshSubject(tc.givenSource, tc.givenSubject, tc.givenEventMeshPrefix))
 		})
 	}
 }

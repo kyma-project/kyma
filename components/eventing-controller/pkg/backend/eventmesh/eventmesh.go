@@ -14,6 +14,7 @@ import (
 	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
@@ -22,11 +23,11 @@ import (
 )
 
 const (
-	eventMeshHandlerName               = "event-mesh-handler"
-	MaxEventMeshSubscriptionNameLength = 50
-	EventMeshTypeSegmentsLimit         = 7
-	SubscriptionNameLogKey             = "eventMeshSubscriptionName"
-	ErrorLogKey                        = "error"
+	eventMeshHandlerName       = "event-mesh-handler"
+	maxSubscriptionNameLength  = 50
+	EventMeshTypeSegmentsLimit = 7
+	subscriptionNameLogKey     = "eventMeshSubscriptionName"
+	errorLogKey                = "error"
 )
 
 // Perform a compile time check.
@@ -100,12 +101,12 @@ func getWebHookAuth(cfg env.Config, credentials *backendbebv1.OAuth2ClientCreden
 func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner,
 	apiRule *apigatewayv1beta1.APIRule) (bool, error) { //nolint:funlen,gocognit
 	// Format logger
-	log := backendutils.LoggerWithSubscriptionV1AlphaV2(em.namedLogger(), subscription)
+	log := backendutilsv2.LoggerWithSubscription(em.namedLogger(), subscription)
 
 	// process event types
 	typesInfo, err := em.getProcessedEventTypes(subscription, cleaner)
 	if err != nil {
-		log.Errorw("Failed to process types", ErrorLogKey, err)
+		log.Errorw("Failed to process types", errorLogKey, err)
 		return false, err
 	}
 
@@ -113,7 +114,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	eventMeshSub, err := backendutils.ConvertKymaSubToEventMeshSub(subscription, typesInfo, apiRule, em.webhookAuth,
 		em.protocolSettings, em.namespace, em.SubNameMapper)
 	if err != nil {
-		log.Errorw("Failed to get Kyma subscription internal view", ErrorLogKey, err)
+		log.Errorw("Failed to get Kyma subscription internal view", errorLogKey, err)
 		return false, err
 	}
 
@@ -124,7 +125,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	// check if Kyma Subscription was modified.
 	isKymaSubModified, err = em.handleKymaSubModified(eventMeshSub, subscription)
 	if err != nil {
-		log.Errorw("Failed to handle kyma subscription modified", ErrorLogKey, err)
+		log.Errorw("Failed to handle kyma subscription modified", errorLogKey, err)
 		return false, err
 	}
 
@@ -133,8 +134,8 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	if !isKymaSubModified {
 		eventMeshServerSub, err = em.getSubscriptionIgnoreNotFound(eventMeshSub.Name)
 		if err != nil {
-			log.Errorw("Failed to get EventMesh subscription", SubscriptionNameLogKey,
-				eventMeshSub.Name, ErrorLogKey, err)
+			log.Errorw("Failed to get EventMesh subscription", subscriptionNameLogKey,
+				eventMeshSub.Name, errorLogKey, err)
 			return false, err
 		}
 	}
@@ -143,7 +144,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	if eventMeshServerSub != nil {
 		isEventMeshSubModified, err = em.handleEventMeshSubModified(eventMeshServerSub, subscription)
 		if err != nil {
-			log.Errorw("Failed to handle EventMesh subscription modified", ErrorLogKey, err)
+			log.Errorw("Failed to handle EventMesh subscription modified", errorLogKey, err)
 			return false, err
 		}
 	}
@@ -153,7 +154,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		// create the new EMS subscription
 		eventMeshServerSub, err = em.handleCreateEventMeshSub(eventMeshSub, subscription)
 		if err != nil {
-			log.Errorw("Failed to handle create EventMesh subscription", ErrorLogKey, err)
+			log.Errorw("Failed to handle create EventMesh subscription", errorLogKey, err)
 			return false, err
 		}
 	}
@@ -201,9 +202,9 @@ func (em *EventMesh) getProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 		if err != nil {
 			return nil, err
 		}
-		eventMeshSubject := GetEventMeshSubject(cleanedSource, cleanedType, em.eventMeshPrefix)
+		eventMeshSubject := getEventMeshSubject(cleanedSource, cleanedType, em.eventMeshPrefix)
 
-		if IsEventTypeSegmentsOverLimit(eventMeshSubject) {
+		if isEventTypeSegmentsOverLimit(eventMeshSubject) {
 			return nil, fmt.Errorf("EventMesh subject exceeds the limit of segments, "+
 				"max number of segements allowed: %d", EventMeshTypeSegmentsLimit)
 		}
