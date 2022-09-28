@@ -5,16 +5,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata"
-	metadatamocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/mocks"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
-	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata"
+	metadatamocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/mocks"
+	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 )
 
 type createHandlerFunc func(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, csrfTokenStrategyFactory csrf.TokenStrategyFactory, config Config) http.Handler
@@ -26,7 +27,7 @@ func TestProxyFactory(t *testing.T) {
 	type testcase struct {
 		name                            string
 		url                             string
-		expectedTargetAPIUrl            string
+		expectedTargetAPIURL            string
 		createHandlerFunc               createHandlerFunc
 		createMockServiceDefServiceFunc createMockServiceDefServiceFunc
 		apiIdentifier                   metadatamodel.APIIdentifier
@@ -80,7 +81,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application and service name",
 			url:                             "/app/service/orders/123",
-			expectedTargetAPIUrl:            "/orders/123",
+			expectedTargetAPIURL:            "/orders/123",
 			createHandlerFunc:               New,
 			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
@@ -88,7 +89,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application and service name when accessing root path",
 			url:                             "/app/service",
-			expectedTargetAPIUrl:            "/",
+			expectedTargetAPIURL:            "/",
 			createHandlerFunc:               New,
 			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
@@ -96,7 +97,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application, service and entry name",
 			url:                             "/app/service/entry/orders/123",
-			expectedTargetAPIUrl:            "/orders/123",
+			expectedTargetAPIURL:            "/orders/123",
 			createHandlerFunc:               NewForCompass,
 			createMockServiceDefServiceFunc: createMockServiceDeffServiceForCompass,
 			apiIdentifier:                   apiIdentifierForCompass,
@@ -104,7 +105,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application, service and entry name when accessing root path",
 			url:                             "/app/service/entry",
-			expectedTargetAPIUrl:            "/",
+			expectedTargetAPIURL:            "/",
 			createHandlerFunc:               NewForCompass,
 			createMockServiceDefServiceFunc: createMockServiceDeffServiceForCompass,
 			apiIdentifier:                   apiIdentifierForCompass,
@@ -112,7 +113,7 @@ func TestProxyFactory(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
-			ts := createTestServer(testCase.expectedTargetAPIUrl)
+			ts := createTestServer(testCase.expectedTargetAPIURL)
 			req, err := http.NewRequest(http.MethodGet, testCase.url, nil)
 			require.NoError(t, err)
 

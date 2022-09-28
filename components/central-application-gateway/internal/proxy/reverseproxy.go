@@ -85,15 +85,24 @@ func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string
 	httptools.SetHeaders(reqHeaders, customHeaders)
 }
 
-func responseModifier(gatewayURL *url.URL, targetURL string) func(*http.Response) error {
+func responseModifier(
+	gatewayURL *url.URL,
+	targetURL string,
+	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
+) func(*http.Response) error {
 	return func(resp *http.Response) error {
-		if resp.StatusCode < 300 || resp.StatusCode >= 400 {
+		if (resp.StatusCode < 300 || resp.StatusCode >= 400) &&
+			resp.StatusCode != http.StatusCreated {
 			return nil
 		}
 
 		const locationHeader = "Location"
 
 		locRaw := resp.Header.Get(locationHeader)
+
+		if locRaw == "" {
+			return nil
+		}
 
 		loc, err := resp.Request.URL.Parse(locRaw)
 		if err != nil {
@@ -105,24 +114,50 @@ func responseModifier(gatewayURL *url.URL, targetURL string) func(*http.Response
 			return nil
 		}
 
-		switch loc.Scheme {
-		case "http", "https":
-			// Good
-		default:
-			return nil
+		newURL := urlRewriter(gatewayURL, target, loc)
+
+		if newURL != nil {
+			resp.Header.Set(locationHeader, newURL.String())
 		}
-
-		if loc.Hostname() != target.Hostname() || !strings.HasPrefix(loc.Path, target.Path) {
-			return nil
-		}
-
-		stripped := strings.TrimPrefix(loc.Path, target.Path)
-		gatewayURL = gatewayURL.JoinPath(stripped)
-		gatewayURL.RawQuery = loc.RawQuery
-		gatewayURL.Fragment = loc.Fragment
-
-		resp.Header.Set(locationHeader, gatewayURL.String())
 
 		return nil
+	}
+}
+
+// urlRewriter modifies redirect URLs for reverse proxy.
+// If the URL should be left unmodified - it returns nil.
+func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
+	switch loc.Scheme {
+	case "http", "https":
+		// Good
+	default:
+		return nil
+	}
+
+	if loc.Hostname() != target.Hostname() || !strings.HasPrefix(loc.Path, target.Path) {
+		return nil
+	}
+
+	stripped := strings.TrimPrefix(loc.Path, target.Path)
+	gatewayURL = gatewayURL.JoinPath(stripped)
+	gatewayURL.RawQuery = loc.RawQuery
+	gatewayURL.Fragment = loc.Fragment
+
+	return gatewayURL
+}
+
+func makeGatewayURLExtractor(segments int) gatewayURLExtractorFunc {
+	return func(u *url.URL) (*url.URL, apperrors.AppError) {
+		trimmed := strings.TrimPrefix(u.Path, "/")
+		split := strings.SplitN(trimmed, "/", segments+1)
+
+		if len(split) < segments {
+			return nil, apperrors.WrongInput("path must contain Application and Service name")
+		}
+
+		new := *u
+		new.Path = "/" + strings.Join(split[:segments], "/")
+
+		return &new, nil
 	}
 }

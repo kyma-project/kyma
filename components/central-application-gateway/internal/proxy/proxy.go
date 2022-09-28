@@ -78,7 +78,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheEntry.Proxy.ModifyResponse = responseModifier(gwUrl, serviceAPI.TargetUrl)
+	cacheEntry.Proxy.ModifyResponse = responseModifier(gwUrl, serviceAPI.TargetUrl, urlRewriter)
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 

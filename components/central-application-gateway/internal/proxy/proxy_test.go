@@ -8,8 +8,11 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
 	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	proxyMocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/proxy/mocks"
@@ -17,9 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestProxyRequest(t *testing.T) {
@@ -356,7 +356,11 @@ func TestProxy(t *testing.T) {
 		csrfStrategyMock.AssertExpectations(t)
 	})
 
-	testRetryOnAuthFailure := func(testServerConstructor func(check func(req *http.Request)) *httptest.Server, requestBody io.Reader, expectedStatusCode int, t *testing.T) {
+	testRetryOnAuthFailure := func(
+		testServerConstructor func(check func(req *http.Request)) *httptest.Server,
+		requestBody io.Reader,
+		expectedStatusCode int,
+		t *testing.T) {
 		// given
 		tsf := testServerConstructor(func(req *http.Request) {
 			assertCookie(t, req, "user-cookie", "user-cookie-value")
@@ -441,11 +445,17 @@ func assertCookie(t *testing.T, r *http.Request, name, value string) {
 }
 
 func NewTestServer(check func(req *http.Request)) *httptest.Server {
+	return NewTestServerWithResponse(check, func(w http.ResponseWriter) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test"))
+	})
+}
+
+func NewTestServerWithResponse(check func(req *http.Request), respond func(http.ResponseWriter)) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test"))
+		respond(w)
 	}))
 }
 
@@ -525,7 +535,10 @@ func createBasicCredentialsMatcher(username, password string) CredentialsMatcher
 	}
 }
 
-func mockCSRFStrategy(authorizationStrategy authorization.Strategy, ef ensureCalledFunc, skipTLSVerify bool) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
+func mockCSRFStrategy(
+	authorizationStrategy authorization.Strategy,
+	ef ensureCalledFunc,
+	skipTLSVerify bool) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
 
 	csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
 	strategyCall := csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request"), skipTLSVerify).

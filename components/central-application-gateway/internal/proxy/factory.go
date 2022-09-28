@@ -45,27 +45,13 @@ func New(
 		serviceDefService: serviceDefService,
 	}
 
-	gwExtractor := func(u *url.URL) (*url.URL, apperrors.AppError) {
-		trimmed := strings.TrimPrefix(u.Path, "/")
-		split := strings.SplitN(trimmed, "/", 3)
-
-		if len(split) < 2 {
-			return nil, apperrors.WrongInput("path must contain Application and Service name")
-		}
-
-		new := *u
-		new.Path = "/" + strings.Join(split[:2], "/")
-
-		return &new, nil
-	}
-
 	return &proxy{
 		cache:                        NewCache(config.ProxyCacheTTL),
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		extractPathFunc:              pathExtractor,
-		extractGatewayFunc:           gwExtractor,
+		extractGatewayFunc:           makeGatewayURLExtractor(2),
 		apiExtractor:                 apiExtractor,
 	}
 }
@@ -99,27 +85,13 @@ func NewForCompass(
 		serviceDefService: serviceDefService,
 	}
 
-	gwExtractor := func(u *url.URL) (*url.URL, apperrors.AppError) {
-		trimmed := strings.TrimPrefix(u.Path, "/")
-		split := strings.SplitN(trimmed, "/", 4)
-
-		if len(split) < 3 {
-			return nil, apperrors.WrongInput("path must contain Application and Service name")
-		}
-
-		new := *u
-		new.Path = "/" + strings.Join(split[:3], "/")
-
-		return &new, nil
-	}
-
 	return &proxy{
 		cache:                        NewCache(config.ProxyCacheTTL),
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		extractPathFunc:              extractFunc,
-		extractGatewayFunc:           gwExtractor,
+		extractGatewayFunc:           makeGatewayURLExtractor(3),
 		apiExtractor:                 apiExtractor,
 	}
 }
