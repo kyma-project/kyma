@@ -3,9 +3,10 @@ package jetstreamv2
 import (
 	"bytes"
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	nats2 "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	v2 "github.com/cloudevents/sdk-go/v2"

@@ -2,15 +2,16 @@ package jetstream
 
 import (
 	"fmt"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	cleanerv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
-	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"net"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+	cleanerv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
+	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats-server/v2/server"
