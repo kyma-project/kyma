@@ -141,8 +141,6 @@ nats:
     reconnectErrorReports:
 
   jetstream:
-    #enabled: JetStream can be enabled via .Values.global.jetstream.enabled
-
     # Jetstream Domain
     domain:
 

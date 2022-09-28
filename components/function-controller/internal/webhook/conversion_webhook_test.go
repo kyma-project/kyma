@@ -748,6 +748,392 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
+		{
+			name: "v1alpha1 to v1alpha2 - with build-resources-preset label",
+			src: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantDst: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Profile: "some-preset-value",
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 - with build-resources-preset label",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha2.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 - with Spec.ResourceConfiguration.Build.Profile",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Profile: "another-preset-value",
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.BuildResourcesPresetLabel: "another-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha1 to v1alpha2 - with build-resources-preset label and Spec.Resources",
+			src: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("123m"),
+							corev1.ResourceMemory: resource.MustParse("124Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("121m"),
+							corev1.ResourceMemory: resource.MustParse("122Mi"),
+						},
+					},
+					Source: "test-source",
+					Deps:   "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantDst: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Profile: "some-preset-value",
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("123m"),
+									corev1.ResourceMemory: resource.MustParse("124Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("121m"),
+									corev1.ResourceMemory: resource.MustParse("122Mi"),
+								},
+							},
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 - with build-resources-preset label and Spec.ResourceConfiguration.Function.Profile (should has highest priority)",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha2.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Profile: "another-preset-value",
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.BuildResourcesPresetLabel: "another-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 - with build-resources-preset label and Spec.ResourceConfiguration.Function.Resources",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha2.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("731m"),
+									corev1.ResourceMemory: resource.MustParse("732Mi"),
+								},
+							},
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+					Labels: map[string]string{
+						serverlessv1alpha1.BuildResourcesPresetLabel: "some-preset-value",
+					},
+				},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					BuildResources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("731m"),
+							corev1.ResourceMemory: resource.MustParse("732Mi"),
+						},
+					},
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Source:  "test-source",
+					Deps:    "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

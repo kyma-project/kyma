@@ -50,8 +50,7 @@ func TestNewDeployment(t *testing.T) {
 			switch tc.givenBackend {
 			case "NATS":
 				natsConfig = env.NatsConfig{
-					EnableJetStreamBackend: true,
-					JSStreamName:           "kyma",
+					JSStreamName: "kyma",
 				}
 				deployment = NewNATSPublisherDeployment(natsConfig, publisherConfig)
 			case "BEB":
@@ -85,23 +84,7 @@ func Test_GetNATSEnvVars(t *testing.T) {
 		wantEnvs        map[string]string
 	}{
 		{
-			name: "REQUEST_TIMEOUT and ENABLE_JETSTREAM_BACKEND should be set and JS envs should stay empty",
-			givenEnvs: map[string]string{
-				"PUBLISHER_REQUESTS_CPU":    "64m",
-				"PUBLISHER_REQUESTS_MEMORY": "128Mi",
-				"PUBLISHER_REQUEST_TIMEOUT": "10s",
-			},
-			givenNatsConfig: env.NatsConfig{
-				EnableJetStreamBackend: true,
-			},
-			wantEnvs: map[string]string{
-				"REQUEST_TIMEOUT":          "10s",
-				"ENABLE_JETSTREAM_BACKEND": "true",
-				"JS_STREAM_NAME":           "",
-			},
-		},
-		{
-			name: "REQUEST_TIMEOUT should not be set, ENABLE_JETSTREAM_BACKEND is false by default and JS envs should stay empty",
+			name: "REQUEST_TIMEOUT should not be set and JS envs should stay empty",
 			givenEnvs: map[string]string{
 				"PUBLISHER_REQUESTS_CPU":    "64m",
 				"PUBLISHER_REQUESTS_MEMORY": "128Mi",
@@ -114,18 +97,16 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			},
 		},
 		{
-			name: "Test the REQUEST_TIMEOUT, ENABLE_JETSTREAM_BACKEND and non-empty NatsConfig",
+			name: "Test the REQUEST_TIMEOUT and non-empty NatsConfig",
 			givenEnvs: map[string]string{
 				"PUBLISHER_REQUEST_TIMEOUT": "10s",
 			},
 			givenNatsConfig: env.NatsConfig{
-				EnableJetStreamBackend: true,
-				JSStreamName:           "kyma",
+				JSStreamName: "kyma",
 			},
 			wantEnvs: map[string]string{
-				"REQUEST_TIMEOUT":          "10s",
-				"JS_STREAM_NAME":           "kyma",
-				"ENABLE_JETSTREAM_BACKEND": "true",
+				"REQUEST_TIMEOUT": "10s",
+				"JS_STREAM_NAME":  "kyma",
 			},
 		},
 	}
@@ -222,7 +203,7 @@ func Test_GetBEBEnvVars(t *testing.T) {
 				"PUBLISHER_REQUESTS_CPU": "64m",
 			},
 			wantEnvs: map[string]string{
-				"REQUEST_TIMEOUT": "5s", //default value
+				"REQUEST_TIMEOUT": "5s", // default value
 			},
 		},
 		{
@@ -262,8 +243,6 @@ func natsBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	assert.Equal(t, streamName.Value, "kyma")
 	url := findEnvVar(container.Env, "NATS_URL")
 	assert.Equal(t, url.Value, natsURL)
-	jsEnabled := findEnvVar(container.Env, "ENABLE_JETSTREAM_BACKEND")
-	assert.Equal(t, jsEnabled.Value, "true")
 
 	// check the affinity was set
 	affinityLabels := deployment.Spec.Template.Spec.Affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution[0].PodAffinityTerm.LabelSelector.MatchLabels

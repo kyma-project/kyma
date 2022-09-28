@@ -14,11 +14,10 @@ import (
 
 const (
 	// defaultShutdownTimeout is the default timeout for the receiver to shutdown.
-	defaultShutdownTimeout = time.Minute * 1
+	defaultShutdownTimeout = 1 * time.Minute
+	readHeaderTimeout      = 5 * time.Second
 
 	receiverName = "receiver"
-
-	readHeaderTimeout = time.Second * 5
 )
 
 // HTTPMessageReceiver is responsible for receiving messages over HTTP.
@@ -43,9 +42,9 @@ func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.H
 
 	recv.handler = createHandler(handler)
 	recv.server = &http.Server{
-		ReadHeaderTimeout: readHeaderTimeout,
 		Addr:              recv.listener.Addr().String(),
 		Handler:           recv.handler,
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	errChan := make(chan error, 1)
