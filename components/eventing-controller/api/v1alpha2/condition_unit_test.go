@@ -24,16 +24,13 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 		},
 		{
 			name: "Conditions partially initialized",
-			givenConditions: func() []v1alpha2.Condition {
-				// on purpose, we only set one condition
-				return []v1alpha2.Condition{
-					{
-						Type:               v1alpha2.ConditionSubscribed,
-						LastTransitionTime: metav1.Now(),
-						Status:             corev1.ConditionUnknown,
-					},
-				}
-			}(),
+			givenConditions: []v1alpha2.Condition{
+				{
+					Type:               v1alpha2.ConditionSubscribed,
+					LastTransitionTime: metav1.Now(),
+					Status:             corev1.ConditionUnknown,
+				},
+			},
 		},
 	}
 
