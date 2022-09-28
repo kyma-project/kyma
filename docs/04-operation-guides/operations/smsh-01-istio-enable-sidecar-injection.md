@@ -34,7 +34,9 @@ You can easily check whether your workloads have automatic Istio sidecar injecti
 
 ```bash
 ./sidecar-analysis.sh
+```
 
+```yaml
 Pods out of istio mesh:
   In namespace labeled with "istio-injection=disabled":
     - sidecar-disabled/httpbin-74fb669cc6-kmxch
@@ -46,7 +48,9 @@ Pods out of istio mesh:
 
 ```bash
 ./sidecar-analysis.sh default
+```
 
+```yaml
 Pods out of istio mesh in namespace default:
   - httpbin-74fb669cc6-vqxtw
 ```
