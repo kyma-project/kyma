@@ -120,7 +120,6 @@ func (s *Subscription) GetEventMeshProtocolSettings() *ProtocolSettings {
 	protocolSettings := &ProtocolSettings{}
 
 	if currentMode, ok := s.Spec.Config[ProtocolSettingsContentMode]; ok {
-		protocolSettings = &ProtocolSettings{}
 		protocolSettings.ContentMode = &currentMode
 	}
 	if qos, ok := s.Spec.Config[ProtocolSettingsQos]; ok {
@@ -133,26 +132,24 @@ func (s *Subscription) GetEventMeshProtocolSettings() *ProtocolSettings {
 		}
 		protocolSettings.ExemptHandshake = &handshake
 	}
-	if protocolSettings != nil {
-		if authType, ok := s.Spec.Config[WebhookAuthType]; ok {
-			protocolSettings.WebhookAuth = &WebhookAuth{}
-			protocolSettings.WebhookAuth.Type = authType
-		}
-		if grantType, ok := s.Spec.Config[WebhookAuthGrantType]; ok {
-			protocolSettings.WebhookAuth.GrantType = grantType
-		}
-		if clientID, ok := s.Spec.Config[WebhookAuthClientID]; ok {
-			protocolSettings.WebhookAuth.ClientID = clientID
-		}
-		if secret, ok := s.Spec.Config[WebhookAuthClientSecret]; ok {
-			protocolSettings.WebhookAuth.ClientSecret = secret
-		}
-		if token, ok := s.Spec.Config[WebhookAuthTokenURL]; ok {
-			protocolSettings.WebhookAuth.TokenURL = token
-		}
-		if scope, ok := s.Spec.Config[WebhookAuthScope]; ok {
-			protocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
-		}
+	if authType, ok := s.Spec.Config[WebhookAuthType]; ok {
+		protocolSettings.WebhookAuth = &WebhookAuth{}
+		protocolSettings.WebhookAuth.Type = authType
+	}
+	if grantType, ok := s.Spec.Config[WebhookAuthGrantType]; ok {
+		protocolSettings.WebhookAuth.GrantType = grantType
+	}
+	if clientID, ok := s.Spec.Config[WebhookAuthClientID]; ok {
+		protocolSettings.WebhookAuth.ClientID = clientID
+	}
+	if secret, ok := s.Spec.Config[WebhookAuthClientSecret]; ok {
+		protocolSettings.WebhookAuth.ClientSecret = secret
+	}
+	if token, ok := s.Spec.Config[WebhookAuthTokenURL]; ok {
+		protocolSettings.WebhookAuth.TokenURL = token
+	}
+	if scope, ok := s.Spec.Config[WebhookAuthScope]; ok {
+		protocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
 	}
 
 	return protocolSettings

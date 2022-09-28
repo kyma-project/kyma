@@ -255,11 +255,6 @@ func NewSampleEventMeshSubscription() *types.Subscription {
 	return NewBEBSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com", eventType, nil)
 }
 
-func exemptHandshake(val bool) *bool {
-	exemptHandshake := val
-	return &exemptHandshake
-}
-
 func WithFakeSubscriptionStatus() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Status.Conditions = []eventingv1alpha2.Condition{

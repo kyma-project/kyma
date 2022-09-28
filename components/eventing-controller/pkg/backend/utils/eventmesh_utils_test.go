@@ -61,7 +61,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 	expectedWebhookURL := fmt.Sprintf("%s://%s", scheme, host)
 	g := NewGomegaWithT(t)
 
-	// @TODO: Fix this test after update procotol settings for EventMesh
+	// @TODO: Fix this test after update protocol settings for EventMesh
 	//t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
 	//	// given
 	//	subscription := eventingtestingv2.NewSubscription("name", "namespace",
@@ -144,7 +144,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
 	})
 
-	// @TODO: Fix this test after update procotol settings for EventMesh
+	// @TODO: Fix this test after update protocol settings for EventMesh
 	//t.Run("subscription with custom webhookauth config followed by a subscription "+
 	//	"with default webhookauth config should not alter the default config", func(t *testing.T) {
 	//	// given
