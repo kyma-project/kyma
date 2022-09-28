@@ -313,107 +313,127 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	//FWhen("With EXACT type matching in subscription", func() {
-	//	It("Should reconcile the Subscription with EXACT type matching", func() {
-	//		subscriptionName := "test-valid-subscription-1"
-	//
-	//		// Ensuring subscriber svc
-	//		subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-	//		ensureSubscriberSvcCreated(ctx, subscriberSvc)
-	//
-	//		// Creating subscription with EXACT type matching
-	//		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-	//			reconcilertesting.WithTypeMatching(eventingv1alpha2.EXACT),
-	//			reconcilertesting.WithEventMeshNamespaceSource(),
-	//			reconcilertesting.WithEventMeshExactType(),
-	//			reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
-	//		)
-	//		ensureSubscriptionCreated(ctx, givenSubscription)
-	//
-	//		By("Creating a valid APIRule")
-	//		getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
-	//
-	//		By("Updating the APIRule(replicating apigateway controller) status to be Ready")
-	//		apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-	//		ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
-	//
-	//		By("Setting APIRule status in Subscription to Ready")
-	//		subscriptionAPIReadyCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionAPIRuleStatus, eventingv1alpha2.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
-	//		getSubscription(ctx, givenSubscription).Should(And(
-	//			reconcilertesting.HaveSubscriptionName(subscriptionName),
-	//			reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
-	//		))
-	//
-	//		By("Setting a finalizer")
-	//		getSubscription(ctx, givenSubscription).Should(And(
-	//			reconcilertesting.HaveSubscriptionName(subscriptionName),
-	//			reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer),
-	//		))
-	//
-	//		By("Setting a subscribed condition")
-	//		message := eventingv1alpha2.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
-	//		subscriptionCreatedCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
-	//		getSubscription(ctx, givenSubscription).Should(And(
-	//			reconcilertesting.HaveSubscriptionName(subscriptionName),
-	//			reconcilertesting.HaveCondition(subscriptionCreatedCondition),
-	//		))
-	//
-	//		By("Emitting a subscription created event")
-	//		var subscriptionEvents = corev1.EventList{}
-	//		subscriptionCreatedEvent := corev1.Event{
-	//			Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionCreated),
-	//			Message: message,
-	//			Type:    corev1.EventTypeNormal,
-	//		}
-	//		getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionCreatedEvent))
-	//
-	//		By("Setting a subscription active condition")
-	//		subscriptionActiveCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
-	//		getSubscription(ctx, givenSubscription).Should(And(
-	//			reconcilertesting.HaveSubscriptionName(subscriptionName),
-	//			reconcilertesting.HaveCondition(subscriptionActiveCondition),
-	//		))
-	//
-	//		By("Emitting a subscription active event")
-	//		subscriptionActiveEvent := corev1.Event{
-	//			Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionActive),
-	//			Message: "",
-	//			Type:    corev1.EventTypeNormal,
-	//		}
-	//		getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionActiveEvent))
-	//
-	//		By("Creating a EventMesh Subscription")
-	//		Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
-	//
-	//		By("Updating APIRule")
-	//		apiRule := &apigatewayv1beta1.APIRule{
-	//			ObjectMeta: metav1.ObjectMeta{
-	//				Name:      givenSubscription.Status.Backend.APIRuleName,
-	//				Namespace: givenSubscription.Namespace,
-	//			},
-	//		}
-	//		expectedLabels := map[string]string{
-	//			constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
-	//			constants.ControllerServiceLabelKey:  subscriberSvc.Name,
-	//		}
-	//		getAPIRule(ctx, apiRule).Should(And(
-	//			reconcilertestingv1.HaveAPIRuleOwnersRefs(givenSubscription.UID),
-	//			reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/"),
-	//			reconcilertestingv1.HaveAPIRuleGateway(constants.ClusterLocalAPIGateway),
-	//			reconcilertestingv1.HaveAPIRuleLabels(expectedLabels),
-	//			reconcilertestingv1.HaveAPIRuleService(subscriberSvc.Name, 443, domain),
-	//		))
-	//
-	//		By("Marking it as ready")
-	//		getSubscription(ctx, givenSubscription).Should(reconcilertesting.HaveSubscriptionReady())
-	//
-	//		By("Sending at least one creation request for the Subscription")
-	//		_, creationRequests, _ := countEventMeshRequests(
-	//			nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
-	//			reconcilertesting.EventMeshOrderCreatedV1Type)
-	//		Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
-	//	})
-	//})
+	When("With EXACT type matching in subscription", func() {
+		It("Should reconcile the Subscription with EXACT type matching", func() {
+			subscriptionName := "test-valid-subscription-1"
+
+			// Ensuring subscriber svc
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+			// Creating subscription with EXACT type matching
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithExactTypeMatching(),
+				reconcilertesting.WithEventMeshNamespaceSource(),
+				//reconcilertesting.WithEventMeshExactType(),
+				reconcilertesting.WithEventType("sap.kyma.custom.noapp.order.created.v1"),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
+			)
+			ensureSubscriptionCreated(ctx, givenSubscription)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+
+			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
+
+			By("Setting APIRule status in Subscription to Ready")
+			subscriptionAPIReadyCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionAPIRuleStatus, eventingv1alpha2.ConditionReasonAPIRuleStatusReady, corev1.ConditionTrue, "")
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
+			))
+
+			By("Setting a finalizer")
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha2.Finalizer),
+			))
+
+			//By("Setting a subscribed condition")
+			//message := eventingv1alpha2.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
+			//subscriptionCreatedCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscribed, eventingv1alpha2.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
+			//getSubscription(ctx, givenSubscription).Should(And(
+			//	reconcilertesting.HaveSubscriptionName(subscriptionName),
+			//	reconcilertesting.HaveCondition(subscriptionCreatedCondition),
+			//))
+			//
+			//By("Emitting a subscription created event")
+			//var subscriptionEvents = corev1.EventList{}
+			//subscriptionCreatedEvent := corev1.Event{
+			//	Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionCreated),
+			//	Message: message,
+			//	Type:    corev1.EventTypeNormal,
+			//}
+			//getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionCreatedEvent))
+			//
+			//By("Setting a subscription active condition")
+			//subscriptionActiveCondition := eventingv1alpha2.MakeCondition(eventingv1alpha2.ConditionSubscriptionActive, eventingv1alpha2.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
+			//getSubscription(ctx, givenSubscription).Should(And(
+			//	reconcilertesting.HaveSubscriptionName(subscriptionName),
+			//	reconcilertesting.HaveCondition(subscriptionActiveCondition),
+			//))
+			//
+			//By("Emitting a subscription active event")
+			//subscriptionActiveEvent := corev1.Event{
+			//	Reason:  string(eventingv1alpha2.ConditionReasonSubscriptionActive),
+			//	Message: "",
+			//	Type:    corev1.EventTypeNormal,
+			//}
+			//getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertestingv1.HaveEvent(subscriptionActiveEvent))
+			//
+			//By("Creating a EventMesh Subscription")
+			//Eventually(wasSubscriptionCreated(givenSubscription)).Should(BeTrue())
+			//
+			//By("Updating APIRule")
+			//apiRule := &apigatewayv1beta1.APIRule{
+			//	ObjectMeta: metav1.ObjectMeta{
+			//		Name:      givenSubscription.Status.Backend.APIRuleName,
+			//		Namespace: givenSubscription.Namespace,
+			//	},
+			//}
+			//expectedLabels := map[string]string{
+			//	constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
+			//	constants.ControllerServiceLabelKey:  subscriberSvc.Name,
+			//}
+			//getAPIRule(ctx, apiRule).Should(And(
+			//	reconcilertestingv1.HaveAPIRuleOwnersRefs(givenSubscription.UID),
+			//	reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/"),
+			//	reconcilertestingv1.HaveAPIRuleGateway(constants.ClusterLocalAPIGateway),
+			//	reconcilertestingv1.HaveAPIRuleLabels(expectedLabels),
+			//	reconcilertestingv1.HaveAPIRuleService(subscriberSvc.Name, 443, domain),
+			//))
+			//
+			//By("Marking it as ready")
+			//getSubscription(ctx, givenSubscription).Should(reconcilertesting.HaveSubscriptionReady())
+			//
+			//By("Checking Status event types")
+			//expectedStatusTypes := []eventingv1alpha2.EventType{
+			//	{
+			//		OriginalType: reconcilertesting.EventMeshExactType,
+			//		CleanType: reconcilertesting.EventMeshExactType,
+			//	},
+			//}
+			//expectedStatusEmsTypes := []eventingv1alpha2.EventMeshTypes{
+			//	{
+			//		OriginalType: reconcilertesting.EventMeshExactType,
+			//		EventMeshType: reconcilertesting.EventMeshExactType,
+			//	},
+			//}
+			//getSubscription(ctx, givenSubscription).Should(And(
+			//	reconcilertesting.HaveSubscriptionName(subscriptionName),
+			//	reconcilertesting.HaveCleanEventTypes(expectedStatusTypes),
+			//	reconcilertesting.HaveEventMeshTypes(expectedStatusEmsTypes),
+			//))
+			//
+			//By("Sending at least one creation request for the Subscription")
+			//_, creationRequests, _ := countEventMeshRequests(
+			//	nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
+			//	reconcilertesting.EventMeshOrderCreatedV1Type)
+			//Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
+		})
+	})
 
 	When("Creating a Subscription with empty protocol, protocolsettings and dialect", func() {
 		It("Should reconcile the Subscription", func() {
@@ -1570,7 +1590,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	// prepare
 	eventMeshCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
-	nameMapper = utils.NewBEBSubscriptionNameMapper(domain, backendeventmesh.MaxEventMeshSubscriptionNameLength)
+	nameMapper = utils.NewBEBSubscriptionNameMapper(domain, backendbeb.MaxBEBSubscriptionNameLength)
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")

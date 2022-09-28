@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"time"
 
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
+
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
@@ -138,7 +140,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	sub := currentSubscription.DeepCopy()
 
 	// bind fields to logger
-	log := backendutils.LoggerWithSubscriptionV1AlphaV2(r.namedLogger(), sub)
+	log := backendutilsv2.LoggerWithSubscription(r.namedLogger(), sub)
 	log.Debugw("Received new reconcile request")
 
 	// instantiate a return object
@@ -644,7 +646,7 @@ func (r *Reconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1beta1.A
 // syncInitialStatus determines the desired initial status and updates it accordingly (if conditions changed).
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscription) {
 	if subscription.Status.Types == nil {
-		subscription.Status.InitializeCleanEventTypes()
+		subscription.Status.InitializeEventTypes()
 	}
 
 	expectedStatus := eventingv1alpha2.SubscriptionStatus{}
@@ -751,6 +753,10 @@ func (r *Reconciler) removeFinalizer(sub *eventingv1alpha2.Subscription) {
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry.
 func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha2.Subscription) (active bool, err error) {
+	if subscription.Status.Backend.EmsSubscriptionStatus == nil {
+		return false, nil
+	}
+
 	// check if the EMS subscription status is active
 	if subscription.Status.Backend.EmsSubscriptionStatus.Status == string(types.SubscriptionStatusActive) {
 		if len(subscription.Status.Backend.FailedActivation) > 0 {

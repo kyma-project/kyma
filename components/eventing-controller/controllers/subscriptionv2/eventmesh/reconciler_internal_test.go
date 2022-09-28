@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
@@ -443,7 +443,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxEventMeshSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 	}
 
 	for _, tc := range testCases {
@@ -546,7 +546,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 	}
 
 	r := Reconciler{
-		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxEventMeshSubscriptionNameLength),
+		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 		logger:     logger,
 	}
 
@@ -554,7 +554,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			sub := tc.givenSubscription
-			log := backendutils.LoggerWithSubscriptionV1AlphaV2(r.namedLogger(), sub)
+			log := backendutilsv2.LoggerWithSubscription(r.namedLogger(), sub)
 
 			// when
 			r.syncConditionSubscriptionActive(sub, tc.givenIsSubscribed, log)
@@ -942,7 +942,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment 
 	}
 	emptyConfig := env.Config{}
 	credentials := &beb.OAuth2ClientCredentials{}
-	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, eventmesh.MaxEventMeshSubscriptionNameLength)
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength)
 	cleaner := cleaner.NewEventMeshCleaner(nil)
 
 	return &testEnvironment{

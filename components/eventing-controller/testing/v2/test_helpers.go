@@ -43,7 +43,7 @@ const (
 	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
 	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
 
-	EventMeshExactType = EventMeshPrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1EventNotClean
+	EventMeshExactType          = EventMeshPrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1EventNotClean
 	EventMeshOrderCreatedV1Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV1Event
 	EventMeshOrderCreatedV2Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 
@@ -380,6 +380,16 @@ func WithEventType(eventType string) SubscriptionOpt {
 // WithEventSource is a SubscriptionOpt for creating a Subscription with a specific event source,
 func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
+}
+
+// WithExactTypeMatching is a SubscriptionOpt for creating a Subscription with an exact type matching.
+func WithExactTypeMatching() SubscriptionOpt {
+	return WithTypeMatching(eventingv1alpha2.TypeMatchingExact)
+}
+
+// WithStandardTypeMatching is a SubscriptionOpt for creating a Subscription with an standard type matching.
+func WithStandardTypeMatching() SubscriptionOpt {
+	return WithTypeMatching(eventingv1alpha2.TypeMatchingStandard)
 }
 
 // WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,
