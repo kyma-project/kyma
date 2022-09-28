@@ -2,6 +2,7 @@ package v2
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )

@@ -2,6 +2,7 @@ package v1alpha1_test
 
 import (
 	"fmt"
+
 	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"

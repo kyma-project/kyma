@@ -1,9 +1,10 @@
 package v1alpha1_test
 
 import (
+	"testing"
+
 	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
