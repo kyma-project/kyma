@@ -186,7 +186,7 @@ func (em *EventMesh) getProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 	// process types including cleaning, appending prefixes
 	result := make([]backendutils.EventTypeInfo, 0, len(uniqueTypes))
 	for _, t := range uniqueTypes {
-		if kymaSubscription.Spec.TypeMatching == eventingv1alpha2.EXACT {
+		if kymaSubscription.Spec.TypeMatching == eventingv1alpha2.TypeMatchingExact {
 			// not do any processing if TypeMatching is exact.
 			result = append(result, backendutils.EventTypeInfo{OriginalType: t, CleanType: t, ProcessedType: t})
 			continue
@@ -258,7 +258,7 @@ func (em *EventMesh) handleEventMeshSubModified(eventMeshSub *types.Subscription
 // handleCreateEventMeshSub handles if a new EventMesh subscription needs to be created.
 func (em *EventMesh) handleCreateEventMeshSub(eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription) (*types.Subscription, error) {
 	// reset the cleanEventTypes
-	kymaSub.Status.InitializeCleanEventTypes()
+	kymaSub.Status.InitializeEventTypes()
 
 	// create the new EMS subscription
 	eventMeshServerSub, err := em.createAndGetSubscription(eventMeshSub)

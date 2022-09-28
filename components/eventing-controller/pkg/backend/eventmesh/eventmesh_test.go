@@ -108,7 +108,7 @@ func Test_getProcessedEventTypes(t *testing.T) {
 						"test1.test2.test3.order.created.v1",
 					},
 					Source:       "test",
-					TypeMatching: eventingv1alpha2.EXACT,
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
 				},
 			},
 			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
