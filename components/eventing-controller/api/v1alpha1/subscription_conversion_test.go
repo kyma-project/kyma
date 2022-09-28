@@ -1,6 +1,8 @@
 package v1alpha1_test
 
 import (
+	testingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -22,15 +24,16 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting NATS Subscription with empty Filters",
 			alpha1Sub: newDefaultSubscription(
-				withEmptyFilter(),
+				testingv1.WithEmptyFilter(),
+				testingv1.WithStatusCleanEventTypes(nil),
 			),
 			alpha2Sub: newV2DefaultSubscription(),
 		},
 		{
 			name: "Converting NATS Subscription with multiple source which should result in a conversion error",
 			alpha1Sub: newDefaultSubscription(
-				withFilter("app", orderUpdatedEventType),
-				withFilter("", orderDeletedEventTypeNonClean),
+				testingv1.WithFilter("app", orderUpdatedEventType),
+				testingv1.WithFilter("", orderDeletedEventTypeNonClean),
 			),
 			alpha2Sub:        newV2DefaultSubscription(),
 			wantErrMsgV1toV2: v1alpha1.ErrorMultipleSourceMsg,
@@ -38,28 +41,28 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting NATS Subscription with non-convertable maxInFlight in the config which should result in a conversion error",
 			alpha1Sub: newDefaultSubscription(
-				withFilter("", orderUpdatedEventType),
+				testingv1.WithFilter("", orderUpdatedEventType),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				v2WithMaxInFlight("nonint"),
+				testingv2.WithMaxInFlight("nonint"),
 			),
 			wantErrMsgV2toV1: "strconv.Atoi: parsing \"nonint\": invalid syntax",
 		},
 		{
 			name: "Converting NATS Subscription with Filters",
 			alpha1Sub: newDefaultSubscription(
-				withFilter(eventSource, orderCreatedEventType),
-				withFilter(eventSource, orderUpdatedEventType),
-				withFilter(eventSource, orderDeletedEventTypeNonClean),
-				withStatusCleanEventTypes([]string{
+				testingv1.WithFilter(eventSource, orderCreatedEventType),
+				testingv1.WithFilter(eventSource, orderUpdatedEventType),
+				testingv1.WithFilter(eventSource, orderDeletedEventTypeNonClean),
+				testingv1.WithStatusCleanEventTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventType,
 				}),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				v2WithSource(eventSource),
-				v2WithTypes([]string{
+				testingv2.WithSource(eventSource),
+				testingv2.WithTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventTypeNonClean,
@@ -97,27 +100,27 @@ func Test_Conversion(t *testing.T) {
 		{
 			name: "Converting BEB Subscription",
 			alpha1Sub: newDefaultSubscription(
-				withProtocolBEB(),
-				withWebhookAuthForBEB(),
-				withFilter(eventSource, orderCreatedEventType),
-				withFilter(eventSource, orderUpdatedEventType),
-				withFilter(eventSource, orderDeletedEventTypeNonClean),
-				withStatusCleanEventTypes([]string{
+				testingv1.WithProtocolBEB(),
+				v1WithWebhookAuthForBEB(),
+				testingv1.WithFilter(eventSource, orderCreatedEventType),
+				testingv1.WithFilter(eventSource, orderUpdatedEventType),
+				testingv1.WithFilter(eventSource, orderDeletedEventTypeNonClean),
+				testingv1.WithStatusCleanEventTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventType,
 				}),
-				withBEBStatusFields(),
+				v1WithBEBStatusFields(),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				v2WithSource(eventSource),
-				v2WithTypes([]string{
+				testingv2.WithSource(eventSource),
+				testingv2.WithTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
 					orderDeletedEventTypeNonClean,
 				}),
-				v2WithProtocolBEB(),
-				v2WithWebhookAuthForBEB(),
+				testingv2.WithProtocolBEB(),
+				testingv2.WithWebhookAuthForBEB(),
 				v2WithStatusTypes([]v1alpha2.EventType{
 					{
 						OriginalType: orderCreatedEventType,

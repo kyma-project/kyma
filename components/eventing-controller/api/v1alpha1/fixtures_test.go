@@ -2,6 +2,7 @@ package v1alpha1_test
 
 import (
 	"fmt"
+	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -40,9 +41,7 @@ var (
 		}}
 )
 
-type subscriptionOpt = eventingtesting.SubscriptionOpt
-
-func newDefaultSubscription(opts ...subscriptionOpt) *v1alpha1.Subscription {
+func newDefaultSubscription(opts ...eventingtesting.SubscriptionOpt) *v1alpha1.Subscription {
 	var defaultConditions []v1alpha1.Condition
 	for _, condition := range v2DefaultConditions {
 		defaultConditions = append(defaultConditions, v1alpha1.ConditionV2ToV1(condition))
@@ -80,11 +79,9 @@ func newDefaultSubscription(opts ...subscriptionOpt) *v1alpha1.Subscription {
 	return newSub
 }
 
-var withStatusCleanEventTypes = eventingtesting.WithStatusCleanEventTypes
+// extend the v1 Subscription helpers with Status fields
 
-// TODO:
-// var withWebhookAuthForBEB = eventingtesting.WithWebhookAuthForBEB
-func withWebhookAuthForBEB() subscriptionOpt {
+func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionOpt {
 	return func(s *v1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
 		s.Spec.ProtocolSettings = &v1alpha1.ProtocolSettings{
@@ -109,9 +106,7 @@ func withWebhookAuthForBEB() subscriptionOpt {
 	}
 }
 
-var withProtocolBEB = eventingtesting.WithProtocolBEB
-
-func withBEBStatusFields() subscriptionOpt {
+func v1WithBEBStatusFields() eventingtesting.SubscriptionOpt {
 	return func(s *v1alpha1.Subscription) {
 		s.Status.Ev2hash = 123
 		s.Status.ExternalSink = "testlink.com"
@@ -127,14 +122,9 @@ func withBEBStatusFields() subscriptionOpt {
 	}
 }
 
-var withFilter = eventingtesting.WithFilter
-
-// TODO:
-// var withEmptyFilter = eventingtesting.WithEmptyFilter
-
 // withEmptyFilter is a subscriptionOpt for creating a subscription with an empty event type filter.
 // Note that this is different from setting Filter to nil.
-func withEmptyFilter() subscriptionOpt {
+func withEmptyFilter() eventingtesting.SubscriptionOpt {
 	return func(subscription *v1alpha1.Subscription) {
 		subscription.Spec.Filter = &v1alpha1.BEBFilters{
 			Filters: []*v1alpha1.BEBFilter{},
@@ -143,86 +133,7 @@ func withEmptyFilter() subscriptionOpt {
 	}
 }
 
-type v2SubscriptionOpt func(subscription *v1alpha2.Subscription)
-
-func v2WithMaxInFlight(maxInFlight string) v2SubscriptionOpt {
-	return func(sub *v1alpha2.Subscription) {
-		sub.Spec.Config = map[string]string{
-			v1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
-		}
-	}
-}
-
-func v2WithSource(source string) v2SubscriptionOpt {
-	return func(sub *v1alpha2.Subscription) {
-		sub.Spec.Source = source
-	}
-}
-
-func v2WithTypes(types []string) v2SubscriptionOpt {
-	return func(sub *v1alpha2.Subscription) {
-		sub.Spec.Types = types
-	}
-}
-
-func v2WithStatusJetStreamTypes(types []v1alpha2.JetStreamTypes) v2SubscriptionOpt {
-	return func(sub *v1alpha2.Subscription) {
-		sub.Status.Backend.Types = types
-	}
-}
-
-func v2WithStatusTypes(statusTypes []v1alpha2.EventType) v2SubscriptionOpt {
-	return func(sub *v1alpha2.Subscription) {
-		if statusTypes == nil {
-			sub.Status.InitializeEventTypes()
-			return
-		}
-		sub.Status.Types = statusTypes
-	}
-}
-
-func v2WithWebhookAuthForBEB() v2SubscriptionOpt {
-	return func(s *v1alpha2.Subscription) {
-		s.Spec.Config = map[string]string{
-			v1alpha2.Protocol:                        "BEB",
-			v1alpha2.ProtocolSettingsContentMode:     v1alpha1.ProtocolSettingsContentModeBinary,
-			v1alpha2.ProtocolSettingsExemptHandshake: "true",
-			v1alpha2.ProtocolSettingsQos:             "true",
-			v1alpha2.WebhookAuthType:                 "oauth2",
-			v1alpha2.WebhookAuthGrantType:            "client_credentials",
-			v1alpha2.WebhookAuthClientID:             "xxx",
-			v1alpha2.WebhookAuthClientSecret:         "xxx",
-			v1alpha2.WebhookAuthTokenURL:             "https://oauth2.xxx.com/oauth2/token",
-			v1alpha2.WebhookAuthScope:                "guid-identifier,root",
-		}
-	}
-}
-
-func v2WithProtocolBEB() v2SubscriptionOpt {
-	return func(s *v1alpha2.Subscription) {
-		if s.Spec.Config == nil {
-			s.Spec.Config = map[string]string{}
-		}
-		s.Spec.Config[v1alpha2.Protocol] = "BEB"
-	}
-}
-
-func v2WithBEBStatusFields() v2SubscriptionOpt {
-	return func(s *v1alpha2.Subscription) {
-		s.Status.Backend.Ev2hash = 123
-		s.Status.Backend.ExternalSink = "testlink.com"
-		s.Status.Backend.FailedActivation = "123156464672"
-		s.Status.Backend.APIRuleName = "APIRule"
-		s.Status.Backend.EmsSubscriptionStatus = &v1alpha2.EmsSubscriptionStatus{
-			Status:                   "not active",
-			StatusReason:             "reason",
-			LastSuccessfulDelivery:   "",
-			LastFailedDelivery:       "1345613234",
-			LastFailedDeliveryReason: "failed",
-		}
-	}
-}
-func newV2DefaultSubscription(opts ...v2SubscriptionOpt) *v1alpha2.Subscription {
+func newV2DefaultSubscription(opts ...v2.SubscriptionOpt) *v1alpha2.Subscription {
 	newSub := &v1alpha2.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Subscription",
@@ -250,4 +161,38 @@ func newV2DefaultSubscription(opts ...v2SubscriptionOpt) *v1alpha2.Subscription 
 	}
 
 	return newSub
+}
+
+// extend the v2 Subscription helpers with Status fields
+
+func v2WithBEBStatusFields() v2.SubscriptionOpt {
+	return func(s *v1alpha2.Subscription) {
+		s.Status.Backend.Ev2hash = 123
+		s.Status.Backend.ExternalSink = "testlink.com"
+		s.Status.Backend.FailedActivation = "123156464672"
+		s.Status.Backend.APIRuleName = "APIRule"
+		s.Status.Backend.EmsSubscriptionStatus = &v1alpha2.EmsSubscriptionStatus{
+			Status:                   "not active",
+			StatusReason:             "reason",
+			LastSuccessfulDelivery:   "",
+			LastFailedDelivery:       "1345613234",
+			LastFailedDeliveryReason: "failed",
+		}
+	}
+}
+
+func v2WithStatusTypes(statusTypes []v1alpha2.EventType) v2.SubscriptionOpt {
+	return func(sub *v1alpha2.Subscription) {
+		if statusTypes == nil {
+			sub.Status.InitializeEventTypes()
+			return
+		}
+		sub.Status.Types = statusTypes
+	}
+}
+
+func v2WithStatusJetStreamTypes(types []v1alpha2.JetStreamTypes) v2.SubscriptionOpt {
+	return func(sub *v1alpha2.Subscription) {
+		sub.Status.Backend.Types = types
+	}
 }
