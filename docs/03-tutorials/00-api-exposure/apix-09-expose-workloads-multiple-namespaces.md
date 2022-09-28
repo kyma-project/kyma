@@ -6,7 +6,7 @@ This tutorial shows how to expose service endpoints in multiple Namespaces using
    > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always secure the workload you expose with [OAuth2](./apix-05-expose-and-secure-workload-oauth2.md) or [JWT](./apix-08-expose-and-secure-workload-jwt.md).
 
 
-## Expose and access your workloads in multiple namespaces
+## Expose and access your workloads in multiple Namespaces
 
 Follow the instructions to expose and access your unsecured instance of the HttpBin service and unsecured sample Function.
 
