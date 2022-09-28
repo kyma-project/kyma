@@ -71,12 +71,13 @@ func statusCleanEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1a
 	return cleanEventTypes
 }
 
-func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1alpha2.JetStreamTypes {
-	// TODO: This method will be removed once CRD implementation is completed
-	var finalEventTypes []eventingv1alpha2.JetStreamTypes
+func statusFinalEventTypes(typeInfos []backendutils.EventTypeInfo) []eventingv1alpha2.EventMeshTypes {
+	var finalEventTypes []eventingv1alpha2.EventMeshTypes
 	for _, i := range typeInfos {
-		finalEventTypes = append(finalEventTypes, eventingv1alpha2.JetStreamTypes{OriginalType: i.OriginalType,
-			ConsumerName: i.ProcessedType})
+		finalEventTypes = append(finalEventTypes, eventingv1alpha2.EventMeshTypes{
+			OriginalType:  i.OriginalType,
+			EventMeshType: i.ProcessedType,
+		})
 	}
 	return finalEventTypes
 }

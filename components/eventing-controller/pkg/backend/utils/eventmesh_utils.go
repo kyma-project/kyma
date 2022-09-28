@@ -87,6 +87,27 @@ func getQos(qosStr string) (types.Qos, error) {
 	}
 }
 
+func getEventMeshEvents(typeInfos []EventTypeInfo, typeMatching eventingv1alpha2.TypeMatching,
+	defaultNamespace, source string) types.Events {
+	eventMeshNamespace := defaultNamespace
+	if typeMatching == eventingv1alpha2.EXACT {
+		eventMeshNamespace = source
+	}
+
+	events := make(types.Events, 0, len(typeInfos))
+	for _, typeInfo := range typeInfos {
+		eventType := typeInfo.ProcessedType
+		if typeMatching == eventingv1alpha2.EXACT {
+			eventType = typeInfo.OriginalType
+		}
+		events = append(
+			events,
+			types.Event{Source: eventMeshNamespace, Type: eventType},
+		)
+	}
+	return events
+}
+
 func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, typeInfos []EventTypeInfo,
 	apiRule *apigatewayv1beta1.APIRule, defaultWebhookAuth *types.WebhookAuth,
 	defaultProtocolSettings *eventingv1alpha2.ProtocolSettings,
@@ -122,22 +143,8 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 
 	// Events
 	// set the event types in EventMesh subscription instance
-
-	eventMeshNamespace := defaultNamespace
-	if subscription.Spec.TypeMatching == eventingv1alpha2.EXACT {
-		eventMeshNamespace = subscription.Spec.Source
-	}
-
-	for _, typeInfo := range typeInfos {
-		eventType := typeInfo.ProcessedType
-		if subscription.Spec.TypeMatching == eventingv1alpha2.EXACT {
-			eventType = typeInfo.OriginalType
-		}
-		eventMeshSubscription.Events = append(
-			eventMeshSubscription.Events,
-			types.Event{Source: eventMeshNamespace, Type: eventType},
-		)
-	}
+	eventMeshSubscription.Events = getEventMeshEvents(typeInfos, subscription.Spec.TypeMatching,
+		defaultNamespace, subscription.Spec.Source)
 
 	// WebhookURL
 	// set WebhookURL of EventMesh subscription where the events will be dispatched to.
@@ -149,6 +156,7 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 
 	// Using default webhook auth unless specified in Subscription CR
 	auth := defaultWebhookAuth
+	// @TODO: Check here as well how the protocol settings would work in new CRD
 	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
 		auth = &types.WebhookAuth{}
 		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientID

@@ -42,8 +42,7 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 
 	bebSubEvents := types.Events{types.Event{
 		Source: eventingtestingv2.EventMeshNamespace,
-		//Type:   eventingtestingv2.OrderCreatedEventType,
-		Type: "prefix.testapp1023.order.created.v1", // @TODO: update it once cleaner logic is finalized
+		Type:   "prefix.testapp1023.order.created.v1",
 	}}
 
 	// getProcessedEventTypes returns the processed types after cleaning and prefixing.
@@ -491,4 +490,75 @@ func TestIsEventMeshSubModified(t *testing.T) {
 		g.Expect(result).To(Equal(test.output))
 
 	}
+}
+
+func Test_getEventMeshEvents(t *testing.T) {
+	// getProcessedEventTypes returns the processed types after cleaning and prefixing.
+	getTypeInfos := func(types []string) []EventTypeInfo {
+		result := make([]EventTypeInfo, 0, len(types))
+		for _, t := range types {
+			result = append(result, EventTypeInfo{OriginalType: t, CleanType: t, ProcessedType: t})
+		}
+		return result
+	}
+
+	g := NewGomegaWithT(t)
+
+	t.Run("with standard type matching", func(t *testing.T) {
+		// given
+		eventTypeInfos := getTypeInfos([]string{
+			eventingtestingv2.OrderCreatedV1Event,
+			eventingtestingv2.OrderCreatedV2Event,
+		})
+
+		defaultNamespace := eventingtestingv2.EventMeshNamespace
+		typeMatching := eventingv1alpha2.STANDARD
+		source := "custom-namespace"
+
+		expectedEventMeshEvents := types.Events{
+			types.Event{
+				Source: defaultNamespace,
+				Type:   eventingtestingv2.OrderCreatedV1Event,
+			},
+			types.Event{
+				Source: defaultNamespace,
+				Type:   eventingtestingv2.OrderCreatedV2Event,
+			},
+		}
+
+		// when
+		gotBEBEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
+
+		// then
+		g.Expect(gotBEBEvents).To(Equal(expectedEventMeshEvents))
+	})
+
+	t.Run("with exact type matching", func(t *testing.T) {
+		// given
+		eventTypeInfos := getTypeInfos([]string{
+			eventingtestingv2.OrderCreatedV1Event,
+			eventingtestingv2.OrderCreatedV2Event,
+		})
+
+		defaultNamespace := eventingtestingv2.EventMeshNamespace
+		typeMatching := eventingv1alpha2.EXACT
+		source := "custom-namespace"
+
+		expectedEventMeshEvents := types.Events{
+			types.Event{
+				Source: source,
+				Type:   eventingtestingv2.OrderCreatedV1Event,
+			},
+			types.Event{
+				Source: source,
+				Type:   eventingtestingv2.OrderCreatedV2Event,
+			},
+		}
+
+		// when
+		gotBEBEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
+
+		// then
+		g.Expect(gotBEBEvents).To(Equal(expectedEventMeshEvents))
+	})
 }

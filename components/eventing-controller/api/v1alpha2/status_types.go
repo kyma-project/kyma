@@ -41,6 +41,9 @@ type Backend struct {
 
 	// +optional
 	Types []JetStreamTypes `json:"types,omitempty"`
+
+	// +optional
+	EmsTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
@@ -90,4 +93,9 @@ type WebhookAuth struct {
 type JetStreamTypes struct {
 	OriginalType string `json:"originalType"`
 	ConsumerName string `json:"consumerName"`
+}
+
+type EventMeshTypes struct {
+	OriginalType  string `json:"originalType"`
+	EventMeshType string `json:"eventMeshType"`
 }
