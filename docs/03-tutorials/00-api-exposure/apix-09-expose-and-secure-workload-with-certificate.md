@@ -8,134 +8,51 @@ This tutorial shows how to expose and secure a workload with mutual authenticati
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
-Before you start, Set up [`kyma-mtls-gateway`](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-02-setup-mtls-gateway#steps). 
+Before you start, Set up [mtls-gateway](../00-security/sec-02-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-02-setup-mtls-gateway#steps). 
 
-## Expose and access your workload
+## Prepare a client certificate
 
-Follow the instruction to expose and access your instance of the HttpBin service or your sample Function.
-
-<div tabs>
-  <details>
-  <summary>
-  HttpBin
-  </summary>
+Follow the instructions to generate a self signed client root CA and client certificate.
 
 1. Export the following values as environment variables:
 
      ```bash
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
    export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
-   export CLIENT_CERT_CRT_FILE=client.example.com.crt
-	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
-	 export CLIENT_CERT_KEY_FILE=client.example.com.key 
+   export CLIENT_ROOT_CA_CN={ROOT_CA_COMMON_NAME}
+   export CLIENT_ROOT_CA_ORG={ROOT_CA_ORGANIZATION}
+   export CLIENT_ROOT_CA_KEY_FILE=${CLIENT_ROOT_CA_CN}.key
+   export CLIENT_ROOT_CA_CRT_FILE=${CLIENT_ROOT_CA_CN}.crt
+   export CLIENT_CERT_CN={COMMON_NAME}
+   export CLIENT_CERT_ORG={ORGANIZATION}
+   export CLIENT_CERT_CRT_FILE=${CLIENT_CERT_CN}.crt
+   export CLIENT_CERT_CSR_FILE=${CLIENT_CERT_CN}.csr
+   export CLIENT_CERT_KEY_FILE=${CLIENT_CERT_CN}.key  
    ```
    >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
 
-2. Generate Client certificate signed by Client Root CA: 
+2. Generate a Client Root CA and a Client certificate:
 
    ```bash
+   # Create a Root CA key and a certificate that's valid for one year - you can use it for validation
+   openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -subj '/O=${CLIENT_ROOT_CA_ORG}/CN=${CLIENT_ROOT_CA_CN}' -keyout ${CLIENT_ROOT_CA_KEY_FILE} -out ${CLIENT_ROOT_CA_CRT_FILE}
    # Create a new key and CSR for the client certificate
-   openssl req -out ${CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE} -subj "/CN=client.example.com/O=example"
-   # Sign the client cert with CA cert
-   openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE} -out ${CLIENT_CERT_CRT_FILE}
-   ```
-  
-  </details>
-  <details>
-  <summary>
-  Function
-  </summary>
-  
-1. Export the following values as environment variables:
-
-     ```bash
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME}
-   export GATEWAY=$NAMESPACE/$MTLS_GATEWAY_NAME
-   export CLIENT_CERT_CRT_FILE=client.example.com.crt
-	 export CLIENT_CERT_CSR_FILE=client.example.com.csr
-	 export CLIENT_CERT_KEY_FILE=client.example.com.key 
-   ```
-   >**NOTE:** `DOMAIN_NAME` is the domain that you own, for example, api.mydomain.com
-
-2. Generate Client certificate signed by Client Root CA: 
-
-   ```bash
-   # Create a new key and CSR for the client certificate
-   openssl req -out ${CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE} -subj "/CN=client.example.com/O=example"
-   # Sign the client cert with CA cert
+   openssl req -out ${CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${CLIENT_CERT_KEY_FILE} -subj "/CN=${CLIENT_CERT_CN}/O=${CLIENT_CERT_ORG}"
+   # Sign the client certificate with the CA certificate
    openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${CLIENT_CERT_CSR_FILE} -out ${CLIENT_CERT_CRT_FILE}
    ```
 
-  </details>
-</div>
-
-## Access the secured resources
-
-Follow the instructions in the tabs to call the secured service or Function using the certificates for the mTLS Gateway.
-
-<div tabs>
-
-  <details>
-  <summary>
-  Call the secured endpoints of a service
-  </summary>
-
-Send a `GET` request to the HttpBin service with the client certificates that you used to create mTLS Gateway:
-
-   ```shell
-   curl --key ${CLIENT_CERT_KEY_FILE} \
-        --cert ${CLIENT_CERT_CRT_FILE} \
-        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
-   ```
-
-These calls return the code `200` response. If you call the service without the proper certificates, you get the code `403` response.
-
-  </details>
-
-  <details>
-  <summary>
-  Call the secured Function
-  </summary>
-
-Send a `GET` request with a token that has the "read" scope to the Function:
-
-   ```shell
-   curl --key ${CLIENT_CERT_KEY_FILE} \
-        --cert ${CLIENT_CERT_CRT_FILE} \
-        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function
-   ```
-
-This call returns the code `200` response. If you call the Function without the proper certificates, you get the code `403` response.
-  </details>
-</div>
-
-## Make your mTLS endpoint more secure
+## Authorize client with a certificate 
 
 Follow the instructions in the tabs to further secure the mTLS service or Function. Create AuthorizationPolicy that checks if the client's Common Name in the certificate matches.
+
 <div tabs>
   <details>
   <summary>
   HttpBin
   </summary>
 
-1. Export the following values as environment variables:
-
-     ```bash
-	export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
-	export NEW_CLIENT_CERT_CSR_FILE=client2.example.com.csr
-	export NEW_CLIENT_CERT_KEY_FILE=client2.example.com.key 
-   ```
-
-2. Generate a new Client certificate signed by Client Root CA:
-
-     ```bash
-   # Create a new key and CSR for the client certificate
-   openssl req -out ${NEW_CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${NEW_CLIENT_CERT_KEY_FILE} -subj "/CN=client2.example.com/O=example"
-   # Sign the client certificate with CA cert
-   openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${NEW_CLIENT_CERT_CSR_FILE} -out ${NEW_CLIENT_CERT_CRT_FILE}
-   ```
-
-3. Create VirtualService that adds the X-CLIENT-SSL headers to the incoming requests:
+1. Create VirtualService that adds the X-CLIENT-SSL headers to the incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
@@ -163,7 +80,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
    EOF
    ```
 
-4. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
+2. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -179,7 +96,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
            hosts: ["httpbin-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}"]
        when:
        - key: request.headers[X-Client-Ssl-Cn]
-         values: ["O=example,CN=client2.example.com"]
+         values: ["O=${CLIENT_CERT_ORG},CN=${CLIENT_CERT_CN}"]
    EOF
    ```
   </details>
@@ -188,24 +105,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
   Function
   </summary>
   
-1. Export the following values as environment variables:
-
-      ```bash
-	 export NEW_CLIENT_CERT_CRT_FILE=client2.example.com.crt
-	 export NEW_CLIENT_CERT_CSR_FILE=client2.example.com.csr
-	 export NEW_CLIENT_CERT_KEY_FILE=client2.example.com.key 
-   ```
-
-2. Generate a new Client certificate signed by Client Root CA:
-
-     ```bash
-   # Create a new key and CSR for the client certificate
-   openssl req -out ${NEW_CLIENT_CERT_CSR_FILE} -newkey rsa:2048 -nodes -keyout ${NEW_CLIENT_CERT_KEY_FILE} -subj "/CN=client2.example.com/O=example"
-   # Sign the client certificate with CA cert
-   openssl x509 -req -days 365 -CA ${CLIENT_ROOT_CA_CRT_FILE} -CAkey ${CLIENT_ROOT_CA_KEY_FILE} -set_serial 0 -in ${NEW_CLIENT_CERT_CSR_FILE} -out ${NEW_CLIENT_CERT_CRT_FILE}
-   ```
-
-3. Create VirtualService that adds the X-CLIENT-SSL headers to incoming requests:
+1. Create VirtualService that adds the X-CLIENT-SSL headers to incoming requests:
    ```bash
    cat <<EOF | kubectl apply -f - 
    apiVersion: networking.istio.io/v1alpha3
@@ -232,7 +132,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-4. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
+2. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -248,7 +148,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
            hosts: ["function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}"]
        when:
        - key: request.headers[X-Client-Ssl-Cn]
-         values: ["O=example,CN=client2.example.com"]
+         values: ["O=${CLIENT_CERT_ORG},CN=${CLIENT_CERT_CN}"]
    EOF
    ```
   </details>
@@ -264,9 +164,9 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
 Send a `GET` request to the HttpBin service with the client certificates that you used to create mTLS Gateway:
 
    ```shell
-   curl --key ${NEW_CLIENT_CERT_KEY_FILE} \
-        --cert ${NEW_CLIENT_CERT_CRT_FILE} \
-        --cacert ${NEW_CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
+   curl --key ${CLIENT_CERT_KEY_FILE} \
+        --cert ${CLIENT_CERT_CRT_FILE} \
+        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
    ```
 
 These calls return the code `200` response. If you call the service without the proper certificates or with old ones, you get the code `403` response.
@@ -281,9 +181,9 @@ These calls return the code `200` response. If you call the service without the 
 Send a `GET` request with a token that has the `read` scope to the Function:
 
    ```shell
-   curl --key ${NEW_CLIENT_CERT_KEY_FILE} \
-        --cert ${NEW_CLIENT_CERT_CRT_FILE} \
-        --cacert ${NEW_CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function
+   curl --key ${CLIENT_CERT_KEY_FILE} \
+        --cert ${CLIENT_CERT_CRT_FILE} \
+        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function
    ```
 
 This call returns the code `200` response. If you call the Function without the proper certificates or with old ones, you get the code `403` response.
