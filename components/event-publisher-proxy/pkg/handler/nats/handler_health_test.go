@@ -33,20 +33,15 @@ func TestHandlerHealth(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NATSServerModes {
-				t.Run(serverMode.Name, func(t *testing.T) {
-					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetStream(serverMode.JetStreamEnabled))
-					defer handlerMock.Stop()
+			handlerMock := mock.StartOrDie(context.TODO(), t)
+			defer handlerMock.Stop()
 
-					if tc.givenNATSServerShutdown {
-						handlerMock.ShutdownNATSServerAndWait()
-					}
-
-					testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)
-					testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetReadinessEndpoint(), tc.wantReadinessStatusCode)
-				})
+			if tc.givenNATSServerShutdown {
+				handlerMock.ShutdownNATSServerAndWait()
 			}
+
+			testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)
+			testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetReadinessEndpoint(), tc.wantReadinessStatusCode)
 		})
 	}
 }

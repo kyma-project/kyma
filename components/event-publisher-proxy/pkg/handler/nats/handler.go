@@ -35,14 +35,14 @@ type Handler struct {
 	// Receiver receives incoming HTTP requests
 	Receiver *receiver.HTTPMessageReceiver
 	// Sender sends requests to the broker
-	Sender *sender.GenericSender
+	Sender sender.GenericSender
 	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
 	// LegacyTransformer handles transformations needed to handle legacy events
 	LegacyTransformer *legacy.Transformer
 	// RequestTimeout timeout for outgoing requests
 	RequestTimeout time.Duration
-	//SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
+	// SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
 	SubscribedProcessor *subscribed.Processor
 	// Logger default logger
 	Logger *logger.Logger
@@ -55,7 +55,7 @@ type Handler struct {
 }
 
 // NewHandler returns a new NATS Handler instance.
-func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.GenericSender, requestTimeout time.Duration,
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
 	return &Handler{
@@ -220,7 +220,7 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 // send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	start := time.Now()
-	s := *h.Sender
+	s := h.Sender
 	resp, err := s.Send(ctx, event)
 	h.collector.RecordEventType(event.Type(), event.Source(), resp)
 	dispatchTime := time.Since(start)

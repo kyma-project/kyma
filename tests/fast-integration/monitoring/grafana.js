@@ -1,3 +1,10 @@
+module.exports = {
+  assertPodsExist,
+  assertGrafanaRedirectsExist,
+  setGrafanaProxy,
+  resetGrafanaProxy,
+};
+
 const {
   assert,
   expect,
@@ -176,10 +183,3 @@ async function checkGrafanaRedirect(redirectURL, httpStatus) {
   }
   return false;
 }
-
-module.exports = {
-  assertPodsExist,
-  assertGrafanaRedirectsExist,
-  setGrafanaProxy,
-  resetGrafanaProxy,
-};

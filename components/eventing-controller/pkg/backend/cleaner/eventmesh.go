@@ -11,7 +11,10 @@ import (
 // Perform a compile-time check.
 var _ Cleaner = &EventMeshCleaner{}
 
-const maxEventMeshSegmentsLimit = 3
+const (
+	minEventMeshSegmentsLimit = 2
+	maxEventMeshSegmentsLimit = 3
+)
 
 var (
 	// invalidEventMeshTypeSegment used to match and replace none-alphanumeric characters in the event-type segments
@@ -29,6 +32,11 @@ func (c *EventMeshCleaner) CleanSource(source string) (string, error) {
 }
 
 func (c *EventMeshCleaner) CleanEventType(eventType string) (string, error) {
+	// check for minEventMeshSegmentsLimit
+	if len(strings.Split(eventType, ".")) < minEventMeshSegmentsLimit {
+		return "", fmt.Errorf("event type should have atlease %d segments", minEventMeshSegmentsLimit)
+	}
+
 	mergedEventType := c.getMergedSegments(eventType)
 	return invalidEventMeshTypeSegment.ReplaceAllString(mergedEventType, ""), nil
 }
@@ -42,7 +50,7 @@ func (c *EventMeshCleaner) getMergedSegments(eventType string) string {
 	if totalSegments > maxEventMeshSegmentsLimit {
 		combinedSegment := ""
 		// combine the first n-2 segments without dots "."
-		for i := 0; i < (totalSegments - 2); i++ { //nolint:gomnd
+		for i := 0; i < totalSegments-2; i++ { //nolint:gomnd
 			combinedSegment += segments[i]
 		}
 		// append the last  two segment with preceding dots "."

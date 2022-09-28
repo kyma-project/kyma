@@ -262,11 +262,6 @@ func NewSampleEventMeshSubscription() *types.Subscription {
 	return NewBEBSubscription("ev2subs1", types.ContentModeStructured, "https://webhook.xxx.com", eventType, nil)
 }
 
-func exemptHandshake(val bool) *bool {
-	exemptHandshake := val
-	return &exemptHandshake
-}
-
 func WithFakeSubscriptionStatus() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Status.Conditions = []eventingv1alpha2.Condition{
@@ -277,6 +272,26 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 				Message: "foo-message",
 			},
 		}
+	}
+}
+
+func WithMaxInFlight(maxInFlight string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Config = map[string]string{
+			eventingv1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
+		}
+	}
+}
+
+func WithSource(source string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Source = source
+	}
+}
+
+func WithTypes(types []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Types = types
 	}
 }
 
@@ -304,7 +319,7 @@ func WithFinalizers(finalizers []string) SubscriptionOpt {
 func WithStatusTypes(cleanEventTypes []eventingv1alpha2.EventType) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
 		if cleanEventTypes == nil {
-			sub.Status.InitializeCleanEventTypes()
+			sub.Status.InitializeEventTypes()
 		} else {
 			sub.Status.Types = cleanEventTypes
 		}
@@ -321,45 +336,35 @@ func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 
 func WithWebhookAuthForBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Protocol = "BEB"
-		s.Spec.ProtocolSettings = &eventingv1alpha2.ProtocolSettings{
-			ContentMode: func() *string {
-				contentMode := eventingv1alpha2.ProtocolSettingsContentModeBinary
-				return &contentMode
-			}(),
-			ExemptHandshake: exemptHandshake(true),
-			Qos:             utils.StringPtr(string(types.QosAtLeastOnce)),
-			WebhookAuth: &eventingv1alpha2.WebhookAuth{
-				Type:         "oauth2",
-				GrantType:    "client_credentials",
-				ClientID:     "xxx",
-				ClientSecret: "xxx",
-				TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-				Scope:        []string{"guid-identifier"},
-			},
+		s.Spec.Config = map[string]string{
+			eventingv1alpha2.Protocol:                        "BEB",
+			eventingv1alpha2.ProtocolSettingsContentMode:     eventingv1alpha2.ProtocolSettingsContentModeBinary,
+			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
+			eventingv1alpha2.ProtocolSettingsQos:             "true",
+			eventingv1alpha2.WebhookAuthType:                 "oauth2",
+			eventingv1alpha2.WebhookAuthGrantType:            "client_credentials",
+			eventingv1alpha2.WebhookAuthClientID:             "xxx",
+			eventingv1alpha2.WebhookAuthClientSecret:         "xxx",
+			eventingv1alpha2.WebhookAuthTokenURL:             "https://oauth2.xxx.com/oauth2/token",
+			eventingv1alpha2.WebhookAuthScope:                "guid-identifier,root",
 		}
 	}
 }
 
 func WithProtocolBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Protocol = "BEB"
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
+		}
+		s.Spec.Config[eventingv1alpha2.Protocol] = "BEB"
 	}
 }
 
-func WithProtocolSettings(p *eventingv1alpha2.ProtocolSettings) SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.ProtocolSettings = p
-	}
-}
-
-// WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
-func WithWebhookForNATS() SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Protocol = "NATS"
-		s.Spec.ProtocolSettings = &eventingv1alpha2.ProtocolSettings{}
-	}
-}
+//func WithProtocolSettings(p *eventingv1alpha2.ProtocolSettings) SubscriptionOpt {
+//	return func(s *eventingv1alpha2.Subscription) {
+//		s.Spec.ProtocolSettings = p
+//	}
+//}
 
 // AddEventType adds a new type to the subscription.
 func AddEventType(eventType string, subscription *eventingv1alpha2.Subscription) {

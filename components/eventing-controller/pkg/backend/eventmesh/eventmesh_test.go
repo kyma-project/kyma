@@ -2,6 +2,7 @@ package eventmesh
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -13,20 +14,21 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	backendbebv1 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	PublisherManagerMock "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	controllertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
-func Test_GetProcessedEventTypes(t *testing.T) {
+func Test_getProcessedEventTypes(t *testing.T) {
 
 	// given
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 
 	// cases
 	testCases := []struct {
@@ -106,7 +108,7 @@ func Test_GetProcessedEventTypes(t *testing.T) {
 						"test1.test2.test3.order.created.v1",
 					},
 					Source:       "test",
-					TypeMatching: eventingv1alpha2.EXACT,
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
 				},
 			},
 			givenEventTypePrefix: controllertestingv2.EventMeshPrefix,
@@ -148,7 +150,7 @@ func Test_GetProcessedEventTypes(t *testing.T) {
 			require.NoError(t, err)
 
 			// when
-			eventTypeInfos, err := eventMesh.GetProcessedEventTypes(tc.givenSubscription, cleaner)
+			eventTypeInfos, err := eventMesh.getProcessedEventTypes(tc.givenSubscription, cleaner)
 
 			// then
 			require.Equal(t, tc.wantError, err != nil)
@@ -158,6 +160,423 @@ func Test_GetProcessedEventTypes(t *testing.T) {
 		})
 	}
 
+}
+
+func Test_handleKymaSubModified(t *testing.T) {
+	// given
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+		maxSubscriptionNameLength)
+
+	// cases
+	testCases := []struct {
+		name                      string
+		givenKymaSub              *eventingv1alpha2.Subscription
+		givenEventMeshSub         *types.Subscription
+		givenClientDeleteResponse *types.DeleteResponse
+		wantIsModified            bool
+		wantError                 bool
+	}{
+		{
+			name: "should not delete EventMesh sub if Kyma sub was not modified",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Backend: eventingv1alpha2.Backend{
+						Ev2hash: int64(-9219276050977208880),
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentMode",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientDeleteResponse: &types.DeleteResponse{
+				Response: types.Response{
+					StatusCode: http.StatusNoContent,
+					Message:    "",
+				},
+			},
+			wantIsModified: false,
+			wantError:      false,
+		},
+		{
+			name: "should delete EventMesh sub if Kyma sub was modified",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Backend: eventingv1alpha2.Backend{
+						Ev2hash: int64(-9219276050977208880),
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentModeModified",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientDeleteResponse: &types.DeleteResponse{
+				Response: types.Response{
+					StatusCode: http.StatusNoContent,
+					Message:    "",
+				},
+			},
+			wantIsModified: true,
+			wantError:      false,
+		},
+		{
+			name: "fail if delete EventMesh sub return error",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Backend: eventingv1alpha2.Backend{
+						Ev2hash: int64(-9219276050977208880),
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentModeModified",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientDeleteResponse: &types.DeleteResponse{
+				Response: types.Response{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "",
+				},
+			},
+			wantIsModified: true,
+			wantError:      true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// given
+			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			// Set a mock client interface for EventMesh
+			mockClient := new(PublisherManagerMock.PublisherManager)
+			mockClient.On("Delete", tc.givenEventMeshSub.Name).Return(tc.givenClientDeleteResponse, nil)
+			eventMesh.client = mockClient
+
+			// when
+			isModified, err := eventMesh.handleKymaSubModified(tc.givenEventMeshSub, tc.givenKymaSub)
+
+			// then
+			require.Equal(t, tc.wantError, err != nil)
+			if !tc.wantError {
+				require.Equal(t, tc.wantIsModified, isModified)
+			}
+		})
+	}
+}
+
+func Test_handleEventMeshSubModified(t *testing.T) {
+	// given
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+		maxSubscriptionNameLength)
+
+	// cases
+	testCases := []struct {
+		name                      string
+		givenKymaSub              *eventingv1alpha2.Subscription
+		givenEventMeshSub         *types.Subscription
+		givenClientDeleteResponse *types.DeleteResponse
+		wantIsModified            bool
+		wantError                 bool
+	}{
+		{
+			name: "should not delete EventMesh sub if EventMesh sub was not modified",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Backend: eventingv1alpha2.Backend{
+						Emshash: int64(-9219276050977208880),
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentMode",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientDeleteResponse: &types.DeleteResponse{
+				Response: types.Response{
+					StatusCode: http.StatusNoContent,
+					Message:    "",
+				},
+			},
+			wantIsModified: false,
+			wantError:      false,
+		},
+		{
+			name: "should delete EventMesh sub if EventMesh sub was modified",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Backend: eventingv1alpha2.Backend{
+						Emshash: int64(-9219276050977208880),
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentModeModified",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientDeleteResponse: &types.DeleteResponse{
+				Response: types.Response{
+					StatusCode: http.StatusNoContent,
+					Message:    "",
+				},
+			},
+			wantIsModified: true,
+			wantError:      false,
+		},
+		{
+			name: "should fail if delete EventMesh sub return error",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Backend: eventingv1alpha2.Backend{
+						Emshash: int64(-9219276050977208880),
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentModeModified",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientDeleteResponse: &types.DeleteResponse{
+				Response: types.Response{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "",
+				},
+			},
+			wantIsModified: true,
+			wantError:      true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// given
+			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			// Set a mock client interface for EventMesh
+			mockClient := new(PublisherManagerMock.PublisherManager)
+			mockClient.On("Delete", tc.givenEventMeshSub.Name).Return(tc.givenClientDeleteResponse, nil)
+			eventMesh.client = mockClient
+
+			// when
+			isModified, err := eventMesh.handleEventMeshSubModified(tc.givenEventMeshSub, tc.givenKymaSub)
+
+			// then
+			require.Equal(t, tc.wantError, err != nil)
+			if !tc.wantError {
+				require.Equal(t, tc.wantIsModified, isModified)
+			}
+		})
+	}
+}
+
+func Test_handleCreateEventMeshSub(t *testing.T) {
+	// given
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
+		maxSubscriptionNameLength)
+
+	// cases
+	testCases := []struct {
+		name                      string
+		givenKymaSub              *eventingv1alpha2.Subscription
+		givenEventMeshSub         *types.Subscription
+		givenClientCreateResponse *types.CreateResponse
+		wantError                 bool
+	}{
+		{
+			name: "should be able create EventMesh sub",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Types: []eventingv1alpha2.EventType{
+						{
+							OriginalType: "test1",
+							CleanType:    "test1",
+						},
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentMode",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientCreateResponse: &types.CreateResponse{
+				Response: types.Response{
+					StatusCode: http.StatusAccepted,
+					Message:    "",
+				},
+			},
+			wantError: false,
+		},
+		{
+			name: "should fail to create EventMesh sub if server returns error",
+			givenKymaSub: &eventingv1alpha2.Subscription{
+				Status: eventingv1alpha2.SubscriptionStatus{
+					Types: []eventingv1alpha2.EventType{
+						{
+							OriginalType: "test1",
+							CleanType:    "test1",
+						},
+					},
+				},
+			},
+			givenEventMeshSub: &types.Subscription{
+				Name:            "Name1",
+				ContentMode:     "ContentModeModified",
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+				WebhookURL:      "www.kyma-project.io",
+			},
+			givenClientCreateResponse: &types.CreateResponse{
+				Response: types.Response{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "",
+				},
+			},
+			wantError: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// given
+			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
+			// Set a mock client interface for EventMesh
+			mockClient := new(PublisherManagerMock.PublisherManager)
+			mockClient.On("Create", tc.givenEventMeshSub).Return(tc.givenClientCreateResponse, nil)
+			mockClient.On("Get", tc.givenEventMeshSub.Name).Return(tc.givenEventMeshSub, &types.Response{
+				StatusCode: http.StatusOK,
+				Message:    "",
+			}, nil)
+			eventMesh.client = mockClient
+
+			// when
+			_, err := eventMesh.handleCreateEventMeshSub(tc.givenEventMeshSub, tc.givenKymaSub)
+
+			// then
+			require.Equal(t, tc.wantError, err != nil)
+			if !tc.wantError {
+				require.Empty(t, tc.givenKymaSub.Status.Types)
+			}
+		})
+	}
+}
+
+func Test_handleKymaSubStatusUpdate(t *testing.T) {
+	// given
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	// cases
+	testCases := []struct {
+		name               string
+		givenKymaSub       *eventingv1alpha2.Subscription
+		givenEventMeshSub  *types.Subscription
+		givenTypeInfos     []backendutils.EventTypeInfo
+		wantEventTypes     []eventingv1alpha2.EventType
+		wantEventMeshTypes []eventingv1alpha2.EventMeshTypes
+	}{
+		{
+			name:         "should be able create EventMesh sub",
+			givenKymaSub: &eventingv1alpha2.Subscription{},
+			givenEventMeshSub: &types.Subscription{
+				Name:                     "Name1",
+				ContentMode:              "ContentMode",
+				ExemptHandshake:          true,
+				Qos:                      types.QosAtLeastOnce,
+				WebhookURL:               "www.kyma-project.io",
+				SubscriptionStatusReason: "test-reason",
+			},
+			givenTypeInfos: []backendutils.EventTypeInfo{
+				{
+					OriginalType:  "test1",
+					CleanType:     "test2",
+					ProcessedType: "test3",
+				},
+				{
+					OriginalType:  "order1",
+					CleanType:     "order2",
+					ProcessedType: "order3",
+				},
+			},
+			wantEventTypes: []eventingv1alpha2.EventType{
+				{
+					OriginalType: "test1",
+					CleanType:    "test2",
+				},
+				{
+					OriginalType: "order1",
+					CleanType:    "order2",
+				},
+			},
+			wantEventMeshTypes: []eventingv1alpha2.EventMeshTypes{
+				{
+					OriginalType:  "test1",
+					EventMeshType: "test3",
+				},
+				{
+					OriginalType:  "order1",
+					EventMeshType: "order3",
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// given
+			eventMesh := NewEventMesh(nil, nil, defaultLogger)
+
+			// when
+			isChanged, _ := eventMesh.handleKymaSubStatusUpdate(tc.givenEventMeshSub, tc.givenEventMeshSub, tc.givenKymaSub, tc.givenTypeInfos)
+
+			// then
+			require.Equal(t, isChanged, true)
+			require.Equal(t, tc.givenKymaSub.Status.Types, tc.wantEventTypes)
+			require.Equal(t, tc.givenKymaSub.Status.Backend.EmsTypes, tc.wantEventMeshTypes)
+			require.Equal(t, tc.givenKymaSub.Status.Backend.EmsSubscriptionStatus.StatusReason,
+				tc.givenEventMeshSub.SubscriptionStatusReason)
+		})
+	}
 }
 
 func Test_SyncSubscription(t *testing.T) {
@@ -170,7 +589,7 @@ func Test_SyncSubscription(t *testing.T) {
 	require.NoError(t, err)
 
 	nameMapper := backendutils.NewBEBSubscriptionNameMapper("mydomain.com",
-		MaxEventMeshSubscriptionNameLength)
+		maxSubscriptionNameLength)
 	eventMesh := NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock

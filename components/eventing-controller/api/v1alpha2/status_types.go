@@ -36,11 +36,10 @@ type Backend struct {
 	// NATS-specific fields
 
 	// +optional
-	// +kubebuilder:validation:Minimum=1
-	MaxInFlightMessages int `json:"maxInFlightMessages,omitempty"`
+	Types []JetStreamTypes `json:"types,omitempty"`
 
 	// +optional
-	Types []JetStreamTypes `json:"types,omitempty"`
+	EmsTypes []EventMeshTypes `json:"emsTypes,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
@@ -65,29 +64,12 @@ type EmsSubscriptionStatus struct {
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
 
-// WebhookAuth defines the Webhook called by an active subscription in BEB
-type WebhookAuth struct {
-	// Type defines type of authentication
-	// +optional
-	Type string `json:"type,omitempty"`
-
-	// GrantType defines grant type for OAuth2
-	GrantType string `json:"grantType"`
-
-	// ClientID defines clientID for OAuth2
-	ClientID string `json:"clientId"`
-
-	// ClientSecret defines client secret for OAuth2
-	ClientSecret string `json:"clientSecret"`
-
-	// TokenURL defines token URL for OAuth2
-	TokenURL string `json:"tokenUrl"`
-
-	// Scope defines scope for OAuth2
-	Scope []string `json:"scope,omitempty"`
-}
-
 type JetStreamTypes struct {
 	OriginalType string `json:"originalType"`
-	ConsumerName string `json:"consumerName"`
+	ConsumerName string `json:"consumerName,omitempty"`
+}
+
+type EventMeshTypes struct {
+	OriginalType  string `json:"originalType"`
+	EventMeshType string `json:"eventMeshType"`
 }

@@ -93,8 +93,9 @@ func (sb *SectionBuilder) Build() string {
 	return sb.builder.String()
 }
 
-func parseMultiline(section string) []config.Parameter {
-	var result []config.Parameter
+func parseMultiline(section string) config.ParameterList {
+	var result config.ParameterList
+
 	for _, line := range strings.Split(section, "\n") {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 || strings.HasPrefix(line, "#") {
@@ -105,7 +106,7 @@ func parseMultiline(section string) []config.Parameter {
 			continue
 		}
 		param := config.Parameter{Key: strings.ToLower(strings.TrimSpace(key)), Value: strings.TrimSpace(value)}
-		result = append(result, param)
+		result.Add(param)
 	}
 	return result
 }

@@ -1,5 +1,5 @@
 //nolint:gosec
-package utils
+package v2
 
 import (
 	"context"
@@ -18,20 +18,8 @@ import (
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 )
 
-type EventTypeInfo struct {
-	OriginalType  string
-	CleanType     string
-	ProcessedType string
-}
-
-// NameMapper is used to map Kyma-specific resource names to their corresponding name on other
-// (external) systems, e.g. on different eventing backends, the same Kyma subscription name
-// could map to a different name.
-type NameMapper interface {
-	MapSubscriptionName(subscriptionName, subscriptionNamespace string) string
-}
-
-func getExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, targetURL string) (string, error) {
+func GetExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, targetURL string) (string, error) {
+	// @TODO: Move this method to backend/eventmesh/utils.go once old BEB backend is depreciated
 	scheme := "https://"
 	path := ""
 
@@ -52,8 +40,8 @@ func getExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, targetURL stri
 	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Host, path), nil
 }
 
-// UpdateSubscriptionV1Alpha2Status updates the status of all Kyma subscriptions on k8s.
-func UpdateSubscriptionV1Alpha2Status(ctx context.Context, dClient dynamic.Interface,
+// UpdateSubscriptionStatus updates the status of all Kyma subscriptions on k8s.
+func UpdateSubscriptionStatus(ctx context.Context, dClient dynamic.Interface,
 	sub *eventingv1alpha2.Subscription) error {
 	unstructuredObj, err := sub.ToUnstructuredSub()
 	if err != nil {
@@ -67,8 +55,8 @@ func UpdateSubscriptionV1Alpha2Status(ctx context.Context, dClient dynamic.Inter
 	return err
 }
 
-// LoggerWithSubscriptionV1AlphaV2 returns a logger with the given subscription (v1alphav2) details.
-func LoggerWithSubscriptionV1AlphaV2(log *zap.SugaredLogger,
+// LoggerWithSubscription returns a logger with the given subscription (v1alphav2) details.
+func LoggerWithSubscription(log *zap.SugaredLogger,
 	subscription *eventingv1alpha2.Subscription) *zap.SugaredLogger {
 	return log.With(
 		"kind", subscription.GetObjectKind().GroupVersionKind().Kind,

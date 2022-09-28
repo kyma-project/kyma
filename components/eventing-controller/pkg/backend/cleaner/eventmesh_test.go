@@ -35,6 +35,12 @@ func Test_CleanEventType(t *testing.T) {
 			wantEventType:  "Segment1Part1Part2.Segment2Part1Part2",
 			wantError:      false,
 		},
+		{
+			name:           "fail if the given event have less than two segments",
+			givenEventType: "Segment1-Part1-Part2-Ä",
+			wantEventType:  "",
+			wantError:      true,
+		},
 	}
 
 	defaultLogger, err1 := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
@@ -60,25 +66,21 @@ func Test_CleanSource(t *testing.T) {
 		name        string
 		givenSource string
 		wantSource  string
-		wantError   bool
 	}{
 		{
 			name:        "success if the given event have non-alphanumeric characters",
 			givenSource: "Source1-Part1-Part2-Ä",
 			wantSource:  "Source1Part1Part2",
-			wantError:   false,
 		},
 		{
 			name:        "success if the given source has more than one segment",
 			givenSource: "Source1-Part1-Part2-Ä.Source2-Part1-Part2-Ä",
 			wantSource:  "Source1Part1Part2Source2Part1Part2",
-			wantError:   false,
 		},
 		{
 			name:        "success if the given source has more than two segments",
 			givenSource: "Source1-Part1-Part2-Ä.Source2-Part1-Part2-Ä.Source3-Part1-Part2-Ä",
 			wantSource:  "Source1Part1Part2Source2Part1Part2Source3Part1Part2",
-			wantError:   false,
 		},
 	}
 
@@ -90,11 +92,8 @@ func Test_CleanSource(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			cleaner := NewEventMeshCleaner(defaultLogger)
-			eventType, err := cleaner.CleanSource(tc.givenSource)
-			require.Equal(t, tc.wantError, err != nil)
-			if !tc.wantError {
-				require.Equal(t, tc.wantSource, eventType)
-			}
+			eventType, _ := cleaner.CleanSource(tc.givenSource)
+			require.Equal(t, tc.wantSource, eventType)
 		})
 	}
 }

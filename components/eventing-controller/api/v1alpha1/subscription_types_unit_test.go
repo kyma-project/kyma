@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha1_test
 
 import (
 	"reflect"
@@ -7,45 +7,42 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-)
 
-const (
-	orderProcessedEventType = "prefix.testapp1023.order.processed.v1"
-	orderCreatedEventType   = "prefix.testapp1023.order.created.v1"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 func TestBEBFilters_Deduplicate(t *testing.T) {
-	filter1 := &BEBFilter{
-		EventSource: &Filter{
+	filter1 := &v1alpha1.BEBFilter{
+		EventSource: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
 			Value:    "",
 		},
-		EventType: &Filter{
+		EventType: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "type",
 			Value:    orderCreatedEventType,
 		},
 	}
-	filter2 := &BEBFilter{
-		EventSource: &Filter{
+	filter2 := &v1alpha1.BEBFilter{
+		EventSource: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
 			Value:    "",
 		},
-		EventType: &Filter{
+		EventType: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "type",
 			Value:    orderProcessedEventType,
 		},
 	}
-	filter3 := &BEBFilter{
-		EventSource: &Filter{
+	filter3 := &v1alpha1.BEBFilter{
+		EventSource: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
 			Value:    "/external/system/id",
 		},
-		EventType: &Filter{
+		EventType: &v1alpha1.Filter{
 			Type:     "exact",
 			Property: "type",
 			Value:    orderCreatedEventType,
@@ -53,26 +50,42 @@ func TestBEBFilters_Deduplicate(t *testing.T) {
 	}
 	tests := []struct {
 		caseName  string
-		input     *BEBFilters
-		expected  *BEBFilters
+		input     *v1alpha1.BEBFilters
+		expected  *v1alpha1.BEBFilters
 		expectErr bool
 	}{
 		{
-			caseName:  "Only one filter",
-			input:     &BEBFilters{Dialect: "beb", Filters: []*BEBFilter{filter1}},
-			expected:  &BEBFilters{Dialect: "beb", Filters: []*BEBFilter{filter1}},
+			caseName: "Only one filter",
+			input: &v1alpha1.BEBFilters{
+				Dialect: "beb",
+				Filters: []*v1alpha1.BEBFilter{filter1},
+			},
+			expected: &v1alpha1.BEBFilters{
+				Dialect: "beb",
+				Filters: []*v1alpha1.BEBFilter{filter1},
+			},
 			expectErr: false,
 		},
 		{
-			caseName:  "Filters with duplicate",
-			input:     &BEBFilters{Dialect: "nats", Filters: []*BEBFilter{filter1, filter1}},
-			expected:  &BEBFilters{Dialect: "nats", Filters: []*BEBFilter{filter1}},
+			caseName: "Filters with duplicate",
+			input: &v1alpha1.BEBFilters{
+				Dialect: "nats",
+				Filters: []*v1alpha1.BEBFilter{filter1, filter1},
+			},
+			expected: &v1alpha1.BEBFilters{
+				Dialect: "nats",
+				Filters: []*v1alpha1.BEBFilter{filter1},
+			},
 			expectErr: false,
 		},
 		{
-			caseName:  "Filters without duplicate",
-			input:     &BEBFilters{Filters: []*BEBFilter{filter1, filter2, filter3}},
-			expected:  &BEBFilters{Filters: []*BEBFilter{filter1, filter2, filter3}},
+			caseName: "Filters without duplicate",
+			input: &v1alpha1.BEBFilters{
+				Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3},
+			},
+			expected: &v1alpha1.BEBFilters{
+				Filters: []*v1alpha1.BEBFilter{filter1, filter2, filter3},
+			},
 			expectErr: false,
 		},
 	}
@@ -94,33 +107,33 @@ func TestMergeSubsConfigs(t *testing.T) {
 	defaultConf := &env.DefaultSubscriptionConfig{MaxInFlightMessages: 4}
 	tests := []struct {
 		caseName       string
-		inputConf      *SubscriptionConfig
+		inputConf      *v1alpha1.SubscriptionConfig
 		inputDefaults  *env.DefaultSubscriptionConfig
-		expectedOutput *SubscriptionConfig
+		expectedOutput *v1alpha1.SubscriptionConfig
 	}{
 		{
 			caseName:       "nil input config",
 			inputConf:      nil,
 			inputDefaults:  defaultConf,
-			expectedOutput: &SubscriptionConfig{MaxInFlightMessages: 4},
+			expectedOutput: &v1alpha1.SubscriptionConfig{MaxInFlightMessages: 4},
 		},
 		{
 			caseName:       "default is overridden",
-			inputConf:      &SubscriptionConfig{MaxInFlightMessages: 10},
+			inputConf:      &v1alpha1.SubscriptionConfig{MaxInFlightMessages: 10},
 			inputDefaults:  defaultConf,
-			expectedOutput: &SubscriptionConfig{MaxInFlightMessages: 10},
+			expectedOutput: &v1alpha1.SubscriptionConfig{MaxInFlightMessages: 10},
 		},
 		{
 			caseName:       "provided input is invalid",
-			inputConf:      &SubscriptionConfig{MaxInFlightMessages: 0},
+			inputConf:      &v1alpha1.SubscriptionConfig{MaxInFlightMessages: 0},
 			inputDefaults:  defaultConf,
-			expectedOutput: &SubscriptionConfig{MaxInFlightMessages: 4},
+			expectedOutput: &v1alpha1.SubscriptionConfig{MaxInFlightMessages: 4},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.caseName, func(t *testing.T) {
-			got := MergeSubsConfigs(tt.inputConf, tt.inputDefaults)
+			got := v1alpha1.MergeSubsConfigs(tt.inputConf, tt.inputDefaults)
 			if !reflect.DeepEqual(got, tt.expectedOutput) {
 				t.Errorf("MergeSubsConfigs() got = %v, want = %v", got, tt.expectedOutput)
 			}
@@ -129,7 +142,7 @@ func TestMergeSubsConfigs(t *testing.T) {
 }
 
 func TestInitializeCleanEventTypes(t *testing.T) {
-	s := Subscription{}
+	s := v1alpha1.Subscription{}
 	require.Nil(t, s.Status.CleanEventTypes)
 
 	s.Status.InitializeCleanEventTypes()
