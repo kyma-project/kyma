@@ -43,6 +43,7 @@ const (
 	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
 	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
 
+	EventMeshExactType = EventMeshPrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1EventNotClean
 	EventMeshOrderCreatedV1Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV1Event
 	EventMeshOrderCreatedV2Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 
@@ -376,6 +377,11 @@ func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
 
+// WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,
+func WithTypeMatching(typeMatching eventingv1alpha2.TypeMatching) SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.TypeMatching = typeMatching }
+}
+
 //// WithNotCleanEventType initializes subscription with a not clean event-type
 //// A not clean event-type means it contains none-alphanumeric characters.
 //func WithNotCleanEventType() SubscriptionOpt {
@@ -400,9 +406,9 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventType)
 }
 
-//func WithOrderCreatedType() SubscriptionOpt {
-//	return WithEventType(OrderCreatedEventType)
-//}
+func WithEventMeshExactType() SubscriptionOpt {
+	return WithEventType(EventMeshExactType)
+}
 
 func WithOrderCreatedV1Event() SubscriptionOpt {
 	return WithEventType(OrderCreatedV1Event)
@@ -414,6 +420,10 @@ func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
 
 func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
+}
+
+func WithEventMeshNamespaceSource() SubscriptionOpt {
+	return WithEventSource(EventMeshNamespace)
 }
 
 func WithNotCleanSource() SubscriptionOpt {
