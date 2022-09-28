@@ -64,7 +64,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-   >**NOTE:** If you didn't specify a Namespace for your service, the default APIRule Namespace will be used.
+   >**NOTE:** If you don't specify a Namespace for your service, the default APIRule Namespace is used.
 
 3. Call the endpoint by sending a `GET` request to the HttpBin service:
 
