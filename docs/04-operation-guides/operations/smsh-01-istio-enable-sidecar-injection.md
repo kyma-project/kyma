@@ -26,7 +26,7 @@ You can easily check whether your workloads have automatic Istio sidecar injecti
 
 If no parameter is passed execution output will contain pods in all namespaces that don't have automatic Istio sidecar injection enabled, whereas passing the parameter will result in analysis of only the given namespace.
 
-The script outputs the information in `{namespace}/{pod}` if run for all namespaces and in `{pod}` form for specific namespace
+The script outputs the information in `{namespace}/{pod}` if run for all namespaces and in `{pod}` form for specific namespace.
 
 * Running the script
 
