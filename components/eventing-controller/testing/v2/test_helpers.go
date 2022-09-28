@@ -205,11 +205,6 @@ func NewBEBSubscription(name, contentMode string, webhookURL string, events type
 	}
 }
 
-func exemptHandshake(val bool) *bool {
-	exemptHandshake := val
-	return &exemptHandshake
-}
-
 func WithFakeSubscriptionStatus() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Status.Conditions = []eventingv1alpha2.Condition{

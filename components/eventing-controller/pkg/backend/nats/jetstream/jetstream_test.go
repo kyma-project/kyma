@@ -9,7 +9,7 @@ import (
 	"time"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	cleanerv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	cleanerv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 
@@ -1052,7 +1052,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 
 // TestJetStream_ServerRestart tests that eventing works when NATS server is restarted
 // for scenarios involving the stream storage type and when reconnect attempts are exhausted or not.
-func TestJetStream_ServerRestart(t *testing.T) {
+func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 	// given
 	subscriber := evtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -1178,9 +1178,8 @@ func TestJetStream_ServerRestart(t *testing.T) {
 			require.Eventually(t, func() bool {
 				if tc.givenEnableCRDVersion {
 					return !testEnvironment.jsBackendv2.Conn.IsConnected()
-				} else {
-					return !testEnvironment.jsBackend.conn.IsConnected()
 				}
+				return !testEnvironment.jsBackend.conn.IsConnected()
 			}, 30*time.Second, 2*time.Second)
 
 			// when
@@ -1193,9 +1192,8 @@ func TestJetStream_ServerRestart(t *testing.T) {
 				require.Eventually(t, func() bool {
 					if tc.givenEnableCRDVersion {
 						return testEnvironment.jsBackendv2.Conn.IsConnected()
-					} else {
-						return testEnvironment.jsBackend.conn.IsConnected()
 					}
+					return testEnvironment.jsBackend.conn.IsConnected()
 				}, 30*time.Second, 2*time.Second)
 			}
 
@@ -1324,9 +1322,8 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 			require.Eventually(t, func() bool {
 				if newCRD {
 					return !testEnvironment.jsBackendv2.Conn.IsConnected()
-				} else {
-					return !testEnvironment.jsBackend.conn.IsConnected()
 				}
+				return !testEnvironment.jsBackend.conn.IsConnected()
 			}, 30*time.Second, 2*time.Second)
 
 			// when
@@ -1414,7 +1411,7 @@ type TestEnvironment struct {
 	jsClient    *jetStreamClient
 	natsConfig  env.NatsConfig
 	cleaner     eventtype.Cleaner
-	cleanerv2   cleanerv2.Cleaner
+	cleanerv2   cleanerv1alpha2.Cleaner
 	natsPort    int
 }
 
@@ -1431,7 +1428,7 @@ func setupTestEnvironment(t *testing.T, newCRD bool) *TestEnvironment {
 
 	jsClient := getJetStreamClient(t, natsConfig.URL)
 
-	cleanerv2 := cleanerv2.NewJetStreamCleaner(defaultLogger)
+	cleanerv2 := cleanerv1alpha2.NewJetStreamCleaner(defaultLogger)
 	cleaner := backendnats.CreateEventTypeCleaner(evtesting.EventTypePrefix, evtesting.ApplicationNameNotClean, defaultLogger)
 
 	var jsBackend *JetStream
