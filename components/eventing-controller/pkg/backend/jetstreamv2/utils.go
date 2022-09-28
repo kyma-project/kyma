@@ -135,7 +135,7 @@ func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Clea
 	for _, eventType := range uniqueTypes {
 		cleanType := eventType
 		var err error
-		if sub.Spec.TypeMatching != eventingv1alpha2.EXACT {
+		if sub.Spec.TypeMatching != eventingv1alpha2.TypeMatchingExact {
 			cleanType, err = getCleanEventType(eventType, cleaner)
 			if err != nil {
 				return []eventingv1alpha2.EventType{}, err

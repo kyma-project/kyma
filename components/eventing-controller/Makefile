@@ -86,8 +86,7 @@ setup-envtest:
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR)
 
 go-test: manifests-local generate-local setup-envtest
-	KUBEBUILDER_ASSETS=${ENVTEST_ASSETS_DIR}/bin go test ./... -tags=skip -coverprofile cover.out
-	KUBEBUILDER_ASSETS=${ENVTEST_ASSETS_DIR}/bin go test ./pkg/backend/jetstreamv2 -coverprofile cover.out
+	KUBEBUILDER_ASSETS=${ENVTEST_ASSETS_DIR}/bin go test ./... -coverprofile cover.out
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
 

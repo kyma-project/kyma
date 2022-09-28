@@ -66,7 +66,7 @@ spec:
       - name: pid
         emptyDir: {}
 
-      {{- if and .Values.global.jetstream.enabled (eq .Values.global.jetstream.storage "file") .Values.nats.jetstream.fileStorage.existingClaim }}
+      {{- if and (eq .Values.global.jetstream.storage "file") .Values.nats.jetstream.fileStorage.existingClaim }}
       # Persistent volume for jetstream running with file storage option
       - name: {{ include "nats.fullname" . }}-js-pvc
         persistentVolumeClaim:
@@ -109,7 +109,7 @@ spec:
       #  NATS Prometheus Exporter  #
       #                            #
       ##############################
-      {{- if and .Values.exporter.enabled .Values.global.jetstream.enabled }}
+      {{- if .Values.exporter.enabled }}
       - name: metrics
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
         imagePullPolicy: {{ .Values.exporter.pullPolicy }}
@@ -182,7 +182,6 @@ spec:
         - name: CLUSTER_ADVERTISE
           value: {{ include "nats.clusterAdvertise" . }}
 
-        {{- if .Values.global.jetstream.enabled }}
         {{- with .Values.nats.jetstream.encryption }}
         {{- with .secret }}
         - name: JS_KEY
@@ -192,13 +191,12 @@ spec:
               key: {{ .key }}
         {{- end }}
         {{- end }}
-        {{- end }}
         volumeMounts:
           - name: config-volume
             mountPath: /etc/nats-config
           - name: pid
             mountPath: /var/run/nats
-          {{- if and .Values.global.jetstream.enabled (eq .Values.global.jetstream.storage "file") }}
+          {{- if (eq .Values.global.jetstream.storage "file") }}
           - name: {{ include "nats.fullname" . }}-js-pvc
             mountPath: {{ .Values.nats.jetstream.fileStorage.storageDirectory }}
           {{- end }}
@@ -270,7 +268,7 @@ spec:
               - "-sl=ldm=/var/run/nats/nats.pid"
 
   volumeClaimTemplates:
-  {{- if and .Values.global.jetstream.enabled (eq .Values.global.jetstream.storage "file") (not .Values.nats.jetstream.fileStorage.existingClaim) }}
+  {{- if and (eq .Values.global.jetstream.storage "file") (not .Values.nats.jetstream.fileStorage.existingClaim) }}
   #####################################
   #                                   #
   #  Jetstream New Persistent Volume  #

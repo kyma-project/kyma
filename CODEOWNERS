@@ -45,7 +45,7 @@
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
+/installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @NHingerl
 /installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
 /resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw

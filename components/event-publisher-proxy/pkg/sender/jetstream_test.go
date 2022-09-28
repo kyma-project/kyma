@@ -17,10 +17,11 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
+
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 func TestJetStreamMessageSender(t *testing.T) {
@@ -164,7 +165,7 @@ type TestEnvironment struct {
 
 // setupTestEnvironment sets up the resources and mocks required for testing.
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	natsServer := testingutils.StartNATSServer(true)
+	natsServer := testingutils.StartNATSServer()
 	require.NotNil(t, natsServer)
 
 	connection, err := testingutils.ConnectToNATSServer(natsServer.ClientURL())

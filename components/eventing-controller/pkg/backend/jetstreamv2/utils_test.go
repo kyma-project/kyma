@@ -1,6 +1,3 @@
-//go:build !skip
-// +build !skip
-
 package jetstreamv2
 
 import (
@@ -10,7 +7,7 @@ import (
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	cleaner2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +20,7 @@ func TestGetCleanEventTypes(t *testing.T) {
 	t.Parallel()
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
-	cleaner := cleaner2.NewJetStreamCleaner(defaultLogger)
+	jscleaner := cleaner.NewJetStreamCleaner(defaultLogger)
 	testCases := []struct {
 		name              string
 		givenSubscription *eventingv1alpha2.Subscription
@@ -116,7 +113,7 @@ func TestGetCleanEventTypes(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			eventTypes, err := getCleanEventTypes(tc.givenSubscription, cleaner)
+			eventTypes, err := getCleanEventTypes(tc.givenSubscription, jscleaner)
 			require.Equal(t, tc.wantError, err != nil)
 			require.Equal(t, tc.wantEventTypes, eventTypes)
 		})

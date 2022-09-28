@@ -2,6 +2,7 @@ package v2
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"net"
 	"net/http"
 	"time"
@@ -175,50 +176,6 @@ func MarkReady(r *apigatewayv1beta1.APIRule) {
 	}
 }
 
-type ProtoOpt func(p *eventingv1alpha2.ProtocolSettings)
-
-func NewProtocolSettings(opts ...ProtoOpt) *eventingv1alpha2.ProtocolSettings {
-	protoSettings := &eventingv1alpha2.ProtocolSettings{}
-	for _, o := range opts {
-		o(protoSettings)
-	}
-	return protoSettings
-}
-
-func WithBinaryContentMode() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.ContentMode = utils.StringPtr(eventingv1alpha2.ProtocolSettingsContentModeBinary)
-	}
-}
-
-func WithExemptHandshake() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.ExemptHandshake = func() *bool {
-			exemptHandshake := true
-			return &exemptHandshake
-		}()
-	}
-}
-
-func WithAtLeastOnceQOS() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.Qos = utils.StringPtr(string(types.QosAtLeastOnce))
-	}
-}
-
-func WithDefaultWebhookAuth() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.WebhookAuth = &eventingv1alpha2.WebhookAuth{
-			Type:         "oauth2",
-			GrantType:    "client_credentials",
-			ClientID:     "xxx",
-			ClientSecret: "xxx",
-			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-			Scope:        []string{"guid-identifier"},
-		}
-	}
-}
-
 type SubscriptionOpt func(subscription *eventingv1alpha2.Subscription)
 
 func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha2.Subscription {
@@ -286,63 +243,11 @@ func WithFinalizers(finalizers []string) SubscriptionOpt {
 	}
 }
 
-func WithStatusTypes(cleanEventTypes []eventingv1alpha2.EventType) SubscriptionOpt {
-	return func(sub *eventingv1alpha2.Subscription) {
-		if cleanEventTypes == nil {
-			sub.Status.InitializeCleanEventTypes()
-		} else {
-			sub.Status.Types = cleanEventTypes
-		}
-	}
-}
-
 func WithEmsSubscriptionStatus(status string) SubscriptionOpt {
 	return func(sub *eventingv1alpha2.Subscription) {
 		sub.Status.Backend.EmsSubscriptionStatus = &eventingv1alpha2.EmsSubscriptionStatus{
 			Status: status,
 		}
-	}
-}
-
-func WithWebhookAuthForBEB() SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Protocol = "BEB"
-		s.Spec.ProtocolSettings = &eventingv1alpha2.ProtocolSettings{
-			ContentMode: func() *string {
-				contentMode := eventingv1alpha2.ProtocolSettingsContentModeBinary
-				return &contentMode
-			}(),
-			ExemptHandshake: exemptHandshake(true),
-			Qos:             utils.StringPtr(string(types.QosAtLeastOnce)),
-			WebhookAuth: &eventingv1alpha2.WebhookAuth{
-				Type:         "oauth2",
-				GrantType:    "client_credentials",
-				ClientID:     "xxx",
-				ClientSecret: "xxx",
-				TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-				Scope:        []string{"guid-identifier"},
-			},
-		}
-	}
-}
-
-func WithProtocolBEB() SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Protocol = "BEB"
-	}
-}
-
-func WithProtocolSettings(p *eventingv1alpha2.ProtocolSettings) SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.ProtocolSettings = p
-	}
-}
-
-// WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
-func WithWebhookForNATS() SubscriptionOpt {
-	return func(s *eventingv1alpha2.Subscription) {
-		s.Spec.Protocol = "NATS"
-		s.Spec.ProtocolSettings = &eventingv1alpha2.ProtocolSettings{}
 	}
 }
 
@@ -355,6 +260,12 @@ func AddEventType(eventType string, subscription *eventingv1alpha2.Subscription)
 // that itself gets created from the passed eventType.
 func WithEventType(eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { AddEventType(eventType, subscription) }
+}
+
+func WithTypes(types []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Types = types
+	}
 }
 
 // WithEventSource is a SubscriptionOpt for creating a Subscription with a specific event source,
@@ -636,20 +547,57 @@ func WithNotCleanEventSourceAndType() SubscriptionOpt {
 // WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard
 func WithTypeMatchingStandard() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
-		subscription.Spec.TypeMatching = eventingv1alpha2.STANDARD
+		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingStandard
 	}
 }
 
 // WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact
 func WithTypeMatchingExact() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
-		subscription.Spec.TypeMatching = eventingv1alpha2.EXACT
+		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingExact
 	}
 }
 
-// WithStatusMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages value
-func WithStatusMaxInFlight(maxInFlight int) SubscriptionOpt {
+// WithMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages int value
+func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
-		subscription.Status.Backend.MaxInFlightMessages = maxInFlight // TODO: change with the new version
+		subscription.Spec.Config = map[string]string{
+			eventingv1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
+		}
+	}
+}
+
+// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value
+func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Config = map[string]string{
+			eventingv1alpha2.MaxInFlightMessages: maxInFlight,
+		}
+	}
+}
+
+func WithProtocolBEB() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		if s.Spec.Config == nil {
+			s.Spec.Config = map[string]string{}
+		}
+		s.Spec.Config[eventingv1alpha2.Protocol] = "BEB"
+	}
+}
+
+func WithWebhookAuthForBEB() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		s.Spec.Config = map[string]string{
+			eventingv1alpha2.Protocol:                        "BEB",
+			eventingv1alpha2.ProtocolSettingsContentMode:     v1alpha1.ProtocolSettingsContentModeBinary,
+			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
+			eventingv1alpha2.ProtocolSettingsQos:             "true",
+			eventingv1alpha2.WebhookAuthType:                 "oauth2",
+			eventingv1alpha2.WebhookAuthGrantType:            "client_credentials",
+			eventingv1alpha2.WebhookAuthClientID:             "xxx",
+			eventingv1alpha2.WebhookAuthClientSecret:         "xxx",
+			eventingv1alpha2.WebhookAuthTokenURL:             "https://oauth2.xxx.com/oauth2/token",
+			eventingv1alpha2.WebhookAuthScope:                "guid-identifier,root",
+		}
 	}
 }

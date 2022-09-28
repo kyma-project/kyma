@@ -3,6 +3,7 @@ package jetstreamv2
 import (
 	"bytes"
 	"context"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"net/http"
 	"time"
 
@@ -17,19 +18,19 @@ import (
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
-func sendEventToJetStream(jsClient *JetStream, data string) error {
+func SendEventToJetStream(jsClient *JetStream, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
 	eventType := evtestingv2.OrderCreatedCleanEvent
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, v1alpha2.STANDARD), []byte(sampleEvent))
+	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, v1alpha2.TypeMatchingStandard), []byte(sampleEvent))
 }
 
 func sendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string, typeMatching v1alpha2.TypeMatching) error {
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, typeMatching), []byte(sampleEvent))
+	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, typeMatching), []byte(sampleEvent))
 }
 
 func sendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, cetype string) error {
@@ -79,5 +80,14 @@ func sendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, c
 	if err := client.Send(ctx, *event); err != nil {
 		return err
 	}
+	return nil
+}
+
+func AddJSCleanEventTypesToStatus(sub *v1alpha2.Subscription, cleaner cleaner.Cleaner) error {
+	cleanEventType, err := getCleanEventTypes(sub, cleaner)
+	if err != nil {
+		return err
+	}
+	sub.Status.Types = cleanEventType
 	return nil
 }

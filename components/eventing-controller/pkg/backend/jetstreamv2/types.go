@@ -32,12 +32,12 @@ type Backend interface {
 
 type JetStream struct {
 	Config        env.NatsConfig
-	conn          *nats.Conn
+	Conn          *nats.Conn
 	jsCtx         nats.JetStreamContext
 	client        cev2.Client
 	subscriptions map[SubscriptionSubjectIdentifier]Subscriber
 	sinks         sync.Map
-	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
+	// connClosedHandler gets called by the NATS server when Conn is closed and retry attempts are exhausted.
 	connClosedHandler ConnClosedHandler
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector

@@ -26,6 +26,7 @@ test-compass-runtime-agent-debug:
 	--set compassCredentials.clientID=$(OAUTH_COMPASS_CLIENT_ID) \
 	--set compassCredentials.clientSecret=$(OAUTH_COMPASS_CLIENT_SECRET) \
 	--set compassCredentials.tokensEndpoint=$(OAUTH_COMPASS_TOKENS_ENDPOINT) \
+	--set directorUrl=$(DIRECTOR_URL) \
     | kubectl apply -f -
 
 	-kubectl wait --for=condition=complete --timeout=$(TEST_TIMEOUT) -n $(NAMESPACE) job/compass-runtime-agent-test

@@ -49,7 +49,6 @@ const {
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
-  isJetStreamEnabled,
   subscriptionNames,
 } = require('./utils');
 const {
@@ -230,7 +229,7 @@ describe('Eventing tests', function() {
     eventingTracingTestSuite(isSKR);
 
     it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+      await eventingMonitoringTest(natsBackend, isSKR);
     });
   });
 
@@ -257,7 +256,7 @@ describe('Eventing tests', function() {
     eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
     it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(bebBackend, isSKR, isJetStreamEnabled());
+      await eventingMonitoringTest(bebBackend, isSKR);
     });
   });
 
@@ -278,7 +277,7 @@ describe('Eventing tests', function() {
     eventingTracingTestSuite(isSKR);
 
     it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+      await eventingMonitoringTest(natsBackend, isSKR);
     });
   });
 

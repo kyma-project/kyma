@@ -135,7 +135,7 @@ func (js *JetStream) GetJetStreamSubjects(source string, subjects []string, type
 
 // getJetStreamSubject appends the prefix and the cleaned source to subject.
 func (js *JetStream) getJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
-	if typeMatching == eventingv1alpha2.EXACT {
+	if typeMatching == eventingv1alpha2.TypeMatchingExact {
 		return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 	}
 	cleanSource, _ := js.cleaner.CleanSource(source)
@@ -159,7 +159,7 @@ func (js *JetStream) validateConfig() error {
 }
 
 func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
-	if js.conn == nil || js.conn.Status() != nats.CONNECTED {
+	if js.Conn == nil || js.Conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
 			nats.MaxReconnects(js.Config.MaxReconnects),
@@ -169,12 +169,12 @@ func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
 		if err != nil || !conn.IsConnected() {
 			return xerrors.Errorf("failed to connect to NATS JetStream: %v", err)
 		}
-		js.conn = conn
+		js.Conn = conn
 		js.connClosedHandler = connCloseHandler
 		if js.connClosedHandler != nil {
-			js.conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
+			js.Conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
 		}
-		js.conn.SetReconnectHandler(js.handleReconnect)
+		js.Conn.SetReconnectHandler(js.handleReconnect)
 	}
 	return nil
 }
@@ -208,7 +208,7 @@ func (js *JetStream) ensureStreamExists() error {
 }
 
 func (js *JetStream) initJSContext() error {
-	jsCtx, err := js.conn.JetStream()
+	jsCtx, err := js.Conn.JetStream()
 	if err != nil {
 		return xerrors.Errorf("failed to create the JetStream context: %v", err)
 	}
@@ -237,9 +237,9 @@ func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
 
 // checkJetStreamConnection reconnects to the server if the server is not connected.
 func (js *JetStream) checkJetStreamConnection() error {
-	if js.conn.Status() != nats.CONNECTED {
+	if js.Conn.Status() != nats.CONNECTED {
 		if err := js.Initialize(js.connClosedHandler); err != nil {
-			return xerrors.Errorf("failed to connect to JetStream with status %d: %v", js.conn.Status(), err)
+			return xerrors.Errorf("failed to connect to JetStream with status %d: %v", js.Conn.Status(), err)
 		}
 	}
 	return nil
@@ -447,7 +447,7 @@ func (js *JetStream) createConsumer(subscription *eventingv1alpha2.Subscription,
 		jsSubscription, err := js.jsCtx.Subscribe(
 			jsSubject,
 			asyncCallback,
-			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Backend.MaxInFlightMessages)..., // TODO: change to the new version
+			js.getDefaultSubscriptionOptions(jsSubKey, subscription.GetMaxInFlightMessages())..., // TODO: change to the new version
 		)
 		if err != nil {
 			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
