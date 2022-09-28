@@ -36,6 +36,8 @@ spec:
         - "14250"
         - "14267"
         - "14268"
+        - "4317"
+        - "4318"
   selector:
     matchLabels:
       app.kubernetes.io/component: all-in-one
