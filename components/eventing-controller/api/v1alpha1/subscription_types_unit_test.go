@@ -12,11 +12,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-const (
-	orderProcessedEventType = "prefix.testapp1023.order.processed.v1"
-	orderCreatedEventType   = "prefix.testapp1023.order.created.v1"
-)
-
 func TestBEBFilters_Deduplicate(t *testing.T) {
 	filter1 := &v1alpha1.BEBFilter{
 		EventSource: &v1alpha1.Filter{
