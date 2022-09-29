@@ -12,6 +12,6 @@ spec:
     - name: ENDPOINT
       valueFrom:
         secretKeyRef:
-          name: mockserver-host
-          namespace: mockserver
+          name: http-backend
+          namespace: default
           key: host
