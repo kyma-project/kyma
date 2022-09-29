@@ -145,19 +145,3 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 
 	return gatewayURL
 }
-
-func makeGatewayURLExtractor(segments int) gatewayURLExtractorFunc {
-	return func(u *url.URL) (*url.URL, apperrors.AppError) {
-		trimmed := strings.TrimPrefix(u.Path, "/")
-		split := strings.SplitN(trimmed, "/", segments+1)
-
-		if len(split) < segments {
-			return nil, apperrors.WrongInput("path must contain Application and Service name")
-		}
-
-		new := *u
-		new.Path = "/" + strings.Join(split[:segments], "/")
-
-		return &new, nil
-	}
-}

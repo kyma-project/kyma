@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 )
 
-type pathExtractorFunc func(string) (model.APIIdentifier, string, apperrors.AppError)
+type pathExtractorFunc func(*url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError)
 type gatewayURLExtractorFunc func(*url.URL) (*url.URL, apperrors.AppError)
 
 // New creates proxy for handling user's services calls
@@ -22,13 +22,13 @@ func New(
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config) http.Handler {
 
-	pathExtractor := func(path string) (model.APIIdentifier, string, apperrors.AppError) {
-
+	pathExtractor := func(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
+		path := u.Path
 		trimmed := strings.Trim(path, "/")
 		split := strings.Split(trimmed, "/")
 
 		if len(split) < 2 || split[0] == path {
-			return model.APIIdentifier{}, "", apperrors.WrongInput("path must contain Application and Service name")
+			return model.APIIdentifier{}, "", nil, apperrors.WrongInput("path must contain Application and Service name")
 		}
 
 		apiIdentifier := model.APIIdentifier{
@@ -38,7 +38,10 @@ func New(
 
 		targetAPIPath := strings.Join(split[2:], "/")
 
-		return apiIdentifier, targetAPIPath, nil
+		gwURL := *u
+		gwURL.Path = "/" + strings.Join(split[:2], "/")
+
+		return apiIdentifier, targetAPIPath, &gwURL, nil
 	}
 
 	apiExtractor := apiExtractor{
@@ -51,7 +54,6 @@ func New(
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		extractPathFunc:              pathExtractor,
-		extractGatewayFunc:           makeGatewayURLExtractor(2),
 		apiExtractor:                 apiExtractor,
 	}
 }
@@ -62,12 +64,13 @@ func NewForCompass(
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config) http.Handler {
 
-	extractFunc := func(path string) (model.APIIdentifier, string, apperrors.AppError) {
+	extractFunc := func(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
+		path := u.Path
 		trimmed := strings.Trim(path, "/")
 		split := strings.Split(trimmed, "/")
 
 		if len(split) < 3 || split[0] == path {
-			return model.APIIdentifier{}, "", apperrors.WrongInput("path must contain Application, Service and Entry name")
+			return model.APIIdentifier{}, "", nil, apperrors.WrongInput("path must contain Application, Service and Entry name")
 		}
 
 		apiIdentifier := model.APIIdentifier{
@@ -78,7 +81,10 @@ func NewForCompass(
 
 		targetAPIPath := strings.Join(split[3:], "/")
 
-		return apiIdentifier, targetAPIPath, nil
+		gwURL := *u
+		gwURL.Path = "/" + strings.Join(split[:3], "/")
+
+		return apiIdentifier, targetAPIPath, &gwURL, nil
 	}
 
 	apiExtractor := compassAPIExtractor{
@@ -91,7 +97,6 @@ func NewForCompass(
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 		extractPathFunc:              extractFunc,
-		extractGatewayFunc:           makeGatewayURLExtractor(3),
 		apiExtractor:                 apiExtractor,
 	}
 }

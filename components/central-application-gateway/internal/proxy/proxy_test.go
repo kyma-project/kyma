@@ -14,6 +14,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	proxyMocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/proxy/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -252,12 +253,17 @@ func TestProxyRequest(t *testing.T) {
 				SkipVerify:        tc.skipTLSVerify,
 			}, nil).Once()
 
-			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
+			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(u *url.URL) (metadatamodel.APIIdentifier, string, *url.URL, apperrors.AppError) {
+				gwURL, err := u.Parse("/")
+				if err != nil {
+					return model.APIIdentifier{}, "", nil, apperrors.WrongInput("Couldn't parse URL")
+				}
+
 				return metadatamodel.APIIdentifier{
 					Application: "app",
 					Service:     "service",
 					Entry:       "entry",
-				}, path, nil
+				}, u.Path, gwURL, nil
 			},
 				func(url *url.URL) (*url.URL, apperrors.AppError) {
 					return url, nil
@@ -291,7 +297,11 @@ func TestProxy(t *testing.T) {
 		Entry:       "entry",
 	}
 
-	fakePathExtractor := func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
+	fakePathExtractor := func(u *url.URL) (metadatamodel.APIIdentifier, string, *url.URL, apperrors.AppError) {
+		gwURL, err := u.Parse("/")
+		if err != nil {
+			return model.APIIdentifier{}, "", nil, apperrors.WrongInput("Couldn't parse URL")
+		}
 
 		apiIdentifier := metadatamodel.APIIdentifier{
 			Application: "app",
@@ -299,7 +309,7 @@ func TestProxy(t *testing.T) {
 			Entry:       "entry",
 		}
 
-		return apiIdentifier, path, nil
+		return apiIdentifier, u.Path, gwURL, nil
 	}
 
 	fakeGwExtractor := func(url *url.URL) (*url.URL, apperrors.AppError) {

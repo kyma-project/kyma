@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -43,13 +44,7 @@ type Config struct {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	apiIdentifier, path, err := p.extractPath(r.URL.Path)
-	if err != nil {
-		handleErrors(w, err)
-		return
-	}
-
-	gwUrl, err := p.extractGatewayFunc(r.URL)
+	apiIdentifier, path, gwURL, err := p.extractPath(r.URL)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -78,17 +73,17 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheEntry.Proxy.ModifyResponse = responseModifier(gwUrl, serviceAPI.TargetUrl, urlRewriter)
+	cacheEntry.Proxy.ModifyResponse = responseModifier(gwURL, serviceAPI.TargetUrl, urlRewriter)
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-func (p *proxy) extractPath(path string) (model.APIIdentifier, string, apperrors.AppError) {
-	apiIdentifier, path, err := p.extractPathFunc(path)
+func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
+	apiIdentifier, path, gwURL, err := p.extractPathFunc(u)
 	if err != nil {
-		return model.APIIdentifier{}, "", apperrors.Internal("failed to extract API Identifier from path")
+		return model.APIIdentifier{}, "", nil, apperrors.Internal("failed to extract API Identifier from path")
 	}
 
-	return apiIdentifier, path, nil
+	return apiIdentifier, path, gwURL, nil
 }
 
 func (p *proxy) getOrCreateCacheEntry(apiIdentifier model.APIIdentifier, serviceAPI model.API) (*CacheEntry, apperrors.AppError) {
