@@ -9,15 +9,6 @@ spec:
   labels:
     app: positive-authorisation
   services:
-    - displayName: redirect-always-ok
-      name: redirect-always-ok
-      providerDisplayName: RedirectOk
-      description: Should return 200 when redirected to unprotected endpoint
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect/ok"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/redirect-always-ok"
     - displayName: unsecure-always-ok
       name: unsecure-always-ok
       providerDisplayName: AlwaysOK
