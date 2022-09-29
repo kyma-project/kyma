@@ -157,7 +157,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), l.CreateNamed("controllers.serviceaccount", "kind", "ServiceAccount"), config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), l.CreateNamed("controllers.serviceaccount"), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)

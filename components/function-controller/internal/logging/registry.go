@@ -23,8 +23,8 @@ func ConfigureRegisteredLogger(logLevel, logFormat string) (*Registry, error) {
 }
 
 // CreateNamed - create and register zap.SugaredLogger. Sub-loggers of the created one would be not registered
-func (r *Registry) CreateNamed(name string, with ...interface{}) *zap.SugaredLogger {
-	l := r.createNamed(name, with)
+func (r *Registry) CreateNamed(name string) *zap.SugaredLogger {
+	l := r.createNamed(name)
 	r.namedLoggers[name] = l
 	return l
 }
@@ -43,18 +43,13 @@ func (r *Registry) CreateUnregistered() *zap.SugaredLogger {
 
 // Reconfigure - apply new configuration for the logger and all registered sub-loggers
 func (r *Registry) Reconfigure(logLevel, logFormat string) (*Registry, error) {
-	return r.reconfigure(logLevel, logFormat, ConfigureLogger)
-}
-
-func (r *Registry) reconfigure(logLevel, logFormat string, configureLogger func(string, string) (*logger.Logger, error)) (*Registry, error) {
-	log, err := configureLogger(logLevel, logFormat)
+	log, err := ConfigureLogger(logLevel, logFormat)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to configure logger")
 	}
 
 	r.logger = log
 	for key := range r.namedLoggers {
-		// TODO support with
 		*r.namedLoggers[key] = *r.createNamed(key)
 	}
 
@@ -65,11 +60,8 @@ func (r *Registry) reconfigure(logLevel, logFormat string, configureLogger func(
 	return r, nil
 }
 
-func (r *Registry) createNamed(name string, with ...interface{}) *zap.SugaredLogger {
-	l := r.logger.WithContext().Named(name)
-	if len(with) > 0 {
-		l = l.With(with)
-	}
+func (r *Registry) createNamed(name string) *zap.SugaredLogger {
+	l := r.logger.WithContext().Named(name).With()
 
 	return l
 }
