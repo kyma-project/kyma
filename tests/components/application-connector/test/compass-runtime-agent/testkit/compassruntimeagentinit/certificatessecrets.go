@@ -8,32 +8,32 @@ import (
 
 type certificatesSecretsConfigurator struct {
 	kubernetesInterface kubernetes.Interface
-	namespace           string
+	testNamespace       string
 }
 
-func NewCertificateSecretConfigurator(kubernetesInterface kubernetes.Interface, namespace string) certificatesSecretsConfigurator {
+func NewCertificateSecretConfigurator(kubernetesInterface kubernetes.Interface, testNamespace string) certificatesSecretsConfigurator {
 	return certificatesSecretsConfigurator{
 		kubernetesInterface: kubernetesInterface,
-		namespace:           namespace,
+		testNamespace:       testNamespace,
 	}
 }
 
-func (csc certificatesSecretsConfigurator) Do(caSecretName, clusterCertSecretName string) (types.RollbackFunc, error) {
+func (csc certificatesSecretsConfigurator) Do(newCASecretName, newClusterCertSecretName string) (types.RollbackFunc, error) {
 	// Original secrets created by Compass Runtime Agent are left intact so that they can be restored after the test.
 	// As part of the test preparation new secret names are passed to the Compass Runtime Agent Deployment. Rollback function needs to delete those.
-	return csc.getRollbackFunction(caSecretName, clusterCertSecretName), nil
+	return csc.getRollbackFunction(newCASecretName, newClusterCertSecretName), nil
 }
 
 func (csc certificatesSecretsConfigurator) getRollbackFunction(caSecretName, clusterCertSecretName string) types.RollbackFunc {
 	return func() error {
 		var result *multierror.Error
 
-		err := deleteSecretWithRetry(csc.kubernetesInterface, caSecretName, csc.namespace)
+		err := deleteSecretWithRetry(csc.kubernetesInterface, caSecretName, csc.testNamespace)
 		if err != nil {
 			multierror.Append(result, err)
 		}
 
-		err = deleteSecretWithRetry(csc.kubernetesInterface, clusterCertSecretName, csc.namespace)
+		err = deleteSecretWithRetry(csc.kubernetesInterface, clusterCertSecretName, csc.testNamespace)
 		if err != nil {
 			multierror.Append(result, err)
 		}

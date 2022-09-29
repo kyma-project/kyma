@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/avast/retry-go"
-	types "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	v12 "k8s.io/api/apps/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -15,54 +15,101 @@ import (
 const (
 	CRAContainerNumber         = 0
 	ConfigurationSecretEnvName = "APP_AGENT_CONFIGURATION_SECRET"
+	CASecretEnvName            = "APP_CA_CERTIFICATES_SECRET"
+	ClusterCertSecretEnvName   = "APP_CLUSTER_CERTIFICATES_SECRET"
 )
 
 type deploymentConfiguration struct {
 	kubernetesInterface kubernetes.Interface
+	deploymentName      string
+	namespaceName       string
 }
 
-func NewDeploymentConfiguration(kubernetesInterface kubernetes.Interface) deploymentConfiguration {
+func NewDeploymentConfiguration(kubernetesInterface kubernetes.Interface, deploymentName, namespaceName string) deploymentConfiguration {
 	return deploymentConfiguration{
 		kubernetesInterface: kubernetesInterface,
+		deploymentName:      deploymentName,
+		namespaceName:       namespaceName,
 	}
 }
 
-func (dc deploymentConfiguration) Do(deploymentName, secretName, namespace string) (types.RollbackFunc, error) {
-	deploymentInterface := dc.kubernetesInterface.AppsV1().Deployments(namespace)
+func (dc deploymentConfiguration) Do(newConfigNamespacedSecretName, newCANamespacedSecretName, newClusterNamespacedCertSecretName string) (types.RollbackFunc, error) {
+	deploymentInterface := dc.kubernetesInterface.AppsV1().Deployments(dc.namespaceName)
 
-	deployment, err := retryGetDeployment(deploymentName, deploymentInterface)
+	deployment, err := retryGetDeployment(dc.deploymentName, deploymentInterface)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(deployment.Spec.Template.Spec.Containers) < 1 {
-		return nil, fmt.Errorf("no containers found in %s/%s deployment", namespace, deploymentName)
+		return nil, fmt.Errorf("no containers found in %s/%s deployment", "compass-system", dc.deploymentName)
 	}
-	envs := deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env
-	previousSecretNamespacedName := ""
-	for i := range envs {
-		if envs[i].Name == ConfigurationSecretEnvName {
-			previousSecretNamespacedName = envs[i].Value
-			envs[i].Value = fmt.Sprintf("%s/%s", namespace, secretName)
-			break
-		}
-	}
-	if previousSecretNamespacedName == "" {
-		return nil, fmt.Errorf("no %s environment variable found in %s/%s deployment", ConfigurationSecretEnvName, namespace, deploymentName)
-	}
-	deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env = envs
 
-	if err := retry.Do(func() error {
-		_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
-		return err
-	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second)); err != nil {
+	previousConfigSecretNamespacedName, found := replaceEnvValue(deployment, ConfigurationSecretEnvName, newConfigNamespacedSecretName)
+	if !found {
+		return nil, fmt.Errorf("environment variable '%s' not found in %s deployment", ConfigurationSecretEnvName, dc.deploymentName)
+	}
+
+	previousCASecretNamespacedName, found := replaceEnvValue(deployment, CASecretEnvName, newCANamespacedSecretName)
+	if !found {
+		return nil, fmt.Errorf("environment variable '%s' not found in %s deployment", CASecretEnvName, dc.deploymentName)
+	}
+
+	previousCertSecretNamespacedName, found := replaceEnvValue(deployment, ClusterCertSecretEnvName, newClusterNamespacedCertSecretName)
+	if !found {
+		return nil, fmt.Errorf("environment variable '%s' not found in %s deployment", ClusterCertSecretEnvName, dc.deploymentName)
+	}
+
+	err = retryUpdateDeployment(deployment, deploymentInterface)
+	if err != nil {
 		return nil, err
 	}
 
-	err = waitForRollout(deploymentName, deploymentInterface)
-	rollbackDeploymentFunc := newRollbackDeploymentFunc(deploymentName, previousSecretNamespacedName, deploymentInterface)
+	err = waitForRollout(dc.deploymentName, deploymentInterface)
+	rollbackDeploymentFunc := newRollbackDeploymentFunc(dc.deploymentName, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, deploymentInterface)
 
 	return rollbackDeploymentFunc, err
+}
+
+func newRollbackDeploymentFunc(name, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName string, deploymentInterface v13.DeploymentInterface) types.RollbackFunc {
+	return func() error {
+		deployment, err := retryGetDeployment(name, deploymentInterface)
+		if err != nil {
+			return err
+		}
+
+		_, found := replaceEnvValue(deployment, ConfigurationSecretEnvName, previousConfigSecretNamespacedName)
+		if !found {
+			return fmt.Errorf("environment variable '%s' not found in %s deployment", ConfigurationSecretEnvName, name)
+		}
+
+		_, found = replaceEnvValue(deployment, CASecretEnvName, previousCASecretNamespacedName)
+		if !found {
+			return fmt.Errorf("environment variable '%s' not found in %s deployment", CASecretEnvName, name)
+		}
+
+		_, found = replaceEnvValue(deployment, ClusterCertSecretEnvName, previousCertSecretNamespacedName)
+		if !found {
+			return fmt.Errorf("environment variable '%s' not found in %s deployment", ClusterCertSecretEnvName, name)
+		}
+
+		return retryUpdateDeployment(deployment, deploymentInterface)
+	}
+}
+
+func replaceEnvValue(deployment *v12.Deployment, name, newValue string) (string, bool) {
+	envs := deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env
+	for i := range envs {
+		if envs[i].Name == name {
+			previousValue := envs[i].Value
+			envs[i].Value = newValue
+			deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env = envs
+
+			return previousValue, true
+		}
+	}
+
+	return "", false
 }
 
 func retryGetDeployment(name string, deploymentInterface v13.DeploymentInterface) (*v12.Deployment, error) {
@@ -77,6 +124,13 @@ func retryGetDeployment(name string, deploymentInterface v13.DeploymentInterface
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 }
 
+func retryUpdateDeployment(deployment *v12.Deployment, deploymentInterface v13.DeploymentInterface) error {
+	return retry.Do(func() error {
+		_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
+		return err
+	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
+}
+
 func waitForRollout(name string, deploymentInterface v13.DeploymentInterface) error {
 	return retry.Do(func() error {
 		deployment, err := deploymentInterface.Get(context.TODO(), name, v1.GetOptions{})
@@ -88,35 +142,4 @@ func waitForRollout(name string, deploymentInterface v13.DeploymentInterface) er
 		}
 		return nil
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
-}
-
-func newRollbackDeploymentFunc(name, previousSecretNamespacedName string, deploymentInterface v13.DeploymentInterface) types.RollbackFunc {
-	return func() error {
-		deployment, err := retryGetDeployment(name, deploymentInterface)
-		if err != nil {
-			return err
-		}
-
-		if len(deployment.Spec.Template.Spec.Containers) < 1 {
-			return fmt.Errorf("no containers found in %s deployment", name)
-		}
-		envs := deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env
-		foundEnv := false
-		for i := range envs {
-			if envs[i].Name == ConfigurationSecretEnvName {
-				foundEnv = true
-				envs[i].Value = previousSecretNamespacedName
-				break
-			}
-		}
-		if foundEnv == false {
-			return fmt.Errorf("no %s environment variable found in %s deployment", ConfigurationSecretEnvName, name)
-		}
-		deployment.Spec.Template.Spec.Containers[CRAContainerNumber].Env = envs
-
-		return retry.Do(func() error {
-			_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
-			return err
-		}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
-	}
 }

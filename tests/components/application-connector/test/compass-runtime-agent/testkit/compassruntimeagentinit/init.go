@@ -96,6 +96,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 			deploymentRollbackFunc,
 			compassConnectionRollbackFunc)
 	}
+
 	return newRollbackFunc(runtimeID,
 		crc.directorClient,
 		compassConnectionRollbackFunc,

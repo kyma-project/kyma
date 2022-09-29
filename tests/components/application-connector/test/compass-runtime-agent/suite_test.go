@@ -65,7 +65,7 @@ func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
 }
 
 func (gs *CompassRuntimeAgentSuite) initComparators() {
-	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, gs.testConfig.TestCredentialsNamespace, gs.testConfig.IntegrationNamespace)
+	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, gs.testConfig.TestNamespace, gs.testConfig.IntegrationNamespace)
 	gs.Require().Nil(err)
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
@@ -83,10 +83,10 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	gs.directorClient, err = gs.makeCompassDirectorClient()
 	gs.Require().Nil(err)
 
-	certificateSecretConfigurator := compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, gs.testConfig.TestCredentialsNamespace)
-	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, gs.testConfig.TestCredentialsNamespace)
+	certificateSecretConfigurator := compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, gs.testConfig.TestNamespace)
+	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, gs.testConfig.TestNamespace)
 	compassConnectionConfigurator := compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections())
-	deploymentConfigurator := compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet)
+	deploymentConfigurator := compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace)
 	compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient, certificateSecretConfigurator, configurationSecretConfigurator, compassConnectionConfigurator, deploymentConfigurator, gs.testConfig.TestingTenant)
 }
 
@@ -113,10 +113,10 @@ func TestCompassRuntimeAgentSuite(t *testing.T) {
 
 func (gs *CompassRuntimeAgentSuite) makeCompassDirectorClient() (director.Client, error) {
 
-	secretsRepo := gs.coreClientSet.CoreV1().Secrets(gs.testConfig.TestCredentialsNamespace)
+	secretsRepo := gs.coreClientSet.CoreV1().Secrets(gs.testConfig.TestNamespace)
 
 	if secretsRepo == nil {
-		return nil, fmt.Errorf("could not access secrets in %s namespace", gs.testConfig.TestCredentialsNamespace)
+		return nil, fmt.Errorf("could not access secrets in %s namespace", gs.testConfig.TestNamespace)
 	}
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -124,13 +124,16 @@ func (gs *CompassRuntimeAgentSuite) makeCompassDirectorClient() (director.Client
 		},
 		Timeout: 10 * time.Second,
 	}
+
 	gqlClient := graphql.NewGraphQLClient(gs.testConfig.DirectorURL, true, gs.testConfig.SkipDirectorCertVerification)
 	if gqlClient == nil {
 		return nil, fmt.Errorf("could not create GraphQLClient for endpoint %s", gs.testConfig.DirectorURL)
 	}
+
 	oauthClient, err := oauth.NewOauthClient(client, secretsRepo, gs.testConfig.OauthCredentialsSecretName)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not create OAuthClient client")
 	}
+
 	return director.NewDirectorClient(gqlClient, oauthClient, gs.testConfig.TestingTenant), nil
 }
