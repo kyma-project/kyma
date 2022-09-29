@@ -8,8 +8,6 @@ import (
 	"reflect"
 	"time"
 
-	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
-
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
@@ -44,6 +42,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	sink "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
@@ -92,33 +91,6 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 		nameMapper:        mapper,
 		sinkValidator:     validator,
 	}
-}
-
-// SetupUnmanaged creates a controller under the client control.
-func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
-	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return xerrors.Errorf("failed to create unmanaged controller: %v", err)
-	}
-
-	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		return xerrors.Errorf("failed to watch subscriptions: %v", err)
-	}
-
-	apiRuleEventHandler :=
-		&handler.EnqueueRequestForOwner{OwnerType: &eventingv1alpha2.Subscription{}, IsController: false}
-	if err := ctru.Watch(&source.Kind{Type: &apigatewayv1beta1.APIRule{}}, apiRuleEventHandler); err != nil {
-		return xerrors.Errorf("failed to watch APIRule: %v", err)
-	}
-
-	go func(r *Reconciler, c controller.Controller) {
-		if err := c.Start(r.ctx); err != nil {
-			r.namedLogger().Fatalw("Failed to start controller",
-				"name", reconcilerName, "error", err)
-		}
-	}(r, ctru)
-
-	return nil
 }
 
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
@@ -749,6 +721,33 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha2.Subscript
 		eventType = corev1.EventTypeWarning
 	}
 	r.recorder.Event(subscription, eventType, string(condition.Reason), condition.Message)
+}
+
+// SetupUnmanaged creates a controller under the client control.
+func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
+	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
+	if err != nil {
+		return xerrors.Errorf("failed to create unmanaged controller: %v", err)
+	}
+
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		return xerrors.Errorf("failed to watch subscriptions: %v", err)
+	}
+
+	apiRuleEventHandler :=
+		&handler.EnqueueRequestForOwner{OwnerType: &eventingv1alpha2.Subscription{}, IsController: false}
+	if err := ctru.Watch(&source.Kind{Type: &apigatewayv1beta1.APIRule{}}, apiRuleEventHandler); err != nil {
+		return xerrors.Errorf("failed to watch APIRule: %v", err)
+	}
+
+	go func(r *Reconciler, c controller.Controller) {
+		if err := c.Start(r.ctx); err != nil {
+			r.namedLogger().Fatalw("Failed to start controller",
+				"name", reconcilerName, "error", err)
+		}
+	}(r, ctru)
+
+	return nil
 }
 
 func (r *Reconciler) removeFinalizer(sub *eventingv1alpha2.Subscription) {
