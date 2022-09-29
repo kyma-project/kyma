@@ -145,12 +145,12 @@ func Test_getProcessedEventTypes(t *testing.T) {
 
 			// given
 			eventMesh := NewEventMesh(&backendbebv1.OAuth2ClientCredentials{}, nameMapper, defaultLogger)
-			cleaner := cleaner.NewEventMeshCleaner(defaultLogger)
+			emCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
 			err = eventMesh.Initialize(env.Config{EventTypePrefix: tc.givenEventTypePrefix})
 			require.NoError(t, err)
 
 			// when
-			eventTypeInfos, err := eventMesh.getProcessedEventTypes(tc.givenSubscription, cleaner)
+			eventTypeInfos, err := eventMesh.getProcessedEventTypes(tc.givenSubscription, emCleaner)
 
 			// then
 			require.Equal(t, tc.wantError, err != nil)

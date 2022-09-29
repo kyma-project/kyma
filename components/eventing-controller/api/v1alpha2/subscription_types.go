@@ -86,6 +86,14 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
+func (s *Subscription) GetMaxInFlightMessages() (*int, error) {
+	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
+	if err != nil {
+		return nil, err
+	}
+	return &val, nil
+}
+
 // InitializeEventTypes initializes the SubscriptionStatus.Types with an empty slice of EventType.
 func (s *SubscriptionStatus) InitializeEventTypes() {
 	s.Types = []EventType{}
