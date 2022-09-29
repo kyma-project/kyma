@@ -150,7 +150,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	}
 
 	// create a new subscription on EventMesh server
-	if isKymaSubModified || isEventMeshSubModified {
+	if isKymaSubModified || isEventMeshSubModified || eventMeshServerSub == nil {
 		// create the new EMS subscription
 		eventMeshServerSub, err = em.handleCreateEventMeshSub(eventMeshSub, subscription)
 		if err != nil {
