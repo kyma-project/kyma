@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_CleanSource(t *testing.T) {
+func Test_JSCleanSource(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name             string
@@ -43,7 +43,7 @@ func Test_CleanSource(t *testing.T) {
 	}
 }
 
-func Test_CleanEventType(t *testing.T) {
+func Test_JSCleanEventType(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name           string

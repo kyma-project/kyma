@@ -110,6 +110,18 @@ spec:
                         description: StatusReason defines the reason of the status
                         type: string
                     type: object
+                  emsTypes:
+                    items:
+                      properties:
+                        eventMeshType:
+                          type: string
+                        originalType:
+                          type: string
+                      required:
+                      - eventMeshType
+                      - originalType
+                      type: object
+                    type: array
                   emshash:
                     description: Emshash defines the hash for the Subscription in
                       BEB
