@@ -382,6 +382,12 @@ func WithEventSource(source string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.Source = source }
 }
 
+// WithNotCleanFilter initializes subscription filter with a not clean event-type
+// A not clean event-type means it contains none-alphanumeric characters.
+func WithNotCleanFilter() SubscriptionOpt {
+	return WithEventType(OrderCreatedEventTypeNotClean)
+}
+
 // WithExactTypeMatching is a SubscriptionOpt for creating a Subscription with an exact type matching.
 func WithExactTypeMatching() SubscriptionOpt {
 	return WithTypeMatching(eventingv1alpha2.TypeMatchingExact)
@@ -435,14 +441,6 @@ func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
 
 func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
-}
-
-func WithEventMeshNamespaceSource() SubscriptionOpt {
-	return WithEventSource(EventMeshNamespace)
-}
-
-func WithNotCleanSource() SubscriptionOpt {
-	return WithEventSource(ApplicationNameNotClean)
 }
 
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
