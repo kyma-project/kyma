@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 	"golang.org/x/xerrors"
@@ -111,18 +113,31 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Handle only the new subscription
 	desiredSubscription := actualSubscription.DeepCopy()
 	// Bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
+	log := backendutils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
 
 	if isInDeletion(desiredSubscription) {
 		// The object is being deleted
 		err := r.handleSubscriptionDeletion(ctx, desiredSubscription, log)
-		return ctrl.Result{}, err
+		if err != nil {
+			log.Errorw("Failed to delete the Subscription", "error", err)
+			if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err); syncErr != nil {
+				return ctrl.Result{}, syncErr
+			}
+			return ctrl.Result{}, err
+		}
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object.
 	if !containsFinalizer(desiredSubscription) {
 		err := r.addFinalizerToSubscription(desiredSubscription, log)
+		if err != nil {
+			log.Errorw("Failed to add finalizer to Subscription", "error", err)
+			if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err); syncErr != nil {
+				return ctrl.Result{}, syncErr
+			}
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 

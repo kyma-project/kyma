@@ -200,11 +200,9 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-async function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
+async function eventingMonitoringTest(backend, isSkr) {
   let allDashboards = dashboards;
-  if (isJetStreamEnabled) {
-    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
-  }
+  allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
   if (isSkr && testCompassFlow) {
     allDashboards = Object.assign(allDashboards, skrDashboards);
   }

@@ -58,18 +58,18 @@ type DefaultingConfig struct {
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
-	fn.Spec.defaultReplicas(config, fn)
+	fn.Spec.defaultReplicas(config)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
 }
 
-func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
+func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig) {
 	if spec.Replicas != nil {
 		return
 	}
 
 	defaultingConfig := config.Function.Replicas
-	replicasPreset := mergeReplicasPreset(fn, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
+	replicasPreset := defaultingConfig.Presets[defaultingConfig.DefaultPreset]
 
 	if spec.ScaleConfig == nil {
 		spec.ScaleConfig = &ScaleConfig{}
@@ -94,11 +94,16 @@ func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {
 	var resources *corev1.ResourceRequirements
-	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil && spec.ResourceConfiguration.Function.Resources != nil {
-		resources = spec.ResourceConfiguration.Function.Resources
+	var profile string
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil {
+		functionResourceCfg := *spec.ResourceConfiguration.Function
+		if functionResourceCfg.Resources != nil {
+			resources = functionResourceCfg.Resources
+		}
+		profile = functionResourceCfg.Profile
 	}
 	defaultingConfig := config.Function.Resources
-	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
+	resourcesPreset := mergeResourcesPreset(fn, profile, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
 	calculatedResources := defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 	setFunctionResources(spec, calculatedResources)
 }
@@ -129,7 +134,7 @@ func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Fu
 	}
 
 	defaultingConfig := config.BuildJob.Resources
-	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
+	resourcesPreset := mergeResourcesPreset(fn, buildResourceCfg.Profile, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 	calculatedResources := defaultResources(buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 
 	setBuildResources(spec, calculatedResources)
@@ -155,8 +160,13 @@ func shouldSkipBuildResourcesDefault(fn *Function) bool {
 		return false
 	}
 
-	if resourceCfg != nil && resourceCfg.Resources != nil {
-		return resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil
+	if resourceCfg != nil {
+		if resourceCfg.Profile != "" {
+			return false
+		}
+		if resourceCfg.Resources != nil {
+			return resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil
+		}
 	}
 	return true
 }
@@ -210,34 +220,13 @@ func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCP
 	return copiedRes
 }
 
-func mergeReplicasPreset(fn *Function, presets map[string]ReplicasPreset, defaultPreset string) ReplicasPreset {
-	replicas := ReplicasPreset{}
-
-	preset := fn.GetLabels()[ReplicasPresetLabel]
-	if preset == "" {
-		return presets[defaultPreset]
-	}
-
-	replicasPreset := presets[preset]
-	replicasDefaultPreset := presets[defaultPreset]
-
-	replicas.Min = replicasPreset.Min
-	if replicas.Min == 0 {
-		replicas.Min = replicasDefaultPreset.Min
-	}
-
-	replicas.Max = replicasPreset.Max
-	if replicas.Max == 0 {
-		replicas.Max = replicasDefaultPreset.Max
-	}
-
-	return replicas
-}
-
-func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) ResourcesPreset {
+func mergeResourcesPreset(fn *Function, profile string, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) ResourcesPreset {
 	resources := ResourcesPreset{}
 
-	preset := fn.GetLabels()[presetLabel]
+	preset := profile
+	if preset == "" {
+		preset = fn.GetLabels()[presetLabel]
+	}
 	if preset == "" {
 		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
 		if ok {

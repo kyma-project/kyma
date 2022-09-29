@@ -1,4 +1,3 @@
-{{ if .Values.global.jetstream.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -29,7 +28,7 @@ data:
          ]
        },
        "description": "NATS JetStream Dashboard",
-       "editable": true,
+       "editable": false,
        "graphTooltip": 1,
        "links": [],
        "panels": [
@@ -1311,4 +1310,3 @@ data:
        "uid": "a7701ad8b41b11ecb9090242ac120002",
        "version": 1
     }`}}
-{{- end }}

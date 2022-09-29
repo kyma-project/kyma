@@ -10,6 +10,7 @@
   "changelog": {
     "repo": "kyma-project/kyma",
     "labels": {
+      "area/api-gateway": "Api Gateway",
       "area/application-connector": "Application Connector",
       "area/serverless": "Serverless",
       "area/cluster": "Cluster",

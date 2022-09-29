@@ -17,6 +17,8 @@ import (
 	natsio "github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/require"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
@@ -31,7 +33,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 // NATSHandlerMock represents a mock for the nats.Handler.
@@ -43,7 +44,6 @@ type NATSHandlerMock struct {
 	eventTypePrefix     string
 	logger              *logger.Logger
 	natsServer          *server.Server
-	jetstreamMode       bool
 	natsConfig          *env.NATSConfig
 	collector           *metrics.Collector
 	legacyTransformer   *legacy.Transformer
@@ -78,21 +78,23 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *
 	for _, opt := range opts {
 		opt(mock)
 	}
-	mock.natsServer = testingutils.StartNATSServer(mock.jetstreamMode)
+	mock.natsServer = testingutils.StartNATSServer()
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
 	connection, err := testingutils.ConnectToNATSServer(mock.GetNATSURL())
 	require.NoError(t, err)
 	mock.connection = connection
+	js, err := connection.JetStream()
+	require.NoError(t, err)
+	_, err = js.AddStream(getStreamConfig())
+	require.NoError(t, err)
 
-	//nolint:gosimple
-	var msgSender sender.GenericSender
-	msgSender = sender.NewNATSMessageSender(ctx, mock.connection, mock.logger)
+	msgSender := sender.NewJetStreamMessageSender(ctx, mock.connection, mock.natsConfig, mock.logger)
 
 	mock.handler = nats.NewHandler(
 		msgReceiver,
-		&msgSender,
+		msgSender,
 		mock.natsConfig.RequestTimeout,
 		mock.legacyTransformer,
 		&options.Options{MaxRequestSize: 65536},
@@ -188,18 +190,21 @@ func WithApplication(applicationName string) NATSHandlerMockOpt {
 	}
 }
 
-// WithJetStream returns NATSHandlerMockOpt which starts the NATS server in the jetstream mode for the given NATSHandlerMock.
-func WithJetStream(jsEnabled bool) NATSHandlerMockOpt {
-	return func(m *NATSHandlerMock) {
-		m.jetstreamMode = jsEnabled
-	}
-}
-
 func newNATSConfig(port int) *env.NATSConfig {
 	return &env.NATSConfig{
 		Port:            port,
 		LegacyNamespace: testingutils.MessagingNamespace,
 		EventTypePrefix: testingutils.MessagingEventTypePrefix,
 		JSStreamName:    testingutils.StreamName,
+	}
+}
+
+// getStreamConfig inits a testing stream config.
+func getStreamConfig() *natsio.StreamConfig {
+	return &natsio.StreamConfig{
+		Name:      testingutils.StreamName,
+		Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+		Storage:   natsio.MemoryStorage,
+		Retention: natsio.InterestPolicy,
 	}
 }

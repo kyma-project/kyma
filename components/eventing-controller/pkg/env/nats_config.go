@@ -1,7 +1,6 @@
 package env
 
 import (
-	"log"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -27,7 +26,6 @@ type NatsConfig struct {
 	IdleConnTimeout     time.Duration `envconfig:"IDLE_CONN_TIMEOUT" default:"10s"`
 
 	// JetStream-specific configs
-	EnableJetStreamBackend bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
 	// Name of the JetStream stream where all events are stored.
 	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
 	// Storage type of the stream, memory or file.
@@ -50,15 +48,20 @@ type NatsConfig struct {
 	// - new: When first consuming messages, the consumer starts receiving messages that were created
 	//   after the consumer was created.
 	JSConsumerDeliverPolicy string `envconfig:"JS_CONSUMER_DELIVER_POLICY" default:"new"`
+
+	// EnableNewCRDVersion changes the Subscription CRD to v1alpha2
+	// Redefining the flag to re-use ENV:ENABLE_NEW_CRD_VERSION instead of updated interfaces to pass the
+	// flag from config.go to NATS instance.
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
-func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {
+func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) (NatsConfig, error) {
 	cfg := NatsConfig{
 		MaxReconnects: maxReconnects,
 		ReconnectWait: reconnectWait,
 	}
 	if err := envconfig.Process("", &cfg); err != nil {
-		log.Fatalf("Invalid configuration: %v", err)
+		return NatsConfig{}, err
 	}
-	return cfg
+	return cfg, nil
 }
