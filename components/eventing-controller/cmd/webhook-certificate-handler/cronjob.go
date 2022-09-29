@@ -6,9 +6,8 @@ import (
 	"os"
 	"strings"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/webhook"
+	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
