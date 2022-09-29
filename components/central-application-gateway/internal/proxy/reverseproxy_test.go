@@ -212,7 +212,8 @@ func TestResponseModifier(t *testing.T) {
 			rm := responseModifier(gw, target, rewriter)
 
 			// when
-			rm(res)
+			err = rm(res)
+			require.Nil(t, err)
 
 			// then
 			tc.validate(t, res, called)
