@@ -37,14 +37,14 @@ const (
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
 
-	EventMeshNamespace                       = "/default/kyma/id"
-	EventSource                              = "/default/kyma/id"
-	EventTypePrefix                          = "prefix"
-	EventMeshPrefix                          = "one.two.three"      // three segments
-	InvalidEventMeshPrefix                   = "one.two.three.four" // four segments
-	EventTypePrefixEmpty                     = ""
-	OrderCreatedV1Event                      = "order.created.v1"
-	OrderCreatedV2Event                      = "order.created.v2"
+	EventMeshNamespace          = "/default/kyma/id"
+	EventSource                 = "/default/kyma/id"
+	EventTypePrefix             = "prefix"
+	EventMeshPrefix             = "one.two.three"      // three segments
+	InvalidEventMeshPrefix      = "one.two.three.four" // four segments
+	EventTypePrefixEmpty        = ""
+	OrderCreatedV1Event         = "order.created.v1"
+	OrderCreatedV2Event         = "order.created.v2"
 	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
 	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
 
