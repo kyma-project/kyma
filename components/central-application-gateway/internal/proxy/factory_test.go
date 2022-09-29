@@ -12,8 +12,8 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata"
 	metadatamocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/mocks"
-	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
+	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 )
