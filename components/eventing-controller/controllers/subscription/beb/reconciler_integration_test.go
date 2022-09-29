@@ -319,7 +319,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Sending at least one creation requests for the Subscription")
-			_, postRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, postRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		}
 		It("Should update the Subscription APIRule status from not ready to ready with sink containing port number", func() {
@@ -366,7 +366,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscribed condition")
-			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
+			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -494,11 +494,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBEBRequests(nameMapper.MapSubscriptionName(subscription1))
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBEBRequests(nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace))
 			Expect(creationRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
-			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBEBRequests(nameMapper.MapSubscriptionName(subscription2))
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBEBRequests(nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace))
 			Expect(creationRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -541,7 +541,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscribed condition")
-			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
+			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -598,7 +598,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).Should(reconcilertesting.HaveSubscriptionReady())
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -638,7 +638,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getBEBSubscriptionCreationRequests(bebCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
-						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription)),
+						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription.Name, readySubscription.Namespace)),
 						"WebhookURL": ContainSubstring(*apiRuleNew.Spec.Host),
 					},
 				))))
@@ -647,7 +647,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(ctx, apiRule).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -700,11 +700,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(ctx, apiRule1).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request for Subscription 1")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(subscription1))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(subscription1.Name, subscription1.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
 			By("Sending at least one creation request for Subscription 2")
-			_, creationRequests, _ = countBEBRequests(nameMapper.MapSubscriptionName(subscription2))
+			_, creationRequests, _ = countBEBRequests(nameMapper.MapSubscriptionName(subscription2.Name, subscription2.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -763,7 +763,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -788,12 +788,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
 				// until the BEB subscription creation call was performed, send successful get requests
 				if !isBEBSubscriptionCreated {
-					reconcilertesting.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription))
+					reconcilertesting.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 				} else {
 					// after the BEB subscription was created, set the status to paused
 					w.WriteHeader(http.StatusOK)
 					s := bebtypes.Subscription{
-						Name: nameMapper.MapSubscriptionName(givenSubscription),
+						Name: nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
 						// ups ... BEB Subscription status is now paused
 						SubscriptionStatus: bebtypes.SubscriptionStatusPaused,
 					}
@@ -842,7 +842,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -868,12 +868,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
 				// until the BEB subscription creation call was performed, send successful get requests
 				if !isBEBSubscriptionCreated {
-					reconcilertesting.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription))
+					reconcilertesting.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 				} else {
 					// after the BEB subscription was created, set lastFailedDelivery
 					w.WriteHeader(http.StatusOK)
 					s := bebtypes.Subscription{
-						Name:                     nameMapper.MapSubscriptionName(givenSubscription),
+						Name:                     nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
 						SubscriptionStatus:       bebtypes.SubscriptionStatusActive,
 						LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),                       // "now",
 						LastFailedDelivery:       time.Now().Add(10 * time.Second).Format(time.RFC3339), // "now + 10s"
@@ -930,7 +930,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(eventingv1alpha1.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -990,7 +990,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
 			By("Sending at least one creation and one deletion request for the Subscription")
-			_, creationRequests, deletionRequests := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, deletionRequests := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -1043,7 +1043,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Delete BEB Subscription", func() {
 				By("Deleting its entry in BEB mock internal cache", func() {
-					beb.Subscriptions.DeleteSubscriptionsByName(nameMapper.MapSubscriptionName(kymaSubscription))
+					beb.Subscriptions.DeleteSubscriptionsByName(nameMapper.MapSubscriptionName(kymaSubscription.Name, kymaSubscription.Namespace))
 				})
 			})
 
@@ -1058,7 +1058,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Check BEB Subscription was recreated", func() {
 				By("Checking BEB mock server received a second creation request", func() {
 					Eventually(func() int {
-						_, countPost, _ := countBEBRequests(nameMapper.MapSubscriptionName(kymaSubscription))
+						_, countPost, _ := countBEBRequests(nameMapper.MapSubscriptionName(kymaSubscription.Name, kymaSubscription.Namespace))
 						return countPost
 					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
 				})
@@ -1562,7 +1562,7 @@ func wasSubscriptionCreated(givenSubscription *eventingv1alpha1.Subscription) fu
 	return func() bool {
 		for request, name := range beb.Requests.GetSubscriptionNames() {
 			if reconcilertesting.IsBEBSubscriptionCreate(request) {
-				return nameMapper.MapSubscriptionName(givenSubscription) == name
+				return nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace) == name
 			}
 		}
 		return false
