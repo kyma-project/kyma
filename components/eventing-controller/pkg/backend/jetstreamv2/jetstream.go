@@ -14,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	backendmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/metrics"
-	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utilsv2"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
