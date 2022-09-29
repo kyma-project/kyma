@@ -13,8 +13,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
-
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
@@ -39,7 +37,7 @@ func TestSinkValidator(t *testing.T) {
 		{
 			name:                  "With invalid scheme",
 			givenSubscriptionSink: "invalid Sink",
-			wantErrString:         sink.MissingSchemeErrMsg,
+			wantErrString:         MissingSchemeErrMsg,
 		},
 		{
 			name:                  "With invalid URL",
@@ -80,7 +78,7 @@ func TestSinkValidator(t *testing.T) {
 		{
 			name:                  "With correct format but missing scheme",
 			givenSubscriptionSink: "eventing-nats.test.svc.cluster.local:8080",
-			wantErrString:         sink.MissingSchemeErrMsg,
+			wantErrString:         MissingSchemeErrMsg,
 		},
 		{
 			name:                  "With no existing svc in the cluster, service has the wrong name",

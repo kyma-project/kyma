@@ -174,58 +174,6 @@ func TestReconciler_Reconcile(t *testing.T) {
 	}
 }
 
-func Test_isInDeletion(t *testing.T) {
-	var testCases = []struct {
-		name              string
-		givenSubscription func() *eventingv1alpha2.Subscription
-		isInDeletion      bool
-	}{
-		{
-			name: "Deletion timestamp uninitialized",
-			givenSubscription: func() *eventingv1alpha2.Subscription {
-				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanSource(),
-					reconcilertesting.WithNotCleanType())
-				sub.DeletionTimestamp = nil
-				return sub
-			},
-			isInDeletion: false,
-		},
-		{
-			name: "Deletion timestamp is zero",
-			givenSubscription: func() *eventingv1alpha2.Subscription {
-				zero := metav1.Time{}
-				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanSource(),
-					reconcilertesting.WithNotCleanType())
-				sub.DeletionTimestamp = &zero
-				return sub
-			},
-			isInDeletion: false,
-		},
-		{
-			name: "Deletion timestamp is set to a useful time",
-			givenSubscription: func() *eventingv1alpha2.Subscription {
-				newTime := metav1.NewTime(time.Now())
-				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanSource(),
-					reconcilertesting.WithNotCleanType())
-				sub.DeletionTimestamp = &newTime
-				return sub
-			},
-			isInDeletion: true,
-		},
-	}
-	g := NewGomegaWithT(t)
-
-	for _, tt := range testCases {
-		t.Run(tt.name, func(t *testing.T) {
-			givenSubscription := tt.givenSubscription()
-			g.Expect(isInDeletion(givenSubscription)).To(Equal(tt.isInDeletion))
-		})
-	}
-}
-
 func Test_replaceStatusCondition(t *testing.T) {
 	var testCases = []struct {
 		name              string

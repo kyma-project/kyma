@@ -443,6 +443,14 @@ func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
 }
 
+func WithEventMeshNamespaceSource() SubscriptionOpt {
+	return WithEventSource(EventMeshNamespace)
+}
+
+func WithNotCleanSource() SubscriptionOpt {
+	return WithEventSource(ApplicationNameNotClean)
+}
+
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
 // the svcNamespace and the svcName.
 func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {

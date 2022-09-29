@@ -444,3 +444,30 @@ func Test_conditionEquals(t *testing.T) {
 		})
 	}
 }
+
+func Test_CreateMessageForConditionReasonSubscriptionCreated(t *testing.T) {
+	testCases := []struct {
+		name      string
+		givenName string
+		wantName  string
+	}{
+		{
+			name:      "with name 1",
+			givenName: "test-one",
+			wantName:  "EventMesh-subscription-name=test-one",
+		},
+		{
+			name:      "with name 2",
+			givenName: "test-second",
+			wantName:  "EventMesh-subscription-name=test-second",
+		},
+	}
+
+	g := NewGomegaWithT(t)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotName := v1alpha2.CreateMessageForConditionReasonSubscriptionCreated(tc.givenName)
+			g.Expect(gotName).To(Equal(tc.wantName))
+		})
+	}
+}
