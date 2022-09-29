@@ -202,3 +202,12 @@ authProxy:
     requests:
       cpu: 20m
       memory: 15Mi
+
+# Additional service accounts to grant Jaeger access via Istio Authorization Policy
+authorizationPolicy:
+  query:
+    extraPrincipals:
+#      - cluster.local/ns/kiali/sa/kiali-server-service-account
+  monitoring:
+     extraPrincipals:
+#      - cluster.local/ns/kiali/sa/kiali-server-service-account

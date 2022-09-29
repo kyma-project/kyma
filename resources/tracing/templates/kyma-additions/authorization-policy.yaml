@@ -19,11 +19,17 @@ spec:
           - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ include "jaeger-operator.fullname" . }}-auth-proxy
           - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali
           - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-grafana
+{{- with .Values.authorizationPolicy.query.extraPrincipals }}
+  {{- toYaml . | nindent 10 }}
+{{- end }}
 {{ end }}
   - from:
     - source:
         principals:
         - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-prometheus
+{{- with .Values.authorizationPolicy.monitoring.extraPrincipals }}
+  {{- toYaml . | nindent 8 }}
+{{- end }}
     to:
       - operation:
           ports: # Jaeger metrics, limit to Prometheus. Istio does not detect this to be an HTTP connection due to the port name. No further restriction of method and path possible.
