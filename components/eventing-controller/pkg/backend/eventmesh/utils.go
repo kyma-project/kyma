@@ -15,10 +15,10 @@ func getEventMeshSubject(source, subject, eventMeshPrefix string) string {
 }
 
 // isEventTypeSegmentsOverLimit checks if the number of segments in event type
-// do not exceed EventMeshTypeSegmentsLimit.
+// do not exceed eventTypeSegmentsLimit.
 func isEventTypeSegmentsOverLimit(eventType string) bool {
 	segments := strings.Split(eventType, ".")
-	return len(segments) > EventMeshTypeSegmentsLimit
+	return len(segments) > eventTypeSegmentsLimit
 }
 
 func updateHashesInStatus(kymaSubscription *eventingv1alpha2.Subscription,

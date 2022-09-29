@@ -23,11 +23,11 @@ import (
 )
 
 const (
-	eventMeshHandlerName       = "event-mesh-handler"
-	maxSubscriptionNameLength  = 50
-	EventMeshTypeSegmentsLimit = 7
-	subscriptionNameLogKey     = "eventMeshSubscriptionName"
-	errorLogKey                = "error"
+	eventMeshHandlerName      = "event-mesh-handler"
+	maxSubscriptionNameLength = 50
+	eventTypeSegmentsLimit    = 7
+	subscriptionNameLogKey    = "eventMeshSubscriptionName"
+	errorLogKey               = "error"
 )
 
 // Perform a compile time check.
@@ -118,7 +118,7 @@ func (em *EventMesh) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		return false, err
 	}
 
-	//// Check and handle if Kyma subscription or EventMesh subscription is modified
+	// check and handle if Kyma subscription or EventMesh subscription is modified
 	isKymaSubModified := false
 	isEventMeshSubModified := false
 
@@ -206,7 +206,7 @@ func (em *EventMesh) getProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 
 		if isEventTypeSegmentsOverLimit(eventMeshSubject) {
 			return nil, fmt.Errorf("EventMesh subject exceeds the limit of segments, "+
-				"max number of segements allowed: %d", EventMeshTypeSegmentsLimit)
+				"max number of segements allowed: %d", eventTypeSegmentsLimit)
 		}
 
 		result = append(result, backendutils.EventTypeInfo{OriginalType: t, CleanType: cleanedType,
@@ -219,12 +219,13 @@ func (em *EventMesh) getProcessedEventTypes(kymaSubscription *eventingv1alpha2.S
 // handleKymaSubModified checks if the Kyma subscription is modified.
 // If modified, then it deletes the corresponding subscription on EventMesh and returns true.
 func (em *EventMesh) handleKymaSubModified(eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription) (bool, error) {
-	isEventMeshSubModified, err := backendutils.IsEventMeshSubModified(eventMeshSub, kymaSub.Status.Backend.Ev2hash)
+	// uses Ev2hash which is to store the hash related to kyma sub
+	isKymaSubModified, err := backendutils.IsEventMeshSubModified(eventMeshSub, kymaSub.Status.Backend.Ev2hash)
 	if err != nil {
 		return false, err
 	}
 
-	if isEventMeshSubModified {
+	if isKymaSubModified {
 		// delete subscription from EventMesh server, so it will be re-created later.
 		if err := em.deleteSubscription(eventMeshSub.Name); err != nil {
 			return false, fmt.Errorf("failed to delete subscription on EventMesh: %w", err)
@@ -237,7 +238,7 @@ func (em *EventMesh) handleKymaSubModified(eventMeshSub *types.Subscription, kym
 // handleEventMeshSubModified checks if the EventMesh subscription is modified.
 // If modified, then it deletes the subscription on EventMesh and returns true.
 func (em *EventMesh) handleEventMeshSubModified(eventMeshSub *types.Subscription, kymaSub *eventingv1alpha2.Subscription) (bool, error) {
-	// get the cleaned EMS subscription for comparing the hash
+	// get the cleaned EMS subscription for comparing the hash (Emshash)
 	cleanedEventMeshServerSub := backendutils.GetCleanedEventMeshSubscription(eventMeshSub)
 	isEventMeshServerSubModified, err := backendutils.IsEventMeshSubModified(cleanedEventMeshServerSub,
 		kymaSub.Status.Backend.Emshash)
@@ -306,7 +307,7 @@ func (em *EventMesh) getSubscriptionIgnoreNotFound(name string) (*types.Subscrip
 
 // getSubscription fetches the subscription from EventMesh.
 func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
-	bebSubscription, resp, err := em.client.Get(name)
+	eventMeshSubscription, resp, err := em.client.Get(name)
 	if err != nil {
 		return nil, fmt.Errorf("get subscription failed: %v", err)
 	}
@@ -314,7 +315,7 @@ func (em *EventMesh) getSubscription(name string) (*types.Subscription, error) {
 		return nil, fmt.Errorf("get subscription failed: %w; %v",
 			backendbebv1.HTTPStatusError{StatusCode: resp.StatusCode}, resp.Message)
 	}
-	return bebSubscription, nil
+	return eventMeshSubscription, nil
 }
 
 // deleteSubscription deletes the subscription on EventMesh.
