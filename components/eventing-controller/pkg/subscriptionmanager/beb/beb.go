@@ -171,16 +171,59 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	if c.cancel != nil {
 		c.cancel()
 	}
+
+	if c.envCfg.EnableNewCRDVersion {
+		return c.stopEventMeshBackend(runCleanup)
+	}
+
+	return c.stopBebBackend(runCleanup)
+}
+
+// stopBebBackend stops and cleans all EventMesh backend (based on Subscription v1alpha1)
+func (c *SubscriptionManager) stopBebBackend(runCleanup bool) error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	if !runCleanup {
 		return markAllSubscriptionsAsNotReady(dynamicClient, c.namedLogger())
 	}
 
-	if c.envCfg.EnableNewCRDVersion {
-		return cleanupEventMesh(c.eventMeshBackend, dynamicClient, c.namedLogger())
+	return cleanup(c.bebBackend, dynamicClient, c.namedLogger())
+}
+
+// stopEventMeshBackend stops and cleans all EventMesh backend (based on Subscription v1alpha2)
+func (c *SubscriptionManager) stopEventMeshBackend(runCleanup bool) error {
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	if !runCleanup {
+		return markAllV1Alpha2SubscriptionsAsNotReady(dynamicClient, c.namedLogger())
 	}
 
-	return cleanup(c.bebBackend, dynamicClient, c.namedLogger())
+	return cleanupEventMesh(c.eventMeshBackend, dynamicClient, c.namedLogger())
+}
+
+func markAllV1Alpha2SubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	// Fetch all subscriptions.
+	subscriptionsUnstructured, err := dynamicClient.Resource(eventingv1alpha2.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "list subscriptions failed")
+	}
+	subs, err := eventingv1alpha2.ConvertUnstructListToSubList(subscriptionsUnstructured)
+	if err != nil {
+		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
+	}
+	// Mark all as not ready
+	for _, sub := range subs.Items {
+		if !sub.Status.Ready {
+			continue
+		}
+
+		desiredSub := sub.DuplicateWithStatusDefaults()
+		desiredSub.Status.Ready = false
+		if err = backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+			logger.Errorw("Failed to update subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+		}
+	}
+	return err
 }
 
 func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
@@ -274,7 +317,7 @@ func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.In
 	}
 
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(eventingv1alpha2.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
