@@ -45,7 +45,7 @@ func Test_Conversion(t *testing.T) {
 				testingv1.WithFilter("", orderUpdatedEventType),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithMaxInFlight("nonint"),
+				testingv2.WithMaxInFlightMessages("nonint"),
 			),
 			wantErrMsgV2toV1: "strconv.Atoi: parsing \"nonint\": invalid syntax",
 		},
@@ -62,7 +62,7 @@ func Test_Conversion(t *testing.T) {
 				}),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithSource(eventSource),
+				testingv2.WithEventSource(eventSource),
 				testingv2.WithTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,
@@ -114,7 +114,7 @@ func Test_Conversion(t *testing.T) {
 				v1WithBEBStatusFields(),
 			),
 			alpha2Sub: newV2DefaultSubscription(
-				testingv2.WithSource(eventSource),
+				testingv2.WithEventSource(eventSource),
 				testingv2.WithTypes([]string{
 					orderCreatedEventType,
 					orderUpdatedEventType,

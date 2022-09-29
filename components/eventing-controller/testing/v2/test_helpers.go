@@ -32,6 +32,11 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
+	OrderCreatedUncleanEvent = "order.cre-ä+t*ed.v2"
+	OrderCreatedCleanEvent   = "order.cre-ä+ted.v2"
+	EventSourceUnclean       = "s>o>*u*r>c.e"
+	EventSourceClean         = "source"
+
 	EventMeshNamespace                       = "/default/kyma/id"
 	EventSource                              = "/default/kyma/id"
 	EventTypePrefix                          = "prefix"
@@ -264,14 +269,6 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 				Reason:  "foo-reason",
 				Message: "foo-message",
 			},
-		}
-	}
-}
-
-func WithMaxInFlight(maxInFlight string) SubscriptionOpt {
-	return func(sub *eventingv1alpha2.Subscription) {
-		sub.Spec.Config = map[string]string{
-			eventingv1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
 		}
 	}
 }
@@ -621,4 +618,59 @@ func GetBinaryMessageHeaders() http.Header {
 	headers.Add(CeSourceHeader, CloudEventSource)
 	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
 	return headers
+}
+
+// AddSource adds the source value to the subscription.
+func AddSource(source string, subscription *eventingv1alpha2.Subscription) {
+	subscription.Spec.Source = source
+}
+
+// WithSourceAndType is a SubscriptionOpt for creating a Subscription with a specific eventSource and eventType.
+func WithSourceAndType(eventSource, eventType string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		AddSource(eventSource, subscription)
+		AddEventType(eventType, subscription)
+	}
+}
+
+// WithCleanEventTypeOld is a SubscriptionOpt that initializes subscription with a not clean event type from v1alpha1
+func WithCleanEventTypeOld() SubscriptionOpt {
+	return WithSourceAndType(EventSourceClean, OrderCreatedEventType)
+}
+
+// WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and type
+func WithNotCleanEventSourceAndType() SubscriptionOpt {
+	return WithSourceAndType(EventSourceUnclean, OrderCreatedUncleanEvent)
+}
+
+// WithTypeMatchingStandard is a SubscriptionOpt that initializes the subscription with type matching to standard
+func WithTypeMatchingStandard() SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingStandard
+	}
+}
+
+// WithTypeMatchingExact is a SubscriptionOpt that initializes the subscription with type matching to exact
+func WithTypeMatchingExact() SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Spec.TypeMatching = eventingv1alpha2.TypeMatchingExact
+	}
+}
+
+// WithMaxInFlight is a SubscriptionOpt that sets the status with the maxInFlightMessages int value
+func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Spec.Config = map[string]string{
+			eventingv1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
+		}
+	}
+}
+
+// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value
+func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Config = map[string]string{
+			eventingv1alpha2.MaxInFlightMessages: maxInFlight,
+		}
+	}
 }
