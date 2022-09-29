@@ -13,8 +13,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// bebSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the BEB backend,
-// which has a max length. Domain name is used to make the names on BEB unique.
+// eventMeshSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the EventMesh backend,
+// which has a max length. Domain name is used to make the names on EventMesh unique.
 type eventMeshSubscriptionNameMapper struct {
 	domainName string
 	maxLength  int
