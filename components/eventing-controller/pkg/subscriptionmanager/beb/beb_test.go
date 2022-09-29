@@ -119,7 +119,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock
-	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
+	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
 	getSubscriptionURL = bebMock.MessagingURL + getSubscriptionURL
 	resp, err := http.Get(getSubscriptionURL) //nolint:gosec
 	g.Expect(err).To(gomega.BeNil())
