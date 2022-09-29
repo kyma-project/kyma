@@ -304,6 +304,20 @@ func (r *Reconciler) syncEventMeshSubscription(subscription *eventingv1alpha2.Su
 		return false, errors.Errorf("APIRule is required")
 	}
 
+	// @TODO: check it in validation webhook
+	if subscription.Spec.Types == nil || len(subscription.Spec.Types) == 0 {
+		err := errors.Errorf("Types are required")
+		r.syncConditionSubscribed(subscription, err)
+		return false, err
+	}
+
+	// @TODO: check it in validation webhook
+	if subscription.Spec.Source == "" {
+		err := errors.Errorf("Source is required")
+		r.syncConditionSubscribed(subscription, err)
+		return false, err
+	}
+
 	if _, err := r.Backend.SyncSubscription(subscription, r.cleaner, apiRule); err != nil {
 		r.syncConditionSubscribed(subscription, err)
 		return false, err

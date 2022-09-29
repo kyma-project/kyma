@@ -18,6 +18,7 @@ import (
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	corev1 "k8s.io/api/core/v1"
@@ -120,20 +121,20 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
-			// @TODO: Update this tests once validation webhook is implemented
 			// validation should reject the subscription CR if types is empty
-			//By("a Subscription without types", func() {
-			//	By("should fail to create subscription if types is empty", func() {
-			//		getSubscription(ctx, subscription).Should(And(
-			//			reconcilertesting.HaveSubscriptionName(subscriptionName),
-			//			reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-			//				eventingv1alpha2.ConditionSubscriptionActive,
-			//				eventingv1alpha2.ConditionReasonSubscriptionActive,
-			//				corev1.ConditionTrue, "")),
-			//			reconcilertesting.HaveCleanEventTypesEmpty(),
-			//		))
-			//	})
-			//})
+			By("a Subscription without types", func() {
+				By("should fail to create subscription if types is empty", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveSubscriptionNotReady(),
+						reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
+							eventingv1alpha2.ConditionSubscribed,
+							eventingv1alpha2.ConditionReasonSubscriptionCreationFailed,
+							corev1.ConditionFalse, "Types are required")),
+						reconcilertesting.HaveCleanEventTypesEmpty(),
+					))
+				})
+			})
 
 			By("Creation of Subscription with types", func() {
 				subscribeToEventTypes := []string{
@@ -313,7 +314,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	FWhen("With EXACT type matching in subscription", func() {
+	When("With EXACT type matching in subscription", func() {
 		It("Should reconcile the Subscription with EXACT type matching", func() {
 			subscriptionName := "test-valid-subscription-1"
 
@@ -411,12 +412,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			expectedStatusTypes := []eventingv1alpha2.EventType{
 				{
 					OriginalType: reconcilertesting.EventMeshExactType,
-					CleanType: reconcilertesting.EventMeshExactType,
+					CleanType:    reconcilertesting.EventMeshExactType,
 				},
 			}
 			expectedStatusEmsTypes := []eventingv1alpha2.EventMeshTypes{
 				{
-					OriginalType: reconcilertesting.EventMeshExactType,
+					OriginalType:  reconcilertesting.EventMeshExactType,
 					EventMeshType: reconcilertesting.EventMeshExactType,
 				},
 			}
@@ -429,7 +430,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countEventMeshRequests(
 				nameMapper.MapSubscriptionName(givenSubscription.Name, givenSubscription.Namespace),
-				reconcilertesting.EventMeshOrderCreatedV1Type)
+				reconcilertesting.EventMeshExactType)
 			Expect(creationRequests).Should(reconcilertestingv1.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -1231,23 +1232,22 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	// @TODO: Update this tests once validation webhook is implemented
-	//DescribeTable("Schema tests: ensuring required fields are not treated as optional",
-	//	func(subscription *eventingv1alpha2.Subscription) {
-	//		subscription.Namespace = namespaceName
-	//
-	//		By("Letting the APIServer reject the custom resource")
-	//		ensureSubscriptionCreationFails(ctx, subscription)
-	//	},
-	//	Entry("types missing",
-	//		func() *eventingv1alpha2.Subscription {
-	//			subscription := reconcilertesting.NewSubscription("schema-filter-missing", "")
-	//			subscription.Spec.Types = nil
-	//			return subscription
-	//		}()),
-	//)
+	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
+		func(subscription *eventingv1alpha2.Subscription) {
+			subscription.Namespace = namespaceName
 
-	// @TODO: Update this tests once validation webhook is implemented
+			By("Letting the APIServer reject the custom resource")
+			ensureSubscriptionCreationFails(ctx, subscription)
+		},
+		Entry("types missing",
+			func() *eventingv1alpha2.Subscription {
+				subscription := reconcilertesting.NewSubscription("schema-types-missing", "")
+				subscription.Spec.Types = nil
+				return subscription
+			}()),
+	)
+
+	// @TODO: Update this tests once protocol settings is implemented
 	//DescribeTable("Schema tests: ensuring optional fields are not treated as required",
 	//	func(subscription *eventingv1alpha2.Subscription) {
 	//		subscription.Namespace = namespaceName
@@ -1382,19 +1382,19 @@ func getEventMeshSubscriptionCreationRequests(eventMeshSubscriptions []eventMesh
 }
 
 // ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema.
-//func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha2.Subscription) {
-//	if subscription.Namespace != "default " {
-//		namespace := fixtureNamespace(subscription.Namespace)
-//		Expect(k8sClient.Create(ctx, namespace)).Should(Succeed())
-//	}
-//	Expect(k8sClient.Create(ctx, subscription)).Should(
-//		And(
-//			// prevent nil-pointer stacktrace
-//			Not(BeNil()),
-//			reconcilertestingv1.IsK8sUnprocessableEntity(),
-//		),
-//	)
-//}
+func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha2.Subscription) {
+	if subscription.Namespace != "default " {
+		namespace := fixtureNamespace(subscription.Namespace)
+		Expect(k8sClient.Create(ctx, namespace)).Should(Succeed())
+	}
+	Expect(k8sClient.Create(ctx, subscription)).Should(
+		And(
+			// prevent nil-pointer stacktrace
+			Not(BeNil()),
+			reconcilertestingv1.IsK8sUnprocessableEntity(),
+		),
+	)
+}
 
 func fixtureNamespace(name string) *corev1.Namespace {
 	namespace := corev1.Namespace{
