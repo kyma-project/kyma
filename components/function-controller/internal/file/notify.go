@@ -8,11 +8,7 @@ import (
 )
 
 func NotifyModification(ctx context.Context, path string) error {
-	return notifyModification(ctx, path, fsnotify.NewWatcher)
-}
-
-func notifyModification(ctx context.Context, path string, fsNotifyFn func() (*fsnotify.Watcher, error)) error {
-	watcher, err := fsNotifyFn()
+	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return errors.Wrap(err, "unable to  create file watcher")
 	}
