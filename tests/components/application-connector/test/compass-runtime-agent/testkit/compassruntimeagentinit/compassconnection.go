@@ -36,9 +36,9 @@ func (cc compassConnectionCRConfiguration) Do() (types.RollbackFunc, error) {
 	if err != nil {
 		return nil, err
 	}
+	compassConnectionCR.ResourceVersion = ""
 
 	compassConnectionCRBackup := compassConnectionCR.DeepCopy()
-
 	compassConnectionCRBackup.ObjectMeta.Name = "compass-connection-backup"
 	_, err = cc.compassConnectionInterface.Create(context.TODO(), compassConnectionCRBackup, meta.CreateOptions{})
 	if err != nil {

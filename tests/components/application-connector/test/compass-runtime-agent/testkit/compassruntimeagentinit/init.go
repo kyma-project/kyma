@@ -1,6 +1,7 @@
 package compassruntimeagentinit
 
 import (
+	"fmt"
 	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ type compassRuntimeAgentConfigurator struct {
 	compassConnectionConfigurator   types.CompassConnectionConfigurator
 	deploymentConfigurator          types.DeploymentConfigurator
 	tenant                          string
+	testNamespace                   string
 }
 
 func NewCompassRuntimeAgentConfigurator(directorClient types.DirectorClient,
@@ -34,7 +36,8 @@ func NewCompassRuntimeAgentConfigurator(directorClient types.DirectorClient,
 	configurationSecretConfigurator types.ConfigurationSecretConfigurator,
 	compassConnectionConfigurator types.CompassConnectionConfigurator,
 	deploymentConfigurator types.DeploymentConfigurator,
-	tenant string) CompassRuntimeAgentConfigurator {
+	tenant string,
+	testNamespace string) CompassRuntimeAgentConfigurator {
 	return compassRuntimeAgentConfigurator{
 		directorClient:                  directorClient,
 		certificateSecretConfigurator:   certificateSecretConfigurator,
@@ -42,6 +45,7 @@ func NewCompassRuntimeAgentConfigurator(directorClient types.DirectorClient,
 		compassConnectionConfigurator:   compassConnectionConfigurator,
 		deploymentConfigurator:          deploymentConfigurator,
 		tenant:                          tenant,
+		testNamespace:                   testNamespace,
 	}
 }
 
@@ -78,7 +82,11 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 			configurationSecretRollbackFunc)
 	}
 
-	deploymentRollbackFunc, err := crc.deploymentConfigurator.Do(NewCACertSecretName, NewClientCertSecretName, NewCompassRuntimeConfigName)
+	newCACertNamespacedSecretName := fmt.Sprintf("%s/%s", crc.testNamespace, NewCACertSecretName)
+	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", crc.testNamespace, NewClientCertSecretName)
+	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", crc.testNamespace, NewCompassRuntimeConfigName)
+
+	deploymentRollbackFunc, err := crc.deploymentConfigurator.Do(newCACertNamespacedSecretName, newClientCertNamespacedSecretName, newCompassRuntimeNamespacedSecretConfigName)
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to modify deployment",
 			runtimeID,

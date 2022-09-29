@@ -57,10 +57,6 @@ func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
 	gs.Require().Nil(err)
 
 	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
-	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
-	gs.Require().Nil(err)
-
-	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
 	gs.Require().Nil(err)
 }
 
@@ -87,7 +83,13 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, gs.testConfig.TestNamespace)
 	compassConnectionConfigurator := compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections())
 	deploymentConfigurator := compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace)
-	compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient, certificateSecretConfigurator, configurationSecretConfigurator, compassConnectionConfigurator, deploymentConfigurator, gs.testConfig.TestingTenant)
+	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient,
+		certificateSecretConfigurator,
+		configurationSecretConfigurator,
+		compassConnectionConfigurator,
+		deploymentConfigurator,
+		gs.testConfig.TestingTenant,
+		gs.testConfig.TestNamespace)
 }
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
