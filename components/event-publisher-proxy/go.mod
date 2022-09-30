@@ -3,7 +3,6 @@ module github.com/kyma-project/kyma/components/event-publisher-proxy
 go 1.19
 
 require (
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.1
 	github.com/cloudevents/sdk-go/v2 v2.11.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -19,9 +18,9 @@ require (
 	go.uber.org/zap v1.23.0
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
-	k8s.io/api v0.25.0
-	k8s.io/apimachinery v0.25.0
-	k8s.io/client-go v0.25.0
+	k8s.io/api v0.25.2
+	k8s.io/apimachinery v0.25.2
+	k8s.io/client-go v0.25.2
 	sigs.k8s.io/controller-runtime v0.13.0
 )
 
