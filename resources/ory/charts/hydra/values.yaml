@@ -165,6 +165,8 @@ deployment:
     allowPrivilegeEscalation: false
     privileged: false
 
+  jwtAccessToken: true
+
   lifecycle: {}
 
   labels: {}

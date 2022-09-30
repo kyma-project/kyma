@@ -166,10 +166,17 @@ spec:
                   fieldPath: status.hostIP
             {{- end }}
             {{- end }}
+            {{- if .Values.deployment.jwtAccessToken }}
+            - name: URLS_SELF_ISSUER
+              value: https://oauth2.{{ .Values.global.domainName }}/
+            - name: STRATEGIES_ACCESS_TOKEN
+              value: jwt
+            {{- else }}
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}
             - name: URLS_SELF_ISSUER
               value: {{ $issuer | quote }}
+            {{- end }}
             {{- end }}
             - name: DSN
               valueFrom:
