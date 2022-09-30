@@ -95,7 +95,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           Tls                on
           tls.verify         on
     ```
-> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
+   > **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 2. To create the instance, apply the resource file in your cluster.
     ```bash
