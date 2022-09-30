@@ -28,14 +28,35 @@ func TestRunOnConfigChange(t *testing.T) {
 			done <- true
 		}()
 
-		time.Sleep(time.Second)
-		err := os.WriteFile(cfgFile.Name(), []byte("{}"), 0644)
-		assert.NoError(t, err)
+		quitChan := modifyFileEveryTick(t, cfgFile, 500*time.Millisecond)
 
-		<-callbackChan
+		assert.Equal(t, true, <-callbackChan)
+
+		quitChan <- true
 		cancel()
+
 		assert.Equal(t, true, <-done)
 	})
+}
+
+func modifyFileEveryTick(t *testing.T, file *os.File, interval time.Duration) chan interface{} {
+	ticker := time.NewTicker(interval)
+
+	quit := make(chan interface{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := os.WriteFile(file.Name(), []byte("{}"), 0o644)
+				assert.NoError(t, err)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
+	return quit
 }
 
 func fixConfig(t *testing.T) *os.File {

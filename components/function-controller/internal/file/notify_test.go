@@ -11,7 +11,7 @@ import (
 )
 
 func TestNotifyModification(t *testing.T) {
-	t.Run("react to file deletion", func(t *testing.T) {
+	t.Run("react to file modification", func(t *testing.T) {
 		file, err := ioutil.TempFile(os.TempDir(), "test-*")
 		assert.NoError(t, err)
 
@@ -20,11 +20,10 @@ func TestNotifyModification(t *testing.T) {
 			notifyErr <- NotifyModification(context.Background(), file.Name())
 		}()
 
-		time.Sleep(1 * time.Second)
-		err = os.Remove(file.Name())
-		assert.NoError(t, err)
+		quit := modifyFileEveryTick(t, file, 500*time.Millisecond)
 
 		assert.NoError(t, <-notifyErr)
+		quit <- true
 	})
 
 	t.Run("file does not exist", func(t *testing.T) {
@@ -32,8 +31,6 @@ func TestNotifyModification(t *testing.T) {
 		go func() {
 			notifyErr <- NotifyModification(context.Background(), "/path/does/not/exist")
 		}()
-
-		time.Sleep(1 * time.Second)
 
 		assert.Error(t, <-notifyErr)
 	})
@@ -50,9 +47,28 @@ func TestNotifyModification(t *testing.T) {
 			notifyErr <- NotifyModification(ctx, file.Name())
 		}()
 
-		time.Sleep(1 * time.Second)
 		cancel()
 
 		assert.Equal(t, <-notifyErr, context.Canceled)
 	})
+}
+
+func modifyFileEveryTick(t *testing.T, file *os.File, interval time.Duration) chan interface{} {
+	ticker := time.NewTicker(interval)
+
+	quit := make(chan interface{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err := os.WriteFile(file.Name(), []byte("{}"), 0o644)
+				assert.NoError(t, err)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
+	return quit
 }
