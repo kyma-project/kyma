@@ -72,10 +72,6 @@ components:
         requests:
           cpu: 100m
           memory: 512Mi
-      strategy:
-        rollingUpdate:
-          maxSurge: 100%
-          maxUnavailable: 0
 
   egressGateways:
     enabled: false
