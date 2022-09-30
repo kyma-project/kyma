@@ -1,9 +1,11 @@
-package utils
+package utils_test
 
 import (
 	"net/url"
 	"reflect"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 func Test_GetPortNumberFromURL(t *testing.T) {
@@ -56,7 +58,7 @@ func Test_GetPortNumberFromURL(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		gotPort, err := GetPortNumberFromURL(tc.givenURL)
+		gotPort, err := utils.GetPortNumberFromURL(tc.givenURL)
 		if err != nil {
 			t.Errorf("test failed with error: [%v]", err)
 			continue
@@ -91,7 +93,7 @@ func Test_ContainsString(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		result := ContainsString(tc.sl, tc.s)
+		result := utils.ContainsString(tc.sl, tc.s)
 		if tc.want != result {
 			t.Errorf("test failed with give slice of strings: %s and string: %s, expected: %v but got: %v",
 				tc.sl, tc.s, tc.want, result)
@@ -122,10 +124,23 @@ func Test_RemoveString(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		result := RemoveString(tc.sl, tc.s)
+		result := utils.RemoveString(tc.sl, tc.s)
 		if !reflect.DeepEqual(tc.want, result) {
 			t.Errorf("test failed with give slice of strings: %s and string: %s, expected: %s but got: %s",
 				tc.sl, tc.s, tc.want, result)
 		}
+	}
+}
+
+func TestGetRandSuffix(t *testing.T) {
+	totalExecutions := 10
+	lengthOfRandomSuffix := 6
+	results := make(map[string]bool)
+	for i := 0; i < totalExecutions; i++ {
+		result := utils.GetRandString(lengthOfRandomSuffix)
+		if _, ok := results[result]; ok {
+			t.Fatalf("generated string already exists: %s", result)
+		}
+		results[result] = true
 	}
 }

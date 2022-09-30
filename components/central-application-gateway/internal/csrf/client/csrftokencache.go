@@ -8,14 +8,14 @@ import (
 	cache "github.com/patrickmn/go-cache"
 )
 
-//Cache for CSRF data items
+// Cache for CSRF data items
 type TokenCache interface {
 	Get(itemID string) (resp *csrf.Response, found bool)
 	Add(itemID string, resp *csrf.Response)
 	Remove(itemID string)
 }
 
-//Creates a new TokenCache instance
+// Creates a new TokenCache instance
 func NewTokenCache() TokenCache {
 	return &tokenCache{
 		cache: cache.New(cache.NoExpiration, cache.NoExpiration),

@@ -268,17 +268,7 @@ spec:
 
 ### Step 5: Rotate the Secret
 
-A Secret being referenced with the **secretKeyRef** construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
-Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
-
-```yaml
-kind: LogPipeline
-apiVersion: telemetry.kyma-project.io/v1alpha1
-metadata:
-  name: http-backend
-  annotations:
-    kyma-project.com/timeStamp: <current-time>
-```
+A Secret being referenced with the **secretKeyRef** construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable. The LogPipeline watches the referenced Secrets and detects changes to them, so Secret rotation takes immediate effect.
 
 ### Step 6: Add a parser
 

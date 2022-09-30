@@ -11,8 +11,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//go:generate mockery -name=ServiceDefinitionService
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
+//
+//go:generate mockery -name=ServiceDefinitionService
 type ServiceDefinitionService interface {
 	// GetAPI gets API of a service with given ID
 	GetAPIByServiceName(appName, serviceName string) (*model.API, apperrors.AppError)
