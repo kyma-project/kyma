@@ -209,5 +209,6 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx.ScenarioContext())
 	InitializeScenarioOAuth2JWTOnePath(ctx.ScenarioContext())
 	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
-	InitializeScenarioTwoServices(ctx.ScenarioContext())
+	InitializeScenarioApiruleWithOverrides(ctx.ScenarioContext())
+	InitializeScenarioServicePerPath(ctx.ScenarioContext())
 }

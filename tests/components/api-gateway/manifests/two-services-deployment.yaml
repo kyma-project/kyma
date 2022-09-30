@@ -66,6 +66,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: helloworld-{{.TestID}}
+  namespace: "{{.Namespace}}"
   labels:
     app: helloworld-{{.TestID}}
     version: v1
@@ -84,9 +85,6 @@ spec:
       containers:
       - name: helloworld
         image: docker.io/istio/examples-helloworld-v1
-        resources:
-          requests:
-            cpu: "100m"
         imagePullPolicy: IfNotPresent #Always
         ports:
         - containerPort: 5000
