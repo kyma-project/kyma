@@ -12,6 +12,7 @@ import (
 )
 
 // Repository contains operations for managing client credentials
+//
 //go:generate mockery --name=Repository
 type Repository interface {
 	Get(name string) (map[string][]byte, apperrors.AppError)
@@ -23,6 +24,7 @@ type repository struct {
 }
 
 // Manager contains operations for managing k8s secrets
+//
 //go:generate mockery --name=Manager
 type Manager interface {
 	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
