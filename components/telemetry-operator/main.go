@@ -36,8 +36,6 @@ import (
 	logpipelinewebhook "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline"
 	logpipelinevalidation "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation"
 
-	"github.com/go-logr/zapr"
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -128,7 +126,7 @@ func main() {
 	}
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
-	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
+	//ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 	if err != nil {
 		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
