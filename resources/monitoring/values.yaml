@@ -149,7 +149,7 @@ global:
       directory: "external/k8s.gcr.io/kube-state-metrics"
     grafana:
       name: "grafana"
-      version: "7.5.16-4256edd8"
+      version: "7.5.17-d8b29d34"
       directory: "tpi"
       sha: ""
     busybox:
