@@ -1,4 +1,35 @@
-if [ "$1" == "" ]; then
+#!/bin/bash
+
+target_namespace=$1
+
+log_pods_with () {
+    namespace=$1
+    label=$2
+
+    if [ "$label" != "" ]; then
+        pods_out_of_istio=$(kubectl get pod -l $label -n $namespace -o jsonpath='{.items[*].metadata.name}')
+        for pod in $pods_out_of_istio
+        do
+            if [ "$target_namespace" == "" ]; then
+                echo "    - $namespace/$pod"
+            else
+                echo "  - $pod"
+            fi
+        done
+    else
+        pods_out_of_istio=$(kubectl get pod -n $namespace -o jsonpath='{.items[*].metadata.name}')
+        for pod in $pods_out_of_istio
+        do
+            if [ "$target_namespace" == "" ]; then
+                echo "    - $namespace/$pod"
+            else
+                echo "  - $pod"
+            fi
+        done
+    fi
+}
+
+if [ "$target_namespace" == "" ]; then
     echo "Pods out of istio mesh:"
 
     echo "  In namespace labeled with \"istio-injection=disabled\":"
@@ -7,11 +38,7 @@ if [ "$1" == "" ]; then
     for ns in $disabled_namespaces
     do
         if [ "$ns" != "kube-system" ] && [ "$ns" != "kyma-system" ]; then
-            pods_out_of_istio=$(kubectl get pod -n $ns -o jsonpath='{.items[*].metadata.name}')
-            for pod in $pods_out_of_istio
-            do
-                echo "    - $ns/$pod"
-            done
+            log_pods_with $ns
         fi
     done
 
@@ -20,11 +47,7 @@ if [ "$1" == "" ]; then
     for ns in $enabled_ns
     do
         if [ "$ns" != "kube-system" ] && [ "$ns" != "kyma-system" ]; then
-            pods_out_of_istio=$(kubectl get pod -l "sidecar.istio.io/inject=false" -n $ns -o jsonpath='{.items[*].metadata.name}')
-            for pod in $pods_out_of_istio
-            do
-                echo "    - $ns/$pod"
-            done
+            log_pods_with $ns "sidecar.istio.io/inject=false"
         fi
     done
 
@@ -33,33 +56,17 @@ if [ "$1" == "" ]; then
     for ns in $not_labeled_ns
     do
         if [ "$ns" != "kube-system" ] && [ "$ns" != "kyma-system" ]; then
-            pods_out_of_istio=$(kubectl get pod -l "sidecar.istio.io/inject!=true" -n $ns -o jsonpath='{.items[*].metadata.name}')
-            for pod in $pods_out_of_istio
-            do
-                echo "    - $ns/$pod"
-            done
+            log_pods_with $ns "sidecar.istio.io/inject!=true"
         fi
     done
 else 
-    ns_label=$(kubectl get ns $1 -o jsonpath='{.metadata.labels.istio-injection}')
-    echo "Pods out of istio mesh in namespace $1:"
+    ns_label=$(kubectl get ns $target_namespace -o jsonpath='{.metadata.labels.istio-injection}')
+    echo "Pods out of istio mesh in namespace $target_namespace:"
     if [ "$ns_label" == "enabled" ]; then
-        pods_out_of_istio=$(kubectl get pod -l "sidecar.istio.io/inject=false" -n $1 -o jsonpath='{.items[*].metadata.name}')
-        for pod in $pods_out_of_istio
-        do
-            echo "  - $pod"
-        done
+        log_pods_with $target_namespace "sidecar.istio.io/inject=false"
     elif [ "$ns_label" == "disabled" ]; then
-        pods_out_of_istio=$(kubectl get pod -n $1 -o jsonpath='{.items[*].metadata.name}')
-        for pod in $pods_out_of_istio
-        do
-            echo "  - $pod"
-        done
+        log_pods_with $target_namespace
     else
-        pods_out_of_istio=$(kubectl get pod -l "sidecar.istio.io/inject!=true" -n $1 -o jsonpath='{.items[*].metadata.name}')
-        for pod in $pods_out_of_istio
-        do
-            echo "  - $pod"
-        done
+        log_pods_with $target_namespace "sidecar.istio.io/inject!=true"
     fi
 fi
