@@ -457,7 +457,10 @@ func assertCookie(t *testing.T, r *http.Request, name, value string) {
 func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	return NewTestServerWithResponse(check, func(w http.ResponseWriter) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test"))
+		_, err := w.Write([]byte("test"))
+		if err != nil {
+			panic(err)
+		}
 	})
 }
 

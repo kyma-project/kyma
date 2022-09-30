@@ -42,13 +42,6 @@ func TestURLRewriter(t *testing.T) {
 			empty:     true,
 		},
 		{
-			name:      "Changed Host",
-			gwURL:     "http://central-gateway.cluser.local/app/service",
-			targetURL: "https://httpbin.org/api/v1",
-			location:  "https://otherService.org/api/v1/some/sub/path",
-			empty:     true,
-		},
-		{
 			name:      "Changed Subpath",
 			gwURL:     "http://central-gateway.cluser.local/app/service",
 			targetURL: "https://httpbin.org/api/v1",

@@ -127,10 +127,7 @@ func responseModifier(
 // urlRewriter modifies redirect URLs for reverse proxy.
 // If the URL should be left unmodified - it returns nil.
 func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
-	switch loc.Scheme {
-	case "http", "https":
-		// Good
-	default:
+	if loc.Scheme != "http" && loc.Scheme != "https" {
 		return nil
 	}
 
