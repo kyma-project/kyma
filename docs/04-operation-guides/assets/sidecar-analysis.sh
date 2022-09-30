@@ -1,32 +1,28 @@
 #!/bin/bash
 
-target_namespace=$1
+set -eou pipefail
+
+target_namespace="${1:-}"
 
 log_pods_with () {
     namespace=$1
     label=$2
 
     if [ "$label" != "" ]; then
-        pods_out_of_istio=$(kubectl get pod -l $label -n $namespace -o jsonpath='{.items[*].metadata.name}')
-        for pod in $pods_out_of_istio
-        do
-            if [ "$target_namespace" == "" ]; then
-                echo "    - $namespace/$pod"
-            else
-                echo "  - $pod"
-            fi
-        done
+        cmd="kubectl get pod -l $label -n $namespace -o jsonpath='{.items[*].metadata.name}'"
     else
-        pods_out_of_istio=$(kubectl get pod -n $namespace -o jsonpath='{.items[*].metadata.name}')
-        for pod in $pods_out_of_istio
-        do
-            if [ "$target_namespace" == "" ]; then
-                echo "    - $namespace/$pod"
-            else
-                echo "  - $pod"
-            fi
-        done
+        cmd="kubectl get pod -n $namespace -o jsonpath='{.items[*].metadata.name}'"
     fi
+
+    pods_out_of_istio=$(eval $cmd)
+    for pod in $pods_out_of_istio
+    do
+        if [ "$target_namespace" == "" ]; then
+            echo "    - $namespace/$pod"
+        else
+            echo "  - $pod"
+        fi
+    done
 }
 
 if [ "$target_namespace" == "" ]; then
