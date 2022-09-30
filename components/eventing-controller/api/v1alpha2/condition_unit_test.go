@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -463,11 +465,9 @@ func Test_CreateMessageForConditionReasonSubscriptionCreated(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotName := v1alpha2.CreateMessageForConditionReasonSubscriptionCreated(tc.givenName)
-			g.Expect(gotName).To(Equal(tc.wantName))
+			require.Equal(t, tc.wantName, v1alpha2.CreateMessageForConditionReasonSubscriptionCreated(tc.givenName))
 		})
 	}
 }
