@@ -11,7 +11,7 @@ import (
 )
 
 // TODO: those values needs to be carefully picked to be in line with Compass Runtime Agent's configuration
-const checkAppExistsPeriod = 30 * time.Second
+const checkAppExistsPeriod = 10 * time.Second
 const appCreationTimeout = 2 * time.Minute
 
 type ApplicationReader interface {
@@ -28,11 +28,13 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	applicationID, err := gs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	gs.Require().NoError(err)
 
-	err = gs.assignApplicationToFormationAndWaitForSync(applicationInterface, compassAppName, applicationID)
+	synchronizedCompassAppName := fmt.Sprintf("mp-%s", compassAppName)
+
+	err = gs.assignApplicationToFormationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
 	gs.Assert().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-	err = gs.appComparator.Compare(expectedAppName, compassAppName)
+	err = gs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
 	gs.Assert().NoError(err)
 
 	// Clean up
@@ -43,9 +45,7 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 func (gs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
 
 	exec := func() error {
-		err := gs.directorClient.AssignApplicationToFormation(applicationID, gs.formationName)
-
-		return err
+		return gs.directorClient.AssignApplicationToFormation(applicationID, gs.formationName)
 	}
 
 	verify := func() bool {
@@ -54,7 +54,7 @@ func (gs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(a
 			gs.T().Log(fmt.Sprintf("Failed to get app: %v", err))
 		}
 
-		return err != nil
+		return err == nil
 	}
 
 	return executor.ExecuteAndWaitForCondition{

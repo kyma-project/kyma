@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,7 +13,7 @@ type ApplicationGetter interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
 
-func NewComparator(assertions *require.Assertions, secretComparer Comparator, applicationGetter ApplicationGetter, expectedNamespace, actualNamespace string) (Comparator, error) {
+func NewComparator(assertions *assert.Assertions, secretComparer Comparator, applicationGetter ApplicationGetter, expectedNamespace, actualNamespace string) (Comparator, error) {
 	return &comparator{
 		assertions:        assertions,
 		secretComparer:    secretComparer,
@@ -24,7 +24,7 @@ func NewComparator(assertions *require.Assertions, secretComparer Comparator, ap
 }
 
 type comparator struct {
-	assertions        *require.Assertions
+	assertions        *assert.Assertions
 	secretComparer    Comparator
 	applicationGetter ApplicationGetter
 	expectedNamespace string
@@ -47,32 +47,29 @@ func (c comparator) Compare(expected, actual string) error {
 		return err
 	}
 
-	c.assertions.Equal(expectedApp.Namespace, c.expectedNamespace)
-	c.assertions.Equal(actualApp.Namespace, c.actualNamespace)
-
-	c.compareSpec(expectedApp.Spec, actualApp.Spec)
+	c.compareSpec(expectedApp, actualApp)
 	return nil
 }
 
-func (c comparator) compareSpec(expected, actual v1alpha1.ApplicationSpec) {
+func (c comparator) compareSpec(expected, actual *v1alpha1.Application) {
 
 	a := c.assertions
-	a.Equal(expected.Description, actual.Description)
-	a.Equal(expected.SkipInstallation, actual.SkipInstallation)
+	a.Equal(expected.Spec.Description, actual.Spec.Description)
+	a.Equal(expected.Spec.SkipInstallation, actual.Spec.SkipInstallation)
 
-	c.compareServices(expected.Services, actual.Services)
+	c.compareServices(expected.Spec.Services, actual.Spec.Services)
 
-	a.Equal(expected.Labels, actual.Labels)
-	a.Equal(expected.Tenant, actual.Tenant)
-	a.Equal(expected.Group, actual.Group)
+	a.NotNil(actual.Labels)
+	a.Equal(expected, actual.Labels["connected-app"])
 
-	a.Equal(expected.CompassMetadata, actual.CompassMetadata)
+	a.Equal(expected.Spec.Tenant, actual.Spec.Tenant)
+	a.Equal(expected.Spec.Group, actual.Spec.Group)
 
-	a.Equal(expected.Tags, actual.Tags)
-	a.Equal(expected.DisplayName, actual.DisplayName)
-	a.Equal(expected.ProviderDisplayName, actual.ProviderDisplayName)
-	a.Equal(expected.LongDescription, actual.LongDescription)
-	a.Equal(expected.SkipVerify, actual.SkipVerify)
+	a.Equal(expected.Spec.Tags, actual.Spec.Tags)
+	a.Equal(expected.Spec.DisplayName, actual.Spec.DisplayName)
+	a.Equal(expected.Spec.ProviderDisplayName, actual.Spec.ProviderDisplayName)
+	a.Equal(expected.Spec.LongDescription, actual.Spec.LongDescription)
+	a.Equal(expected.Spec.SkipVerify, actual.Spec.SkipVerify)
 }
 
 func (c comparator) compareServices(expected, actual []v1alpha1.Service) {

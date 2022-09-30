@@ -67,7 +67,7 @@ func (gs *CompassRuntimeAgentSuite) initComparators() {
 	gs.Require().Nil(err)
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
+	gs.appComparator, err = applications.NewComparator(gs.Assertions, secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
 }
 
 func (gs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
