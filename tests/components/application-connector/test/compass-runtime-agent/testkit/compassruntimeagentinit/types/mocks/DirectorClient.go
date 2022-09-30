@@ -9,6 +9,20 @@ type DirectorClient struct {
 	mock.Mock
 }
 
+// AssignRuntimeToFormation provides a mock function with given fields: runtimeId, formationName
+func (_m *DirectorClient) AssignRuntimeToFormation(runtimeId string, formationName string) error {
+	ret := _m.Called(runtimeId, formationName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(runtimeId, formationName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetConnectionToken provides a mock function with given fields: runtimeID
 func (_m *DirectorClient) GetConnectionToken(runtimeID string) (string, string, error) {
 	ret := _m.Called(runtimeID)
@@ -37,6 +51,20 @@ func (_m *DirectorClient) GetConnectionToken(runtimeID string) (string, string, 
 	return r0, r1, r2
 }
 
+// RegisterFormation provides a mock function with given fields: formationName
+func (_m *DirectorClient) RegisterFormation(formationName string) error {
+	ret := _m.Called(formationName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(formationName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // RegisterRuntime provides a mock function with given fields: runtimeName
 func (_m *DirectorClient) RegisterRuntime(runtimeName string) (string, error) {
 	ret := _m.Called(runtimeName)
@@ -56,6 +84,20 @@ func (_m *DirectorClient) RegisterRuntime(runtimeName string) (string, error) {
 	}
 
 	return r0, r1
+}
+
+// UnregisterFormation provides a mock function with given fields: formationName
+func (_m *DirectorClient) UnregisterFormation(formationName string) error {
+	ret := _m.Called(formationName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(formationName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UnregisterRuntime provides a mock function with given fields: id

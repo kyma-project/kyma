@@ -2,6 +2,7 @@ package compassruntimeagentinit
 
 import (
 	"context"
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +17,7 @@ type compassConnectionCRConfiguration struct {
 type CompassConnectionInterface interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.CompassConnection, error)
 	Create(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.CreateOptions) (*v1alpha1.CompassConnection, error)
+	Update(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.UpdateOptions) (*v1alpha1.CompassConnection, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 }
 
@@ -46,10 +48,18 @@ func (cc compassConnectionCRConfiguration) Do() (types.RollbackFunc, error) {
 	}
 
 	return func() error {
-		_, err = cc.compassConnectionInterface.Create(context.TODO(), compassConnectionCR, meta.CreateOptions{})
-		if err != nil {
+		retry.Do(func() error {
+			restoredCompassConnection, err := cc.compassConnectionInterface.Get(context.TODO(), "compass-connection", meta.GetOptions{})
+			if err != nil {
+				return err
+			}
+
+			restoredCompassConnection.Spec = compassConnectionCRBackup.Spec
+			restoredCompassConnection.Status = compassConnectionCRBackup.Status
+
+			_, err = cc.compassConnectionInterface.Update(context.TODO(), restoredCompassConnection, meta.UpdateOptions{})
 			return err
-		}
+		})
 
 		err = cc.compassConnectionInterface.Delete(context.TODO(), "compass-connection-backup", meta.DeleteOptions{})
 		if err != nil {

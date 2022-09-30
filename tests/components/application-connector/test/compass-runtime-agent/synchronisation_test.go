@@ -25,29 +25,26 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 
 	//Create Application in Director and wait until it gets created
 	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName)
+	applicationID, err := gs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	gs.Require().NoError(err)
+
+	err = gs.assignApplicationToFormationAndWaitForSync(applicationInterface, compassAppName, applicationID)
+	gs.Assert().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
 	err = gs.appComparator.Compare(expectedAppName, compassAppName)
-	gs.Require().NoError(err)
+	gs.Assert().NoError(err)
 
 	// Clean up
 	err = gs.directorClient.UnregisterApplication(applicationID)
 	gs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName string) (string, error) {
-
-	var applicationID string
-
-	scenarioName := "auto-testing"
+func (gs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
 
 	exec := func() error {
-		id, err := gs.directorClient.RegisterApplication(compassAppName, scenarioName)
-		if err != nil {
-			applicationID = id
-		}
+		err := gs.directorClient.AssignApplicationToFormation(applicationID, gs.formationName)
+
 		return err
 	}
 
@@ -60,7 +57,7 @@ func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader Applicatio
 		return err != nil
 	}
 
-	return applicationID, executor.ExecuteAndWaitForCondition{
+	return executor.ExecuteAndWaitForCondition{
 		RetryableExecuteFunc: exec,
 		ConditionMetFunc:     verify,
 		Tick:                 checkAppExistsPeriod,

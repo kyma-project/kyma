@@ -32,6 +32,7 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		token := "token"
 		connectorURL := "www.someurl.com"
 		tenant := "tenant"
+		formationName := "newFormation"
 
 		config := types.CompassRuntimeAgentConfig{
 			ConnectorUrl: connectorURL,
@@ -41,18 +42,26 @@ func TestCompassRuntimeAgentInit(t *testing.T) {
 		}
 
 		directorMock.On("RegisterRuntime", runtimeName).Return(runtimeID, nil)
+		directorMock.On("RegisterFormation", formationName).Return(nil)
+		directorMock.On("AssignRuntimeToFormation", runtimeID, formationName).Return(nil)
+
 		directorMock.On("GetConnectionToken", runtimeID).Return(token, connectorURL, nil)
+
 		directorMock.On("UnregisterRuntime", runtimeID).Return(nil)
+		directorMock.On("UnregisterFormation", formationName).Return(nil)
 
 		certificateSecretConfiguratorMock.On("Do", NewCACertSecretName, NewClientCertSecretName).Return(certificateSecretsRollbackFunc.Func(), nil)
 		configurationSecretConfiguratorMock.On("Do", NewCompassRuntimeConfigName, config).Return(configurationSecretRollbackFunc.Func(), nil)
 		compassConnectionConfiguratorMock.On("Do").Return(compassConnectionRollbackFunc.Func(), nil)
-		deploymentConfiguratorMock.On("Do", NewCACertSecretName, NewClientCertSecretName, NewCompassRuntimeConfigName).Return(deploymentRollbackFunc.Func(), nil)
+		deploymentConfiguratorMock.On("Do",
+			"test/"+NewCACertSecretName,
+			"test/"+NewClientCertSecretName,
+			"test/"+NewCompassRuntimeConfigName).Return(deploymentRollbackFunc.Func(), nil)
 
-		configurator := NewCompassRuntimeAgentConfigurator(directorMock, certificateSecretConfiguratorMock, configurationSecretConfiguratorMock, compassConnectionConfiguratorMock, deploymentConfiguratorMock, "tenant")
+		configurator := NewCompassRuntimeAgentConfigurator(directorMock, certificateSecretConfiguratorMock, configurationSecretConfiguratorMock, compassConnectionConfiguratorMock, deploymentConfiguratorMock, "tenant", "test")
 
 		// when
-		rollbackFunc, err := configurator.Do(runtimeName)
+		rollbackFunc, err := configurator.Do(runtimeName, formationName)
 
 		// then
 		require.NoError(t, err)

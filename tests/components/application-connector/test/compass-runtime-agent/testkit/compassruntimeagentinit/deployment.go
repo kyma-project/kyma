@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	v12 "k8s.io/api/apps/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,7 @@ func NewDeploymentConfiguration(kubernetesInterface kubernetes.Interface, deploy
 	}
 }
 
-func (dc deploymentConfiguration) Do(newConfigNamespacedSecretName, newCANamespacedSecretName, newClusterNamespacedCertSecretName string) (types.RollbackFunc, error) {
+func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamespacedCertSecretName, newConfigNamespacedSecretName string) (types.RollbackFunc, error) {
 	deploymentInterface := dc.kubernetesInterface.AppsV1().Deployments(dc.namespaceName)
 
 	deployment, err := retryGetDeployment(dc.deploymentName, deploymentInterface)
@@ -64,9 +65,20 @@ func (dc deploymentConfiguration) Do(newConfigNamespacedSecretName, newCANamespa
 	if err != nil {
 		return nil, err
 	}
+	rollbackDeploymentFunc := newRollbackDeploymentFunc(dc.deploymentName, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, deploymentInterface)
 
 	err = waitForRollout(dc.deploymentName, deploymentInterface)
-	rollbackDeploymentFunc := newRollbackDeploymentFunc(dc.deploymentName, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, deploymentInterface)
+	if err != nil {
+		var murliErr *multierror.Error
+
+		multierror.Append(murliErr, err)
+
+		err := rollbackDeploymentFunc()
+		if err != nil {
+			multierror.Append(murliErr, err)
+		}
+		return nil, murliErr.ErrorOrNil()
+	}
 
 	return rollbackDeploymentFunc, err
 }

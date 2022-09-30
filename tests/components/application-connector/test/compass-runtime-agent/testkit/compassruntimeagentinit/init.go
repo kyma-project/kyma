@@ -18,7 +18,7 @@ const (
 )
 
 type CompassRuntimeAgentConfigurator interface {
-	Do(runtimeName string) (types.RollbackFunc, error)
+	Do(runtimeName, formationName string) (types.RollbackFunc, error)
 }
 
 type compassRuntimeAgentConfigurator struct {
@@ -49,15 +49,25 @@ func NewCompassRuntimeAgentConfigurator(directorClient types.DirectorClient,
 	}
 }
 
-func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.RollbackFunc, error) {
+func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string) (types.RollbackFunc, error) {
 	runtimeID, err := crc.directorClient.RegisterRuntime(runtimeName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = crc.directorClient.RegisterFormation(formationName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = crc.directorClient.AssignRuntimeToFormation(runtimeID, formationName)
 	if err != nil {
 		return nil, err
 	}
 
 	token, compassConnectorUrl, err := crc.directorClient.GetConnectionToken(runtimeID)
 	if err != nil {
-		return nil, crc.rollbackOnError(err, "failed to get token URL", runtimeID)
+		return nil, crc.rollbackOnError(err, "failed to get token URL", runtimeID, formationName)
 	}
 
 	config := types.CompassRuntimeAgentConfig{
@@ -71,6 +81,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret",
 			runtimeID,
+			formationName,
 			certificateSecretsRollbackFunc)
 	}
 
@@ -78,18 +89,20 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to create Compass Runtime Configuration secret",
 			runtimeID,
+			formationName,
 			certificateSecretsRollbackFunc,
 			configurationSecretRollbackFunc)
 	}
 
-	newCACertNamespacedSecretName := fmt.Sprintf("%s/%s", crc.testNamespace, NewCACertSecretName)
-	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", crc.testNamespace, NewClientCertSecretName)
-	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", crc.testNamespace, NewCompassRuntimeConfigName)
+	newCACertNamespacedSecretName := fmt.Sprintf("%s/%s", "istio-system", NewCACertSecretName)
+	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", "compass-system", NewClientCertSecretName)
+	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", "compass-system", NewCompassRuntimeConfigName)
 
 	deploymentRollbackFunc, err := crc.deploymentConfigurator.Do(newCACertNamespacedSecretName, newClientCertNamespacedSecretName, newCompassRuntimeNamespacedSecretConfigName)
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to modify deployment",
 			runtimeID,
+			formationName,
 			certificateSecretsRollbackFunc,
 			configurationSecretRollbackFunc,
 			deploymentRollbackFunc)
@@ -99,6 +112,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 	if err != nil {
 		return nil, crc.rollbackOnError(err, "failed to configure Compass Connection CR",
 			runtimeID,
+			formationName,
 			certificateSecretsRollbackFunc,
 			configurationSecretRollbackFunc,
 			deploymentRollbackFunc,
@@ -106,6 +120,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 	}
 
 	return newRollbackFunc(runtimeID,
+		formationName,
 		crc.directorClient,
 		compassConnectionRollbackFunc,
 		certificateSecretsRollbackFunc,
@@ -113,8 +128,8 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName string) (types.Rollbac
 		deploymentRollbackFunc), nil
 }
 
-func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID string, rollbackFunctions ...types.RollbackFunc) error {
-	err := newRollbackFunc(runtimeID, crc.directorClient, rollbackFunctions...)()
+func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, wrapMsgString, runtimeID, formationName string, rollbackFunctions ...types.RollbackFunc) error {
+	err := newRollbackFunc(runtimeID, formationName, crc.directorClient, rollbackFunctions...)()
 	if err != nil {
 		initialWrapped := errors.Wrap(initialError, wrapMsgString)
 		errorWrapped := errors.Wrap(err, "failed to rollback changes after configuring Compass Runtime Agent error")
@@ -125,11 +140,15 @@ func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialError error, w
 	return initialError
 }
 
-func newRollbackFunc(runtimeID string, directorClient types.DirectorClient, rollbackFunctions ...types.RollbackFunc) types.RollbackFunc {
+func newRollbackFunc(runtimeID, formationName string, directorClient types.DirectorClient, rollbackFunctions ...types.RollbackFunc) types.RollbackFunc {
 	var result *multierror.Error
 
 	return func() error {
 		if err := directorClient.UnregisterRuntime(runtimeID); err != nil {
+			multierror.Append(result, err)
+		}
+
+		if err := directorClient.UnregisterFormation(formationName); err != nil {
 			multierror.Append(result, err)
 		}
 

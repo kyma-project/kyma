@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"github.com/vrischmann/envconfig"
@@ -31,6 +32,7 @@ type CompassRuntimeAgentSuite struct {
 	appComparator                   applications.Comparator
 	testConfig                      config
 	rollbackTestFunc                compassruntimeagentinittypes.RollbackFunc
+	formationName                   string
 }
 
 func (gs *CompassRuntimeAgentSuite) SetupSuite() {
@@ -65,12 +67,15 @@ func (gs *CompassRuntimeAgentSuite) initComparators() {
 	gs.Require().Nil(err)
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "", "")
+	gs.appComparator, err = applications.NewComparator(gs.Require(), secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
 }
 
 func (gs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
 	var err error
-	gs.rollbackTestFunc, err = gs.compassRuntimeAgentConfigurator.Do("cratest")
+	runtimeName := "cratest"
+	gs.formationName = "cratest" + random.RandomString(5)
+
+	gs.rollbackTestFunc, err = gs.compassRuntimeAgentConfigurator.Do(runtimeName, gs.formationName)
 	gs.Require().Nil(err)
 }
 
@@ -79,8 +84,8 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	gs.directorClient, err = gs.makeCompassDirectorClient()
 	gs.Require().Nil(err)
 
-	certificateSecretConfigurator := compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, gs.testConfig.TestNamespace)
-	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, gs.testConfig.TestNamespace)
+	certificateSecretConfigurator := compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, "istio-system", "compass-system")
+	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, "compass-system")
 	compassConnectionConfigurator := compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections())
 	deploymentConfigurator := compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace)
 	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient,
@@ -95,6 +100,7 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
 	if gs.rollbackTestFunc != nil {
 		err := gs.rollbackTestFunc()
+
 		if err != nil {
 			gs.T().Logf("Failed to rollback test configuration: %v", err)
 		}

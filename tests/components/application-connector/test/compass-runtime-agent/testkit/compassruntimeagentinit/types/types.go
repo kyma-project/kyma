@@ -12,7 +12,10 @@ type RollbackFunc func() error
 //go:generate mockery --name=DirectorClient
 type DirectorClient interface {
 	RegisterRuntime(runtimeName string) (string, error)
+	RegisterFormation(formationName string) error
+	AssignRuntimeToFormation(runtimeId, formationName string) error
 	UnregisterRuntime(id string) error
+	UnregisterFormation(formationName string) error
 	GetConnectionToken(runtimeID string) (string, string, error)
 }
 
