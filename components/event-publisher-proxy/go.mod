@@ -110,13 +110,3 @@ replace (
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
-
-replace (
-	github.com/emicklei/go-restful => github.com/emicklei/go-restful/v3 v3.8.0
-	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
-) // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
-
-exclude (
-	github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633
-	github.com/emicklei/go-restful v2.9.5+incompatible
-) // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
