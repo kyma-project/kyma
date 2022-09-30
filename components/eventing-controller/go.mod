@@ -22,8 +22,8 @@ require (
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/atomic v1.10.0
 	go.uber.org/zap v1.23.0
-	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
-	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
+	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	k8s.io/api v0.25.2
 	k8s.io/apimachinery v0.25.2
 	k8s.io/client-go v0.25.2
