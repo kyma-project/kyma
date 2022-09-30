@@ -45,9 +45,11 @@ const (
 	OauthClientIDLength            = 8
 	manifestsDirectory             = "manifests/"
 	testingAppFile                 = "testing-app.yaml"
+	twoServicesDeploymentFile      = "two-services-deployment.yaml"
 	globalCommonResourcesFile      = "global-commons.yaml"
 	hydraClientFile                = "hydra-client.yaml"
 	noAccessStrategyApiruleFile    = "no_access_strategy.yaml"
+	twoServicesApiruleFile         = "two-services.yaml"
 	oauthStrategyApiruleFile       = "oauth-strategy.yaml"
 	jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
@@ -195,11 +197,15 @@ func getApiRules() string {
 	return string(pretty.Pretty(toPrint))
 }
 
-func CreateScenario(templateFileName string, namePrefix string) (*Scenario, error) {
+func CreateScenario(templateFileName string, namePrefix string, deploymentFile ...string) (*Scenario, error) {
 	testID := generateRandomString(testIDLength)
+	deploymentFileName := testingAppFile
+	if len(deploymentFile) > 0 {
+		deploymentFileName = deploymentFile[0]
+	}
 
 	// create common resources from files
-	commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct {
+	commonResources, err := manifestprocessor.ParseFromFileWithTemplate(deploymentFileName, manifestsDirectory, resourceSeparator, struct {
 		Namespace string
 		TestID    string
 	}{
