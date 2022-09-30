@@ -6,9 +6,9 @@ target_namespace="${1:-}"
 
 log_pods_with () {
     namespace=$1
-    label=$2
+    label=${2:-}
 
-    if [ "$label" != "" ]; then
+    if [ -n "$label" ]; then
         cmd="kubectl get pod -l $label -n $namespace -o jsonpath='{.items[*].metadata.name}'"
     else
         cmd="kubectl get pod -n $namespace -o jsonpath='{.items[*].metadata.name}'"
@@ -25,7 +25,7 @@ log_pods_with () {
     done
 }
 
-if [ "$target_namespace" == "" ]; then
+if [ -z "$target_namespace" ]; then
     echo "Pods out of istio mesh:"
 
     echo "  In namespace labeled with \"istio-injection=disabled\":"
