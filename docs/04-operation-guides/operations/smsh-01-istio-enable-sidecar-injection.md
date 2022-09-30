@@ -22,13 +22,13 @@ If there are issues with the Istio sidecar, you can check whether there is an [i
 
 ## Check whether your workloads have automatic Istio sidecar injection enabled
 
-You can easily check whether your workloads have automatic Istio sidecar injection enabled by running [this script](../assets/sidecar-analysis.sh). You can either pass a namespace parameter to the script or run with no parameter.
+You can easily check whether your workloads have automatic Istio sidecar injection enabled by running [this script](../assets/sidecar-analysis.sh). You can either pass a **namespace** parameter to the script or run it with no parameter.
 
-If no parameter is passed execution output will contain pods in all namespaces that don't have automatic Istio sidecar injection enabled, whereas passing the parameter will result in analysis of only the given namespace.
+If no parameter is passed, the execution output will contain Pods from all Namespaces that don't have automatic Istio sidecar injection enabled, whereas passing the parameter results in the analysis of only the given  Namespace.
 
-The script outputs the information in `{namespace}/{pod}` if run for all namespaces and in `{pod}` form for specific namespace.
+The script outputs the information in `{namespace}/{pod}` if run for all Namespaces and in `{pod}` form for a specific Namespace.
 
-* Running the script
+* Run the script
 
 ```bash
 ./sidecar-analysis.sh {namespace}
