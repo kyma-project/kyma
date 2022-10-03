@@ -23,17 +23,17 @@ func (cc compassconfigurator) Do(runtimeName, formationName string) (types.Compa
 		return types.CompassRuntimeAgentConfig{}, nil, err
 	}
 
+	rollBackFunc := cc.getRollbackFunction(runtimeID, formationName)
+
 	err = cc.directorClient.RegisterFormation(formationName)
 	if err != nil {
-		return types.CompassRuntimeAgentConfig{}, nil, err
+		return types.CompassRuntimeAgentConfig{}, rollBackFunc, err
 	}
 
 	err = cc.directorClient.AssignRuntimeToFormation(runtimeID, formationName)
 	if err != nil {
-		return types.CompassRuntimeAgentConfig{}, nil, err
+		return types.CompassRuntimeAgentConfig{}, rollBackFunc, err
 	}
-
-	rollBackFunc := cc.getRollbackFunction(runtimeID, formationName)
 
 	token, compassConnectorUrl, err := cc.directorClient.GetConnectionToken(runtimeID)
 	if err != nil {
@@ -47,7 +47,7 @@ func (cc compassconfigurator) Do(runtimeName, formationName string) (types.Compa
 			}
 		}
 
-		return types.CompassRuntimeAgentConfig{}, nil, result.ErrorOrNil()
+		return types.CompassRuntimeAgentConfig{}, rollBackFunc, result.ErrorOrNil()
 	}
 
 	config := types.CompassRuntimeAgentConfig{

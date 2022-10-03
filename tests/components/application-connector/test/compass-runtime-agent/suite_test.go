@@ -86,8 +86,8 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 
 	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(
 		compassruntimeagentinit.NewCompassConfigurator(gs.directorClient, gs.testConfig.TestingTenant),
-		compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, "istio-system", "compass-system"),
-		compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, "compass-system"),
+		compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet),
+		compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet),
 		compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
 		compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace),
 		gs.testConfig.TestNamespace)

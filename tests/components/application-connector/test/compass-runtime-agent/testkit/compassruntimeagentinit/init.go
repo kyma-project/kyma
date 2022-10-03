@@ -8,6 +8,7 @@ import (
 
 const (
 	CompassSystemNamespace        = "compass-system"
+	IstioSystemNamespace          = "istio-system"
 	CompassRuntimeAgentDeployment = "compass-runtime-agent"
 	NewCompassRuntimeConfigName   = "test-compass-runtime-agent-config"
 	NewCACertSecretName           = "ca-cert-test"
@@ -18,6 +19,10 @@ const (
 
 type CompassRuntimeAgentConfigurator interface {
 	Do(runtimeName, formationName string) (types.RollbackFunc, error)
+}
+
+type Configurator interface {
+	Configure(runtimeName, formationName string) (types.RollbackFunc, error)
 }
 
 type compassRuntimeAgentConfigurator struct {
@@ -67,9 +72,9 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string)
 			configurationSecretRollbackFunc)
 	}
 
-	newCACertNamespacedSecretName := fmt.Sprintf("%s/%s", "istio-system", NewCACertSecretName)
-	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", "compass-system", NewClientCertSecretName)
-	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", "compass-system", NewCompassRuntimeConfigName)
+	newCACertNamespacedSecretName := fmt.Sprintf("%s/%s", IstioSystemNamespace, NewCACertSecretName)
+	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", CompassSystemNamespace, NewClientCertSecretName)
+	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName)
 
 	deploymentRollbackFunc, err := crc.deploymentConfigurator.Do(newCACertNamespacedSecretName,
 		newClientCertNamespacedSecretName,
@@ -92,19 +97,20 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string)
 			compassConnectionRollbackFunc)
 	}
 
-	return newRollbackFunc(compassConnectionRollbackFunc,
+	return newRollbackFunc(compassConfiguratorRollbackFunc,
 		certificateSecretsRollbackFunc,
 		configurationSecretRollbackFunc,
-		deploymentRollbackFunc), nil
+		deploymentRollbackFunc,
+		compassConnectionRollbackFunc), nil
 }
 
 func (crc compassRuntimeAgentConfigurator) rollbackOnError(initialErr error, rollbackFunctions ...types.RollbackFunc) error {
 	var result *multierror.Error
-	multierror.Append(result, initialErr)
+	result = multierror.Append(result, initialErr)
 
 	err := newRollbackFunc(rollbackFunctions...)()
 	if err != nil {
-		multierror.Append(result, err)
+		result = multierror.Append(result, err)
 	}
 
 	return result.ErrorOrNil()
@@ -117,7 +123,7 @@ func newRollbackFunc(rollbackFunctions ...types.RollbackFunc) types.RollbackFunc
 		for _, f := range rollbackFunctions {
 			if f != nil {
 				if err := f(); err != nil {
-					multierror.Append(result, err)
+					result = multierror.Append(result, err)
 				}
 			}
 		}

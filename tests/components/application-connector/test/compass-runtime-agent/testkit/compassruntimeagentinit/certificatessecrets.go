@@ -8,15 +8,11 @@ import (
 
 type certificatesSecretsConfigurator struct {
 	kubernetesInterface kubernetes.Interface
-	caCertNamespace     string
-	clientCertNamespace string
 }
 
-func NewCertificateSecretConfigurator(kubernetesInterface kubernetes.Interface, caCertNamespace, clientCertNamespace string) certificatesSecretsConfigurator {
+func NewCertificateSecretConfigurator(kubernetesInterface kubernetes.Interface) certificatesSecretsConfigurator {
 	return certificatesSecretsConfigurator{
 		kubernetesInterface: kubernetesInterface,
-		caCertNamespace:     caCertNamespace,
-		clientCertNamespace: clientCertNamespace,
 	}
 }
 
@@ -30,12 +26,12 @@ func (csc certificatesSecretsConfigurator) getRollbackFunction(caSecretName, clu
 	return func() error {
 		var result *multierror.Error
 
-		err := deleteSecretWithRetry(csc.kubernetesInterface, caSecretName, csc.caCertNamespace)
+		err := deleteSecretWithRetry(csc.kubernetesInterface, caSecretName, IstioSystemNamespace)
 		if err != nil {
 			multierror.Append(result, err)
 		}
 
-		err = deleteSecretWithRetry(csc.kubernetesInterface, clusterCertSecretName, csc.clientCertNamespace)
+		err = deleteSecretWithRetry(csc.kubernetesInterface, clusterCertSecretName, CompassSystemNamespace)
 		if err != nil {
 			multierror.Append(result, err)
 		}

@@ -19,14 +19,12 @@ const (
 )
 
 type configurationSecretConfigurator struct {
-	kubernetesInterface          kubernetes.Interface
-	configurationSecretNamespace string
+	kubernetesInterface kubernetes.Interface
 }
 
-func NewConfigurationSecretConfigurator(kubernetesInterface kubernetes.Interface, configurationSecretNamespace string) configurationSecretConfigurator {
+func NewConfigurationSecretConfigurator(kubernetesInterface kubernetes.Interface) configurationSecretConfigurator {
 	return configurationSecretConfigurator{
-		kubernetesInterface:          kubernetesInterface,
-		configurationSecretNamespace: configurationSecretNamespace,
+		kubernetesInterface: kubernetesInterface,
 	}
 }
 
@@ -35,7 +33,7 @@ func (s configurationSecretConfigurator) Do(newConfigSecretName string, config t
 	secret := v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      newConfigSecretName,
-			Namespace: s.configurationSecretNamespace,
+			Namespace: CompassSystemNamespace,
 		},
 		Data: map[string][]byte{
 			connectorURLConfigKey: []byte(config.ConnectorUrl),
@@ -46,7 +44,7 @@ func (s configurationSecretConfigurator) Do(newConfigSecretName string, config t
 	}
 
 	err := retry.Do(func() error {
-		_, err := s.kubernetesInterface.CoreV1().Secrets(s.configurationSecretNamespace).Create(context.Background(), &secret, metav1.CreateOptions{})
+		_, err := s.kubernetesInterface.CoreV1().Secrets(CompassSystemNamespace).Create(context.Background(), &secret, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -58,7 +56,7 @@ func (s configurationSecretConfigurator) Do(newConfigSecretName string, config t
 		return nil, err
 	}
 
-	return s.newRollbackSecretFunc(newConfigSecretName, s.configurationSecretNamespace), nil
+	return s.newRollbackSecretFunc(newConfigSecretName, CompassSystemNamespace), nil
 }
 
 func (s configurationSecretConfigurator) newRollbackSecretFunc(name, namespace string) types.RollbackFunc {

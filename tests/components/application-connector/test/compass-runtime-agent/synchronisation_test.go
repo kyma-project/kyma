@@ -10,7 +10,6 @@ import (
 	"time"
 )
 
-// TODO: those values needs to be carefully picked to be in line with Compass Runtime Agent's configuration
 const checkAppExistsPeriod = 10 * time.Second
 const appCreationTimeout = 2 * time.Minute
 
@@ -19,7 +18,6 @@ type ApplicationReader interface {
 }
 
 func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
-	// Created in chart
 	expectedAppName := "app1"
 	compassAppName := expectedAppName + random.RandomString(10)
 

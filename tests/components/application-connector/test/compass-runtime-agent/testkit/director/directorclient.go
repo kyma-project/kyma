@@ -212,18 +212,12 @@ func (cc *directorClient) AssignApplicationToFormation(appId, formationName stri
 }
 
 func (cc *directorClient) UnassignApplication(appId, formationName string) error {
-	//queryFunc := func() string { return cc.queryProvider.unassignFormation(appId, formationName) }
-	//execFunc := getExecGraphQLFunc[graphql.Formation](cc)
-	//operationDescription := "unregister formation"
-	//successfulLogMessage := fmt.Sprintf("Successfully unassigned application %s from Formation %s in Director for tenant %s", appId, formationName, cc.tenant)
-	//
-	//return executeQuery[graphql.Formation](queryFunc, execFunc, operationDescription, successfulLogMessage)
+	queryFunc := func() string { return cc.queryProvider.unassignFormation(appId, formationName) }
+	execFunc := getExecGraphQLFunc[graphql.Formation](cc)
+	operationDescription := "unregister formation"
+	successfulLogMessage := fmt.Sprintf("Successfully unassigned application %s from Formation %s in Director for tenant %s", appId, formationName, cc.tenant)
 
-	return executeQuery[graphql.Formation](
-		func() string { return cc.queryProvider.unassignFormation(appId, formationName) },
-		getExecGraphQLFunc[graphql.Formation](cc),
-		"unregister formation",
-		fmt.Sprintf("Successfully unassigned application %s from Formation %s in Director for tenant %s", appId, formationName, cc.tenant))
+	return executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
 }
 
 type ResultGen[T any] struct {
