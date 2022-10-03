@@ -13,7 +13,7 @@ import (
 )
 
 func TestRunOnConfigChange(t *testing.T) {
-	t.Run("run on canfig change and cancel context", func(t *testing.T) {
+	t.Run("run on config change and cancel context", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cfgFile := fixConfig(t)
 		defer os.Remove(cfgFile.Name())

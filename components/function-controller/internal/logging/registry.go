@@ -61,7 +61,7 @@ func (r *Registry) Reconfigure(logLevel, logFormat string) (*Registry, error) {
 }
 
 func (r *Registry) createNamed(name string) *zap.SugaredLogger {
-	l := r.logger.WithContext().Named(name).With()
+	l := r.logger.WithContext().Named(name)
 
 	return l
 }

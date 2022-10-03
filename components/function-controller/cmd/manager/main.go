@@ -192,6 +192,9 @@ func configureLogger(ctx context.Context, cfgPath string) (*logging.Registry, er
 	}
 
 	log, err := logging.ConfigureRegisteredLogger(cfg.LogLevel, cfg.LogFormat)
+	if err != nil {
+		return nil, err
+	}
 
 	notifyLog := log.CreateNamed("notifier")
 	go fileconfig.RunOnConfigChange(ctx, notifyLog, cfgPath, func(cfg fileconfig.Config) {
