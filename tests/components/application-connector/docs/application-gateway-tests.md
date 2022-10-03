@@ -139,7 +139,7 @@ Pipelines run the tests using the **test-gateway** target from the `Makefile`.
 ### Run the tests
 
 ``` sh
-make test-gateway
+make test-gateway -f Makefile.test-application-gateway
 ```
 
 By default, the tests clean up after themselves, removing all the previously created resources and the `test` Namespace.

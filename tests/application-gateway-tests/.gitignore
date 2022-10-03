@@ -1,8 +1,0 @@
-.idea/
-*.iml
-*.test
-vendor
-licenses
-
-/tests.test
-
