@@ -19,6 +19,11 @@ type DirectorClient interface {
 	GetConnectionToken(runtimeID string) (string, string, error)
 }
 
+//go:generate mockery --name=CompassConfigurator
+type CompassConfigurator interface {
+	Do(runtimeName, formationName string) (CompassRuntimeAgentConfig, RollbackFunc, error)
+}
+
 //go:generate mockery --name=DeploymentConfigurator
 type DeploymentConfigurator interface {
 	Do(caSecretName, clusterCertSecretName, runtimeAgentConfigSecretName string) (RollbackFunc, error)

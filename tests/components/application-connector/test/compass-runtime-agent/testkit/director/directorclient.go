@@ -2,6 +2,7 @@ package director
 
 import (
 	"fmt"
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql/graphqlizer"
 	gql "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
@@ -18,8 +19,9 @@ const (
 //go:generate mockery --name=Client
 type Client interface {
 	RegisterApplication(appName, displayName string) (string, error)
-	AssignApplicationToFormation(appId, formationName string) error
 	UnregisterApplication(id string) error
+	AssignApplicationToFormation(appId, formationName string) error
+	UnassignApplication(appId, formationName string) error
 	RegisterRuntime(runtimeName string) (string, error)
 	UnregisterRuntime(id string) error
 	RegisterFormation(formationName string) error
@@ -207,6 +209,69 @@ func (cc *directorClient) AssignApplicationToFormation(appId, formationName stri
 	log.Infof("Successfully assigned application %s to Formation %s in Director for tenant %s", appId, formationName, cc.tenant)
 
 	return nil
+}
+
+func (cc *directorClient) UnassignApplication(appId, formationName string) error {
+	//queryFunc := func() string { return cc.queryProvider.unassignFormation(appId, formationName) }
+	//execFunc := getExecGraphQLFunc[graphql.Formation](cc)
+	//operationDescription := "unregister formation"
+	//successfulLogMessage := fmt.Sprintf("Successfully unassigned application %s from Formation %s in Director for tenant %s", appId, formationName, cc.tenant)
+	//
+	//return executeQuery[graphql.Formation](queryFunc, execFunc, operationDescription, successfulLogMessage)
+
+	return executeQuery[graphql.Formation](
+		func() string { return cc.queryProvider.unassignFormation(appId, formationName) },
+		getExecGraphQLFunc[graphql.Formation](cc),
+		"unregister formation",
+		fmt.Sprintf("Successfully unassigned application %s from Formation %s in Director for tenant %s", appId, formationName, cc.tenant))
+}
+
+type ResultGen[T any] struct {
+	Result *T
+}
+
+func executeQuery[T any](getQuery func() string, executeQuery func(string, *ResultGen[T]) error, operationDescription, successfulLogMessage string) error {
+	query := getQuery()
+
+	var response ResultGen[T]
+	err := executeQuery(query, &response)
+
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("Failed to %s in Director. Request failed", operationDescription))
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return errors.New(fmt.Sprintf("Failed to %s in Director: Received nil response.", operationDescription))
+	}
+
+	log.Infof(successfulLogMessage)
+
+	return nil
+}
+
+func getExecGraphQLFunc[T any](cc *directorClient) func(string, *ResultGen[T]) error {
+	return func(query string, result *ResultGen[T]) error {
+		if cc.token.EmptyOrExpired() {
+			log.Infof("Refreshing token to access Director Service")
+			if err := cc.getToken(); err != nil {
+				return err
+			}
+		}
+
+		req := gcli.NewRequest(query)
+		req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", cc.token.AccessToken))
+		req.Header.Set(TenantHeader, cc.tenant)
+
+		if err := cc.gqlClient.Do(req, result); err != nil {
+			if egErr, ok := err.(gcli.ExtendedError); ok {
+				return errors.Wrap(egErr, "Failed to execute GraphQL request to Director")
+			}
+			return fmt.Errorf("Failed to execute GraphQL request to Director: %v", err)
+		}
+
+		return nil
+	}
 }
 
 func (cc *directorClient) AssignRuntimeToFormation(runtimeId, formationName string) error {

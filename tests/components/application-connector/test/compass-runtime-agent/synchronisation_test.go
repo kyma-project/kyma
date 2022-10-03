@@ -24,12 +24,12 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	compassAppName := expectedAppName + random.RandomString(10)
 
 	//Create Application in Director and wait until it gets created
-	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	applicationID, err := gs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	gs.Require().NoError(err)
 
 	synchronizedCompassAppName := fmt.Sprintf("mp-%s", compassAppName)
 
+	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	err = gs.assignApplicationToFormationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
 	gs.Assert().NoError(err)
 
@@ -38,6 +38,9 @@ func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	gs.Assert().NoError(err)
 
 	// Clean up
+	err = gs.directorClient.UnassignApplication(applicationID, gs.formationName)
+	gs.Assert().NoError(err)
+
 	err = gs.directorClient.UnregisterApplication(applicationID)
 	gs.Require().NoError(err)
 }

@@ -60,7 +60,7 @@ func (c comparator) compareSpec(expected, actual *v1alpha1.Application) {
 	c.compareServices(expected.Spec.Services, actual.Spec.Services)
 
 	a.NotNil(actual.Labels)
-	a.Equal(expected, actual.Labels["connected-app"])
+	a.Equal(actual.Name, actual.Spec.Labels["connected-app"])
 
 	a.Equal(expected.Spec.Tenant, actual.Spec.Tenant)
 	a.Equal(expected.Spec.Group, actual.Spec.Group)

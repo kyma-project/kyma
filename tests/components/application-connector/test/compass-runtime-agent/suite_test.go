@@ -84,16 +84,12 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	gs.directorClient, err = gs.makeCompassDirectorClient()
 	gs.Require().Nil(err)
 
-	certificateSecretConfigurator := compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, "istio-system", "compass-system")
-	configurationSecretConfigurator := compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, "compass-system")
-	compassConnectionConfigurator := compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections())
-	deploymentConfigurator := compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace)
-	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(gs.directorClient,
-		certificateSecretConfigurator,
-		configurationSecretConfigurator,
-		compassConnectionConfigurator,
-		deploymentConfigurator,
-		gs.testConfig.TestingTenant,
+	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(
+		compassruntimeagentinit.NewCompassConfigurator(gs.directorClient, gs.testConfig.TestingTenant),
+		compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet, "istio-system", "compass-system"),
+		compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet, "compass-system"),
+		compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
+		compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace),
 		gs.testConfig.TestNamespace)
 }
 
