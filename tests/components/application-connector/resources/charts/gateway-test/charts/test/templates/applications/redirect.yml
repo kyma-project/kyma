@@ -12,7 +12,7 @@ spec:
     - displayName: unsecured
       name: unsecured
       providerDisplayName: unsecured
-      description: Should rewrite redirects
+      description: Should return 200 when redirected to unsecured endpoint
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -21,7 +21,7 @@ spec:
     - displayName: basic
       name: basic
       providerDisplayName: basic
-      description: Should rewrite redirects
+      description: Should return 200 when redirected to basic-auth endpoint
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -33,7 +33,7 @@ spec:
     - displayName: external
       name: external
       providerDisplayName: external
-      description: Should rewrite redirects
+      description: Should return 200 when redirected to external service
       id: "{{ uuidv4 }}"
       entries:
         - type: API
