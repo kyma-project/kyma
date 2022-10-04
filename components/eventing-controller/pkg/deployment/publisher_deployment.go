@@ -45,8 +45,6 @@ const (
 
 	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
-
-	natsURL = "eventing-nats.kyma-system.svc.cluster.local"
 )
 
 var (
