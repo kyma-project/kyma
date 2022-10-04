@@ -143,10 +143,12 @@ type PodSpecTemplate struct {
 
 type MetadataTemplate struct {
 	// Additional labels
+	// Not implemented yet
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Additional annotations
+	// Not implemented yet
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
@@ -171,14 +173,17 @@ type Templates struct {
 	// This metadata is applied on functionPod and buildPod.
 	// Can be overwritten by specific pod metadata
 	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+	// Not implemented yet
 	// +optional
 	Metadata *MetadataTemplate `json:"metadata,omitempty"`
 
 	// Additional specification for build job's pod
+	// Not implemented yet
 	// +optional
 	BuildJob *PodTemplate `json:"buildJob,omitempty"`
 
 	// Additional specification for function's pod
+	// Not implemented yet
 	// +optional
 	FunctionPod *PodTemplate `json:"functionPod,omitempty"`
 }
@@ -221,8 +226,9 @@ type FunctionSpec struct {
 	//templates.buildJobTemplate.metadata for function's build job
 	Template *Template `json:"template,omitempty"`
 
-	// Additional configuration of function's created pods
 	// +optional
+	// Additional configuration of function's created pods
+	// Not implemented yet
 	Templates *Templates `json:"templates,omitempty"`
 }
 

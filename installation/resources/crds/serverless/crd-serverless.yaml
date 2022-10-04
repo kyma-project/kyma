@@ -617,10 +617,12 @@ spec:
                     type: object
                 type: object
               templates:
-                description: Additional configuration of function's created pods
+                description: Additional configuration of function's created pods Not
+                  implemented yet
                 properties:
                   buildJob:
-                    description: Additional specification for build job's pod
+                    description: Additional specification for build job's pod Not
+                      implemented yet
                     properties:
                       metadata:
                         description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
@@ -628,12 +630,12 @@ spec:
                           annotations:
                             additionalProperties:
                               type: string
-                            description: Additional annotations
+                            description: Additional annotations Not implemented yet
                             type: object
                           labels:
                             additionalProperties:
                               type: string
-                            description: Additional labels
+                            description: Additional labels Not implemented yet
                             type: object
                         type: object
                       spec:
@@ -2434,7 +2436,8 @@ spec:
                         type: array
                     type: object
                   functionPod:
-                    description: Additional specification for function's pod
+                    description: Additional specification for function's pod Not implemented
+                      yet
                     properties:
                       metadata:
                         description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
@@ -2442,12 +2445,12 @@ spec:
                           annotations:
                             additionalProperties:
                               type: string
-                            description: Additional annotations
+                            description: Additional annotations Not implemented yet
                             type: object
                           labels:
                             additionalProperties:
                               type: string
-                            description: Additional labels
+                            description: Additional labels Not implemented yet
                             type: object
                         type: object
                       spec:
@@ -4250,17 +4253,18 @@ spec:
                   metadata:
                     description: 'Standard object''s metadata. This metadata is applied
                       on functionPod and buildPod. Can be overwritten by specific
-                      pod metadata More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
+                      pod metadata More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+                      Not implemented yet'
                     properties:
                       annotations:
                         additionalProperties:
                           type: string
-                        description: Additional annotations
+                        description: Additional annotations Not implemented yet
                         type: object
                       labels:
                         additionalProperties:
                           type: string
-                        description: Additional labels
+                        description: Additional labels Not implemented yet
                         type: object
                     type: object
                 type: object
