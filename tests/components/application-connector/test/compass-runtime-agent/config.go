@@ -11,7 +11,7 @@ type config struct {
 	CompassRuntimeAgentDeploymentName string `envconfig:"default=compass-runtime-agent"`
 	OauthCredentialsSecretName        string `envconfig:"default=oauth-compass-credentials"`
 	TestingTenant                     string `envconfig:"default=tenant"`
-	KubeconfigPath                    string `envconfig:"default="`
+	KubeconfigPath                    string `envconfig:"default=''"`
 }
 
 func (c *config) String() string {

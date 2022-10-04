@@ -43,7 +43,10 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 
 	gs.T().Logf("Config: %s", gs.testConfig.String())
 
+	gs.T().Logf("Init Kubernetes APIs")
 	gs.initKubernetesApis()
+
+	gs.T().Logf("Configure Compass Runtime Agent for test")
 	gs.initCompassRuntimeAgentConfigurator()
 	gs.initComparators()
 	gs.configureRuntimeAgent()
@@ -104,6 +107,7 @@ func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 
 func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
 	if gs.rollbackTestFunc != nil {
+		gs.T().Logf("Restore Compass Runtime Agent configuration")
 		err := gs.rollbackTestFunc()
 
 		if err != nil {
