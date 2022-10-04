@@ -219,7 +219,7 @@ func mapsEqual(existing, expected map[string]string) bool {
 }
 
 // TODO refactor to make this code more readable
-func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
+func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment) bool {
 	return len(existing.Spec.Template.Spec.Containers) == 1 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
@@ -227,7 +227,7 @@ func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, sc
 		mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
-		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
+		equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas)
 }
 
 func equalServices(existing corev1.Service, expected corev1.Service) bool {
@@ -265,7 +265,7 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 	return *first == *second
 }
 
-func isScalingEnabled(instance *serverlessv1alpha2.Function) bool {
+func isScaleConfigEnabled(instance *serverlessv1alpha2.Function) bool {
 	if instance.Spec.ScaleConfig == nil {
 		return false
 	}

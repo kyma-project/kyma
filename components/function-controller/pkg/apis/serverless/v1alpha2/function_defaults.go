@@ -58,35 +58,34 @@ type DefaultingConfig struct {
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
-	fn.Spec.defaultReplicas(config)
+	fn.Spec.defaultScaling(config)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
 }
 
-func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig) {
-	if spec.Replicas != nil {
-		if spec.ScaleConfig == nil {
-			spec.ScaleConfig = &ScaleConfig{}
-		}
-		spec.ScaleConfig.MinReplicas = spec.Replicas
-		spec.ScaleConfig.MaxReplicas = spec.Replicas
-		return
-	}
-
+func (spec *FunctionSpec) defaultScaling(config *DefaultingConfig) {
 	defaultingConfig := config.Function.Replicas
 	replicasPreset := defaultingConfig.Presets[defaultingConfig.DefaultPreset]
 
-	if spec.ScaleConfig == nil {
-		spec.ScaleConfig = &ScaleConfig{}
+	if spec.Replicas == nil {
+		// TODO: The presets structure and docs should be updated to reflect the new behavior.
+		spec.Replicas = &replicasPreset.Min
 	}
+
+	if spec.ScaleConfig == nil {
+		return
+	}
+
+	// spec.ScaleConfig is SET, but not fully configured, for sanity, we will default MinReplicas, we will also use it as a default spec.Replica
 	if spec.ScaleConfig.MinReplicas == nil {
 		newMin := replicasPreset.Min
 		if spec.ScaleConfig.MaxReplicas != nil && *spec.ScaleConfig.MaxReplicas < newMin {
 			newMin = *spec.ScaleConfig.MaxReplicas
 		}
-
 		spec.ScaleConfig.MinReplicas = &newMin
 	}
+	spec.Replicas = spec.ScaleConfig.MinReplicas
+
 	if spec.ScaleConfig.MaxReplicas == nil {
 		newMax := replicasPreset.Max
 		if *spec.ScaleConfig.MinReplicas > newMax {
