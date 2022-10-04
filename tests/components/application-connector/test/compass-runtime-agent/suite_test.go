@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"testing"
@@ -49,8 +50,16 @@ func (gs *CompassRuntimeAgentSuite) SetupSuite() {
 }
 
 func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
-	cfg, err := clientcmd.BuildConfigFromFlags("", gs.testConfig.KubeconfigPath)
-	gs.Require().Nil(err)
+	var cfg *rest.Config
+	var err error
+
+	if gs.testConfig.KubeconfigPath != "" {
+		cfg, err = clientcmd.BuildConfigFromFlags("", gs.testConfig.KubeconfigPath)
+		gs.Require().Nil(err)
+	} else {
+		cfg, err = rest.InClusterConfig()
+		gs.Require().Nil(err)
+	}
 
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
 	gs.Require().Nil(err)

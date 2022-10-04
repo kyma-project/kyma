@@ -16,7 +16,7 @@ func TestCertificateSecrets(t *testing.T) {
 		fakeKubernetesInterface := fake.NewSimpleClientset()
 
 		// when
-		configurator := NewCertificateSecretConfigurator(fakeKubernetesInterface, "compass-system", "compass-system")
+		configurator := NewCertificateSecretConfigurator(fakeKubernetesInterface)
 		rollbackFunc, err := configurator.Do("newCaSecret", "newClientSetSecret")
 
 		// then
@@ -51,7 +51,7 @@ func TestCertificateSecrets(t *testing.T) {
 		fakeKubernetesInterface := fake.NewSimpleClientset()
 
 		// when
-		configurator := NewCertificateSecretConfigurator(fakeKubernetesInterface, "compass-system", "compass-system")
+		configurator := NewCertificateSecretConfigurator(fakeKubernetesInterface)
 		rollbackFunc, err := configurator.Do("newCaSecret", "newClientSetSecret")
 
 		// then
