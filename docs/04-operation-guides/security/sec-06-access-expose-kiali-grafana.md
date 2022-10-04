@@ -2,6 +2,8 @@
 title: Access and Expose Kiali, Grafana, and Jaeger
 ---
 
+> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and will be removed after Kyma 2.10. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
+ 
 By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana, and Jaeger securely, use an identity provider of your choice.
 
 ![Access services flow](./assets/obsv-access-services.svg)
