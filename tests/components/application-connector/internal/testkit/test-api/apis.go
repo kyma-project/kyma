@@ -69,12 +69,12 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 
 		r.Handle("/ok", http.RedirectHandler("/v1/api/redirect/ok/target", http.StatusTemporaryRedirect))
 
-		r.Handle("/basic", http.RedirectHandler("/v1/api/redirect/target/basic", http.StatusTemporaryRedirect))
 		ba := BasicAuth(basicAuthCredentials)
 		ok := http.HandlerFunc(alwaysOk)
-		r.Handle("/basic/ok", ba(ok)).Methods(http.MethodGet)
+		r.Handle("/basic/target", ba(ok)).Methods(http.MethodGet)
+		r.Handle("/basic", http.RedirectHandler("/v1/api/redirect/basic/target", http.StatusTemporaryRedirect))
 
-		r.Handle("/external", http.RedirectHandler("www.example.com", http.StatusTemporaryRedirect))
+		r.Handle("/external", http.RedirectHandler("https://www.example.com", http.StatusTemporaryRedirect))
 	}
 
 	return router
