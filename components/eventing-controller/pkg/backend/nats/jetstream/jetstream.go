@@ -537,7 +537,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := backendnats.ConvertMsgToCE(msg)
+		ce, err := backendutils.ConvertMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return

@@ -29,10 +29,11 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
-	backendbebv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/bebv2"
+	backendeventmesh "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
@@ -65,14 +66,15 @@ func AddV1Alpha2ToScheme(scheme *runtime.Scheme) error {
 
 // SubscriptionManager implements the subscriptionmanager.Manager interface.
 type SubscriptionManager struct {
-	cancel       context.CancelFunc
-	envCfg       env.Config
-	restCfg      *rest.Config
-	metricsAddr  string
-	resyncPeriod time.Duration
-	mgr          manager.Manager
-	backend      backendbeb.Backend
-	logger       *logger.Logger
+	cancel           context.CancelFunc
+	envCfg           env.Config
+	restCfg          *rest.Config
+	metricsAddr      string
+	resyncPeriod     time.Duration
+	mgr              manager.Manager
+	bebBackend       backendbeb.Backend
+	eventMeshBackend backendeventmesh.Backend
+	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the SubscriptionManager for BEB and initializes it as far as it
@@ -118,27 +120,25 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	client := c.mgr.GetClient()
 	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
 	if c.envCfg.EnableNewCRDVersion {
-		// TODO: re-add the oauth2credentials so that we do not duplicate code
-		bebHandler := backendbebv2.NewBEB(nil, nameMapper, c.logger)
+		eventMeshHandler := backendeventmesh.NewEventMesh(oauth2credential, nameMapper, c.logger)
 		eventMeshcleaner := cleaner.NewEventMeshCleaner(c.logger)
-		bebReconciler := bebv2.NewReconciler(
+		eventMeshReconciler := bebv2.NewReconciler(
 			ctx,
 			client,
 			c.logger,
 			recorder,
 			c.envCfg,
 			eventMeshcleaner,
-			bebHandler,
+			eventMeshHandler,
 			oauth2credential,
 			nameMapper,
 			sink.NewValidator(ctx, client, recorder, c.logger),
 		)
-		// TODO: fix this
-		// c.backend = bebReconciler.Backend
-		if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
-			return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
+		c.eventMeshBackend = eventMeshReconciler.Backend
+		if err := eventMeshReconciler.SetupUnmanaged(c.mgr); err != nil {
+			return xerrors.Errorf("setup EventMesh subscription controller failed: %v", err)
 		}
-		c.namedLogger().Info("Started v1alpha2 BEB subscription manager")
+		c.namedLogger().Info("Started v1alpha2 EventMesh subscription manager")
 	} else {
 		bebHandler := backendbeb.NewBEB(oauth2credential, nameMapper, c.logger)
 		eventMeshcleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
@@ -154,7 +154,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 			nameMapper,
 			sink.NewValidator(ctx, client, recorder, c.logger),
 		)
-		c.backend = bebReconciler.Backend
+		c.bebBackend = bebReconciler.Backend
 		if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
 			return xerrors.Errorf("setup BEB subscription controller failed: %v", err)
 		}
@@ -163,9 +163,9 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	return nil
 }
 
-// Stop implements the subscriptionmanager.Manager interface and stops the BEB subscription manager.
+// Stop implements the subscriptionmanager.Manager interface and stops the EventMesh subscription manager.
 // If runCleanup is false, it will only mark the subscriptions as not ready. If it is true, it will
-// clean up subscriptions on BEB.
+// clean up subscriptions on EventMesh.
 func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	if c.cancel != nil {
 		c.cancel()
@@ -174,7 +174,12 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	if !runCleanup {
 		return markAllSubscriptionsAsNotReady(dynamicClient, c.namedLogger())
 	}
-	return cleanup(c.backend, dynamicClient, c.namedLogger())
+
+	if c.envCfg.EnableNewCRDVersion {
+		return cleanupEventMesh(c.eventMeshBackend, dynamicClient, c.namedLogger())
+	}
+
+	return cleanup(c.bebBackend, dynamicClient, c.namedLogger())
 }
 
 func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
@@ -202,7 +207,8 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 	return err
 }
 
-// cleanup removes all created BEB artifacts.
+// cleanup removes all created BEB artifacts (based on Subscription v1alpha1).
+// This method will be depreciated once Subscription v1alpha2 is active.
 func cleanup(backend backendbeb.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -247,6 +253,59 @@ func cleanup(backend backendbeb.Backend, dynamicClient dynamic.Interface, logger
 			if err := bebBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
 				logger.Errorw("Failed to delete BEB subscription", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+			}
+		}
+	}
+
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
+	return nil
+}
+
+// cleanupEventMesh removes all created EventMesh artifacts (based on Subscription v1alpha2).
+func cleanupEventMesh(backend backendeventmesh.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var eventMeshBackend *backendeventmesh.EventMesh
+	var ok bool
+	if eventMeshBackend, ok = backend.(*backendeventmesh.EventMesh); !ok {
+		return xerrors.Errorf("no EventMesh backend exists: convert backend handler to EventMesh handler failed")
+	}
+
+	// Fetch all subscriptions.
+	subscriptionsUnstructured, err := dynamicClient.Resource(utils.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "list subscriptions failed")
+	}
+	subs, err := eventingv1alpha2.ConvertUnstructListToSubList(subscriptionsUnstructured)
+	if err != nil {
+		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
+	}
+
+	// Clean APIRules.
+	isCleanupSuccessful := true
+	for _, v := range subs.Items {
+		sub := v
+		if apiRule := sub.Status.Backend.APIRuleName; apiRule != "" {
+			if err := dynamicClient.Resource(utils.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
+				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {
+				isCleanupSuccessful = false
+				logger.Errorw("Failed to delete APIRule", "namespace", sub.Namespace, "name", apiRule, "error", err)
+			}
+		}
+
+		// Clean statuses.
+		desiredSub := sub.DuplicateWithStatusDefaults()
+		if err := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+			isCleanupSuccessful = false
+			logger.Errorw("Failed to update EventMesh subscription status", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+		}
+
+		// Clean subscriptions from EventMesh.
+		if eventMeshBackend != nil {
+			if err := eventMeshBackend.DeleteSubscription(&sub); err != nil {
+				isCleanupSuccessful = false
+				logger.Errorw("Failed to delete EventMesh subscription", "namespace", sub.Namespace, "name", sub.Name, "error", err)
 			}
 		}
 	}

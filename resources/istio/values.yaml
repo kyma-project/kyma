@@ -23,6 +23,9 @@ helmValues:
         requests:
           cpu: 10m
           memory: 10Mi
+  cni:
+    cniConfDir: /etc/cni/net.d
+    cniBinDir: /opt/cni/bin
   gateways:
     istio-ingressgateway:
       autoscaleEnabled: true
@@ -59,6 +62,17 @@ meshConfig:
           labels: {}
 
 components:
+  cni:
+    enabled: true
+    config:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1024Mi
+        requests:
+          cpu: 100m
+          memory: 512Mi
+
   egressGateways:
     enabled: false
     config:
@@ -134,12 +148,12 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.14.4-distroless"
+      version: "1.15.0-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.14.4-distroless"
+      version: "1.15.0-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
