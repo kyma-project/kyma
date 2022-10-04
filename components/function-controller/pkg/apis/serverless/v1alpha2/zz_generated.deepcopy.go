@@ -447,7 +447,7 @@ func (in *PodSpecTemplate) DeepCopyInto(out *PodSpecTemplate) {
 	*out = *in
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources
-		*out = new(ResourceRequirements)
+		*out = new(v1.ResourceRequirements)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Env != nil {
@@ -488,6 +488,13 @@ func (in *PodTemplate) DeepCopyInto(out *PodTemplate) {
 		in, out := &in.Spec, &out.Spec
 		*out = new(PodSpecTemplate)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Volumes != nil {
+		in, out := &in.Volumes, &out.Volumes
+		*out = make([]v1.Volume, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 
@@ -702,13 +709,6 @@ func (in *Templates) DeepCopyInto(out *Templates) {
 		in, out := &in.FunctionPodTemplate, &out.FunctionPodTemplate
 		*out = new(PodTemplate)
 		(*in).DeepCopyInto(*out)
-	}
-	if in.Volumes != nil {
-		in, out := &in.Volumes, &out.Volumes
-		*out = make([]v1.Volume, len(*in))
-		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
-		}
 	}
 }
 

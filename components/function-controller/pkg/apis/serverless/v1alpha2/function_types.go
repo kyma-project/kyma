@@ -98,10 +98,12 @@ type Template struct {
 
 type ResourceRequirements struct {
 	// +optional
-	// Set resources field with predefined values.
-	//The resources field shouldn't be filled when this field is set.
+	// Set resources with predefined values.
 	Profile string `json:"profile,omitempty"`
+
 	// +optional
+	//DEPRECATED: use templates.functionPod.spec.resources or
+	//templates.buildJob.spec.resources to configure resources
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
@@ -123,7 +125,7 @@ type ResourceConfiguration struct {
 type PodSpecTemplate struct {
 	// Compute Resources required by container created by function controller.
 	// +optional
-	Resources *ResourceRequirements `json:"resources,omitempty"`
+	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 
 	// List of environment variables to set in the container.
 	// Cannot be updated.
@@ -158,6 +160,10 @@ type PodTemplate struct {
 	// Additional specification for pod created by function-controller
 	//+optional
 	Spec *PodSpecTemplate `json:"spec,omitempty"`
+
+	// Configuration of available volumes for pod
+	// +optional
+	Volumes []v1.Volume `json:"volumes,omitempty"`
 }
 
 type Templates struct {
@@ -168,17 +174,13 @@ type Templates struct {
 	// +optional
 	Metadata *MetadataTemplate `json:"metadata,omitempty"`
 
-	// Additional specification for build job pod
+	// Additional specification for build job's pod
 	// +optional
 	BuildJobTemplate *PodTemplate `json:"buildJobTemplate,omitempty"`
 
-	// Additional specification for function pod
+	// Additional specification for function's pod
 	// +optional
 	FunctionPodTemplate *PodTemplate `json:"functionPodTemplate,omitempty"`
-
-	// Configuration of available volumes for function pod and buildjob pod
-	// +optional
-	Volumes []v1.Volume `json:"volumes,omitempty"`
 }
 
 const (
@@ -205,8 +207,6 @@ type FunctionSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
-	//DEPRECATED: use templates.functionPod.spec.resoruces or
-	//templates.buildJob.spec.resources to configure resources
 	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
 	// +optional
