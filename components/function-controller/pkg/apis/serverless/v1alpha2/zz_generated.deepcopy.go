@@ -700,13 +700,13 @@ func (in *Templates) DeepCopyInto(out *Templates) {
 		*out = new(MetadataTemplate)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.BuildJobTemplate != nil {
-		in, out := &in.BuildJobTemplate, &out.BuildJobTemplate
+	if in.BuildJob != nil {
+		in, out := &in.BuildJob, &out.BuildJob
 		*out = new(PodTemplate)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.FunctionPodTemplate != nil {
-		in, out := &in.FunctionPodTemplate, &out.FunctionPodTemplate
+	if in.FunctionPod != nil {
+		in, out := &in.FunctionPod, &out.FunctionPod
 		*out = new(PodTemplate)
 		(*in).DeepCopyInto(*out)
 	}

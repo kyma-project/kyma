@@ -176,11 +176,11 @@ type Templates struct {
 
 	// Additional specification for build job's pod
 	// +optional
-	BuildJobTemplate *PodTemplate `json:"buildJobTemplate,omitempty"`
+	BuildJob *PodTemplate `json:"buildJob,omitempty"`
 
 	// Additional specification for function's pod
 	// +optional
-	FunctionPodTemplate *PodTemplate `json:"functionPodTemplate,omitempty"`
+	FunctionPod *PodTemplate `json:"functionPod,omitempty"`
 }
 
 const (

@@ -619,7 +619,7 @@ spec:
               templates:
                 description: Additional configuration of function's created pods
                 properties:
-                  buildJobTemplate:
+                  buildJob:
                     description: Additional specification for build job's pod
                     properties:
                       metadata:
@@ -2433,7 +2433,7 @@ spec:
                           type: object
                         type: array
                     type: object
-                  functionPodTemplate:
+                  functionPod:
                     description: Additional specification for function's pod
                     properties:
                       metadata:
