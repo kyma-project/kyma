@@ -56,11 +56,11 @@ func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
 	var cfg *rest.Config
 	var err error
 
-	if gs.testConfig.KubeconfigPath != "" {
+	cfg, err = rest.InClusterConfig()
+	gs.Assert().Nil(err)
+
+	if err != nil {
 		cfg, err = clientcmd.BuildConfigFromFlags("", gs.testConfig.KubeconfigPath)
-		gs.Require().Nil(err)
-	} else {
-		cfg, err = rest.InClusterConfig()
 		gs.Require().Nil(err)
 	}
 
