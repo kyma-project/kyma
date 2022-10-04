@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -51,12 +52,14 @@ func NewCompassRuntimeAgentConfigurator(compassConfigurator types.CompassConfigu
 }
 
 func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string) (types.RollbackFunc, error) {
+	log.Info("Configuring Compass")
 	compassRuntimeAgentConfig, compassConfiguratorRollbackFunc, err := crc.compassConfigurator.Do(runtimeName, formationName)
 	if err != nil {
 		return nil, crc.rollbackOnError(err,
 			compassConfiguratorRollbackFunc)
 	}
 
+	log.Info("Configuring certificate secrets")
 	certificateSecretsRollbackFunc, err := crc.certificateSecretConfigurator.Do(NewCACertSecretName, NewClientCertSecretName)
 	if err != nil {
 		return nil, crc.rollbackOnError(err,
@@ -64,6 +67,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string)
 			certificateSecretsRollbackFunc)
 	}
 
+	log.Info("Preparing Compass Runtime Agent configuration secret")
 	configurationSecretRollbackFunc, err := crc.configurationSecretConfigurator.Do(NewCompassRuntimeConfigName, compassRuntimeAgentConfig)
 	if err != nil {
 		return nil, crc.rollbackOnError(err,
@@ -76,6 +80,7 @@ func (crc compassRuntimeAgentConfigurator) Do(runtimeName, formationName string)
 	newClientCertNamespacedSecretName := fmt.Sprintf("%s/%s", CompassSystemNamespace, NewClientCertSecretName)
 	newCompassRuntimeNamespacedSecretConfigName := fmt.Sprintf("%s/%s", CompassSystemNamespace, NewCompassRuntimeConfigName)
 
+	log.Info("Preparing Compass Runtime Agent configuration secret")
 	deploymentRollbackFunc, err := crc.deploymentConfigurator.Do(newCACertNamespacedSecretName,
 		newClientCertNamespacedSecretName,
 		newCompassRuntimeNamespacedSecretConfigName)

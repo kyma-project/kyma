@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +47,10 @@ func (s configurationSecretConfigurator) Do(newConfigSecretName string, config t
 	err := retry.Do(func() error {
 		_, err := s.kubernetesInterface.CoreV1().Secrets(CompassSystemNamespace).Create(context.Background(), &secret, metav1.CreateOptions{})
 		if err != nil {
-			return err
+			if k8serrors.IsAlreadyExists(err) {
+				return retry.Unrecoverable(err)
+			}
+			return errors.Wrap(err, "failed to create configuration secret")
 		}
 
 		return nil
@@ -74,6 +78,6 @@ func deleteSecretWithRetry(kubernetesInterface kubernetes.Interface, name, names
 			}
 		}
 
-		return err
+		return errors.Wrap(err, "failed to delete secret")
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 }

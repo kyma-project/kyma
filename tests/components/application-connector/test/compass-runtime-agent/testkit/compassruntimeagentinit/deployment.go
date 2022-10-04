@@ -6,6 +6,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
+	"github.com/pkg/errors"
 	v12 "k8s.io/api/apps/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -69,15 +70,15 @@ func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamesp
 
 	err = waitForRollout(dc.deploymentName, deploymentInterface)
 	if err != nil {
-		var murliErr *multierror.Error
+		var multi *multierror.Error
 
-		multierror.Append(murliErr, err)
+		multierror.Append(multi, errors.Wrap(err, "failed to update Compass Runtime Agent deployment"))
 
 		err := rollbackDeploymentFunc()
 		if err != nil {
-			multierror.Append(murliErr, err)
+			multierror.Append(multi, err)
 		}
-		return nil, murliErr.ErrorOrNil()
+		return nil, multi.ErrorOrNil()
 	}
 
 	return rollbackDeploymentFunc, err
@@ -126,20 +127,23 @@ func replaceEnvValue(deployment *v12.Deployment, name, newValue string) (string,
 
 func retryGetDeployment(name string, deploymentInterface v13.DeploymentInterface) (*v12.Deployment, error) {
 	var deployment *v12.Deployment
-	return deployment, retry.Do(func() error {
+
+	err := retry.Do(func() error {
 		var err error
 		deployment, err = deploymentInterface.Get(context.TODO(), name, v1.GetOptions{})
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to get Compass Runtime Agent deployment")
 		}
 		return nil
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
+
+	return deployment, err
 }
 
 func retryUpdateDeployment(deployment *v12.Deployment, deploymentInterface v13.DeploymentInterface) error {
 	return retry.Do(func() error {
 		_, err := deploymentInterface.Update(context.TODO(), deployment, v1.UpdateOptions{})
-		return err
+		return errors.Wrap(err, "failed to update Compass Runtime Agent deployment")
 	}, retry.Attempts(RetryAttempts), retry.Delay(RetrySeconds*time.Second))
 }
 
@@ -147,7 +151,7 @@ func waitForRollout(name string, deploymentInterface v13.DeploymentInterface) er
 	return retry.Do(func() error {
 		deployment, err := deploymentInterface.Get(context.TODO(), name, v1.GetOptions{})
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to get Compass Runtime Agent deployment")
 		}
 		if deployment.Status.AvailableReplicas == 0 || deployment.Status.UnavailableReplicas != 0 {
 			return fmt.Errorf("deployment %s is not yet ready", name)
