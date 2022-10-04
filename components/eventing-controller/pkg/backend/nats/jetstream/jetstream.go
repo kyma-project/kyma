@@ -188,7 +188,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	return nil
 }
 
-// CheckSubscriptionConfig checks that the latest Subscription Config changes are propagated to the consumer.
+// checkSubscriptionConfig checks that the latest Subscription Config changes are propagated to the consumer.
 // In our case config contains only the "maxInFlightMessages" property, which is the maxAckPending on the consumer side.
 func (js *JetStream) checkSubscriptionConfig(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
