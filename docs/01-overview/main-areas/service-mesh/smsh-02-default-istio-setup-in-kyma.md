@@ -12,7 +12,6 @@ This list shows the available Istio components and addons. Check which of those 
 - Grafana - installed as separate component - [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md)
 - Prometheus - installed as separate component - [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md)
 - Tracing - installed as separate component - [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md)
-- Kiali - installed as separate component - [Kiali](../../../05-technical-reference/00-architecture/obsv-04-architecture-kiali.md)
 
 ## Kyma-specific configuration
 
