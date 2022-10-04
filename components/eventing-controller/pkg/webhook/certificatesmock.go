@@ -6,9 +6,7 @@ import (
 	"net"
 
 	"golang.org/x/xerrors"
-	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/util/cert"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,36 +37,30 @@ type MockUpdateFailedClient struct {
 }
 
 var (
-	fakeGetErr         = xerrors.New("fake get error")
-	fakeCreateErr      = xerrors.New("fake create error")
-	fakeUpdateErr      = xerrors.New("fake update error")
-	fakeCertInvalidErr = xerrors.New("fake cert invalid error")
-	fakeNotfoundErr    = apiErrors.NewNotFound(schema.GroupResource{"bla", "bla"}, "fake resource not found")
+	ErrFakeGet         = xerrors.New("fake get error")
+	ErrFakeCreate      = xerrors.New("fake create error")
+	ErrFakeUpdate      = xerrors.New("fake update error")
+	ErrFakeCertInvalid = xerrors.New("fake cert invalid error")
+	ErrFakeNotfound    = apiErrors.NewNotFound(schema.GroupResource{Group: "test", Resource: "test"}, "fake resource not found")
 )
 
 func (r *MockGetFailedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
-	return fakeGetErr
+	return ErrFakeGet
 }
 
 func (r *MockCreateFailedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
-	return fakeNotfoundErr
+	return ErrFakeNotfound
 }
 
 func (r *MockCreateFailedClient) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
-	return fakeCreateErr
+	return ErrFakeCreate
 }
 
 func (r *MockUpdateFailedClient) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
-	return fakeUpdateErr
+	return ErrFakeUpdate
 }
 
 func (r *MockUpdateFailedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
-	obj = &corev1.Secret{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      "name",
-			Namespace: "namespace",
-		},
-	}
 	return nil
 }
 
@@ -77,5 +69,5 @@ type MockCertificateHandler struct {
 }
 
 func (r *MockCertificateHandler) isValidCertificate(cert, key []byte) (bool, error) {
-	return false, fakeCertInvalidErr
+	return false, ErrFakeCertInvalid
 }

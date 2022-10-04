@@ -27,7 +27,7 @@ const (
 	KeyName  = "tls.key"
 )
 
-type WebhookHandler struct {
+type Certificates struct {
 	secretHandler ISecretHandler
 	crdName       string
 	secretName    string
@@ -58,8 +58,8 @@ type CertificateHandler struct {
 	logger       *logr.Logger
 }
 
-func NewWebhookCertificateHandler(ctx context.Context, client client.Client, logger *logr.Logger, crdName string, secretName string) *WebhookHandler {
-	return &WebhookHandler{
+func NewCertificates(ctx context.Context, client client.Client, logger *logr.Logger, crdName string, secretName string) *Certificates {
+	return &Certificates{
 		secretHandler: &SecretHandler{
 			certHandler: &CertificateHandler{
 				clientGoCert: &ClientGoCert{},
@@ -78,7 +78,7 @@ func NewWebhookCertificateHandler(ctx context.Context, client client.Client, log
 	}
 }
 
-func (r *WebhookHandler) SetupCertificates() error {
+func (r *Certificates) Setup() error {
 	if err := apiextensionsv1.AddToScheme(r.Client.Scheme()); err != nil {
 		return xerrors.Errorf("while adding apiextensions.v1 schema to k8s client: %w", err)
 	}
@@ -89,6 +89,7 @@ func (r *WebhookHandler) SetupCertificates() error {
 		return xerrors.Errorf("failed to get %s crd: %w", r.crdName, err)
 	}
 
+	// TODO:
 	if contains, msg := r.containsConversionWebhookClientConfig(crd); !contains {
 		return xerrors.Errorf("failed to validate CRD webhook: %s", msg)
 	}
@@ -99,7 +100,7 @@ func (r *WebhookHandler) SetupCertificates() error {
 	return r.ensureWebhookCertificate(r.secretName, webhookServiceNamespace, webhookServiceName)
 }
 
-func (r *WebhookHandler) addCertToConversionWebhook(caBundle []byte) error {
+func (r *Certificates) addCertToConversionWebhook(caBundle []byte) error {
 	crd := &apiextensionsv1.CustomResourceDefinition{}
 	err := r.Client.Get(r.ctx, types.NamespacedName{Name: r.crdName}, crd)
 	if err != nil {
@@ -118,7 +119,7 @@ func (r *WebhookHandler) addCertToConversionWebhook(caBundle []byte) error {
 	return nil
 }
 
-func (r *WebhookHandler) ensureWebhookCertificate(secretName, secretNamespace, serviceName string) error {
+func (r *Certificates) ensureWebhookCertificate(secretName, secretNamespace, serviceName string) error {
 	r.logger.Info("ensuring webhook secret")
 
 	secret, err := r.secretHandler.ensureSecret(secretName, secretNamespace, serviceName)
@@ -127,14 +128,14 @@ func (r *WebhookHandler) ensureWebhookCertificate(secretName, secretNamespace, s
 	}
 
 	caBundle := secret.Data[CertName]
-	if err := r.addCertToConversionWebhook(caBundle); err != nil {
+	if err = r.addCertToConversionWebhook(caBundle); err != nil {
 		return xerrors.Errorf("couldn't inject webhook caBundle: %w", err)
 	}
 
 	return nil
 }
 
-func (r *WebhookHandler) containsConversionWebhookClientConfig(crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
+func (r *Certificates) containsConversionWebhookClientConfig(crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
 	if crd.Spec.Conversion == nil {
 		return false, "conversion not found in " + r.crdName
 	}
@@ -169,7 +170,7 @@ func (r *SecretHandler) ensureSecret(secretName, secretNamespace, serviceName st
 	_, err = r.isValidSecret(secret)
 	if err != nil {
 		r.logger.Error(err, "invalid secret")
-		if err := r.updateSecret(secret, serviceName); err != nil {
+		if err = r.updateSecret(secret, serviceName); err != nil {
 			return secret, err
 		}
 	}
@@ -185,7 +186,7 @@ func (r *SecretHandler) createSecret(name, namespace, serviceName string) (*core
 
 	secret := r.buildSecret(name, namespace, certificate, key)
 
-	if err := r.Client.Create(r.ctx, secret); err != nil {
+	if err = r.Client.Create(r.ctx, secret); err != nil {
 		return nil, xerrors.Errorf("failed to create secret: %w", err)
 	}
 
@@ -216,7 +217,7 @@ func (r *SecretHandler) updateSecret(secret *corev1.Secret, serviceName string) 
 	newSecret := r.buildSecret(secret.Name, secret.Namespace, certificate, key)
 
 	secret.Data = newSecret.Data
-	if err := r.Client.Update(r.ctx, secret); err != nil {
+	if err = r.Client.Update(r.ctx, secret); err != nil {
 		return xerrors.Errorf("failed to update secret: %w", err)
 	}
 
@@ -257,7 +258,7 @@ func (r *CertificateHandler) buildCert(namespace, serviceName string) (cert []by
 
 	cert, key, err = r.generateCertificates(serviceName, namespace)
 	if err != nil {
-		return nil, nil, xerrors.Errorf("failed to generate certificates: %w", err)
+		return cert, key, xerrors.Errorf("failed to generate certificates: %w", err)
 	}
 
 	return cert, key, nil

@@ -19,12 +19,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
-var (
-	ctx    = context.Background()
-	logger = zap.New()
-)
-
 func TestWebhookHandler(t *testing.T) {
+	ctx := context.Background()
+	logger := zap.New()
 	_ = apiextensionsv1.AddToScheme(scheme.Scheme)
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 
@@ -89,8 +86,8 @@ func TestWebhookHandler(t *testing.T) {
 			require.NoError(t, fakeClient.Create(ctx, tc.crd))
 		}
 
-		webhookHandler := NewWebhookCertificateHandler(ctx, fakeClient, &logger, crdName, secretName)
-		err := webhookHandler.SetupCertificates()
+		webhookHandler := NewCertificates(ctx, fakeClient, &logger, crdName, secretName)
+		err := webhookHandler.Setup()
 		if (err != nil) != tc.wantErr {
 			t.Errorf("%s: got err = %v; want (err != nil) = %v", tc.description, err, tc.wantErr)
 		}
@@ -120,6 +117,8 @@ func TestWebhookHandler(t *testing.T) {
 }
 
 func TestCertificateHandlerServiceAltNames(t *testing.T) {
+	ctx := context.Background()
+	logger := zap.New()
 	certHandler := CertificateHandler{
 		ctx:    ctx,
 		logger: &logger,
@@ -150,6 +149,8 @@ func TestCertificateHandlerServiceAltNames(t *testing.T) {
 }
 
 func TestCertHandlerBuildCert(t *testing.T) {
+	ctx := context.Background()
+	logger := zap.New()
 	certHandler := CertificateHandler{
 		clientGoCert: &ClientGoCert{},
 		ctx:          ctx,
@@ -188,10 +189,10 @@ func TestCertHandlerBuildCert(t *testing.T) {
 				t.Errorf("%s: BuildCert() failed, want:[%v] but got:[%v]", tc.description, tc.wantErr, err)
 			}
 		} else {
-			if err := certHandler.verifyCertificate(crt); err != nil {
+			if err = certHandler.verifyCertificate(crt); err != nil {
 				t.Errorf("%s: cert must have been valid, but got invalid certificate", tc.description)
 			}
-			if err := certHandler.verifyKey(key); err != nil {
+			if err = certHandler.verifyKey(key); err != nil {
 				t.Errorf("%s: key must have been valid, but got invalid key", tc.description)
 			}
 		}
@@ -199,6 +200,8 @@ func TestCertHandlerBuildCert(t *testing.T) {
 }
 
 func TestSecretHandlerEnsureSecret(t *testing.T) {
+	ctx := context.Background()
+	logger := zap.New()
 	fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 	secretHandler := SecretHandler{
 		certHandler: &CertificateHandler{
@@ -242,7 +245,7 @@ func TestSecretHandlerEnsureSecret(t *testing.T) {
 			namespace:   "test-namespace2",
 			serviceName: "test-service-name2",
 			client:      &MockGetFailedClient{},
-			wantErr:     xerrors.Errorf("failed to get webhook secret: %w", fakeGetErr),
+			wantErr:     xerrors.Errorf("failed to get webhook secret: %w", ErrFakeGet),
 		},
 		{
 			description: "should fail to create secret",
@@ -250,7 +253,7 @@ func TestSecretHandlerEnsureSecret(t *testing.T) {
 			namespace:   "test-namespace3",
 			serviceName: "test-service-name3",
 			client:      &MockCreateFailedClient{},
-			wantErr:     xerrors.Errorf("failed to create secret: %w", fakeCreateErr),
+			wantErr:     xerrors.Errorf("failed to create secret: %w", ErrFakeCreate),
 		},
 		{
 			description: "should fail to update secret",
@@ -258,7 +261,7 @@ func TestSecretHandlerEnsureSecret(t *testing.T) {
 			namespace:   "test-namespace4",
 			serviceName: "test-service-name4",
 			client:      &MockUpdateFailedClient{},
-			wantErr:     xerrors.Errorf("failed to update secret: %w", fakeUpdateErr),
+			wantErr:     xerrors.Errorf("failed to update secret: %w", ErrFakeUpdate),
 		},
 	}
 

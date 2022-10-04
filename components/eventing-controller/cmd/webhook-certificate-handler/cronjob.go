@@ -33,8 +33,8 @@ func main() {
 		return
 	}
 
-	webhookCertHandler := webhook.NewWebhookCertificateHandler(context.Background(), client, &logger, crdName, secretName)
-	err = webhookCertHandler.SetupCertificates()
+	webhookCertificates := webhook.NewCertificates(context.Background(), client, &logger, crdName, secretName)
+	err = webhookCertificates.Setup()
 	if err != nil {
 		panic(err)
 	}
