@@ -128,7 +128,6 @@ type PodSpecTemplate struct {
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 
 	// List of environment variables to set in the container.
-	// Cannot be updated.
 	// +optional
 	// +patchMergeKey=name
 	// +patchStrategy=merge
@@ -143,12 +142,10 @@ type PodSpecTemplate struct {
 
 type MetadataTemplate struct {
 	// Additional labels
-	// Not implemented yet
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Additional annotations
-	// Not implemented yet
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
@@ -173,17 +170,14 @@ type Templates struct {
 	// This metadata is applied on functionPod and buildPod.
 	// Can be overwritten by specific pod metadata
 	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-	// Not implemented yet
 	// +optional
 	Metadata *MetadataTemplate `json:"metadata,omitempty"`
 
 	// Additional specification for build job's pod
-	// Not implemented yet
 	// +optional
 	BuildJob *PodTemplate `json:"buildJob,omitempty"`
 
 	// Additional specification for function's pod
-	// Not implemented yet
 	// +optional
 	FunctionPod *PodTemplate `json:"functionPod,omitempty"`
 }
@@ -228,7 +222,7 @@ type FunctionSpec struct {
 
 	// +optional
 	// Additional configuration of function's created pods
-	// Not implemented yet
+	// NOTE: Not implemented yet
 	Templates *Templates `json:"templates,omitempty"`
 }
 

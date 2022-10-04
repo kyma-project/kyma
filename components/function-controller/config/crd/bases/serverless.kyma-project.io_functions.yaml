@@ -607,12 +607,11 @@ spec:
                     type: object
                 type: object
               templates:
-                description: Additional configuration of function's created pods Not
-                  implemented yet
+                description: 'Additional configuration of function''s created pods
+                  NOTE: Not implemented yet'
                 properties:
                   buildJob:
-                    description: Additional specification for build job's pod Not
-                      implemented yet
+                    description: Additional specification for build job's pod
                     properties:
                       metadata:
                         description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
@@ -620,12 +619,12 @@ spec:
                           annotations:
                             additionalProperties:
                               type: string
-                            description: Additional annotations Not implemented yet
+                            description: Additional annotations
                             type: object
                           labels:
                             additionalProperties:
                               type: string
-                            description: Additional labels Not implemented yet
+                            description: Additional labels
                             type: object
                         type: object
                       spec:
@@ -633,7 +632,7 @@ spec:
                         properties:
                           env:
                             description: List of environment variables to set in the
-                              container. Cannot be updated.
+                              container.
                             items:
                               description: EnvVar represents an environment variable
                                 present in a Container.
@@ -2426,8 +2425,7 @@ spec:
                         type: array
                     type: object
                   functionPod:
-                    description: Additional specification for function's pod Not implemented
-                      yet
+                    description: Additional specification for function's pod
                     properties:
                       metadata:
                         description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
@@ -2435,12 +2433,12 @@ spec:
                           annotations:
                             additionalProperties:
                               type: string
-                            description: Additional annotations Not implemented yet
+                            description: Additional annotations
                             type: object
                           labels:
                             additionalProperties:
                               type: string
-                            description: Additional labels Not implemented yet
+                            description: Additional labels
                             type: object
                         type: object
                       spec:
@@ -2448,7 +2446,7 @@ spec:
                         properties:
                           env:
                             description: List of environment variables to set in the
-                              container. Cannot be updated.
+                              container.
                             items:
                               description: EnvVar represents an environment variable
                                 present in a Container.
@@ -4243,18 +4241,17 @@ spec:
                   metadata:
                     description: 'Standard object''s metadata. This metadata is applied
                       on functionPod and buildPod. Can be overwritten by specific
-                      pod metadata More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-                      Not implemented yet'
+                      pod metadata More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
                     properties:
                       annotations:
                         additionalProperties:
                           type: string
-                        description: Additional annotations Not implemented yet
+                        description: Additional annotations
                         type: object
                       labels:
                         additionalProperties:
                           type: string
-                        description: Additional labels Not implemented yet
+                        description: Additional labels
                         type: object
                     type: object
                 type: object
