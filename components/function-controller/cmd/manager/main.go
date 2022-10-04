@@ -70,15 +70,15 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	l, err := configureLogger(ctx, config.FileConfigPath)
+	loggerRegistry, err := configureLogger(ctx, config.FileConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to configure logger")
 		os.Exit(1)
 	}
 
-	ctrl.SetLogger(zapr.NewLogger(l.CreateDesugared()))
+	ctrl.SetLogger(zapr.NewLogger(loggerRegistry.CreateDesugared()))
 
-	zapLogger := l.CreateUnregistered()
+	zapLogger := loggerRegistry.CreateUnregistered()
 	zapLogger.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
 
@@ -109,7 +109,7 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
-	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, l.CreateNamed("healthz"))
+	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, loggerRegistry.CreateNamed("healthz"))
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
 		os.Exit(1)
@@ -120,13 +120,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), l.CreateNamed("controllers.gitrepo")).SetupWithManager(mgr)
+	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.gitrepo")).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create gitRepo controller")
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunctionReconciler(resourceClient, l.CreateNamed("controllers.function"), config.Function, &git.GitClientFactory{}, mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunctionReconciler(resourceClient, loggerRegistry.CreateNamed("controllers.function"), config.Function, &git.GitClientFactory{}, mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
@@ -139,37 +139,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewConfigMap(mgr.GetClient(), l.CreateNamed("controllers.configmap"), config.Kubernetes, configMapSvc).
+	if err := k8s.NewConfigMap(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.configmap"), config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewNamespace(mgr.GetClient(), l.CreateNamed("controllers.namespace"), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
+	if err := k8s.NewNamespace(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.namespace"), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewSecret(mgr.GetClient(), l.CreateNamed("controllers.secret"), config.Kubernetes, secretSvc).
+	if err := k8s.NewSecret(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.secret"), config.Kubernetes, secretSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Secret controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), l.CreateNamed("controllers.serviceaccount"), config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.serviceaccount"), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRole(mgr.GetClient(), l.CreateNamed("controllers.role"), config.Kubernetes, roleSvc).
+	if err := k8s.NewRole(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.role"), config.Kubernetes, roleSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Role controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRoleBinding(mgr.GetClient(), l.CreateNamed("controllers.rolebinding"), config.Kubernetes, roleBindingSvc).
+	if err := k8s.NewRoleBinding(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.rolebinding"), config.Kubernetes, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create RoleBinding controller")
 		os.Exit(1)

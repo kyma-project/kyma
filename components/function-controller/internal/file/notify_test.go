@@ -32,7 +32,8 @@ func TestNotifyModification(t *testing.T) {
 			notifyErr <- NotifyModification(context.Background(), "/path/does/not/exist")
 		}()
 
-		assert.Error(t, <-notifyErr)
+		err := <-notifyErr
+		assert.Contains(t, err.Error(), "no such file or directory")
 	})
 
 	t.Run("cancel context", func(t *testing.T) {
