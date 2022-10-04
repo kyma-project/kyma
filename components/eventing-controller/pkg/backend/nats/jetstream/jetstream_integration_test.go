@@ -1333,7 +1333,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 // TestJetStream_CheckConsumerConfig that the latest Subscription Config changes will be propagated to the consumer.
 func TestJetStream_CheckConsumerConfig(t *testing.T) {
 	// given
-	testEnvironment := setupTestEnvironment(t)
+	testEnvironment := setupTestEnvironment(t, false)
 	jsBackend := testEnvironment.jsBackend
 	defer testEnvironment.natsServer.Shutdown()
 	defer testEnvironment.jsClient.natsConn.Close()
