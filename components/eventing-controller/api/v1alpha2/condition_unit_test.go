@@ -456,12 +456,12 @@ func Test_CreateMessageForConditionReasonSubscriptionCreated(t *testing.T) {
 		{
 			name:      "with name 1",
 			givenName: "test-one",
-			wantName:  "EventMesh-subscription-name=test-one",
+			wantName:  "EventMesh subscription name is: test-one",
 		},
 		{
 			name:      "with name 2",
 			givenName: "test-second",
-			wantName:  "EventMesh-subscription-name=test-second",
+			wantName:  "EventMesh subscription name is: test-second",
 		},
 	}
 

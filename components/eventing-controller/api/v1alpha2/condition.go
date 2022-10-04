@@ -248,5 +248,5 @@ func ConditionEquals(existing, expected Condition) bool {
 }
 
 func CreateMessageForConditionReasonSubscriptionCreated(eventMeshName string) string {
-	return fmt.Sprintf("EventMesh-subscription-name=%s", eventMeshName)
+	return fmt.Sprintf("EventMesh subscription name is: %s", eventMeshName)
 }
