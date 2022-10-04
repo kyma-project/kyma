@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	clusterLocalURLSuffix = "svc.cluster.local"
+	ClusterLocalURLSuffix = "svc.cluster.local"
 	MissingSchemeErrMsg   = "subscription sink URL scheme should be 'http' or 'https'"
 )
 
@@ -48,7 +48,7 @@ func NewValidator(ctx context.Context, client client.Client, recorder record.Eve
 }
 
 func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) error {
-	if !isValidScheme(subscription.Spec.Sink) {
+	if !IsValidScheme(subscription.Spec.Sink) {
 		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
 		return xerrors.Errorf(MissingSchemeErrMsg)
 	}
@@ -61,9 +61,9 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) erro
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
-	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
-		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", clusterLocalURLSuffix)
-		return xerrors.Errorf("failed to validate subscription sink URL. It does not contain suffix: %s", clusterLocalURLSuffix)
+	if !strings.HasSuffix(trimmedHost, ClusterLocalURLSuffix) {
+		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", ClusterLocalURLSuffix)
+		return xerrors.Errorf("failed to validate subscription sink URL. It does not contain suffix: %s", ClusterLocalURLSuffix)
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"
@@ -82,7 +82,7 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) erro
 
 	// Validate svc is a cluster-local one
 	svcName := subDomains[0]
-	if _, err := getClusterLocalService(s.ctx, s.client, svcNs, svcName); err != nil {
+	if _, err := GetClusterLocalService(s.ctx, s.client, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
 			events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
 			return xerrors.Errorf("failed to validate subscription sink URL. It is not a valid cluster local svc: %v", err)
@@ -95,7 +95,7 @@ func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) erro
 	return nil
 }
 
-func getClusterLocalService(ctx context.Context, client client.Client, svcNs, svcName string) (*corev1.Service, error) {
+func GetClusterLocalService(ctx context.Context, client client.Client, svcNs, svcName string) (*corev1.Service, error) {
 	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
 	svc := &corev1.Service{}
 	if err := client.Get(ctx, svcLookupKey, svc); err != nil {
@@ -104,7 +104,7 @@ func getClusterLocalService(ctx context.Context, client client.Client, svcNs, sv
 	return svc, nil
 }
 
-// isValidScheme returns true if the sink scheme is http or https, otherwise returns false.
-func isValidScheme(sink string) bool {
+// IsValidScheme returns true if the sink scheme is http or https, otherwise returns false.
+func IsValidScheme(sink string) bool {
 	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }

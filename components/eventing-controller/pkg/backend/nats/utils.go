@@ -2,12 +2,10 @@ package nats
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -70,18 +68,6 @@ func CreateKymaSubscriptionNamespacedName(key string, sub Subscriber) types.Name
 // IsNatsSubAssociatedWithKymaSub checks if the NATS subscription is associated / related to Kyma subscription or not.
 func IsNatsSubAssociatedWithKymaSub(natsSubKey string, natsSub Subscriber, sub *eventingv1alpha1.Subscription) bool {
 	return CreateKeyPrefix(sub) == CreateKymaSubscriptionNamespacedName(natsSubKey, natsSub).String()
-}
-
-func ConvertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
-	event := cev2event.New(cev2event.CloudEventsVersionV1)
-	err := json.Unmarshal(msg.Data, &event)
-	if err != nil {
-		return nil, err
-	}
-	if err := event.Validate(); err != nil {
-		return nil, err
-	}
-	return &event, nil
 }
 
 func CreateKeyPrefix(sub *eventingv1alpha1.Subscription) string {

@@ -3,13 +3,11 @@ package utils
 
 import (
 	"context"
-	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"net/url"
-	"strings"
-	"time"
+
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	"github.com/nats-io/nats.go"
 
 	"go.uber.org/zap"
 
@@ -19,74 +17,26 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 
-	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
-const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+type EventTypeInfo struct {
+	OriginalType  string
+	CleanType     string
+	ProcessedType string
+}
 
 // NameMapper is used to map Kyma-specific resource names to their corresponding name on other
 // (external) systems, e.g. on different eventing backends, the same Kyma subscription name
 // could map to a different name.
 type NameMapper interface {
-	MapSubscriptionName(sub *eventingv1alpha1.Subscription) string
-}
-
-// bebSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the BEB backend,
-// which has a max length. Domain name is used to make the names on BEB unique.
-type bebSubscriptionNameMapper struct {
-	domainName string
-	maxLength  int
-}
-
-func NewBEBSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
-	return &bebSubscriptionNameMapper{
-		domainName: domainName,
-		maxLength:  maxNameLength,
-	}
-}
-
-func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
-	hash := hashSubscriptionFullName(m.domainName, sub.Namespace, sub.Name)
-	return shortenNameAndAppendHash(sub.Name, hash, m.maxLength)
-}
-
-func hashSubscriptionFullName(domainName, namespace, name string) string {
-	hash := sha1.Sum([]byte(domainName + namespace + name))
-	return fmt.Sprintf("%x", hash)
-}
-
-// produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
-// Requires maxLength >= len(hash).
-func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
-	if len(hash) > maxLength {
-		// This shouldn't happen!
-		panic(fmt.Sprintf("max name length (%d) used for BEB subscription mapper is not large enough to hold the hash (%s)", maxLength, hash))
-	}
-	maxNameLen := maxLength - len(hash)
-	// keep the first maxNameLen characters of the name
-	if maxNameLen <= 0 {
-		return hash
-	}
-	if len(name) > maxNameLen {
-		name = name[:maxNameLen]
-	}
-	return name + hash
-}
-
-var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-func GetHash(subscription *types.Subscription) (int64, error) {
-	hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil)
-	if err != nil {
-		return 0, err
-	}
-	return int64(hash), nil
+	MapSubscriptionName(subscriptionName, subscriptionNamespace string) string
 }
 
 func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
@@ -101,18 +51,8 @@ func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings)
 	return emsSubscription, nil
 }
 
-func getQos(qosStr string) (types.Qos, error) {
-	qosStr = strings.ReplaceAll(qosStr, "-", "_")
-	switch qosStr {
-	case string(types.QosAtLeastOnce):
-		return types.QosAtLeastOnce, nil
-	case string(types.QosAtMostOnce):
-		return types.QosAtMostOnce, nil
-	default:
-		return "", fmt.Errorf("invalid Qos: %s", qosStr)
-	}
-}
-
+// GetInternalView4Ev2 returns the BEB subscription equivalent of Kyma Subscription
+// Will be depreciated when Subscription v1alpha2 is active.
 func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1beta1.APIRule,
 	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
@@ -121,7 +61,7 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		return nil, errors.Wrap(err, "apply default protocol settings failed")
 	}
 	// Name
-	emsSubscription.Name = nameMapper.MapSubscriptionName(subscription)
+	emsSubscription.Name = nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace)
 
 	// Applying protocol settings if provided in subscription CR
 	if subscription.Spec.ProtocolSettings != nil {
@@ -143,7 +83,7 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	}
 
 	// WebhookURL
-	urlTobeRegistered, err := getExposedURLFromAPIRule(apiRule, subscription)
+	urlTobeRegistered, err := backendutilsv2.GetExposedURLFromAPIRule(apiRule, subscription.Spec.Sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}
@@ -183,60 +123,6 @@ func GetInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	}
 	emsSubscription.WebhookAuth = auth
 	return emsSubscription, nil
-}
-
-func getExposedURLFromAPIRule(apiRule *apigatewayv1beta1.APIRule, sub *eventingv1alpha1.Subscription) (string, error) {
-	scheme := "https://"
-	path := ""
-
-	sURL, err := url.ParseRequestURI(sub.Spec.Sink)
-	if err != nil {
-		return "", err
-	}
-	sURLPath := sURL.Path
-	if sURL.Path == "" {
-		sURLPath = "/"
-	}
-	for _, rule := range apiRule.Spec.Rules {
-		if rule.Path == sURLPath {
-			path = rule.Path
-			break
-		}
-	}
-	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Host, path), nil
-}
-
-func GetInternalView4Ems(subscription *types.Subscription) *types.Subscription {
-	emsSubscription := &types.Subscription{}
-
-	// Name
-	emsSubscription.Name = subscription.Name
-	emsSubscription.ContentMode = subscription.ContentMode
-	emsSubscription.ExemptHandshake = subscription.ExemptHandshake
-
-	// Qos
-	emsSubscription.Qos = subscription.Qos
-
-	// WebhookURL
-	emsSubscription.WebhookURL = subscription.WebhookURL
-
-	// Events
-	for _, e := range subscription.Events {
-		s := e.Source
-		t := e.Type
-		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
-	}
-
-	return emsSubscription
-}
-
-// GetRandString returns a random string of the given length.
-func GetRandString(l int) string {
-	b := make([]byte, l)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
 }
 
 func ResetStatusToDefaults(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
@@ -299,6 +185,18 @@ func APIRuleGroupVersionResource() schema.GroupVersionResource {
 		Group:    apigatewayv1beta1.GroupVersion.Group,
 		Resource: "apirules",
 	}
+}
+
+func ConvertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
+	event := cev2event.New(cev2event.CloudEventsVersionV1)
+	err := json.Unmarshal(msg.Data, &event)
+	if err != nil {
+		return nil, err
+	}
+	if err := event.Validate(); err != nil {
+		return nil, err
+	}
+	return &event, nil
 }
 
 // LoggerWithSubscription returns a logger with the given subscription details.

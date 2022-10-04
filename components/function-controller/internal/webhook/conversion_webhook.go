@@ -153,6 +153,7 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha1ToV1Alpha2(src, dst runtime.O
 	}
 
 	w.convertStatusV1Alpha1ToV1Alpha2(&in.Status, &out.Status)
+	cleanEmptyLabelsAndAnnotations(&out.ObjectMeta)
 	return nil
 }
 
@@ -197,11 +198,12 @@ func convertTemplateLabelsV1alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, ou
 }
 
 func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) {
+	buildResourcesPresetValue, buildResourcesPresetExists := in.ObjectMeta.Labels[serverlessv1alpha1.BuildResourcesPresetLabel]
 	functionResourcesPresetValue, functionResourcesPresetExists := in.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel]
 	buildResourcesExists := len(in.Spec.BuildResources.Limits) != 0 || len(in.Spec.BuildResources.Requests) != 0
 	functionResourcesExists := len(in.Spec.Resources.Limits) != 0 || len(in.Spec.Resources.Requests) != 0
 
-	buildResourcesNeeded := buildResourcesExists
+	buildResourcesNeeded := buildResourcesExists || buildResourcesPresetExists
 	functionResourcesNeeded := functionResourcesExists || functionResourcesPresetExists
 	if (functionResourcesNeeded || buildResourcesNeeded) && out.Spec.ResourceConfiguration == nil {
 		out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
@@ -219,8 +221,13 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 	if functionResourcesExists {
 		out.Spec.ResourceConfiguration.Function.Resources = &in.Spec.Resources
 	}
+	if buildResourcesPresetExists {
+		out.Spec.ResourceConfiguration.Build.Profile = buildResourcesPresetValue
+		delete(out.ObjectMeta.Labels, serverlessv1alpha2.BuildResourcesPresetLabel)
+	}
 	if functionResourcesPresetExists {
 		out.Spec.ResourceConfiguration.Function.Profile = functionResourcesPresetValue
+		delete(out.ObjectMeta.Labels, serverlessv1alpha2.FunctionResourcesPresetLabel)
 	}
 }
 
@@ -302,7 +309,17 @@ func (w *ConvertingWebhook) convertFunctionV1Alpha2ToV1Alpha1(src, dst runtime.O
 	}
 
 	w.convertStatusV1Alpha2ToV1Alpha1(&in.Status, out.Spec.Source, &out.Status)
+	cleanEmptyLabelsAndAnnotations(&out.ObjectMeta)
 	return nil
+}
+
+func cleanEmptyLabelsAndAnnotations(out *metav1.ObjectMeta) {
+	if len(out.Annotations) == 0 {
+		out.Annotations = nil
+	}
+	if len(out.Labels) == 0 {
+		out.Labels = nil
+	}
 }
 
 func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) error {
@@ -324,11 +341,43 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 }
 
 func convertResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
-	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil && in.Spec.ResourceConfiguration.Build.Resources != nil {
-		out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
+	convertBuildResourcesV1Alpha2ToV1Alpha1(in, out)
+	convertFunctionResourcesV1Alpha2ToV1Alpha1(in, out)
+}
+
+func convertBuildResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil {
+		if in.Spec.ResourceConfiguration.Build.Resources != nil {
+			out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
+		}
+		convertBuildResourcesProfileV1Alpha2ToV1Alpha1(in, out)
 	}
-	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Function != nil && in.Spec.ResourceConfiguration.Function.Resources != nil {
-		out.Spec.Resources = *in.Spec.ResourceConfiguration.Function.Resources
+}
+
+func convertBuildResourcesProfileV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	if in.Spec.ResourceConfiguration.Build.Profile != "" {
+		if out.ObjectMeta.Labels == nil {
+			out.ObjectMeta.Labels = map[string]string{}
+		}
+		out.ObjectMeta.Labels[serverlessv1alpha1.BuildResourcesPresetLabel] = in.Spec.ResourceConfiguration.Build.Profile
+	}
+}
+
+func convertFunctionResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Function != nil {
+		if in.Spec.ResourceConfiguration.Function.Resources != nil {
+			out.Spec.Resources = *in.Spec.ResourceConfiguration.Function.Resources
+		}
+		convertFunctionResourcesProfileV1Alpha2ToV1Alpha1(in, out)
+	}
+}
+
+func convertFunctionResourcesProfileV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
+	if in.Spec.ResourceConfiguration.Function.Profile != "" {
+		if out.ObjectMeta.Labels == nil {
+			out.ObjectMeta.Labels = map[string]string{}
+		}
+		out.ObjectMeta.Labels[serverlessv1alpha1.FunctionResourcesPresetLabel] = in.Spec.ResourceConfiguration.Function.Profile
 	}
 }
 
@@ -345,6 +394,7 @@ func (w *ConvertingWebhook) convertSourceV1Alpha2ToV1Alpha1(in *serverlessv1alph
 	repoName := ""
 	if in.Annotations != nil {
 		repoName = in.Annotations[v1alpha1GitRepoNameAnnotation]
+		delete(out.ObjectMeta.Annotations, v1alpha1GitRepoNameAnnotation)
 	}
 
 	out.Spec.Source = repoName

@@ -76,13 +76,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "e84bd3ab"
+      version: "PR-15610"
     function_webhook:
       name: "function-webhook"
-      version: "e84bd3ab"
+      version: "PR-15610"
     function_build_init:
       name: "function-build-init"
-      version: "e84bd3ab"
+      version: "PR-15610"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "f94d14f3"

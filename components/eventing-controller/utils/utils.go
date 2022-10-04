@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"math/rand"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -72,4 +74,18 @@ func BoolPtrEqual(b1, b2 *bool) bool {
 	}
 
 	return false
+}
+
+// for Random string generation.
+const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec,gochecknoglobals
+
+// GetRandString returns a random string of the given length.
+func GetRandString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }
