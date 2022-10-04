@@ -110,7 +110,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "05ca702a"
+      version: "PR-15576"
     git_server:
       name: "gitserver"
       version: "708f6a87"
