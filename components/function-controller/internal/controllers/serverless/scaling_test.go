@@ -323,7 +323,7 @@ func Test_isScalingEnabled(t *testing.T) {
 				},
 			}
 
-			if got := isScalingEnabled(instance); got != tt.want {
+			if got := isScaleConfigEnabled(instance); got != tt.want {
 				t.Errorf("isScalingEnabled() = %v, want %v", got, tt.want)
 			}
 		})

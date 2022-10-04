@@ -96,14 +96,14 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
-
+		one := int32(1)
 		two := int32(2)
 		four := int32(4)
 
 		t.Log("updating function to use fixed replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.ScaleConfig.MinReplicas = &two
 		function.Spec.ScaleConfig.MaxReplicas = &two
+		function.Spec.ScaleConfig.MinReplicas = &two
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("updating deployment with new number of replicas")
@@ -116,20 +116,20 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentUpdated))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
 		deployments := &appsv1.DeploymentList{}
 		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
 		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
 		deployment := &deployments.Items[0]
 		g.Expect(deployment).ToNot(gomega.BeNil())
-		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&two))
+		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&one))
 
 		t.Log("removing hpa")
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
 
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
@@ -151,10 +151,10 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 
 		t.Log("updating function to use scalable replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.ScaleConfig.MaxReplicas = &four
+		function.Spec.Replicas = &four
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
-		t.Log("creating hpa")
+		t.Log("Updating deployment")
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
@@ -166,19 +166,17 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonHorizontalPodAutoscalerCreated))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentUpdated))
 
+		// we scale the deployment directly using spec.Replicas, a new HPA shouldn't be created
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
 		g.Expect(err).To(gomega.BeNil())
-		g.Expect(hpaList.Items).To(gomega.HaveLen(1))
-
-		hpaSpec := hpaList.Items[0].Spec
-
-		g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-		g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-		g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+		g.Expect(hpaList.Items).To(gomega.HaveLen(0))
 
 		t.Log("deployment ready")
+		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
+		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
+		deployment = &deployments.Items[0]
 		deployment.Status.Conditions = []appsv1.DeploymentCondition{
 			{Type: appsv1.DeploymentAvailable, Status: corev1.ConditionTrue, Reason: MinimumReplicasAvailable},
 			{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionTrue, Reason: NewRSAvailableReason},
@@ -705,7 +703,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
-		g.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
+		g.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(inFunction.GetName()), "hpa should target the function")
 
 		t.Log("deleting deployment by 'accident' to check proper hpa-deployment reference")
 
@@ -731,7 +729,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(deployList.Items).To(gomega.HaveLen(1))
 
-		g.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
+		g.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()), "hpa should target function")
 	})
 
 	t.Run("should requeue before creating a job", func(t *testing.T) {
