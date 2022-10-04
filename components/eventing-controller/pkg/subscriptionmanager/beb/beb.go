@@ -25,7 +25,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
-	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	backendbeb "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"

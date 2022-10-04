@@ -258,7 +258,7 @@ func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription 
 	r.replaceStatusCondition(subscription, condition)
 
 	// remove finalizers from subscription
-	r.removeFinalizer(subscription)
+	removeFinalizer(subscription)
 
 	// update subscription CR with changes
 	if err := r.updateSubscription(ctx, subscription, logger); err != nil {
@@ -748,20 +748,6 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}(r, ctru)
 
 	return nil
-}
-
-func (r *Reconciler) removeFinalizer(sub *eventingv1alpha2.Subscription) {
-	var finalizers []string
-
-	// Build finalizer list without the one the controller owns
-	for _, finalizer := range sub.ObjectMeta.Finalizers {
-		if finalizer == eventingv1alpha2.Finalizer {
-			continue
-		}
-		finalizers = append(finalizers, finalizer)
-	}
-
-	sub.ObjectMeta.Finalizers = finalizers
 }
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry.

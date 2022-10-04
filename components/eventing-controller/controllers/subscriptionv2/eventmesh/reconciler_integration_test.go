@@ -1515,7 +1515,6 @@ var _ = BeforeSuite(func(done Done) {
 			filepath.Join("../../../", "config", "crd", "bases"),
 			filepath.Join("../../../", "config", "crd", "basesv1alpha2"),
 			filepath.Join("../../../", "config", "crd", "external"),
-			// filepath.Join("../../../", "config", "crd", "patches"), // @TODO: check if this is needed
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,

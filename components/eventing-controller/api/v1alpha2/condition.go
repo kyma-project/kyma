@@ -32,7 +32,7 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	// BEB Conditions
+	// EventMesh Conditions
 	ConditionReasonSubscriptionCreated        ConditionReason = "EventMesh Subscription created"
 	ConditionReasonSubscriptionCreationFailed ConditionReason = "EventMesh Subscription creation failed"
 	ConditionReasonSubscriptionActive         ConditionReason = "EventMesh Subscription active"
@@ -41,7 +41,6 @@ const (
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 	ConditionReasonWebhookCallStatus          ConditionReason = "EventMesh Subscription webhook call no errors status"
-	ConditionReasonOauth2ClientSyncFailed     ConditionReason = "Failed to sync OAuth2 Client Credentials"
 )
 
 // initializeConditions sets unset conditions to Unknown.

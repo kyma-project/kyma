@@ -357,12 +357,6 @@ func WithProtocolBEB() SubscriptionOpt {
 	}
 }
 
-//func WithProtocolSettings(p *eventingv1alpha2.ProtocolSettings) SubscriptionOpt {
-//	return func(s *eventingv1alpha2.Subscription) {
-//		s.Spec.ProtocolSettings = p
-//	}
-//}
-
 // AddEventType adds a new type to the subscription.
 func AddEventType(eventType string, subscription *eventingv1alpha2.Subscription) {
 	subscription.Spec.Types = append(subscription.Spec.Types, eventType)
@@ -399,12 +393,6 @@ func WithStandardTypeMatching() SubscriptionOpt {
 func WithTypeMatching(typeMatching eventingv1alpha2.TypeMatching) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.TypeMatching = typeMatching }
 }
-
-//// WithNotCleanEventType initializes subscription with a not clean event-type
-//// A not clean event-type means it contains none-alphanumeric characters.
-//func WithNotCleanEventType() SubscriptionOpt {
-//	return WithEventType(OrderCreatedEventTypeNotClean)
-//}
 
 // WithNotCleanType initializes subscription with a not clean event-type
 // A not clean event-type means it contains none-alphanumeric characters.

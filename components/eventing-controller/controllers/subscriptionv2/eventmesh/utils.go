@@ -35,6 +35,21 @@ func addFinalizer(sub *eventingv1alpha2.Subscription, logger *zap.SugaredLogger)
 	return nil
 }
 
+// removeFinalizer removes eventingv1alpha2 finalizer from the Subscription.
+func removeFinalizer(sub *eventingv1alpha2.Subscription) {
+	var finalizers []string
+
+	// Build finalizer list without the one the controller owns
+	for _, finalizer := range sub.ObjectMeta.Finalizers {
+		if finalizer == eventingv1alpha2.Finalizer {
+			continue
+		}
+		finalizers = append(finalizers, finalizer)
+	}
+
+	sub.ObjectMeta.Finalizers = finalizers
+}
+
 // getSvcNsAndName returns namespace and name of the svc from the URL.
 func getSvcNsAndName(url string) (string, string, error) {
 	parts := strings.Split(url, ".")
