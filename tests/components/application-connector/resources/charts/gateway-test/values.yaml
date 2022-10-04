@@ -5,11 +5,11 @@ global:
   images:
     gatewayTest:
       name: "gateway-test"
-      version: "29da0039"
+      version: "29da0039" # TODO
 
     mockApplication:
       name: "mock-app"
-      version: "29da0039"
+      version: "29da0039" # TODO
 
   serviceAccountName: "test-account"
   namespace: "test"
