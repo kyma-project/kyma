@@ -25,44 +25,4 @@ func (gs *GatewaySuite) TestComplex() {
 		gs.Nil(err, "Second request failed")
 		gs.Equal(200, res.StatusCode, "Second request failed")
 	})
-
-	gs.Run("Redirects", func() {
-
-		type testCase struct {
-			name     string
-			service  string
-			endpoint string
-		}
-
-		cases := []testCase{
-			{
-				name:     "Should redirect without auth",
-				service:  "redirect-ok",
-				endpoint: "/ok",
-			},
-			{
-				name:     "Should redirect basic auth",
-				service:  "redirect-basic",
-				endpoint: "/basic",
-			},
-			{
-				name:     "Should redirect to external services",
-				service:  "redirect-external",
-				endpoint: "/external",
-			},
-		}
-
-		for _, tc := range cases {
-			gs.Run(tc.name, func() {
-				http := httpd.NewCli(gs.T())
-
-				url := gatewayURL("complex-cases", tc.service)
-				gs.T().Log("Url:", url)
-
-				res, _, err := http.Get(url + tc.endpoint)
-				gs.Nil(err)
-				gs.Equal(200, res.StatusCode)
-			})
-		}
-	})
 }

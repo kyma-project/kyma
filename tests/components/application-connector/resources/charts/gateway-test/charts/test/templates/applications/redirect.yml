@@ -1,0 +1,41 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: redirects
+  namespace: "{{ .Values.global.namespace }}"
+spec:
+  description: Endpoints for redirect cases
+  skipVerify: true
+  labels:
+    app: redirect-cases
+  services:
+    - displayName: unsecured
+      name: unsecured
+      providerDisplayName: unsecured
+      description: Should rewrite redirects
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/unsecured"
+    - displayName: basic
+      name: basic
+      providerDisplayName: basic
+      description: Should rewrite redirects
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect/basic"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/basic"
+          credentials:
+            secretName: basic-test
+            type: Basic
+    - displayName: external
+      name: external
+      providerDisplayName: external
+      description: Should rewrite redirects
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect/external"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/external"

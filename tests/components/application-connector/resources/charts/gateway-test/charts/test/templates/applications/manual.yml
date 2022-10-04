@@ -21,34 +21,3 @@ spec:
             secretName: oauth-test
             authenticationUrl: "http://{{ .Values.global.mockServiceName }}.{{ .Values.global.namespace }}.svc.cluster.local:8080/v1/api/oauth/token?token_lifetime=5s"
             type: OAuth
-
-    - displayName: redirect-ok
-      name: redirect-ok
-      providerDisplayName: redirect-ok
-      description: Should rewrite redirects
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/redirect"
-    - displayName: redirect-basic
-      name: redirect-basic
-      providerDisplayName: redirect-basic
-      description: Should rewrite redirects
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/redirect"
-          credentials:
-            secretName: basic-test
-            type: Basic
-    - displayName: redirect-external
-      name: redirect-external
-      providerDisplayName: redirect-external
-      description: Should rewrite redirects
-      id: "{{ uuidv4 }}"
-      entries:
-        - type: API
-          targetUrl: "http://{{ .Values.mockServiceName }}.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/redirect"
-          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/positive-authorisation/redirect"
