@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -441,6 +443,31 @@ func Test_conditionEquals(t *testing.T) {
 			if gotEqualStatus := v1alpha2.ConditionEquals(tc.condition1, tc.condition2); tc.wantEqualStatus != gotEqualStatus {
 				t.Errorf("The conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
 			}
+		})
+	}
+}
+
+func Test_CreateMessageForConditionReasonSubscriptionCreated(t *testing.T) {
+	testCases := []struct {
+		name      string
+		givenName string
+		wantName  string
+	}{
+		{
+			name:      "with name 1",
+			givenName: "test-one",
+			wantName:  "EventMesh subscription name is: test-one",
+		},
+		{
+			name:      "with name 2",
+			givenName: "test-second",
+			wantName:  "EventMesh subscription name is: test-second",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.wantName, v1alpha2.CreateMessageForConditionReasonSubscriptionCreated(tc.givenName))
 		})
 	}
 }
