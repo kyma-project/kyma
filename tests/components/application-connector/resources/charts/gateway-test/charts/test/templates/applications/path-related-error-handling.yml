@@ -12,7 +12,7 @@ spec:
     - displayName: missing-srv-app
       name: missing-srv-app
       providerDisplayName: Kyma
-      description: Should return 500 when service and application are missing in the path
+      description: Should return 400 when service and application are missing in the path
       id: "{{ uuidv4 }}"
       entries:
         - type: API
@@ -21,7 +21,7 @@ spec:
     - displayName: missing-srv
       name: missing-srv
       providerDisplayName: Kyma
-      description: Should return 500 when service is missing in the path
+      description: Should return 400 when service is missing in the path
       id: "{{ uuidv4 }}"
       entries:
         - type: API

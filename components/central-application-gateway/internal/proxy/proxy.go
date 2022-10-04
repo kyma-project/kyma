@@ -80,7 +80,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
 	apiIdentifier, path, gwURL, err := p.extractPathFunc(u)
 	if err != nil {
-		return model.APIIdentifier{}, "", nil, apperrors.Internal("failed to extract API Identifier from path")
+		return model.APIIdentifier{}, "", nil, apperrors.WrongInput("failed to extract API Identifier from path")
 	}
 
 	return apiIdentifier, path, gwURL, nil
