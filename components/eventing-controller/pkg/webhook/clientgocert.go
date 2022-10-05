@@ -15,7 +15,8 @@ type IClientGoCert interface {
 
 type ClientGoCert struct{}
 
-func (r *ClientGoCert) generateSelfSignedCertKey(host string, alternateIPs []net.IP, alternateDNS []string) ([]byte, []byte, error) {
+func (r *ClientGoCert) generateSelfSignedCertKey(
+	host string, alternateIPs []net.IP, alternateDNS []string) ([]byte, []byte, error) {
 	return cert.GenerateSelfSignedCertKey(host, alternateIPs, alternateDNS)
 }
 

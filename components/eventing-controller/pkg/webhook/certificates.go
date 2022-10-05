@@ -58,7 +58,11 @@ type CertificateHandler struct {
 	logger       *logr.Logger
 }
 
-func NewCertificates(ctx context.Context, client client.Client, logger *logr.Logger, crdName string, secretName string) *Certificates {
+func NewCertificates(ctx context.Context,
+	client client.Client,
+	logger *logr.Logger,
+	crdName string,
+	secretName string) *Certificates {
 	return &Certificates{
 		secretHandler: &SecretHandler{
 			certHandler: &CertificateHandler{
@@ -135,7 +139,8 @@ func (r *Certificates) ensureWebhookCertificate(secretName, secretNamespace, ser
 	return nil
 }
 
-func (r *Certificates) containsConversionWebhookClientConfig(crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
+func (r *Certificates) containsConversionWebhookClientConfig(
+	crd *apiextensionsv1.CustomResourceDefinition) (bool, string) {
 	if crd.Spec.Conversion == nil {
 		return false, "conversion not found in " + r.crdName
 	}
@@ -253,15 +258,15 @@ func (r *SecretHandler) hasRequiredKeys(data map[string][]byte) bool {
 	return true
 }
 
-func (r *CertificateHandler) buildCert(namespace, serviceName string) (cert []byte, key []byte, err error) {
+func (r *CertificateHandler) buildCert(namespace, serviceName string) ([]byte, []byte, error) {
 	r.logger.Info("creating certificate")
 
-	cert, key, err = r.generateCertificates(serviceName, namespace)
+	crt, key, err := r.generateCertificates(serviceName, namespace)
 	if err != nil {
-		return cert, key, xerrors.Errorf("failed to generate certificates: %w", err)
+		return nil, nil, xerrors.Errorf("failed to generate certificates: %w", err)
 	}
 
-	return cert, key, nil
+	return crt, key, nil
 }
 
 func (r *CertificateHandler) generateCertificates(serviceName, namespace string) ([]byte, []byte, error) {

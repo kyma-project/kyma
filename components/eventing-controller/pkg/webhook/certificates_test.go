@@ -1,4 +1,4 @@
-package webhook
+package webhook //nolint:testpackage // because this is unit test
 
 import (
 	"context"
@@ -96,7 +96,8 @@ func TestWebhookHandler(t *testing.T) {
 		if err == nil {
 			// verify if secret is created
 			secret := &corev1.Secret{}
-			err = fakeClient.Get(ctx, types.NamespacedName{Name: secretName, Namespace: tc.crd.Spec.Conversion.Webhook.ClientConfig.Service.Namespace}, secret)
+			err = fakeClient.Get(ctx, types.NamespacedName{Name: secretName,
+				Namespace: tc.crd.Spec.Conversion.Webhook.ClientConfig.Service.Namespace}, secret)
 			if err != nil {
 				t.Errorf("%s: there must be the secret [%s] created", tc.description, secretName)
 			}
@@ -113,7 +114,6 @@ func TestWebhookHandler(t *testing.T) {
 			require.NoError(t, fakeClient.Delete(ctx, tc.crd))
 		}
 	}
-
 }
 
 func TestCertificateHandlerServiceAltNames(t *testing.T) {
@@ -130,19 +130,22 @@ func TestCertificateHandlerServiceAltNames(t *testing.T) {
 		wantAltNames []string
 	}{
 		{
-			serviceName:  "service-name1",
-			namespace:    "namespace1",
-			wantAltNames: []string{"service-name1", "service-name1.namespace1", "service-name1.namespace1.svc", "service-name1.namespace1.svc.cluster.local"},
+			serviceName: "service-name1",
+			namespace:   "namespace1",
+			wantAltNames: []string{"service-name1", "service-name1.namespace1", "service-name1.namespace1.svc",
+				"service-name1.namespace1.svc.cluster.local"},
 		},
 		{
-			serviceName:  "service-name2",
-			namespace:    "namespace2",
-			wantAltNames: []string{"service-name2", "service-name2.namespace2", "service-name2.namespace2.svc", "service-name2.namespace2.svc.cluster.local"},
+			serviceName: "service-name2",
+			namespace:   "namespace2",
+			wantAltNames: []string{"service-name2", "service-name2.namespace2", "service-name2.namespace2.svc",
+				"service-name2.namespace2.svc.cluster.local"},
 		},
 	}
 
 	for _, tc := range testCases {
-		if gotAltNames := certHandler.serviceAltNames(tc.serviceName, tc.namespace); !reflect.DeepEqual(gotAltNames, tc.wantAltNames) {
+		gotAltNames := certHandler.serviceAltNames(tc.serviceName, tc.namespace)
+		if !reflect.DeepEqual(gotAltNames, tc.wantAltNames) {
 			t.Errorf("get service alt names failed, want:[%v] but got:[%v]", tc.wantAltNames, gotAltNames)
 		}
 	}
