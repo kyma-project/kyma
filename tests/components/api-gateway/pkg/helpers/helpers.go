@@ -53,7 +53,7 @@ func (h *Helper) CallEndpointWithHeadersWithRetries(headerValue string, headerNa
 	}, predicate.TestPredicate)
 
 	if err != nil {
-		return fmt.Errorf("error calling endpoint %s err=%s", url, err)
+		return fmt.Errorf("error calling endpoint %s with %s=%s err=%s", url, headerName, headerValue, err)
 	}
 
 	return nil
