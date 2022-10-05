@@ -19,6 +19,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 )
@@ -56,27 +57,32 @@ func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
 	var cfg *rest.Config
 	var err error
 
+	gs.T().Logf("Initializing with in cluster config")
 	cfg, err = rest.InClusterConfig()
-	gs.Assert().Nil(err)
+	gs.Assert().NoError(err)
 
 	if err != nil {
-		cfg, err = clientcmd.BuildConfigFromFlags("", gs.testConfig.KubeconfigPath)
-		gs.Require().Nil(err)
+		gs.T().Logf("Initializing kubeconfig")
+		kubeconfig, ok := os.LookupEnv("KUBECONFIG")
+		gs.Require().True(ok)
+
+		cfg, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		gs.Require().NoError(err)
 	}
 
 	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
-	gs.Require().Nil(err)
+	gs.Require().NoError(err)
 
 	gs.compassConnectionClientSet, err = ccclientset.NewForConfig(cfg)
-	gs.Require().Nil(err)
+	gs.Require().NoError(err)
 
 	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
-	gs.Require().Nil(err)
+	gs.Require().NoError(err)
 }
 
 func (gs *CompassRuntimeAgentSuite) initComparators() {
 	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, gs.testConfig.TestNamespace, gs.testConfig.IntegrationNamespace)
-	gs.Require().Nil(err)
+	gs.Require().NoError(err)
 
 	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
 	gs.appComparator, err = applications.NewComparator(gs.Assertions, secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
@@ -88,13 +94,13 @@ func (gs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
 	gs.formationName = "cratest" + random.RandomString(5)
 
 	gs.rollbackTestFunc, err = gs.compassRuntimeAgentConfigurator.Do(runtimeName, gs.formationName)
-	gs.Require().Nil(err)
+	gs.Require().NoError(err)
 }
 
 func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	var err error
 	gs.directorClient, err = gs.makeCompassDirectorClient()
-	gs.Require().Nil(err)
+	gs.Require().NoError(err)
 
 	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(
 		compassruntimeagentinit.NewCompassConfigurator(gs.directorClient, gs.testConfig.TestingTenant),
