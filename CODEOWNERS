@@ -25,8 +25,8 @@
 /components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /components/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao @PK85 @dbadura
-/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/telemetry-operator @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
@@ -41,7 +41,7 @@
 /installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
@@ -58,7 +58,7 @@
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /resources/istio-resources/files/dashboards @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
@@ -77,8 +77,8 @@
 
 # Fast Integration Tests
 /tests/fast-integration @lindnerby @skhalash @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
-/tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @jaroslaw-pieszka
 /tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @jaroslaw-pieszka
 /tests/fast-integration/skr-aws-upgrade-integration @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
@@ -99,7 +99,7 @@
 /tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @muralov
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
