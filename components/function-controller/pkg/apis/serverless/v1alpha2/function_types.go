@@ -166,13 +166,6 @@ type PodTemplate struct {
 }
 
 type Templates struct {
-	// Standard object's metadata.
-	// This metadata is applied on functionPod and buildPod.
-	// Can be overwritten by specific pod metadata
-	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-	// +optional
-	Metadata *MetadataTemplate `json:"metadata,omitempty"`
-
 	// Additional specification for build job's pod
 	// +optional
 	BuildJob *PodTemplate `json:"buildJob,omitempty"`
@@ -215,14 +208,12 @@ type FunctionSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
-	//DEPRECATED: use templates.metadata for build job and function's pod or
-	//templates.functionTemplatePod.metadata for function's pod
-	//templates.buildJobTemplate.metadata for function's build job
+	//DEPRECATED: use templates.functionPod.metadata for function's pod
+	//templates.buildJob.metadata for function's build job
 	Template *Template `json:"template,omitempty"`
 
 	// +optional
 	// Additional configuration of function's created pods
-	// NOTE: Not implemented yet
 	Templates *Templates `json:"templates,omitempty"`
 }
 

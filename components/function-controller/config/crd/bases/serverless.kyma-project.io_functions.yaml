@@ -593,9 +593,8 @@ spec:
                     type: object
                 type: object
               template:
-                description: 'DEPRECATED: use templates.metadata for build job and
-                  function''s pod or templates.functionTemplatePod.metadata for function''s
-                  pod templates.buildJobTemplate.metadata for function''s build job'
+                description: 'DEPRECATED: use templates.functionPod.metadata for function''s
+                  pod templates.buildJob.metadata for function''s build job'
                 properties:
                   annotations:
                     additionalProperties:
@@ -607,8 +606,7 @@ spec:
                     type: object
                 type: object
               templates:
-                description: 'Additional configuration of function''s created pods
-                  NOTE: Not implemented yet'
+                description: Additional configuration of function's created pods
                 properties:
                   buildJob:
                     description: Additional specification for build job's pod
@@ -4237,22 +4235,6 @@ spec:
                           - name
                           type: object
                         type: array
-                    type: object
-                  metadata:
-                    description: 'Standard object''s metadata. This metadata is applied
-                      on functionPod and buildPod. Can be overwritten by specific
-                      pod metadata More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
-                    properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        description: Additional annotations
-                        type: object
-                      labels:
-                        additionalProperties:
-                          type: string
-                        description: Additional labels
-                        type: object
                     type: object
                 type: object
             required:
