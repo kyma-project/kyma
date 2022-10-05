@@ -28,6 +28,7 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
 	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
+	tracepipelinereconciler "github.com/kyma-project/kyma/components/telemetry-operator/controller/tracepipeline"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/dryrun"
@@ -57,6 +58,8 @@ var (
 	deniedFilterPlugins        string
 	deniedOutputPlugins        string
 	enableLeaderElection       bool
+	enableLogging              bool
+	enableTracing              bool
 	fluentBitConfigMap         string
 	fluentBitSectionsConfigMap string
 	fluentBitParsersConfigMap  string
@@ -101,6 +104,8 @@ func main() {
 	flag.DurationVar(&syncPeriod, "sync-period", 1*time.Hour, "minimum frequency at which watched resources are reconciled")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	flag.BoolVar(&enableLogging, "enable-logging", true, "Enable configurable logging.")
+	flag.BoolVar(&enableTracing, "enable-tracing", false, "Enable configurable tracing.")
 	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "sections-cm-name", "", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
 	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent Bit Parsers to be written by Fluent Bit controller")
@@ -154,17 +159,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
-	mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
+	if enableLogging {
+		setupLog.Info("Starting with logging controllers")
+		mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
+		mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
 
-	if err = createLogPipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
-		os.Exit(1)
+		if err = createLogPipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
+			os.Exit(1)
+		}
+
+		if err = createLogParserReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
+			os.Exit(1)
+		}
 	}
 
-	if err = createLogParserReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "Failed to create controller", "controller", "LogParser")
-		os.Exit(1)
+	if enableTracing {
+		setupLog.Info("Starting with tracing controller")
+		if err = createTracePipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "Failed to create controller", "controller", "TracePipeline")
+			os.Exit(1)
+		}
 	}
 
 	//+kubebuilder:scaffold:builder
@@ -254,6 +270,11 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 		client,
 		logparservalidation.NewParserValidator(),
 		dryrun.NewDryRunner(client, createDryRunConfig()))
+}
+
+func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
+	config := tracepipelinereconciler.Config{}
+	return tracepipelinereconciler.NewReconciler(client, config)
 }
 
 func createDryRunConfig() dryrun.Config {

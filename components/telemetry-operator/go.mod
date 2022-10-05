@@ -7,9 +7,11 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20220208093900-75da62ce99a9
 	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/ginkgo/v2 v2.0.0
 	github.com/onsi/gomega v1.18.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/common v0.32.1
 	github.com/stretchr/testify v1.7.0
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
@@ -66,7 +68,6 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect

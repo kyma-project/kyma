@@ -1,0 +1,12 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  labels:
+    app.kubernetes.io/name: tracepipeline
+    app.kubernetes.io/instance: tracepipeline-sample
+    app.kubernetes.io/part-of: telemetry-operator
+    app.kuberentes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: telemetry-operator
+  name: tracepipeline-sample
+spec:
+  # TODO(user): Add fields here

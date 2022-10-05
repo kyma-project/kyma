@@ -90,3 +90,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - tracepipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - tracepipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - tracepipelines/status
+  verbs:
+  - get
+  - patch
+  - update
