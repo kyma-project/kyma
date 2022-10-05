@@ -9,7 +9,7 @@ global:
 
     mockApplication:
       name: "mock-app"
-      version: "29da0039"
+      version: "de411ec6"
 
   serviceAccountName: "test-account"
   namespace: "test"
