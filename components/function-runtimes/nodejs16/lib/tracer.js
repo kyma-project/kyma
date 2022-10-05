@@ -20,17 +20,6 @@ const ignoredTargets = [
 
 function setupTracer(serviceName){
 
-  const traceCollectorEndpoint = process.env.TRACE_COLLECTOR_ENDPOINT;
-
-  if(!isTraceCollectorAvailable(traceCollectorEndpoint)){
-    console.log("Trace collector not installed. Skipping tracer setup...")
-    return;
-  }
-
-  const exporter = new OTLPTraceExporter({
-    url: traceCollectorEndpoint
-  });
-
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
@@ -59,7 +48,24 @@ function setupTracer(serviceName){
     ],
   });
 
-  provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+
+  const traceCollectorEndpoint = process.env.TRACE_COLLECTOR_ENDPOINT;
+
+  if(traceCollectorEndpoint){
+    axios(traceCollectorEndpoint).catch((err) => {
+      if (err.response && err.response.status === 405) {
+        // TODO: resolve dependencies via serverless operator
+        // 405 is the right status code for the GET method if jaeger service exists
+        // because the only allowed method is POST and usage of other methods are not allowe
+        // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
+        const exporter = new OTLPTraceExporter({
+          url: traceCollectorEndpoint
+        });
+    
+        provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+      }
+    });
+  }
 
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
   provider.register({
@@ -74,24 +80,6 @@ module.exports = {
     startNewSpan
 }
 
-async function isTraceCollectorAvailable(endpoint){
-  let traceCollectorAvailable = false;
-  console.log('checking availibility of trace collector', endpoint);  
-  await axios(endpoint)
-  .then(response => {
-     console.log('response from trace collector', response);  
-  })
-  .catch((err) => {
-    if (err.response && err.response.status === 405) {
-      // TODO: resolve dependencies via serverless operator
-      // 405 is the right status code for the GET method if jaeger service exists
-      // because the only allowed method is POST and usage of other methods are not allowe
-      // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
-      traceCollectorAvailable = true;
-    }
-  });
-  return traceCollectorAvailable;
-}
 
 function startNewSpan(name, tracer){
   const currentSpan = opentelemetry.trace.getSpan(opentelemetry.context.active());
