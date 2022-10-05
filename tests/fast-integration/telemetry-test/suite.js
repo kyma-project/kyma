@@ -183,6 +183,47 @@ describe('Telemetry Operator', function() {
         });
       });
 
+      context('Custom Output', function() {
+        const backend1Secret = loadTestData('http-backend-1-secret.yaml');
+        const backend1Host = backend1Secret[0].stringData.host;
+        const backend2Secret = loadTestData('http-backend-2-secret.yaml');
+        const backend2Host = backend2Secret[0].stringData.host;
+
+        it(`Should create host secret with host set to '${backend1Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-1-secret.yaml'));
+        });
+
+        const pipeline = loadTestData('logpipeline-output-custom.yaml');
+        const pipelineName = pipeline[0].metadata.name;
+
+        it(`Should create LogPipeline '${pipelineName}'`, async function() {
+          await k8sApply(pipeline);
+          await waitForLogPipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should push logs to '${backend1Host}'`, async function() {
+          const labels = '{namespace="http-backend-1"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should update host secret with host set to '${backend2Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-2-secret.yaml'));
+          await sleep(5000);
+          await waitForLogPipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should detect secret update and push logs to '${backend2Host}'`, async function() {
+          const labels = '{namespace="http-backend-2"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should delete LogPipeline '${pipelineName}'`, async function() {
+          await k8sDelete(pipeline);
+        });
+      });
+
       context('Input', function() {
         context('Drop annotations, keep labels', function() {
           const pipeline = loadTestData('logpipeline-input-keep-labels.yaml');
