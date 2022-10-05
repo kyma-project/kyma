@@ -32,6 +32,10 @@ type Condition struct {
 type ConditionReason string
 
 const (
+	// JetStream Conditions
+	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
+	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
+
 	// EventMesh Conditions
 	ConditionReasonSubscriptionCreated        ConditionReason = "EventMesh Subscription created"
 	ConditionReasonSubscriptionCreationFailed ConditionReason = "EventMesh Subscription creation failed"
