@@ -1,8 +1,8 @@
-package compassruntimeagentinit
+package init
 
 import (
 	"github.com/hashicorp/go-multierror"
-	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/init/types"
 	"k8s.io/client-go/kubernetes"
 )
 

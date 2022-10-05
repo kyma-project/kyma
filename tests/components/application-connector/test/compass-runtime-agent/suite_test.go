@@ -6,10 +6,10 @@ import (
 	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	ccclientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications"
-	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit"
-	compassruntimeagentinittypes "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/director"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/graphql"
+	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/init"
+	compassruntimeagentinittypes "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/init/types"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/oauth"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
 	"github.com/pkg/errors"
@@ -29,7 +29,7 @@ type CompassRuntimeAgentSuite struct {
 	applicationsClientSet           *cli.Clientset
 	compassConnectionClientSet      *ccclientset.Clientset
 	coreClientSet                   *kubernetes.Clientset
-	compassRuntimeAgentConfigurator compassruntimeagentinit.CompassRuntimeAgentConfigurator
+	compassRuntimeAgentConfigurator init.CompassRuntimeAgentConfigurator
 	directorClient                  director.Client
 	appComparator                   applications.Comparator
 	testConfig                      config
@@ -102,12 +102,12 @@ func (cs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	cs.directorClient, err = cs.makeCompassDirectorClient()
 	cs.Require().NoError(err)
 
-	cs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(
-		compassruntimeagentinit.NewCompassConfigurator(cs.directorClient, cs.testConfig.TestingTenant),
-		compassruntimeagentinit.NewCertificateSecretConfigurator(cs.coreClientSet),
-		compassruntimeagentinit.NewConfigurationSecretConfigurator(cs.coreClientSet),
-		compassruntimeagentinit.NewCompassConnectionCRConfiguration(cs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
-		compassruntimeagentinit.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassSystemNamespace),
+	cs.compassRuntimeAgentConfigurator = init.NewCompassRuntimeAgentConfigurator(
+		init.NewCompassConfigurator(cs.directorClient, cs.testConfig.TestingTenant),
+		init.NewCertificateSecretConfigurator(cs.coreClientSet),
+		init.NewConfigurationSecretConfigurator(cs.coreClientSet),
+		init.NewCompassConnectionCRConfiguration(cs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
+		init.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassSystemNamespace),
 		cs.testConfig.OAuthCredentialsNamespace)
 }
 

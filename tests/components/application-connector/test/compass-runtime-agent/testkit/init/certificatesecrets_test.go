@@ -1,4 +1,4 @@
-package compassruntimeagentinit
+package init
 
 import (
 	"context"
@@ -23,13 +23,13 @@ func TestCertificateSecrets(t *testing.T) {
 		require.NoError(t, err)
 
 		// given
-		caCertSecret := createSecret("newCaSecret", "test")
-		clientCertSecret := createSecret("newClientSetSecret", "test")
+		caCertSecret := createSecret("newCaSecret", IstioSystemNamespace)
+		clientCertSecret := createSecret("newClientSetSecret", CompassSystemNamespace)
 
-		_, err = fakeKubernetesInterface.CoreV1().Secrets("test").Create(context.TODO(), caCertSecret, meta.CreateOptions{})
+		_, err = fakeKubernetesInterface.CoreV1().Secrets(IstioSystemNamespace).Create(context.TODO(), caCertSecret, meta.CreateOptions{})
 		require.NoError(t, err)
 
-		_, err = fakeKubernetesInterface.CoreV1().Secrets("test").Create(context.TODO(), clientCertSecret, meta.CreateOptions{})
+		_, err = fakeKubernetesInterface.CoreV1().Secrets(CompassSystemNamespace).Create(context.TODO(), clientCertSecret, meta.CreateOptions{})
 		require.NoError(t, err)
 
 		// when
@@ -46,7 +46,7 @@ func TestCertificateSecrets(t *testing.T) {
 		require.True(t, k8serrors.IsNotFound(err))
 	})
 
-	t.Run("should return error when rollback function failed", func(t *testing.T) {
+	t.Run("should not return error when rollback function tries to delete non-existent secrets", func(t *testing.T) {
 		// given
 		fakeKubernetesInterface := fake.NewSimpleClientset()
 
@@ -59,8 +59,9 @@ func TestCertificateSecrets(t *testing.T) {
 
 		// when
 		err = rollbackFunc()
-		require.Error(t, err)
+		require.NoError(t, err)
 	})
+	// TODO: consider a case when rollback function fails
 }
 
 func createSecret(name, namespace string) *v1.Secret {

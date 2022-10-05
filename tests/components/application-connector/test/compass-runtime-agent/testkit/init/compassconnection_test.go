@@ -1,4 +1,4 @@
-package compassruntimeagentinit
+package init
 
 import (
 	"context"
@@ -40,6 +40,8 @@ func TestCompassConnectionConfigurator(t *testing.T) {
 		_, err = compassConnectionCRFake.Get(context.TODO(), "compass-connection-backup", meta.GetOptions{})
 		require.NoError(t, err)
 
+		_, err = compassConnectionCRFake.Create(context.TODO(), compassConnection, meta.CreateOptions{})
+		require.NoError(t, err)
 		// when
 		err = rollbackFunc()
 
@@ -49,7 +51,7 @@ func TestCompassConnectionConfigurator(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("should return error when rollback function failed", func(t *testing.T) {
+	t.Run("should not return error when Compass Connection CR doesn't exist", func(t *testing.T) {
 		// given
 		compassConnectionCRFake := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 		compassConnection := &v1alpha1.CompassConnection{
@@ -80,4 +82,6 @@ func TestCompassConnectionConfigurator(t *testing.T) {
 		// then
 		require.Error(t, err)
 	})
+
+	// TODO: consider a case when rollback function fails
 }

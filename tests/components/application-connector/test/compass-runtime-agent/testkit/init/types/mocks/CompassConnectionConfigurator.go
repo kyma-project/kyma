@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	types "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
+	types "github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/init/types"
 	mock "github.com/stretchr/testify/mock"
 )
 
