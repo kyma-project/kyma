@@ -42,7 +42,7 @@ RUN addgroup -g 1000 node \
     && apk add --no-cache --virtual .build-deps \
         curl \
     && ARCH= && alpineArch="$(apk --print-arch)" \
-      && case "${alpineArch##*-}" in \
+      && case "${alpineArch}" in \
         x86_64) \
           ARCH='x64' \
           CHECKSUM="e5eb941bd3d5b7ab197e27c353049e6e8fd03d39c4949ea393f5af4ba8ef020a" \
