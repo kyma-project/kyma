@@ -37,96 +37,96 @@ type CompassRuntimeAgentSuite struct {
 	formationName                   string
 }
 
-func (gs *CompassRuntimeAgentSuite) SetupSuite() {
+func (cs *CompassRuntimeAgentSuite) SetupSuite() {
 
-	err := envconfig.InitWithPrefix(&gs.testConfig, "APP")
-	gs.Require().Nil(err)
+	err := envconfig.InitWithPrefix(&cs.testConfig, "APP")
+	cs.Require().Nil(err)
 
-	gs.T().Logf("Config: %s", gs.testConfig.String())
+	cs.T().Logf("Config: %s", cs.testConfig.String())
 
-	gs.T().Logf("Init Kubernetes APIs")
-	gs.initKubernetesApis()
+	cs.T().Logf("Init Kubernetes APIs")
+	cs.initKubernetesApis()
 
-	gs.T().Logf("Configure Compass Runtime Agent for test")
-	gs.initCompassRuntimeAgentConfigurator()
-	gs.initComparators()
-	gs.configureRuntimeAgent()
+	cs.T().Logf("Configure Compass Runtime Agent for test")
+	cs.initCompassRuntimeAgentConfigurator()
+	cs.initComparators()
+	cs.configureRuntimeAgent()
 }
 
-func (gs *CompassRuntimeAgentSuite) initKubernetesApis() {
+func (cs *CompassRuntimeAgentSuite) initKubernetesApis() {
 	var cfg *rest.Config
 	var err error
 
-	gs.T().Logf("Initializing with in cluster config")
+	cs.T().Logf("Initializing with in cluster config")
 	cfg, err = rest.InClusterConfig()
-	gs.Assert().NoError(err)
+	cs.Assert().NoError(err)
 
 	if err != nil {
-		gs.T().Logf("Initializing kubeconfig")
+		cs.T().Logf("Initializing kubeconfig")
 		kubeconfig, ok := os.LookupEnv("KUBECONFIG")
-		gs.Require().True(ok)
+		cs.Require().True(ok)
 
 		cfg, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-		gs.Require().NoError(err)
+		cs.Require().NoError(err)
 	}
 
-	gs.applicationsClientSet, err = cli.NewForConfig(cfg)
-	gs.Require().NoError(err)
+	cs.applicationsClientSet, err = cli.NewForConfig(cfg)
+	cs.Require().NoError(err)
 
-	gs.compassConnectionClientSet, err = ccclientset.NewForConfig(cfg)
-	gs.Require().NoError(err)
+	cs.compassConnectionClientSet, err = ccclientset.NewForConfig(cfg)
+	cs.Require().NoError(err)
 
-	gs.coreClientSet, err = kubernetes.NewForConfig(cfg)
-	gs.Require().NoError(err)
+	cs.coreClientSet, err = kubernetes.NewForConfig(cfg)
+	cs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) initComparators() {
-	secretComparator, err := applications.NewSecretComparator(gs.Require(), gs.coreClientSet, gs.testConfig.TestNamespace, gs.testConfig.IntegrationNamespace)
-	gs.Require().NoError(err)
+func (cs *CompassRuntimeAgentSuite) initComparators() {
+	secretComparator, err := applications.NewSecretComparator(cs.Require(), cs.coreClientSet, cs.testConfig.OAuthCredentialsNamespace, cs.testConfig.IntegrationNamespace)
+	cs.Require().NoError(err)
 
-	applicationGetter := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	gs.appComparator, err = applications.NewComparator(gs.Assertions, secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
+	applicationGetter := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
+	cs.appComparator, err = applications.NewComparator(cs.Assertions, secretComparator, applicationGetter, "kyma-integration", "kyma-integration")
 }
 
-func (gs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
+func (cs *CompassRuntimeAgentSuite) configureRuntimeAgent() {
 	var err error
 	runtimeName := "cratest"
-	gs.formationName = "cratest" + random.RandomString(5)
+	cs.formationName = "cratest" + random.RandomString(5)
 
-	gs.rollbackTestFunc, err = gs.compassRuntimeAgentConfigurator.Do(runtimeName, gs.formationName)
-	gs.Require().NoError(err)
+	cs.rollbackTestFunc, err = cs.compassRuntimeAgentConfigurator.Do(runtimeName, cs.formationName)
+	cs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
+func (cs *CompassRuntimeAgentSuite) initCompassRuntimeAgentConfigurator() {
 	var err error
-	gs.directorClient, err = gs.makeCompassDirectorClient()
-	gs.Require().NoError(err)
+	cs.directorClient, err = cs.makeCompassDirectorClient()
+	cs.Require().NoError(err)
 
-	gs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(
-		compassruntimeagentinit.NewCompassConfigurator(gs.directorClient, gs.testConfig.TestingTenant),
-		compassruntimeagentinit.NewCertificateSecretConfigurator(gs.coreClientSet),
-		compassruntimeagentinit.NewConfigurationSecretConfigurator(gs.coreClientSet),
-		compassruntimeagentinit.NewCompassConnectionCRConfiguration(gs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
-		compassruntimeagentinit.NewDeploymentConfiguration(gs.coreClientSet, "compass-runtime-agent", gs.testConfig.CompassSystemNamespace),
-		gs.testConfig.TestNamespace)
+	cs.compassRuntimeAgentConfigurator = compassruntimeagentinit.NewCompassRuntimeAgentConfigurator(
+		compassruntimeagentinit.NewCompassConfigurator(cs.directorClient, cs.testConfig.TestingTenant),
+		compassruntimeagentinit.NewCertificateSecretConfigurator(cs.coreClientSet),
+		compassruntimeagentinit.NewConfigurationSecretConfigurator(cs.coreClientSet),
+		compassruntimeagentinit.NewCompassConnectionCRConfiguration(cs.compassConnectionClientSet.CompassV1alpha1().CompassConnections()),
+		compassruntimeagentinit.NewDeploymentConfiguration(cs.coreClientSet, "compass-runtime-agent", cs.testConfig.CompassSystemNamespace),
+		cs.testConfig.OAuthCredentialsNamespace)
 }
 
-func (gs *CompassRuntimeAgentSuite) TearDownSuite() {
-	if gs.rollbackTestFunc != nil {
-		gs.T().Logf("Restore Compass Runtime Agent configuration")
-		err := gs.rollbackTestFunc()
+func (cs *CompassRuntimeAgentSuite) TearDownSuite() {
+	if cs.rollbackTestFunc != nil {
+		cs.T().Logf("Restore Compass Runtime Agent configuration")
+		err := cs.rollbackTestFunc()
 
 		if err != nil {
-			gs.T().Logf("Failed to rollback test configuration: %v", err)
+			cs.T().Logf("Failed to rollback test configuration: %v", err)
 		}
 	}
 	_, err := http.Post("http://localhost:15000/quitquitquit", "", nil)
 	if err != nil {
-		gs.T().Logf("Failed to quit sidecar: %v", err)
+		cs.T().Logf("Failed to quit sidecar: %v", err)
 	}
 	_, err = http.Post("http://localhost:15020/quitquitquit", "", nil)
 	if err != nil {
-		gs.T().Logf("Failed to quit sidecar: %v", err)
+		cs.T().Logf("Failed to quit sidecar: %v", err)
 	}
 }
 
@@ -134,29 +134,29 @@ func TestCompassRuntimeAgentSuite(t *testing.T) {
 	suite.Run(t, new(CompassRuntimeAgentSuite))
 }
 
-func (gs *CompassRuntimeAgentSuite) makeCompassDirectorClient() (director.Client, error) {
+func (cs *CompassRuntimeAgentSuite) makeCompassDirectorClient() (director.Client, error) {
 
-	secretsRepo := gs.coreClientSet.CoreV1().Secrets(gs.testConfig.TestNamespace)
+	secretsRepo := cs.coreClientSet.CoreV1().Secrets(cs.testConfig.OAuthCredentialsNamespace)
 
 	if secretsRepo == nil {
-		return nil, fmt.Errorf("could not access secrets in %s namespace", gs.testConfig.TestNamespace)
+		return nil, fmt.Errorf("could not access secrets in %s namespace", cs.testConfig.OAuthCredentialsNamespace)
 	}
 	client := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: gs.testConfig.SkipDirectorCertVerification},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: cs.testConfig.SkipDirectorCertVerification},
 		},
 		Timeout: 10 * time.Second,
 	}
 
-	gqlClient := graphql.NewGraphQLClient(gs.testConfig.DirectorURL, true, gs.testConfig.SkipDirectorCertVerification)
+	gqlClient := graphql.NewGraphQLClient(cs.testConfig.DirectorURL, true, cs.testConfig.SkipDirectorCertVerification)
 	if gqlClient == nil {
-		return nil, fmt.Errorf("could not create GraphQLClient for endpoint %s", gs.testConfig.DirectorURL)
+		return nil, fmt.Errorf("could not create GraphQLClient for endpoint %s", cs.testConfig.DirectorURL)
 	}
 
-	oauthClient, err := oauth.NewOauthClient(client, secretsRepo, gs.testConfig.OauthCredentialsSecretName)
+	oauthClient, err := oauth.NewOauthClient(client, secretsRepo, cs.testConfig.OAuthCredentialsSecretName)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not create OAuthClient client")
 	}
 
-	return director.NewDirectorClient(gqlClient, oauthClient, gs.testConfig.TestingTenant), nil
+	return director.NewDirectorClient(gqlClient, oauthClient, cs.testConfig.TestingTenant), nil
 }

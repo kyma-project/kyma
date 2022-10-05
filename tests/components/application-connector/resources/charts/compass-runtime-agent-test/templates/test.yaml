@@ -21,6 +21,6 @@ spec:
               value: {{ .Values.skipDirectorCertVerification | quote }}
             - name: APP_OAUTH_CREDENTIALS_SECRET_NAME
               value: {{.Values.oauthCredentialsSecretName}}
-            - name: APP_TEST_CREDENTIALS_NAMESPACE
+            - name: APP_OAUTH_CREDENTIALS_NAMESPACE
               value: {{ .Values.oauthCredentialsNamespace }}
   backoffLimit: 0

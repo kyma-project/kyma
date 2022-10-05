@@ -2,6 +2,8 @@ package connector
 
 import (
 	"context"
+	"testing"
+
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
 	gql "github.com/machinebox/graphql"
@@ -9,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 const (

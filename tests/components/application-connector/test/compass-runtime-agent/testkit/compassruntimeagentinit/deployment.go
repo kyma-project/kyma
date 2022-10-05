@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/compassruntimeagentinit/types"
 	"github.com/pkg/errors"
 	v12 "k8s.io/api/apps/v1"
@@ -69,17 +68,6 @@ func (dc deploymentConfiguration) Do(newCANamespacedSecretName, newClusterNamesp
 	rollbackDeploymentFunc := newRollbackDeploymentFunc(dc.deploymentName, previousConfigSecretNamespacedName, previousCASecretNamespacedName, previousCertSecretNamespacedName, deploymentInterface)
 
 	err = waitForRollout(dc.deploymentName, deploymentInterface)
-	if err != nil {
-		var multi *multierror.Error
-
-		multierror.Append(multi, errors.Wrap(err, "failed to update Compass Runtime Agent deployment"))
-
-		err := rollbackDeploymentFunc()
-		if err != nil {
-			multierror.Append(multi, err)
-		}
-		return nil, multi.ErrorOrNil()
-	}
 
 	return rollbackDeploymentFunc, err
 }
