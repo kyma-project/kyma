@@ -54,7 +54,7 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
 	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
-		codeRewriter(err, rw)
+		codeRewriter(rw, err)
 	}
 	return &httputil.ReverseProxy{Director: director, Transport: transport, ErrorHandler: errorHandler}, nil
 }
@@ -145,7 +145,7 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 	return gatewayURL
 }
 
-func codeRewriter(err error, rw http.ResponseWriter) {
+func codeRewriter(rw http.ResponseWriter, err error) {
 
 	if strings.Contains("context deadline exceeded", err.Error()) {
 		rw.WriteHeader(http.StatusGatewayTimeout)
