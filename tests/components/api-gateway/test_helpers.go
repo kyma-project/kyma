@@ -121,7 +121,7 @@ func generateRandomString(length int) string {
 }
 
 func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
-	var tokenOAUTH *oauth2.Token
+	var tokenOAUTH oauth2.Token
 	err := retry.Do(
 		func() error {
 			token, err := oauth2Cfg.Token(context.Background())
@@ -133,11 +133,11 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 				return fmt.Errorf("got empty OAuth2 token")
 			}
 
-			tokenOAUTH = token
+			tokenOAUTH = *token
 			return nil
 		},
 		retry.Delay(500*time.Millisecond), retry.Attempts(3))
-	return tokenOAUTH, err
+	return &tokenOAUTH, err
 }
 
 func generateReport() {

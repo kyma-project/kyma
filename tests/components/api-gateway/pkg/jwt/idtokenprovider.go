@@ -62,8 +62,8 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 		}
 		return nil
 	}
-	_, _ = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
-	return token, nil
+	_, err = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
+	return token, err
 }
 
 func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
