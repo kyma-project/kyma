@@ -1,11 +1,10 @@
 package jetstream
 
 import (
-	"strings"
-
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -21,7 +20,7 @@ func containsFinalizer(sub *eventingv1alpha2.Subscription) bool {
 
 // missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map.
 func missingSubscriptionErr(err error) bool {
-	return strings.Contains(err.Error(), jetstreamv2.MissingNATSSubscriptionMsg)
+	return errors.Is(err, jetstreamv2.ErrMissingSubscription)
 }
 
 // setSubReadyStatus returns true if the subscription ready status has changed.

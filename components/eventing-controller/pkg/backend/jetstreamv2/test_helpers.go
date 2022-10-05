@@ -26,7 +26,7 @@ import (
 const (
 	DefaultStreamName    = "kyma"
 	DefaultMaxReconnects = 10
-	DefaultMaxInFlights  = env.DefaultMaxInFlight
+	DefaultMaxInFlights  = 10
 )
 
 // TestEnvironment provides mocked resources for tests.

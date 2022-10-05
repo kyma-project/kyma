@@ -2,7 +2,6 @@ package v1alpha2
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -90,19 +89,13 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 }
 
 // GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer
-// and returns the error in case the conversion is not successful.
-func (s *Subscription) GetMaxInFlightMessages() (int, error) {
-	if s.Spec.Config == nil {
-		return env.DefaultMaxInFlight, nil
-	}
-	if _, ok := s.Spec.Config[MaxInFlightMessages]; !ok {
-		return env.DefaultMaxInFlight, nil
-	}
+func (s *Subscription) GetMaxInFlightMessages(defaults *env.DefaultSubscriptionConfig) int {
+	// TODO: move this to validation webhook
 	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
 	if err != nil {
-		return -1, err
+		return defaults.MaxInFlightMessages
 	}
-	return val, nil
+	return val
 }
 
 // InitializeEventTypes initializes the SubscriptionStatus.Types with an empty slice of EventType.
@@ -180,16 +173,6 @@ func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
 		return nil, err
 	}
 	return &unstructured.Unstructured{Object: object}, nil
-}
-
-// UpdateSubConfig updates the config with defaults if an invalid value was provided
-// and  returns true if the subscription config was changed.
-func (s *Subscription) UpdateSubConfig(defaults *env.DefaultSubscriptionConfig) bool {
-	if _, err := s.GetMaxInFlightMessages(); err != nil {
-		return false
-	}
-	s.Spec.Config[MaxInFlightMessages] = fmt.Sprint(defaults.MaxInFlightMessages)
-	return true
 }
 
 //+kubebuilder:object:root=true

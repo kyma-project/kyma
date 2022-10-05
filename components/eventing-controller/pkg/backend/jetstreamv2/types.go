@@ -42,6 +42,7 @@ type JetStream struct {
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector
 	cleaner           cleaner.Cleaner
+	subsConfig        env.DefaultSubscriptionConfig
 }
 
 type ConnClosedHandler func(conn *nats.Conn)

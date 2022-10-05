@@ -40,18 +40,18 @@ var (
 	ErrAddConsumer         = errors.New("failed to add a consumer")
 	ErrGetConsumer         = errors.New("failed to get consumer info")
 	ErrUpdateConsumer      = errors.New("failed to update consumer")
-	ErrInvalidMaxInFlight  = errors.New("failed to parse the MaxInFlightMessages value from Subscription's Config")
 	ErrFailedSubscribe     = errors.New("failed to create NATS JetStream subscription")
 )
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector,
-	cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
+	cleaner cleaner.Cleaner, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
 		subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
 		metricsCollector: metricsCollector,
 		cleaner:          cleaner,
+		subsConfig:       subsConfig,
 	}
 }
 
@@ -448,17 +448,13 @@ func (js *JetStream) getOrCreateConsumer(subscription *eventingv1alpha2.Subscrip
 	subject eventingv1alpha2.EventType) (*nats.ConsumerInfo, error) {
 	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-	maxInFlight, err := subscription.GetMaxInFlightMessages()
-	if err != nil {
-		return nil, controllererrors.MakeError(ErrInvalidMaxInFlight, err)
-	}
 
 	consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
 	if err != nil {
 		if errors.Is(err, nats.ErrConsumerNotFound) {
 			consumerInfo, err = js.jsCtx.AddConsumer(
 				js.Config.JSStreamName,
-				js.getConsumerConfig(jsSubKey, jsSubject, maxInFlight),
+				js.getConsumerConfig(jsSubKey, jsSubject, subscription.GetMaxInFlightMessages(&js.subsConfig)),
 			)
 			if err != nil {
 				return nil, controllererrors.MakeError(ErrAddConsumer, err)
@@ -475,15 +471,11 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 	subject eventingv1alpha2.EventType, asyncCallback func(m *nats.Msg)) error {
 	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-	maxInFlight, err := subscription.GetMaxInFlightMessages()
-	if err != nil {
-		return controllererrors.MakeError(ErrInvalidMaxInFlight, err)
-	}
 
 	jsSubscription, err := js.jsCtx.Subscribe(
 		jsSubject,
 		asyncCallback,
-		js.getDefaultSubscriptionOptions(jsSubKey, maxInFlight)...,
+		js.getDefaultSubscriptionOptions(jsSubKey, subscription.GetMaxInFlightMessages(&js.subsConfig))...,
 	)
 	if err != nil {
 		return controllererrors.MakeError(ErrFailedSubscribe, err)
@@ -523,10 +515,7 @@ func (js *JetStream) bindInvalidSubscriptions(subscription *eventingv1alpha2.Sub
 // is propagated to the NATS consumer as MaxAckPending.
 func (js *JetStream) syncConsumerMaxInFlight(subscription *eventingv1alpha2.Subscription,
 	consumerInfo nats.ConsumerInfo) error {
-	maxInFlight, err := subscription.GetMaxInFlightMessages()
-	if err != nil {
-		return controllererrors.MakeError(ErrInvalidMaxInFlight, err)
-	}
+	maxInFlight := subscription.GetMaxInFlightMessages(&js.subsConfig)
 
 	if consumerInfo.Config.MaxAckPending == maxInFlight {
 		return nil

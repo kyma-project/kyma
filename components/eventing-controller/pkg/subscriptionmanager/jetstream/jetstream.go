@@ -105,7 +105,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	if sm.envCfg.EnableNewCRDVersion {
 		jsCleaner := cleaner.NewJetStreamCleaner(sm.logger)
-		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, jsCleaner, sm.logger)
+		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, jsCleaner, defaultSubsConfig, sm.logger)
 		jetStreamReconciler := jetstreamv2.NewReconciler(
 			ctx,
 			client,
@@ -113,7 +113,6 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 			sm.logger,
 			recorder,
 			jsCleaner,
-			defaultSubsConfig,
 			sinkv2.NewValidator(ctx, client, recorder, sm.logger),
 		)
 		sm.backendv2 = jetStreamReconciler.Backend

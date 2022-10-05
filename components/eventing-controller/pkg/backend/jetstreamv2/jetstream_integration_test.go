@@ -723,7 +723,6 @@ func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
 	defer testEnvironment.jsClient.natsConn.Close()
 	initErr := jsBackend.Initialize(nil)
 	require.NoError(t, initErr)
-	// defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
 
 	subscriber := evtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -1051,7 +1050,8 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 
 	jsClient := getJetStreamClient(t, natsConfig.URL)
 	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
-	jsBackend := NewJetStream(natsConfig, metricsCollector, jsCleaner, defaultLogger)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
+	jsBackend := NewJetStream(natsConfig, metricsCollector, jsCleaner, defaultSubsConfig, defaultLogger)
 
 	return &TestEnvironment{
 		jsBackend:  jsBackend,
