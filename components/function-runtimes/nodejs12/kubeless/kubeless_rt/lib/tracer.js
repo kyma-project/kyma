@@ -18,7 +18,7 @@ const ignoredTargets = [
 
 function getTracer(serviceName) {
  
-  const traceCollectorEndpoint = process.env.TRACE_COLLECTOR_ENDPOINT ? process.env.TRACE_COLLECTOR_ENDPOINT : "http://localhost:3000"
+  const traceCollectorEndpoint = process.env.TRACE_COLLECTOR_ENDPOINT;
 
   if(!isTraceCollectorAvailable(traceCollectorEndpoint)){
     console.log("Trace collector not installed. Skipping tracer setup...")
