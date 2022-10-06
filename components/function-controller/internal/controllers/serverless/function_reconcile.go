@@ -52,7 +52,7 @@ type FunctionReconciler struct {
 
 func NewFunctionReconciler(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitFactory GitClientFactory, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		Log:               log.Named("controllers").Named("function"),
+		Log:               log,
 		client:            client,
 		recorder:          recorder,
 		config:            config,

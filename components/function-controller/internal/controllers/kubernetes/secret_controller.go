@@ -22,7 +22,7 @@ type SecretReconciler struct {
 func NewSecret(client client.Client, log *zap.SugaredLogger, config Config, secretSvc SecretService) *SecretReconciler {
 	return &SecretReconciler{
 		client: client,
-		Log:    log.Named("controllers").Named("secret"),
+		Log:    log,
 		config: config,
 		svc:    secretSvc,
 	}
