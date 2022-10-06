@@ -18,7 +18,6 @@ type Logger struct {
 }
 
 func New(format Format, level Level, additionalCores ...zapcore.Core) (*Logger, error) {
-	println("New")
 	filterLevel, err := level.ToZapLevel()
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting zap log level")
@@ -41,7 +40,6 @@ func New(format Format, level Level, additionalCores ...zapcore.Core) (*Logger, 
 }
 
 func (l *Logger) WithTracing(ctx context.Context) *zap.SugaredLogger {
-	println("WithTracing")
 	newLogger := *l
 	for key, val := range tracing.GetMetadata(ctx) {
 		newLogger.zapLogger = newLogger.zapLogger.With(key, val)
@@ -51,7 +49,6 @@ func (l *Logger) WithTracing(ctx context.Context) *zap.SugaredLogger {
 }
 
 func (l *Logger) WithContext() *zap.SugaredLogger {
-	println("WithContext")
 	return l.zapLogger.With(zap.Namespace("context"))
 }
 
@@ -60,7 +57,6 @@ func (l *Logger) WithContext() *zap.SugaredLogger {
 By default the Fatal Error log will be in json format, because it's production default.
 */
 func LogFatalError(format string, args ...interface{}) error {
-	println("LogFatalError")
 	logger, err := New(JSON, ERROR)
 	if err != nil {
 		return errors.Wrap(err, "while getting Error Json Logger")
@@ -74,7 +70,6 @@ func LogFatalError(format string, args ...interface{}) error {
 This function initialize klog which is used in k8s/go-client
 */
 func InitKlog(log *Logger, level Level) error {
-	println("InitKlog")
 	zaprLogger := zapr.NewLogger(log.WithContext().Desugar())
 	lvl, err := level.ToZapLevel()
 	if err != nil {

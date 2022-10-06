@@ -25,6 +25,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/go-logr/zapr"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	logparsercontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logparser"
 	logpipelinecontroller "github.com/kyma-project/kyma/components/telemetry-operator/controller/logpipeline"
@@ -126,7 +127,7 @@ func main() {
 	}
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
-	//ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
+	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 	if err != nil {
 		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
