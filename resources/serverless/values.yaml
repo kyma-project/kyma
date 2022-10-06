@@ -171,7 +171,15 @@ containers:
     healthz:
       port: "8090"
     extraProperties: {}
+    configuration:
+      targetDir: "/appdata"
+      filename: "config.yaml"
+      data:
+        logLevel: "info"
+        logFormat: "json"
     envs:
+      fileConfigPath:
+        value: "{{ .Values.containers.manager.configuration.targetDir }}/{{ .Values.containers.manager.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -206,10 +214,6 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildMaxSimultaneousJobs:
         value: "5"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 

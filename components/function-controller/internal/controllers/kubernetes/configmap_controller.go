@@ -22,7 +22,7 @@ type ConfigMapReconciler struct {
 func NewConfigMap(client client.Client, log *zap.SugaredLogger, config Config, service ConfigMapService) *ConfigMapReconciler {
 	return &ConfigMapReconciler{
 		client: client,
-		Log:    log.Named("controllers").Named("configmap"),
+		Log:    log,
 		config: config,
 		svc:    service,
 	}
