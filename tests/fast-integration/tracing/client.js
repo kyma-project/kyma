@@ -13,7 +13,7 @@ async function getJaegerViaGrafana(path, retries = 5, interval = 30,
 async function getJaegerTrace(traceId) {
   const path = `api/traces/${traceId}`;
 
-  debug(`fetching trace: ${traceId} from jaeger`);
+  debug(`fetching trace ${traceId} from jaeger`);
 
   try {
     const debugMsg = `waiting for trace (id: ${traceId}) from jaeger...`;
