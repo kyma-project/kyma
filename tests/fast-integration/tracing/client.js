@@ -6,7 +6,7 @@ const {proxyGrafanaDatasource} = require('../monitoring/client');
 
 
 async function getJaegerViaGrafana(path, retries = 5, interval = 30,
-    timeout = 10000, debugMsg = undefined) {
+    timeout = 50000, debugMsg = undefined) {
   return await proxyGrafanaDatasource('Jaeger', path, retries, interval, timeout, debugMsg);
 }
 
