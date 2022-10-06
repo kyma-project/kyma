@@ -62,6 +62,20 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
 	}
+	{
+		r := api.PathPrefix("/redirect").Subrouter()
+
+		r.HandleFunc("/ok/target", alwaysOk).Methods(http.MethodGet)
+
+		r.Handle("/ok", http.RedirectHandler("/v1/api/redirect/ok/target", http.StatusTemporaryRedirect))
+
+		ba := BasicAuth(basicAuthCredentials)
+		ok := http.HandlerFunc(alwaysOk)
+		r.Handle("/basic/target", ba(ok)).Methods(http.MethodGet)
+		r.Handle("/basic", http.RedirectHandler("/v1/api/redirect/basic/target", http.StatusTemporaryRedirect))
+
+		r.Handle("/external", http.RedirectHandler("http://central-application-gateway.kyma-system:8081/v1/health", http.StatusTemporaryRedirect))
+	}
 
 	return router
 }

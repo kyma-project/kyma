@@ -59,7 +59,7 @@ var (
 	bebSubMgr  = &SubMgrMock{}
 )
 
-// TestAPIs prepares gingko to run the test suite.
+// TestAPIs prepares ginkgo to run the test suite.
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecsWithDefaultAndCustomReporters(t,

@@ -85,3 +85,11 @@ func HaveCleanEventTypesEmpty() gomegatypes.GomegaMatcher {
 		},
 		BeEmpty())
 }
+
+func HaveEventMeshTypes(emsTypes []eventingv1alpha2.EventMeshTypes) gomegatypes.GomegaMatcher {
+	return WithTransform(
+		func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.EventMeshTypes {
+			return s.Status.Backend.EmsTypes
+		},
+		Equal(emsTypes))
+}

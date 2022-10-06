@@ -63,9 +63,9 @@ spec:
               drop:
               - ALL
             privileged: false
-            runAsGroup: 65534
+            runAsGroup: 1337
             runAsNonRoot: true
-            runAsUser: 65534
+            runAsUser: 1337
         {{- end }}
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"
@@ -94,9 +94,9 @@ spec:
               drop:
               - ALL
             privileged: false
-            runAsGroup: 1000
+            runAsGroup: 1337
             runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 1337
     {{- end}}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
