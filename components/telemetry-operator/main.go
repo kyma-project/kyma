@@ -152,7 +152,7 @@ func main() {
 		setupLog.Error(err, "Failed to start manager")
 		os.Exit(1)
 	}
-
+	//sm
 	mgr.GetWebhookServer().Register("/validate-logpipeline", &k8sWebhook.Admission{Handler: createLogPipelineValidator(mgr.GetClient())})
 	mgr.GetWebhookServer().Register("/validate-logparser", &k8sWebhook.Admission{Handler: createLogParserValidator(mgr.GetClient())})
 
