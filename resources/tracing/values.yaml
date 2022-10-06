@@ -85,13 +85,13 @@ jaeger:
       runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      privileged: false
-      readOnlyRootFilesystem: true
-      capabilities:
-        drop:
-          - ALL
+    #containerSecurityContext: # available with jaeger-operator 1.38
+    #  allowPrivilegeEscalation: false
+    #  privileged: false
+    #  readOnlyRootFilesystem: true
+    #  capabilities:
+    #    drop:
+    #      - ALL
 
 rbac:
   # Specifies whether RBAC resources should be created
