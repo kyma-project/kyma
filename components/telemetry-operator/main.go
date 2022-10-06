@@ -128,6 +128,7 @@ func main() {
 	}
 
 	fmt.Println("Main!!!")
+	setupLog.Info("Main info !!!")
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
