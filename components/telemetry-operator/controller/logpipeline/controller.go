@@ -135,6 +135,7 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.Info("Reconciliation triggered")
+	log.Info("Last hope to trigger something!")
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
