@@ -30,6 +30,10 @@ For example:
 "serverless.kyma-project.io/uuid": "98f05b9d-ecd1-4a70-96d6-5848ec4ed3a7",
 ```
 
+### old field for function metadata
+In v1alpha2 version we have `spec.template` field on root level which configures function pod metadata.
+This field will be copied/moved to `spec.templates.functionPod.metadata`.
+
 If we want to deal with Kubernetes Labels we should create a separate issue for implementing them and then decide if we want to allow overriding them.
 https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 
@@ -58,10 +62,6 @@ resourceProfiles:
 ## Env
 In v1alpha2 version we have `spec.env` field on root level which configures function pod envs.
 This field will be copied/moved to `spec.templates.functionPod.spec.env`.
-
-## Template
-In v1alpha2 version we have `spec.template` field on root level which configures function pod metadata.
-This field will be copied/moved to `spec.templates.functionPod.metadata`.
 
 ## VolumeMounts
 This is new feature.
