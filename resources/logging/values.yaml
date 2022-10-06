@@ -26,11 +26,11 @@ global:
   images:
     fluent_bit:
       name: fluent-bit
-      version: 1.9.7-248e790f
+      version: 1.9.9-a2385ca5
       directory: tpi
     loki:
       name: loki
-      version: 2.2.1-4256edd8
+      version: 2.2.1-2e513b00
       directory: tpi
     alpine:
       name: "alpine"

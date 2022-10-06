@@ -3,6 +3,8 @@ package jetstream
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+
 	"golang.org/x/xerrors"
 
 	"github.com/pkg/errors"
@@ -96,17 +98,17 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 	recorder := sm.mgr.GetEventRecorderFor("eventing-controller-jetstream")
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
 
 	if sm.envCfg.EnableNewCRDVersion {
-		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
+		jsCleaner := cleaner.NewJetStreamCleaner(sm.logger)
+		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, jsCleaner, sm.logger)
 		jetStreamReconciler := jetstreamv2.NewReconciler(
 			ctx,
 			client,
 			jetStreamHandler,
 			sm.logger,
 			recorder,
-			cleaner,
+			jsCleaner,
 			defaultSubsConfig,
 			sink.NewValidator(ctx, client, recorder, sm.logger),
 		)
@@ -117,6 +119,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 		}
 		sm.namedLogger().Info("Started v1alpha2 JetStream subscription manager")
 	} else {
+		jsCleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
 		jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
 		jetStreamReconciler := jetstream.NewReconciler(
 			ctx,
@@ -124,7 +127,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 			jetStreamHandler,
 			sm.logger,
 			recorder,
-			cleaner,
+			jsCleaner,
 			defaultSubsConfig,
 			sink.NewValidator(ctx, client, recorder, sm.logger),
 		)

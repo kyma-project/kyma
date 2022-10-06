@@ -6,6 +6,7 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
+  sleep,
 } = require('../utils');
 const {
   logsPresentInLoki,
@@ -20,20 +21,30 @@ const {
   waitForLogPipelineStatusRunning,
 } = require('./helpers');
 
-const regexFilterDeployment = loadTestData('regex-filter-deployment.yaml');
-const mockserverDeployment = loadTestData('mockserver.yaml');
-const spammerWorkloadPod = loadTestData('logs-workload.yaml');
-
 async function prepareEnvironment() {
-  await k8sApply(mockserverDeployment, 'mockserver');
-  await k8sApply(regexFilterDeployment, 'default');
-  await k8sApply(spammerWorkloadPod, 'default');
+  async function k8sApplyFile(name, namespace) {
+    await k8sApply(loadTestData(name), namespace);
+  }
+
+  await k8sApplyFile('http-backend-namespaces.yaml');
+  await k8sApplyFile('http-backend.yaml', 'http-backend-1');
+  await k8sApplyFile('http-backend.yaml', 'http-backend-2');
+  await k8sApplyFile('regex-filter-deployment.yaml', 'default');
+  await k8sApplyFile('logs-workload.yaml', 'default');
+  await k8sApplyFile('logs-workload.yaml', 'kyma-system');
 }
 
 async function cleanEnvironment() {
-  await k8sDelete(mockserverDeployment, 'mockserver');
-  await k8sDelete(regexFilterDeployment, 'default');
-  await k8sDelete(spammerWorkloadPod, 'default');
+  async function k8sDeleteFile(name, namespace) {
+    await k8sDelete(loadTestData(name), namespace);
+  }
+
+  await k8sDeleteFile('http-backend.yaml', 'http-backend-1');
+  await k8sDeleteFile('http-backend.yaml', 'http-backend-2');
+  await k8sDeleteFile('http-backend-namespaces.yaml');
+  await k8sDeleteFile('regex-filter-deployment.yaml', 'default');
+  await k8sDeleteFile('logs-workload.yaml', 'default');
+  await k8sDeleteFile('logs-workload.yaml', 'kyma-system');
 }
 
 describe('Telemetry Operator', function() {
@@ -70,7 +81,7 @@ describe('Telemetry Operator', function() {
 
       it('Should push system logs to Kyma Loki', async function() {
         const labels = '{namespace="kyma-system", job="telemetry-fluent-bit"}';
-        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+        const logsPresent = await logsPresentInLoki(labels, testStartTimestamp, 5);
         assert.isTrue(logsPresent, 'No logs present in Loki with namespace="kyma-system"');
       });
     });
@@ -132,6 +143,15 @@ describe('Telemetry Operator', function() {
 
     context('LogPipeline', function() {
       context('HTTP Output', function() {
+        const backend1Secret = loadTestData('http-backend-1-secret.yaml');
+        const backend1Host = backend1Secret[0].stringData.host;
+        const backend2Secret = loadTestData('http-backend-2-secret.yaml');
+        const backend2Host = backend2Secret[0].stringData.host;
+
+        it(`Should create host secret with host set to '${backend1Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-1-secret.yaml'));
+        });
+
         const pipeline = loadTestData('logpipeline-output-http.yaml');
         const pipelineName = pipeline[0].metadata.name;
 
@@ -140,8 +160,61 @@ describe('Telemetry Operator', function() {
           await waitForLogPipelineStatusRunning(pipelineName);
         });
 
-        it('Should push logs to the HTTP mockserver', async function() {
-          const labels = '{namespace="mockserver"}';
+        it(`Should push logs to '${backend1Host}'`, async function() {
+          const labels = '{namespace="http-backend-1"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should update host secret with host set to '${backend2Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-2-secret.yaml'));
+          await sleep(5000);
+          await waitForLogPipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should detect secret update and push logs to '${backend2Host}'`, async function() {
+          const labels = '{namespace="http-backend-2"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should delete LogPipeline '${pipelineName}'`, async function() {
+          await k8sDelete(pipeline);
+        });
+      });
+
+      context('Custom Output', function() {
+        const backend1Secret = loadTestData('http-backend-1-secret.yaml');
+        const backend1Host = backend1Secret[0].stringData.host;
+        const backend2Secret = loadTestData('http-backend-2-secret.yaml');
+        const backend2Host = backend2Secret[0].stringData.host;
+
+        it(`Should create host secret with host set to '${backend1Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-1-secret.yaml'));
+        });
+
+        const pipeline = loadTestData('logpipeline-output-custom.yaml');
+        const pipelineName = pipeline[0].metadata.name;
+
+        it(`Should create LogPipeline '${pipelineName}'`, async function() {
+          await k8sApply(pipeline);
+          await waitForLogPipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should push logs to '${backend1Host}'`, async function() {
+          const labels = '{namespace="http-backend-1"}';
+          const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+          assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
+        });
+
+        it(`Should update host secret with host set to '${backend2Host}'`, async function() {
+          await k8sApply(loadTestData('http-backend-2-secret.yaml'));
+          await sleep(5000);
+          await waitForLogPipelineStatusRunning(pipelineName);
+        });
+
+        it(`Should detect secret update and push logs to '${backend2Host}'`, async function() {
+          const labels = '{namespace="http-backend-2"}';
           const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
           assert.isTrue(logsPresent, 'No logs received by mockserver present in Loki');
         });
@@ -162,14 +235,16 @@ describe('Telemetry Operator', function() {
           });
 
           it(`Should push only labels to Loki`, async function() {
-            const labels = '{namespace="kyma-system", job="drop-annotations-keep-labels-telemetry-fluent-bit"}';
-            const responseBody = await queryLoki(labels, testStartTimestamp);
-            assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
+            const labels = '{job="drop-annotations-keep-labels-telemetry-fluent-bit", container="flog"}';
+            const found = await logsPresentInLoki(labels, testStartTimestamp);
+            assert.isTrue(found, `No logs in Loki with labels: ${labels}`);
 
+            const responseBody = await queryLoki(labels, testStartTimestamp);
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-            assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
-            expect(entry['kubernetes']).not.to.have.property('annotations');
-            expect(entry['kubernetes']).to.have.property('labels');
+            assert.hasAnyKeys(entry, 'kubernetes', `No kubernetes metadata in ${entry}`);
+            const k8smeta = entry['kubernetes'];
+            assert.doesNotHaveAnyKeys(k8smeta, 'annotations', `Annotations found in ${JSON.stringify(k8smeta)}`);
+            assert.hasAnyKeys(k8smeta, 'labels', `No labels in ${JSON.stringify(k8smeta)}`);
           });
 
           it(`Should delete LogPipeline '${pipelineName}'`, async function() {
@@ -187,14 +262,16 @@ describe('Telemetry Operator', function() {
           });
 
           it(`Should push only annotations to Loki`, async function() {
-            const labels = '{namespace="kyma-system", job="keep-annotations-drop-labels-telemetry-fluent-bit"}';
-            const responseBody = await queryLoki(labels, testStartTimestamp);
-            assert.isTrue(responseBody.data.result.length > 0, `No logs present in Loki for labels: ${labels}`);
+            const labels = '{job="keep-annotations-drop-labels-telemetry-fluent-bit", container="flog"}';
+            const found = await logsPresentInLoki(labels, testStartTimestamp);
+            assert.isTrue(found, `No logs in Loki with labels: ${labels}`);
 
+            const responseBody = await queryLoki(labels, testStartTimestamp);
             const entry = JSON.parse(responseBody.data.result[0].values[0][1]);
-            assert.isTrue('kubernetes' in entry, `No kubernetes metadata present in log entry: ${entry} `);
-            expect(entry['kubernetes']).not.to.have.property('labels');
-            expect(entry['kubernetes']).to.have.property('annotations');
+            assert.hasAnyKeys(entry, 'kubernetes', `No kubernetes metadata in ${entry}`);
+            const k8smeta = entry['kubernetes'];
+            assert.doesNotHaveAnyKeys(k8smeta, 'labels', `Labels found in ${JSON.stringify(k8smeta)}`);
+            assert.hasAnyKeys(k8smeta, 'annotations', `No annotations in ${JSON.stringify(k8smeta)}`);
           });
 
           it(`Should delete LogPipeline '${pipelineName}'`, async function() {

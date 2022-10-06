@@ -4,12 +4,13 @@ import (
 	golog "log"
 
 	"github.com/kelseyhightower/envconfig"
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
-	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
@@ -20,9 +21,6 @@ const (
 type Config struct {
 	// Backend used for Eventing. It could be "nats" or "beb".
 	Backend string `envconfig:"BACKEND" required:"true"`
-
-	// JetStreamModeEnabled indicates whether NATS backend will be used in default or jetstream mode.
-	JetStreamModeEnabled bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
 
 	// AppLogFormat defines the log format.
 	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
@@ -62,7 +60,7 @@ func main() {
 			golog.Printf("Failed to flush logger, error: %v", err)
 		}
 	}()
-	setupLogger := logger.WithContext().With("backend", cfg.Backend, "jetstream mode", cfg.JetStreamModeEnabled)
+	setupLogger := logger.WithContext().With("backend", cfg.Backend)
 
 	// metrics collector
 	metricsCollector := metrics.NewCollector()
@@ -74,7 +72,7 @@ func main() {
 	case backendBEB:
 		commander = beb.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
-		commander = nats.NewCommander(opts, metricsCollector, logger, cfg.JetStreamModeEnabled)
+		commander = nats.NewCommander(opts, metricsCollector, logger)
 	default:
 		setupLogger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
 	}

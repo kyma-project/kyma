@@ -26,5 +26,9 @@ This table lists the configurable parameters, their descriptions, and default va
 | **components.ingressGateways.resources.requests.memory** | Defines requests for memory resources for the Ingress Gateway component.| `128Mi` |
 | **components.pilot.resources.limits.cpu** | Defines limits for CPU resources for the Pilot component. | `500m` |
 | **components.pilot.resources.limits.memory** | Defines limits for memory resources for the Pilot component. | `1024Mi` |
-| **components.pilot.resources.requests.cpu** | Defines requests for CPU resources for the Pilot component. | `250m` |
+| **components.pilot.resources.requests.cpu** | Defines requests for CPU resources for the Pilot component. | `100m` |
 | **components.pilot.resources.requests.memory** | Defines requests for memory resources for the Pilot component. | `512Mi` |
+| **components.cni.resources.limits.cpu** | Defines limits for CPU resources for the CNI node component. | `500m` |
+| **components.cni.resources.limits.memory** | Defines limits for memory resources for the CNI node component. | `1024Mi` |
+| **components.cni.resources.requests.cpu** | Defines requests for CPU resources for the CNI node component. | `100m` |
+| **components.cni.resources.requests.memory** | Defines requests for memory resources for the CNI node component. | `512Mi` |

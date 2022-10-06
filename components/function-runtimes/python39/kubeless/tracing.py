@@ -4,7 +4,7 @@ from typing import Iterator
 
 import requests
 from opentelemetry import trace
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.propagate import extract
 from opentelemetry.propagate import set_global_textmap
@@ -45,11 +45,11 @@ def _get_tracer(jaeger_endpoint: str, service_name: str) -> trace.Tracer:
         )
     )
 
-    jaeger_exporter = JaegerExporter(
-        collector_endpoint=jaeger_endpoint + '?format=jaeger.thrift',
+    otlp_exporter = OTLPSpanExporter(
+        endpoint=jaeger_endpoint,
     )
 
-    span_processor = BatchSpanProcessor(jaeger_exporter)
+    span_processor = BatchSpanProcessor(otlp_exporter)
 
     trace.get_tracer_provider().add_span_processor(span_processor)
 

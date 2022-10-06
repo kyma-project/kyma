@@ -2,29 +2,26 @@ package v1alpha2
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var Finalizer = GroupVersion.Group
+type TypeMatching string
 
-const ProtocolSettingsContentModeBinary string = "BINARY"
+var Finalizer = GroupVersion.Group
 
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only
 	// +optional
 	ID string `json:"id,omitempty"`
-
-	// todo check if we still need it or move it to config
-	// Protocol defines the CE protocol specification implementation
-	// +optional
-	Protocol string `json:"protocol,omitempty"`
-
-	// todo check if we still need it or move it to config
-	// ProtocolSettings defines the CE protocol setting specification implementation
-	// +optional
-	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 
 	// Sink defines endpoint of the subscriber
 	Sink string `json:"sink"`
@@ -36,7 +33,7 @@ type SubscriptionSpec struct {
 	Source string `json:"source"`
 
 	// Types defines the list of event names for the topics we need to subscribe for messages
-	Types []string `json:"types,omitempty"`
+	Types []string `json:"types"`
 
 	// Config defines the configurations that can be applied to the eventing backend
 	// +optional
@@ -84,14 +81,94 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	type Alias Subscription
 	a := Alias(s)
 	if a.Status.Types == nil {
-		a.Status.InitializeCleanEventTypes()
+		a.Status.InitializeEventTypes()
 	}
 	return json.Marshal(a)
 }
 
-// InitializeCleanEventTypes initializes the SubscriptionStatus.CleanEventTypes with an empty slice of strings.
-func (s *SubscriptionStatus) InitializeCleanEventTypes() {
+func (s *Subscription) GetMaxInFlightMessages() (*int, error) {
+	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
+	if err != nil {
+		return nil, err
+	}
+	return &val, nil
+}
+
+// InitializeEventTypes initializes the SubscriptionStatus.Types with an empty slice of EventType.
+func (s *SubscriptionStatus) InitializeEventTypes() {
 	s.Types = []EventType{}
+}
+
+// GetUniqueTypes returns the de-duplicated types from subscription spec.
+func (s *Subscription) GetUniqueTypes() []string {
+	result := make([]string, 0, len(s.Spec.Types))
+	for _, t := range s.Spec.Types {
+		if !utils.ContainsString(result, t) {
+			result = append(result, t)
+		}
+	}
+
+	return result
+}
+
+func (s *Subscription) DuplicateWithStatusDefaults() *Subscription {
+	desiredSub := s.DeepCopy()
+	desiredSub.Status = SubscriptionStatus{}
+	return desiredSub
+}
+
+func (s *Subscription) GetEventMeshProtocol() string {
+	if protocol, ok := s.Spec.Config[Protocol]; ok {
+		return protocol
+	}
+	return ""
+}
+
+func (s *Subscription) GetEventMeshProtocolSettings() *ProtocolSettings {
+	protocolSettings := &ProtocolSettings{}
+
+	if currentMode, ok := s.Spec.Config[ProtocolSettingsContentMode]; ok {
+		protocolSettings.ContentMode = &currentMode
+	}
+	if qos, ok := s.Spec.Config[ProtocolSettingsQos]; ok {
+		protocolSettings.Qos = &qos
+	}
+	if exemptHandshake, ok := s.Spec.Config[ProtocolSettingsExemptHandshake]; ok {
+		handshake, err := strconv.ParseBool(exemptHandshake)
+		if err != nil {
+			handshake = true
+		}
+		protocolSettings.ExemptHandshake = &handshake
+	}
+	if authType, ok := s.Spec.Config[WebhookAuthType]; ok {
+		protocolSettings.WebhookAuth = &WebhookAuth{}
+		protocolSettings.WebhookAuth.Type = authType
+	}
+	if grantType, ok := s.Spec.Config[WebhookAuthGrantType]; ok {
+		protocolSettings.WebhookAuth.GrantType = grantType
+	}
+	if clientID, ok := s.Spec.Config[WebhookAuthClientID]; ok {
+		protocolSettings.WebhookAuth.ClientID = clientID
+	}
+	if secret, ok := s.Spec.Config[WebhookAuthClientSecret]; ok {
+		protocolSettings.WebhookAuth.ClientSecret = secret
+	}
+	if token, ok := s.Spec.Config[WebhookAuthTokenURL]; ok {
+		protocolSettings.WebhookAuth.TokenURL = token
+	}
+	if scope, ok := s.Spec.Config[WebhookAuthScope]; ok {
+		protocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
+	}
+
+	return protocolSettings
+}
+
+func (s *Subscription) ToUnstructuredSub() (*unstructured.Unstructured, error) {
+	object, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&s)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: object}, nil
 }
 
 //+kubebuilder:object:root=true

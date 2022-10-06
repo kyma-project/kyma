@@ -6,11 +6,12 @@ const opentelemetry = require('@opentelemetry/api');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { NodeTracerProvider } = require('@opentelemetry/node');
 const { SimpleSpanProcessor } = require('@opentelemetry/tracing');
-const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
+const { OTLPTraceExporter } =  require('@opentelemetry/exporter-trace-otlp-grpc');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { B3Propagator,B3InjectEncoding } = require("@opentelemetry/propagator-b3");
 const  {NoopTracerProvider} = require('@opentelemetry/api')
 const {ExpressInstrumentation} = require("@opentelemetry/instrumentation-express");
+const { Resource } = require( '@opentelemetry/resources');
 
 const TRACER_SAMPLE_HEADER= "x-b3-sampled"
 
@@ -38,7 +39,11 @@ class ServerlessTracerProvider {
 }
 
 function getTracerProvider (serviceName, endpoint) {
-  const provider = new NodeTracerProvider();
+  const provider = new NodeTracerProvider({
+    resource: new Resource({
+      ["service.name"]: serviceName,
+    })
+  });
 
   registerInstrumentations({
     tracerProvider: provider,
@@ -56,10 +61,11 @@ function getTracerProvider (serviceName, endpoint) {
     ],
   });
 
-  const exporter = new JaegerExporter({
-    endpoint,
-    serviceName,
-  });
+  const collectorOptions = {
+    url: endpoint
+  }
+
+  const exporter = new OTLPTraceExporter(collectorOptions);
 
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 

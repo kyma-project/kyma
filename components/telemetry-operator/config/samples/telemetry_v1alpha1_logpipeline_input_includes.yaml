@@ -6,8 +6,7 @@ spec:
   input:
     application:
       namespaces:
-        include:
-          system: true
+        system: true
   output:
     custom: |
       Name               stdout

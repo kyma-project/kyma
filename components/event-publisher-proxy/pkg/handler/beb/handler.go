@@ -2,7 +2,7 @@ package beb
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -13,6 +13,7 @@ import (
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -56,7 +57,7 @@ type Handler struct {
 	LegacyTransformer *legacy.Transformer
 	// RequestTimeout timeout for outgoing requests
 	RequestTimeout time.Duration
-	//SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
+	// SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
 	SubscribedProcessor *subscribed.Processor
 	// Logger default logger
 	Logger *logger.Logger
@@ -252,7 +253,7 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 	defer func() { _ = resp.Body.Close() }()
 	h.collector.RecordLatency(dispatchTime, resp.StatusCode, request.URL.Host)
 	h.collector.RecordRequests(resp.StatusCode, request.URL.Host)
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		h.namedLogger().Errorw("Failed to read response body", "error", err)
 		return http.StatusInternalServerError, dispatchTime, []byte{}

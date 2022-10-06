@@ -1,6 +1,5 @@
 namespace: "test"
 testTenant: "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae"
-directorUrl: "https://compass-gateway-auth-oauth.mps.dev.kyma.cloud.sap/director/graphql"
 oauthCredentialsSecretName: "oauth-compass-credentials"
 oauthCredentialsNamespace: "test"
 skipDirectorCertVerification: true

@@ -4,9 +4,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// +kubebuilder:validation:Enum=BEB;NATS
 type BackendType string
 
+// +kubebuilder:validation:Enum=BEB;NATS
 const (
 	BEBBackendType  BackendType = "BEB"
 	NatsBackendType BackendType = "NATS"
@@ -46,6 +46,7 @@ type EventingBackendStatus struct {
 // +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
 // +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=string,JSONPath=`.status.conditions[?(@.type=="Subscription Controller Ready")].status`
 // +kubebuilder:printcolumn:name="PublisherProxyReady",type=string,JSONPath=`.status.conditions[?(@.type=="Publisher Proxy Ready")].status`
+
 // EventingBackend is the Schema for the eventingbackends API.
 type EventingBackend struct {
 	metav1.TypeMeta   `json:",inline"`

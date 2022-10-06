@@ -176,7 +176,6 @@ type Templates struct {
 }
 
 const (
-	ReplicasPresetLabel          = "serverless.kyma-project.io/replicas-preset"
 	FunctionResourcesPresetLabel = "serverless.kyma-project.io/function-resources-preset"
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
 )
