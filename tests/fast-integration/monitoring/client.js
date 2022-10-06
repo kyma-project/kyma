@@ -31,7 +31,7 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   debug(`fetching grafana data source via ${url}`);
   return retryPromise(async () => {
     if (debugMsg) {
-      debug(debugMsg);
+      debug(`${debugMsg} via ${url}`);
     }
     return await axios.get(url, {timeout: timeout});
   }, retries, interval);
