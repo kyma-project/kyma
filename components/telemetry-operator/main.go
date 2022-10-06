@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -179,6 +180,10 @@ func main() {
 		setupLog.Info("Starting with tracing controller")
 		if err = createTracePipelineReconciler(mgr.GetClient()).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "Failed to create controller", "controller", "TracePipeline")
+			os.Exit(1)
+		}
+		if err = monitoringv1.AddToScheme(scheme); err != nil {
+			setupLog.Error(err, "Failed to add monitoring scheme", "controller", "TracePipeline")
 			os.Exit(1)
 		}
 	}

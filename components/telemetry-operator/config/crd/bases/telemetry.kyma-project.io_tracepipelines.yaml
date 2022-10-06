@@ -13,7 +13,7 @@ spec:
     listKind: TracePipelineList
     plural: tracepipelines
     singular: tracepipeline
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1alpha1
     schema:
@@ -35,10 +35,31 @@ spec:
           spec:
             description: TracePipelineSpec defines the desired state of TracePipeline
             properties:
-              foo:
+              output:
                 description: Foo is an example field of TracePipeline. Edit tracepipeline_types.go
                   to remove/update
-                type: string
+                properties:
+                  otlp:
+                    properties:
+                      url:
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                    type: object
+                type: object
             type: object
           status:
             description: TracePipelineStatus defines the observed state of TracePipeline

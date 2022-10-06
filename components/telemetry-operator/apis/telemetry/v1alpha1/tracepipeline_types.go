@@ -23,13 +23,21 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type OtlpOutput struct {
+	URL ValueType `json:"url,omitempty"`
+}
+
+type TracePipelineOutput struct {
+	Otlp OtlpOutput `json:"otlp,omitempty"`
+}
+
 // TracePipelineSpec defines the desired state of TracePipeline
 type TracePipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of TracePipeline. Edit tracepipeline_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Output TracePipelineOutput `json:"output,omitempty"`
 }
 
 // TracePipelineStatus defines the observed state of TracePipeline
@@ -39,6 +47,7 @@ type TracePipelineStatus struct {
 }
 
 //+kubebuilder:object:root=true
+//+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 
 // TracePipeline is the Schema for the tracepipelines API
