@@ -27,6 +27,7 @@ func NewDaemonSetHelper(client client.Client, restartsTotal prometheus.Counter) 
 
 // Restart deletes all Fluent Bit pods to apply the new configuration
 func (f *DaemonSetHelper) Restart(ctx context.Context, daemonSet types.NamespacedName) error {
+	fmt.Println("Restart")
 	log := logf.FromContext(ctx)
 
 	var ds appsv1.DaemonSet
@@ -50,6 +51,7 @@ func (f *DaemonSetHelper) Restart(ctx context.Context, daemonSet types.Namespace
 }
 
 func (f *DaemonSetHelper) IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error) {
+	fmt.Println("IsReady")
 	log := logf.FromContext(ctx)
 
 	var ds appsv1.DaemonSet

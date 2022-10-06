@@ -12,7 +12,7 @@ type Logger struct {
 
 // New returns a new logger with the given format and level.
 func New(format, level string) (*Logger, error) {
-	fmt.Println("New logger")
+	fmt.Println("Logger New")
 	logFormat, err := logger.MapFormat(format)
 	if err != nil {
 		return nil, err

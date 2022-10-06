@@ -76,6 +76,7 @@ func NewValidatingWebhookHandler(
 }
 
 func (v *ValidatingWebhookHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
+	fmt.Println("Handle")
 	log := logf.FromContext(ctx)
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{}
@@ -164,6 +165,7 @@ func (v *ValidatingWebhookHandler) validateLogPipeline(ctx context.Context, logP
 }
 
 func (v *ValidatingWebhookHandler) InjectDecoder(d *admission.Decoder) error {
+	fmt.Println("InjectDecoder")
 	v.decoder = d
 	return nil
 }
