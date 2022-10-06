@@ -37,6 +37,10 @@ spec:
       {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
       priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
       {{- end }}
+      {{- if .Values.kyma.authProxy.securityContext }}
+      securityContext:
+{{ toYaml .Values.kyma.authProxy.securityContext | nindent 8 }}
+      {{- end }}
       containers:
       - image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}"
         imagePullPolicy: {{ .Values.kyma.authProxy.image.pullPolicy }}
@@ -71,9 +75,9 @@ spec:
           httpGet:
             path: /ping
             port: http
-        {{- if .Values.kyma.authProxy.securityContext }}
+        {{- if .Values.kyma.authProxy.containerSecurityContext }}
         securityContext:
-{{ toYaml .Values.kyma.authProxy.securityContext | nindent 10 }}
+{{ toYaml .Values.kyma.authProxy.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
 {{ toYaml .Values.kyma.authProxy.resources | indent 10 }}

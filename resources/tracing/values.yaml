@@ -82,8 +82,16 @@ jaeger:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
       allowPrivilegeEscalation: false
       privileged: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
 
 rbac:
   # Specifies whether RBAC resources should be created
@@ -132,8 +140,16 @@ tolerations: []
 affinity: {}
 
 securityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
+  capabilities:
+    drop:
+      - ALL
 
 priorityClassName:
 
@@ -188,11 +204,20 @@ authProxy:
     upstreamTimeout: 1m
   env: {}
   nodeSelector: {}
-  podSecurityContext: {}
   securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
     allowPrivilegeEscalation: false
     privileged: false
-    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   image:
     pullPolicy: IfNotPresent
   resources:
