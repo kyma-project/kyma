@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"fmt"
+
 	"github.com/kyma-project/kyma/common/logging/logger"
 )
 
@@ -10,6 +12,7 @@ type Logger struct {
 
 // New returns a new logger with the given format and level.
 func New(format, level string) (*Logger, error) {
+	fmt.Println("New logger")
 	logFormat, err := logger.MapFormat(format)
 	if err != nil {
 		return nil, err
