@@ -32,6 +32,7 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
     if (debugMsg) {
       debug(debugMsg);
     }
+    debugMsg(`fetching grafana data source via: ${url}`);
     return await axios.get(url, {timeout: timeout});
   }, retries, interval);
 }
