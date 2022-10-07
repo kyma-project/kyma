@@ -97,7 +97,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
      hosts:
      - "function-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}"
      gateways:
-     - ${GATEWAY}
+     - ${MTLS_GATEWAY_NAME}
      http:
      - route:
        - destination:
