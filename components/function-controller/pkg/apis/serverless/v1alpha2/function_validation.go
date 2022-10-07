@@ -320,10 +320,7 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 	var labels map[string]string
-	if spec.Templates != nil && spec.Templates.FunctionPod != nil && spec.Templates.FunctionPod.Metadata != nil && spec.
-		Templates.
-		FunctionPod.
-		Metadata.Labels != nil {
+	if spec.Templates != nil && spec.Templates.FunctionPod != nil && spec.Templates.FunctionPod.Metadata != nil && spec.Templates.FunctionPod.Metadata.Labels != nil {
 		labels = spec.Templates.FunctionPod.Metadata.Labels
 	}
 	fieldPath := field.NewPath("spec.labels")
