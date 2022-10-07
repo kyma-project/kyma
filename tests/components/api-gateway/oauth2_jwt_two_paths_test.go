@@ -39,7 +39,7 @@ func (o *oauthJWTTwoPathsScenario) callingTheEndpointWithValidTokenShouldResultI
 		if err != nil {
 			return fmt.Errorf("failed to fetch and id_token. %s", err.Error())
 		}
-
+		fmt.Printf("-->vladimir, JWT Bearer token: %s", tokenJWT)
 		headerVal := fmt.Sprintf("Bearer %s", tokenJWT)
 
 		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})

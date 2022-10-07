@@ -42,6 +42,7 @@ func (h *Helper) CallEndpointWithRetries(url string, predicate *StatusPredicate)
 
 // Returns error if the status code is not in between bounds of status predicate after retrying deadline is reached
 func (h *Helper) CallEndpointWithHeadersWithRetries(headerValue string, headerName, url string, predicate *StatusPredicate) error {
+	fmt.Printf("-->vladimir, headerName: %s; headerValue: %s", headerName, headerValue)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
