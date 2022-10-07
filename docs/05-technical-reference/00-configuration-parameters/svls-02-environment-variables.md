@@ -18,7 +18,7 @@ Every runtime provides its own unique environment configuration which can be rea
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
 | **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs12`, `nodejs14`, `nodejs16`. |
-| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | Full address of the Jaeger service. |
+| **TRACE_COLLECTOR_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces` | Full address of the Open-Telemetry Trace Collector. |
 | **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
 
 ### Specific environments

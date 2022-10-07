@@ -22,7 +22,7 @@ type ServiceAccountReconciler struct {
 func NewServiceAccount(client client.Client, log *zap.SugaredLogger, config Config, serviceAccountSvc ServiceAccountService) *ServiceAccountReconciler {
 	return &ServiceAccountReconciler{
 		client: client,
-		Log:    log.Named("controllers").Named("serviceaccount").With("kind", "ServiceAccount"),
+		Log:    log,
 		config: config,
 		svc:    serviceAccountSvc,
 	}

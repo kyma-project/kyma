@@ -37,14 +37,21 @@ const (
 	EventSourceUnclean       = "s>o>*u*r>c.e"
 	EventSourceClean         = "source"
 
-	EventMeshNamespace                       = "/default/kyma/id"
-	EventSource                              = "/default/kyma/id"
-	EventTypePrefix                          = "prefix"
-	EventMeshPrefix                          = "one.two.three"      // three segments
-	InvalidEventMeshPrefix                   = "one.two.three.four" // four segments
-	EventTypePrefixEmpty                     = ""
-	OrderCreatedV1Event                      = "order.created.v1"
-	OrderCreatedV2Event                      = "order.created.v2"
+	EventMeshNamespace          = "/default/kyma/id"
+	EventSource                 = "/default/kyma/id"
+	EventTypePrefix             = "prefix"
+	EventMeshPrefix             = "one.two.three"      // three segments
+	InvalidEventMeshPrefix      = "one.two.three.four" // four segments
+	EventTypePrefixEmpty        = ""
+	OrderCreatedV1Event         = "order.created.v1"
+	OrderCreatedV2Event         = "order.created.v2"
+	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
+	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
+
+	EventMeshExactType          = EventMeshPrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1EventNotClean
+	EventMeshOrderCreatedV1Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	EventMeshOrderCreatedV2Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV2Event
+
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
 	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -350,12 +357,6 @@ func WithProtocolBEB() SubscriptionOpt {
 	}
 }
 
-//func WithProtocolSettings(p *eventingv1alpha2.ProtocolSettings) SubscriptionOpt {
-//	return func(s *eventingv1alpha2.Subscription) {
-//		s.Spec.ProtocolSettings = p
-//	}
-//}
-
 // AddEventType adds a new type to the subscription.
 func AddEventType(eventType string, subscription *eventingv1alpha2.Subscription) {
 	subscription.Spec.Types = append(subscription.Spec.Types, eventType)
@@ -378,6 +379,27 @@ func WithNotCleanFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventTypeNotClean)
 }
 
+// WithExactTypeMatching is a SubscriptionOpt for creating a Subscription with an exact type matching.
+func WithExactTypeMatching() SubscriptionOpt {
+	return WithTypeMatching(eventingv1alpha2.TypeMatchingExact)
+}
+
+// WithStandardTypeMatching is a SubscriptionOpt for creating a Subscription with an standard type matching.
+func WithStandardTypeMatching() SubscriptionOpt {
+	return WithTypeMatching(eventingv1alpha2.TypeMatchingStandard)
+}
+
+// WithTypeMatching is a SubscriptionOpt for creating a Subscription with a specific type matching,
+func WithTypeMatching(typeMatching eventingv1alpha2.TypeMatching) SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) { subscription.Spec.TypeMatching = typeMatching }
+}
+
+// WithNotCleanType initializes subscription with a not clean event-type
+// A not clean event-type means it contains none-alphanumeric characters.
+func WithNotCleanType() SubscriptionOpt {
+	return WithEventType(OrderCreatedV1EventNotClean)
+}
+
 // WithEmptyTypes is a SubscriptionOpt for creating a subscription with an empty event type filter.
 // Note that this is different from setting Types to nil.
 func WithEmptyTypes() SubscriptionOpt {
@@ -390,12 +412,28 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventType)
 }
 
+func WithEventMeshExactType() SubscriptionOpt {
+	return WithEventType(EventMeshExactType)
+}
+
+func WithOrderCreatedV1Event() SubscriptionOpt {
+	return WithEventType(OrderCreatedV1Event)
+}
+
 func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
 	return WithSinkURL(fmt.Sprintf("%s.%s.svc.cluster.local", svcName, svcNamespace))
 }
 
 func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
+}
+
+func WithEventMeshNamespaceSource() SubscriptionOpt {
+	return WithEventSource(EventMeshNamespace)
+}
+
+func WithNotCleanSource() SubscriptionOpt {
+	return WithEventSource(ApplicationNameNotClean)
 }
 
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from

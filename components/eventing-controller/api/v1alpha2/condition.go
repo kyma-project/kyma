@@ -1,6 +1,8 @@
 package v1alpha2
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -30,10 +32,15 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	ConditionReasonSubscriptionActive    ConditionReason = "BEB Subscription active"
-	ConditionReasonSubscriptionDeleted   ConditionReason = "BEB Subscription deleted"
-	ConditionReasonAPIRuleStatusReady    ConditionReason = "APIRule status ready"
-	ConditionReasonAPIRuleStatusNotReady ConditionReason = "APIRule status not ready"
+	// EventMesh Conditions
+	ConditionReasonSubscriptionCreated        ConditionReason = "EventMesh Subscription created"
+	ConditionReasonSubscriptionCreationFailed ConditionReason = "EventMesh Subscription creation failed"
+	ConditionReasonSubscriptionActive         ConditionReason = "EventMesh Subscription active"
+	ConditionReasonSubscriptionNotActive      ConditionReason = "EventMesh Subscription not active"
+	ConditionReasonSubscriptionDeleted        ConditionReason = "EventMesh Subscription deleted"
+	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
+	ConditionReasonWebhookCallStatus          ConditionReason = "EventMesh Subscription webhook call no errors status"
 )
 
 // initializeConditions sets unset conditions to Unknown.
@@ -238,4 +245,8 @@ func ConditionEquals(existing, expected Condition) bool {
 	}
 
 	return true
+}
+
+func CreateMessageForConditionReasonSubscriptionCreated(eventMeshName string) string {
+	return fmt.Sprintf("EventMesh subscription name is: %s", eventMeshName)
 }
