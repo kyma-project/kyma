@@ -55,21 +55,27 @@ func (f *OidcHydraTestFlow) GetToken() (string, error) {
 }
 
 func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, consentForm url.Values) (string, error) {
+	fmt.Print("-->vladimir, Here5.1")
 	redirectUrl, err := url.Parse(f.config.ClientConfig.RedirectUri)
 	if err != nil {
 		return "", err
 	}
+	fmt.Print("-->vladimir, Here5.2")
 	var token string
 	f.httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		fmt.Print("-->vladimir, Here5.3")
 		if req.URL.Host == redirectUrl.Host {
+			fmt.Print("-->vladimir, Here5.4")
 			token = getToken(req)
 			fmt.Printf("-->vladimir, GOT token: %s", token)
 			return http.ErrUseLastResponse
 		}
-		fmt.Print("-->vladimir, Here5")
+		fmt.Print("-->vladimir, Here5.5")
 		return nil
 	}
+	fmt.Print("-->vladimir, Here5.6")
 	_, err = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
+	fmt.Print("-->vladimir, Here5.7")
 	return token, err
 }
 
