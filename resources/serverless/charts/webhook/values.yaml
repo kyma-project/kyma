@@ -59,6 +59,8 @@ container:
   privileged: false
   runAsUser: 1000
   envs:
+    fileConfigPath:
+      value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
     metricsDomain:
       value: "kyma-project.io/serverless"
     configObservabilityName:

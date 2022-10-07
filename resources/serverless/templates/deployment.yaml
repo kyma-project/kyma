@@ -46,7 +46,7 @@ spec:
       volumes:
         - name: {{ template "fullname" . }}-configuration
           configMap:
-            name: {{ template "fullname" . }}-configuration
+            name: "{{ .Values.global.configuration.configmapName }}"
       serviceAccountName: {{ template "fullname" . }}-controller-manager
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
@@ -55,7 +55,7 @@ spec:
         - name: manager
           volumeMounts:
             - name: {{ template "fullname" . }}-configuration
-              mountPath: {{ .Values.containers.manager.configuration.targetDir }}
+              mountPath: {{ .Values.global.configuration.targetDir }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
           imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
           command:
