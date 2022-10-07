@@ -34,7 +34,7 @@ This tutorial shows how to create self-sign Root CA and use it to sign Client Ce
    export CLIENT_CERT_KEY_FILE=${CLIENT_CERT_CN}.key
    ```
 
-2. Generate a Client Root CA and a Client certificate:
+2. Generate a Client certificate and sign it with the Root CA:
 
    ```bash
    # Create a new key and CSR for the client certificate
