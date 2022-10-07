@@ -49,6 +49,7 @@ global:
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
   eventTypePrefix: "sap.kyma.custom"
+  appLogLevel: "info"
 
   log:
     format: "json"
@@ -57,7 +58,7 @@ global:
     name: eventing
     keys:
       eventTypePrefix: "eventTypePrefix"
-      appLogLevel: "info"
+      appLogLevel: "appLogLevel"
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
