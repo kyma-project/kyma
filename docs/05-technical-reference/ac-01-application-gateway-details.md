@@ -47,8 +47,6 @@ In addition, the `User-Agent` header is set to an empty value not specified in t
 
 ## Response rewriting
 
-If during a call from an external system to the target path (`TARGET_PATH`), the target responds with `Created` (`201`) or with a redirect (`3xx`) within the same Application CR (`APP_NAME`) and service (`SERVICE_NAME`), the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port, with the sub-path pointing to the called service attached at the end, in this format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
+If during a call to the external system, the target responds with a redirect (`3xx` status code) that points to the URL with the same host and different path, the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port, with the sub-path pointing to the called service attached at the end, in this format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
 
-For example, if an external system calls `https://httpbin.org`, and it's redirected to `https://httpbin.org/basic-auth/user/passwd`, Application Gateway changes the URL to `http://central-application-gateway.kyma-system:8080/httpbin/httpbin/basic-auth/user/passwd`.
-
-This allows the redirects to go through Application Gateway, and thus, it allows for passing authorization, custom headers, URL parameters, and the body without an issue.
+This addition makes the HTTP clients (the ones that called the Application Gateway before) follow redirects through the Application Gateway, and not to the service directly. This allows the redirects to go through Application Gateway, and thus, it allows for passing authorization, custom headers, URL parameters, and the body without an issue.
