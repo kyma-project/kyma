@@ -1,5 +1,5 @@
 // Package handlertest provides utilities for Handler testing.
-package handlertest
+package handler
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
-	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )

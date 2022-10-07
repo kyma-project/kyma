@@ -1,4 +1,4 @@
-package sender
+package jetstream
 
 import (
 	"context"
@@ -14,13 +14,12 @@ import (
 
 	"github.com/cloudevents/sdk-go/v2/event"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -74,7 +73,7 @@ func TestJetStreamMessageSender(t *testing.T) {
 
 			// when
 			ctx := context.Background()
-			sender := NewJetStreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
+			sender := NewSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
 			if tc.givenNATSConnectionClosed {
 				connection.Close()
@@ -85,7 +84,9 @@ func TestJetStreamMessageSender(t *testing.T) {
 
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 			assert.Equal(t, tc.wantError, err != nil)
-			assert.Equal(t, tc.wantStatusCode, status)
+			if !tc.wantError {
+				assert.Equal(t, tc.wantStatusCode, status.HTTPStatus())
+			}
 		})
 	}
 }
@@ -158,7 +159,7 @@ type TestEnvironment struct {
 	Connection *nats.Conn
 	Config     *env.NATSConfig
 	Logger     *logger.Logger
-	Sender     *JetStreamMessageSender
+	Sender     *Sender
 	Server     *server.Server
 	JsContext  *nats.JetStreamContext
 }
@@ -180,7 +181,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	jsCtx, err := connection.JetStream()
 	require.NoError(t, err)
 
-	sender := &JetStreamMessageSender{
+	sender := &Sender{
 		connection: connection,
 		envCfg:     natsConfig,
 		logger:     mockedLogger,

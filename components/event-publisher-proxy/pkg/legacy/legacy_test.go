@@ -1,11 +1,8 @@
 package legacy
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -17,7 +14,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
-	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
 	. "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -97,7 +95,7 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			request, err := mockLegacyRequest(tc.wantVersion, tc.givenApplication, tc.givenEventName)
+			request, err := legacytest.ValidLegacyRequest(tc.wantVersion, tc.givenApplication, tc.givenEventName)
 			assert.NoError(t, err)
 
 			writer := httptest.NewRecorder()
@@ -108,7 +106,7 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
 			assert.Equal(t, wantEventType, gotEventType)
 
-			//check eventType
+			// check eventType
 			gotType := gotEvent.Context.GetType()
 			assert.Equal(t, tc.wantType, gotType)
 
@@ -129,21 +127,6 @@ func applicationTypeLabel(label string) map[string]string {
 		return map[string]string{application.TypeLabel: label}
 	}
 	return nil
-}
-
-func mockLegacyRequest(version, appname, eventType string) (*http.Request, error) {
-	body, err := json.Marshal(map[string]string{
-		"event-type":         eventType,
-		"event-type-version": version,
-		"event-time":         "2020-04-02T21:37:00Z",
-		"data":               "{\"legacy\":\"event\"}",
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	url := fmt.Sprintf("http://localhost:8080/%s/%s/events", appname, version)
-	return http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 }
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {

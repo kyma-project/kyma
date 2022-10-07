@@ -7,8 +7,9 @@ import (
 	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/beb"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/nats"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 )
@@ -27,18 +28,6 @@ type Config struct {
 
 	// AppLogLevel defines the log level.
 	AppLogLevel string `envconfig:"APP_LOG_LEVEL" default:"info"`
-}
-
-// Commander defines the interface of different implementations
-type Commander interface {
-	// Init allows main() to pass flag values to the commander instance.
-	Init() error
-
-	// Start runs the initialized commander instance.
-	Start() error
-
-	// Stop stops the commander instance.
-	Stop() error
 }
 
 func main() {
@@ -67,18 +56,18 @@ func main() {
 	prometheus.MustRegister(metricsCollector)
 
 	// Instantiate configured commander.
-	var commander Commander
+	var c commander.Commander
 	switch cfg.Backend {
 	case backendBEB:
-		commander = beb.NewCommander(opts, metricsCollector, logger)
+		c = beb.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
-		commander = nats.NewCommander(opts, metricsCollector, logger)
+		c = nats.NewCommander(opts, metricsCollector, logger)
 	default:
 		setupLogger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
 	}
 
 	// Init the commander.
-	if err := commander.Init(); err != nil {
+	if err := c.Init(); err != nil {
 		setupLogger.Fatalw("Commander initialization failed", "error", err)
 	}
 
@@ -92,7 +81,7 @@ func main() {
 	setupLogger.Infof("Starting publisher to: %v", cfg.Backend)
 
 	// Start the commander.
-	if err := commander.Start(); err != nil {
+	if err := c.Start(); err != nil {
 		setupLogger.Fatalw("Failed to to start publisher", "error", err)
 	}
 

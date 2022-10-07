@@ -1,4 +1,4 @@
-package beb
+package nats
 
 import (
 	"context"
@@ -8,53 +8,54 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
+
 	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only used in a development setup
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/generic"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/jetstream"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
 
 const (
-	bebBackend       = "beb"
-	bebCommanderName = bebBackend + "-commander"
+	natsBackend       = "nats"
+	natsCommanderName = natsBackend + "-commander"
 )
 
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
-	envCfg           *env.BEBConfig
-	logger           *logger.Logger
 	metricsCollector *metrics.Collector
+	logger           *logger.Logger
+	envCfg           *env.NATSConfig
 	opts             *options.Options
 }
 
-// NewCommander creates the Commander for publisher to BEB.
+// NewCommander creates the Commander for publisher to NATS.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
-		metricsCollector: metricsCollector,
+		envCfg:           new(env.NATSConfig),
 		logger:           logger,
-		envCfg:           new(env.BEBConfig),
+		metricsCollector: metricsCollector,
 		opts:             opts,
 	}
 }
 
-// Init implements the Commander interface and initializes the publisher to BEB.
+// Init implements the Commander interface and initializes the publisher to NATS.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		return xerrors.Errorf("failed to read configuration for %s : %v", bebCommanderName, err)
+		return xerrors.Errorf("failed to read configuration for %s : %v", natsCommanderName, err)
 	}
 	return nil
 }
@@ -63,19 +64,26 @@ func (c *Commander) Init() error {
 func (c *Commander) Start() error {
 	c.namedLogger().Infow("Starting Event Publisher", "configuration", c.envCfg.String(), "startup arguments", c.opts)
 
-	// configure message receiver
-	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
-
 	// assure uniqueness
 	var ctx context.Context
 	ctx, c.cancel = context.WithCancel(signals.NewContext())
 
-	// configure auth client
-	client := oauth.NewClient(ctx, c.envCfg)
-	defer client.CloseIdleConnections()
+	// configure message receiver
+	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
-	// configure message sender
-	messageSender := sender.NewBEBMessageSender(c.envCfg.EmsPublishURL, client)
+	// connect to nats
+	connection, err := pkgnats.Connect(c.envCfg.URL,
+		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
+		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
+		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
+	)
+	if err != nil {
+		return xerrors.Errorf("failed to connect to backend server for %s : %v", natsCommanderName, err)
+	}
+	defer connection.Close()
+
+	// configure the message sender
+	messageSender := jetstream.NewSender(ctx, connection, c.envCfg, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -86,33 +94,37 @@ func (c *Commander) Start() error {
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(
-		c.envCfg.BEBNamespace,
-		c.envCfg.EventTypePrefix,
+		c.envCfg.ToConfig().BEBNamespace,
+		c.envCfg.ToConfig().EventTypePrefix,
 		applicationLister,
 	)
 
-	// Configure Subscription Lister
+	// configure Subscription Lister
 	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig)
 	subLister := subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
-		Config:             c.envCfg,
+		Prefix:             c.envCfg.ToConfig().EventTypePrefix,
+		Namespace:          c.envCfg.ToConfig().BEBNamespace,
 		Logger:             c.logger,
 	}
-	// Sync informer cache or die
+
+	// sync informer cache or die
 	c.namedLogger().Info("Waiting for informers caches to sync")
 	informers.WaitForCacheSyncOrDie(ctx, subDynamicSharedInfFactory, c.logger)
-	c.namedLogger().Info("Informers were successfully synced")
+	c.namedLogger().Info("Informers are synced successfully")
 
 	// configure event type cleaner
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := beb.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := generic.NewHandler(messageReceiver, messageSender, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
-		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
+		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
-	c.namedLogger().Info("Event Publisher was shut down")
+
+	c.namedLogger().Infof("Event Publisher was shut down")
+
 	return nil
 }
 
@@ -123,5 +135,5 @@ func (c *Commander) Stop() error {
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(bebCommanderName).With("backend", bebBackend)
+	return c.logger.WithContext().Named(natsCommanderName).With("backend", natsBackend)
 }

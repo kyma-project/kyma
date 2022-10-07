@@ -16,12 +16,9 @@ func TestChecker(t *testing.T) {
 		useCustomReadinessCheck     bool             // use the givenCustomReadinessCheck instead of the default one
 		givenCustomLivenessCheck    http.HandlerFunc // custom liveness check (can be nil)
 		givenCustomReadinessCheck   http.HandlerFunc // custom readiness check (can be nil)
-		givenNextHandler            http.Handler     // next handler
-		givenNextHandlerEndpoint    string           // next handler endpoint
 		wantPanicForNilHealthChecks bool             // panic if provided health checks is nil
 		wantLivenessStatusCode      int              // expected liveness status code
 		wantReadinessStatusCode     int              // expected readiness status code
-		wantNextHandlerStatusCode   int              // expected next handler status code
 	}{
 		{
 			name:                    "should report default health checks status-codes",
@@ -31,14 +28,11 @@ func TestChecker(t *testing.T) {
 			wantReadinessStatusCode: StatusCodeHealthy,
 		},
 		{
-			name:                      "should report default health checks and next handler status-codes",
-			useCustomLivenessCheck:    false,
-			useCustomReadinessCheck:   false,
-			givenNextHandler:          handlerWithStatusCode(http.StatusNoContent),
-			givenNextHandlerEndpoint:  "/endpoint",
-			wantLivenessStatusCode:    StatusCodeHealthy,
-			wantReadinessStatusCode:   StatusCodeHealthy,
-			wantNextHandlerStatusCode: http.StatusNoContent,
+			name:                    "should report default health checks and next handler status-codes",
+			useCustomLivenessCheck:  false,
+			useCustomReadinessCheck: false,
+			wantLivenessStatusCode:  StatusCodeHealthy,
+			wantReadinessStatusCode: StatusCodeHealthy,
 		},
 		{
 			name:                        "should panic if provided liveness check is nil",
@@ -60,12 +54,9 @@ func TestChecker(t *testing.T) {
 			useCustomReadinessCheck:     true,
 			givenCustomLivenessCheck:    handlerFuncWithStatusCode(http.StatusOK),
 			givenCustomReadinessCheck:   handlerFuncWithStatusCode(http.StatusAccepted),
-			givenNextHandler:            handlerWithStatusCode(http.StatusNoContent),
-			givenNextHandlerEndpoint:    "/endpoint",
 			wantPanicForNilHealthChecks: false,
 			wantLivenessStatusCode:      http.StatusOK,
 			wantReadinessStatusCode:     http.StatusAccepted,
-			wantNextHandlerStatusCode:   http.StatusNoContent,
 		},
 	}
 	for _, tc := range testCases {
@@ -91,29 +82,34 @@ func TestChecker(t *testing.T) {
 			checker := NewChecker(opts...)
 
 			if tc.useCustomLivenessCheck {
-				assertResponseStatusCode(t, LivenessURI, checker, tc.givenCustomLivenessCheck, tc.wantLivenessStatusCode)
+				assertResponseLivenessStatusCode(t, LivenessURI, checker, tc.wantLivenessStatusCode)
 			} else {
-				assertResponseStatusCode(t, LivenessURI, checker, http.HandlerFunc(DefaultCheck), StatusCodeHealthy)
+				assertResponseLivenessStatusCode(t, LivenessURI, checker, StatusCodeHealthy)
 			}
 
 			if tc.useCustomReadinessCheck {
-				assertResponseStatusCode(t, ReadinessURI, checker, tc.givenCustomReadinessCheck, tc.wantReadinessStatusCode)
+				assertResponseReadynessStatusCode(t, ReadinessURI, checker, tc.wantReadinessStatusCode)
 			} else {
-				assertResponseStatusCode(t, ReadinessURI, checker, http.HandlerFunc(DefaultCheck), StatusCodeHealthy)
-			}
-
-			if tc.givenNextHandler != nil {
-				assertResponseStatusCode(t, tc.givenNextHandlerEndpoint, checker, tc.givenNextHandler, tc.wantNextHandlerStatusCode)
+				assertResponseReadynessStatusCode(t, ReadinessURI, checker, StatusCodeHealthy)
 			}
 		})
 	}
 }
 
-func assertResponseStatusCode(t *testing.T, endpoint string, checker *Checker, handler http.Handler, statusCode int) {
+func assertResponseLivenessStatusCode(t *testing.T, endpoint string, checker *ConfigurableChecker, statusCode int) {
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, endpoint, nil)
 
-	checker.Check(handler).ServeHTTP(writer, request)
+	checker.LivenessCheck(writer, request)
+
+	require.Equal(t, statusCode, writer.Result().StatusCode)
+}
+
+func assertResponseReadynessStatusCode(t *testing.T, endpoint string, checker *ConfigurableChecker, statusCode int) {
+	writer := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, endpoint, nil)
+
+	checker.ReadinessCheck(writer, request)
 
 	require.Equal(t, statusCode, writer.Result().StatusCode)
 }
@@ -122,8 +118,4 @@ func handlerFuncWithStatusCode(statusCode int) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(statusCode)
 	}
-}
-
-func handlerWithStatusCode(statusCode int) http.Handler {
-	return handlerFuncWithStatusCode(statusCode)
 }
