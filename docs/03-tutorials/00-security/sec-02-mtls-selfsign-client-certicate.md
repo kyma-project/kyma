@@ -22,7 +22,7 @@ This tutorial shows how to create self-sign Root CA and use it to sign Client Ce
    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -subj '/O=${CLIENT_ROOT_CA_ORG}/CN=${CLIENT_ROOT_CA_CN}' -keyout ${CLIENT_ROOT_CA_KEY_FILE} -out ${CLIENT_ROOT_CA_CRT_FILE}
    ```
    
-## Prepare Client Root Certificate
+## Prepare Client Certificate
 
 1. Export the following values as environment variables:
 
