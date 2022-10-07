@@ -122,10 +122,10 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 	var tokenOAUTH *oauth2.Token
 	err := retry.Do(
 		func() error {
-			fmt.Printf("vladimir, clientID: %s", oauth2Cfg.ClientID)
-			fmt.Printf("vladimir, ClientSecret: %s", oauth2Cfg.ClientSecret)
-			fmt.Printf("vladimir, TokenURL: %s", oauth2Cfg.TokenURL)
-			fmt.Printf("vladimir, Scopes: %s", oauth2Cfg.Scopes[0])
+			fmt.Printf("-->vladimir, clientID: %s", oauth2Cfg.ClientID)
+			fmt.Printf("-->vladimir, ClientSecret: %s", oauth2Cfg.ClientSecret)
+			fmt.Printf("-->vladimir, TokenURL: %s", oauth2Cfg.TokenURL)
+			fmt.Printf("-->vladimir, Scopes: %s", oauth2Cfg.Scopes[0])
 			token, err := oauth2Cfg.Token(context.Background())
 			if err != nil {
 				return fmt.Errorf("error during Token retrival: %+v", err)
@@ -137,6 +137,7 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 			return nil
 		},
 		retry.Delay(500*time.Millisecond), retry.Attempts(3))
+	fmt.Printf("-->vladimir, Token: %s", tokenOAUTH.AccessToken)
 	return tokenOAUTH, err
 }
 
