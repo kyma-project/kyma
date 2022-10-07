@@ -45,20 +45,21 @@ global:
     allowPrivilegeEscalation: false
     privileged: false
 
-  # eventTypePrefix is an optional prefix for the eventType
-  # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
-  # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
-  eventTypePrefix: "sap.kyma.custom"
-  appLogLevel: "info"
-
   log:
     format: "json"
 
+# eventTypePrefix is an optional prefix for the eventType
+# note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
+# for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
   configMap:
     name: eventing
     keys:
       eventTypePrefix: "eventTypePrefix"
       appLogLevel: "appLogLevel"
+    values:
+      eventTypePrefix: "sap.kyma.custom"
+      appLogLevel: "info"
+
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB

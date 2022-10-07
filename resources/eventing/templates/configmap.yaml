@@ -4,6 +4,6 @@ metadata:
   name: {{ .Values.global.configMap.name }}
   labels: {{ include "eventing.labels" . | nindent 4 }}
 data:
-  {{ .Values.global.configMap.keys.eventTypePrefix }}: {{ .Values.global.eventTypePrefix | quote }}
-  {{ .Values.global.configMap.keys.appLogLevel }}: {{ .Values.global.appLogLevel | quote }}
+  {{ .Values.global.configMap.keys.eventTypePrefix }}: {{ .Values.global.configMap.values.eventTypePrefix | quote }}
+  {{ .Values.global.configMap.keys.appLogLevel }}: {{ .Values.global.configMap.values.appLogLevel | quote }}
 ---
