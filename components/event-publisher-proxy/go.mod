@@ -10,7 +10,7 @@ require (
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220930074158-ab54b86ee597
 	github.com/nats-io/nats-server/v2 v2.9.1
 	github.com/nats-io/nats.go v1.16.1-0.20220906180156-a1017eec10b0
-	github.com/onsi/gomega v1.20.2
+	github.com/onsi/gomega v1.21.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
