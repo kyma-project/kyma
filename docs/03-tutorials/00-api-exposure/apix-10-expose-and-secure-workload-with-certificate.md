@@ -125,7 +125,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
      rules:
      - to:
        - operation:
-           hosts: ["function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}"]
+           hosts: ["function-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}"]
        when:
        - key: request.headers[X-Client-Ssl-Cn]
          values: ["O=${CLIENT_CERT_ORG},CN=${CLIENT_CERT_CN}"]
