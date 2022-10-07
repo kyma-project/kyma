@@ -163,7 +163,8 @@ Send a `GET` request with a token that has the `read` scope to the Function:
    ```shell
    curl --key ${CLIENT_CERT_KEY_FILE} \
         --cert ${CLIENT_CERT_CRT_FILE} \
-        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function
+        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \
+        -ik -X GET https://function-vs.$DOMAIN_TO_EXPOSE_WORKLOADS/function
    ```
 
 This call returns the code `200` response. If you call the Function without the proper certificates or with old ones, you get the code `403` response.
