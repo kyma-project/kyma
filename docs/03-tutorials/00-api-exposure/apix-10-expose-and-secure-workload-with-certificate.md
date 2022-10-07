@@ -95,7 +95,7 @@ Follow the instructions in the tabs to further secure the mTLS service or Functi
      namespace: ${NAMESPACE}
    spec:
      hosts:
-     - "function-example.${DOMAIN_TO_EXPOSE_WORKLOADS}"
+     - "function-vs.${DOMAIN_TO_EXPOSE_WORKLOADS}"
      gateways:
      - ${GATEWAY}
      http:
