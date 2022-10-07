@@ -33,6 +33,7 @@ func (u *secureToUnsecureScenario) thereIsASecuredOAuth2Endpoint() error {
 
 func (u *secureToUnsecureScenario) theEndpointIsReachable() error {
 	token, err := getOAUTHToken(*oauth2Cfg)
+	fmt.Printf("-->vladimir, unsecuredEp Token: %s", token.AccessToken)
 	if err != nil {
 		return err
 	}

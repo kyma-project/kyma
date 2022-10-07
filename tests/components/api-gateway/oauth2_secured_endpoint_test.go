@@ -32,7 +32,7 @@ func (o *oauth2Scenario) thereIsAnOauth2Endpoint() error {
 
 func (o *oauth2Scenario) callingTheEndpointWithValidTokenShouldResultInStatusBeetween(lower, higher int) error {
 	token, err := getOAUTHToken(*oauth2Cfg)
-	fmt.Printf("-->vladimir, Token2: %s", token.AccessToken)
+	fmt.Printf("-->vladimir, securedEp Token: %s", token.AccessToken)
 	if err != nil {
 		return err
 	}

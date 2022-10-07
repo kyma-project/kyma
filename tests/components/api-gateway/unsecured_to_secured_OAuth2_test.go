@@ -46,6 +46,7 @@ func (u *unsecureToSecureScenario) callingTheEndpointWithAInvalidTokenShouldResu
 
 func (u *unsecureToSecureScenario) callingTheEndpointWithAValidTokenShouldResultInStatusBeetween(lower int, higher int) error {
 	token, err := getOAUTHToken(*oauth2Cfg)
+	fmt.Printf("-->vladimir, OAuth2 Token: %s", token.AccessToken)
 	if err != nil {
 		return err
 	}
