@@ -32,6 +32,7 @@ type PublisherConfig struct {
 	PriorityClassName string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
 	// publisher takes the controller values
 	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
+	AppLogLevel  string `envconfig:"APP_LOG_LEVEL" default:"info"`
 }
 
 type DefaultSubscriptionConfig struct {

@@ -21,6 +21,7 @@ func TestNewDeployment(t *testing.T) {
 		LimitsMemory:    "128Mi",
 		Image:           "testImage",
 		ImagePullPolicy: "Always",
+		AppLogLevel:     "info",
 		AppLogFormat:    "json",
 	}
 	testCases := []struct {
