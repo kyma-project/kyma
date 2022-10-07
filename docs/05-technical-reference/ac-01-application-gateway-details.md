@@ -44,3 +44,11 @@ Application Gateway proxies the following headers while making calls to the regi
 - `X-Forwarded-Client-Cert`
 
 In addition, the `User-Agent` header is set to an empty value not specified in the call, which prevents setting the default value.
+
+## Response rewriting
+
+If during a call from an external system to the target path (`TARGET_PATH`), the target responds with `Created` (`201`) or with a redirect (`3xx`) within the same Application CR (`APP_NAME`) and service (`SERVICE_NAME`), the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port, with the sub-path pointing to the called service attached at the end, in this format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
+
+For example, if an external system calls `https://httpbin.org`, and it's redirected to `https://httpbin.org/basic-auth/user/passwd`, Application Gateway changes the URL to `http://central-application-gateway.kyma-system:8080/httpbin/httpbin/basic-auth/user/passwd`.
+
+This allows the redirects to go through Application Gateway, and thus, it allows for passing authorization, custom headers, URL parameters, and the body without an issue.
