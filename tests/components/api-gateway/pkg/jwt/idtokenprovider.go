@@ -40,11 +40,16 @@ func (f *OidcHydraTestFlow) fetchIdToken() (string, error) {
 }
 
 func (f *OidcHydraTestFlow) GetToken() (string, error) {
+	fmt.Print("-->vladimir, Here1")
 	loginResp, err := f.doLogin()
+
+	fmt.Print("-->vladimir, Here2")
 	if err != nil {
 		return "", err
 	}
+	fmt.Print("-->vladimir, Here3")
 	consent := f.prepareConsent(loginResp)
+	fmt.Print("-->vladimir, Here4")
 
 	return f.sentConsentToGetToken(loginResp, consent)
 }
@@ -61,7 +66,7 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 			fmt.Printf("-->vladimir, GOT token: %s", token)
 			return http.ErrUseLastResponse
 		}
-		fmt.Print("-->vladimir, Here2")
+		fmt.Print("-->vladimir, Here5")
 		return nil
 	}
 	_, err = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
@@ -73,10 +78,12 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Print("-->vladimir, Here6")
 	resp, err := f.httpClient.Get(u.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP GET on auth endpoint")
 	}
+	fmt.Print("-->vladimir, Here7")
 	loginForm := url.Values{}
 	loginForm.Set("email", f.config.UserCredentials.Username)
 	loginForm.Set("password", f.config.UserCredentials.Password)
@@ -85,7 +92,7 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
-	fmt.Print("-->vladimir, Here3")
+	fmt.Print("-->vladimir, Here8")
 	return resp, nil
 }
 

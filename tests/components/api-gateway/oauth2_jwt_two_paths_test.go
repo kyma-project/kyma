@@ -48,7 +48,7 @@ func (o *oauthJWTTwoPathsScenario) callingTheEndpointWithValidTokenShouldResultI
 		if err != nil {
 			return err
 		}
-		fmt.Printf("OAuth2 Bearer token: %s", token.AccessToken)
+		fmt.Printf("-->vladimir, OAuth2 Bearer token: %s", token.AccessToken)
 		headerVal := fmt.Sprintf("Bearer %s", token.AccessToken)
 
 		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
