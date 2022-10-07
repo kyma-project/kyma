@@ -146,7 +146,8 @@ Send a `GET` request to the HttpBin service with the client certificates that yo
    ```shell
    curl --key ${CLIENT_CERT_KEY_FILE} \
         --cert ${CLIENT_CERT_CRT_FILE} \
-        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \ -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
+        --cacert ${CLIENT_ROOT_CA_CRT_FILE} \
+        -ik -X GET https://httpbin-vs.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
    ```
 
 These calls return the code `200` response. If you call the service without the proper certificates or with old ones, you get the code `403` response.
