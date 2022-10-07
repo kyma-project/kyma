@@ -58,12 +58,14 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 	f.httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if req.URL.Host == redirectUrl.Host {
 			token = getToken(req)
+			fmt.Printf("vladimir, GOT token: %s", token)
 			return http.ErrUseLastResponse
 		}
+		fmt.Print("vladimir, Here2")
 		return nil
 	}
-	_, _ = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
-	return token, nil
+	_, err = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
+	return token, err
 }
 
 func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
