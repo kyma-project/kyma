@@ -74,6 +74,8 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 		return nil
 	}
 	fmt.Print("-->vladimir, Here5.6")
+	fmt.Printf("-->vladimir, Here5, URL: %s", response.Request.URL.String())
+	fmt.Printf("-->vladimir, Here5, consent: %T", consentForm)
 	_, err = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
 	fmt.Print("-->vladimir, Here5.7")
 	return token, err

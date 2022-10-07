@@ -52,7 +52,7 @@ func (o *oauthJWTOnePathScenario) callingTheEndpointWithValidTokenShouldResultIn
 		fmt.Printf("-->vladimir, 1path OAuth2 Bearer token: %s", token.AccessToken)
 		headerVal := fmt.Sprintf("Bearer %s", token.AccessToken)
 
-		return helper.CallEndpointWithHeadersWithRetries(headerVal, "oauth2-access-token", fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
+		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 	}
 	return errors.New("should not happen")
 }
