@@ -3,6 +3,7 @@ package jwt
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -78,7 +79,12 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 	fmt.Printf("-->vladimir, Here5, consent1: %s", consentForm.Get("challenge"))
 	fmt.Printf("-->vladimir, Here5, consent2: %s", consentForm.Get("grant_scope"))
 	fmt.Printf("-->vladimir, Here5, consent3: %s", consentForm.Get("submit"))
-	_, err = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
+	resp, err := f.httpClient.PostForm(response.Request.URL.String(), consentForm)
+	respDump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		return "", errors.Wrap(err, "error dumping response")
+	}
+	fmt.Printf("-->vladimir, login RESPONSE:\n%s", string(respDump))
 	fmt.Print("-->vladimir, Here5.7")
 	return token, err
 }
@@ -107,6 +113,11 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	fmt.Printf("-->vladimir, Here7, consent2: %s", loginForm.Get("password"))
 	fmt.Printf("-->vladimir, Here7, consent3: %s", loginForm.Get("challenge"))
 	fmt.Print("-->vladimir, Here8")
+	respDump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		return nil, errors.Wrap(err, "error dumping response")
+	}
+	fmt.Printf("-->vladimir, login RESPONSE:\n%s", string(respDump))
 	return resp, nil
 }
 
