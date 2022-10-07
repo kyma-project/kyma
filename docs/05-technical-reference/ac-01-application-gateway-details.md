@@ -47,6 +47,9 @@ In addition, the `User-Agent` header is set to an empty value not specified in t
 
 ## Response rewriting
 
-If during a call to the external system, the target responds with a redirect (`3xx` status code) that points to the URL with the same host and a different path, the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port, with the sub-path pointing to the called service attached at the end, in this format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
+Application Gateway performs response rewriting in situations when during a call to the external system, the target responds with a redirect (`3xx` status code) that points to the URL with the same host and a different path.
+In such a case, the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port. The sub-path pointing to the called service remains attached at the end. 
+The modified `Location` header has the following format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
 
-This functionality makes the HTTP clients that originally called Application Gateway follow redirects through the Gateway, and not to the service directly. This allows for passing authorization, custom headers, URL parameters, and the body without an issue.
+This functionality makes the HTTP clients that originally called Application Gateway follow redirects through the Gateway, and not to the service directly. 
+This allows for passing authorization, custom headers, URL parameters, and the body without an issue.
