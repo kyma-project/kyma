@@ -5,7 +5,8 @@ import (
 	"os"
 
 	"github.com/go-logr/zapr"
-	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
+	fileconfig "github.com/kyma-project/kyma/components/function-controller/internal/config"
+	"github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -27,8 +28,7 @@ type config struct {
 	WebhookServiceName string `envconfig:"default=serverless-webhook"`
 	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
 	WebhookPort        int    `envconfig:"default=8443"`
-	LogFormat          string `envconfig:"default=text"`
-	LogLevel           string `envconfig:"default=debug"`
+	FileConfigPath     string `envconfig:"default=/appdata/config.yaml"`
 }
 
 var (
@@ -53,16 +53,19 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	l, err := serverlessLogging.ConfigureLogger(cfg.LogLevel, cfg.LogFormat)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	loggerRegistry, err := configureLogger(ctx, cfg.FileConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to configure log")
 		os.Exit(1)
 	}
 
-	logrZap := zapr.NewLogger(l.WithContext().Desugar())
+	logrZap := zapr.NewLogger(loggerRegistry.CreateDesugared())
 	ctrl.SetLogger(logrZap)
 
-	log := l.WithContext()
+	log := loggerRegistry.CreateUnregistered()
 
 	validationConfigv1alpha1 := webhook.ReadValidationConfigV1Alpha1OrDie()
 	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
@@ -137,4 +140,26 @@ func main() {
 		log.Error(err, "failed to start controller-manager")
 		os.Exit(1)
 	}
+}
+
+func configureLogger(ctx context.Context, cfgPath string) (*logging.Registry, error) {
+	cfg, err := fileconfig.Load(cfgPath)
+	if err != nil {
+		return nil, err
+	}
+
+	log, err := logging.ConfigureRegisteredLogger(cfg.LogLevel, cfg.LogFormat)
+	if err != nil {
+		return nil, err
+	}
+
+	notifyLog := log.CreateNamed("notifier")
+	go fileconfig.RunOnConfigChange(ctx, notifyLog, cfgPath, func(cfg fileconfig.Config) {
+		log, err = log.Reconfigure(cfg.LogLevel, cfg.LogFormat)
+		if err != nil {
+			notifyLog.Error(err)
+		}
+	})
+
+	return log, err
 }
