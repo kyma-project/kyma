@@ -2,7 +2,7 @@
 title: Application Gateway details
 ---
 
-Application Gateway is an intermediary component between a Function or a service and an external API.
+Application Gateway is an intermediary component between a Function or a microservice and an external API.
 
 ## Application Gateway URL
 
@@ -47,6 +47,6 @@ In addition, the `User-Agent` header is set to an empty value not specified in t
 
 ## Response rewriting
 
-If during a call to the external system, the target responds with a redirect (`3xx` status code) that points to the URL with the same host and different path, the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port, with the sub-path pointing to the called service attached at the end, in this format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
+If during a call to the external system, the target responds with a redirect (`3xx` status code) that points to the URL with the same host and a different path, the `Location` header is modified so that the original target path is replaced with the Application Gateway URL and port, with the sub-path pointing to the called service attached at the end, in this format: `{APP_GATEWAY_URL}:{APP_GATEWAY_PORT}/{APP_NAME}/{SERVICE_NAME}/{SUB-PATH}`.
 
-This addition makes the HTTP clients (the ones that called the Application Gateway before) follow redirects through the Application Gateway, and not to the service directly. This allows the redirects to go through Application Gateway, and thus, it allows for passing authorization, custom headers, URL parameters, and the body without an issue.
+This functionality makes the HTTP clients that originally called Application Gateway follow redirects through the Gateway, and not to the service directly. This allows for passing authorization, custom headers, URL parameters, and the body without an issue.
