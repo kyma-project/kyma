@@ -2,6 +2,7 @@ package main
 
 import (
 	golog "log"
+	"os"
 
 	"github.com/kelseyhightower/envconfig"
 	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -51,7 +52,11 @@ func main() {
 	}
 
 	// init the logger
-	logger, err := kymalogger.New(cfg.AppLogFormat, cfg.AppLogLevel)
+	logLevel, ok := os.LookupEnv("APP_LOG_LEVEL")
+	if !ok {
+		golog.Fatal("Missing APP_LOG_LEVEL environment variable")
+	}
+	logger, err := kymalogger.New(cfg.AppLogFormat, logLevel)
 	if err != nil {
 		golog.Fatalf("Failed to initialize logger, error: %v", err)
 	}
