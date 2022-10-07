@@ -55,7 +55,7 @@ function_context = {
     'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
 }
 
-jaeger_endpoint = os.getenv('JAEGER_SERVICE_ENDPOINT')
+tracecollector_endpoint = os.getenv('TRACE_COLLECTOR_ENDPOINT')
 pod_name = os.getenv('HOSTNAME')
 service_namespace = os.getenv('SERVICE_NAMESPACE')
 service_name = create_service_name(pod_name, service_namespace)
@@ -63,7 +63,7 @@ service_name = create_service_name(pod_name, service_namespace)
 tracer_provider = None
 # To not create several tracer providers, when the server start forking.
 if __name__ == "__main__":
-    tracer_provider = tracing.ServerlessTracerProvider(jaeger_endpoint, service_name)
+    tracer_provider = tracing.ServerlessTracerProvider(tracecollector_endpoint, service_name)
 
 
 def func_with_context(e, function_context):

@@ -361,10 +361,10 @@ func (s *systemState) podLabels() map[string]string {
 }
 
 type buildDeploymentArgs struct {
-	DockerPullAddress     string
-	JaegerServiceEndpoint string
-	PublisherProxyAddress string
-	ImagePullAccountName  string
+	DockerPullAddress      string
+	TraceCollectorEndpoint string
+	PublisherProxyAddress  string
+	ImagePullAccountName   string
 }
 
 func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment {
@@ -382,7 +382,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 
 	deploymentEnvs := buildDeploymentEnvs(
 		s.instance.GetNamespace(),
-		cfg.JaegerServiceEndpoint,
+		cfg.TraceCollectorEndpoint,
 		cfg.PublisherProxyAddress,
 	)
 	envs = append(envs, deploymentEnvs...)
