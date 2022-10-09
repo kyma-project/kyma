@@ -125,12 +125,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		g.Expect(deployment).ToNot(gomega.BeNil())
 		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&one))
 
-		t.Log("removing hpa")
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
-
+		t.Log("HPA is removed")
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
 		g.Expect(err).To(gomega.BeNil())
