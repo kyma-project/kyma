@@ -22,7 +22,7 @@ type RoleBindingReconciler struct {
 func NewRoleBinding(client client.Client, log *zap.SugaredLogger, config Config, service RoleBindingService) *RoleBindingReconciler {
 	return &RoleBindingReconciler{
 		client: client,
-		Log:    log.Named("controllers").Named("role"),
+		Log:    log,
 		config: config,
 		svc:    service,
 	}

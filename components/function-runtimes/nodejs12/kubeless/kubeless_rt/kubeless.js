@@ -10,7 +10,7 @@ const express = require('express');
 const helper = require('./lib/helper');
 const ce = require('./lib/ce');
 const morgan = require('morgan');
-const {ServerlessTracerProvider} = require('./lib/tracer')
+const { getTracer } = require('./lib/tracer')
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
 // Open telemetry metrics
@@ -26,8 +26,7 @@ const serviceNamespace = process.env.SERVICE_NAMESPACE
 let serviceName = podName.substring(0, podName.lastIndexOf("-"));
 serviceName = serviceName.substring(0, serviceName.lastIndexOf("-"))
 
-const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
-let tracerProvider = new ServerlessTracerProvider([serviceName, serviceNamespace].join('.'), jaegerServiceEndpoint);
+let tracer = getTracer([serviceName, serviceNamespace].join('.'));
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
@@ -95,7 +94,6 @@ function modExecute(handler, req, res, end) {
         throw new Error(`Unable to load ${handler}`);
 
     try {
-        let tracer = tracerProvider.getTracer(req.headers)
         let event = ce.buildEvent(req, res, tracer);
         Promise.resolve(func(event, context))
             // Finalize

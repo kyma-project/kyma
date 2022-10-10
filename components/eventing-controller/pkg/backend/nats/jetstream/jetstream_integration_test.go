@@ -1341,8 +1341,7 @@ func TestJetStream_CheckConsumerConfig(t *testing.T) {
 	require.NoError(t, initErr)
 
 	// set the initial MaxInFlight
-	initialMaxInFlight := 10
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: initialMaxInFlight}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}
 
 	// create a new Subscription
 	sub := evtesting.NewSubscription("sub", "foo",
@@ -1363,12 +1362,12 @@ func TestJetStream_CheckConsumerConfig(t *testing.T) {
 	// check that the consumer info war created with the expected maxAckPending value
 	consumerInfo, _ := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
 	require.NotNil(t, consumerInfo)
-	require.Equal(t, consumerInfo.Config.MaxAckPending, initialMaxInFlight)
+	require.Equal(t, consumerInfo.Config.MaxAckPending, defaultMaxInFlights)
 
 	// given
 	// set the new MaxInFlight value in the Subscription
 	newMaxInFlight := 20
-	sub.Status.Config.MaxInFlightMessages = newMaxInFlight
+	sub.Spec.Config = &eventingv1alpha1.SubscriptionConfig{MaxInFlightMessages: newMaxInFlight}
 
 	// when
 	require.NoError(t, jsBackend.SyncSubscription(sub))
@@ -1380,4 +1379,21 @@ func TestJetStream_CheckConsumerConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, consumerInfo.Config.MaxAckPending, newMaxInFlight)
+
+	// given
+	// unset the config which should lead to returning to defaults
+	sub.Spec.Config = nil
+	// imitate the reconciler call, which will set the maxInFlight value back to the default value
+	sub.Status.Config.MaxInFlightMessages = defaultMaxInFlights
+
+	// when
+	require.NoError(t, jsBackend.SyncSubscription(sub))
+
+	// then
+	// check that the new value was propagated dto the consumer
+	consumerInfo, err = jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
+	require.NotNil(t, consumerInfo)
+	require.NoError(t, err)
+
+	require.Equal(t, consumerInfo.Config.MaxAckPending, defaultMaxInFlights)
 }

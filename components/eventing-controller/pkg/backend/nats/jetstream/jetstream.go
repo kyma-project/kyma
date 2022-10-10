@@ -206,14 +206,19 @@ func (js *JetStream) checkSubscriptionConfig(subscription *eventingv1alpha1.Subs
 			return err
 		}
 
+		subscriptionMaxInFlight := subscription.Status.Config.MaxInFlightMessages
+		if subscription.Spec.Config != nil {
+			subscriptionMaxInFlight = subscription.Spec.Config.MaxInFlightMessages
+		}
+
 		// skip the up-to-date consumers
-		if consumerInfo.Config.MaxAckPending == subscription.Status.Config.MaxInFlightMessages {
+		if consumerInfo.Config.MaxAckPending == subscriptionMaxInFlight {
 			continue
 		}
 
 		// set the new maxInFlight value
 		consumerConfig := consumerInfo.Config
-		consumerConfig.MaxAckPending = subscription.Status.Config.MaxInFlightMessages
+		consumerConfig.MaxAckPending = subscriptionMaxInFlight
 
 		// update the consumer
 		if _, err := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); err != nil {
