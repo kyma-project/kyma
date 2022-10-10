@@ -27,6 +27,23 @@ const (
 	ConsumerDeliverPolicyNew            = "new"
 )
 
+// todo describe
+func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier, maxInFlightMessages int) DefaultSubOpts {
+	return DefaultSubOpts{
+		nats.Durable(consumer.consumerName),
+		nats.Description(consumer.namespacedSubjectName),
+		nats.ManualAck(),
+		nats.AckExplicit(),
+		nats.IdleHeartbeat(idleHeartBeatDuration),
+		nats.EnableFlowControl(),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
+		nats.MaxAckPending(maxInFlightMessages),
+		nats.MaxDeliver(jsConsumerMaxRedeliver),
+		nats.AckWait(jsConsumerAcKWait),
+		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
+	}
+}
+
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
 	case StorageTypeMemory:
@@ -64,6 +81,24 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 	return nats.DeliverNew()
 }
 
+// toJetStreamConsumerDeliverPolicy returns a nats.DeliverPolicy based on the given deliver policy string value.
+// It returns "DeliverNew" as the default nats.DeliverPolicy, if the given deliver policy value is not supported.
+// Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
+// todo test
+func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
+	switch deliverPolicy {
+	case ConsumerDeliverPolicyAll:
+		return nats.DeliverAllPolicy
+	case ConsumerDeliverPolicyLast:
+		return nats.DeliverLastPolicy
+	case ConsumerDeliverPolicyLastPerSubject:
+		return nats.DeliverLastPerSubjectPolicy
+	case ConsumerDeliverPolicyNew:
+		return nats.DeliverNewPolicy
+	}
+	return nats.DeliverNewPolicy
+}
+
 func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
@@ -88,6 +123,26 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		Subjects: []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 	}
 	return streamConfig, nil
+}
+
+// getConsumerConfig return the consumerConfig according to the default configuration.
+// todo test
+func (js *JetStream) getConsumerConfig(subscription *eventingv1alpha2.Subscription, jsSubKey SubscriptionSubjectIdentifier, jsSubject string) *nats.ConsumerConfig {
+	maxInFlight := subscription.GetMaxInFlightMessages(js.namedLogger())
+	return &nats.ConsumerConfig{
+		Durable:        jsSubKey.ConsumerName(),
+		Description:    jsSubKey.namespacedSubjectName,
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.Config.JSConsumerDeliverPolicy),
+		FlowControl:    true,
+		MaxAckPending:  maxInFlight,
+		AckPolicy:      nats.AckExplicitPolicy,
+		AckWait:        jsConsumerAcKWait,
+		MaxDeliver:     jsConsumerMaxRedeliver,
+		FilterSubject:  jsSubject,
+		ReplayPolicy:   nats.ReplayInstantPolicy,
+		DeliverSubject: nats.NewInbox(),
+		Heartbeat:      idleHeartBeatDuration,
+	}
 }
 
 func createKeyPrefix(sub *eventingv1alpha2.Subscription) string {

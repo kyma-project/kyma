@@ -2,6 +2,7 @@ package jetstreamv2
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
 	"strings"
 	"testing"
 	"time"
@@ -24,7 +25,7 @@ import (
 const (
 	defaultStreamName    = "kyma"
 	defaultMaxReconnects = 10
-	defaultMaxInFlights  = 10
+	defaultMaxInFlights  = env.DefaultMaxInFlight
 )
 
 // TestJetStream_SubscriptionDeletion tests the creation and deletion
@@ -55,7 +56,7 @@ func TestJetStream_SubscriptionDeletion(t *testing.T) {
 	// when
 	err := jsBackend.SyncSubscription(sub)
 
-	// then`
+	// then
 	require.NoError(t, err)
 
 	data := "sampledata"
@@ -1037,6 +1038,7 @@ type TestEnvironment struct {
 	logger     *logger.Logger
 	natsServer *server.Server
 	jsClient   *jetStreamClient
+	jsCtxMock  *mocks.JetStreamContext
 	natsConfig env.NatsConfig
 	cleaner    cleaner.Cleaner
 	natsPort   int

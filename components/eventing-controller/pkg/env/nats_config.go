@@ -6,7 +6,10 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const JetStreamSubjectPrefix = "kyma"
+const (
+	JetStreamSubjectPrefix = "kyma"
+	DefaultMaxInFlight     = 10
+)
 
 // NatsConfig represents the environment config for the Eventing Controller with Nats.
 type NatsConfig struct {

@@ -2,6 +2,8 @@ package v1alpha2
 
 import (
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"go.uber.org/zap"
 	"strconv"
 	"strings"
 
@@ -86,12 +88,17 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (s *Subscription) GetMaxInFlightMessages() (*int, error) {
+// GetMaxInFlightMessages todo desc and test
+func (s *Subscription) GetMaxInFlightMessages(log *zap.SugaredLogger) int {
+	if s.Spec.Config == nil {
+		return env.DefaultMaxInFlight
+	}
 	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
 	if err != nil {
-		return nil, err
+		log.With("subscription-name", s.Name).Errorw("Failed to convert the maxInFlight config value", "error", err)
+		return env.DefaultMaxInFlight
 	}
-	return &val, nil
+	return val
 }
 
 // InitializeEventTypes initializes the SubscriptionStatus.Types with an empty slice of EventType.
