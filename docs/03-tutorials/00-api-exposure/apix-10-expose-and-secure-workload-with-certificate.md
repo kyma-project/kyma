@@ -10,7 +10,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 Before you start, Set up [mTLS Gateway](../00-security/sec-03-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-03-setup-mtls-gateway#steps).
 
-Optionally you can take a look on tutorial [How to create own self-signed Client Root CA and Certificate](../00-security/sec-02-mtls-selfsign-client-certicate.md)
+Optionally, take a look at the [How to create own self-signed Client Root CA and Certificate](../00-security/sec-02-mtls-selfsign-client-certicate.md) tutorial.
 
 ## Authorize client with a certificate
 
