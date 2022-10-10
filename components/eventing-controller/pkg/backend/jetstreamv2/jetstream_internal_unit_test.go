@@ -19,7 +19,7 @@ import (
 )
 
 // Test_SyncNATSConsumers tests creation/binding of the consumer and NATS Subscriptions.
-func Test_SyncNATSConsumers(t *testing.T) {
+func TestVlad_SyncNATSConsumers(t *testing.T) {
 	testEnv := getTestEnvironmentWithMock(t)
 	callback := func(m *nats.Msg) {}
 	subWithType := testingv2.NewSubscription("test", "test",
@@ -324,9 +324,8 @@ func Test_SyncNATSConsumers(t *testing.T) {
 }
 
 // Test_CheckNATSSubscriptionsCount test the behaviour of the checkNATSSubscriptionsCount function.
-func Test_CheckNATSSubscriptionsCount(t *testing.T) {
+func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 	// given
-	testEnv := getTestEnvironmentWithMock(t)
 	subWithType := testingv2.NewSubscription("test", "test",
 		testingv2.WithSourceAndType(testingv2.EventSource, testingv2.CloudEventType),
 		testingv2.WithTypeMatchingStandard(),
@@ -338,13 +337,19 @@ func Test_CheckNATSSubscriptionsCount(t *testing.T) {
 			},
 		}),
 	)
-	_, jsSubKey, newConsumer, natsSub := generateConsumerInfra(testEnv.jsBackend, subWithType, subWithType.Status.Types[0])
-	callback := func(m *nats.Msg) {}
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
+	jsBackend := &JetStream{
+		subscriptions: make(map[SubscriptionSubjectIdentifier]Subscriber),
+		cleaner:       jsCleaner,
+	}
 
 	testCases := []struct {
 		name                 string
 		givenSubscription    *v1alpha2.Subscription
-		givenSubscriptionMap map[SubscriptionSubjectIdentifier]Subscriber
+		givenSubscriptionMap func() map[SubscriptionSubjectIdentifier]Subscriber
 		wantErrMsg           *string
 	}{
 		{
@@ -352,22 +357,29 @@ func Test_CheckNATSSubscriptionsCount(t *testing.T) {
 			givenSubscription: testingv2.NewSubscription("test", "test",
 				testingv2.WithStatusTypes(nil),
 			),
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
-			wantErrMsg:           nil,
-		},
-		{
-			name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
-			givenSubscription: subWithType,
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{
-				jsSubKey: natsSub,
+			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
+				return map[SubscriptionSubjectIdentifier]Subscriber{}
 			},
 			wantErrMsg: nil,
 		},
+		//{
+		//	name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
+		//	givenSubscription: subWithType,
+		//	givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
+		//		_, jsSubKey, _, natsSub := generateConsumerInfra(testEnv.jsBackend, subWithType, subWithType.Status.Types[0])
+		//		return map[SubscriptionSubjectIdentifier]Subscriber{
+		//			jsSubKey: natsSub,
+		//		}
+		//	},
+		//	wantErrMsg: nil,
+		//},
 		{
-			name:                 "unexpected empty subscriptions map should result into an error",
-			givenSubscription:    subWithType,
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
-			wantErrMsg:           errorMessage(fmt.Sprintf(MissingNATSSubscriptionMsgWithInfo, subWithType.Spec.Types[0])),
+			name:              "unexpected empty subscriptions map should result into an error",
+			givenSubscription: subWithType,
+			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
+				return map[SubscriptionSubjectIdentifier]Subscriber{}
+			},
+			wantErrMsg: errorMessage(fmt.Sprintf(MissingNATSSubscriptionMsgWithInfo, subWithType.Spec.Types[0])),
 		},
 	}
 
@@ -375,18 +387,11 @@ func Test_CheckNATSSubscriptionsCount(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 
-			// mock the sync NATS Consumers call
-			if len(testCase.givenSubscription.Status.Types) > 0 {
-				testEnv.jsCtxMock.On("ConsumerInfo", mock.Anything, mock.Anything).Return(newConsumer, nil)
-				testEnv.jsCtxMock.On("Subscribe", getSubOptsAsVariadicSlice(testEnv.jsBackend, testCase.givenSubscription, testCase.givenSubscription.Status.Types[0])...).Return(natsSub, nil)
-			}
-			require.NoError(t, testEnv.jsBackend.syncNATSConsumers(testCase.givenSubscription, callback, testEnv.logger.WithContext()))
-
 			// inject the fake subscription map
-			testEnv.jsBackend.subscriptions = testCase.givenSubscriptionMap
+			jsBackend.subscriptions = testCase.givenSubscriptionMap()
 
 			// when
-			err := testEnv.jsBackend.checkNATSSubscriptionsCount(testCase.givenSubscription)
+			err := jsBackend.checkNATSSubscriptionsCount(testCase.givenSubscription)
 
 			// then
 			if testCase.wantErrMsg == nil {
