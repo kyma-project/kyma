@@ -350,7 +350,7 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 		name                 string
 		givenSubscription    *v1alpha2.Subscription
 		givenSubscriptionMap func() map[SubscriptionSubjectIdentifier]Subscriber
-		wantErrMsg           *string
+		wantErr              error
 	}{
 		{
 			name: "empty subscriptions map with subscription with no types should result in not error",
@@ -360,7 +360,7 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
 				return map[SubscriptionSubjectIdentifier]Subscriber{}
 			},
-			wantErrMsg: nil,
+			wantErr: nil,
 		},
 		{
 			name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
@@ -371,7 +371,7 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 					subIdentifier: &nats.Subscription{},
 				}
 			},
-			wantErrMsg: nil,
+			wantErr: nil,
 		},
 		{
 			name:              "unexpected empty subscriptions map should result into an error",
@@ -379,7 +379,7 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
 				return map[SubscriptionSubjectIdentifier]Subscriber{}
 			},
-			wantErrMsg: errorMessage(fmt.Sprintf(MissingNATSSubscriptionMsgWithInfo, subWithType.Spec.Types[0])),
+			wantErr: &ErrMissingNATSSubscription{},
 		},
 	}
 
@@ -394,11 +394,10 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 			err := jsBackend.checkNATSSubscriptionsCount(testCase.givenSubscription)
 
 			// then
-			if testCase.wantErrMsg == nil {
+			if testCase.wantErr == nil {
 				require.NoError(t, err)
 			} else {
-				require.Error(t, err)
-				require.Equal(t, err.Error(), *testCase.wantErrMsg)
+				require.ErrorIs(t, err, testCase.wantErr)
 			}
 		})
 	}
