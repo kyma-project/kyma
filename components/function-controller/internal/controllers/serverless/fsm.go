@@ -82,7 +82,7 @@ loop:
 func (m *reconciler) stateFnName() string {
 	fullName := runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name()
 	splitFullName := strings.Split(fullName, ".")
-	shortName := splitFullName[len(splitFullName)-1]
+	shortName := splitFullName[2]
 	return shortName
 }
 
