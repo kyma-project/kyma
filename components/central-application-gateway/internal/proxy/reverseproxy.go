@@ -1,6 +1,8 @@
 package proxy
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -147,7 +149,7 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 
 func codeRewriter(rw http.ResponseWriter, err error) {
 
-	if strings.Contains("context deadline exceeded", err.Error()) {
+	if errors.Is(err, context.DeadlineExceeded) {
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
