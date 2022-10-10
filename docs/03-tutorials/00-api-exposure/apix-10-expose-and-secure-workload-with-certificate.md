@@ -14,7 +14,8 @@ Optionally, take a look at the [How to create own self-signed Client Root CA and
 
 ## Authorize client with a certificate
 
-Follow the instructions in the tabs to further secure the mTLS service or Function. Create AuthorizationPolicy that checks if the client's Common Name in the certificate matches.
+The following instructions describe how to further secure the mTLS service or Function. 
+>**NOTE:** Create AuthorizationPolicy to check if the client's common name in the certificate matches.
 
 1. Export the following values as environment variables:
 
