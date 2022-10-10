@@ -1,4 +1,4 @@
-package generic
+package handler
 
 import (
 	"context"
@@ -20,7 +20,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
@@ -516,7 +515,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 						Status: 204,
 					},
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", handler.NewApplicationListerOrDie(context.Background(), "testapp")),
+				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
 				collector:         metricstest.PublishingMetricsCollectorStub{},
 				eventTypeCleaner:  eventtypetest.CleanerStub{},
 			},
@@ -532,7 +531,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				Sender: &GenericSenderStub{
 					Err: fmt.Errorf("i cannot send"),
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", handler.NewApplicationListerOrDie(context.Background(), "testapp")),
+				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
 				collector:         metricstest.PublishingMetricsCollectorStub{},
 				eventTypeCleaner:  eventtypetest.CleanerStub{},
 			},
@@ -550,7 +549,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 						Status: 204,
 					},
 				},
-				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", handler.NewApplicationListerOrDie(context.Background(), "testapp")),
+				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
 				collector:         metricstest.PublishingMetricsCollectorStub{},
 				eventTypeCleaner:  eventtypetest.CleanerStub{},
 			},

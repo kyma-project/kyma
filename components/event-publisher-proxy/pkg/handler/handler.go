@@ -1,4 +1,4 @@
-package generic
+package handler
 
 import (
 	"context"
@@ -15,7 +15,6 @@ import (
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
@@ -78,9 +77,9 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 // setupMux configures the request router for all required endpoints.
 func (h *Handler) setupMux() {
 	router := mux.NewRouter()
-	router.HandleFunc(handler.PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
-	router.HandleFunc(handler.LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
-	router.HandleFunc(handler.SubscribedEndpointPattern, h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
+	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
+	router.HandleFunc(SubscribedEndpointPattern, h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
 	router.HandleFunc(health.ReadinessURI, h.maxBytes(h.HealthChecker.ReadinessCheck))
 	router.HandleFunc(health.LivenessURI, h.maxBytes(h.HealthChecker.LivenessCheck))
 	h.router = router
