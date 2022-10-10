@@ -2,10 +2,11 @@ package jetstreamv2
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"

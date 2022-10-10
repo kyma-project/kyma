@@ -2,10 +2,11 @@ package v1alpha2
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"go.uber.org/zap"
 	"strconv"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"go.uber.org/zap"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"

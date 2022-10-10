@@ -2,6 +2,9 @@ package jetstreamv2
 
 import (
 	"fmt"
+	"sync"
+	"testing"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -13,8 +16,6 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"sync"
-	"testing"
 )
 
 // Test_SyncNATSConsumers todo rename and add desc
