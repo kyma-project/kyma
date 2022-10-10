@@ -29,6 +29,6 @@ To override the configuration, redefine the default values in your custom `value
 
 ### Kiali
 
-> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and will be removed after Kyma 2.10. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
+> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and is planned to be removed with Kyma release 2.11. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
 
 [Kiali `values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/kiali/values.yaml)

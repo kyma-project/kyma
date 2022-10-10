@@ -2,8 +2,8 @@
 title: Access and Expose Kiali, Grafana, and Jaeger
 ---
 
-> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and will be removed after Kyma 2.10. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
- 
+> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and is planned to be removed with Kyma release 2.11. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
+
 By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana, and Jaeger securely, use an identity provider of your choice.
 
 ![Access services flow](./assets/obsv-access-services.svg)
@@ -67,11 +67,11 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 >**NOTE:** The OAuth2 Proxy supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. To find instructions for other authentication services, see the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
 1. Create a new OpenID Connect application for your identity provider and set the callback URL to the `/oauth2/callback` path of your service.
-   
+
    For example, if your Kyma cluster is reachable under `kyma.example.com`, use `https://kiali.kyma.example.com/oauth2/callback` for Kiali.
-   
+
    > **TIP:** The subdomain is already exposed by default. Simply change the root domain to your cluster domain.
-   
+
    Your identity provider will return a client ID, a client secret, and a token issuer URL.
 
 2. Create a Secret for the OAuth2 Proxy configuration [environment variables](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#environment-variables).

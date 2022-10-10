@@ -2,7 +2,7 @@
 title: Kiali Architecture
 ---
 
-> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and will be removed after Kyma 2.10. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
+> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and is planned to be removed with Kyma release 2.11. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
 
 The following diagram presents the overall Kiali architecture and the way the components interact with each other.
 
