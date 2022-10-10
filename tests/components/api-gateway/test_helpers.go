@@ -160,6 +160,10 @@ func generateReport() {
 	}
 
 	err = filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+		if path == "reports" {
+			return nil
+		}
+
 		data, err1 := os.ReadFile(path)
 		if err1 != nil {
 			return err
@@ -195,7 +199,7 @@ func generateReport() {
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-	
+
 		_, err = copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
 		if err != nil {
 			log.Fatalf(err.Error())
@@ -347,7 +351,7 @@ func getPodListReport() string {
 	err := json.Unmarshal(toMarshal, &p)
 	if err != nil {
 		log.Fatalf(err.Error())
-	}	
+	}
 	toPrint, _ := json.Marshal(p)
 	return string(pretty.Pretty(toPrint))
 }
