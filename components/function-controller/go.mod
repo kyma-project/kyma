@@ -18,6 +18,7 @@ replace (
 )
 
 require (
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-logr/zapr v1.2.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20220602092229-f2e29f34ed5e
 	github.com/libgit2/git2go/v31 v31.7.9
@@ -39,8 +40,6 @@ require (
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 	sigs.k8s.io/controller-runtime v0.11.2
 )
-
-require github.com/fsnotify/fsnotify v1.5.1
 
 require (
 	cloud.google.com/go v0.98.0 // indirect
