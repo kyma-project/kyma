@@ -32,7 +32,7 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription,
-  waitForPodStatusWithLabel,
+  waitForPodStatusWithLabel, waitForDeployment,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -54,6 +54,8 @@ const {
 const {
   bebBackend,
   natsBackend, getEventMeshNamespace,
+  kymaSystem,
+  jaegerLabel, jaegerOperatorLabel,
 } = require('./common/common');
 const {
   assert,
@@ -70,6 +72,11 @@ describe('Eventing tests', function() {
   before('Ensure the test and mock namespaces exist', async function() {
     await waitForNamespace(testNamespace);
     await waitForNamespace(mockNamespace);
+  });
+
+  before('Ensure tracing is ready', async function() {
+    await waitForPodStatusWithLabel(jaegerLabel.key, jaegerLabel.value, kymaSystem);
+    await waitForPodStatusWithLabel(jaegerOperatorLabel.key, jaegerOperatorLabel.value, kymaSystem);
   });
 
   before('Expose Grafana', async function() {
