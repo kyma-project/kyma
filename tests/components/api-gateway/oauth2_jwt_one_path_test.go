@@ -38,7 +38,7 @@ func (o *oauthJWTOnePathScenario) callingTheEndpointWithValidTokenShouldResultIn
 	case "JWT":
 		tokenJWT, err := jwt.Authenticate(oauth2Cfg.ClientID, jwtConfig.OidcHydraConfig)
 		if err != nil {
-			return fmt.Errorf("failed to fetch and id_token. %s", err.Error())
+			return fmt.Errorf("failed to fetch an id_token: %s", err.Error())
 		}
 		headerVal := fmt.Sprintf("Bearer %s", tokenJWT)
 

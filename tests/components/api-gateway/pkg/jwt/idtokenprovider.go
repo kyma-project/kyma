@@ -91,7 +91,7 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	}
 
 	if resp.StatusCode>399 {
-		return nil, fmt.Errorf("could not do login, err_code=%d", resp.StatusCode)
+		return nil, fmt.Errorf("could not doLogin, err_code=%d", resp.StatusCode)
 	}
 	
 	return resp, nil
