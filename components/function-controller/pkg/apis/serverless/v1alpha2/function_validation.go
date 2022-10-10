@@ -322,9 +322,28 @@ func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 		labels = spec.Templates.FunctionPod.Metadata.Labels
 	}
 	fieldPath := field.NewPath("spec.labels")
+	err := validateKymaLabels(labels)
+	if err != nil {
+		return err
+	}
 
 	errs := v1validation.ValidateLabels(labels, fieldPath)
 	return errs.ToAggregate()
+}
+
+func validateKymaLabels(labels map[string]string) error {
+	allErrs := []string{}
+	for key, _ := range labels {
+		isUsed, err := regexp.MatchString(".*serverless.kyma-project.io*.", key)
+		if err != nil {
+			return err
+		}
+
+		if isUsed == true {
+			allErrs = append(allErrs, fmt.Sprintf("spec.templates.function|build.metadata is set to (%d)", key))
+		}
+	}
+	return returnAllErrs("invalid values", allErrs)
 }
 
 type property struct {
