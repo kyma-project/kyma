@@ -98,6 +98,8 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
+// the configured GenericSender.
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
 	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
 	if event == nil {
@@ -117,6 +119,8 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), event, string(result.ResponseBody()))
 }
 
+// publishCloudEvents validates an incoming cloudevent and dispatches it using
+// the configured GenericSender.
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
@@ -155,6 +159,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 }
 
+// extractCloudEventFromRequest converts an incoming CloudEvent request to an Event.
 func extractCloudEventFromRequest(request *http.Request) (*cev2event.Event, error) {
 	message := cev2http.NewMessageFromHttpRequest(request)
 	defer func() { _ = message.Finish(nil) }()
@@ -171,6 +176,7 @@ func extractCloudEventFromRequest(request *http.Request) (*cev2event.Event, erro
 	return event, nil
 }
 
+// sendEventAndRecordMetrics dispatches an Event and records metrics based on dispatch success.
 func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2event.Event, host string, header http.Header) (sender.PublishResult, error) {
 	ctx, cancel := context.WithTimeout(ctx, h.RequestTimeout)
 	defer cancel()
