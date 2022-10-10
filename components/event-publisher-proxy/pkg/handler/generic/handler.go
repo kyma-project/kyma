@@ -26,7 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
 )
 
-// EventingHandler is responsible for receiving HTTP requests and dispatching them to the EMS gateway.
+// EventingHandler is responsible for receiving HTTP requests and dispatching them to the Backend.
 // It also assures that the messages received are compliant with the Cloud Events spec.
 type EventingHandler interface {
 	Start(ctx context.Context) error
