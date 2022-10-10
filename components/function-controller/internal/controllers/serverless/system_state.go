@@ -571,7 +571,7 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 
 	expected := s.buildHorizontalPodAutoscaler(targetCPUUtilizationPercentage)
 
-	scalingEnabled := isScaleConfigEnabled(&s.instance)
+	scalingEnabled := isScalingEnabled(&s.instance)
 
 	numHpa := len(s.hpas.Items)
 	return (scalingEnabled && numHpa != 1) ||

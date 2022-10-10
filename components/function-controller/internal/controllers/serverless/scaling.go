@@ -20,7 +20,7 @@ func stateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) sta
 		return nil
 	}
 
-	if !isScaleConfigEnabled(&s.instance) {
+	if !isScalingEnabled(&s.instance) {
 		return stateFnCheckReplicas(ctx, r, s)
 	}
 
@@ -56,7 +56,7 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 		return stateFnDeleteAllHorizontalPodAutoscalers
 	}
 
-		if numHpa == 1 && !isScaleConfigEnabled(&s.instance) {
+	if numHpa == 1 && !isScalingEnabled(&s.instance) {
 		// this case is when we previously created HPA with maxReplicas > minReplicas, but now user changed
 		// function spec and NOW maxReplicas == minReplicas, so hpa is not needed anymore
 		return stateFnDeleteAllHorizontalPodAutoscalers

@@ -265,7 +265,7 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 	return *first == *second
 }
 
-func isScaleConfigEnabled(instance *serverlessv1alpha2.Function) bool {
+func isScalingEnabled(instance *serverlessv1alpha2.Function) bool {
 	if instance.Spec.ScaleConfig == nil {
 		return false
 	}

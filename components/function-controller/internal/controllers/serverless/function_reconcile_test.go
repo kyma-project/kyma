@@ -96,7 +96,6 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
-		one := int32(1)
 		two := int32(2)
 		four := int32(4)
 
@@ -104,6 +103,8 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		function.Spec.ScaleConfig.MaxReplicas = &two
 		function.Spec.ScaleConfig.MinReplicas = &two
+		// TODO: This should be applied by the defaulting webhook
+		function.Spec.Replicas = &two
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("updating deployment with new number of replicas")
@@ -116,16 +117,21 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentUpdated))
 		deployments := &appsv1.DeploymentList{}
 		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
 		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
 		deployment := &deployments.Items[0]
 		g.Expect(deployment).ToNot(gomega.BeNil())
-		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&one))
+		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&two))
 
 		t.Log("HPA is removed")
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
 		g.Expect(err).To(gomega.BeNil())
@@ -144,7 +150,7 @@ func TestFunctionReconciler_Reconcile_Scaling(t *testing.T) {
 		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
 		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha2.ConditionRunning)).To(gomega.Equal(serverlessv1alpha2.ConditionReasonDeploymentReady))
 
-		t.Log("updating function to use scalable replicas number")
+		t.Log("replicas increased by an external scaler")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		function.Spec.Replicas = &four
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
