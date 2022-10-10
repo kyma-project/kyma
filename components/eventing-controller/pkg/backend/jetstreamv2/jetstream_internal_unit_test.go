@@ -349,7 +349,7 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 	testCases := []struct {
 		name                 string
 		givenSubscription    *v1alpha2.Subscription
-		givenSubscriptionMap func() map[SubscriptionSubjectIdentifier]Subscriber
+		givenSubscriptionMap map[SubscriptionSubjectIdentifier]Subscriber
 		wantErr              error
 	}{
 		{
@@ -357,29 +357,22 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 			givenSubscription: testingv2.NewSubscription("test", "test",
 				testingv2.WithStatusTypes(nil),
 			),
-			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
-				return map[SubscriptionSubjectIdentifier]Subscriber{}
-			},
-			wantErr: nil,
+			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
+			wantErr:              nil,
 		},
 		{
 			name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
 			givenSubscription: subWithType,
-			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
-				subIdentifier := NewSubscriptionSubjectIdentifier(subWithType, "kyma./default/kyma/id.prefix.testapp1023.order.created.v1")
-				return map[SubscriptionSubjectIdentifier]Subscriber{
-					subIdentifier: &nats.Subscription{},
-				}
+			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				NewSubscriptionSubjectIdentifier(subWithType, "kyma./default/kyma/id.prefix.testapp1023.order.created.v1"): &nats.Subscription{},
 			},
 			wantErr: nil,
 		},
 		{
-			name:              "unexpected empty subscriptions map should result into an error",
-			givenSubscription: subWithType,
-			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
-				return map[SubscriptionSubjectIdentifier]Subscriber{}
-			},
-			wantErr: &ErrMissingNATSSubscription{},
+			name:                 "unexpected empty subscriptions map should result into an error",
+			givenSubscription:    subWithType,
+			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
+			wantErr:              &ErrMissingNATSSubscription{},
 		},
 	}
 
@@ -388,7 +381,7 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			// inject the fake subscription map
-			jsBackend.subscriptions = testCase.givenSubscriptionMap()
+			jsBackend.subscriptions = testCase.givenSubscriptionMap
 
 			// when
 			err := jsBackend.checkNATSSubscriptionsCount(testCase.givenSubscription)
