@@ -366,9 +366,9 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 			name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
 			givenSubscription: subWithType,
 			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
-				_, jsSubKey, _, natsSub := generateConsumerInfra(jsBackend, subWithType, subWithType.Status.Types[0])
+				subIdentifier := NewSubscriptionSubjectIdentifier(subWithType, "kyma./default/kyma/id.prefix.testapp1023.order.created.v1")
 				return map[SubscriptionSubjectIdentifier]Subscriber{
-					jsSubKey: natsSub,
+					subIdentifier: &nats.Subscription{},
 				}
 			},
 			wantErrMsg: nil,
