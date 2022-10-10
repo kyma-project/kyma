@@ -32,7 +32,6 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription,
-  waitForPodStatusWithLabel, waitForDeployment,
 } = require('../utils');
 const {
   eventingMonitoringTest,
