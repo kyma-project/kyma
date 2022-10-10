@@ -3,6 +3,7 @@ package jetstreamv2
 import (
 	"context"
 	"fmt"
+	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
 	"net/http"
 	"time"
 
@@ -32,27 +33,7 @@ const (
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerAcKWait      = 30 * time.Second
-
-	// error messages
-
-	FailedToSubscribeMsg = "failed to subscribe on JetStream: %v"
 )
-
-type ErrMissingNATSSubscription = MissingNATSSubscriptionError
-type MissingNATSSubscriptionError struct {
-	subject eventingv1alpha2.EventType
-}
-
-func (e *MissingNATSSubscriptionError) Error() string {
-	return fmt.Sprintf("failed to create NATS JetStream subscription for subject: %v", e.subject)
-}
-
-func (e *MissingNATSSubscriptionError) Is(target error) bool {
-	if _, ok := target.(*MissingNATSSubscriptionError); !ok {
-		return false
-	}
-	return true
-}
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
 	return &JetStream{
@@ -400,7 +381,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 	return nil
 }
 
-// syncNATSConsumers makes sure there are consumers and subscription created on the NATS Backend.
+// syncNATSConsumers makes sure there are consumers and subscriptions created on the NATS Backend.
 func (js *JetStream) syncNATSConsumers(subscription *eventingv1alpha2.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.Types {
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
@@ -464,7 +445,7 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 		js.getDefaultSubscriptionOptions(jsSubKey, maxInFlight)...,
 	)
 	if err != nil {
-		return xerrors.Errorf(FailedToSubscribeMsg, err)
+		return backenderrors.NewFailedToSubscribeOnNATSError(err)
 	}
 	// save created JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -484,7 +465,7 @@ func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(jsSubject string, 
 		nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
 	)
 	if err != nil {
-		return xerrors.Errorf(FailedToSubscribeMsg, err)
+		return backenderrors.NewFailedToSubscribeOnNATSError(err)
 	}
 	// save recreated JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -519,7 +500,7 @@ func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha2.
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if _, ok := js.subscriptions[jsSubKey]; !ok {
-			return fmt.Errorf("%w", &ErrMissingNATSSubscription{subject: subject})
+			return backenderrors.NewMissingNatsSubscriptionError(subject)
 		}
 	}
 	return nil

@@ -2,6 +2,7 @@ package jetstreamv2
 
 import (
 	"fmt"
+	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
 	"testing"
 	"time"
 
@@ -962,9 +963,9 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			givenFilterToDelete:             evtestingv2.OrderCreatedEventType,
 			wantNatsSubsLen:                 2,
 			wantErr: func(t *testing.T, givenError error) {
-				var wantError *ErrMissingNATSSubscription
+				var wantError *backenderrors.ErrMissingNATSSubscription
 				require.ErrorAs(t, givenError, &wantError)
-				assert.Equal(t, wantError.subject.CleanType, evtestingv2.OrderCreatedEventType)
+				assert.Equal(t, wantError.Subject.CleanType, evtestingv2.OrderCreatedEventType)
 			},
 		},
 	}
@@ -991,7 +992,6 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 
 			err = jsBackend.SyncSubscription(sub)
 			testEnvironment.logger.WithContext().Error(err)
-			require.Equal(t, err != nil, tc.wantErr)
 
 			if tc.wantErr != nil {
 				// the createConsumer function won't create a new Subscription,
