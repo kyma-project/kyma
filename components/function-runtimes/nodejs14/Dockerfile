@@ -29,7 +29,7 @@
 # image base on alpine:3.16.2
 FROM alpine@sha256:bc41182d7ef5ffc53a40b044e725193bc10142a1243f395ee852a8d9730fc2ad
 
-ENV NODE_VERSION 14.20.0
+ENV NODE_VERSION 14.20.1
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
