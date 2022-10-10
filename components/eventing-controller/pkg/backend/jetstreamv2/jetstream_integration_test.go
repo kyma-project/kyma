@@ -2,11 +2,11 @@ package jetstreamv2
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
+	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -924,8 +924,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 		givenManuallyDeleteSubscription bool
 		givenFilterToDelete             string
 		wantNatsSubsLen                 int
-		wantErr                         bool
-		wantErrText                     string
+		wantErr                         func(t *testing.T, givenError error)
 	}{
 		{
 			name: "No error should happen, when there is only one type",
@@ -937,7 +936,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			},
 			givenManuallyDeleteSubscription: false,
 			wantNatsSubsLen:                 1,
-			wantErr:                         false,
+			wantErr:                         nil,
 		},
 		{
 			name: "No error expected when js.subscriptions map has entries for all the eventTypes",
@@ -949,7 +948,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			},
 			givenManuallyDeleteSubscription: false,
 			wantNatsSubsLen:                 2,
-			wantErr:                         false,
+			wantErr:                         nil,
 		},
 		{
 			name: "An error is expected, when we manually delete a subscription from js.subscriptions map",
@@ -962,8 +961,11 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			givenManuallyDeleteSubscription: true,
 			givenFilterToDelete:             evtestingv2.OrderCreatedEventType,
 			wantNatsSubsLen:                 2,
-			wantErr:                         true,
-			wantErrText:                     fmt.Sprintf(MissingNATSSubscriptionMsgWithInfo, evtestingv2.OrderCreatedEventType),
+			wantErr: func(t *testing.T, givenError error) {
+				var wantError *ErrMissingNATSSubscription
+				require.ErrorAs(t, givenError, &wantError)
+				assert.Equal(t, wantError.subject.CleanType, evtestingv2.OrderCreatedEventType)
+			},
 		},
 	}
 	for i, tc := range testCases {
@@ -991,12 +993,12 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			testEnvironment.logger.WithContext().Error(err)
 			require.Equal(t, err != nil, tc.wantErr)
 
-			if tc.wantErr {
+			if tc.wantErr != nil {
 				// the createConsumer function won't create a new Subscription,
 				// because the subscription was manually deleted from the js.subscriptions map
 				// hence the consumer will be shown in the NATS Backend as still bound
 				err = jsBackend.SyncSubscription(sub)
-				require.True(t, strings.Contains(err.Error(), tc.wantErrText))
+				tc.wantErr(t, err)
 			}
 
 			// empty the js.subscriptions map

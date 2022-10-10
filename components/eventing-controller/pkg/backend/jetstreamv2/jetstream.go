@@ -35,10 +35,24 @@ const (
 
 	// error messages
 
-	MissingNATSSubscriptionMsg         = "failed to create NATS JetStream subscription"
-	MissingNATSSubscriptionMsgWithInfo = MissingNATSSubscriptionMsg + " for subject: %v"
-	FailedToSubscribeMsg               = "failed to subscribe on JetStream: %v"
+	FailedToSubscribeMsg = "failed to subscribe on JetStream: %v"
 )
+
+type ErrMissingNATSSubscription = MissingNATSSubscriptionError
+type MissingNATSSubscriptionError struct {
+	subject eventingv1alpha2.EventType
+}
+
+func (e *MissingNATSSubscriptionError) Error() string {
+	return fmt.Sprintf("failed to create NATS JetStream subscription for subject: %v", e.subject)
+}
+
+func (e *MissingNATSSubscriptionError) Is(target error) bool {
+	if _, ok := target.(*MissingNATSSubscriptionError); !ok {
+		return false
+	}
+	return true
+}
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
 	return &JetStream{
@@ -505,7 +519,7 @@ func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha2.
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if _, ok := js.subscriptions[jsSubKey]; !ok {
-			return errors.Errorf(MissingNATSSubscriptionMsgWithInfo, subject.CleanType)
+			return fmt.Errorf("%w", &ErrMissingNATSSubscription{subject: subject})
 		}
 	}
 	return nil
