@@ -313,12 +313,15 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				UID:  "fn-uuid",
 			},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: &serverlessv1alpha2.Template{
-						Labels: map[string]string{
-							"test-some": "test-label",
+					Templates: &serverlessv1alpha2.Templates{
+						FunctionPod: &serverlessv1alpha2.PodTemplate{
+							Metadata: &serverlessv1alpha2.MetadataTemplate{
+								Labels: map[string]string{
+									"test-some": "test-label",
+								},
+							},
 						},
-					},
-				}}},
+					}}}},
 			want: map[string]string{
 				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
@@ -334,14 +337,17 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				UID:  "fn-uuid",
 			},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Template: &serverlessv1alpha2.Template{
-						Labels: map[string]string{
-							"test-some":                              "test-label",
-							serverlessv1alpha2.FunctionResourceLabel: "job",
-							serverlessv1alpha2.FunctionNameLabel:     "some-other-name",
+					Templates: &serverlessv1alpha2.Templates{
+						FunctionPod: &serverlessv1alpha2.PodTemplate{
+							Metadata: &serverlessv1alpha2.MetadataTemplate{
+								Labels: map[string]string{
+									"test-some":                              "test-label",
+									serverlessv1alpha2.FunctionResourceLabel: "job",
+									serverlessv1alpha2.FunctionNameLabel:     "some-other-name",
+								},
+							},
 						},
-					},
-				}}},
+					}}}},
 			want: map[string]string{
 				serverlessv1alpha2.FunctionUUIDLabel:      "fn-uuid",
 				serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue,
