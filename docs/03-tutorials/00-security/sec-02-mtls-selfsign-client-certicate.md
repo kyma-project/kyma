@@ -4,7 +4,7 @@ title: Prepare self-signed client certificates
 
 This tutorial shows how to create a self-signed root certificate authority (CA) and use it to sign a client certificate.
 
-## Prepare a Client Root CA
+## Prepare a client root CA
 
 1. Export the following values as environment variables:
 
