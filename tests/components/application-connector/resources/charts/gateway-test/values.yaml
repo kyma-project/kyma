@@ -5,11 +5,11 @@ global:
   images:
     gatewayTest:
       name: "gateway-test"
-      version: "PR-15710"
+      version: "19bb01b"
 
     mockApplication:
       name: "mock-app"
-      version: "PR-15710"
+      version: "19bb01b"
 
   serviceAccountName: "test-account"
   namespace: "test"
