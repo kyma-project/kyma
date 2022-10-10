@@ -214,6 +214,29 @@ func (_m *JetStreamContext) ConsumerNames(stream string, opts ...nats.JSOpt) <-c
 	return r0
 }
 
+// Consumers provides a mock function with given fields: stream, opts
+func (_m *JetStreamContext) Consumers(stream string, opts ...nats.JSOpt) <-chan *nats.ConsumerInfo {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, stream)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 <-chan *nats.ConsumerInfo
+	if rf, ok := ret.Get(0).(func(string, ...nats.JSOpt) <-chan *nats.ConsumerInfo); ok {
+		r0 = rf(stream, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan *nats.ConsumerInfo)
+		}
+	}
+
+	return r0
+}
+
 // ConsumersInfo provides a mock function with given fields: stream, opts
 func (_m *JetStreamContext) ConsumersInfo(stream string, opts ...nats.JSOpt) <-chan *nats.ConsumerInfo {
 	_va := make([]interface{}, len(opts))
@@ -478,6 +501,50 @@ func (_m *JetStreamContext) ObjectStore(bucket string) (nats.ObjectStore, error)
 	}
 
 	return r0, r1
+}
+
+// ObjectStoreNames provides a mock function with given fields: opts
+func (_m *JetStreamContext) ObjectStoreNames(opts ...nats.ObjectOpt) <-chan string {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 <-chan string
+	if rf, ok := ret.Get(0).(func(...nats.ObjectOpt) <-chan string); ok {
+		r0 = rf(opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan string)
+		}
+	}
+
+	return r0
+}
+
+// ObjectStores provides a mock function with given fields: opts
+func (_m *JetStreamContext) ObjectStores(opts ...nats.ObjectOpt) <-chan nats.ObjectStore {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 <-chan nats.ObjectStore
+	if rf, ok := ret.Get(0).(func(...nats.ObjectOpt) <-chan nats.ObjectStore); ok {
+		r0 = rf(opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan nats.ObjectStore)
+		}
+	}
+
+	return r0
 }
 
 // Publish provides a mock function with given fields: subj, data, opts
@@ -808,6 +875,28 @@ func (_m *JetStreamContext) StreamNames(opts ...nats.JSOpt) <-chan string {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(<-chan string)
+		}
+	}
+
+	return r0
+}
+
+// Streams provides a mock function with given fields: opts
+func (_m *JetStreamContext) Streams(opts ...nats.JSOpt) <-chan *nats.StreamInfo {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 <-chan *nats.StreamInfo
+	if rf, ok := ret.Get(0).(func(...nats.JSOpt) <-chan *nats.StreamInfo); ok {
+		r0 = rf(opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan *nats.StreamInfo)
 		}
 	}
 
