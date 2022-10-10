@@ -68,7 +68,6 @@ func (r *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Hand
 		<-errChan // Wait for server goroutine to exit
 		return err
 	case err := <-errChan:
-		logger.WithContext().With(err).Error(err)
 		return err
 	}
 }
