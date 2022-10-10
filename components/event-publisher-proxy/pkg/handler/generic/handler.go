@@ -75,6 +75,7 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 	}
 }
 
+// setupMux configures the request router for all required endpoints.
 func (h *Handler) setupMux() {
 	router := mux.NewRouter()
 	router.HandleFunc(handler.PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
@@ -91,6 +92,7 @@ func (h *Handler) Start(ctx context.Context) error {
 	return h.Receiver.StartListen(ctx, h.router, h.Logger)
 }
 
+// maxBytes installs a MaxBytesReader onto the request, so that incoming request larger than a given size will cause an error.
 func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, h.Options.MaxRequestSize)
