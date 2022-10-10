@@ -34,6 +34,8 @@ const (
 	eventSourceLabel = "event_source"
 )
 
+// PublishingMetricsCollector interface provides a Prometheus compatible Collector with additional convenience methods
+// for recording epp specific metrics.
 type PublishingMetricsCollector interface {
 	prometheus.Collector
 	RecordError()
