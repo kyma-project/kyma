@@ -12,7 +12,7 @@ replace (
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api => k8s.io/api v0.22.7
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.7
-	k8s.io/apimachinery => k8s.io/apimachinery v0.22.7
+	k8s.io/apimachinery => k8s.io/apimachinery v0.22.15
 	k8s.io/client-go => k8s.io/client-go v0.22.7
 	k8s.io/component-base => k8s.io/component-base v0.22.7
 )
@@ -40,13 +40,14 @@ require (
 	sigs.k8s.io/controller-runtime v0.11.2
 )
 
+require github.com/fsnotify/fsnotify v1.5.1
+
 require (
 	cloud.google.com/go v0.98.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
