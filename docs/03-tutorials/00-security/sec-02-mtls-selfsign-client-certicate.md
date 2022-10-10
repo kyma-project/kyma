@@ -1,5 +1,5 @@
 ---
-title: Prepare self-sign client certificates
+title: Prepare self-signed client certificates
 ---
 
 This tutorial shows how to create self-sign Root CA and use it to sign Client Certificate
