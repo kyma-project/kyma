@@ -26,7 +26,7 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    kubectl label namespace $NAMESPACE istio-injection=enabled --overwrite
    ```
 
-3. Export Gateway name, tls secret name and Client Root CA Cert File path
+3. Export Gateway name, TLS secret name, and client root Certificate Authority (CA) crt file path:
 
     ```bash
    export MTLS_GATEWAY_NAME=mtls-gateway
