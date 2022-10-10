@@ -362,17 +362,17 @@ func TestVlad_CheckNATSSubscriptionsCount(t *testing.T) {
 			},
 			wantErrMsg: nil,
 		},
-		//{
-		//	name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
-		//	givenSubscription: subWithType,
-		//	givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
-		//		_, jsSubKey, _, natsSub := generateConsumerInfra(testEnv.jsBackend, subWithType, subWithType.Status.Types[0])
-		//		return map[SubscriptionSubjectIdentifier]Subscriber{
-		//			jsSubKey: natsSub,
-		//		}
-		//	},
-		//	wantErrMsg: nil,
-		//},
+		{
+			name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
+			givenSubscription: subWithType,
+			givenSubscriptionMap: func() map[SubscriptionSubjectIdentifier]Subscriber {
+				_, jsSubKey, _, natsSub := generateConsumerInfra(jsBackend, subWithType, subWithType.Status.Types[0])
+				return map[SubscriptionSubjectIdentifier]Subscriber{
+					jsSubKey: natsSub,
+				}
+			},
+			wantErrMsg: nil,
+		},
 		{
 			name:              "unexpected empty subscriptions map should result into an error",
 			givenSubscription: subWithType,
