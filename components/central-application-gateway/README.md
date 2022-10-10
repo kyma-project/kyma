@@ -54,6 +54,8 @@ Central Application Gateway exposes:
 - an external API implementing a health endpoint for liveness and readiness probes
 - 2 internal APIs implementing a proxy handler accessible via a service of type `ClusterIP`
 
+Application Gateway also supports redirects for the request flows in which the URL host remains unchanged. For more details, see [Response rewriting](../../docs/05-technical-reference/ac-01-application-gateway-details.md#response-rewriting).
+
 ### Standalone mode
 
 The proxy API exposes the following endpoint:
