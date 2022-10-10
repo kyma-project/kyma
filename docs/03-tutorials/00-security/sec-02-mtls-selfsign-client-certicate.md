@@ -22,7 +22,7 @@ This tutorial shows how to create a self-signed root certificate authority (CA) 
    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -subj '/O=${CLIENT_ROOT_CA_ORG}/CN=${CLIENT_ROOT_CA_CN}' -keyout ${CLIENT_ROOT_CA_KEY_FILE} -out ${CLIENT_ROOT_CA_CRT_FILE}
    ```
    
-## Prepare Client Certificate
+## Prepare client certificate
 
 1. Export the following values as environment variables:
 
