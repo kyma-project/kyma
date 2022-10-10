@@ -2,7 +2,7 @@
 title: Prepare self-signed client certificates
 ---
 
-This tutorial shows how to create self-sign Root CA and use it to sign Client Certificate
+This tutorial shows how to create a self-signed root certificate authority (CA) and use it to sign a client certificate.
 
 ## Prepare a Client Root CA
 
