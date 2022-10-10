@@ -18,9 +18,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_SyncNATSConsumers todo rename and add desc
+// Test_SyncNATSConsumers tests creation/binding of the consumer and NATS Subscriptions.
 func Test_SyncNATSConsumers(t *testing.T) {
-	testEnv := getTestEnvironment(t)
+	testEnv := getTestEnvironmentWithMock(t)
 	callback := func(m *nats.Msg) {}
 	subWithType := testingv2.NewSubscription("test", "test",
 		testingv2.WithSourceAndType(testingv2.EventSource, testingv2.CloudEventType),
@@ -287,7 +287,7 @@ func Test_SyncNATSConsumers(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			// given
-			testEnv := getTestEnvironment(t)
+			testEnv := getTestEnvironmentWithMock(t)
 			if testCase.givenSubscriptionMap != nil {
 				testEnv.jsBackend.subscriptions = testCase.givenSubscriptionMap
 			}
@@ -301,6 +301,9 @@ func Test_SyncNATSConsumers(t *testing.T) {
 
 			// when
 			err := testEnv.jsBackend.syncNATSConsumers(testCase.givenSubscription, callback, testEnv.logger.WithContext())
+
+			// then
+			// check if error is expected
 			if testCase.wantErr == nil {
 				require.NoError(t, err)
 			} else {
@@ -309,6 +312,7 @@ func Test_SyncNATSConsumers(t *testing.T) {
 			}
 
 			// then
+			// check the expected assetions
 			for _, eventType := range tc.givenSubscription.Status.Types {
 				jsSubject := testEnv.jsBackend.getJetStreamSubject(testCase.givenSubscription.Spec.Source, eventType.CleanType, testCase.givenSubscription.Spec.TypeMatching)
 				jsSubKey := NewSubscriptionSubjectIdentifier(testCase.givenSubscription, jsSubject)
@@ -319,9 +323,10 @@ func Test_SyncNATSConsumers(t *testing.T) {
 	}
 }
 
+// Test_CheckNATSSubscriptionsCount test the behaviour of the checkNATSSubscriptionsCount function.
 func Test_CheckNATSSubscriptionsCount(t *testing.T) {
 	// given
-	testEnv := getTestEnvironment(t)
+	testEnv := getTestEnvironmentWithMock(t)
 	subWithType := testingv2.NewSubscription("test", "test",
 		testingv2.WithSourceAndType(testingv2.EventSource, testingv2.CloudEventType),
 		testingv2.WithTypeMatchingStandard(),
@@ -395,27 +400,10 @@ func Test_CheckNATSSubscriptionsCount(t *testing.T) {
 
 }
 
-// todo
-func generateConsumerInfra(jsBackend *JetStream, sub *v1alpha2.Subscription, eventType v1alpha2.EventType) (string, SubscriptionSubjectIdentifier, *nats.ConsumerInfo, *nats.Subscription) {
-	jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-	consumerConfig := jsBackend.getConsumerConfig(sub, jsSubKey, jsSubject)
-	newConsumer := &nats.ConsumerInfo{
-		Stream: jsBackend.Config.JSStreamName,
-		Name:   eventType.OriginalType,
-		Config: *consumerConfig,
-	}
-	natsSub := &nats.Subscription{
-		Subject: eventType.CleanType,
-		Queue:   "test",
-	}
-	return jsSubject, jsSubKey, newConsumer, natsSub
-}
+// HELPER FUNCTION
 
-// HELPERS
-
-// todo without server
-func getTestEnvironment(t *testing.T) *TestEnvironment {
+// sets up the TestEnvironment with the mocks instead of running a full-fledged NATS test server.
+func getTestEnvironmentWithMock(t *testing.T) *TestEnvironment {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 	jsCtx := &mocks.JetStreamContext{}
@@ -443,6 +431,7 @@ func getTestEnvironment(t *testing.T) *TestEnvironment {
 	}
 }
 
+// getSubOptsAsVariadicSlice computes the variadic argument for the JetStreamContext.Subscribe call.
 func getSubOptsAsVariadicSlice(jsBackend *JetStream, sub *v1alpha2.Subscription, eventType v1alpha2.EventType) []interface{} {
 	jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
@@ -454,6 +443,23 @@ func getSubOptsAsVariadicSlice(jsBackend *JetStream, sub *v1alpha2.Subscription,
 		args = append(args, mock.Anything)
 	}
 	return args
+}
+
+// generateConsumerInfra is a helper function to initialize the resources which are necessary to test the consumer logic.
+func generateConsumerInfra(jsBackend *JetStream, sub *v1alpha2.Subscription, eventType v1alpha2.EventType) (string, SubscriptionSubjectIdentifier, *nats.ConsumerInfo, *nats.Subscription) {
+	jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+	consumerConfig := jsBackend.getConsumerConfig(sub, jsSubKey, jsSubject)
+	newConsumer := &nats.ConsumerInfo{
+		Stream: jsBackend.Config.JSStreamName,
+		Name:   eventType.OriginalType,
+		Config: *consumerConfig,
+	}
+	natsSub := &nats.Subscription{
+		Subject: eventType.CleanType,
+		Queue:   "test",
+	}
+	return jsSubject, jsSubKey, newConsumer, natsSub
 }
 
 func errorMessage(val string) *string {

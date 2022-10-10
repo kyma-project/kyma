@@ -99,6 +99,48 @@ func TestToJetStreamRetentionPolicy(t *testing.T) {
 		})
 	}
 }
+func Test_ToJetStreamConsumerDeliverPolicy(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name                       string
+		givenConsumerDeliverPolicy string
+		wantDeliveryPolicy         nats.DeliverPolicy
+	}{
+		{
+			name:                       "retention policy all",
+			givenConsumerDeliverPolicy: ConsumerDeliverPolicyAll,
+			wantDeliveryPolicy:         nats.DeliverAllPolicy,
+		},
+		{
+			name:                       "retention policy last",
+			givenConsumerDeliverPolicy: ConsumerDeliverPolicyLast,
+			wantDeliveryPolicy:         nats.DeliverLastPolicy,
+		},
+		{
+			name:                       "retention policy per subject",
+			givenConsumerDeliverPolicy: ConsumerDeliverPolicyLastPerSubject,
+			wantDeliveryPolicy:         nats.DeliverLastPerSubjectPolicy,
+		},
+		{
+			name:                       "retention policy new",
+			givenConsumerDeliverPolicy: ConsumerDeliverPolicyNew,
+			wantDeliveryPolicy:         nats.DeliverNewPolicy,
+		},
+		{
+			name:                       "unknown retention policy results into policy new",
+			givenConsumerDeliverPolicy: "unknown",
+			wantDeliveryPolicy:         nats.DeliverNewPolicy,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			retentionPolicy := toJetStreamConsumerDeliverPolicy(tc.givenConsumerDeliverPolicy)
+			require.Equal(t, tc.wantDeliveryPolicy, retentionPolicy)
+		})
+	}
+}
 
 func TestGetStreamConfig(t *testing.T) {
 	testCases := []struct {

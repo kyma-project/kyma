@@ -27,7 +27,7 @@ const (
 	ConsumerDeliverPolicyNew            = "new"
 )
 
-// todo describe
+// getDefaultSubscriptionOptions builds the default nats.SubOpts by using the subscription/consumer configuration.
 func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier, maxInFlightMessages int) DefaultSubOpts {
 	return DefaultSubOpts{
 		nats.Durable(consumer.consumerName),
@@ -84,7 +84,6 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 // toJetStreamConsumerDeliverPolicy returns a nats.DeliverPolicy based on the given deliver policy string value.
 // It returns "DeliverNew" as the default nats.DeliverPolicy, if the given deliver policy value is not supported.
 // Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
-// todo test
 func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
 	switch deliverPolicy {
 	case ConsumerDeliverPolicyAll:
@@ -126,7 +125,6 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 }
 
 // getConsumerConfig return the consumerConfig according to the default configuration.
-// todo test
 func (js *JetStream) getConsumerConfig(subscription *eventingv1alpha2.Subscription, jsSubKey SubscriptionSubjectIdentifier, jsSubject string) *nats.ConsumerConfig {
 	maxInFlight := subscription.GetMaxInFlightMessages(js.namedLogger())
 	return &nats.ConsumerConfig{

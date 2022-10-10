@@ -92,10 +92,6 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		return err
 	}
 
-	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -390,6 +386,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 	return nil
 }
 
+// syncNATSConsumers makes sure there are consumers and subscription created on the NATS Backend.
 func (js *JetStream) syncNATSConsumers(subscription *eventingv1alpha2.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.Types {
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
@@ -417,9 +414,8 @@ func (js *JetStream) syncNATSConsumers(subscription *eventingv1alpha2.Subscripti
 
 		natsSubscription, subExists := js.subscriptions[jsSubKey]
 
-		// try to create a NATS Subscriptions it doesn't exist
+		// try to create a NATS Subscription it doesn't exist
 		if !subExists && !consumerInfo.PushBound {
-			// todo comment
 			if err := js.createNATSSubscription(subscription, subject, jsSubject, jsSubKey, asyncCallback, log); err != nil {
 				return err
 			}
@@ -438,16 +434,20 @@ func (js *JetStream) syncNATSConsumers(subscription *eventingv1alpha2.Subscripti
 			}
 		}
 	}
+	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// createNATSSubscription todo
+// createNATSSubscription creates a NATS Subscription and binds it to the already existing consumer.
 func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subscription, subject eventingv1alpha2.EventType, jsSubject string, jsSubKey SubscriptionSubjectIdentifier, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	maxInFlight := subscription.GetMaxInFlightMessages(js.namedLogger())
 	jsSubscription, err := js.jsCtx.Subscribe(
 		jsSubject,
 		asyncCallback,
-		js.getDefaultSubscriptionOptions(jsSubKey, maxInFlight)..., // todo test tgus function
+		js.getDefaultSubscriptionOptions(jsSubKey, maxInFlight)...,
 	)
 	if err != nil {
 		return xerrors.Errorf(FailedToSubscribeMsg, err)
@@ -460,7 +460,7 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 	return nil
 }
 
-// bindConsumersForInvalidNATSSubscriptions todo
+// bindConsumersForInvalidNATSSubscriptions tries to bind the invalid NATS Subscription to the existing consumer.
 func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(jsSubject string, jsSubKey SubscriptionSubjectIdentifier, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	log.Debugw("Recreating subscription on JetStream because it was invalid")
 	// bind the existing consumer to a new subscription on JetStream
