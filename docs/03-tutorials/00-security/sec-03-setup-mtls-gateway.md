@@ -34,7 +34,7 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    export CLIENT_ROOT_CA_CRT_FILE={CLIENT_ROOT_CA_CRT_FILE}
    ```
 
-4. Create mTLS Gateway (mode: MUTUAL)
+4. Create mTLS Gateway (mode: MUTUAL):
    ```bash
    cat <<EOF | kubectl apply -f -
    ---
