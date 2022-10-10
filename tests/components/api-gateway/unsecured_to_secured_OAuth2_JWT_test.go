@@ -53,7 +53,6 @@ func (u *unsecureToSecureScenarioJWT) callingTheEndpointWithAValidTokenShouldRes
 		if err != nil {
 			return fmt.Errorf("failed to fetch and id_token. %s", err.Error())
 		}
-		fmt.Printf("-->vladimir, OAuth2_JWT JWT Bearer token: %s", tokenJWT)
 		headerVal := fmt.Sprintf("Bearer %s", tokenJWT)
 
 		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", u.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
@@ -62,7 +61,6 @@ func (u *unsecureToSecureScenarioJWT) callingTheEndpointWithAValidTokenShouldRes
 		if err != nil {
 			return err
 		}
-		fmt.Printf("-->vladimir, OAuth2_JWT OAuth2 Bearer token: %s", token.AccessToken)
 		headerVal := fmt.Sprintf("Bearer %s", token.AccessToken)
 
 		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", u.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})

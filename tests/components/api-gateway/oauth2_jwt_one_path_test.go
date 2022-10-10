@@ -40,19 +40,18 @@ func (o *oauthJWTOnePathScenario) callingTheEndpointWithValidTokenShouldResultIn
 		if err != nil {
 			return fmt.Errorf("failed to fetch and id_token. %s", err.Error())
 		}
-		fmt.Printf("-->vladimir, 1path JWT Bearer token: %s", tokenJWT)
 		headerVal := fmt.Sprintf("Bearer %s", tokenJWT)
 
 		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 	case "OAuth2":
 		token, err := getOAUTHToken(*oauth2Cfg)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("-->vladimir, 1path OAuth2 Bearer token: %s", token.AccessToken)
-		headerVal := fmt.Sprintf("Bearer %s", token.AccessToken)
+ 		if err != nil {
+ 			return err
+ 		}
 
-		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
+ 		headerVal := token.AccessToken
+
+ 		return helper.CallEndpointWithHeadersWithRetries(headerVal, "oauth2-access-token", fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 	}
 	return errors.New("should not happen")
 }

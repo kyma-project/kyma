@@ -122,10 +122,6 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 	var tokenOAUTH *oauth2.Token
 	err := retry.Do(
 		func() error {
-			fmt.Printf("-->vladimir, clientID: %s", oauth2Cfg.ClientID)
-			fmt.Printf("-->vladimir, ClientSecret: %s", oauth2Cfg.ClientSecret)
-			fmt.Printf("-->vladimir, TokenURL: %s", oauth2Cfg.TokenURL)
-			fmt.Printf("-->vladimir, Scopes: %s", oauth2Cfg.Scopes[0])
 			token, err := oauth2Cfg.Token(context.Background())
 			if err != nil {
 				return fmt.Errorf("error during Token retrival: %+v", err)
@@ -137,7 +133,6 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 			return nil
 		},
 		retry.Delay(500*time.Millisecond), retry.Attempts(3))
-	fmt.Printf("-->vladimir, Token: %s", tokenOAUTH.AccessToken)
 	return tokenOAUTH, err
 }
 
@@ -176,7 +171,11 @@ func generateReport() {
 			return []byte{b[0], ' ', b[1], b[2]}
 		})
 
-		os.WriteFile(path, formatted, fs.FileMode(02))
+		err = os.WriteFile(path, formatted, fs.FileMode(02))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -185,11 +184,22 @@ func generateReport() {
 	}
 
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
-			copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
+		err = filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+			_, err1 := copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
+			if err1 != nil {
+				return err1
+			}
 			return nil
 		})
-		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+	
+		_, err = copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
 	}
 
 }
@@ -334,7 +344,10 @@ func getPodListReport() string {
 
 	p := returnedPodList{}
 	toMarshal, _ := json.Marshal(list)
-	json.Unmarshal(toMarshal, &p)
+	err := json.Unmarshal(toMarshal, &p)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}	
 	toPrint, _ := json.Marshal(p)
 	return string(pretty.Pretty(toPrint))
 }

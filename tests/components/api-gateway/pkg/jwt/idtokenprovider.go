@@ -3,7 +3,6 @@ package jwt
 import (
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -41,51 +40,33 @@ func (f *OidcHydraTestFlow) fetchIdToken() (string, error) {
 }
 
 func (f *OidcHydraTestFlow) GetToken() (string, error) {
-	fmt.Print("-->vladimir, Here1")
 	loginResp, err := f.doLogin()
 
-	fmt.Print("-->vladimir, Here2")
 	if err != nil {
 		return "", err
 	}
-	fmt.Print("-->vladimir, Here3")
 	consent := f.prepareConsent(loginResp)
-	fmt.Print("-->vladimir, Here4")
 
 	return f.sentConsentToGetToken(loginResp, consent)
 }
 
 func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, consentForm url.Values) (string, error) {
-	fmt.Print("-->vladimir, Here5.1")
 	redirectUrl, err := url.Parse(f.config.ClientConfig.RedirectUri)
 	if err != nil {
 		return "", err
 	}
-	fmt.Print("-->vladimir, Here5.2")
 	var token string
 	f.httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		fmt.Print("-->vladimir, Here5.3")
 		if req.URL.Host == redirectUrl.Host {
-			fmt.Print("-->vladimir, Here5.4")
 			token = getToken(req)
-			fmt.Printf("-->vladimir, GOT token: %s", token)
 			return http.ErrUseLastResponse
 		}
-		fmt.Print("-->vladimir, Here5.5")
 		return nil
 	}
-	fmt.Print("-->vladimir, Here5.6")
-	fmt.Printf("-->vladimir, Here5, URL: %s", response.Request.URL.String())
-	fmt.Printf("-->vladimir, Here5, consent1: %s", consentForm.Get("challenge"))
-	fmt.Printf("-->vladimir, Here5, consent2: %s", consentForm.Get("grant_scope"))
-	fmt.Printf("-->vladimir, Here5, consent3: %s", consentForm.Get("submit"))
 	resp, err := f.httpClient.PostForm(response.Request.URL.String(), consentForm)
-	respDump, err := httputil.DumpResponse(resp, true)
-	if err != nil {
-		return "", errors.Wrap(err, "error dumping response")
+	if resp.StatusCode>299 {
+		return "", fmt.Errorf("could not fetch token, err_code=%d", resp.StatusCode)
 	}
-	fmt.Printf("-->vladimir, login RESPONSE:\n%s", string(respDump))
-	fmt.Print("-->vladimir, Here5.7")
 	return token, err
 }
 
@@ -94,12 +75,12 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("-->vladimir, Here6, URL: %s", u.String())
+
 	resp, err := f.httpClient.Get(u.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP GET on auth endpoint")
 	}
-	fmt.Print("-->vladimir, Here7")
+
 	loginForm := url.Values{}
 	loginForm.Set("email", f.config.UserCredentials.Username)
 	loginForm.Set("password", f.config.UserCredentials.Password)
@@ -108,16 +89,11 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
-	fmt.Printf("-->vladimir, Here7, URL: %s", resp.Request.URL.String())
-	fmt.Printf("-->vladimir, Here7, consent1: %s", loginForm.Get("email"))
-	fmt.Printf("-->vladimir, Here7, consent2: %s", loginForm.Get("password"))
-	fmt.Printf("-->vladimir, Here7, consent3: %s", loginForm.Get("challenge"))
-	fmt.Print("-->vladimir, Here8")
-	respDump, err := httputil.DumpResponse(resp, true)
-	if err != nil {
-		return nil, errors.Wrap(err, "error dumping response")
+
+	if resp.StatusCode>299 {
+		return nil, fmt.Errorf("could not do login, err_code=%d", resp.StatusCode)
 	}
-	fmt.Printf("-->vladimir, login RESPONSE:\n%s", string(respDump))
+	
 	return resp, nil
 }
 
