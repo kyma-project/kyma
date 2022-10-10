@@ -88,9 +88,9 @@ func TestChecker(t *testing.T) {
 			}
 
 			if tc.useCustomReadinessCheck {
-				assertResponseReadynessStatusCode(t, ReadinessURI, checker, tc.wantReadinessStatusCode)
+				assertResponseReadinessStatusCode(t, ReadinessURI, checker, tc.wantReadinessStatusCode)
 			} else {
-				assertResponseReadynessStatusCode(t, ReadinessURI, checker, StatusCodeHealthy)
+				assertResponseReadinessStatusCode(t, ReadinessURI, checker, StatusCodeHealthy)
 			}
 		})
 	}
@@ -105,7 +105,7 @@ func assertResponseLivenessStatusCode(t *testing.T, endpoint string, checker *Co
 	require.Equal(t, statusCode, writer.Result().StatusCode)
 }
 
-func assertResponseReadynessStatusCode(t *testing.T, endpoint string, checker *ConfigurableChecker, statusCode int) {
+func assertResponseReadinessStatusCode(t *testing.T, endpoint string, checker *ConfigurableChecker, statusCode int) {
 	writer := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, endpoint, nil)
 
