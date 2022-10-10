@@ -75,7 +75,7 @@ Before you start, Set up a [`custom-domain`](../00-api-exposure/apix-02-setup-cu
    EOF
    ```
 
-5. Add Client Root CA to cacert bundle secret for mTLS Gateway. Export the following value as an environment variable and run the command provided:
+5. Add client root CA to CA cert bundle secret for mTLS Gateway. Export the following value as an environment variable and run the command:
 
    ```bash
    # Add CA Cert to kyma-mtls-gateway
