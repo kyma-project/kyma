@@ -189,6 +189,10 @@ func generateReport() {
 
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
 		err = filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+			if path == "reports" {
+				return nil
+			}
+
 			_, err1 := copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
 			if err1 != nil {
 				return err1
