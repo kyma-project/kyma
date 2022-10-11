@@ -115,6 +115,10 @@ func dummyFunctionForTest_stateFnName(_ context.Context, r *reconciler, s *syste
 	return nil
 }
 
+func dummyBuilderForTest_stateFnName() stateFn {
+	return dummyFunctionForTest_stateFnName
+}
+
 func Test_stateFnName(t *testing.T) {
 	type fields struct {
 		fn stateFn
@@ -128,6 +132,11 @@ func Test_stateFnName(t *testing.T) {
 		{
 			name: "function name is short",
 			fn:   dummyFunctionForTest_stateFnName,
+			want: "dummyFunctionForTest_stateFnName",
+		},
+		{
+			name: "function is returned from a builder",
+			fn:   dummyBuilderForTest_stateFnName(),
 			want: "dummyFunctionForTest_stateFnName",
 		},
 	}
