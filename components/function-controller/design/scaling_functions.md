@@ -36,5 +36,5 @@ This configuration is disabled by removing `spec.ScaleConfig`. The Busola UI can
 - `spec.Replicas` is the only source of truth for scaling the Function/runtime deployment.
 - `spec.ScaleConfig` is only used to configure the controller internal HPA.
 - The internal HPA is removed if `spec.ScaleConfig == nil`
-- The HPA resource created by the controller will still target the Function resources.
+- The HPA resource created by the controller still targets the Function resources.
 - The current Function status update logic should be fixed to reflect the function current scale. 
