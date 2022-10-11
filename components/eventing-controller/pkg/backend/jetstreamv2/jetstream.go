@@ -44,7 +44,7 @@ var (
 )
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector,
-	cleaner cleaner.Cleaner, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *JetStream {
+	cleaner cleaner.Cleaner, logger *logger.Logger, subsConfig env.DefaultSubscriptionConfig) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
@@ -75,6 +75,11 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	subKeyPrefix := createKeyPrefix(subscription)
 	if err := js.checkJetStreamConnection(); err != nil {
 		return err
+	}
+
+	// TODO: move this to the validation webhook
+	if subscription.Spec.Source == "" {
+		return xerrors.Errorf("source value cannot be empty")
 	}
 
 	if err := js.syncSubscriptionTypes(subscription); err != nil {

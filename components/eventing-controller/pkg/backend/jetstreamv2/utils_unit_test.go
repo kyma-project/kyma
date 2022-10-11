@@ -180,7 +180,7 @@ func TestGetCleanEventTypesFromStatus(t *testing.T) {
 		},
 	}
 	// when
-	cleanTypes := getCleanEventTypesFromStatus(sub.Status)
+	cleanTypes := GetCleanEventTypesFromEventTypes(sub.Status.Types)
 	// then
 	require.Equal(t, cleanTypes, []string{evtestingv2.OrderCreatedCleanEvent, evtestingv2.OrderCreatedEventType})
 }
@@ -277,6 +277,88 @@ func TestGetCleanEventTypes(t *testing.T) {
 			eventTypes, getCleanTypesErr := GetCleanEventTypes(tc.givenSubscription, jscleaner)
 			require.Equal(t, tc.wantError, getCleanTypesErr != nil)
 			require.Equal(t, tc.wantEventTypes, eventTypes)
+		})
+	}
+}
+
+func TestGetBackendJetStreamTypes(t *testing.T) {
+	jsCleaner := cleaner.NewJetStreamCleaner(nil)
+	defaultSub := evtestingv2.NewSubscription(subName, subNamespace)
+	js := NewJetStream(env.NatsConfig{}, nil, jsCleaner, nil, env.DefaultSubscriptionConfig{})
+	testCases := []struct {
+		name              string
+		givenSubscription *eventingv1alpha2.Subscription
+		givenJSSubjects   []string
+		wantJSTypes       []eventingv1alpha2.JetStreamTypes
+	}{
+		{
+			name:              "Should be nil is there are no jsSubjects",
+			givenSubscription: defaultSub,
+			givenJSSubjects:   []string{},
+			wantJSTypes:       nil,
+		},
+		{
+			name: "one type and one jsSubject",
+			givenSubscription: evtestingv2.NewSubscription(subName, subNamespace,
+				evtestingv2.WithSource(evtestingv2.EventSourceUnclean),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedUncleanEvent)),
+			givenJSSubjects: js.GetJetStreamSubjects(evtestingv2.EventSourceUnclean,
+				[]string{evtestingv2.OrderCreatedCleanEvent},
+				eventingv1alpha2.TypeMatchingStandard),
+			wantJSTypes: []eventingv1alpha2.JetStreamTypes{
+				{
+					OriginalType: evtestingv2.OrderCreatedUncleanEvent,
+					ConsumerName: "828ed501e743dfc43e2f23cfc14b0232",
+				},
+			},
+		},
+		{
+			name: "two types and two jsSubjects",
+			givenSubscription: evtestingv2.NewSubscription(subName, subNamespace,
+				evtestingv2.WithSource(evtestingv2.EventSourceUnclean),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedCleanEvent),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedV1Event)),
+			givenJSSubjects: js.GetJetStreamSubjects(evtestingv2.EventSourceUnclean,
+				[]string{evtestingv2.OrderCreatedCleanEvent, evtestingv2.OrderCreatedV1Event},
+				eventingv1alpha2.TypeMatchingStandard),
+			wantJSTypes: []eventingv1alpha2.JetStreamTypes{
+				{
+					OriginalType: evtestingv2.OrderCreatedCleanEvent,
+					ConsumerName: "828ed501e743dfc43e2f23cfc14b0232",
+				},
+				{
+					OriginalType: evtestingv2.OrderCreatedV1Event,
+					ConsumerName: "ec2f903b07de7a974cf97c3d61fb043f",
+				},
+			},
+		},
+		{
+			name: "two types and two jsSubjects with type matching exact",
+			givenSubscription: evtestingv2.NewSubscription(subName, subNamespace,
+				evtestingv2.WithSource(evtestingv2.EventSourceUnclean),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedCleanEvent),
+				evtestingv2.WithEventType(evtestingv2.OrderCreatedV1Event)),
+			givenJSSubjects: js.GetJetStreamSubjects(evtestingv2.EventSourceUnclean,
+				[]string{evtestingv2.OrderCreatedCleanEvent, evtestingv2.OrderCreatedV1Event},
+				eventingv1alpha2.TypeMatchingExact),
+			wantJSTypes: []eventingv1alpha2.JetStreamTypes{
+				{
+					OriginalType: evtestingv2.OrderCreatedCleanEvent,
+					ConsumerName: "015e691825a7813383a419a53d8c5ea0",
+				},
+				{
+					OriginalType: evtestingv2.OrderCreatedV1Event,
+					ConsumerName: "15b59df6dc97f232718e05d7087c7a50",
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			jsTypes := GetBackendJetStreamTypes(tc.givenSubscription, tc.givenJSSubjects)
+			require.Equal(t, tc.wantJSTypes, jsTypes)
 		})
 	}
 }

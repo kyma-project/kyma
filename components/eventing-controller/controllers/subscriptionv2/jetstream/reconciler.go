@@ -256,7 +256,7 @@ func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha2.Subscripti
 	return nil
 }
 
-// syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription.
+// syncInitialStatus keeps the latest cleaned EventTypes and jetStreamTypes in the subscription.
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscription) (bool, error) {
 	statusChanged := false
 	cleanedTypes, err := jetstream.GetCleanEventTypes(subscription, r.cleaner)
@@ -266,6 +266,14 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscripti
 	}
 	if !reflect.DeepEqual(subscription.Status.Types, cleanedTypes) {
 		subscription.Status.Types = cleanedTypes
+		statusChanged = true
+	}
+	jsSubjects := r.Backend.GetJetStreamSubjects(subscription.Spec.Source,
+		jetstream.GetCleanEventTypesFromEventTypes(cleanedTypes),
+		subscription.Spec.TypeMatching)
+	jsTypes := jetstream.GetBackendJetStreamTypes(subscription, jsSubjects)
+	if !reflect.DeepEqual(subscription.Status.Backend.Types, jsTypes) {
+		subscription.Status.Backend.Types = jsTypes
 		statusChanged = true
 	}
 	return statusChanged, nil
