@@ -144,7 +144,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := getBuildResourceRequiremenets(s)
+	resourceRequirements := getBuildResourceRequirements(s)
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
 	return batchv1.Job{
@@ -247,7 +247,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
 
-	resourceRequirements := getBuildResourceRequiremenets(s)
+	resourceRequirements := getBuildResourceRequirements(s)
 	labels := s.functionLabels()
 
 	return batchv1.Job{
@@ -341,7 +341,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 	)
 }
 
-func getBuildResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
+func getBuildResourceRequirements(s *systemState) corev1.ResourceRequirements {
 	var resourceRequirements corev1.ResourceRequirements
 	if s.instance.Spec.ResourceConfiguration != nil &&
 		s.instance.Spec.ResourceConfiguration.Build != nil &&
@@ -353,8 +353,8 @@ func getBuildResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
 
 func (s *systemState) podLabels() map[string]string {
 	selectorLabels := s.deploymentSelectorLabels()
-	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
-		return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
+	if s.instance.Spec.Templates != nil && s.instance.Spec.Templates.FunctionPod != nil && s.instance.Spec.Templates.FunctionPod.Metadata != nil && s.instance.Spec.Templates.FunctionPod.Metadata.Labels != nil {
+		return mergeLabels(s.instance.Spec.Templates.FunctionPod.Metadata.Labels, selectorLabels)
 	} else {
 		return selectorLabels
 	}

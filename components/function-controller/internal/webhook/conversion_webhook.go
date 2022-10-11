@@ -334,8 +334,8 @@ func (w *ConvertingWebhook) convertSpecV1Alpha2ToV1Alpha1(in *serverlessv1alpha2
 
 	convertResourcesV1Alpha2ToV1Alpha1(in, out)
 
-	if in.Spec.Template != nil && in.Spec.Template.Labels != nil {
-		out.Spec.Labels = in.Spec.Template.Labels
+	if in.Spec.Templates != nil && in.Spec.Templates.FunctionPod.Metadata.Labels != nil {
+		out.Spec.Labels = in.Spec.Templates.FunctionPod.Metadata.Labels // TODO Zastanowic sie czy niie ma byc tak serverless.mergeLabels(in.Spec.Templates.FunctionPod.Metadata.Labels, in.Spec.Templates.BuildJob.Metadata.Labels)
 	}
 	return w.convertSourceV1Alpha2ToV1Alpha1(in, out)
 }
