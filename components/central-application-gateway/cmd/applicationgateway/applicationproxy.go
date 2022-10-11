@@ -83,17 +83,15 @@ func main() {
 	}
 
 	internalSrv := &http.Server{
-		Addr:         ":" + strconv.Itoa(options.proxyPort),
-		Handler:      internalHandler,
-		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
-		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
+		Addr:        ":" + strconv.Itoa(options.proxyPort),
+		Handler:     internalHandler,
+		ReadTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
 	internalSrvCompass := &http.Server{
-		Addr:         ":" + strconv.Itoa(options.proxyPortCompass),
-		Handler:      internalHandlerForCompass,
-		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
-		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
+		Addr:        ":" + strconv.Itoa(options.proxyPortCompass),
+		Handler:     internalHandlerForCompass,
+		ReadTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
 	var g run.Group

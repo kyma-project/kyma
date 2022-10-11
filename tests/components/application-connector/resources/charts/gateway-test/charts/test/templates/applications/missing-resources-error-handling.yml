@@ -12,7 +12,7 @@ spec:
     - displayName: application-doesnt-exist
       name: application-doesnt-exist
       providerDisplayName: Kyma
-      description: Should return 500 when application doesn't exist
+      description: Should return 404 when application doesn't exist
       id: "{{ uuidv4 }}"
       entries:
         - type: API
