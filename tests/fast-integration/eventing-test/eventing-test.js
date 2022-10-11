@@ -31,7 +31,7 @@ const {
   isDebugEnabled,
   k8sApply,
   deleteK8sPod,
-  eventingSubscription,
+  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -54,7 +54,7 @@ const {
   bebBackend,
   natsBackend, getEventMeshNamespace,
   kymaSystem,
-  jaegerLabel, jaegerOperatorLabel,
+  // jaegerLabel, jaegerOperatorLabel,
 } = require('./common/common');
 const {
   assert,
@@ -74,8 +74,10 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure tracing is ready', async function() {
-    await waitForPodStatusWithLabel(jaegerLabel.key, jaegerLabel.value, kymaSystem);
-    await waitForPodStatusWithLabel(jaegerOperatorLabel.key, jaegerOperatorLabel.value, kymaSystem);
+    // await waitForPodStatusWithLabel(jaegerLabel.key, jaegerLabel.value, kymaSystem);
+    // await waitForPodStatusWithLabel(jaegerOperatorLabel.key, jaegerOperatorLabel.value, kymaSystem);
+    await waitForPodWithLabelAndCondition('app', 'jaeger', kymaSystem, 'Ready', 'True');
+    await waitForEndpoint('tracing-jaeger-collector', kymaSystem);
   });
 
   before('Expose Grafana', async function() {

@@ -386,6 +386,21 @@ function waitForApplicationCr(appName, timeout = 300000) {
   );
 }
 
+function waitForEndpoint(name, namespace = 'default', timeout = 300000) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/endpoints`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name === name &&
+              watchObj.object.subsets
+        );
+      },
+      timeout,
+      `Waiting for endpoint ${name} timeout (${timeout} ms)`,
+  );
+}
+
 function waitForFunction(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
       `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
@@ -694,6 +709,34 @@ function waitForPodWithLabel(
   );
 }
 
+function waitForPodWithLabelAndCondition(
+    labelKey,
+    labelValue,
+    namespace = 'default',
+    condition = 'Ready',
+    conditionStatus = 'True',
+    timeout = 90000,
+) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/pods`,
+      query,
+      (_type, _apiObj, watchObj) => {
+        debug(`Waiting for pod "${namespace}/${watchObj.object.metadata.name}" lol`);
+        return (
+          watchObj.object.status.conditions &&
+            watchObj.object.status.conditions.some(
+                (c) => c.type === condition && c.status === conditionStatus,
+            )
+        );
+      },
+      timeout,
+      `Waiting for pod condition ${condition}:${conditionStatus} and label ${labelKey}=${labelValue} 
+      timeout (${timeout} ms)`,
+  );
+}
 function waitForPodStatusWithLabel(
     labelKey,
     labelValue,
@@ -1688,4 +1731,6 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
+  waitForEndpoint,
+  waitForPodWithLabelAndCondition,
 };
