@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -76,12 +77,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if tracePipeline.ObjectMeta.DeletionTimestamp.IsZero() {
-		return ctrl.Result{}, r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
-	}
-
-	// Deletion
-	return ctrl.Result{}, r.uninstallOtelCollector(ctx, &tracePipeline)
+	err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
+	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -133,26 +130,6 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		if err := createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
 			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
 		}
-	}
-
-	return nil
-}
-
-func (r *Reconciler) uninstallOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
-	if err := r.Delete(ctx, makeDeployment()); err != nil {
-		return fmt.Errorf("failed to delete otel collector configmap: %w", err)
-	}
-
-	if err := r.Delete(ctx, makeConfigMap(tracing.Spec.Output)); err != nil {
-		return fmt.Errorf("failed to delete otel collector deployment: %w", err)
-	}
-
-	if err := r.Delete(ctx, makeService()); err != nil {
-		return fmt.Errorf("failed to delete otel collector service: %w", err)
-	}
-
-	if err := r.Delete(ctx, makeServiceMonitor()); err != nil {
-		return fmt.Errorf("failed to delete otel collector prometheus service monitor: %w", err)
 	}
 
 	return nil
