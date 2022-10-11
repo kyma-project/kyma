@@ -28,7 +28,7 @@ This is managed and configured using `spec.Replicas`. It describes the scale sub
 ### Built-in scaling configuration
 This is managed and enabled by setting `spec.ScaleConfig`. It is configurable using Busola and it provides the most basic scaling configuration for the Function.
 
-This configuration will be disabled by removing `spec.ScaleConfig`. Busola UI can be extended to allow users to add/remove `spec.ScaleConfig` to manage built-in scaling with minimal effort to the user.
+This configuration is disabled by removing `spec.ScaleConfig`. The Busola UI can be extended to allow you to add or remove `spec.ScaleConfig` to manage built-in scaling with minimal effort.
 
 ## Implementation details
 
