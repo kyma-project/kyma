@@ -20,7 +20,7 @@ const {
   sleep,
   waitForDeployment,
   waitForPodWithLabel,
-  error,
+  error, waitForPodWithLabelAndCondition,
 } = require('../utils');
 
 const {
@@ -169,6 +169,7 @@ async function restartProxyPod() {
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
   await waitForDeployment(kymaProxyDeployment, kymaNs);
+  await waitForPodWithLabelAndCondition('app', 'grafana', kymaNs, 'Ready', 'True', 60_000);
 }
 
 async function checkGrafanaRedirect(redirectURL, httpStatus) {

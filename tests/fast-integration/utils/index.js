@@ -724,7 +724,8 @@ function waitForPodWithLabelAndCondition(
       `/api/v1/namespaces/${namespace}/pods`,
       query,
       (_type, _apiObj, watchObj) => {
-        debug(`Waiting for pod "${namespace}/${watchObj.object.metadata.name}" lol`);
+        debug(`Waiting for pod "${namespace}/${watchObj.object.metadata.name}" 
+          to have condition "${condition}: ${conditionStatus}" for ${timeout/1000} seconds`);
         return (
           watchObj.object.status.conditions &&
             watchObj.object.status.conditions.some(
@@ -733,8 +734,7 @@ function waitForPodWithLabelAndCondition(
         );
       },
       timeout,
-      `Waiting for pod condition ${condition}:${conditionStatus} and label ${labelKey}=${labelValue} 
-      timeout (${timeout} ms)`,
+      `not found.`,
   );
 }
 function waitForPodStatusWithLabel(

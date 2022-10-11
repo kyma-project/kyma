@@ -80,9 +80,9 @@ describe('Eventing tests', function() {
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
-    debug('wait?');
+    debug('🐈‍⬛');
     await sleep(20_000);
-    debug('wait!');
+    debug('🐕');
   });
 
   before('Get stream config for JetStream', async function() {
