@@ -76,32 +76,32 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15610"
+      version: "PR-15761"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15610"
+      version: "PR-15761"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15610"
+      version: "PR-15761"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "f94d14f3"
+      version: "PR-15671"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "f94d14f3"
+      version: "PR-15761"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "f94d14f3"
+      version: "PR-15671"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "f94d14f3"
+      version: "PR-15671"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-a550386f"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-1f852e34"
+      version: "2.7.1-981f40fb"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -171,7 +171,15 @@ containers:
     healthz:
       port: "8090"
     extraProperties: {}
+    configuration:
+      targetDir: "/appdata"
+      filename: "config.yaml"
+      data:
+        logLevel: "info"
+        logFormat: "json"
     envs:
+      fileConfigPath:
+        value: "{{ .Values.containers.manager.configuration.targetDir }}/{{ .Values.containers.manager.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -196,8 +204,8 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
-      functionJaegerServiceEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
+      functionTraceCollectorEndpoint:
+        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
         value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
@@ -206,10 +214,6 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildMaxSimultaneousJobs:
         value: "5"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 

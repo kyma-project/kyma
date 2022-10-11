@@ -24,13 +24,13 @@ docker-registry:
 
 containers:
   manager:
+    configuration:
+      data:
+        logLevel: "warn"
+        logFormat: "json"
     envs:
       functionBuildMaxSimultaneousJobs:
         value: "1"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
     resources:
       limits:
         cpu: 400m
