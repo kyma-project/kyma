@@ -150,6 +150,7 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 func codeRewriter(rw http.ResponseWriter, err error) {
 
 	if errors.Is(err, context.DeadlineExceeded) {
+		log.Infof("%s: HTTP status code was rewritten to 504", err)
 		rw.WriteHeader(http.StatusGatewayTimeout)
 		return
 	}
