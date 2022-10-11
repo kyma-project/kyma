@@ -26,7 +26,7 @@ This is managed and configured using `spec.Replicas`. It describes the scale sub
 - Using an external scaler like [KEDA](https://keda.sh/).
 
 ### Built-in scaling configuration
-This is managed and enabled by setting `spec.ScaleConfig`. It should be configurable using Busola and it provide the most basic scaling configuration for the function.
+This is managed and enabled by setting `spec.ScaleConfig`. It is configurable using Busola and it provides the most basic scaling configuration for the Function.
 
 This configuration will be disabled by removing `spec.ScaleConfig`. Busola UI can be extended to allow users to add/remove `spec.ScaleConfig` to manage built-in scaling with minimal effort to the user.
 
