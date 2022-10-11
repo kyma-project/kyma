@@ -21,7 +21,7 @@ Describe and implement two different scaling configuration. Both configurations 
 
 ### External scaling configuration
 This is managed and configured using `spec.Replicas`. It describes the scale subresource use case. It supports:
-- Manually scaling the Function up/down through the API.
+- Manual scaling of the Function up and down through the API.
 - Configuring an HPA resource with the Function resources as a target.
 - Using an external scaler like KEDA.
 
