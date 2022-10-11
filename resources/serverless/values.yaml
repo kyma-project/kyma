@@ -76,19 +76,19 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15671"
+      version: "PR-15761"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15671"
+      version: "PR-15761"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15671"
+      version: "PR-15761"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-15671"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-15671"
+      version: "PR-15761"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
       version: "PR-15671"
@@ -101,7 +101,7 @@ global:
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-1f852e34"
+      version: "2.7.1-981f40fb"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
