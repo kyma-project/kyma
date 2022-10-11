@@ -8,7 +8,7 @@ Initially, the Serverless API supported the `spec.ScaleConfig` field only. The w
 - The Function Controller did not enforce the runtime deployment `spec.Replicas` anymore and it was handled by the HPA resources.
 
 
-Later, we extended the Serverless API to include a `Scale` subresource, which allows us to directly scale the function resources through the Kubernetes API.
+Later, the Serverless API was extended by the `Scale` subresource, which allows for direct scaling of the Function resources through the Kubernetes API.
 
 However, there are some implementation conflicts between the two features. This is a design and an implementation plan to unify the UX while using Functions as scaled resources.
 
