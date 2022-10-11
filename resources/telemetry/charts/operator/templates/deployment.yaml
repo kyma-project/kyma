@@ -43,6 +43,8 @@ spec:
             - --denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
             - --sync-period={{.Values.syncPeriod}}
             - --max-pipelines={{.Values.maxLogPipelines}}
+            - --enable-logging={{ .Values.controllers.logging.enabled }}
+            - --enable-tracing={{ .Values.controllers.tracing.enabled }}
           name: manager
           ports:
           - containerPort: 9443
