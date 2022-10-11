@@ -37,4 +37,4 @@ This configuration is disabled by removing `spec.ScaleConfig`. The Busola UI can
 - `spec.ScaleConfig` is only used to configure the controller internal HPA.
 - The internal HPA is removed if `spec.ScaleConfig == nil`
 - The HPA resource created by the controller still targets the Function resources.
-- The current Function status update logic should be fixed to reflect the function current scale. 
+- The current Function status update logic must be fixed to reflect the Function's current scale. 
