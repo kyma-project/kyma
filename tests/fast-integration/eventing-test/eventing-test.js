@@ -31,7 +31,7 @@ const {
   isDebugEnabled,
   k8sApply,
   deleteK8sPod,
-  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
+  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition, sleep,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -74,10 +74,9 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure tracing is ready', async function() {
-    // await waitForPodStatusWithLabel(jaegerLabel.key, jaegerLabel.value, kymaSystem);
-    // await waitForPodStatusWithLabel(jaegerOperatorLabel.key, jaegerOperatorLabel.value, kymaSystem);
     await waitForPodWithLabelAndCondition('app', 'jaeger', kymaSystem, 'Ready', 'True');
     await waitForEndpoint('tracing-jaeger-collector', kymaSystem);
+    sleep(10_000);
   });
 
   before('Expose Grafana', async function() {
