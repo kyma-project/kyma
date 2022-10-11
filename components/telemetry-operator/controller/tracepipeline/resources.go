@@ -18,7 +18,9 @@ var (
 	configMapKey      = "relay.conf"
 	systemNamespace   = "kyma-system"
 	podSelectorLabels = map[string]string{
-		"app.kubernetes.io/name":  name,
+		"app.kubernetes.io/name": name,
+	}
+	podAnnotations = map[string]string{
 		"sidecar.istio.io/inject": "false",
 	}
 )
@@ -83,7 +85,8 @@ func makeDeployment() *appsv1.Deployment {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: podSelectorLabels,
+					Labels:      podSelectorLabels,
+					Annotations: podAnnotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -135,23 +138,24 @@ func makeService() *corev1.Service {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: systemNamespace,
+			Labels:    podSelectorLabels,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
-					Name:       "otlp",
+					Name:       "grpc-otlp",
 					Protocol:   corev1.ProtocolTCP,
 					Port:       4317,
 					TargetPort: intstr.FromInt(4317),
 				},
 				{
-					Name:       "otlp-http",
+					Name:       "http-otlp",
 					Protocol:   corev1.ProtocolTCP,
 					Port:       4318,
 					TargetPort: intstr.FromInt(4318),
 				},
 				{
-					Name:       "opencensus",
+					Name:       "http-opencensus",
 					Protocol:   corev1.ProtocolTCP,
 					Port:       55678,
 					TargetPort: intstr.FromInt(55678),

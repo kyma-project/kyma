@@ -15,7 +15,7 @@ import (
 
 var _ = Describe("Deploying a TracePipeline", func() {
 	const (
-		timeout  = time.Second * 10
+		timeout  = time.Second * 100
 		interval = time.Millisecond * 250
 	)
 
@@ -47,17 +47,10 @@ var _ = Describe("Deploying a TracePipeline", func() {
 			},
 		}
 
-		BeforeEach(func() {
+		It("creates OpenTelemetry Collector resources", func() {
 			Expect(k8sClient.Create(ctx, kymaSystemNamespace)).Should(Succeed())
 			Expect(k8sClient.Create(ctx, tracePipeline)).Should(Succeed())
-		})
 
-		AfterEach(func() {
-			Expect(k8sClient.Delete(ctx, tracePipeline)).Should(Succeed())
-			Expect(k8sClient.Delete(ctx, kymaSystemNamespace)).Should(Succeed())
-		})
-
-		It("creates OpenTelemetry Collector resources", func() {
 			Eventually(func() error {
 				var otelCollectorDeployment appsv1.Deployment
 				return k8sClient.Get(ctx, otelCollectorDeploymentLookupKey, &otelCollectorDeployment)
@@ -72,6 +65,9 @@ var _ = Describe("Deploying a TracePipeline", func() {
 				var otelCollectorConfigMap v1.ConfigMap
 				return k8sClient.Get(ctx, otelCollectorConfigMapLookupKey, &otelCollectorConfigMap)
 			}, timeout, interval).Should(BeNil())
+
+			Expect(k8sClient.Delete(ctx, tracePipeline)).Should(Succeed())
+			Expect(k8sClient.Delete(ctx, kymaSystemNamespace)).Should(Succeed())
 		})
 	})
 })

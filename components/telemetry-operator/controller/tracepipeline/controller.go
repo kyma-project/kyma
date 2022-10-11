@@ -56,7 +56,6 @@ func NewReconciler(
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -73,35 +72,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	const finalizer = "telemetry.kyma-project.io/finalizer"
-
 	if tracePipeline.ObjectMeta.DeletionTimestamp.IsZero() {
-		if !controllerutil.ContainsFinalizer(&tracePipeline, finalizer) {
-			controllerutil.AddFinalizer(&tracePipeline, finalizer)
-			if err := r.Update(ctx, &tracePipeline); err != nil {
-				return ctrl.Result{}, err
-			}
-		}
-	} else {
-		// Deletion
-		if controllerutil.ContainsFinalizer(&tracePipeline, finalizer) {
-			if err := r.uninstallOtelCollector(ctx, &tracePipeline); err != nil {
-				return ctrl.Result{}, err
-			}
-
-			controllerutil.RemoveFinalizer(&tracePipeline, finalizer)
-			if err := r.Update(ctx, &tracePipeline); err != nil {
-				return ctrl.Result{}, err
-			}
-		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
 	}
 
-	if err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	return ctrl.Result{}, nil
+	// Deletion
+	return ctrl.Result{}, r.uninstallOtelCollector(ctx, &tracePipeline)
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -105,12 +105,6 @@ rules:
 - apiGroups:
   - telemetry.kyma-project.io
   resources:
-  - tracepipelines/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - telemetry.kyma-project.io
-  resources:
   - tracepipelines/status
   verbs:
   - get

@@ -61,6 +61,7 @@ var (
 	enableLeaderElection       bool
 	enableLogging              bool
 	enableTracing              bool
+	createServiceMonitor       bool
 	fluentBitConfigMap         string
 	fluentBitSectionsConfigMap string
 	fluentBitParsersConfigMap  string
@@ -107,6 +108,7 @@ func main() {
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "Enable configurable logging.")
 	flag.BoolVar(&enableTracing, "enable-tracing", false, "Enable configurable tracing.")
+	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "sections-cm-name", "", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
 	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent Bit Parsers to be written by Fluent Bit controller")
@@ -278,7 +280,9 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 }
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
-	config := tracepipelinereconciler.Config{}
+	config := tracepipelinereconciler.Config{
+		CreateServiceMonitor: createServiceMonitor,
+	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)
 }
 
