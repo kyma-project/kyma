@@ -1,7 +1,7 @@
 # Serverless Functions Scaling Modes
 
 ## Summary
-Initially, the Serverless API supported the `spec.ScaleConfig` field only. The work flow was as follow:
+Initially, the Serverless API supported the `spec.ScaleConfig` field only. The workflow was as follows:
 - Function resources were defaulted to min/max replicas = 1
 - If the user sets a different scaling config, the function controller will create an HPA resources with the user defined min/max values. 
 - The HPA resource target ref will be the Function runtime deployment.
