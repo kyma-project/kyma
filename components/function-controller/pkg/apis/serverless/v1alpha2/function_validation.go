@@ -334,7 +334,7 @@ func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 func validateKymaLabels(labels map[string]string) error {
 	allErrs := []string{}
 	for key, _ := range labels {
-		isUsed, err := regexp.MatchString(".*serverless.kyma-project.io*.", key)
+		isUsed, err := regexp.MatchString(".*serverless\\.kyma-project\\.io.*", key)
 		if err != nil {
 			return err
 		}
