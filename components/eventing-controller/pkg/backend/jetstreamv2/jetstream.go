@@ -37,7 +37,8 @@ const (
 )
 
 var (
-	ErrConsumerAdd = errors.New("failed to add consumer")
+	ErrConsumerAdd      = errors.New("failed to add consumer")
+	ErrConsumerNotFound = errors.New("failed to find consumer")
 )
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
@@ -406,7 +407,7 @@ func (js *JetStream) syncNATSConsumers(subscription *eventingv1alpha2.Subscripti
 				}
 				log.Debug("Created consumer on JetStream")
 			} else {
-				return err
+				return fmt.Errorf("%w: %v", ErrConsumerNotFound, err)
 			}
 		}
 

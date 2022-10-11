@@ -72,7 +72,7 @@ func TestNils_SyncNATSConsumers_ForConsumerInfo_ReturnsError(t *testing.T) {
 	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
 
 	// then
-	assert.ErrorIs(t, err, myError)
+	assert.ErrorIs(t, err, ErrConsumerNotFound)
 }
 
 func TestNils_SyncNATSConsumers_AddConsumer_ReturnsError(t *testing.T) {
