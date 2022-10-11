@@ -279,7 +279,7 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{}
-	return tracepipelinereconciler.NewReconciler(client, config)
+	return tracepipelinereconciler.NewReconciler(client, config, scheme)
 }
 
 func createDryRunConfig() dryrun.Config {
