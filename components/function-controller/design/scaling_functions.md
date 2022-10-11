@@ -23,7 +23,7 @@ Describe and implement two different scaling configuration. Both configurations 
 This is managed and configured using `spec.Replicas`. It describes the scale subresource use case. It supports:
 - Manual scaling of the Function up and down through the API.
 - Configuring an HPA resource with the Function resources as a target.
-- Using an external scaler like KEDA.
+- Using an external scaler like [KEDA](https://keda.sh/).
 
 ### Built-in scaling configuration
 This is managed and enabled by setting `spec.ScaleConfig`. It should be configurable using Busola and it provide the most basic scaling configuration for the function.
