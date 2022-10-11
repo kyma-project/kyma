@@ -10,7 +10,7 @@ import (
 func TestMakeConfigMap(t *testing.T) {
 	output := v1alpha1.TracePipelineOutput{
 		Otlp: v1alpha1.OtlpOutput{
-			URL: v1alpha1.ValueType{
+			Endpoint: v1alpha1.ValueType{
 				Value: "localhost",
 			},
 		},

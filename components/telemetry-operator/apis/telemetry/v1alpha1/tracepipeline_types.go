@@ -24,26 +24,25 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 type OtlpOutput struct {
-	URL ValueType `json:"url,omitempty"`
+	// Protocol defines the OTLP protocol (http or grpc).
+	Protocol string `json:"protocol,omitempty"`
+	// Endpoint defines the host and port (<host>:<port>) of an OTLP endpoint.
+	Endpoint ValueType `json:"endpoint,omitempty"`
 }
 
 type TracePipelineOutput struct {
+	// Otlp defines an output using the OpenTelmetry protocol.
 	Otlp OtlpOutput `json:"otlp,omitempty"`
 }
 
 // TracePipelineSpec defines the desired state of TracePipeline
 type TracePipelineSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of TracePipeline. Edit tracepipeline_types.go to remove/update
+	// Output configures the trace receiver of a TracePipeline.
 	Output TracePipelineOutput `json:"output,omitempty"`
 }
 
 // TracePipelineStatus defines the observed state of TracePipeline
 type TracePipelineStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 //+kubebuilder:object:root=true

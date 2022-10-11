@@ -26,25 +26,24 @@ var (
 )
 
 func makeConfigMap(output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
+	exporterConfig := makeExporterConfig(output)
+	outputType := getOutputType(output)
 	conf := confmap.NewFromStringMap(map[string]any{
 		"receivers": map[string]any{
 			"opencensus": map[string]any{},
 			"otlp": map[string]any{
 				"protocols": map[string]any{
 					"http": map[string]any{},
+					"grpc": map[string]any{},
 				},
 			},
 		},
-		"exporters": map[string]any{
-			"otlphttp": map[string]any{
-				"endpoint": output.Otlp.URL.Value,
-			},
-		},
+		"exporters": exporterConfig,
 		"service": map[string]any{
 			"pipelines": map[string]any{
 				"traces": map[string]any{
 					"receivers": []any{"opencensus", "otlp"},
-					"exporters": []any{"otlphttp"},
+					"exporters": []any{outputType},
 				},
 			},
 			"telemetry": map[string]any{
@@ -65,6 +64,22 @@ func makeConfigMap(output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
 		},
 		Data: map[string]string{
 			configMapKey: confYAML,
+		},
+	}
+}
+
+func getOutputType(output v1alpha1.TracePipelineOutput) string {
+	if output.Otlp.Protocol == "http" {
+		return "otlphttp"
+	}
+	return "otlp"
+}
+
+func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
+	outputType := getOutputType(output)
+	return map[string]any{
+		outputType: map[string]any{
+			"endpoint": output.Otlp.Endpoint.Value,
 		},
 	}
 }

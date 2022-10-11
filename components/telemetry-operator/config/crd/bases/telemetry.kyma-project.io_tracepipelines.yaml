@@ -36,12 +36,14 @@ spec:
             description: TracePipelineSpec defines the desired state of TracePipeline
             properties:
               output:
-                description: Foo is an example field of TracePipeline. Edit tracepipeline_types.go
-                  to remove/update
+                description: Output configures the trace receiver of a TracePipeline.
                 properties:
                   otlp:
+                    description: Otlp defines an output using the OpenTelmetry protocol.
                     properties:
-                      url:
+                      endpoint:
+                        description: Endpoint defines the host and port (<host>:<port>)
+                          of an OTLP endpoint.
                         properties:
                           value:
                             type: string
@@ -58,6 +60,9 @@ spec:
                                 type: object
                             type: object
                         type: object
+                      protocol:
+                        description: Protocol defines the OTLP protocol (http or grpc).
+                        type: string
                     type: object
                 type: object
             type: object

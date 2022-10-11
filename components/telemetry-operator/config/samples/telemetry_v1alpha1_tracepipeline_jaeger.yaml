@@ -5,5 +5,5 @@ metadata:
 spec:
   output:
     otlp:
-      url:
+      endpoint:
         value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318
