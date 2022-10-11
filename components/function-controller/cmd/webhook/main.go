@@ -94,7 +94,7 @@ func main() {
 		cfg.WebhookSecretName,
 		cfg.SystemNamespace,
 		cfg.WebhookServiceName,
-		log.Named("setup-certificates")); err != nil {
+		loggerRegistry.CreateNamed("setup-certificates")); err != nil {
 		log.Error(err, "failed to setup certificates and webhook secret")
 		os.Exit(1)
 	}
@@ -108,7 +108,7 @@ func main() {
 		webhook.NewConvertingWebhook(
 			mgr.GetClient(),
 			scheme,
-			log.Named("converting-webhook")),
+			loggerRegistry.CreateNamed("converting-webhook")),
 	)
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(defaultingConfigv1alpha1, defaultingConfigv1alpha2, mgr.GetClient()),
@@ -128,7 +128,7 @@ func main() {
 		cfg.WebhookServiceName,
 		cfg.SystemNamespace,
 		cfg.WebhookSecretName,
-		log.Named("resource-ctrl")); err != nil {
+		loggerRegistry); err != nil {
 		log.Error(err, "failed to setup webhook resources controller")
 		os.Exit(1)
 	}
