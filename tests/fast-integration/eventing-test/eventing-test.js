@@ -76,11 +76,13 @@ describe('Eventing tests', function() {
   before('Ensure tracing is ready', async function() {
     await waitForPodWithLabelAndCondition('app', 'jaeger', kymaSystem, 'Ready', 'True');
     await waitForEndpoint('tracing-jaeger-collector', kymaSystem);
-    sleep(60_000);
   });
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
+    debug('wait?');
+    await sleep(20_000);
+    debug('wait!');
   });
 
   before('Get stream config for JetStream', async function() {
