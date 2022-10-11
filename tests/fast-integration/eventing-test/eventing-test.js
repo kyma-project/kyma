@@ -76,7 +76,7 @@ describe('Eventing tests', function() {
   before('Ensure tracing is ready', async function() {
     await waitForPodWithLabelAndCondition('app', 'jaeger', kymaSystem, 'Ready', 'True');
     await waitForEndpoint('tracing-jaeger-collector', kymaSystem);
-    sleep(10_000);
+    sleep(60_000);
   });
 
   before('Expose Grafana', async function() {
