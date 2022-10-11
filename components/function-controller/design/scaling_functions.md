@@ -5,7 +5,7 @@ Initially, the Serverless API supported the `spec.ScaleConfig` field only. The w
 - Function resources were defaulted to min/max replicas = 1
 - If you set a different scaling config, Function Controller created HPA resources with the user-defined min/max values. 
 - The HPA resource target ref was the Function runtime deployment.
-- The Function controller will not enforce the runtime deployment `spec.Replicas` any more and it will be handled by the HPA resources.
+- The Function Controller did not enforce the runtime deployment `spec.Replicas` anymore and it was handled by the HPA resources.
 
 
 Later, we extended the Serverless API to include a `Scale` subresource, which allows us to directly scale the function resources through the Kubernetes API.
