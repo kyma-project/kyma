@@ -115,7 +115,17 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 				MinReplicas: &one,
 				MaxReplicas: &two,
 			},
-			Templates: &serverlessv1alpha2.Templates{},
+			Templates: &serverlessv1alpha2.Templates{
+				FunctionPod: &serverlessv1alpha2.PodTemplate{
+					Metadata: &serverlessv1alpha2.MetadataTemplate{
+						Labels: map[string]string{
+							testBindingLabel1: "foobar",
+							testBindingLabel2: testBindingLabelValue,
+							"foo":             "bar",
+						},
+					},
+				},
+			},
 		},
 	}
 }
