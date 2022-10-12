@@ -10,7 +10,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 ## Access Grafana
 
-> **NOTE:** See how to [expose Grafana securely](../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) for easier access in the future.
+> **NOTE:** See how to [expose Grafana securely](../04-operation-guides/security/sec-06-access-expose-grafana.md) for easier access in the future.
 
 1. To access Grafana, forward a local port to the Service's port:
     ```bash

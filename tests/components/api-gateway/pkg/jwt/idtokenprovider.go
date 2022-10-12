@@ -63,10 +63,12 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 		}
 		return nil
 	}
+
 	resp, err := f.httpClient.PostForm(response.Request.URL.String(), consentForm)
 	if resp.StatusCode>399 {
 		return "", fmt.Errorf("could not fetch token, err_code=%d", resp.StatusCode)
 	}
+
 	return token, err
 }
 

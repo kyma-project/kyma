@@ -4,9 +4,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// +kubebuilder:validation:Enum=BEB;NATS
+
 type BackendType string
 
-// +kubebuilder:validation:Enum=BEB;NATS
 const (
 	BEBBackendType  BackendType = "BEB"
 	NatsBackendType BackendType = "NATS"
