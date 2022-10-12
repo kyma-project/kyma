@@ -129,7 +129,7 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 				return fmt.Errorf("error during Token retrival: %+v", err)
 			}
 
-			if token.AccessToken == "" {
+			if token == nil || token.AccessToken == "" {
 				return fmt.Errorf("got empty OAuth2 token")
 			}
 			tokenOAUTH = *token
