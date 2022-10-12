@@ -180,20 +180,19 @@ func calculateResources(fn *Function, resourceRequirements *corev1.ResourceRequi
 	if preset == "" {
 		preset = fn.GetLabels()[presetLabel]
 	}
+	if preset != "" {
+		return presetsToRequirements(presets[preset])
+	}
 	// when no profile we use user defined resources
-	if preset == "" && resourceRequirements != nil {
+	if resourceRequirements != nil {
 		return resourceRequirements
 	}
 	// we use default preset only when no profile and no resources
-	if preset == "" {
-		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
-		if ok {
-			return presetsToRequirements(presets[rtmPreset])
-		}
-		return presetsToRequirements(presets[defaultPreset])
+	rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
+	if ok {
+		return presetsToRequirements(presets[rtmPreset])
 	}
-
-	return presetsToRequirements(presets[preset])
+	return presetsToRequirements(presets[defaultPreset])
 }
 
 func presetsToRequirements(preset ResourcesPreset) *corev1.ResourceRequirements {

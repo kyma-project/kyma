@@ -143,7 +143,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should return default webhook": {
+		"Should default minimal function": {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
