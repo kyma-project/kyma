@@ -433,8 +433,8 @@ github.com/kyma-project/kyma/common/logging v0.0.0-20220903121145-690b76935712/g
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20220903121145-690b76935712/go.mod h1:4jh1Qn1DLbQRdCHqEdHsV4Tk9b6L4i9nhgGdEc2XaIg=
 github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220915084356-1d9b39c6797a h1:t1wNtM9GV8GBuPdjk6646iWPlf1nkQs6rGTLYAbDAxA=
 github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220915084356-1d9b39c6797a/go.mod h1:ATzbpEZqwuawkwCfI8jegw3ItXw+3s2WuKgEhbUI4Jw=
-github.com/kyma-project/kyma/components/function-controller v0.0.0-20220928064850-1c007274729b h1:lBdnMyh4LIHgCv7IoAvr2h06oY6pf71O98XV2xlAIRw=
-github.com/kyma-project/kyma/components/function-controller v0.0.0-20220928064850-1c007274729b/go.mod h1:yKPrqviLs4EX6fgpNUgt9n9Xg5PPEut4GcLeNlw7Us0=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20221012075513-f3e30e39496e h1:Pm0uUdTChJ7eQ/K8qFS3KBtn6yKXByxTU921Y9AqhhA=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20221012075513-f3e30e39496e/go.mod h1:+fJNvqX/KOg1MVYDjct8CL4YftBplx3Aazg8v8jRX+g=
 github.com/libgit2/git2go/v31 v31.7.9/go.mod h1:c/rkJcBcUFx6wHaT++UwNpKvIsmPNqCeQ/vzO4DrEec=
 github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.5/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
