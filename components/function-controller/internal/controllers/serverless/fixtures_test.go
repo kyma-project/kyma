@@ -73,6 +73,12 @@ func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string,
 	return fn
 }
 
+func newFixFunctionWithTemplates(namespace, name string, templates *serverlessv1alpha2.Templates) *serverlessv1alpha2.Function {
+	fn := newFixFunction(namespace, name, 1, 1)
+	fn.Spec.Templates = templates
+	return fn
+}
+
 func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)

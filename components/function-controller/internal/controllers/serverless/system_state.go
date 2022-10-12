@@ -17,7 +17,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const DefaultDeploymentReplicas int32 = 1
+const (
+	DefaultDeploymentReplicas int32 = 1
+
+	tmpDirVolName = "temp-dir"
+)
 
 type SystemState interface{}
 
@@ -164,43 +168,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 					Annotations: istioSidecarInjectFalse,
 				},
 				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.docker.ActiveRegistryConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
-								},
-							},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmCfg.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
-							Name:         "workspace",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-						},
-						{
-							Name: "registry-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.fn.PackageRegistryConfigSecretName,
-									Optional:   &optionalTrue,
-								},
-							},
-						},
-					},
+					Volumes: s.getGitJobVolumes(cfg),
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
@@ -238,8 +206,52 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 		},
 	}
 }
+func (s *systemState) getGitJobVolumes(cfg cfg) []corev1.Volume {
+	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
+	volumes := []corev1.Volume{
+		{
+			Name: "credentials",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: cfg.docker.ActiveRegistryConfigSecretName,
+					Items: []corev1.KeyToPath{
+						{
+							Key:  ".dockerconfigjson",
+							Path: ".docker/config.json",
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "runtime",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: rtmCfg.DockerfileConfigMapName},
+				},
+			},
+		},
+		{
+			Name:         "workspace",
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		},
+		{
+			Name: "registry-config",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: cfg.fn.PackageRegistryConfigSecretName,
+					Optional:   &optionalTrue,
+				},
+			},
+		},
+	}
+	if s.instance.Spec.Templates != nil && s.instance.Spec.Templates.BuildJob.HasVolumes() {
+		volumes = append(volumes, s.instance.Spec.Templates.BuildJob.Volumes...)
+	}
+	return volumes
+}
 
-func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
+func (s *systemState) buildInlineJob(configMapName string, cfg cfg) batchv1.Job {
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 	imageName := s.buildImageAddress(cfg.docker.PushAddress)
 	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
@@ -267,54 +279,14 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 					Annotations: istioSidecarInjectFalse,
 				},
 				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "sources",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
-								},
-							},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmCfg.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.docker.ActiveRegistryConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
-								},
-							},
-						},
-						{
-							Name: "registry-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.fn.PackageRegistryConfigSecretName,
-									Optional:   &optionalTrue,
-								},
-							},
-						},
-					},
+					Volumes: s.getInlineJobVolumes(configMapName, cfg),
 					Containers: []corev1.Container{
 						{
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
 							Resources:       resourceRequirements,
-							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
+							VolumeMounts:    s.getInlineJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
@@ -330,6 +302,73 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 			},
 		},
 	}
+}
+
+func (s *systemState) getInlineJobVolumes(configMapName string, cfg cfg) []corev1.Volume {
+	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
+	volumes := []corev1.Volume{
+		{
+			Name: "sources",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
+				},
+			},
+		},
+		{
+			Name: "runtime",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: rtmCfg.DockerfileConfigMapName},
+				},
+			},
+		},
+		{
+			Name: "credentials",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: cfg.docker.ActiveRegistryConfigSecretName,
+					Items: []corev1.KeyToPath{
+						{
+							Key:  ".dockerconfigjson",
+							Path: ".docker/config.json",
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "registry-config",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: cfg.fn.PackageRegistryConfigSecretName,
+					Optional:   &optionalTrue,
+				},
+			},
+		},
+	}
+	if s.instance.Spec.Templates.BuildJob.HasVolumes() {
+		volumes = append(volumes, s.instance.Spec.Templates.BuildJob.Volumes...)
+	}
+	return volumes
+}
+
+func (s *systemState) getInlineJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+
+	if s.instance.Spec.Templates.BuildJob.HasVolumes() {
+		volumeMounts = append(volumeMounts, s.instance.Spec.Templates.BuildJob.Spec.VolumeMounts...)
+	}
+	return volumeMounts
 }
 
 func (s *systemState) deploymentSelectorLabels() map[string]string {
@@ -368,13 +407,9 @@ type buildDeploymentArgs struct {
 }
 
 func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment {
-
 	imageName := s.buildImageAddress(cfg.DockerPullAddress)
 	deploymentLabels := s.functionLabels()
 	podLabels := s.podLabels()
-
-	const volumeName = "tmp-dir"
-	emptyDirVolumeSize := resource.MustParse("100Mi")
 
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
@@ -407,31 +442,14 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 					},
 				},
 				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{{
-						Name: volumeName,
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{
-								Medium:    corev1.StorageMediumDefault,
-								SizeLimit: &emptyDirVolumeSize,
-							},
-						},
-					}},
+					Volumes: s.getDeploymentVolumes(tmpDirVolName),
 					Containers: []corev1.Container{
 						{
-							Name:      functionContainerName,
-							Image:     imageName,
-							Env:       envs,
-							Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
-							VolumeMounts: []corev1.VolumeMount{{
-								Name: volumeName,
-								/* needed in order to have python functions working:
-								python functions need writable /tmp dir, but we disable writing to root filesystem via
-								security context below. That's why we override this whole /tmp directory with emptyDir volume.
-								We've decided to add this directory to be writable by all functions, as it may come in handy
-								*/
-								MountPath: "/tmp",
-								ReadOnly:  false,
-							}},
+							Name:         functionContainerName,
+							Image:        imageName,
+							Env:          envs,
+							Resources:    *s.instance.Spec.ResourceConfiguration.Function.Resources,
+							VolumeMounts: s.getDeploymentVolumeMounts(tmpDirVolName),
 							/*
 								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
 								We do this but first ensuring that sidecar is ready by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
@@ -492,6 +510,40 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 		},
 	}
+}
+
+func (s *systemState) getDeploymentVolumes(tmpVolName string) []corev1.Volume {
+	emptyDirVolumeSize := resource.MustParse("100Mi")
+	volumes := []corev1.Volume{{
+		Name: tmpVolName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{
+				Medium:    corev1.StorageMediumDefault,
+				SizeLimit: &emptyDirVolumeSize,
+			},
+		},
+	}}
+	if s.instance.Spec.Templates != nil && s.instance.Spec.Templates.FunctionPod.HasVolumes() {
+		volumes = append(volumes, s.instance.Spec.Templates.FunctionPod.Volumes...)
+	}
+	return volumes
+}
+
+func (s *systemState) getDeploymentVolumeMounts(tmpVolName string) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{{
+		Name: tmpDirVolName,
+		/* needed in order to have python functions working:
+		python functions need writable /tmp dir, but we disable writing to root filesystem via
+		security context below. That's why we override this whole /tmp directory with emptyDir volume.
+		We've decided to add this directory to be writable by all functions, as it may come in handy
+		*/
+		MountPath: "/tmp",
+		ReadOnly:  false,
+	}}
+	if s.instance.Spec.Templates != nil && s.instance.Spec.Templates.FunctionPod.HasVolumes() {
+		volumeMounts = append(volumeMounts, s.instance.Spec.Templates.FunctionPod.Spec.VolumeMounts...)
+	}
+	return volumeMounts
 }
 
 func (s *systemState) getReplicas(defaultVal int32) *int32 {
@@ -653,6 +705,10 @@ func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []cor
 	}
 	// add package registry config volume mount depending on the used runtime
 	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+
+	if s.instance.Spec.Templates != nil && s.instance.Spec.Templates.BuildJob.HasVolumes() {
+		volumeMounts = append(volumeMounts, s.instance.Spec.Templates.BuildJob.Spec.VolumeMounts...)
+	}
 	return volumeMounts
 }
 

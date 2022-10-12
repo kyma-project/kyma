@@ -349,3 +349,91 @@ func urlIsSSH(repoURL string) bool {
 
 	return exp.MatchString(repoURL)
 }
+
+func (spec *FunctionSpec) validateTemplates(vc *ValidationConfig) error {
+	if spec.Templates == nil {
+		return nil
+	}
+
+	return runValidations(vc, spec.validateVolumes)
+}
+
+func (spec *FunctionSpec) validateVolumes(_ *ValidationConfig) error {
+	templates := []*PodTemplate{
+		spec.Templates.BuildJob,
+		spec.Templates.FunctionPod,
+	}
+	allErrs := []string{}
+	for _, t := range templates {
+		allErrs = append(allErrs, t.validateTemplateVolumes()...)
+	}
+	return returnAllErrs("invalid volume spec", allErrs)
+}
+
+func (template *PodTemplate) validateTemplateVolumes() []string {
+	allErrs := []string{}
+	if !template.HasVolumes() && !template.HasVolumeMounts() {
+		return nil
+	}
+	if !template.HasVolumes() {
+		return append(allErrs, "volumes can't be empty if the volumeMounts are set.")
+	}
+	if !template.HasVolumeMounts() {
+		return append(allErrs, "volumeMounts can't be empty if the volumes are set.")
+	}
+
+	allErrs = append(allErrs, validateVolumes(template)...)
+	allErrs = append(allErrs, validateVolumeMounts(template)...)
+
+	return allErrs
+}
+
+func validateVolumes(template *PodTemplate) []string {
+	vols := template.Volumes
+	allErrs := []string{}
+	for _, vol := range vols {
+		if vol.VolumeSource.Secret == nil && vol.VolumeSource.ConfigMap == nil {
+			allErrs = append(allErrs, fmt.Sprintf("invalid volume source for volume [%s], only Secret and ConfigMap sources are supported.", vol.Name))
+		}
+		if vol.Name == "" {
+			allErrs = append(allErrs, "volume name can't be empty.")
+		}
+	}
+	return allErrs
+}
+
+func validateVolumeMounts(template *PodTemplate) []string {
+	vols := template.Volumes
+	volMounts := template.Spec.VolumeMounts
+	allErrs := []string{}
+	if volMounts == nil {
+		allErrs = append(allErrs, "volumeMounts must be set if volumes are used.")
+	}
+	if len(vols) != len(volMounts) {
+		allErrs = append(allErrs, "number of volumes and volumeMounts must be the same.")
+	}
+
+	volNames := map[string]bool{}
+	for _, vol := range vols {
+		volNames[vol.Name] = false
+	}
+
+	for _, volMount := range volMounts {
+		_, exits := volNames[volMount.Name]
+		if !exits {
+			allErrs = append(allErrs, fmt.Sprintf("volume spec [%s] for volumeMount [%s] is not set.", volMount.Name, volMount.Name))
+			continue
+		}
+		volNames[volMount.Name] = true
+		if volMount.MountPath == "" {
+			allErrs = append(allErrs, fmt.Sprintf("mountPath for volumeMount [%s] can't be empty.", volMount.Name))
+		}
+	}
+
+	for vol, hasMount := range volNames {
+		if !hasMount {
+			allErrs = append(allErrs, fmt.Sprintf("volumeMount spec [%s] for volume [%s] is not set.", vol, vol))
+		}
+	}
+	return allErrs
+}

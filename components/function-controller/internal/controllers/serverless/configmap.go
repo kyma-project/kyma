@@ -27,7 +27,7 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 
 	srcChanged := s.inlineFnSrcChanged(r.cfg.docker.PullAddress)
 	if !srcChanged {
-		expectedJob := s.buildJob(s.configMaps.Items[0].GetName(), r.cfg)
+		expectedJob := s.buildInlineJob(s.configMaps.Items[0].GetName(), r.cfg)
 		return buildStateFnCheckImageJob(expectedJob)
 	}
 

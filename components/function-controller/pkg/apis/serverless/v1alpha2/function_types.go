@@ -361,3 +361,17 @@ func (l *Condition) Equal(r *Condition) bool {
 	}
 	return true
 }
+
+func (p *PodTemplate) HasVolumes() bool {
+	if p == nil || p.Volumes == nil {
+		return false
+	}
+	return true
+}
+
+func (p *PodTemplate) HasVolumeMounts() bool {
+	if p == nil || p.Spec == nil || p.Spec.VolumeMounts == nil {
+		return false
+	}
+	return true
+}

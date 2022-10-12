@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -279,4 +282,21 @@ func createFakeStateReconcilerWithTestFunction(ctx context.Context, testFunction
 		},
 		gitClient: functionReconciler.gitFactory.GetGitClient(log),
 	}
+}
+
+func returnFunc() func() {
+	return func() {
+
+	}
+}
+
+func TestName(t *testing.T) {
+	expectedName := "TestName"
+	fn := returnFunc()
+
+	fnName := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	if !strings.Contains(fnName, expectedName) {
+		t.Fail()
+	}
+	fmt.Printf("%s, should contain: %s", fnName, expectedName)
 }

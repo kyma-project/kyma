@@ -753,3 +753,212 @@ func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
 		})
 	}
 }
+
+func TestFunctionSpec_validateVolumes(t *testing.T) {
+	type args struct {
+		in0 *ValidationConfig
+	}
+	tests := []struct {
+		name    string
+		spec    *FunctionSpec
+		wantErr bool
+	}{
+		{
+			name: "No volumes",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{},
+				},
+			},
+		},
+		{
+			name: "Valid Secret Volume source",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testVol",
+								VolumeSource: corev1.VolumeSource{
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: "testSecret",
+									},
+								},
+							},
+						},
+						Spec: &PodSpecTemplate{
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "testVol",
+									MountPath: "/tmp/test",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: " Valid ConfigMap Volume source for build",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					BuildJob: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testVol",
+								VolumeSource: corev1.VolumeSource{
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										LocalObjectReference: corev1.LocalObjectReference{Name: "testConfigMap"},
+									},
+								},
+							},
+						},
+						Spec: &PodSpecTemplate{
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name: "testVol2",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ConfigMap Volume source with missing volumeMount",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testVol",
+								VolumeSource: corev1.VolumeSource{
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										LocalObjectReference: corev1.LocalObjectReference{Name: "testConfigMap"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Secret Volume source with missing VolumeMount mountPath",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testVol",
+								VolumeSource: corev1.VolumeSource{
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: "testSecret",
+									},
+								},
+							},
+						},
+						Spec: &PodSpecTemplate{
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name: "testVol",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Secret Volume source with incorrect extra volume",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testVol",
+								VolumeSource: corev1.VolumeSource{
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: "testSecret",
+									},
+								},
+							},
+							{
+								Name: "testVol2",
+								VolumeSource: corev1.VolumeSource{
+									Secret: &corev1.SecretVolumeSource{
+										SecretName: "testSecret2",
+									},
+								},
+							},
+						},
+						Spec: &PodSpecTemplate{
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name: "testVol",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ConfigMap Volume source with name mismatch",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testVol",
+								VolumeSource: corev1.VolumeSource{
+									ConfigMap: &corev1.ConfigMapVolumeSource{
+										LocalObjectReference: corev1.LocalObjectReference{Name: "testConfigMap"},
+									},
+								},
+							},
+						},
+						Spec: &PodSpecTemplate{
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name: "testVol2",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Unsupported Volume source",
+			spec: &FunctionSpec{
+				Templates: &Templates{
+					FunctionPod: &PodTemplate{
+						Volumes: []corev1.Volume{
+							{
+								Name: "testEmptyDirVol",
+								VolumeSource: corev1.VolumeSource{
+									EmptyDir: &corev1.EmptyDirVolumeSource{},
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if err := tt.spec.validateVolumes(nil); (err != nil) != tt.wantErr {
+				t.Errorf("FunctionSpec.validateVolumes() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
