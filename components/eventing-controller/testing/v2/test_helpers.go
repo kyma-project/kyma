@@ -2,10 +2,11 @@ package v2
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"

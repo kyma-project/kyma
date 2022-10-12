@@ -1,7 +1,6 @@
 package jetstreamv2
 
 import (
-	"errors"
 	"sync"
 	"testing"
 
@@ -20,97 +19,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNils_SyncNATSConsumers_ForEmptyTypes(t *testing.T) {
-	// - [ ]  What is the `system under test`
-	// JetStream
-	// - [ ]  what is the `unit of work`
-	// SyncNATSConsumers
-	// - [ ]  What **kind of test** (`value vs. state vs interaction testing`) will we write ?
-	// value test
-
+func Test_SyncNATSConsumers_ForEmptyTypes(t *testing.T) {
 	// given
 	callback := func(m *nats.Msg) {}
 	subWithOneType := subtesting.NewSubscriptionWithEmptyTypes()
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
 
 	// when
 	js := JetStream{}
-	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
+	err := js.syncNATSConsumers(subWithOneType, callback)
 
 	// then
 	assert.NoError(t, err)
-}
-
-func TestNils_SyncNATSConsumers_ForConsumerInfo_ReturnsError(t *testing.T) {
-	// - [ ]  What is the `system under test`
-	// JetStream
-	// - [ ]  what is the `unit of work`
-	// SyncNATSConsumers
-	// - [ ]  What **kind of test** (`value vs. state vs interaction testing`) will we write ?
-	// value test
-
-	// given
-	callback := func(m *nats.Msg) {}
-	subWithOneType := subtesting.NewSubscriptionWithOneType()
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
-
-	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
-
-	myError := errors.New("error")
-	js := JetStream{
-		jsCtx: jetStreamContextStub{
-			consumerInfoError: myError,
-			consumerInfo:      nil,
-		},
-		cleaner: jsCleaner,
-	}
-
-	// when
-	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
-
-	// then
-	assert.ErrorIs(t, err, ErrConsumerNotFound)
-}
-
-func TestNils_SyncNATSConsumers_AddConsumer_ReturnsError(t *testing.T) {
-	// - [ ]  What is the `system under test`
-	// JetStream
-	// - [ ]  what is the `unit of work`
-	// SyncNATSConsumers
-	// - [ ]  What **kind of test** (`value vs. state vs interaction testing`) will we write ?
-	// value test
-
-	// given
-	callback := func(m *nats.Msg) {}
-	subWithOneType := subtesting.NewSubscriptionWithOneType()
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
-
-	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
-	myError := nats.ErrConsumerNotFound
-	js := JetStream{
-		// TODO(nils): get rid of this logger
-		logger: defaultLogger,
-		jsCtx: jetStreamContextStub{
-			// ConsumerInfo() needs to say that the consumer is not found in order
-			// to trigger AddConsumer()
-			consumerInfoError: nats.ErrConsumerNotFound,
-			consumerInfo:      &nats.ConsumerInfo{},
-
-			addConsumerError: myError,
-			addConsumer:      nil,
-		},
-		cleaner: jsCleaner,
-	}
-
-	// when
-	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
-
-	// then
-	assert.ErrorIs(t, err, ErrConsumerAdd)
 }
 
 // Test_SyncNATSConsumers tests creation/binding of the consumer and NATS Subscriptions.
@@ -130,38 +49,7 @@ func Test_SyncNATSConsumers(t *testing.T) {
 		wantErr              error
 	}{
 		{
-			name:              "No types on subscription should result in no action",
-			givenSubscription: subtesting.NewSubscriptionWithEmptyTypes(),
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-			},
-			givenAssertions: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				jsCtx.AssertNotCalled(t, "ConsumerInfo", mock.Anything, mock.Anything)
-			},
-		},
-		{
-			name:              "Failed to get Consumer info should give expected error",
-			givenSubscription: subWithOneType,
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-
-					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(nil, nats.ErrStreamNameRequired)
-				}
-			},
-			givenAssertions: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				// check if the expected methods got called
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-
-					jsCtx.AssertCalled(t, "ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
-				}
-			},
-			wantErr: nats.ErrStreamNameRequired,
-		},
-		{
-			name:              "Creating a consumer/subscribing should be successful",
+			name:              "Adding a consumer/subscribing should be successful",
 			givenSubscription: subWithOneType,
 			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
 				for _, eventType := range sub.Status.Types {
@@ -187,60 +75,7 @@ func Test_SyncNATSConsumers(t *testing.T) {
 			},
 		},
 		{
-			name:              "Adding a consumer should result in an error",
-			givenSubscription: subWithOneType,
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-
-					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(nil, nats.ErrConsumerNotFound)
-					jsCtx.On("AddConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig")).Return(nil, nats.ErrJetStreamNotEnabled)
-				}
-			},
-			givenAssertions: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				// check if the expected methods got called
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-					subscribeArgs := getSubOptsAsVariadicSlice(jsBackend, sub, eventType)
-
-					jsCtx.AssertCalled(t, "ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
-					jsCtx.AssertCalled(t, "AddConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig"))
-					jsCtx.AssertNotCalled(t, "Subscribe", subscribeArgs...)
-				}
-			},
-			wantErr: nats.ErrJetStreamNotEnabled,
-		},
-		{
-			name:              "Creating a new NATS Subscription should result in a Stream not found error",
-			givenSubscription: subWithOneType,
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				for _, eventType := range sub.Status.Types {
-					_, jsSubKey, newConsumer, _ := generateConsumerInfra(jsBackend, sub, eventType)
-					subscribeArgs := getSubOptsAsVariadicSlice(jsBackend, sub, eventType)
-
-					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(nil, nats.ErrConsumerNotFound)
-					jsCtx.On("AddConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig")).Return(newConsumer, nil)
-					jsCtx.On("Subscribe", subscribeArgs...).Return(nil, nats.ErrStreamNotFound)
-				}
-			},
-			givenAssertions: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				// check if the expected methods got called
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-					subscribeArgs := getSubOptsAsVariadicSlice(jsBackend, sub, eventType)
-
-					jsCtx.AssertCalled(t, "ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
-					jsCtx.AssertCalled(t, "AddConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig"))
-					jsCtx.AssertCalled(t, "Subscribe", subscribeArgs...)
-				}
-			},
-			wantErr: &backenderrors.FailedToSubscribeOnNATSError{OriginalError: nats.ErrStreamNotFound},
-		},
-		{
-			name:              "Bind invalid NATS Subscription",
+			name:              "Bind invalid NATS Subscription should be successful",
 			givenSubscription: subWithOneType,
 			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
 				for _, eventType := range sub.Status.Types {
@@ -301,7 +136,7 @@ func Test_SyncNATSConsumers(t *testing.T) {
 			wantErr: &backenderrors.FailedToSubscribeOnNATSError{OriginalError: nats.ErrJetStreamNotEnabled},
 		},
 		{
-			name:              "Update maxInFlight on the consumer side, when the subscription config changes",
+			name:              "Update maxInFlight on the consumer side should be successful, when the subscription config changes",
 			givenSubscription: subWithOneType,
 			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{
 				jsSubKey: subscriberMock,
@@ -332,39 +167,6 @@ func Test_SyncNATSConsumers(t *testing.T) {
 				}
 			},
 		},
-		{
-			name:              "Update consumer should result into an error",
-			givenSubscription: subWithOneType,
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{
-				jsSubKey: subscriberMock,
-			},
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-					subscriberMock.On("IsValid").Return(true)
-
-					defaultConsumerInfo.Config.MaxAckPending = defaultMaxInFlights
-					subWithOneType.Spec.Config[v1alpha2.MaxInFlightMessages] = "20"
-					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(defaultConsumerInfo, nil)
-					jsCtx.On("UpdateConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig")).Return(nil, nats.ErrJetStreamNotEnabled)
-				}
-			},
-			givenAssertions: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
-				// check if the expected methods got called
-				for _, eventType := range sub.Status.Types {
-					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-
-					jsCtx.AssertCalled(t, "ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName())
-
-					defaultConsumerInfo.Config.MaxAckPending = 20
-					jsCtx.AssertCalled(t, "UpdateConsumer", jsBackend.Config.JSStreamName, &defaultConsumerInfo.Config)
-					jsCtx.AssertNotCalled(t, "AddConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig"))
-				}
-			},
-			wantErr: nats.ErrJetStreamNotEnabled,
-		},
 	}
 	for _, testCase := range testCases {
 		tc := testCase
@@ -383,7 +185,7 @@ func Test_SyncNATSConsumers(t *testing.T) {
 			}
 
 			// when
-			err := testEnv.jsBackend.syncNATSConsumers(testCase.givenSubscription, callback, testEnv.logger.WithContext())
+			err := testEnv.jsBackend.syncNATSConsumers(testCase.givenSubscription, callback)
 
 			// then
 			// check if error is expected
@@ -402,6 +204,99 @@ func Test_SyncNATSConsumers(t *testing.T) {
 
 				tc.givenAssertions(testCase.givenSubscription, testEnv.jsBackend, testEnv.jsCtxMock, jsSubKey)
 			}
+		})
+	}
+}
+
+// Test_SyncNATSConsumers_ForErrors test the syncNATSConsumers for right error handling.
+func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
+	// given
+	callback := func(m *nats.Msg) {}
+	subWithOneType := subtesting.NewSubscriptionWithOneType()
+	jsCleaner := &cleaner.JetStreamCleaner{}
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name             string
+		jetStreamContext *jetStreamContextStub
+		wantError        error
+	}{
+		{
+			name: "ConsumerInfo's not found error should be ignored",
+			jetStreamContext: &jetStreamContextStub{
+				consumerInfoError: nats.ErrConsumerNotFound,
+				consumerInfo:      nil,
+
+				addConsumer: &nats.ConsumerInfo{Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}},
+
+				subscribe: &nats.Subscription{},
+			},
+			wantError: nil,
+		},
+		{
+			name: "ConsumerInfo's error should be propagated",
+			jetStreamContext: &jetStreamContextStub{
+				consumerInfoError: ErrConsumerInfo,
+				consumerInfo:      nil,
+			},
+			wantError: ErrConsumerInfo,
+		},
+		{
+			name: "AddConsumer's error should be propagated",
+			jetStreamContext: &jetStreamContextStub{
+				consumerInfo:      nil,
+				consumerInfoError: nats.ErrConsumerNotFound,
+
+				addConsumer:      nil,
+				addConsumerError: ErrConsumerAdd,
+			},
+			wantError: ErrConsumerAdd,
+		},
+		{
+			name: "Subscribe call on createNATSSubscription error should be propagated",
+			jetStreamContext: &jetStreamContextStub{
+				consumerInfo:      &nats.ConsumerInfo{},
+				consumerInfoError: nil,
+
+				subscribe:      nil,
+				subscribeError: nats.ErrJetStreamNotEnabled,
+			},
+			wantError: &backenderrors.FailedToSubscribeOnNATSError{OriginalError: nats.ErrJetStreamNotEnabled},
+		},
+		{
+			name: "UpdateConsumer call error should be propagated",
+			jetStreamContext: &jetStreamContextStub{
+				consumerInfo:      &nats.ConsumerInfo{},
+				consumerInfoError: nil,
+
+				subscribe:      &nats.Subscription{},
+				subscribeError: nil,
+
+				update:      nil,
+				updateError: nats.ErrJetStreamNotEnabled,
+			},
+			wantError: ErrConsumerUpdate,
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			js := JetStream{
+				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
+				metricsCollector: metrics.NewCollector(),
+				jsCtx:            *testCase.jetStreamContext,
+				cleaner:          jsCleaner,
+				logger:           defaultLogger,
+			}
+
+			// when
+			err := js.syncNATSConsumers(subWithOneType, callback)
+
+			// then
+			assert.ErrorIs(t, err, testCase.wantError)
+
 		})
 	}
 }

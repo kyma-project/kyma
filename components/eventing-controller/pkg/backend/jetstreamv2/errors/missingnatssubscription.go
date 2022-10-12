@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"golang.org/x/xerrors"
 )

@@ -6,6 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/nats-io/nats-server/v2/server"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	nats2 "github.com/cloudevents/sdk-go/protocol/nats/v2"
@@ -18,6 +23,24 @@ import (
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
+
+const (
+	DefaultStreamName    = "kyma"
+	DefaultMaxReconnects = 10
+	DefaultMaxInFlights  = env.DefaultMaxInFlight
+)
+
+// TestEnvironment provides mocked resources for tests.
+type TestEnvironment struct {
+	jsBackend  *JetStream
+	logger     *logger.Logger
+	natsServer *server.Server
+	jsClient   *jetStreamClient
+	jsCtxMock  *mocks.JetStreamContext
+	natsConfig env.NatsConfig
+	cleaner    cleaner.Cleaner
+	natsPort   int
+}
 
 func SendEventToJetStream(jsClient *JetStream, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters

@@ -10,6 +10,12 @@ type jetStreamContextStub struct {
 
 	addConsumerError error
 	addConsumer      *nats.ConsumerInfo
+
+	subscribe      *nats.Subscription
+	subscribeError error
+
+	update      *nats.ConsumerInfo
+	updateError error
 }
 
 func (j jetStreamContextStub) Streams(opts ...nats.JSOpt) <-chan *nats.StreamInfo {
@@ -62,9 +68,8 @@ func (j jetStreamContextStub) PublishAsyncComplete() <-chan struct{} {
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
-	panic("implement me")
+func (j jetStreamContextStub) Subscribe(_ string, _ nats.MsgHandler, _ ...nats.SubOpt) (*nats.Subscription, error) {
+	return j.subscribe, j.subscribeError
 }
 
 func (j jetStreamContextStub) SubscribeSync(subj string, opts ...nats.SubOpt) (*nats.Subscription, error) {
@@ -150,13 +155,12 @@ func (j jetStreamContextStub) SecureDeleteMsg(name string, seq uint64, opts ...n
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) AddConsumer(stream string, cfg *nats.ConsumerConfig, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+func (j jetStreamContextStub) AddConsumer(_ string, _ *nats.ConsumerConfig, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
 	return j.addConsumer, j.addConsumerError
 }
 
-func (j jetStreamContextStub) UpdateConsumer(stream string, cfg *nats.ConsumerConfig, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
-	//TODO implement me
-	panic("implement me")
+func (j jetStreamContextStub) UpdateConsumer(_ string, _ *nats.ConsumerConfig, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+	return j.update, j.updateError
 }
 
 func (j jetStreamContextStub) DeleteConsumer(stream, consumer string, opts ...nats.JSOpt) error {
@@ -164,7 +168,7 @@ func (j jetStreamContextStub) DeleteConsumer(stream, consumer string, opts ...na
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ConsumerInfo(stream, name string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+func (j jetStreamContextStub) ConsumerInfo(_, _ string, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
 	return j.consumerInfo, j.consumerInfoError
 }
 

@@ -55,7 +55,7 @@ func UpdateSubscriptionStatus(ctx context.Context, dClient dynamic.Interface,
 	return err
 }
 
-// LoggerWithSubscription returns a logger with the given subscription (v1alphav2) details.
+// LoggerWithSubscription returns a logger with the given subscription (v1alpha2) details.
 func LoggerWithSubscription(log *zap.SugaredLogger,
 	subscription *eventingv1alpha2.Subscription) *zap.SugaredLogger {
 	return log.With(
@@ -64,4 +64,9 @@ func LoggerWithSubscription(log *zap.SugaredLogger,
 		"namespace", subscription.GetNamespace(),
 		"name", subscription.GetName(),
 	)
+}
+
+// LoggerWithSubscriptionAndEventType returns a logger with the given subscription (v1alpha2) details and the subject.
+func LoggerWithSubscriptionAndEventType(log *zap.SugaredLogger, subscription *eventingv1alpha2.Subscription, eventType eventingv1alpha2.EventType) *zap.SugaredLogger {
+	return LoggerWithSubscription(log, subscription).With("eventType", eventType)
 }

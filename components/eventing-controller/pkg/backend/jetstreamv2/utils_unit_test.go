@@ -168,7 +168,7 @@ func TestGetStreamConfig(t *testing.T) {
 		{
 			name: "Should return valid StreamConfig",
 			givenNatsConfig: env.NatsConfig{
-				JSStreamName:            defaultStreamName,
+				JSStreamName:            DefaultStreamName,
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
 				JSStreamReplicas:        3,
@@ -176,7 +176,7 @@ func TestGetStreamConfig(t *testing.T) {
 				JSStreamMaxBytes:        -1,
 			},
 			wantStreamConfig: &nats.StreamConfig{
-				Name:      defaultStreamName,
+				Name:      DefaultStreamName,
 				Storage:   nats.MemoryStorage,
 				Replicas:  3,
 				Retention: nats.LimitsPolicy,
