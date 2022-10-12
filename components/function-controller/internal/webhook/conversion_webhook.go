@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	v1 "k8s.io/api/core/v1"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -205,6 +206,7 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 
 	buildResourcesNeeded := buildResourcesExists || buildResourcesPresetExists
 	functionResourcesNeeded := functionResourcesExists || functionResourcesPresetExists
+	//TODO: remove ResourceConfiguration in next step
 	if (functionResourcesNeeded || buildResourcesNeeded) && out.Spec.ResourceConfiguration == nil {
 		out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
 	}
@@ -216,10 +218,14 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 	}
 
 	if buildResourcesExists {
+		//TODO: remove ResourceConfiguration in next step
 		out.Spec.ResourceConfiguration.Build.Resources = &in.Spec.BuildResources
+		setV1Alpha2BuildJobResources(in.Spec.BuildResources, out)
 	}
 	if functionResourcesExists {
+		//TODO: remove ResourceConfiguration in next step
 		out.Spec.ResourceConfiguration.Function.Resources = &in.Spec.Resources
+		setV1Alpha2FunctionPodResources(in.Spec.Resources, out)
 	}
 	if buildResourcesPresetExists {
 		out.Spec.ResourceConfiguration.Build.Profile = buildResourcesPresetValue
@@ -229,6 +235,32 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 		out.Spec.ResourceConfiguration.Function.Profile = functionResourcesPresetValue
 		delete(out.ObjectMeta.Labels, serverlessv1alpha2.FunctionResourcesPresetLabel)
 	}
+}
+
+func setV1Alpha2BuildJobResources(resources v1.ResourceRequirements, out *serverlessv1alpha2.Function) {
+	if out.Spec.Templates == nil {
+		out.Spec.Templates = &serverlessv1alpha2.Templates{}
+	}
+	if out.Spec.Templates.BuildJob == nil {
+		out.Spec.Templates.BuildJob = &serverlessv1alpha2.PodTemplate{}
+	}
+	if out.Spec.Templates.BuildJob.Spec == nil {
+		out.Spec.Templates.BuildJob.Spec = &serverlessv1alpha2.PodSpecTemplate{}
+	}
+	out.Spec.Templates.BuildJob.Spec.Resources = &resources
+}
+
+func setV1Alpha2FunctionPodResources(resources v1.ResourceRequirements, out *serverlessv1alpha2.Function) {
+	if out.Spec.Templates == nil {
+		out.Spec.Templates = &serverlessv1alpha2.Templates{}
+	}
+	if out.Spec.Templates.FunctionPod == nil {
+		out.Spec.Templates.FunctionPod = &serverlessv1alpha2.PodTemplate{}
+	}
+	if out.Spec.Templates.FunctionPod.Spec == nil {
+		out.Spec.Templates.FunctionPod.Spec = &serverlessv1alpha2.PodSpecTemplate{}
+	}
+	out.Spec.Templates.FunctionPod.Spec.Resources = &resources
 }
 
 func (w *ConvertingWebhook) convertSourceV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *serverlessv1alpha2.Function) error {
@@ -347,10 +379,15 @@ func convertResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *se
 
 func convertBuildResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
 	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Build != nil {
+		// deprecated, but used for backward compatibility
 		if in.Spec.ResourceConfiguration.Build.Resources != nil {
 			out.Spec.BuildResources = *in.Spec.ResourceConfiguration.Build.Resources
 		}
 		convertBuildResourcesProfileV1Alpha2ToV1Alpha1(in, out)
+	}
+	// Templates//Resources has higher priority than ResourceConfiguration
+	if in.Spec.Templates != nil && in.Spec.Templates.BuildJob != nil && in.Spec.Templates.BuildJob.Spec != nil && in.Spec.Templates.BuildJob.Spec.Resources != nil {
+		out.Spec.BuildResources = *in.Spec.Templates.BuildJob.Spec.Resources
 	}
 }
 
@@ -365,10 +402,15 @@ func convertBuildResourcesProfileV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Funct
 
 func convertFunctionResourcesV1Alpha2ToV1Alpha1(in *serverlessv1alpha2.Function, out *serverlessv1alpha1.Function) {
 	if in.Spec.ResourceConfiguration != nil && in.Spec.ResourceConfiguration.Function != nil {
+		// deprecated, but used for backward compatibility
 		if in.Spec.ResourceConfiguration.Function.Resources != nil {
 			out.Spec.Resources = *in.Spec.ResourceConfiguration.Function.Resources
 		}
 		convertFunctionResourcesProfileV1Alpha2ToV1Alpha1(in, out)
+	}
+	// Templates//Resources has higher priority than ResourceConfiguration
+	if in.Spec.Templates != nil && in.Spec.Templates.FunctionPod != nil && in.Spec.Templates.FunctionPod.Spec != nil && in.Spec.Templates.FunctionPod.Spec.Resources != nil {
+		out.Spec.Resources = *in.Spec.Templates.FunctionPod.Spec.Resources
 	}
 }
 
