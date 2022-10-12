@@ -80,9 +80,10 @@ describe('Eventing tests', function() {
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
-    debug('🐈‍⬛');
+    debug('🐈‍');
     await sleep(20_000);
     debug('🐕');
+    await waitForPodWithLabelAndCondition('control-plane', 'telemetry-operator', kymaNs, 'Ready', 'True', 60_000);
   });
 
   before('Get stream config for JetStream', async function() {
