@@ -4,7 +4,7 @@ title: Create a Grafana dashboard
 
 Kyma comes with a set of dashboards for monitoring Kubernetes clusters. These dashboards display metrics that the Prometheus server collects.
 
-You can create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/next/visualizations/gauge-panel/#gauge) type. On the dashboard, you see how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
+You can create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/next/panels-visualizations/visualizations/gauge/) type. On the dashboard, you see how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
 
 In addition to creating a dashboard during runtime, you can also add it to the Kubernetes resources in your repository. This way, the dashboard configuration is portable and you can deploy it together with the application in any new cluster.
 
