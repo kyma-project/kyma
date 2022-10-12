@@ -41,8 +41,6 @@ require (
 	sigs.k8s.io/controller-runtime v0.11.2
 )
 
-require github.com/fsnotify/fsnotify v1.5.1
-
 require (
 	cloud.google.com/go v0.98.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
