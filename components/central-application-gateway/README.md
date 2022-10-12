@@ -110,6 +110,12 @@ As a result, Central Application Gateway:
 A combination of `{API_BUNDLE_NAME}` and `{API_DEFINITION_NAME}` which are extracted from an Application CR must be unique for a given application.
 Invocation of endpoints with duplicate names results in a `400 Bad Request` failure. In such a case, you must change one of the names to avoid ambiguity.
 
+### Status codes for errors returned by Application Gateway
+
+- when application specified in path doesn't exist Application Gateway returns `404 Not Found`
+- when application, service or entry for Compass use case is not specified in the path, Application Gateway returns `400 Bad Request `
+- when call to target API timeouts Application Gateway returns `504 Gateway Timeout`
+
 ## Development
 
 This section explains the development process.
