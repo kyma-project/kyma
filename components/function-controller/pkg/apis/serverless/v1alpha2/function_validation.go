@@ -3,7 +3,6 @@ package v1alpha2
 import (
 	"fmt"
 	"net/url"
-	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -334,10 +333,7 @@ func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 func validateKymaLabels(labels map[string]string) error {
 	allErrs := []string{}
 	for key, _ := range labels {
-		isUsed, err := regexp.MatchString(".*serverless\\.kyma-project\\.io.*", key)
-		if err != nil {
-			return err
-		}
+		isUsed := strings.HasPrefix(key, "serverless.kyma-project.io")
 
 		if isUsed == true {
 			allErrs = append(allErrs, fmt.Sprintf("spec.templates.function|build.metadata is set to (%d)", key))
