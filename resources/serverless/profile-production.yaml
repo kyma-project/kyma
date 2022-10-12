@@ -22,7 +22,7 @@ containers:
   manager:
     configuration:
       data:
-        logLevel: "warn"
+        logLevel: "info"
         logFormat: "json"
     envs:
       functionBuildMaxSimultaneousJobs:
