@@ -23,6 +23,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"k8s.io/client-go/kubernetes/scheme"
@@ -46,7 +48,29 @@ var ctx context.Context
 var cancel context.CancelFunc
 
 var testConfig = Config{
-	CreateServiceMonitor: false,
+	CreateServiceMonitor:    false,
+	CollectorNamespace:      "kyma-system",
+	CollectorDeploymentName: "telemetry-tracing-collector",
+	CollectorConfigMapName:  "telemetry-tracing-collector-config",
+	CollectorImage:          "otel/opentelemetry-collector-contrib:0.60.0",
+	ConfigMapKey:            "relay.conf",
+	Replicas:                1,
+	PodSelectorLabels: map[string]string{
+		"app.kubernetes.io/name": "telemetry-tracing-collector",
+	},
+	PodAnnotations: map[string]string{
+		"sidecar.istio.io/inject": "false",
+	},
+	CollectorResources: corev1.ResourceRequirements{
+		Requests: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    resource.MustParse("10m"),
+			corev1.ResourceMemory: resource.MustParse("64Mi"),
+		},
+		Limits: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    resource.MustParse("256m"),
+			corev1.ResourceMemory: resource.MustParse("512Mi"),
+		},
+	},
 }
 
 func TestAPIs(t *testing.T) {
