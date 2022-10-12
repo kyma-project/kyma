@@ -3,6 +3,7 @@ package v1alpha2
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
