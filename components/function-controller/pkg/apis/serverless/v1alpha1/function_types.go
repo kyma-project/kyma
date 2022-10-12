@@ -176,7 +176,7 @@ type FunctionList struct {
 	Items           []Function `json:"items"`
 }
 
-//nolint
+// nolint
 func init() {
 	SchemeBuilder.Register(&Function{}, &FunctionList{})
 }

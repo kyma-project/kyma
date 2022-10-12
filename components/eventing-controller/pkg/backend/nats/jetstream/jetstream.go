@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
@@ -149,7 +151,7 @@ func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) 
 }
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
-	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+	log := backendutils.LoggerWithSubscription(js.namedLogger(), subscription)
 	subKeyPrefix := backendnats.CreateKeyPrefix(subscription)
 	if err := js.checkJetStreamConnection(); err != nil {
 		return err
@@ -175,6 +177,10 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		return err
 	}
 
+	if err := js.checkSubscriptionConfig(subscription, log); err != nil {
+		return err
+	}
+
 	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
 		return err
 	}
@@ -182,8 +188,49 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	return nil
 }
 
+// checkSubscriptionConfig checks that the latest Subscription Config changes are propagated to the consumer.
+// In our case config contains only the "maxInFlightMessages" property, which is the maxAckPending on the consumer side.
+func (js *JetStream) checkSubscriptionConfig(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	for _, subject := range subscription.Status.CleanEventTypes {
+		jsSubject := js.GetJetStreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		log := log.With("subject", subject)
+
+		if _, ok := js.subscriptions[jsSubKey]; !ok {
+			continue
+		}
+
+		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+		if err != nil && err != nats.ErrConsumerNotFound {
+			log.Errorw("Failed to get the consumer info", "error", err)
+			return err
+		}
+
+		subscriptionMaxInFlight := subscription.Status.Config.MaxInFlightMessages
+		if subscription.Spec.Config != nil {
+			subscriptionMaxInFlight = subscription.Spec.Config.MaxInFlightMessages
+		}
+
+		// skip the up-to-date consumers
+		if consumerInfo.Config.MaxAckPending == subscriptionMaxInFlight {
+			continue
+		}
+
+		// set the new maxInFlight value
+		consumerConfig := consumerInfo.Config
+		consumerConfig.MaxAckPending = subscriptionMaxInFlight
+
+		// update the consumer
+		if _, err := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); err != nil {
+			log.Errorw("Failed to update the consumer", "error", err)
+			return err
+		}
+	}
+	return nil
+}
+
 func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+	log := backendutils.LoggerWithSubscription(js.namedLogger(), subscription)
 
 	// loop over the global list of subscriptions
 	// and delete any related JetStream subscription
@@ -495,7 +542,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 			js.namedLogger().Errorw("Failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-		ce, err := backendnats.ConvertMsgToCE(msg)
+		ce, err := backendutils.ConvertMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("Failed to convert JetStream message to CloudEvent", "error", err)
 			return

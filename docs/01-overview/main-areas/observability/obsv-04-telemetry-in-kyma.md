@@ -6,7 +6,7 @@ title: Telemetry
 
 Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The Telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
 
-To support the logging domain, the Telemetry component provides a log collector, Fluent Bit. You can configure the log collector with external systems using runtime configuration with a dedicated Kubernetes API (CRD) named `LogPipeline`. Using the LogPipeline's HTTP output, you can natively integrate with vendors such as [VMWare](https://medium.com/@shrishs/log-forwarding-from-fluent-bit-to-vrealizeloginsightcloud-9eeb14b40276), or with any vendor using a [Fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa). Furthermore, you can run the collector in an [unsupported mode](#unsupported-mode), leveraging the full output options of Fluent Bit. Additionally, you can always bring your own log collector if you need advanced configuration options.
+To support the logging domain, the Telemetry component provides a log collector, [Fluent Bit](https://fluentbit.io/). You can configure the log collector with external systems using runtime configuration with a dedicated Kubernetes API (CRD) named `LogPipeline`. Using the LogPipeline's HTTP output, you can natively integrate with vendors which support this output, or with any vendor using a [Fluentd integration](https://medium.com/hepsiburadatech/fluent-logging-architecture-fluent-bit-fluentd-elasticsearch-ca4a898e28aa). Furthermore, you can run the collector in an [unsupported mode](#unsupported-mode), leveraging the full output options of Fluent Bit. Additionally, you can always bring your own log collector if you need advanced configuration options.
 
 ## Prerequisites
 
@@ -95,7 +95,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
           Tls                on
           tls.verify         on
     ```
-> **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
+   > **NOTE:** Usage of a `custom` output will put the LogPipeline in [unsupported mode](#unsupported-mode).
 
 2. To create the instance, apply the resource file in your cluster.
     ```bash
@@ -268,17 +268,7 @@ spec:
 
 ### Step 5: Rotate the Secret
 
-A Secret being referenced with the **secretKeyRef** construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable.
-Once an hour, the LogPipeline watches the referenced Secrets and detects changes to them. To enforce the detection, just annotate the LogPipeline; for example, with the following code:
-
-```yaml
-kind: LogPipeline
-apiVersion: telemetry.kyma-project.io/v1alpha1
-metadata:
-  name: http-backend
-  annotations:
-    kyma-project.com/timeStamp: <current-time>
-```
+A Secret being referenced with the **secretKeyRef** construct, as used in the previous step, can be rotated manually or automatically. For automatic rotation, update the actual values of the Secret and keep the keys of the Secret stable. The LogPipeline watches the referenced Secrets and detects changes to them, so Secret rotation takes immediate effect.
 
 ### Step 6: Add a parser
 

@@ -52,7 +52,7 @@ type FunctionReconciler struct {
 
 func NewFunctionReconciler(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitFactory GitClientFactory, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		Log:               log.Named("controllers").Named("function"),
+		Log:               log,
 		client:            client,
 		recorder:          recorder,
 		config:            config,
@@ -98,9 +98,15 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 
 func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
+		r.Log.Debug("health check request received")
 		r.healthCh <- true
 		return ctrl.Result{}, nil
 	}
+
+	r.Log.With(
+		"name", request.Name,
+		"namespace", request.Namespace).
+		Debug("starting pre-reconciliation steps")
 
 	var instance serverlessv1alpha2.Function
 
@@ -123,6 +129,8 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
+	contextLogger.Debug("starting state machine")
 
 	stateReconciler := reconciler{
 		fn:  r.initStateFunction,

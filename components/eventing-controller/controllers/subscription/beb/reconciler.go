@@ -106,7 +106,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	sub := currentSubscription.DeepCopy()
 
 	// bind fields to logger
-	log := utils.LoggerWithSubscription(r.namedLogger(), sub)
+	log := backendutils.LoggerWithSubscription(r.namedLogger(), sub)
 	log.Debugw("Received new reconcile request")
 
 	// instantiate a return object
@@ -292,7 +292,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 // syncConditionSubscribed syncs the condition ConditionSubscribed.
 func (r *Reconciler) syncConditionSubscribed(subscription *eventingv1alpha1.Subscription, err error) {
 	// Include the BEB subscription ID in the Condition message
-	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
+	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 	if err != nil {
 		message = err.Error()
@@ -577,7 +577,7 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 
 func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) *apigatewayv1beta1.APIRule {
 
-	randomSuffix := backendutils.GetRandString(suffixLength)
+	randomSuffix := utils.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 	svc := object.GetService(svcName, port)
 	apiRule := object.NewAPIRule(svcNs, apiRuleNamePrefix,

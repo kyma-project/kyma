@@ -5,6 +5,7 @@ import (
 )
 
 // +kubebuilder:validation:Enum=BEB;NATS
+
 type BackendType string
 
 const (
@@ -46,6 +47,7 @@ type EventingBackendStatus struct {
 // +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
 // +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=string,JSONPath=`.status.conditions[?(@.type=="Subscription Controller Ready")].status`
 // +kubebuilder:printcolumn:name="PublisherProxyReady",type=string,JSONPath=`.status.conditions[?(@.type=="Publisher Proxy Ready")].status`
+
 // EventingBackend is the Schema for the eventingbackends API.
 type EventingBackend struct {
 	metav1.TypeMeta   `json:",inline"`

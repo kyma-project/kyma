@@ -1,6 +1,8 @@
 package proxy
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -53,7 +55,10 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
-	return &httputil.ReverseProxy{Director: director, Transport: transport}, nil
+	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
+		codeRewriter(rw, err)
+	}
+	return &httputil.ReverseProxy{Director: director, Transport: transport, ErrorHandler: errorHandler}, nil
 }
 
 func joinPaths(a, b string) string {
@@ -82,4 +87,72 @@ func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string
 	}
 
 	httptools.SetHeaders(reqHeaders, customHeaders)
+}
+
+func responseModifier(
+	gatewayURL *url.URL,
+	targetURL string,
+	urlRewriter func(gatewayURL, target, loc *url.URL) *url.URL,
+) func(*http.Response) error {
+	return func(resp *http.Response) error {
+		if (resp.StatusCode < 300 || resp.StatusCode >= 400) &&
+			resp.StatusCode != http.StatusCreated {
+			return nil
+		}
+
+		const locationHeader = "Location"
+
+		locRaw := resp.Header.Get(locationHeader)
+
+		if locRaw == "" {
+			return nil
+		}
+
+		loc, err := resp.Request.URL.Parse(locRaw)
+		if err != nil {
+			return nil
+		}
+
+		target, err := url.Parse(targetURL)
+		if err != nil {
+			return nil
+		}
+
+		newURL := urlRewriter(gatewayURL, target, loc)
+
+		if newURL != nil {
+			resp.Header.Set(locationHeader, newURL.String())
+		}
+
+		return nil
+	}
+}
+
+// urlRewriter modifies redirect URLs for reverse proxy.
+// If the URL should be left unmodified - it returns nil.
+func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
+	if loc.Scheme != "http" && loc.Scheme != "https" {
+		return nil
+	}
+
+	if loc.Hostname() != target.Hostname() || !strings.HasPrefix(loc.Path, target.Path) {
+		return nil
+	}
+
+	stripped := strings.TrimPrefix(loc.Path, target.Path)
+	gatewayURL = gatewayURL.JoinPath(stripped)
+	gatewayURL.RawQuery = loc.RawQuery
+	gatewayURL.Fragment = loc.Fragment
+
+	return gatewayURL
+}
+
+func codeRewriter(rw http.ResponseWriter, err error) {
+
+	if errors.Is(err, context.DeadlineExceeded) {
+		log.Infof("%s: HTTP status code was rewritten to 504", err)
+		rw.WriteHeader(http.StatusGatewayTimeout)
+		return
+	}
+	rw.WriteHeader(http.StatusBadGateway)
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -121,7 +120,7 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed.
 func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1beta1.APIRule) (bool, error) {
 	// Format logger
-	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
+	log := backendutils.LoggerWithSubscription(b.namedLogger(), subscription)
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
@@ -168,7 +167,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			}
 		}
 		// get the internal view for the EMS subscription
-		sEms := backendutils.GetInternalView4Ems(bebSubscription)
+		sEms := backendutils.GetCleanedEventMeshSubscription(bebSubscription)
 		newEmsHash, err := backendutils.GetHash(sEms)
 		if err != nil {
 			log.Errorw("Failed to get BEB subscription hash", ErrorLogKey, err)
@@ -197,7 +196,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 // DeleteSubscription deletes the corresponding EMS subscription.
 func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
+	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace))
 }
 
 func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
@@ -228,7 +227,7 @@ func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	// get the new hash
-	sEMS := backendutils.GetInternalView4Ems(bebSubscription)
+	sEMS := backendutils.GetCleanedEventMeshSubscription(bebSubscription)
 	if err != nil {
 		log.Errorw("Failed to get BEB subscription internal view", ErrorLogKey, err)
 	}

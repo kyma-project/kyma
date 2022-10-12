@@ -275,10 +275,15 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					Template: &Template{
-						Labels: map[string]string{
-							"shoul-be-ok":      "test",
-							"should BE not OK": "test",
+					Templates: &Templates{
+						BuildJob: nil,
+						FunctionPod: &PodTemplate{
+							Metadata: &MetadataTemplate{
+								Labels: map[string]string{
+									"should-be-ok":     "test",
+									"should BE not OK": "test",
+								},
+							},
 						},
 					},
 				},
@@ -570,7 +575,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			),
 			expectedError: gomega.HaveOccurred(),
 		},
-		"Should return error because replicas field is use together with scaleConfig": {
+		"Should not return error when replicas field is use together with scaleConfig": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
@@ -612,7 +617,50 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					},
 				},
 			},
-			expectedError: gomega.HaveOccurred(),
+			expectedError: gomega.BeNil(),
+		},
+		"Should validate without error Resources and Profile occurring at once in ResourceConfiguration.Function/Build": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source:       "test-source",
+							Dependencies: " { test }",
+						},
+					},
+					Runtime: NodeJs12,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Profile: "function-profile",
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("100m"),
+									corev1.ResourceMemory: resource.MustParse("128Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+						Build: &ResourceRequirements{
+							Profile: "build-profile",
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {

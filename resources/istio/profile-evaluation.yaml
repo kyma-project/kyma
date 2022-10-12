@@ -34,6 +34,20 @@ helmValues:
       autoscaleEnabled: false
 
 components:
+  cni:
+    enabled: true
+    config:
+      hpaSpec:
+        maxReplicas: 1
+        minReplicas: 1
+      resources:
+        limits:
+          cpu: 250m
+          memory: 384Mi
+        requests:
+          cpu: 10m
+          memory: 128Mi
+
   ingressGateways:
     enabled: true
     config:
