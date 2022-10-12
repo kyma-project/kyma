@@ -132,7 +132,7 @@ func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
 			if token.AccessToken == "" {
 				return fmt.Errorf("got empty OAuth2 token")
 			}
-			tokenOAUTH = token
+			tokenOAUTH = *token
 
 			return nil
 		},
