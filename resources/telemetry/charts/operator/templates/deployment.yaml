@@ -31,20 +31,25 @@ spec:
             - /manager
           args:
             - --leader-elect
-            - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
-            - --parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
-            - --ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
-            - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
-            - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
-            - --fluent-bit-ns={{ .Release.Namespace }}
-            - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
-            - --denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
-            - --denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
             - --sync-period={{.Values.syncPeriod}}
-            - --max-pipelines={{.Values.maxLogPipelines}}
-            - --enable-logging={{ .Values.controllers.logging.enabled }}
-            - --enable-tracing={{ .Values.controllers.tracing.enabled }}
+            - --cert-dir="/var/run/telemetry-webhook"
+            - --telemetry-namespace={{ .Release.Namespace }}
+            - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
+            - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
+            - --fluent-bit-parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
+            - --fluent-bit-ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
+            - --fluent-bit-env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
+            - --fluent-bit-files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
+            - --fluent-bit-filesystem-buffer-limit={{ .Values.filesystemBufferLimit }}
+            - --fluent-bit-denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
+            - --fluent-bit-denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
+            - --fluent-bit-max-pipelines={{.Values.maxLogPipelines}}
+{{- if not .Values.controllers.logging.enabled }}
+            - --enable-logging=false
+{{- end }}
+{{- if not .Values.controllers.tracing.enabled }}
+            - --enable-tracing=false
+{{- end }}
           name: manager
           ports:
           - containerPort: 9443

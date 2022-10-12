@@ -33,14 +33,23 @@ import (
 )
 
 type Config struct {
-	CreateServiceMonitor bool
+	CreateServiceMonitor    bool
+	CollectorNamespace      string
+	CollectorDeploymentName string
+	CollectorConfigMapName  string
+	CollectorImage          string
+	ConfigMapKey            string
+	PodSelectorLabels       map[string]string
+	PodAnnotations          map[string]string
+	Replicas                int32
+	CollectorResources      corev1.ResourceRequirements
 }
 
 // Reconciler reconciles a TracePipeline object
 type Reconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
-	Config
+	config Config
 }
 
 func NewReconciler(
@@ -50,17 +59,17 @@ func NewReconciler(
 ) *Reconciler {
 	var r Reconciler
 	r.Client = client
-	r.Config = config
+	r.config = config
 	r.Scheme = scheme
 	return &r
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -89,7 +98,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{})
 
-	if r.Config.CreateServiceMonitor {
+	if r.config.CreateServiceMonitor {
 		newReconciler.Owns(&monitoringv1.ServiceMonitor{})
 	}
 
@@ -97,7 +106,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
-	configMap := makeConfigMap(tracing.Spec.Output)
+	configMap := makeConfigMap(r.config, tracing.Spec.Output)
 	if err := controllerutil.SetControllerReference(tracing, configMap, r.Scheme); err != nil {
 		return err
 	}
@@ -105,7 +114,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
-	deployment := makeDeployment()
+	deployment := makeDeployment(r.config)
 	if err := controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
 		return err
 	}
@@ -113,7 +122,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeService()
+	service := makeService(r.config)
 	if err := controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
 		return err
 	}
@@ -121,8 +130,8 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector service: %w", err)
 	}
 
-	if r.Config.CreateServiceMonitor {
-		serviceMonitor := makeServiceMonitor()
+	if r.config.CreateServiceMonitor {
+		serviceMonitor := makeServiceMonitor(r.config)
 		if err := controllerutil.SetControllerReference(tracing, serviceMonitor, r.Scheme); err != nil {
 			return err
 		}

@@ -7,25 +7,11 @@ import (
 	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-var (
-	name              = "opentelemetry-collector"
-	configMapName     = "opentelemetry-collector-config"
-	configMapKey      = "relay.conf"
-	systemNamespace   = "kyma-system"
-	podSelectorLabels = map[string]string{
-		"app.kubernetes.io/name": name,
-	}
-	podAnnotations = map[string]string{
-		"sidecar.istio.io/inject": "false",
-	}
-)
-
-func makeConfigMap(output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
+func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
 	exporterConfig := makeExporterConfig(output)
 	outputType := getOutputType(output)
 	conf := confmap.NewFromStringMap(map[string]any{
@@ -59,11 +45,11 @@ func makeConfigMap(output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      configMapName,
-			Namespace: systemNamespace,
+			Name:      config.CollectorConfigMapName,
+			Namespace: config.CollectorNamespace,
 		},
 		Data: map[string]string{
-			configMapKey: confYAML,
+			config.ConfigMapKey: confYAML,
 		},
 	}
 }
@@ -84,31 +70,28 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 	}
 }
 
-func makeDeployment() *appsv1.Deployment {
-	var replicaCount int32 = 1
-	image := "otel/opentelemetry-collector-contrib:0.60.0"
-
+func makeDeployment(config Config) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: systemNamespace,
+			Name:      config.CollectorDeploymentName,
+			Namespace: config.CollectorNamespace,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicaCount,
+			Replicas: &config.Replicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: podSelectorLabels,
+				MatchLabels: config.PodSelectorLabels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      podSelectorLabels,
-					Annotations: podAnnotations,
+					Labels:      config.PodSelectorLabels,
+					Annotations: config.PodAnnotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    name,
-							Image:   image,
-							Command: []string{"/otelcol-contrib", "--config=/conf/relay.yaml"},
+							Name:    config.CollectorDeploymentName,
+							Image:   config.CollectorImage,
+							Command: []string{"/otelcol-contrib", "--config=/conf/" + config.ConfigMapKey},
 							Env: []corev1.EnvVar{
 								{
 									Name: "MY_POD_IP",
@@ -120,12 +103,7 @@ func makeDeployment() *appsv1.Deployment {
 									},
 								},
 							},
-							Resources: corev1.ResourceRequirements{
-								Limits: map[corev1.ResourceName]resource.Quantity{
-									corev1.ResourceCPU:    resource.MustParse("256m"),
-									corev1.ResourceMemory: resource.MustParse("512Mi"),
-								},
-							},
+							Resources:    config.CollectorResources,
 							VolumeMounts: []corev1.VolumeMount{{Name: "config", MountPath: "/conf"}},
 						},
 					},
@@ -135,9 +113,9 @@ func makeDeployment() *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: configMapName,
+										Name: config.CollectorConfigMapName,
 									},
-									Items: []corev1.KeyToPath{{Key: configMapKey, Path: "relay.yaml"}},
+									Items: []corev1.KeyToPath{{Key: config.ConfigMapKey, Path: config.ConfigMapKey}},
 								},
 							},
 						},
@@ -148,12 +126,12 @@ func makeDeployment() *appsv1.Deployment {
 	}
 }
 
-func makeService() *corev1.Service {
+func makeService(config Config) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: systemNamespace,
-			Labels:    podSelectorLabels,
+			Name:      config.CollectorDeploymentName,
+			Namespace: config.CollectorNamespace,
+			Labels:    config.PodSelectorLabels,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -182,17 +160,17 @@ func makeService() *corev1.Service {
 					TargetPort: intstr.FromInt(8888),
 				},
 			},
-			Selector: podSelectorLabels,
+			Selector: config.PodSelectorLabels,
 			Type:     corev1.ServiceTypeClusterIP,
 		},
 	}
 }
 
-func makeServiceMonitor() *monitoringv1.ServiceMonitor {
+func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 	return &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: systemNamespace,
+			Name:      config.CollectorDeploymentName,
+			Namespace: config.CollectorNamespace,
 		},
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Endpoints: []monitoringv1.Endpoint{
@@ -202,11 +180,11 @@ func makeServiceMonitor() *monitoringv1.ServiceMonitor {
 			},
 			NamespaceSelector: monitoringv1.NamespaceSelector{
 				MatchNames: []string{
-					systemNamespace,
+					config.CollectorNamespace,
 				},
 			},
 			Selector: metav1.LabelSelector{
-				MatchLabels: podSelectorLabels,
+				MatchLabels: config.PodSelectorLabels,
 			},
 		},
 	}
