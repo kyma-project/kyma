@@ -1,9 +1,12 @@
 package jetstreamv2
 
 import (
-	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
+	"errors"
 	"sync"
 	"testing"
+
+	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
+	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -16,6 +19,99 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNils_SyncNATSConsumers_ForEmptyTypes(t *testing.T) {
+	// - [ ]  What is the `system under test`
+	// JetStream
+	// - [ ]  what is the `unit of work`
+	// SyncNATSConsumers
+	// - [ ]  What **kind of test** (`value vs. state vs interaction testing`) will we write ?
+	// value test
+
+	// given
+	callback := func(m *nats.Msg) {}
+	subWithOneType := subtesting.NewSubscriptionWithEmptyTypes()
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	// when
+	js := JetStream{}
+	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
+
+	// then
+	assert.NoError(t, err)
+}
+
+func TestNils_SyncNATSConsumers_ForConsumerInfo_ReturnsError(t *testing.T) {
+	// - [ ]  What is the `system under test`
+	// JetStream
+	// - [ ]  what is the `unit of work`
+	// SyncNATSConsumers
+	// - [ ]  What **kind of test** (`value vs. state vs interaction testing`) will we write ?
+	// value test
+
+	// given
+	callback := func(m *nats.Msg) {}
+	subWithOneType := subtesting.NewSubscriptionWithOneType()
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
+
+	myError := errors.New("error")
+	js := JetStream{
+		jsCtx: jetStreamContextStub{
+			consumerInfoError: myError,
+			consumerInfo:      nil,
+		},
+		cleaner: jsCleaner,
+	}
+
+	// when
+	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
+
+	// then
+	assert.ErrorIs(t, err, ErrConsumerNotFound)
+}
+
+func TestNils_SyncNATSConsumers_AddConsumer_ReturnsError(t *testing.T) {
+	// - [ ]  What is the `system under test`
+	// JetStream
+	// - [ ]  what is the `unit of work`
+	// SyncNATSConsumers
+	// - [ ]  What **kind of test** (`value vs. state vs interaction testing`) will we write ?
+	// value test
+
+	// given
+	callback := func(m *nats.Msg) {}
+	subWithOneType := subtesting.NewSubscriptionWithOneType()
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	require.NoError(t, err)
+
+	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
+	myError := nats.ErrConsumerNotFound
+	js := JetStream{
+		// TODO(nils): get rid of this logger
+		logger: defaultLogger,
+		jsCtx: jetStreamContextStub{
+			// ConsumerInfo() needs to say that the consumer is not found in order
+			// to trigger AddConsumer()
+			consumerInfoError: nats.ErrConsumerNotFound,
+			consumerInfo:      &nats.ConsumerInfo{},
+
+			addConsumerError: myError,
+			addConsumer:      nil,
+		},
+		cleaner: jsCleaner,
+	}
+
+	// when
+	err = js.syncNATSConsumers(subWithOneType, callback, defaultLogger.WithContext())
+
+	// then
+	assert.ErrorIs(t, err, ErrConsumerAdd)
+}
 
 // Test_SyncNATSConsumers tests creation/binding of the consumer and NATS Subscriptions.
 func Test_SyncNATSConsumers(t *testing.T) {
@@ -431,9 +527,4 @@ func generateConsumerInfra(jsBackend *JetStream, sub *v1alpha2.Subscription, eve
 		Queue:   "test",
 	}
 	return jsSubject, jsSubKey, newConsumer, natsSub
-}
-
-func errorMessage(val string) *string {
-	errString := val
-	return &errString
 }

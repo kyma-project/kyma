@@ -3,9 +3,10 @@ package jetstreamv2
 import (
 	"context"
 	"fmt"
-	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
 	"net/http"
 	"time"
+
+	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
 
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
@@ -33,6 +34,11 @@ const (
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerAcKWait      = 30 * time.Second
+)
+
+var (
+	ErrConsumerAdd      = errors.New("failed to add consumer")
+	ErrConsumerNotFound = errors.New("failed to find consumer")
 )
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
@@ -397,19 +403,17 @@ func (js *JetStream) syncNATSConsumers(subscription *eventingv1alpha2.Subscripti
 					js.getConsumerConfig(subscription, jsSubKey, jsSubject),
 				)
 				if err != nil {
-					log.Errorw("Failed to create a consumer", "error", err)
-					return err
+					return fmt.Errorf("%w: %v", ErrConsumerAdd, err)
 				}
 				log.Debug("Created consumer on JetStream")
 			} else {
-				log.Errorw("Failed to get consumerInfo", "error", err)
-				return err
+				return fmt.Errorf("%w: %v", ErrConsumerNotFound, err)
 			}
 		}
 
 		natsSubscription, subExists := js.subscriptions[jsSubKey]
 
-		// try to create a NATS Subscription it doesn't exist
+		// try to create a NATS Subscription if it doesn't exist
 		if !subExists && !consumerInfo.PushBound {
 			if err := js.createNATSSubscription(subscription, subject, jsSubject, jsSubKey, asyncCallback, log); err != nil {
 				return err
