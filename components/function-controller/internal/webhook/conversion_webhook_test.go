@@ -142,6 +142,89 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
+					//TODO: remove ResourceConfiguration in next step of #15737 after changes in controller
+					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+						Build: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+						Function: &serverlessv1alpha2.ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("100m"),
+									corev1.ResourceMemory: resource.MustParse("128Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+					},
+					Templates: &serverlessv1alpha2.Templates{
+						BuildJob: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Limits: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("300m"),
+										corev1.ResourceMemory: resource.MustParse("300Mi"),
+									},
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("200m"),
+										corev1.ResourceMemory: resource.MustParse("200Mi"),
+									},
+								},
+							},
+						},
+						FunctionPod: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Limits: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("100m"),
+										corev1.ResourceMemory: resource.MustParse("128Mi"),
+									},
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("50m"),
+										corev1.ResourceMemory: resource.MustParse("64Mi"),
+									},
+								},
+							},
+						},
+					},
+					Runtime: serverlessv1alpha2.NodeJs12,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+				},
+				Status: serverlessv1alpha2.FunctionStatus{
+					Conditions: []serverlessv1alpha2.Condition{
+						{
+							Type:               serverlessv1alpha2.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha2 to v1alpha1 inline function - with ResourceConfiguration (deprecated) and Status",
+			src: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
 					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 						Build: &serverlessv1alpha2.ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{
@@ -187,35 +270,80 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 			},
-			wantVersion: serverlessv1alpha2.GroupVersion.String(),
+			wantDst: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					Runtime: serverlessv1alpha1.Nodejs12,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("200m"),
+							corev1.ResourceMemory: resource.MustParse("200Mi"),
+						},
+					},
+
+					Source: "test-source",
+					Deps:   "test-deps",
+				},
+				Status: serverlessv1alpha1.FunctionStatus{
+					Conditions: []serverlessv1alpha1.Condition{
+						{
+							Type:               serverlessv1alpha1.ConditionConfigurationReady,
+							Status:             corev1.ConditionTrue,
+							Message:            "Configured successfully",
+							LastTransitionTime: testTransitionTime,
+						},
+					},
+					Source:  "test-source",
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+				},
+			},
+			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 inline function - with ResourceConfiguration and Status",
+			name: "v1alpha2 to v1alpha1 inline function - with Templates..Resources and Status",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
-						Build: &serverlessv1alpha2.ResourceRequirements{
-							Resources: &corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("300m"),
-									corev1.ResourceMemory: resource.MustParse("300Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("200m"),
-									corev1.ResourceMemory: resource.MustParse("200Mi"),
+					Templates: &serverlessv1alpha2.Templates{
+						BuildJob: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Limits: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("300m"),
+										corev1.ResourceMemory: resource.MustParse("300Mi"),
+									},
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("200m"),
+										corev1.ResourceMemory: resource.MustParse("200Mi"),
+									},
 								},
 							},
 						},
-						Function: &serverlessv1alpha2.ResourceRequirements{
-							Resources: &corev1.ResourceRequirements{
-								Limits: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("100m"),
-									corev1.ResourceMemory: resource.MustParse("128Mi"),
-								},
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("50m"),
-									corev1.ResourceMemory: resource.MustParse("64Mi"),
+						FunctionPod: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Limits: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("100m"),
+										corev1.ResourceMemory: resource.MustParse("128Mi"),
+									},
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("50m"),
+										corev1.ResourceMemory: resource.MustParse("64Mi"),
+									},
 								},
 							},
 						},
@@ -578,6 +706,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 						Function: &serverlessv1alpha2.ResourceRequirements{
 							Profile: "some-preset-value",
+							//TODO: remove ResourceConfiguration//Resources in next step of #15737 after changes in controller
 							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("123m"),
@@ -586,6 +715,22 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 								Requests: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("121m"),
 									corev1.ResourceMemory: resource.MustParse("122Mi"),
+								},
+							},
+						},
+					},
+					Templates: &serverlessv1alpha2.Templates{
+						FunctionPod: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Limits: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("123m"),
+										corev1.ResourceMemory: resource.MustParse("124Mi"),
+									},
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("121m"),
+										corev1.ResourceMemory: resource.MustParse("122Mi"),
+									},
 								},
 							},
 						},
@@ -612,7 +757,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 - with function-resources-preset label and Spec.ResourceConfiguration.Function.Profile (should has highest priority)",
+			name: "v1alpha2 to v1alpha1 - with function-resources-preset label and Spec.ResourceConfiguration.Function.Profile (should has the highest priority)",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test",
@@ -675,7 +820,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 - with function-resources-preset label and Spec.ResourceConfiguration.Function.Resources",
+			name: "v1alpha2 to v1alpha1 - with function-resources-preset label and Templates.FunctionPod..Resources",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test",
@@ -685,12 +830,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
-						Function: &serverlessv1alpha2.ResourceRequirements{
-							Resources: &corev1.ResourceRequirements{
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("731m"),
-									corev1.ResourceMemory: resource.MustParse("732Mi"),
+					Templates: &serverlessv1alpha2.Templates{
+						FunctionPod: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("731m"),
+										corev1.ResourceMemory: resource.MustParse("732Mi"),
+									},
 								},
 							},
 						},
@@ -964,6 +1111,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 						Build: &serverlessv1alpha2.ResourceRequirements{
 							Profile: "some-preset-value",
+							// TODO: remove Resources in next step of #15737 after changes in controller
 							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("123m"),
@@ -972,6 +1120,22 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 								Requests: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("121m"),
 									corev1.ResourceMemory: resource.MustParse("122Mi"),
+								},
+							},
+						},
+					},
+					Templates: &serverlessv1alpha2.Templates{
+						BuildJob: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Limits: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("123m"),
+										corev1.ResourceMemory: resource.MustParse("124Mi"),
+									},
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("121m"),
+										corev1.ResourceMemory: resource.MustParse("122Mi"),
+									},
 								},
 							},
 						},
@@ -998,7 +1162,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 - with build-resources-preset label and Spec.ResourceConfiguration.Function.Profile (should has highest priority)",
+			name: "v1alpha2 to v1alpha1 - with build-resources-preset label and Spec.ResourceConfiguration.Build.Profile (should has the highest priority)",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test",
@@ -1061,7 +1225,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
 		},
 		{
-			name: "v1alpha2 to v1alpha1 - with build-resources-preset label and Spec.ResourceConfiguration.Function.Resources",
+			name: "v1alpha2 to v1alpha1 - with build-resources-preset label and Templates.BuildJob..Resources",
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test",
@@ -1071,12 +1235,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
-						Build: &serverlessv1alpha2.ResourceRequirements{
-							Resources: &corev1.ResourceRequirements{
-								Requests: corev1.ResourceList{
-									corev1.ResourceCPU:    resource.MustParse("731m"),
-									corev1.ResourceMemory: resource.MustParse("732Mi"),
+					Templates: &serverlessv1alpha2.Templates{
+						BuildJob: &serverlessv1alpha2.PodTemplate{
+							Spec: &serverlessv1alpha2.PodSpecTemplate{
+								Resources: &corev1.ResourceRequirements{
+									Requests: corev1.ResourceList{
+										corev1.ResourceCPU:    resource.MustParse("731m"),
+										corev1.ResourceMemory: resource.MustParse("732Mi"),
+									},
 								},
 							},
 						},
