@@ -32,7 +32,7 @@ spec:
           args:
             - --leader-elect
             - --sync-period={{.Values.syncPeriod}}
-            - --cert-dir="/var/run/telemetry-webhook"
+            - --cert-dir=/var/run/telemetry-webhook
             - --telemetry-namespace={{ .Release.Namespace }}
             - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
             - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
