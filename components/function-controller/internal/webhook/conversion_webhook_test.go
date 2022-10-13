@@ -142,7 +142,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					//TODO: remove ResourceConfiguration in next step
+					//TODO: remove ResourceConfiguration in next step of #15737 after changes in controller
 					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 						Build: &serverlessv1alpha2.ResourceRequirements{
 							Resources: &corev1.ResourceRequirements{
@@ -706,7 +706,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 						Function: &serverlessv1alpha2.ResourceRequirements{
 							Profile: "some-preset-value",
-							//TODO: remove ResourceConfiguration//Resources in next step
+							//TODO: remove ResourceConfiguration//Resources in next step of #15737 after changes in controller
 							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("123m"),
@@ -1111,7 +1111,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
 						Build: &serverlessv1alpha2.ResourceRequirements{
 							Profile: "some-preset-value",
-							// TODO: remove Resources in next step
+							// TODO: remove Resources in next step of #15737 after changes in controller
 							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("123m"),

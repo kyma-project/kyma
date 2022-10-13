@@ -206,7 +206,7 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 
 	buildResourcesNeeded := buildResourcesExists || buildResourcesPresetExists
 	functionResourcesNeeded := functionResourcesExists || functionResourcesPresetExists
-	//TODO: remove ResourceConfiguration in next step
+	//TODO: remove ResourceConfiguration in next step of #15737 after changes in controller
 	if (functionResourcesNeeded || buildResourcesNeeded) && out.Spec.ResourceConfiguration == nil {
 		out.Spec.ResourceConfiguration = &serverlessv1alpha2.ResourceConfiguration{}
 	}
@@ -218,12 +218,12 @@ func convertResourcesV1Alpha1ToV1Alpha2(in *serverlessv1alpha1.Function, out *se
 	}
 
 	if buildResourcesExists {
-		//TODO: remove ResourceConfiguration in next step
+		//TODO: remove ResourceConfiguration in next step of #15737 after changes in controller
 		out.Spec.ResourceConfiguration.Build.Resources = &in.Spec.BuildResources
 		setV1Alpha2BuildJobResources(in.Spec.BuildResources, out)
 	}
 	if functionResourcesExists {
-		//TODO: remove ResourceConfiguration in next step
+		//TODO: remove ResourceConfiguration in next step of #15737 after changes in controller
 		out.Spec.ResourceConfiguration.Function.Resources = &in.Spec.Resources
 		setV1Alpha2FunctionPodResources(in.Spec.Resources, out)
 	}
