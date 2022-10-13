@@ -47,6 +47,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorConfigMapName,
 			Namespace: config.CollectorNamespace,
+			Labels:    config.PodSelectorLabels,
 		},
 		Data: map[string]string{
 			config.ConfigMapKey: confYAML,
@@ -75,6 +76,7 @@ func makeDeployment(config Config) *appsv1.Deployment {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorDeploymentName,
 			Namespace: config.CollectorNamespace,
+			Labels:    config.PodSelectorLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &config.Replicas,
@@ -171,6 +173,7 @@ func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorDeploymentName,
 			Namespace: config.CollectorNamespace,
+			Labels:    config.PodSelectorLabels,
 		},
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Endpoints: []monitoringv1.Endpoint{
