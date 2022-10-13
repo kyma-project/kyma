@@ -2,10 +2,10 @@ package v1alpha2
 
 import (
 	"encoding/json"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const DefaultingConfigKey = "defaulting-config"
@@ -107,8 +107,7 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 		profile = functionResourceCfg.Profile
 	}
 	defaultingConfig := config.Function.Resources
-	resourcesPreset := mergeResourcesPreset(fn, profile, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
-	calculatedResources := defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	calculatedResources := calculateResources(fn, resources, profile, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
 	setFunctionResources(spec, calculatedResources)
 }
 
@@ -138,8 +137,7 @@ func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Fu
 	}
 
 	defaultingConfig := config.BuildJob.Resources
-	resourcesPreset := mergeResourcesPreset(fn, buildResourceCfg.Profile, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
-	calculatedResources := defaultResources(buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	calculatedResources := calculateResources(fn, buildResourceCfg.Resources, buildResourceCfg.Profile, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 
 	setBuildResources(spec, calculatedResources)
 }
@@ -175,94 +173,40 @@ func shouldSkipBuildResourcesDefault(fn *Function) bool {
 	return true
 }
 
-func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) *corev1.ResourceRequirements {
-	copiedRes := &corev1.ResourceRequirements{}
-	if res != nil {
-		copiedRes = (res).DeepCopy()
-	}
-
-	if copiedRes.Requests == nil {
-		copiedRes.Requests = corev1.ResourceList{}
-	}
-	if copiedRes.Requests.Memory().IsZero() {
-		newResource := resource.MustParse(requestMemory)
-		if !copiedRes.Limits.Memory().IsZero() && copiedRes.Limits.Memory().Cmp(newResource) == -1 {
-			newResource = *copiedRes.Limits.Memory()
-		}
-
-		copiedRes.Requests[corev1.ResourceMemory] = newResource
-	}
-	if copiedRes.Requests.Cpu().IsZero() {
-		newResource := resource.MustParse(requestCPU)
-		if !copiedRes.Limits.Cpu().IsZero() && copiedRes.Limits.Cpu().Cmp(newResource) == -1 {
-			newResource = *copiedRes.Limits.Cpu()
-		}
-
-		copiedRes.Requests[corev1.ResourceCPU] = newResource
-	}
-
-	if copiedRes.Limits == nil {
-		copiedRes.Limits = corev1.ResourceList{}
-	}
-	if copiedRes.Limits.Memory().IsZero() {
-		newResource := resource.MustParse(limitMemory)
-		if copiedRes.Requests.Memory().Cmp(newResource) == 1 {
-			newResource = *copiedRes.Requests.Memory()
-		}
-
-		copiedRes.Limits[corev1.ResourceMemory] = newResource
-	}
-	if copiedRes.Limits.Cpu().IsZero() {
-		newResource := resource.MustParse(limitCPU)
-		if copiedRes.Requests.Cpu().Cmp(newResource) == 1 {
-			newResource = *copiedRes.Requests.Cpu()
-		}
-
-		copiedRes.Limits[corev1.ResourceCPU] = newResource
-	}
-
-	return copiedRes
-}
-
-func mergeResourcesPreset(fn *Function, profile string, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) ResourcesPreset {
-	resources := ResourcesPreset{}
-
+func calculateResources(fn *Function, resourceRequirements *corev1.ResourceRequirements, profile string, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) *corev1.ResourceRequirements {
+	// profile has the highest priority
 	preset := profile
+	// we can use profile from label (deprecated) instead of new profile
 	if preset == "" {
 		preset = fn.GetLabels()[presetLabel]
 	}
-	if preset == "" {
-		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
-		if ok {
-			return presets[rtmPreset]
-		}
-		return presets[defaultPreset]
+	if preset != "" {
+		return presetsToRequirements(presets[preset])
 	}
-
-	resourcesPreset := presets[preset]
-	resourcesDefaultPreset := presets[defaultPreset]
-
-	resources.RequestCPU = resourcesPreset.RequestCPU
-	if resources.RequestCPU == "" {
-		resources.RequestCPU = resourcesDefaultPreset.RequestCPU
+	// when no profile we use user defined resources
+	if resourceRequirements != nil {
+		return resourceRequirements
 	}
-
-	resources.RequestMemory = resourcesPreset.RequestMemory
-	if resources.RequestMemory == "" {
-		resources.RequestMemory = resourcesDefaultPreset.RequestMemory
+	// we use default preset only when no profile and no resources
+	rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
+	if ok {
+		return presetsToRequirements(presets[rtmPreset])
 	}
+	return presetsToRequirements(presets[defaultPreset])
+}
 
-	resources.LimitCPU = resourcesPreset.LimitCPU
-	if resources.LimitCPU == "" {
-		resources.LimitCPU = resourcesDefaultPreset.LimitCPU
+func presetsToRequirements(preset ResourcesPreset) *corev1.ResourceRequirements {
+	result := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse(preset.LimitCPU),
+			corev1.ResourceMemory: resource.MustParse(preset.LimitMemory),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse(preset.RequestCPU),
+			corev1.ResourceMemory: resource.MustParse(preset.RequestMemory),
+		},
 	}
-
-	resources.LimitMemory = resourcesPreset.LimitMemory
-	if resources.LimitMemory == "" {
-		resources.LimitMemory = resourcesDefaultPreset.LimitMemory
-	}
-
-	return resources
+	return &result
 }
 
 func ParseReplicasPresets(presetsMap string) (map[string]ReplicasPreset, error) {
