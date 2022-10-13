@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ConfigureLogger - builds logger based on logLevel and logFormat
 func ConfigureLogger(logLevel, logFormat string) (*logger.Logger, error) {
 	parsedLogLevel, err := logger.MapLevel(logLevel)
 	if err != nil {

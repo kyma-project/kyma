@@ -3,7 +3,7 @@ package helpers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/avast/retry-go"
@@ -53,7 +53,7 @@ func (h *Helper) CallEndpointWithHeadersWithRetries(headerValue string, headerNa
 	}, predicate.TestPredicate)
 
 	if err != nil {
-		return fmt.Errorf("error calling endpoint %s err=%s", url, err)
+		return fmt.Errorf("error calling endpoint %s with \"%s=%s\" err=%s", url, headerName, headerValue, err)
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func (h *Helper) withRetries(httpCall func() (*http.Response, error), isResponse
 		}
 
 		if !isResponseValid(response) {
-			body, err := ioutil.ReadAll(response.Body)
+			body, err := io.ReadAll(response.Body)
 			if err != nil {
 				return errors.Errorf("unexpected response %s. Reason unknown: unable to parse response body: %s.", response.Status, err.Error())
 			}
@@ -118,7 +118,11 @@ func (h *Helper) APIRuleWithRetries(toExecute RetriableApiRule, onRetry Retriabl
 
 	apiStatus := status{}
 
-	json.Unmarshal(js, &apiStatus)
+	err = json.Unmarshal(js, &apiStatus)
+	if err != nil {
+		return err
+	}
+
 	if apiStatus.Status.APIRuleStatus.Code == "ERROR" {
 		return retry.Do(func() error {
 			res, err := onRetry(k8sClient, resources...)
@@ -130,7 +134,10 @@ func (h *Helper) APIRuleWithRetries(toExecute RetriableApiRule, onRetry Retriabl
 			if err != nil {
 				return err
 			}
-			json.Unmarshal(js, &apiStatus)
+			err = json.Unmarshal(js, &apiStatus)
+			if err != nil {
+				return err
+			}
 			if apiStatus.Status.APIRuleStatus.Code == "ERROR" {
 				return errors.New("APIRule status not ok")
 			}

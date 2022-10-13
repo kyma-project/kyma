@@ -1,12 +1,12 @@
 package proxy
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
+	log "github.com/sirupsen/logrus"
 )
 
 func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipTLSVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
@@ -54,7 +55,10 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
-	return &httputil.ReverseProxy{Director: director, Transport: transport}, nil
+	errorHandler := func(rw http.ResponseWriter, req *http.Request, err error) {
+		codeRewriter(rw, err)
+	}
+	return &httputil.ReverseProxy{Director: director, Transport: transport, ErrorHandler: errorHandler}, nil
 }
 
 func joinPaths(a, b string) string {
@@ -141,4 +145,14 @@ func urlRewriter(gatewayURL, target, loc *url.URL) *url.URL {
 	gatewayURL.Fragment = loc.Fragment
 
 	return gatewayURL
+}
+
+func codeRewriter(rw http.ResponseWriter, err error) {
+
+	if errors.Is(err, context.DeadlineExceeded) {
+		log.Infof("%s: HTTP status code was rewritten to 504", err)
+		rw.WriteHeader(http.StatusGatewayTimeout)
+		return
+	}
+	rw.WriteHeader(http.StatusBadGateway)
 }

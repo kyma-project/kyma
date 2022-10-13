@@ -44,7 +44,6 @@ func main() {
 		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, oauthTokens, csrfTokens)
 		mtlsServer := newMTLSServer(cfg.mTLS.caCertPath, address, router)
 		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.mTLS.serverCertPath, cfg.mTLS.serverKeyPath))
-		wg.Done()
 	}()
 
 	go func() {
@@ -52,7 +51,6 @@ func main() {
 		router := test_api.SetupMTLSRoutes(os.Stdout, oAuthCredentials, oauthTokens, csrfTokens)
 		mtlsServer := newMTLSServer(cfg.mTLSExpiredCerts.caCertPath, address, router)
 		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.mTLSExpiredCerts.serverCertPath, cfg.mTLSExpiredCerts.serverKeyPath))
-		wg.Done()
 	}()
 
 	wg.Wait()

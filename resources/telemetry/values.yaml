@@ -7,10 +7,10 @@ global:
       version: "5f79928b"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-15428"
+      version: "PR-15692"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.9.8-ad15ce64"
+      version: "1.9.9-a2385ca5"
       directory: "tpi"
     busybox:
       name: "busybox"

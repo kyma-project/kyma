@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220915084356-1d9b39c6797a
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210708083136-5479837a0948
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20221012075513-f3e30e39496e
 	github.com/onsi/gomega v1.20.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
@@ -23,12 +23,12 @@ require (
 
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
-	//TODO: replace it in another PR
-	github.com/kyma-project/kyma/components/function-controller => github.com/pPrecel/kyma/components/function-controller v0.0.0-20220801083447-41d01d8dc0c7
+	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20200410145947-bcb3869e6f29
+
 )
 
 replace k8s.io/api => k8s.io/api v0.18.12

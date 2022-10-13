@@ -40,9 +40,9 @@ func TestSetDefaults(t *testing.T) {
 }
 `
 
-	LRuntimeResources := ResourceRequirementsBuilder{}.Limits("200m", "256Mi").Requests("100m", "128Mi").BuildCoreV1()
-
-	MRuntimeResources := ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").BuildCoreV1()
+	MRuntimeResourcesBuilder := ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi")
+	SRuntimeResourcesBuilder := ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi")
+	MRuntimeResources := MRuntimeResourcesBuilder.BuildCoreV1()
 
 	buildResources := `
 {
@@ -52,7 +52,7 @@ func TestSetDefaults(t *testing.T) {
 }
 `
 
-	fastBuildResources := ResourceRequirementsBuilder{}.Limits("1800m", "1800Mi").Requests("1100m", "1100Mi").BuildCoreV1()
+	slowBuildResourcesBuilder := ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi")
 
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
@@ -82,6 +82,8 @@ func TestSetDefaults(t *testing.T) {
 					MinReplicas: &two,
 					MaxReplicas: &two,
 				},
+
+				Replicas: &two,
 			},
 			},
 		},
@@ -110,6 +112,7 @@ func TestSetDefaults(t *testing.T) {
 						MinReplicas: &two,
 						MaxReplicas: &two,
 					},
+					Replicas: &two,
 				},
 			},
 		},
@@ -136,24 +139,22 @@ func TestSetDefaults(t *testing.T) {
 						MinReplicas: &two,
 						MaxReplicas: &two,
 					},
+					Replicas: &two,
 				},
 			},
 		},
-		"Should return default webhook": {
+		"Should default minimal function": {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
+						Function: MRuntimeResourcesBuilder.Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
-		"Should fill missing fields": {
+		"Should not fill missing resources": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: &ResourceConfiguration{
@@ -166,8 +167,8 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("150m", "150Mi").Requests("150m", "150Mi").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("1200m", "12000Mi").Requests("1200m", "12000Mi").Build(),
+						Function: ResourceRequirementsBuilder{}.Requests("150m", "150Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Requests("1200m", "12000Mi").Build(),
 					},
 					Replicas: &two,
 				},
@@ -188,13 +189,14 @@ func TestSetDefaults(t *testing.T) {
 			expectedFunc: Function{
 				Spec: FunctionSpec{
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("15m", "15Mi").Requests("15m", "15Mi").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("800m", "800Mi").Requests("700m", "700Mi").Build(),
+						Function: ResourceRequirementsBuilder{}.Limits("15m", "15Mi").Build(),
+						Build:    ResourceRequirementsBuilder{}.Limits("800m", "800Mi").Build(),
 					},
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &zero,
 						MaxReplicas: &zero,
 					},
+					Replicas: &zero,
 				},
 			},
 		},
@@ -251,13 +253,10 @@ func TestSetDefaults(t *testing.T) {
 				}, Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
+						Function: SRuntimeResourcesBuilder.Build(),
+						Build:    slowBuildResourcesBuilder.Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -280,17 +279,14 @@ func TestSetDefaults(t *testing.T) {
 				ObjectMeta: v1.ObjectMeta{}, Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi").Profile("S").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Profile("slow").Build(),
+						Function: SRuntimeResourcesBuilder.Profile("S").Build(),
+						Build:    slowBuildResourcesBuilder.Profile("slow").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
-		"Should properly merge resources presets (using labels) - case with all fields": {
+		"Should overwrite custom resources by presets (using labels) - case with all fields": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
@@ -318,9 +314,10 @@ func TestSetDefaults(t *testing.T) {
 				}, Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("250m", "250Mi").Build(),
+						Function: SRuntimeResourcesBuilder.Build(),
+						Build:    slowBuildResourcesBuilder.Build(),
 					},
+					Replicas: &two,
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
 						MaxReplicas: &two,
@@ -328,7 +325,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should properly merge resources presets (using ResourceConfiguration..Preset) - case with all fields": {
+		"Should overwrite custom resources by presets (using ResourceConfiguration..Preset) - case with all fields": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{},
 				Spec: FunctionSpec{
@@ -337,9 +334,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Profile("S").Build(),
 						Build:    ResourceRequirementsBuilder{}.Requests("250m", "250Mi").Profile("slow").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 			expectedFunc: Function{
@@ -347,81 +342,10 @@ func TestSetDefaults(t *testing.T) {
 				Spec: FunctionSpec{
 					Runtime: NodeJs14,
 					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Profile("S").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("250m", "250Mi").Profile("slow").Build(),
+						Function: SRuntimeResourcesBuilder.Profile("S").Build(),
+						Build:    slowBuildResourcesBuilder.Profile("slow").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
-					},
-				},
-			},
-		},
-		"Should properly merge resources presets (using labels) - case with concatenating missing values with default preset": {
-			givenFunc: Function{
-				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						FunctionResourcesPresetLabel: "L",
-						BuildResourcesPresetLabel:    "fast",
-					},
-				},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-				},
-			},
-			expectedFunc: Function{
-				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						FunctionResourcesPresetLabel: "L",
-						BuildResourcesPresetLabel:    "fast",
-					},
-				},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: &ResourceRequirements{
-							Resources: &LRuntimeResources,
-						},
-						Build: &ResourceRequirements{
-							Resources: &fastBuildResources,
-						},
-					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
-				},
-			},
-		},
-		"Should properly merge resources presets (using ResourceConfiguration..Preset) - case with concatenating missing values with default preset": {
-			givenFunc: Function{
-				ObjectMeta: v1.ObjectMeta{},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Build:    ResourceRequirementsBuilder{}.Profile("fast").Build(),
-						Function: ResourceRequirementsBuilder{}.Profile("L").Build(),
-					},
-				},
-			},
-			expectedFunc: Function{
-				ObjectMeta: v1.ObjectMeta{},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: &ResourceRequirements{
-							Profile:   "L",
-							Resources: &LRuntimeResources,
-						},
-						Build: &ResourceRequirements{
-							Profile:   "fast",
-							Resources: &fastBuildResources,
-						},
-					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &two,
 				},
 			},
 		},
@@ -449,10 +373,7 @@ func TestSetDefaults(t *testing.T) {
 							Resources: &MRuntimeResources,
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				}},
 		},
 		"Should set function profile to function presets M instead of default L value (using ResourceConfiguration..Preset)": {
@@ -475,77 +396,8 @@ func TestSetDefaults(t *testing.T) {
 							Resources: &MRuntimeResources,
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				}},
-		},
-		"Should properly merge resources presets (using labels) - case with missing buildResources Requests": {
-			givenFunc: Function{
-				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						FunctionResourcesPresetLabel: "S",
-						BuildResourcesPresetLabel:    "slow",
-					},
-				},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Build(),
-					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-					},
-				},
-			},
-			expectedFunc: Function{
-				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{
-						FunctionResourcesPresetLabel: "S",
-						BuildResourcesPresetLabel:    "slow",
-					},
-				}, Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
-					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
-					},
-				},
-			},
-		},
-		"Should properly merge resources presets (using ResourceConfiguration..Preset) - case with missing buildResources Requests": {
-			givenFunc: Function{
-				ObjectMeta: v1.ObjectMeta{},
-				Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Profile("S").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Profile("slow").Build(),
-					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-					},
-				},
-			},
-			expectedFunc: Function{
-				ObjectMeta: v1.ObjectMeta{}, Spec: FunctionSpec{
-					Runtime: NodeJs14,
-					ResourceConfiguration: &ResourceConfiguration{
-						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Profile("S").Build(),
-						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Profile("slow").Build(),
-					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
-					},
-				},
-			},
 		},
 		"Should ignore label replicas-preset": {
 			givenFunc: Function{
@@ -568,10 +420,7 @@ func TestSetDefaults(t *testing.T) {
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -605,7 +454,7 @@ func TestSetDefaults(t *testing.T) {
 
 			// then
 			//g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
-			require.EqualValues(t, testData.givenFunc, testData.expectedFunc)
+			require.EqualValues(t, testData.expectedFunc, testData.givenFunc)
 		})
 	}
 }

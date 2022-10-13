@@ -275,10 +275,15 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					Template: &Template{
-						Labels: map[string]string{
-							"shoul-be-ok":      "test",
-							"should BE not OK": "test",
+					Templates: &Templates{
+						BuildJob: nil,
+						FunctionPod: &PodTemplate{
+							Metadata: &MetadataTemplate{
+								Labels: map[string]string{
+									"should-be-ok":     "test",
+									"should BE not OK": "test",
+								},
+							},
 						},
 					},
 				},
@@ -570,7 +575,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			),
 			expectedError: gomega.HaveOccurred(),
 		},
-		"Should return error because replicas field is use together with scaleConfig": {
+		"Should not return error when replicas field is use together with scaleConfig": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
@@ -612,7 +617,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					},
 				},
 			},
-			expectedError: gomega.HaveOccurred(),
+			expectedError: gomega.BeNil(),
 		},
 		"Should validate without error Resources and Profile occurring at once in ResourceConfiguration.Function/Build": {
 			givenFunc: Function{
