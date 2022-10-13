@@ -17,6 +17,8 @@ import (
 
 type TypeMatching string
 
+var Finalizer = GroupVersion.Group
+
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only
