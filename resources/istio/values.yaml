@@ -156,6 +156,11 @@ global:
       version: "1.15.0-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
+    istio_install-cni:
+      name: "install-cni"
+      version: "1.15.0-distroless"
+      directory: "external/istio"
+      containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
   # This configuration is only temporary and will be removed in kyma version 2.7.x.
