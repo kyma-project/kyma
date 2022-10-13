@@ -22,7 +22,7 @@ const {
   waitForTracePipeline,
   waitForPodWithLabel,
 } = require('./helpers');
-const grafana = require("../monitoring/grafana");
+
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
