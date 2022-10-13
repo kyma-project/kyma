@@ -41,7 +41,6 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 function checkLastCondition(logPipeline, conditionType) {
   const conditions = logPipeline.status.conditions;
-  console.log(conditions);
   if (conditions.length === 0) {
     return false;
   }
