@@ -19,7 +19,10 @@ const {
 const {
   loadTestData,
   waitForLogPipelineStatusRunning,
+  waitForTracePipeline,
+  waitForPodWithLabel,
 } = require('./helpers');
+const grafana = require("../monitoring/grafana");
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
@@ -32,6 +35,7 @@ async function prepareEnvironment() {
   await k8sApplyFile('regex-filter-deployment.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'kyma-system');
+  await k8sApplyFile('tracepipeline-simple.yaml', 'tracing-test');
 }
 
 async function cleanEnvironment() {
@@ -45,6 +49,7 @@ async function cleanEnvironment() {
   await k8sDeleteFile('regex-filter-deployment.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'kyma-system');
+  await k8sDeleteFile('tracepipeline-simple.yaml', 'tracing-test');
 }
 
 describe('Telemetry Operator', function() {
@@ -304,6 +309,18 @@ describe('Telemetry Operator', function() {
             await k8sDelete(pipeline);
           });
         });
+      });
+    });
+  });
+
+  context('Trace Pipeline', function() {
+    context('Trace Pipeline Simple Instance', function() {
+      it('Should be pipeline simple exist', async function() {
+        await waitForTracePipeline('simple');
+      });
+
+      it('Trace pods should be ready', async () => {
+        await waitForPodWithLabel('app.kubernetes.io/name', 'telemetry-tracing-collector', 'kyma-system');
       });
     });
   });
