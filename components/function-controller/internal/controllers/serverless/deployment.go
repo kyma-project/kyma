@@ -46,7 +46,6 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 	}
 
 	expectedDeployment := s.buildDeployment(args)
-
 	deploymentChanged := !s.deploymentEqual(expectedDeployment)
 
 	if !deploymentChanged {
@@ -61,7 +60,7 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 		return stateFnDeleteDeployments
 	}
 
-	if !equalDeployments(s.deployments.Items[0], expectedDeployment, isScalingEnabled(&s.instance)) {
+	if !equalDeployments(s.deployments.Items[0], expectedDeployment) {
 		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels)
 	}
 

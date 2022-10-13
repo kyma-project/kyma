@@ -35,7 +35,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     kubectl create ns sap-btp-operator
     kubectl label namespace sap-btp-operator istio-injection=disabled
     helm repo add sap-btp-operator https://sap.github.io/sap-btp-service-operator
-    helm upgrade --install btp-operator sap-btp-operator/sap-btp-operator --create-namespace --namespace=sap-btp-operator --set manager.secret.clientid="$(jq --raw-output '.clientid' creds.json)" --set manager.secret.clientsecret="$(jq --raw-output '.clientsecret' creds.json)" --set manager.secret.url="$(jq --raw-output '.sm_url' creds.json)" --set manager.secret.tokenurl="$(jq --raw-output '.url' creds.json)"
+    helm upgrade --install btp-operator sap-btp-operator/sap-btp-operator --create-namespace --namespace=sap-btp-operator --set manager.secret.clientid="$(jq --raw-output '.clientid' creds.json)" --set manager.secret.clientsecret="$(jq --raw-output '.clientsecret' creds.json)" --set manager.secret.sm_url="$(jq --raw-output '.sm_url' creds.json)" --set manager.secret.tokenurl="$(jq --raw-output '.url' creds.json)"
 
     echo "Wait 30 seconds to make btp-operator webhook ready"
     sleep 30

@@ -203,7 +203,7 @@ func TestPathExtractionErrors(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			// then
-			assert.Equal(t, http.StatusInternalServerError, rr.Code)
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
 		})
 	}
 }

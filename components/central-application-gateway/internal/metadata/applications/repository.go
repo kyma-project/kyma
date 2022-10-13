@@ -130,7 +130,7 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application: %s not found.", appName)
 			log.Warn(message)
-			return nil, apperrors.Internal(message)
+			return nil, apperrors.NotFound(message)
 		}
 
 		message := fmt.Sprintf("failed to get Application '%s' : %s", appName, err.Error())

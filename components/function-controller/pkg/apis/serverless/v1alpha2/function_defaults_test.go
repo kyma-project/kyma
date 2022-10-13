@@ -82,6 +82,8 @@ func TestSetDefaults(t *testing.T) {
 					MinReplicas: &two,
 					MaxReplicas: &two,
 				},
+
+				Replicas: &two,
 			},
 			},
 		},
@@ -110,6 +112,7 @@ func TestSetDefaults(t *testing.T) {
 						MinReplicas: &two,
 						MaxReplicas: &two,
 					},
+					Replicas: &two,
 				},
 			},
 		},
@@ -136,6 +139,7 @@ func TestSetDefaults(t *testing.T) {
 						MinReplicas: &two,
 						MaxReplicas: &two,
 					},
+					Replicas: &two,
 				},
 			},
 		},
@@ -146,10 +150,7 @@ func TestSetDefaults(t *testing.T) {
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -195,6 +196,7 @@ func TestSetDefaults(t *testing.T) {
 						MinReplicas: &zero,
 						MaxReplicas: &zero,
 					},
+					Replicas: &zero,
 				},
 			},
 		},
@@ -254,10 +256,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -283,10 +282,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("25m", "32Mi").Profile("S").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Profile("slow").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -321,6 +317,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("250m", "250Mi").Build(),
 					},
+					Replicas: &two,
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
 						MaxReplicas: &two,
@@ -337,9 +334,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Requests("15m", "15Mi").Profile("S").Build(),
 						Build:    ResourceRequirementsBuilder{}.Requests("250m", "250Mi").Profile("slow").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 			expectedFunc: Function{
@@ -350,10 +345,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Profile("S").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("250m", "250Mi").Profile("slow").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &two,
-						MaxReplicas: &two,
-					},
+					Replicas: &two,
 				},
 			},
 		},
@@ -386,10 +378,7 @@ func TestSetDefaults(t *testing.T) {
 							Resources: &fastBuildResources,
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -418,10 +407,7 @@ func TestSetDefaults(t *testing.T) {
 							Resources: &fastBuildResources,
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
@@ -449,10 +435,7 @@ func TestSetDefaults(t *testing.T) {
 							Resources: &MRuntimeResources,
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				}},
 		},
 		"Should set function profile to function presets M instead of default L value (using ResourceConfiguration..Preset)": {
@@ -475,10 +458,7 @@ func TestSetDefaults(t *testing.T) {
 							Resources: &MRuntimeResources,
 						},
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				}},
 		},
 		"Should properly merge resources presets (using labels) - case with missing buildResources Requests": {
@@ -512,6 +492,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Build(),
 					},
+					Replicas: &two,
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
 						MaxReplicas: &two,
@@ -540,6 +521,7 @@ func TestSetDefaults(t *testing.T) {
 						Function: ResourceRequirementsBuilder{}.Limits("50m", "64Mi").Requests("15m", "15Mi").Profile("S").Build(),
 						Build:    ResourceRequirementsBuilder{}.Limits("700m", "700Mi").Requests("350m", "350Mi").Profile("slow").Build(),
 					},
+					Replicas: &two,
 					ScaleConfig: &ScaleConfig{
 						MinReplicas: &two,
 						MaxReplicas: &two,
@@ -568,10 +550,7 @@ func TestSetDefaults(t *testing.T) {
 					ResourceConfiguration: &ResourceConfiguration{
 						Function: ResourceRequirementsBuilder{}.Limits("100m", "128Mi").Requests("50m", "64Mi").Build(),
 					},
-					ScaleConfig: &ScaleConfig{
-						MinReplicas: &one,
-						MaxReplicas: &one,
-					},
+					Replicas: &one,
 				},
 			},
 		},
