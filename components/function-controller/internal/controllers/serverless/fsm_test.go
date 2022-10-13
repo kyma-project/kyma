@@ -115,8 +115,10 @@ func dummyFunctionForTest_stateFnName(_ context.Context, r *reconciler, s *syste
 	return nil
 }
 
-func dummyBuilderForTest_stateFnName() stateFn {
-	return dummyFunctionForTest_stateFnName
+func dummyInlineFunctionForTest_stateFnName() stateFn {
+	return func(ctx context.Context, r *reconciler, ss *systemState) stateFn {
+		return nil
+	}
 }
 
 func Test_stateFnName(t *testing.T) {
@@ -135,9 +137,9 @@ func Test_stateFnName(t *testing.T) {
 			want: "dummyFunctionForTest_stateFnName",
 		},
 		{
-			name: "function is returned from a builder",
-			fn:   dummyBuilderForTest_stateFnName(),
-			want: "dummyFunctionForTest_stateFnName",
+			name: "function is returned from an inline function",
+			fn:   dummyInlineFunctionForTest_stateFnName(),
+			want: "Test_stateFnName",
 		},
 	}
 	for _, tt := range tests {
