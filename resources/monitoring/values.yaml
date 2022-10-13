@@ -145,8 +145,9 @@ global:
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: v2.5.0
-      directory: "external/k8s.gcr.io/kube-state-metrics"
+      version: "2.6.0-688b14ea"
+      directory: "tpi"
+      sha: ""
     grafana:
       name: "grafana"
       version: "7.5.17-d8b29d34"
@@ -164,7 +165,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.3.0-4256edd8"
+      version: "7.3.0-c54bc74b"
       directory: "tpi"
       sha: ""
 
