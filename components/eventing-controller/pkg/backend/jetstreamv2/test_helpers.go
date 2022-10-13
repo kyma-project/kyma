@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats-server/v2/server"
 
@@ -36,7 +35,6 @@ type TestEnvironment struct {
 	logger     *logger.Logger
 	natsServer *server.Server
 	jsClient   *jetStreamClient
-	jsCtxMock  *mocks.JetStreamContext
 	natsConfig env.NatsConfig
 	cleaner    cleaner.Cleaner
 	natsPort   int
@@ -48,10 +46,14 @@ func SendEventToJetStream(jsClient *JetStream, data string) error {
 	eventType := evtestingv2.OrderCreatedCleanEvent
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
-	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, v1alpha2.TypeMatchingStandard), []byte(sampleEvent))
+	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean,
+		eventType,
+		v1alpha2.TypeMatchingStandard,
+	), []byte(sampleEvent))
 }
 
-func sendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string, typeMatching v1alpha2.TypeMatching) error {
+func sendEventToJetStreamOnEventType(jsClient *JetStream,
+	eventType string, data string, typeMatching v1alpha2.TypeMatching) error {
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
 	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, typeMatching), []byte(sampleEvent))
@@ -81,8 +83,8 @@ func sendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, c
 	if err != nil {
 		return err
 	}
-	if err := event.Validate(); err != nil {
-		return err
+	if validateErr := event.Validate(); validateErr != nil {
+		return validateErr
 	}
 	// get a CE sender for the embedded NATS using CE-SDK
 	natsOpts := nats2.NatsOptions()

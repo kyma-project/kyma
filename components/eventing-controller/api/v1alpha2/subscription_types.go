@@ -17,8 +17,6 @@ import (
 
 type TypeMatching string
 
-var Finalizer = GroupVersion.Group
-
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only
@@ -66,7 +64,7 @@ type SubscriptionStatus struct {
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 //+kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
 
-// Subscription is the Schema for the subscriptions API
+// Subscription is the Schema for the subscriptions API.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

@@ -28,7 +28,8 @@ const (
 )
 
 // getDefaultSubscriptionOptions builds the default nats.SubOpts by using the subscription/consumer configuration.
-func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier, maxInFlightMessages int) DefaultSubOpts {
+func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier,
+	maxInFlightMessages int) DefaultSubOpts {
 	return DefaultSubOpts{
 		nats.Durable(consumer.consumerName),
 		nats.Description(consumer.namespacedSubjectName),
@@ -125,7 +126,8 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 }
 
 // getConsumerConfig return the consumerConfig according to the default configuration.
-func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier, jsSubject string, maxInFlight int) *nats.ConsumerConfig {
+func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier,
+	jsSubject string, maxInFlight int) *nats.ConsumerConfig {
 	return &nats.ConsumerConfig{
 		Durable:        jsSubKey.ConsumerName(),
 		Description:    jsSubKey.namespacedSubjectName,
@@ -174,7 +176,8 @@ func getUniqueEventTypes(eventTypes []string) []string {
 }
 
 // getCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
-func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
+func getCleanEventTypes(sub *eventingv1alpha2.Subscription,
+	cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
 	if sub.Spec.Types == nil {
 		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
@@ -212,7 +215,8 @@ func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
 // have the same namespaced name, otherwise returns false.
-func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha2.Subscription) bool {
+func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier,
+	subscription *eventingv1alpha2.Subscription) bool {
 	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
@@ -231,7 +235,8 @@ func (s SubscriptionSubjectIdentifier) ConsumerName() string {
 }
 
 // NewSubscriptionSubjectIdentifier returns a new SubscriptionSubjectIdentifier instance.
-func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha2.Subscription, subject string) SubscriptionSubjectIdentifier {
+func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha2.Subscription,
+	subject string) SubscriptionSubjectIdentifier {
 	cn := computeConsumerName(subscription, subject)          // compute the consumer name once
 	nn := computeNamespacedSubjectName(subscription, subject) // compute the namespaced name with the subject once
 	return SubscriptionSubjectIdentifier{consumerName: cn, namespacedSubjectName: nn}

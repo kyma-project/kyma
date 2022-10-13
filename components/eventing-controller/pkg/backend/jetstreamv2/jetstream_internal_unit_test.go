@@ -1,6 +1,7 @@
 package jetstreamv2
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -33,7 +34,12 @@ func Test_SyncConsumersAndSubscriptions_ForEmptyTypes(t *testing.T) {
 // Test_GetOrCreateConsumer tests the behaviour of the getOrCreateConsumer function.
 func Test_GetOrCreateConsumer(t *testing.T) {
 	// pre-requisites
-	existingConsumer := &nats.ConsumerInfo{Name: "ExistingConsumer", Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}
+	existingConsumer := &nats.ConsumerInfo{
+		Name: "ExistingConsumer",
+		Config: nats.ConsumerConfig{
+			MaxAckPending: DefaultMaxInFlights,
+		},
+	}
 	newConsumer := &nats.ConsumerInfo{Name: "NewConsumer", Config: nats.ConsumerConfig{MaxAckPending: 20}}
 
 	testCases := []struct {
@@ -75,14 +81,9 @@ func Test_GetOrCreateConsumer(t *testing.T) {
 			}
 			sub := NewSubscriptionWithOneType()
 			eventType := sub.Status.Types[0]
-			jsSubject := js.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-			jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-
-			maxInFlight, err := sub.GetMaxInFlightMessages()
-			assert.NoError(t, err)
 
 			// when
-			consumerInfo, err := js.getOrCreateConsumer(jsSubject, jsSubKey, maxInFlight)
+			consumerInfo, err := js.getOrCreateConsumer(sub, eventType)
 
 			// then
 			assert.Equal(t, tc.wantConsumerInfo, consumerInfo)
@@ -139,10 +140,10 @@ func Test_SyncConsumersAndSubscriptions_ForGetMaxInFlight(t *testing.T) {
 			require.ErrorIs(t, err, testCase.wantErr)
 		})
 	}
-
 }
 
-// Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions tests the binding behaviour in the syncConsumersAndSubscriptions function.
+// Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions tests the
+// binding behaviour in the syncConsumersAndSubscriptions function.
 func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T) {
 	// pre-requisites
 	sub := NewSubscriptionWithOneType()
@@ -154,51 +155,69 @@ func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T
 	testCases := []struct {
 		name       string
 		wantError  error
-		givenMocks func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier)
+		givenMocks func(sub *v1alpha2.Subscription,
+			jsBackend *JetStream,
+			jsCtx *mocks.JetStreamContext,
+			jsSubKey SubscriptionSubjectIdentifier,
+		)
 	}{
 		{
 			name: "Bind invalid NATS Subscription should result into error",
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
+			givenMocks: func(sub *v1alpha2.Subscription,
+				jsBackend *JetStream,
+				jsCtx *mocks.JetStreamContext,
+				jsSubKey SubscriptionSubjectIdentifier,
+			) {
 				// inject the subscriptions map
 				jsBackend.subscriptions = map[SubscriptionSubjectIdentifier]Subscriber{
 					jsSubKey: invalidSubMock,
 				}
 				for _, eventType := range sub.Status.Types {
 					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 					// mock the expected calls
 					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(&nats.ConsumerInfo{}, nil)
-					jsCtx.On("Subscribe", jsSubject, mock.AnythingOfType("nats.MsgHandler"), mock.AnythingOfType("nats.subOptFn")).Return(nil, nats.ErrJetStreamNotEnabled)
+					jsCtx.On("Subscribe", jsSubject, mock.AnythingOfType("nats.MsgHandler"), mock.AnythingOfType("nats.subOptFn")).
+						Return(nil, nats.ErrJetStreamNotEnabled)
 				}
 			},
 			wantError: ErrFailedSubscribe,
 		},
 		{
 			name: "Bind invalid NATS Subscription should succeed",
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
+			givenMocks: func(sub *v1alpha2.Subscription,
+				jsBackend *JetStream,
+				jsCtx *mocks.JetStreamContext,
+				jsSubKey SubscriptionSubjectIdentifier,
+			) {
 				// inject the subscriptions map
 				jsBackend.subscriptions = map[SubscriptionSubjectIdentifier]Subscriber{
 					jsSubKey: invalidSubMock,
 				}
 				for _, eventType := range sub.Status.Types {
 					jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
-					jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 					// mock the expected calls
-					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(&nats.ConsumerInfo{Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}, nil)
-					jsCtx.On("Subscribe", jsSubject, mock.AnythingOfType("nats.MsgHandler"), mock.AnythingOfType("nats.subOptFn")).Return(&nats.Subscription{}, nil)
+					jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).
+						Return(&nats.ConsumerInfo{Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}, nil)
+					jsCtx.On("Subscribe", jsSubject, mock.AnythingOfType("nats.MsgHandler"), mock.AnythingOfType("nats.subOptFn")).
+						Return(&nats.Subscription{}, nil)
 				}
 			},
 			wantError: nil,
 		},
 		{
 			name: "Skip binding for when no invalid NATS Subscriptions",
-			givenMocks: func(sub *v1alpha2.Subscription, jsBackend *JetStream, jsCtx *mocks.JetStreamContext, jsSubKey SubscriptionSubjectIdentifier) {
+			givenMocks: func(sub *v1alpha2.Subscription,
+				jsBackend *JetStream,
+				jsCtx *mocks.JetStreamContext,
+				jsSubKey SubscriptionSubjectIdentifier,
+			) {
 				// inject the subscriptions map
 				jsBackend.subscriptions = map[SubscriptionSubjectIdentifier]Subscriber{
 					jsSubKey: validSubMock,
 				}
 				// mock the expected calls
-				jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).Return(&nats.ConsumerInfo{Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}, nil)
+				jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).
+					Return(&nats.ConsumerInfo{Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}, nil)
 			},
 			wantError: nil,
 		},
@@ -229,17 +248,20 @@ func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T
 			jsCtxMock.AssertExpectations(t)
 		})
 	}
-
 }
 
-// Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight tests the behaviour of the syncConsumerMaxInFlight function.
+// Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight tests
+// the behaviour of the syncConsumerMaxInFlight function.
 func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T) {
 	testCases := []struct {
 		name                       string
 		givenSubMaxInFlight        int
 		givenConsumerMaxAckPending int
-		givenMocks                 func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext, consumerConfigToUpdate *nats.ConsumerConfig)
-		wantConfigToUpdate         *nats.ConsumerConfig
+		givenMocks                 func(jsBackend *JetStream,
+			jsCtx *mocks.JetStreamContext,
+			consumerConfigToUpdate *nats.ConsumerConfig,
+		)
+		wantConfigToUpdate *nats.ConsumerConfig
 	}{
 		{
 			name:                       "up-to-date consumer shouldn't be updated",
@@ -271,6 +293,9 @@ func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T)
 			js := &JetStream{
 				jsCtx: jsCtxMock,
 			}
+			sub := subtesting.NewSubscription("test", "test",
+				subtesting.WithMaxInFlightMessages(fmt.Sprint(tc.givenSubMaxInFlight)),
+			)
 
 			// setup the mocks
 			consumer := nats.ConsumerInfo{
@@ -280,7 +305,7 @@ func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T)
 			tc.givenMocks(js, jsCtxMock, tc.wantConfigToUpdate)
 
 			// when
-			err := js.syncConsumerMaxInFlight(consumer, tc.givenSubMaxInFlight)
+			err := js.syncConsumerMaxInFlight(sub, consumer)
 
 			// then
 			assert.NoError(t, err)
@@ -372,7 +397,6 @@ func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 
 			// then
 			assert.ErrorIs(t, err, testCase.wantError)
-
 		})
 	}
 }
