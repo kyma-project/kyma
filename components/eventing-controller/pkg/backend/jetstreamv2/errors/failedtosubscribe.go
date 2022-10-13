@@ -2,18 +2,14 @@ package errors
 
 import (
 	"fmt"
-
-	"golang.org/x/xerrors"
 )
-
-type ErrFailedToSubscribeOnNATS = FailedToSubscribeOnNATSError
 
 type FailedToSubscribeOnNATSError struct {
 	OriginalError error
 }
 
 func NewFailedToSubscribeOnNATSError(reason error) error {
-	return xerrors.Errorf("%w", &FailedToSubscribeOnNATSError{OriginalError: reason})
+	return fmt.Errorf("%w", &FailedToSubscribeOnNATSError{OriginalError: reason})
 }
 
 func (e *FailedToSubscribeOnNATSError) Error() string {

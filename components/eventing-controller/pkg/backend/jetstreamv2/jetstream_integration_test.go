@@ -954,7 +954,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			givenFilterToDelete:             evtestingv2.OrderCreatedEventType,
 			wantNatsSubsLen:                 2,
 			wantErr: func(t *testing.T, givenError error) {
-				var wantError *backenderrors.ErrMissingNATSSubscription
+				var wantError *backenderrors.MissingSubscriptionError
 				require.ErrorAs(t, givenError, &wantError)
 				assert.Equal(t, wantError.Subject.CleanType, evtestingv2.OrderCreatedEventType)
 			},

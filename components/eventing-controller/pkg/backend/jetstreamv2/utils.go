@@ -125,8 +125,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 }
 
 // getConsumerConfig return the consumerConfig according to the default configuration.
-func (js *JetStream) getConsumerConfig(subscription *eventingv1alpha2.Subscription, jsSubKey SubscriptionSubjectIdentifier, jsSubject string) *nats.ConsumerConfig {
-	maxInFlight := subscription.GetMaxInFlightMessages(js.namedLogger())
+func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier, jsSubject string, maxInFlight int) *nats.ConsumerConfig {
 	return &nats.ConsumerConfig{
 		Durable:        jsSubKey.ConsumerName(),
 		Description:    jsSubKey.namespacedSubjectName,

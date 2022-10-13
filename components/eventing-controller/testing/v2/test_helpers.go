@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -244,26 +242,6 @@ func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv
 		o(newSub)
 	}
 	return newSub
-}
-
-func NewSubscriptionWithEmptyTypes() *eventingv1alpha2.Subscription {
-	return NewSubscription("test", "test",
-		WithStatusTypes(nil),
-	)
-}
-
-func NewSubscriptionWithOneType() *eventingv1alpha2.Subscription {
-	return NewSubscription("test", "test",
-		WithSourceAndType(EventSource, CloudEventType),
-		WithTypeMatchingStandard(),
-		WithMaxInFlight(env.DefaultMaxInFlight),
-		WithStatusTypes([]eventingv1alpha2.EventType{
-			{
-				OriginalType: CloudEventType,
-				CleanType:    CloudEventType,
-			},
-		}),
-	)
 }
 
 func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events, webhookAuth *types.WebhookAuth) *types.Subscription {
