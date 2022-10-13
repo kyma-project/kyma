@@ -313,13 +313,13 @@ describe('Telemetry Operator', function() {
     });
   });
 
-  context('Trace Pipeline', function() {
-    context('Trace Pipeline Simple Instance', function() {
-      it('Should be pipeline simple exist', async function() {
+  context('Configurable Tracing', function() {
+    context('TracePipeline', function() {
+      it('Should have created TracePipeline', async function () {
         await waitForTracePipeline('simple');
       });
 
-      it('Trace pods should be ready', async () => {
+      it('Should have ready trace collector pods', async () => {
         await waitForPodWithLabel('app.kubernetes.io/name', 'telemetry-tracing-collector', 'kyma-system');
       });
     });
