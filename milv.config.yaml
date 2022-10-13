@@ -44,6 +44,7 @@ files:
   - path: "./kyma/docs/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md"
     config:
       external-links-to-ignore: [ "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces",
+                                  "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces",
                                   "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish" ]
   - path: "./kyma/docs/04-operation-guides/troubleshooting/evnt-02-jetstream-troubleshooting.md"
     config:

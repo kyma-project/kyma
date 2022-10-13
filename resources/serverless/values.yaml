@@ -76,13 +76,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15805"
+      version: "PR-15792"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15805"
+      version: "PR-15792"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15805"
+      version: "PR-15792"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-15671"
@@ -204,6 +204,10 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      # Deprecated as of kyma 2.8
+      # TODO : remove this ENV in 2.10 (two version compatibility rule for open source)
+      functionJaegerServiceEndpoint:
+        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
         value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
