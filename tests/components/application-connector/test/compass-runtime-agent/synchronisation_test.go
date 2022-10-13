@@ -21,7 +21,7 @@ func (cs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	expectedAppName := "app1"
 	compassAppName := expectedAppName + random.RandomString(10)
 
-	//Create Application in Director and wait until it gets created
+	//Create Application in Director
 	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
 	cs.Require().NoError(err)
 

@@ -3,7 +3,6 @@ package init
 import (
 	"context"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/init/types"
 	"github.com/pkg/errors"
@@ -15,6 +14,11 @@ import (
 type compassConnectionCRConfiguration struct {
 	compassConnectionInterface CompassConnectionInterface
 }
+
+const (
+	ConnectionCRName       = "compass-connection"
+	ConnectionBackupCRName = "compass-connection-backup"
+)
 
 //go:generate mockery --name=CompassConnectionInterface
 type CompassConnectionInterface interface {
@@ -32,15 +36,24 @@ func NewCompassConnectionCRConfiguration(compassConnectionInterface CompassConne
 
 func (cc compassConnectionCRConfiguration) Do() (types.RollbackFunc, error) {
 
-	compassConnectionCR, err := cc.compassConnectionInterface.Get(context.TODO(), "compass-connection", meta.GetOptions{})
+	backupRollbackFunc, err := cc.backup()
+	if err != nil {
+		return nil, err
+	}
+
+	deleteRollbackFunc, err := cc.delete()
+	if err != nil {
+		return backupRollbackFunc, err
+	}
+
+	return newRollbackFunc(deleteRollbackFunc, backupRollbackFunc), nil
+}
+func (cc compassConnectionCRConfiguration) backup() (types.RollbackFunc, error) {
+	compassConnectionCR, err := cc.compassConnectionInterface.Get(context.TODO(), ConnectionCRName, meta.GetOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get Compass Connection CR")
 	}
 
-	err = cc.compassConnectionInterface.Delete(context.TODO(), "compass-connection", meta.DeleteOptions{})
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to delete Compass Connection CR")
-	}
 	compassConnectionCR.ResourceVersion = ""
 
 	compassConnectionCRBackup := compassConnectionCR.DeepCopy()
@@ -50,15 +63,38 @@ func (cc compassConnectionCRConfiguration) Do() (types.RollbackFunc, error) {
 		return nil, errors.Wrap(err, "failed to create Compass Connection CR")
 	}
 
-	return cc.getRollbackFunc(compassConnectionCRBackup), nil
+	rollbackFunc := func() error {
+		return retry.Do(func() error {
+			err = cc.compassConnectionInterface.Delete(context.TODO(), "compass-connection-backup", meta.DeleteOptions{})
+			if err != nil {
+				if k8serrors.IsNotFound(err) {
+					return nil
+				}
+				return errors.Wrap(err, "failed to delete Compass Connection CR")
+			}
+
+			return nil
+		})
+	}
+
+	return rollbackFunc, nil
 }
 
-func (cc compassConnectionCRConfiguration) getRollbackFunc(compassConnectionCRBackup *v1alpha1.CompassConnection) types.RollbackFunc {
-	return func() error {
-		var result *multierror.Error
+func (cc compassConnectionCRConfiguration) delete() (types.RollbackFunc, error) {
+	err := cc.compassConnectionInterface.Delete(context.TODO(), ConnectionCRName, meta.DeleteOptions{})
 
-		err := retry.Do(func() error {
-			restoredCompassConnection, err := cc.compassConnectionInterface.Get(context.TODO(), "compass-connection", meta.GetOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to delete Compass Connection CR")
+	}
+
+	rollbackFunc := func() error {
+		return retry.Do(func() error {
+			restoredCompassConnection, err := cc.compassConnectionInterface.Get(context.TODO(), ConnectionCRName, meta.GetOptions{})
+			if err != nil {
+				return err
+			}
+
+			compassConnectionCRBackup, err := cc.compassConnectionInterface.Get(context.TODO(), ConnectionBackupCRName, meta.GetOptions{})
 			if err != nil {
 				return err
 			}
@@ -72,27 +108,7 @@ func (cc compassConnectionCRConfiguration) getRollbackFunc(compassConnectionCRBa
 			}
 			return err
 		})
-
-		if err != nil {
-			multierror.Append(result, err)
-		}
-
-		err = retry.Do(func() error {
-			err = cc.compassConnectionInterface.Delete(context.TODO(), "compass-connection-backup", meta.DeleteOptions{})
-			if err != nil {
-				if k8serrors.IsNotFound(err) {
-					return nil
-				}
-				return errors.Wrap(err, "failed to delete Compass Connection CR")
-			}
-
-			return nil
-		})
-
-		if err != nil {
-			multierror.Append(result, err)
-		}
-
-		return result.ErrorOrNil()
 	}
+
+	return rollbackFunc, nil
 }

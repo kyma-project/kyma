@@ -16,7 +16,7 @@ func TestCompassConnectionConfigurator(t *testing.T) {
 		compassConnectionCRFake := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 		compassConnection := &v1alpha1.CompassConnection{
 			ObjectMeta: meta.ObjectMeta{
-				Name: "compass-connection",
+				Name: ConnectionCRName,
 			},
 			TypeMeta: meta.TypeMeta{
 				Kind:       "CompassConnection",
@@ -51,12 +51,62 @@ func TestCompassConnectionConfigurator(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("should not return error when Compass Connection CR doesn't exist", func(t *testing.T) {
+	t.Run("should fail when CompassConnection CR doesn't exist", func(t *testing.T) {
+		// given
+		compassConnectionCRFake := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
+
+		// when
+		configurator := NewCompassConnectionCRConfiguration(compassConnectionCRFake)
+		_, err := configurator.Do()
+
+		// then
+		require.Error(t, err)
+	})
+
+	t.Run("should fail when CompassConnection CR backup already exist", func(t *testing.T) {
 		// given
 		compassConnectionCRFake := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 		compassConnection := &v1alpha1.CompassConnection{
 			ObjectMeta: meta.ObjectMeta{
-				Name: "compass-connection",
+				Name: ConnectionCRName,
+			},
+			TypeMeta: meta.TypeMeta{
+				Kind:       "CompassConnection",
+				APIVersion: "v1alpha",
+			},
+		}
+
+		compassConnectionBackup := &v1alpha1.CompassConnection{
+			ObjectMeta: meta.ObjectMeta{
+				Name: ConnectionBackupCRName,
+			},
+			TypeMeta: meta.TypeMeta{
+				Kind:       "CompassConnection",
+				APIVersion: "v1alpha",
+			},
+		}
+
+		_, err := compassConnectionCRFake.Create(context.TODO(), compassConnection, meta.CreateOptions{})
+		require.NoError(t, err)
+
+		_, err = compassConnectionCRFake.Create(context.TODO(), compassConnectionBackup, meta.CreateOptions{})
+		require.NoError(t, err)
+
+		// when
+		configurator := NewCompassConnectionCRConfiguration(compassConnectionCRFake)
+		rollbackFunc, err := configurator.Do()
+
+		// then
+		require.Nil(t, rollbackFunc)
+		require.Error(t, err)
+	})
+
+	t.Run("rollback function should fail when CompassConnection CR backup doesn't exist", func(t *testing.T) {
+		// given
+		compassConnectionCRFake := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
+		compassConnection := &v1alpha1.CompassConnection{
+			ObjectMeta: meta.ObjectMeta{
+				Name: ConnectionCRName,
 			},
 			TypeMeta: meta.TypeMeta{
 				Kind:       "CompassConnection",
@@ -73,15 +123,17 @@ func TestCompassConnectionConfigurator(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
+
+		// when
 		_, err = compassConnectionCRFake.Create(context.TODO(), compassConnection, meta.CreateOptions{})
 		require.NoError(t, err)
 
-		// when
+		err = compassConnectionCRFake.Delete(context.TODO(), ConnectionBackupCRName, meta.DeleteOptions{})
+		require.NoError(t, err)
+
 		err = rollbackFunc()
 
 		// then
 		require.Error(t, err)
 	})
-
-	// TODO: consider a case when rollback function fails
 }
