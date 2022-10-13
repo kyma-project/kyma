@@ -1,13 +1,9 @@
 package jetstreamv2
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -20,15 +16,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test_SyncNATSConsumersAndSubscriptions_ForEmptyTypes tests the subscription without any EventType.
-func Test_SyncNATSConsumersAndSubscriptions_ForEmptyTypes(t *testing.T) {
+// Test_SyncConsumersAndSubscriptions_ForEmptyTypes tests the subscription without any EventType.
+func Test_SyncConsumersAndSubscriptions_ForEmptyTypes(t *testing.T) {
 	// given
 	callback := func(m *nats.Msg) {}
 	subWithOneType := NewSubscriptionWithEmptyTypes()
 
 	// when
 	js := JetStream{}
-	err := js.syncNATSConsumersAndSubscriptions(subWithOneType, callback)
+	err := js.syncConsumersAndSubscriptions(subWithOneType, callback)
 
 	// then
 	assert.NoError(t, err)
@@ -36,9 +32,9 @@ func Test_SyncNATSConsumersAndSubscriptions_ForEmptyTypes(t *testing.T) {
 
 // Test_GetOrCreateConsumer tests the behaviour of the getOrCreateConsumer function.
 func Test_GetOrCreateConsumer(t *testing.T) {
+	// pre-requisites
 	existingConsumer := &nats.ConsumerInfo{Name: "ExistingConsumer", Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}
 	newConsumer := &nats.ConsumerInfo{Name: "NewConsumer", Config: nats.ConsumerConfig{MaxAckPending: 20}}
-	sub := NewSubscriptionWithOneType()
 
 	testCases := []struct {
 		name             string
@@ -73,11 +69,11 @@ func Test_GetOrCreateConsumer(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			js := JetStream{
-				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
-				metricsCollector: metrics.NewCollector(),
-				jsCtx:            *testCase.jetStreamContext,
-				cleaner:          &cleaner.JetStreamCleaner{},
+				subscriptions: make(map[SubscriptionSubjectIdentifier]Subscriber),
+				jsCtx:         *testCase.jetStreamContext,
+				cleaner:       &cleaner.JetStreamCleaner{},
 			}
+			sub := NewSubscriptionWithOneType()
 			eventType := sub.Status.Types[0]
 			jsSubject := js.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
 			jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
@@ -95,11 +91,8 @@ func Test_GetOrCreateConsumer(t *testing.T) {
 	}
 }
 
-// Test_SyncNATSConsumersAndSubscriptions_ForGetMaxInFlight test for valid/invalid maxInFlight values in the subscription.
-func Test_SyncNATSConsumersAndSubscriptions_ForGetMaxInFlight(t *testing.T) {
-	// given
-	callback := func(m *nats.Msg) {}
-
+// Test_SyncConsumersAndSubscriptions_ForGetMaxInFlight test for valid/invalid maxInFlight values in the subscription.
+func Test_SyncConsumersAndSubscriptions_ForGetMaxInFlight(t *testing.T) {
 	testCases := []struct {
 		name             string
 		jetStreamContext *jetStreamContextStub
@@ -110,7 +103,7 @@ func Test_SyncNATSConsumersAndSubscriptions_ForGetMaxInFlight(t *testing.T) {
 			name:             "invalid maxInFlight should return an error",
 			givenMaxInFlight: "nonInt",
 			jetStreamContext: &jetStreamContextStub{},
-			wantErr:          &backenderrors.FailedToReadConfigError{},
+			wantErr:          ErrInvalidMaxInFlight,
 		},
 		{
 			name:             "invalid maxInFlight should return an error",
@@ -127,32 +120,31 @@ func Test_SyncNATSConsumersAndSubscriptions_ForGetMaxInFlight(t *testing.T) {
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
-			sub := subtesting.NewSubscription("test", "test",
-				subtesting.WithStatusTypes([]v1alpha2.EventType{
-					{
-						OriginalType: subtesting.CloudEventType,
-						CleanType:    subtesting.CloudEventType,
-					},
-				}),
-				subtesting.WithMaxInFlightMessages(testCase.givenMaxInFlight),
-			)
 			// given
-
+			callback := func(m *nats.Msg) {}
+			sub := NewSubscriptionWithOneType()
+			sub.Spec.Config = map[string]string{
+				v1alpha2.MaxInFlightMessages: testCase.givenMaxInFlight,
+			}
 			js := JetStream{
 				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
 				metricsCollector: metrics.NewCollector(),
 				jsCtx:            *testCase.jetStreamContext,
 				cleaner:          &cleaner.JetStreamCleaner{},
 			}
-			err := js.syncNATSConsumersAndSubscriptions(sub, callback)
+			// when
+			err := js.syncConsumersAndSubscriptions(sub, callback)
+
+			// then
 			require.ErrorIs(t, err, testCase.wantErr)
 		})
 	}
 
 }
 
-// Test_SyncNATSConsumersAndSubscriptions_ForBindInvalidSubscriptions tests the binding behaviour in the syncNATSConsumersAndSubscriptions function.
-func Test_SyncNATSConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T) {
+// Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions tests the binding behaviour in the syncConsumersAndSubscriptions function.
+func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T) {
+	// pre-requisites
 	sub := NewSubscriptionWithOneType()
 	validSubMock := &mocks.Subscriber{}
 	validSubMock.On("IsValid").Return(true)
@@ -179,7 +171,7 @@ func Test_SyncNATSConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testi
 					jsCtx.On("Subscribe", jsSubject, mock.AnythingOfType("nats.MsgHandler"), mock.AnythingOfType("nats.subOptFn")).Return(nil, nats.ErrJetStreamNotEnabled)
 				}
 			},
-			wantError: &backenderrors.FailedToSubscribeOnNATSError{OriginalError: nats.ErrJetStreamNotEnabled},
+			wantError: ErrFailedSubscribe,
 		},
 		{
 			name: "Bind invalid NATS Subscription should succeed",
@@ -217,7 +209,11 @@ func Test_SyncNATSConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testi
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			callback := func(m *nats.Msg) {}
-			js, jsCtxMock := setupJetStreamBackend()
+			jsCtxMock := &mocks.JetStreamContext{}
+			js := &JetStream{
+				jsCtx:   jsCtxMock,
+				cleaner: &cleaner.JetStreamCleaner{},
+			}
 
 			// setup the mocks
 			eventType := sub.Status.Types[0]
@@ -226,52 +222,44 @@ func Test_SyncNATSConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testi
 			tc.givenMocks(sub, js, jsCtxMock, jsSubKey)
 
 			// when
-			err := js.syncNATSConsumersAndSubscriptions(sub, callback)
+			err := js.syncConsumersAndSubscriptions(sub, callback)
 
 			// then
-			if tc.wantError != nil {
-				assert.ErrorIs(t, err, tc.wantError)
-			}
+			assert.ErrorIs(t, err, tc.wantError)
 			jsCtxMock.AssertExpectations(t)
 		})
 	}
 
 }
 
-// Test_SyncSyncConsumerMaxInFlight tests the behaviour of the syncConsumerMaxInFlight function.
-func Test_SyncSyncConsumerMaxInFlight(t *testing.T) {
+// Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight tests the behaviour of the syncConsumerMaxInFlight function.
+func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T) {
 	testCases := []struct {
 		name                       string
 		givenSubMaxInFlight        int
 		givenConsumerMaxAckPending int
-		givenMocks                 func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext)
+		givenMocks                 func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext, consumerConfigToUpdate *nats.ConsumerConfig)
+		wantConfigToUpdate         *nats.ConsumerConfig
 	}{
 		{
 			name:                       "up-to-date consumer shouldn't be updated",
 			givenSubMaxInFlight:        DefaultMaxInFlights,
 			givenConsumerMaxAckPending: DefaultMaxInFlights,
 			// no updateConsumer calls expected
-			givenMocks: func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext) {},
+			givenMocks: func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext, consumerConfigToUpdate *nats.ConsumerConfig) {
+			},
+			wantConfigToUpdate: nil,
 		},
 		{
-			name:                       "up-to-date consumer should be updated",
+			name:                       "non-up-to-date consumer should be updated with the expected MaxAckPending value",
 			givenSubMaxInFlight:        10,
 			givenConsumerMaxAckPending: 20,
-			givenMocks: func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext) {
-				jsCtx.On("UpdateConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig")).Return(&nats.ConsumerInfo{
-					Config: nats.ConsumerConfig{MaxAckPending: 20},
+			givenMocks: func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext, consumerConfigToUpdate *nats.ConsumerConfig) {
+				jsCtx.On("UpdateConsumer", jsBackend.Config.JSStreamName, consumerConfigToUpdate).Return(&nats.ConsumerInfo{
+					Config: *consumerConfigToUpdate,
 				}, nil)
 			},
-		},
-		{
-			name:                       "up-to-date consumer should be updated",
-			givenSubMaxInFlight:        10,
-			givenConsumerMaxAckPending: 20,
-			givenMocks: func(jsBackend *JetStream, jsCtx *mocks.JetStreamContext) {
-				jsCtx.On("UpdateConsumer", jsBackend.Config.JSStreamName, mock.AnythingOfType("*nats.ConsumerConfig")).Return(&nats.ConsumerInfo{
-					Config: nats.ConsumerConfig{MaxAckPending: 20},
-				}, nil)
-			},
+			wantConfigToUpdate: &nats.ConsumerConfig{MaxAckPending: 10},
 		},
 	}
 
@@ -279,14 +267,17 @@ func Test_SyncSyncConsumerMaxInFlight(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			// given
-			js, jsCtxMock := setupJetStreamBackend()
+			jsCtxMock := &mocks.JetStreamContext{}
+			js := &JetStream{
+				jsCtx: jsCtxMock,
+			}
 
 			// setup the mocks
 			consumer := nats.ConsumerInfo{
 				Name:   "name",
 				Config: nats.ConsumerConfig{MaxAckPending: tc.givenConsumerMaxAckPending},
 			}
-			tc.givenMocks(js, jsCtxMock)
+			tc.givenMocks(js, jsCtxMock, tc.wantConfigToUpdate)
 
 			// when
 			err := js.syncConsumerMaxInFlight(consumer, tc.givenSubMaxInFlight)
@@ -298,13 +289,8 @@ func Test_SyncSyncConsumerMaxInFlight(t *testing.T) {
 	}
 }
 
-// Test_SyncNATSConsumers_ForErrors test the syncNATSConsumersAndSubscriptions for right error handling.
-func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
-	// given
-	callback := func(m *nats.Msg) {}
-	subWithOneType := NewSubscriptionWithOneType()
-	jsCleaner := &cleaner.JetStreamCleaner{}
-
+// Test_SyncConsumersAndSubscriptions_ForErrors test the syncConsumersAndSubscriptions for right error handling.
+func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 	testCases := []struct {
 		name             string
 		jetStreamContext *jetStreamContextStub
@@ -328,7 +314,7 @@ func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
 				consumerInfoError: nats.ErrStreamNotFound,
 				consumerInfo:      nil,
 			},
-			wantError: &backenderrors.FailedToFetchConsumerInfoError{OriginalError: nats.ErrStreamNotFound},
+			wantError: ErrGetConsumer,
 		},
 		{
 			name: "AddConsumer's error should be propagated",
@@ -339,7 +325,7 @@ func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
 				addConsumer:      nil,
 				addConsumerError: nats.ErrJetStreamNotEnabledForAccount,
 			},
-			wantError: &backenderrors.FailedToAddConsumerError{OriginalError: nats.ErrJetStreamNotEnabledForAccount},
+			wantError: ErrAddConsumer,
 		},
 		{
 			name: "Subscribe call on createNATSSubscription error should be propagated",
@@ -350,7 +336,7 @@ func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
 				subscribe:      nil,
 				subscribeError: nats.ErrJetStreamNotEnabled,
 			},
-			wantError: &backenderrors.FailedToSubscribeOnNATSError{OriginalError: nats.ErrJetStreamNotEnabled},
+			wantError: ErrFailedSubscribe,
 		},
 		{
 			name: "UpdateConsumer call error should be propagated",
@@ -364,22 +350,25 @@ func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
 				update:      nil,
 				updateError: nats.ErrJetStreamNotEnabled,
 			},
-			wantError: &backenderrors.FailedToUpdateConsumerInfoError{OriginalError: nats.ErrJetStreamNotEnabled},
+			wantError: ErrUpdateConsumer,
 		},
 	}
 
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
+			// given
+			callback := func(m *nats.Msg) {}
+			subWithOneType := NewSubscriptionWithOneType()
 			js := JetStream{
 				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
 				metricsCollector: metrics.NewCollector(),
 				jsCtx:            *testCase.jetStreamContext,
-				cleaner:          jsCleaner,
+				cleaner:          &cleaner.JetStreamCleaner{},
 			}
 
 			// when
-			err := js.syncNATSConsumersAndSubscriptions(subWithOneType, callback)
+			err := js.syncConsumersAndSubscriptions(subWithOneType, callback)
 
 			// then
 			assert.ErrorIs(t, err, testCase.wantError)
@@ -388,105 +377,37 @@ func Test_SyncNATSConsumers_ForErrors(t *testing.T) {
 	}
 }
 
-// Test_CheckNATSSubscriptionsCount tests the behaviour of the checkNATSSubscriptionsCount function.
-func Test_CheckNATSSubscriptionsCount(t *testing.T) {
+// Test_SyncConsumersAndSubscriptions_ForBoundConsumerWithoutSubscription tests the scenario
+// then the consumer reports, that it is bound to a NATS subscription even though it is not.
+func Test_SyncConsumersAndSubscriptions_ForBoundConsumerWithoutSubscription(t *testing.T) {
 	// given
+	js := &JetStream{
+		jsCtx: &jetStreamContextStub{
+			consumerInfoError: nil,
+			consumerInfo:      &nats.ConsumerInfo{PushBound: true},
+		},
+		cleaner: &cleaner.JetStreamCleaner{},
+	}
 	subWithType := NewSubscriptionWithOneType()
-	jsBackend := &JetStream{
-		subscriptions: make(map[SubscriptionSubjectIdentifier]Subscriber),
-		cleaner:       &cleaner.JetStreamCleaner{},
-	}
+	callback := func(m *nats.Msg) {}
 
-	testCases := []struct {
-		name                 string
-		givenSubscription    *v1alpha2.Subscription
-		givenSubscriptionMap map[SubscriptionSubjectIdentifier]Subscriber
-		wantErr              error
-	}{
-		{
-			name:                 "empty subscriptions map with subscription with no types should result in not error",
-			givenSubscription:    NewSubscriptionWithEmptyTypes(),
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
-			wantErr:              nil,
-		},
-		{
-			name:              "if the subscriptions map contains all the NATS Subscriptions, no error is expected",
-			givenSubscription: subWithType,
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{
-				NewSubscriptionSubjectIdentifier(subWithType, "kyma./default/kyma/id.prefix.testapp1023.order.created.v1"): &nats.Subscription{},
-			},
-			wantErr: nil,
-		},
-		{
-			name:                 "unexpected empty subscriptions map should result into an error",
-			givenSubscription:    subWithType,
-			givenSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
-			wantErr:              &backenderrors.MissingSubscriptionError{},
-		},
-	}
+	// when
+	err := js.syncConsumersAndSubscriptions(subWithType, callback)
 
-	for _, testCase := range testCases {
-		tc := testCase
-		t.Run(tc.name, func(t *testing.T) {
-
-			// inject the fake subscription map
-			jsBackend.subscriptions = testCase.givenSubscriptionMap
-
-			// when
-			err := jsBackend.checkNATSSubscriptionsCount(testCase.givenSubscription)
-
-			// then
-			if testCase.wantErr == nil {
-				require.NoError(t, err)
-			} else {
-				require.ErrorIs(t, err, testCase.wantErr)
-			}
-		})
-	}
-
+	// then
+	require.ErrorIs(t, err, ErrMissingSubscription)
 }
 
-// HELPER FUNCTION
-
-// sets up the setupJetStreamBackend with the mocks instead of running a full-fledged NATS test server.
-func setupJetStreamBackend() (*JetStream, *mocks.JetStreamContext) {
-	jsCtx := &mocks.JetStreamContext{}
-	natsConfig := env.NatsConfig{}
-	metricsCollector := metrics.NewCollector()
-
-	return &JetStream{
-		Config:           natsConfig,
-		Conn:             nil,
-		jsCtx:            jsCtx,
-		subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
-		sinks:            sync.Map{},
-		metricsCollector: metricsCollector,
-		cleaner:          &cleaner.JetStreamCleaner{},
-	}, jsCtx
-}
-
-func NewSubscription(name, namespace string, opts ...subtesting.SubscriptionOpt) *v1alpha2.Subscription {
-	newSub := &v1alpha2.Subscription{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: v1alpha2.SubscriptionSpec{},
-	}
-	for _, o := range opts {
-		o(newSub)
-	}
-	return newSub
-}
+// HELPER FUNCTIONS
 
 func NewSubscriptionWithEmptyTypes() *v1alpha2.Subscription {
-	return NewSubscription("test", "test",
+	return subtesting.NewSubscription("test", "test",
 		subtesting.WithStatusTypes(nil),
 	)
 }
 
 func NewSubscriptionWithOneType() *v1alpha2.Subscription {
-	return NewSubscription("test", "test",
+	return subtesting.NewSubscription("test", "test",
 		subtesting.WithSourceAndType(subtesting.EventSource, subtesting.CloudEventType),
 		subtesting.WithTypeMatchingStandard(),
 		subtesting.WithMaxInFlight(env.DefaultMaxInFlight),

@@ -3,10 +3,9 @@ package jetstreamv2
 import (
 	"context"
 	"fmt"
+	controllererrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
 	"net/http"
 	"time"
-
-	backenderrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/errors"
 
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
@@ -34,6 +33,15 @@ const (
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerAcKWait      = 30 * time.Second
+)
+
+var (
+	ErrMissingSubscription = errors.New("failed to find a NATS subscription for a subject")
+	ErrAddConsumer         = errors.New("failed to add a consumer")
+	ErrGetConsumer         = errors.New("failed to get consumer info")
+	ErrUpdateConsumer      = errors.New("failed to update consumer")
+	ErrInvalidMaxInFlight  = errors.New("failed to parse the MaxInFlightMessages value from Subscription's Config")
+	ErrFailedSubscribe     = errors.New("failed to create NATS JetStream subscription")
 )
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
@@ -83,7 +91,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		go callback(m)
 	}
 
-	if err := js.syncNATSConsumersAndSubscriptions(subscription, asyncCallback); err != nil {
+	if err := js.syncConsumersAndSubscriptions(subscription, asyncCallback); err != nil {
 		return err
 	}
 
@@ -382,14 +390,14 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 	return nil
 }
 
-// syncNATSConsumersAndSubscriptions makes sure there are consumers and subscriptions created on the NATS Backend.
-func (js *JetStream) syncNATSConsumersAndSubscriptions(subscription *eventingv1alpha2.Subscription, asyncCallback func(m *nats.Msg)) error {
+// syncConsumersAndSubscriptions makes sure there are consumers and subscriptions created on the NATS Backend.
+func (js *JetStream) syncConsumersAndSubscriptions(subscription *eventingv1alpha2.Subscription, asyncCallback func(m *nats.Msg)) error {
 	for _, subject := range subscription.Status.Types {
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		maxInFlight, err := subscription.GetMaxInFlightMessages()
 		if err != nil {
-			return backenderrors.NewFailedToReadConfigError(eventingv1alpha2.MaxInFlightMessages, err)
+			return controllererrors.MakeError(ErrInvalidMaxInFlight, err)
 		}
 
 		consumerInfo, err := js.getOrCreateConsumer(jsSubject, jsSubKey, maxInFlight)
@@ -406,6 +414,10 @@ func (js *JetStream) syncNATSConsumersAndSubscriptions(subscription *eventingv1a
 			}
 		}
 
+		if _, ok := js.subscriptions[jsSubKey]; !ok {
+			return controllererrors.MakeError(ErrMissingSubscription, err)
+		}
+
 		// try to bind invalid NATS Subscriptions
 		if subExists && !natsSubscription.IsValid() {
 			if err := js.bindInvalidSubscriptions(jsSubject, jsSubKey, asyncCallback); err != nil {
@@ -418,10 +430,6 @@ func (js *JetStream) syncNATSConsumersAndSubscriptions(subscription *eventingv1a
 			return err
 		}
 	}
-	if err := js.checkNATSSubscriptionsCount(subscription); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -435,10 +443,10 @@ func (js *JetStream) getOrCreateConsumer(jsSubject string, jsSubKey Subscription
 				js.getConsumerConfig(jsSubKey, jsSubject, maxInFlight),
 			)
 			if err != nil {
-				return nil, backenderrors.NewFailedToAddConsumerError(err)
+				return nil, controllererrors.MakeError(ErrAddConsumer, err)
 			}
 		} else {
-			return nil, backenderrors.NewFailedToFetchConsumerInfoError(err)
+			return nil, controllererrors.MakeError(ErrGetConsumer, err)
 		}
 	}
 	return consumerInfo, nil
@@ -452,7 +460,7 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 		js.getDefaultSubscriptionOptions(jsSubKey, maxInFlight)...,
 	)
 	if err != nil {
-		return backenderrors.NewFailedToSubscribeOnNATSError(err)
+		return controllererrors.MakeError(ErrFailedSubscribe, err)
 	}
 	// save created JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -470,7 +478,7 @@ func (js *JetStream) bindInvalidSubscriptions(jsSubject string, jsSubKey Subscri
 		nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
 	)
 	if err != nil {
-		return backenderrors.NewFailedToSubscribeOnNATSError(err)
+		return controllererrors.MakeError(ErrFailedSubscribe, err)
 	}
 	// save recreated JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -489,19 +497,7 @@ func (js *JetStream) syncConsumerMaxInFlight(consumerInfo nats.ConsumerInfo, max
 
 	// update the consumer
 	if _, err := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); err != nil {
-		return backenderrors.NewFailedToUpdateConsumerInfoError(err)
-	}
-	return nil
-}
-
-// checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription types
-func (js *JetStream) checkNATSSubscriptionsCount(subscription *eventingv1alpha2.Subscription) error {
-	for _, subject := range subscription.Status.Types {
-		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
-		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-		if _, ok := js.subscriptions[jsSubKey]; !ok {
-			return backenderrors.NewMissingSubscriptionError(subject)
-		}
+		return controllererrors.MakeError(ErrUpdateConsumer, err)
 	}
 	return nil
 }
