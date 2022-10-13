@@ -315,7 +315,7 @@ describe('Telemetry Operator', function() {
 
   context('Configurable Tracing', function() {
     context('TracePipeline', function() {
-      it('Should have created TracePipeline', async function () {
+      it('Should have created TracePipeline', async function() {
         await waitForTracePipeline('simple');
       });
 
