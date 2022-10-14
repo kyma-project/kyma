@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -11,6 +12,7 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/pkg/errors"
+	"github.com/tidwall/pretty"
 	apix "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -137,6 +139,13 @@ func (w *ConvertingWebhook) convertFunction(src, dst runtime.Object) error {
 
 // v1alpha1 -> v1alpha2
 func (w *ConvertingWebhook) convertFunctionV1Alpha1ToV1Alpha2(src, dst runtime.Object) error {
+	json_raw, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+
+	log.Default().Println(string(pretty.Pretty(json_raw)))
+
 	in := src.(*serverlessv1alpha1.Function)
 
 	out, ok := dst.(*serverlessv1alpha2.Function)
