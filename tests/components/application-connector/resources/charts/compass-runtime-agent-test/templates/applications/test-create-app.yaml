@@ -10,4 +10,4 @@ spec:
   longDescription: ""
   providerDisplayName: ""
   services: []
-  skipVerify: false
+  skipVerify: true
