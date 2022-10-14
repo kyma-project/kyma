@@ -12,15 +12,9 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-)
-
-const (
-	sectionsFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
-	filesFinalizer    = "FLUENT_BIT_FILES"
 )
 
 type syncer struct {
@@ -73,9 +67,8 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, pipeline *telemetryv
 	changed := false
 	cmKey := pipeline.Name + ".conf"
 	if pipeline.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer) {
+		if cm.Data != nil {
 			delete(cm.Data, cmKey)
-			controllerutil.RemoveFinalizer(pipeline, sectionsFinalizer)
 			changed = true
 		}
 	} else {
@@ -88,10 +81,6 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, pipeline *telemetryv
 			changed = true
 		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != newConfig {
 			cm.Data[cmKey] = newConfig
-			changed = true
-		}
-		if !controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer) {
-			controllerutil.AddFinalizer(pipeline, sectionsFinalizer)
 			changed = true
 		}
 	}
@@ -117,7 +106,6 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, pipeline *telemetryv1al
 		if pipeline.DeletionTimestamp != nil {
 			if _, hasKey := cm.Data[file.Name]; hasKey {
 				delete(cm.Data, file.Name)
-				controllerutil.RemoveFinalizer(pipeline, filesFinalizer)
 				changed = true
 			}
 		} else {
@@ -126,10 +114,6 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, pipeline *telemetryv1al
 				changed = true
 			} else if oldContent, hasKey := cm.Data[file.Name]; !hasKey || oldContent != file.Content {
 				cm.Data[file.Name] = file.Content
-				changed = true
-			}
-			if !controllerutil.ContainsFinalizer(pipeline, filesFinalizer) {
-				controllerutil.AddFinalizer(pipeline, filesFinalizer)
 				changed = true
 			}
 		}
