@@ -21,7 +21,6 @@ test-compass-runtime-agent-debug:
 
 	helm template resources/charts/compass-runtime-agent-test \
 	--set namespace=$(NAMESPACE) \
-	--set testTenant=$(COMPASS_TENANT) \
 	--set compassCredentials.clientID=$(COMPASS_CLIENT_ID) \
 	--set compassCredentials.clientSecret=$(COMPASS_CLIENT_SECRET) \
 	--set compassCredentials.tokensEndpoint=$(TOKENS_ENDPOINT) \
