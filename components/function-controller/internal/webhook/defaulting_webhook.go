@@ -66,7 +66,6 @@ func (w *DefaultingWebHook) handleFunctionDefaulting(req admission.Request) admi
 			}
 			fn.Default(w.configAlphaV2)
 			f = fn
-
 		}
 	default:
 		return admission.Errored(http.StatusBadRequest, errors.Errorf("Invalid resource version provided: %s", req.Kind.Version))

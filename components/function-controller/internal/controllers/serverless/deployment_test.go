@@ -332,7 +332,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 				expected:       fixDeploymentWithReplicas(2),
 				scalingEnabled: true,
 			},
-			want: true,
+			want: false,
 		},
 		{
 			name: "scaling enabled and replicas match",
@@ -365,7 +365,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			got := equalDeployments(tt.args.existing, tt.args.expected, tt.args.scalingEnabled)
+			got := equalDeployments(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

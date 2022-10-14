@@ -87,7 +87,7 @@ The following code samples illustrate how to enrich the default trace with custo
    </div>
 
 2. [Expose your Function](./svls-03-expose-function.md).
-3. [Expose Jaeger securely](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) and open the following Jaeger's address in your browser:
+3. [Expose Jaeger securely](../../04-operation-guides/security/sec-06-access-expose-grafana.md) and open the following Jaeger's address in your browser:
 
    ```text
    http://localhost:16686

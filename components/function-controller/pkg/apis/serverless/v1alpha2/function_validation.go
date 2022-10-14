@@ -297,9 +297,7 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 	maxReplicas = spec.ScaleConfig.MaxReplicas
 	minReplicas = spec.ScaleConfig.MinReplicas
 	allErrs := []string{}
-	if spec.Replicas != nil && spec.ScaleConfig != nil {
-		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are use at the same time")
-	}
+
 	if spec.Replicas == nil && spec.ScaleConfig == nil {
 		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are empty at the same time")
 	}
@@ -320,8 +318,8 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 	var labels map[string]string
-	if spec.Templates != nil && spec.Templates.FunctionPod != nil && spec.Templates.FunctionPod.Metadata != nil && spec.Templates.FunctionPod.Metadata.Labels != nil {
-		labels = spec.Templates.FunctionPod.Metadata.Labels
+	if spec.Template != nil && spec.Template.Labels != nil {
+		labels = spec.Template.Labels
 	}
 	fieldPath := field.NewPath("spec.labels")
 

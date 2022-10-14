@@ -3,7 +3,7 @@ package manifestprocessor
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 	"text/template"
@@ -26,7 +26,7 @@ func parseManifest(input []byte) (*unstructured.Unstructured, error) {
 }
 
 func getManifestsFromFile(fileName string, directory string, separator string) ([]string, error) {
-	data, err := ioutil.ReadFile(path.Join(directory, fileName))
+	data, err := os.ReadFile(path.Join(directory, fileName))
 	if err != nil {
 		return nil, err
 	}
