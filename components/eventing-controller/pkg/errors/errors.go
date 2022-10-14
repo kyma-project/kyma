@@ -11,7 +11,7 @@ import (
 // the actualError is encapsulated into a new error and not returned directly.
 // This forces callers to use
 // errors.Is(err, pkg.ErrPermission) instead of
-// err == pkg.ErrPermission { … }
+// err == pkg.ErrPermission { … }.
 func MakeError(actualError, underlyingError error) error {
 	return fmt.Errorf("%w: %v", actualError, underlyingError)
 }

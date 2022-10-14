@@ -537,8 +537,8 @@ func (js *JetStream) syncConsumerMaxInFlight(subscription *eventingv1alpha2.Subs
 	consumerConfig.MaxAckPending = maxInFlight
 
 	// update the consumer
-	if _, err := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); err != nil {
-		return controllererrors.MakeError(ErrUpdateConsumer, err)
+	if _, updateErr := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); updateErr != nil {
+		return controllererrors.MakeError(ErrUpdateConsumer, updateErr)
 	}
 	return nil
 }

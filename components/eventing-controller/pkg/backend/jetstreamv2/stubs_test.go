@@ -1,4 +1,4 @@
-package jetstreamv2
+package jetstreamv2 //nolint:nolintlint,testpackage
 
 import (
 	"github.com/nats-io/nats.go"
@@ -18,53 +18,53 @@ type jetStreamContextStub struct {
 	updateError error
 }
 
-func (j jetStreamContextStub) Streams(opts ...nats.JSOpt) <-chan *nats.StreamInfo {
-	//TODO implement me
+func (j jetStreamContextStub) Streams(_ ...nats.JSOpt) <-chan *nats.StreamInfo {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) Consumers(stream string, opts ...nats.JSOpt) <-chan *nats.ConsumerInfo {
-	//TODO implement me
+func (j jetStreamContextStub) Consumers(_ string, _ ...nats.JSOpt) <-chan *nats.ConsumerInfo {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ObjectStoreNames(opts ...nats.ObjectOpt) <-chan string {
-	//TODO implement me
+func (j jetStreamContextStub) ObjectStoreNames(_ ...nats.ObjectOpt) <-chan string {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ObjectStores(opts ...nats.ObjectOpt) <-chan nats.ObjectStore {
-	//TODO implement me
+func (j jetStreamContextStub) ObjectStores(_ ...nats.ObjectOpt) <-chan nats.ObjectStore {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) Publish(subj string, data []byte, opts ...nats.PubOpt) (*nats.PubAck, error) {
-	//TODO implement me
+func (j jetStreamContextStub) Publish(_ string, _ []byte, _ ...nats.PubOpt) (*nats.PubAck, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) PublishMsg(m *nats.Msg, opts ...nats.PubOpt) (*nats.PubAck, error) {
-	//TODO implement me
+func (j jetStreamContextStub) PublishMsg(_ *nats.Msg, _ ...nats.PubOpt) (*nats.PubAck, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) PublishAsync(subj string, data []byte, opts ...nats.PubOpt) (nats.PubAckFuture, error) {
-	//TODO implement me
+func (j jetStreamContextStub) PublishAsync(_ string, _ []byte, _ ...nats.PubOpt) (nats.PubAckFuture, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) PublishMsgAsync(m *nats.Msg, opts ...nats.PubOpt) (nats.PubAckFuture, error) {
-	//TODO implement me
+func (j jetStreamContextStub) PublishMsgAsync(_ *nats.Msg, _ ...nats.PubOpt) (nats.PubAckFuture, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
 func (j jetStreamContextStub) PublishAsyncPending() int {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (j jetStreamContextStub) PublishAsyncComplete() <-chan struct{} {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -72,99 +72,103 @@ func (j jetStreamContextStub) Subscribe(_ string, _ nats.MsgHandler, _ ...nats.S
 	return j.subscribe, j.subscribeError
 }
 
-func (j jetStreamContextStub) SubscribeSync(subj string, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
+func (j jetStreamContextStub) SubscribeSync(_ string, _ ...nats.SubOpt) (*nats.Subscription, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ChanSubscribe(subj string, ch chan *nats.Msg, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
+func (j jetStreamContextStub) ChanSubscribe(_ string, _ chan *nats.Msg, _ ...nats.SubOpt) (*nats.Subscription, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ChanQueueSubscribe(subj, queue string, ch chan *nats.Msg, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
+func (j jetStreamContextStub) ChanQueueSubscribe(_, _ string,
+	_ chan *nats.Msg, _ ...nats.SubOpt) (*nats.Subscription, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
+func (j jetStreamContextStub) QueueSubscribe(_, _ string, _ nats.MsgHandler,
+	_ ...nats.SubOpt) (*nats.Subscription, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) QueueSubscribeSync(subj, queue string, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
+func (j jetStreamContextStub) QueueSubscribeSync(_, _ string, _ ...nats.SubOpt) (*nats.Subscription, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) PullSubscribe(subj, durable string, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	//TODO implement me
+func (j jetStreamContextStub) PullSubscribe(_, _ string, _ ...nats.SubOpt) (*nats.Subscription, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error) {
+func (j jetStreamContextStub) AddStream(_ *nats.StreamConfig, _ ...nats.JSOpt) (*nats.StreamInfo, error) {
 	panic("really implement me")
 }
 
-func (j jetStreamContextStub) UpdateStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error) {
-	//TODO implement me
+func (j jetStreamContextStub) UpdateStream(_ *nats.StreamConfig, _ ...nats.JSOpt) (*nats.StreamInfo, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) DeleteStream(name string, opts ...nats.JSOpt) error {
-	//TODO implement me
+func (j jetStreamContextStub) DeleteStream(_ string, _ ...nats.JSOpt) error {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) StreamInfo(stream string, opts ...nats.JSOpt) (*nats.StreamInfo, error) {
+func (j jetStreamContextStub) StreamInfo(_ string, _ ...nats.JSOpt) (*nats.StreamInfo, error) {
 	panic("really implement me")
 }
 
-func (j jetStreamContextStub) PurgeStream(name string, opts ...nats.JSOpt) error {
-	//TODO implement me
+func (j jetStreamContextStub) PurgeStream(_ string, _ ...nats.JSOpt) error {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) StreamsInfo(opts ...nats.JSOpt) <-chan *nats.StreamInfo {
-	//TODO implement me
+func (j jetStreamContextStub) StreamsInfo(_ ...nats.JSOpt) <-chan *nats.StreamInfo {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) StreamNames(opts ...nats.JSOpt) <-chan string {
-	//TODO implement me
+func (j jetStreamContextStub) StreamNames(_ ...nats.JSOpt) <-chan string {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) GetMsg(name string, seq uint64, opts ...nats.JSOpt) (*nats.RawStreamMsg, error) {
-	//TODO implement me
+func (j jetStreamContextStub) GetMsg(_ string, _ uint64, _ ...nats.JSOpt) (*nats.RawStreamMsg, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) GetLastMsg(name, subject string, opts ...nats.JSOpt) (*nats.RawStreamMsg, error) {
-	//TODO implement me
+func (j jetStreamContextStub) GetLastMsg(_, _ string, _ ...nats.JSOpt) (*nats.RawStreamMsg, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) DeleteMsg(name string, seq uint64, opts ...nats.JSOpt) error {
-	//TODO implement me
+func (j jetStreamContextStub) DeleteMsg(_ string, _ uint64, _ ...nats.JSOpt) error {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) SecureDeleteMsg(name string, seq uint64, opts ...nats.JSOpt) error {
-	//TODO implement me
+func (j jetStreamContextStub) SecureDeleteMsg(_ string, _ uint64, _ ...nats.JSOpt) error {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) AddConsumer(_ string, _ *nats.ConsumerConfig, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+func (j jetStreamContextStub) AddConsumer(_ string, _ *nats.ConsumerConfig,
+	_ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
 	return j.addConsumer, j.addConsumerError
 }
 
-func (j jetStreamContextStub) UpdateConsumer(_ string, _ *nats.ConsumerConfig, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+func (j jetStreamContextStub) UpdateConsumer(_ string, _ *nats.ConsumerConfig,
+	_ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
 	return j.update, j.updateError
 }
 
-func (j jetStreamContextStub) DeleteConsumer(stream, consumer string, opts ...nats.JSOpt) error {
-	//TODO implement me
+func (j jetStreamContextStub) DeleteConsumer(_, _ string, _ ...nats.JSOpt) error {
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -172,47 +176,47 @@ func (j jetStreamContextStub) ConsumerInfo(_, _ string, _ ...nats.JSOpt) (*nats.
 	return j.consumerInfo, j.consumerInfoError
 }
 
-func (j jetStreamContextStub) ConsumersInfo(stream string, opts ...nats.JSOpt) <-chan *nats.ConsumerInfo {
-	//TODO implement me
+func (j jetStreamContextStub) ConsumersInfo(_ string, _ ...nats.JSOpt) <-chan *nats.ConsumerInfo {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ConsumerNames(stream string, opts ...nats.JSOpt) <-chan string {
-	//TODO implement me
+func (j jetStreamContextStub) ConsumerNames(_ string, _ ...nats.JSOpt) <-chan string {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) AccountInfo(opts ...nats.JSOpt) (*nats.AccountInfo, error) {
-	//TODO implement me
+func (j jetStreamContextStub) AccountInfo(_ ...nats.JSOpt) (*nats.AccountInfo, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) KeyValue(bucket string) (nats.KeyValue, error) {
-	//TODO implement me
+func (j jetStreamContextStub) KeyValue(_ string) (nats.KeyValue, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) CreateKeyValue(cfg *nats.KeyValueConfig) (nats.KeyValue, error) {
-	//TODO implement me
+func (j jetStreamContextStub) CreateKeyValue(_ *nats.KeyValueConfig) (nats.KeyValue, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) DeleteKeyValue(bucket string) error {
-	//TODO implement me
+func (j jetStreamContextStub) DeleteKeyValue(_ string) error {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) ObjectStore(bucket string) (nats.ObjectStore, error) {
-	//TODO implement me
+func (j jetStreamContextStub) ObjectStore(_ string) (nats.ObjectStore, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) CreateObjectStore(cfg *nats.ObjectStoreConfig) (nats.ObjectStore, error) {
-	//TODO implement me
+func (j jetStreamContextStub) CreateObjectStore(_ *nats.ObjectStoreConfig) (nats.ObjectStore, error) {
+	// TODO implement me
 	panic("implement me")
 }
 
-func (j jetStreamContextStub) DeleteObjectStore(bucket string) error {
-	//TODO implement me
+func (j jetStreamContextStub) DeleteObjectStore(_ string) error {
+	// TODO implement me
 	panic("implement me")
 }

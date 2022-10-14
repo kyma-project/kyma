@@ -1,4 +1,4 @@
-package jetstreamv2
+package jetstreamv2 //nolint:nolintlint,testpackage
 
 import (
 	"fmt"
