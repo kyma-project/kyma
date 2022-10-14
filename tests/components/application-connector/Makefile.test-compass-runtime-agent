@@ -1,5 +1,7 @@
 NAMESPACE ?= test
 GOPATH ?= $(shell go env GOPATH)
+DIRECTOR_URL=https://compass-gateway-auth-oauth.$(COMPASS_HOST)/director/graphql
+TOKENS_ENDPOINT=https://oauth2.${COMPASS_HOST}/oauth2/token
 
 COMPASS_TEST_IMAGE = "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/compass-runtime-agent-test:$(DOCKER_TAG)"
 TEST_TIMEOUT = "3m"
@@ -19,9 +21,10 @@ test-compass-runtime-agent-debug:
 
 	helm template resources/charts/compass-runtime-agent-test \
 	--set namespace=$(NAMESPACE) \
-	--set compassCredentials.clientID=$(OAUTH_COMPASS_CLIENT_ID) \
-	--set compassCredentials.clientSecret=$(OAUTH_COMPASS_CLIENT_SECRET) \
-	--set compassCredentials.tokensEndpoint=$(OAUTH_COMPASS_TOKENS_ENDPOINT) \
+	--set testTenant=$(COMPASS_TENANT) \
+	--set compassCredentials.clientID=$(COMPASS_CLIENT_ID) \
+	--set compassCredentials.clientSecret=$(COMPASS_CLIENT_SECRET) \
+	--set compassCredentials.tokensEndpoint=$(TOKENS_ENDPOINT) \
 	--set directorUrl=$(DIRECTOR_URL) \
     | kubectl apply -f -
 
