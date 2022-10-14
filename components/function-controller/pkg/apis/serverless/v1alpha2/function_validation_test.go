@@ -275,15 +275,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					Templates: &Templates{
-						BuildJob: nil,
-						FunctionPod: &PodTemplate{
-							Metadata: &MetadataTemplate{
-								Labels: map[string]string{
-									"should-be-ok":     "test",
-									"should BE not OK": "test",
-								},
-							},
+					Template: &Template{
+						Labels: map[string]string{
+							"shoul-be-ok":      "test",
+							"should BE not OK": "test",
 						},
 					},
 				},
