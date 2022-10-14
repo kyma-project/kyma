@@ -98,12 +98,8 @@ type Template struct {
 
 type ResourceRequirements struct {
 	// +optional
-	// Set resources with predefined values.
 	Profile string `json:"profile,omitempty"`
-
 	// +optional
-	//DEPRECATED: use templates.functionPod.spec.resources or
-	//templates.buildJob.spec.resources to configure resources
 	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 }
 
@@ -120,59 +116,6 @@ type ResourceConfiguration struct {
 	Build *ResourceRequirements `json:"build,omitempty"`
 	// +optional
 	Function *ResourceRequirements `json:"function,omitempty"`
-}
-
-type PodSpecTemplate struct {
-	// Compute Resources required by container created by function controller.
-	// +optional
-	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
-
-	// List of environment variables to set in the container.
-	// +optional
-	// +patchMergeKey=name
-	// +patchStrategy=merge
-	Env []v1.EnvVar `json:"env,omitempty"`
-
-	// Pod volumes to mount into the container's filesystem.
-	// +optional
-	// +patchMergeKey=mountPath
-	// +patchStrategy=merge
-	VolumeMounts []v1.VolumeMount `json:"volumeMounts,omitempty"`
-}
-
-type MetadataTemplate struct {
-	// Additional labels
-	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
-
-	// Additional annotations
-	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
-}
-
-type PodTemplate struct {
-	// Standard object's metadata.
-	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-	// +optional
-	Metadata *MetadataTemplate `json:"metadata,omitempty"`
-
-	// Additional specification for pod created by function-controller
-	//+optional
-	Spec *PodSpecTemplate `json:"spec,omitempty"`
-
-	// Configuration of available volumes for pod
-	// +optional
-	Volumes []v1.Volume `json:"volumes,omitempty"`
-}
-
-type Templates struct {
-	// Additional specification for build job's pod
-	// +optional
-	BuildJob *PodTemplate `json:"buildJob,omitempty"`
-
-	// Additional specification for function's pod
-	// +optional
-	FunctionPod *PodTemplate `json:"functionPod,omitempty"`
 }
 
 const (
@@ -192,9 +135,7 @@ type FunctionSpec struct {
 
 	Source Source `json:"source"`
 
-	//DEPRECATED: use spec.templates.functionPod.env or spec.templates.buildJob.env
-	//Env defines an array of key value pairs need to be used as env variable for a function
-	// +optional
+	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
@@ -207,13 +148,7 @@ type FunctionSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
-	//DEPRECATED: use templates.functionPod.metadata for function's pod
-	//templates.buildJob.metadata for function's build job
 	Template *Template `json:"template,omitempty"`
-
-	// +optional
-	// Additional configuration of function's created pods
-	Templates *Templates `json:"templates,omitempty"`
 }
 
 // TODO: Status related things needs to be developed.
