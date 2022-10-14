@@ -6,6 +6,7 @@ import (
 
 type FunctionConfig struct {
 	PublisherProxyAddress                       string        `envconfig:"default=http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"`
+	JaegerServiceEndpoint                       string        `envconfig:"default=http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"`
 	TraceCollectorEndpoint                      string        `envconfig:"default=http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"`
 	ImageRegistryDefaultDockerConfigSecretName  string        `envconfig:"default=serverless-registry-config-default"`
 	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`
