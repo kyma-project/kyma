@@ -315,7 +315,7 @@ async function checkInClusterEventTracing(targetNamespace) {
   ];
 
   // wait sometime for jaeger to complete tracing data
-  await sleep(60_000);
+  await sleep(10_000);
   await checkTrace(traceId, correctTraceProcessSequence);
 }
 

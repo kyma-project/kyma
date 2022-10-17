@@ -345,7 +345,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   });
 }
 
-function waitForNamespace(name, timeout = 30000) {
+function waitForNamespace(name, timeout = 30_000) {
   return waitForK8sObject(
       `/api/v1/namespaces/${name}`,
       {},
@@ -360,7 +360,7 @@ function waitForNamespace(name, timeout = 30000) {
   );
 }
 
-function waitForClusterAddonsConfiguration(name, timeout = 90000) {
+function waitForClusterAddonsConfiguration(name, timeout = 90_000) {
   return waitForK8sObject(
       '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
       {},
@@ -372,7 +372,7 @@ function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   );
 }
 
-function waitForApplicationCr(appName, timeout = 300000) {
+function waitForApplicationCr(appName, timeout = 300_000) {
   return waitForK8sObject(
       '/apis/applicationconnector.kyma-project.io/v1alpha1/applications',
       {},
@@ -386,7 +386,7 @@ function waitForApplicationCr(appName, timeout = 300000) {
   );
 }
 
-function waitForEndpoint(name, namespace = 'default', timeout = 300000) {
+function waitForEndpoint(name, namespace = 'default', timeout = 300_000) {
   return waitForK8sObject(
       `/api/v1/namespaces/${namespace}/endpoints`,
       {},
@@ -401,7 +401,7 @@ function waitForEndpoint(name, namespace = 'default', timeout = 300000) {
   );
 }
 
-function waitForFunction(name, namespace = 'default', timeout = 90000) {
+function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
       `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
       {},
@@ -466,7 +466,7 @@ async function getEventingBackend(namespace = 'kyma-system') {
   return '';
 }
 
-function waitForSubscription(name, namespace = 'default', timeout = 180000) {
+function waitForSubscription(name, namespace = 'default', timeout = 180_000) {
   return waitForK8sObject(
       `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
       {},
@@ -484,7 +484,7 @@ function waitForSubscription(name, namespace = 'default', timeout = 180000) {
   );
 }
 
-function waitForReplicaSet(name, namespace = 'default', timeout = 90000) {
+function waitForReplicaSet(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
       `/apis/apps/v1/namespaces/${namespace}/replicasets`,
       {},
@@ -501,7 +501,7 @@ function waitForReplicaSet(name, namespace = 'default', timeout = 90000) {
   );
 }
 
-function waitForDaemonSet(name, namespace = 'default', timeout = 90000) {
+function waitForDaemonSet(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
       `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,
       {},
@@ -515,7 +515,7 @@ function waitForDaemonSet(name, namespace = 'default', timeout = 90000) {
   );
 }
 
-function waitForDeployment(name, namespace = 'default', timeout = 90000) {
+function waitForDeployment(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
       `/apis/apps/v1/namespaces/${namespace}/deployments`,
       {},
@@ -533,7 +533,7 @@ function waitForDeployment(name, namespace = 'default', timeout = 90000) {
   );
 }
 
-function waitForStatefulSet(name, namespace = 'default', timeout = 90000) {
+function waitForStatefulSet(name, namespace = 'default', timeout = 90_000) {
   return waitForK8sObject(
       `/apis/apps/v1/namespaces/${namespace}/statefulsets`,
       {},
@@ -548,7 +548,7 @@ function waitForStatefulSet(name, namespace = 'default', timeout = 90000) {
   );
 }
 
-function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) {
+function waitForJob(name, namespace = 'default', timeout = 900_000, success = 1) {
   return waitForK8sObject(
       `/apis/batch/v1/namespaces/${namespace}/jobs`,
       {},
@@ -611,7 +611,7 @@ async function printContainerLogs(selector, container, namespace = 'default', ti
   process.stdout.write('Done getting logs\n');
 }
 
-function waitForVirtualService(namespace, apiRuleName, timeout = 30000) {
+function waitForVirtualService(namespace, apiRuleName, timeout = 30_000) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = {
     labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}`,
@@ -738,6 +738,7 @@ function waitForPodWithLabelAndCondition(
       and condition ${condition}=${conditionStatus} timeout (${timeout} ms)`,
   );
 }
+
 function waitForPodStatusWithLabel(
     labelKey,
     labelValue,
@@ -763,7 +764,7 @@ function waitForPodStatusWithLabel(
 function waitForConfigMap(
     cmName,
     namespace = 'default',
-    timeout = 90000,
+    timeout = 90_000,
 ) {
   return waitForK8sObject(
       `/api/v1/namespaces/${namespace}/configmaps`,

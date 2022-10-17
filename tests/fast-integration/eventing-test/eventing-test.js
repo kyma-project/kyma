@@ -31,7 +31,7 @@ const {
   isDebugEnabled,
   k8sApply,
   deleteK8sPod,
-  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition, sleep,
+  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -53,8 +53,7 @@ const {
 const {
   bebBackend,
   natsBackend, getEventMeshNamespace,
-  kymaSystem, telemetryOperatorLabel, readyCondition, conditionReady, jaegerLabel, jaegerEndpoint,
-  // jaegerLabel, jaegerOperatorLabel,
+  kymaSystem, telemetryOperatorLabel, conditionReady, jaegerLabel, jaegerEndpoint,
 } = require('./common/common');
 const {
   assert,
