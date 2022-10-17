@@ -362,6 +362,7 @@ func (s *systemState) podLabels() map[string]string {
 
 type buildDeploymentArgs struct {
 	DockerPullAddress      string
+	JaegerServiceEndpoint  string
 	TraceCollectorEndpoint string
 	PublisherProxyAddress  string
 	ImagePullAccountName   string
@@ -382,6 +383,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 
 	deploymentEnvs := buildDeploymentEnvs(
 		s.instance.GetNamespace(),
+		cfg.JaegerServiceEndpoint,
 		cfg.TraceCollectorEndpoint,
 		cfg.PublisherProxyAddress,
 	)
@@ -495,20 +497,16 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 }
 
 func (s *systemState) getReplicas(defaultVal int32) *int32 {
-	if s.instance.Spec.ScaleConfig != nil {
-		return s.instance.Spec.ScaleConfig.MinReplicas
-	}
 	if s.instance.Spec.Replicas != nil {
 		return s.instance.Spec.Replicas
 	}
-
 	return &defaultVal
 }
 
 // TODO do not negate
 func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
 	return len(s.deployments.Items) == 1 &&
-		equalDeployments(s.deployments.Items[0], d, isScalingEnabled(&s.instance))
+		equalDeployments(s.deployments.Items[0], d)
 }
 
 func (s *systemState) hasDeploymentConditionTrueStatusWithReason(conditionType appsv1.DeploymentConditionType, reason string) bool {
@@ -604,7 +602,6 @@ func (s *systemState) defaultReplicas() (int32, int32) {
 
 func (s *systemState) buildHorizontalPodAutoscaler(targetCPUUtilizationPercentage int32) autoscalingv1.HorizontalPodAutoscaler {
 	minReplicas, maxReplicas := s.defaultReplicas()
-	deploymentName := s.deployments.Items[0].GetName()
 	return autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -613,9 +610,9 @@ func (s *systemState) buildHorizontalPodAutoscaler(targetCPUUtilizationPercentag
 		},
 		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
 			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
-				Kind:       "Deployment",
-				Name:       deploymentName,
-				APIVersion: appsv1.SchemeGroupVersion.String(),
+				Kind:       serverlessv1alpha2.FunctionKind,
+				Name:       s.instance.Name,
+				APIVersion: serverlessv1alpha2.GroupVersion.String(),
 			},
 			MinReplicas:                    &minReplicas,
 			MaxReplicas:                    maxReplicas,

@@ -9,7 +9,7 @@ If you're interested in learning more about the Observability area, check out th
 - Check out the different ways to [access the logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) provided by Kubernetes and Loki.
 - Learn how to adjust Loki's [log limits](../../../04-operation-guides/operations/obsv-02-adjust-loki.md).
 
-- See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) the services Grafana, Jaeger, and Kiali.
+- See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-grafana.md) the services Grafana, Jaeger, and Kiali.
 
 - Troubleshoot Observability-related issues:
   - [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/observability/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md)
@@ -19,3 +19,5 @@ If you're interested in learning more about the Observability area, check out th
 - Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) components.
 
 - Find the [configuration parameters for Monitoring, Logging, Tracing, and Kiali](../../../05-technical-reference/00-configuration-parameters/obsv-01-configpara-observability.md).
+
+- [Deploy Kiali](https://github.com/kyma-project/examples/blob/main/kiali/README.md) to a Kyma cluster

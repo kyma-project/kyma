@@ -11,7 +11,7 @@ require (
 	github.com/vrischmann/envconfig v1.3.0
 	gitlab.com/rodrigoodhin/gocure v0.0.0-20220301084845-20a07464f4f0
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129
-	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
+	golang.org/x/oauth2 v0.0.0-20221006150949-b44042a4b9c1
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
 	sigs.k8s.io/yaml v1.3.0

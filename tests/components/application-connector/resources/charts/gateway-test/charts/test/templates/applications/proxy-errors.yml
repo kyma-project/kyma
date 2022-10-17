@@ -22,7 +22,7 @@ spec:
     - displayName: timeout
       name: timeout
       providerDisplayName: timeout
-      description: Should return 503 when target times out
+      description: Should return 504 when target times out
       id: "{{ uuidv4 }}"
       entries:
         - type: API

@@ -12,12 +12,13 @@ replace (
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api => k8s.io/api v0.22.7
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.7
-	k8s.io/apimachinery => k8s.io/apimachinery v0.22.7
+	k8s.io/apimachinery => k8s.io/apimachinery v0.22.15
 	k8s.io/client-go => k8s.io/client-go v0.22.7
 	k8s.io/component-base => k8s.io/component-base v0.22.7
 )
 
 require (
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-logr/zapr v1.2.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20220602092229-f2e29f34ed5e
 	github.com/libgit2/git2go/v31 v31.7.9
@@ -46,7 +47,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect

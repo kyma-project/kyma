@@ -13,7 +13,7 @@ global:
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.3.0-4256edd8
+      version: 7.3.0-c54bc74b
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
@@ -30,7 +30,7 @@ authProxy:
   enabled: true
   replicaCount: 1
   port: 3000
-  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
+  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-grafana"
   config:
     clientId: "dummy"
     clientSecret: "dummy"
