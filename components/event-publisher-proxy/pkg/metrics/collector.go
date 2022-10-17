@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/histogram"
 )
 
 const (
@@ -43,7 +45,7 @@ type Collector struct {
 }
 
 // NewCollector a new instance of Collector
-func NewCollector() *Collector {
+func NewCollector(latency histogram.BucketsProvider) *Collector {
 	return &Collector{
 		errors: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -54,8 +56,9 @@ func NewCollector() *Collector {
 		),
 		latency: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name: LatencyKey,
-				Help: latencyHelp,
+				Name:    LatencyKey,
+				Help:    latencyHelp,
+				Buckets: latency.Buckets(),
 			},
 			[]string{responseCodeLabel, destSvcLabel},
 		),
