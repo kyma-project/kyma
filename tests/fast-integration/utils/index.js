@@ -715,7 +715,7 @@ function waitForPodWithLabelAndCondition(
     namespace = 'default',
     condition = 'Ready',
     conditionStatus = 'True',
-    timeout = 90000,
+    timeout = 90_000,
 ) {
   const query = {
     labelSelector: `${labelKey}=${labelValue}`,
@@ -725,7 +725,7 @@ function waitForPodWithLabelAndCondition(
       query,
       (_type, _apiObj, watchObj) => {
         debug(`Waiting for pod "${namespace}/${watchObj.object.metadata.name}" 
-          to have condition "${condition}: ${conditionStatus}" for ${timeout/1000} seconds`);
+          to have condition "${condition}: ${conditionStatus}" for ${timeout} ms`);
         return (
           watchObj.object.status.conditions &&
             watchObj.object.status.conditions.some(
@@ -734,7 +734,8 @@ function waitForPodWithLabelAndCondition(
         );
       },
       timeout,
-      `not found.`,
+      `Waiting for pod with label ${labelKey}=${labelValue} 
+      and condition ${condition}=${conditionStatus} timeout (${timeout} ms)`,
   );
 }
 function waitForPodStatusWithLabel(
@@ -742,7 +743,7 @@ function waitForPodStatusWithLabel(
     labelValue,
     namespace = 'default',
     status = 'Running',
-    timeout = 90000,
+    timeout = 90_000,
 ) {
   const query = {
     labelSelector: `${labelKey}=${labelValue}`,

@@ -53,7 +53,7 @@ const {
 const {
   bebBackend,
   natsBackend, getEventMeshNamespace,
-  kymaSystem,
+  kymaSystem, telemetryOperatorLabel, readyCondition, conditionReady, jaegerLabel, jaegerEndpoint,
   // jaegerLabel, jaegerOperatorLabel,
 } = require('./common/common');
 const {
@@ -74,17 +74,15 @@ describe('Eventing tests', function() {
   });
 
   before('Ensure tracing is ready', async function() {
-    await waitForPodWithLabelAndCondition('app', 'jaeger', kymaSystem, 'Ready', 'True');
-    await waitForEndpoint('tracing-jaeger-collector', kymaSystem);
+    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
+        conditionReady.status);
+    await waitForEndpoint(jaegerEndpoint, kymaSystem);
   });
 
   before('Expose Grafana', async function() {
     await exposeGrafana();
-    debug('🐈‍');
-    await sleep(20_000);
-    debug('🐕');
-    await waitForPodWithLabelAndCondition('control-plane', 'telemetry-operator', 'kyma-system',
-        'Ready', 'True', 60_000);
+    await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
+        conditionReady.condition, conditionReady.status, 60_000);
   });
 
   before('Get stream config for JetStream', async function() {
