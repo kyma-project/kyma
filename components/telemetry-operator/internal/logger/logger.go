@@ -24,6 +24,7 @@ func New(format, level string) (*Logger, error) {
 	}
 
 	log, err := logger.New(logFormat, logLevel)
+
 	if err != nil {
 		return nil, err
 	}

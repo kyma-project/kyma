@@ -90,7 +90,7 @@ tls.crt: tls.key
 gen-webhook-cert-local: tls.key tls.crt
 
 run-local: gen-webhook-cert-local manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system --cert-dir=.
+	go run ./main.go --logging-format=json --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system --cert-dir=.
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image

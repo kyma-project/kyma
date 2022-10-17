@@ -127,11 +127,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Main!!!")
+	fmt.Println("Main main main!!!")
 	setupLog.Info("Main info !!!")
 
-	ctrLogger, err := logger.New(logFormat, logLevel)
+	ctrLogger, err := logger.New("text", logLevel)
+	//zap.New
+	//lgr, err := zap.NewStdLogAt(ctrLogger.WithContext().Desugar().Named("stdlib"), zap.DebugLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
+
+	// ctrLogger.LoggerserverLogger, err := zap.NewStdLogAt(app.logger.Named("stdlib"), zap.DebugLevel)
+
+	// o := &zap.Options{
+	// 	Development: true,
+	// 	DestWriter:  os.Stdout,
+	// 	Level:       zapcore.DebugLevel,
+	// }
+	//ctrl.SetLogger(zap.New(zap.UseFlagOptions(o)))
+
 	if err != nil {
 		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
