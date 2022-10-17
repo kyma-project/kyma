@@ -29,6 +29,14 @@ const {
 
 const kymaNs = 'kyma-system';
 const kymaProxyDeployment = 'monitoring-auth-proxy-grafana';
+const grafanaLabel = {
+  key: 'app',
+  value: 'grafana',
+};
+const conditionReady = {
+  condition: 'Ready',
+  status: 'True',
+};
 const proxySecret = {
   apiVersion: 'v1',
   kind: 'Secret',
@@ -167,9 +175,10 @@ async function restartProxyPod() {
   expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
 
   // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
+  await sleep(1_000);
   await waitForDeployment(kymaProxyDeployment, kymaNs);
-  await waitForPodWithLabelAndCondition('app', 'grafana', kymaNs, 'Ready', 'True', 60_000);
+  await waitForPodWithLabelAndCondition(grafanaLabel.key, grafanaLabel.value, kymaNs, conditionReady.condition,
+      conditionReady.status, 60_000);
 }
 
 async function checkGrafanaRedirect(redirectURL, httpStatus) {
