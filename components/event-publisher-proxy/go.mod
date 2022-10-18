@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/event-publisher-proxy
 
-go 1.18
+go 1.19
 
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.1
