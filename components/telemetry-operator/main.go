@@ -289,12 +289,10 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
-		CreateServiceMonitor:    createServiceMonitor,
-		CollectorNamespace:      telemetryNamespace,
-		CollectorDeploymentName: traceCollectorDeploymentName,
-		CollectorConfigMapName:  traceCollectorDeploymentName + "-config",
-		CollectorImage:          traceCollectorImage,
-		ConfigMapKey:            "relay.conf",
+		CreateServiceMonitor: createServiceMonitor,
+		CollectorNamespace:   telemetryNamespace,
+		ResourceName:         traceCollectorDeploymentName,
+		CollectorImage:       traceCollectorImage,
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)
 }

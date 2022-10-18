@@ -27,11 +27,12 @@ var (
 			corev1.ResourceMemory: resource.MustParse("512Mi"),
 		},
 	}
+	configMapKey = "relay.conf"
 )
 
 func getLabels(config Config) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name": config.CollectorDeploymentName,
+		"app.kubernetes.io/name": config.ResourceName,
 	}
 }
 
@@ -69,12 +70,12 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.CollectorConfigMapName,
+			Name:      config.ResourceName,
 			Namespace: config.CollectorNamespace,
 			Labels:    getLabels(config),
 		},
 		Data: map[string]string{
-			config.ConfigMapKey: confYAML,
+			configMapKey: confYAML,
 		},
 	}
 }
@@ -99,7 +100,7 @@ func makeDeployment(config Config) *appsv1.Deployment {
 	labels := getLabels(config)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.CollectorDeploymentName,
+			Name:      config.ResourceName,
 			Namespace: config.CollectorNamespace,
 			Labels:    labels,
 		},
@@ -116,9 +117,9 @@ func makeDeployment(config Config) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    config.CollectorDeploymentName,
+							Name:    config.ResourceName,
 							Image:   config.CollectorImage,
-							Command: []string{"/otelcol-contrib", "--config=/conf/" + config.ConfigMapKey},
+							Command: []string{"/otelcol-contrib", "--config=/conf/" + configMapKey},
 							Env: []corev1.EnvVar{
 								{
 									Name: "MY_POD_IP",
@@ -140,9 +141,9 @@ func makeDeployment(config Config) *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: config.CollectorConfigMapName,
+										Name: config.ResourceName,
 									},
-									Items: []corev1.KeyToPath{{Key: config.ConfigMapKey, Path: config.ConfigMapKey}},
+									Items: []corev1.KeyToPath{{Key: configMapKey, Path: configMapKey}},
 								},
 							},
 						},
@@ -157,7 +158,7 @@ func makeCollectorService(config Config) *corev1.Service {
 	labels := getLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.CollectorDeploymentName,
+			Name:      config.ResourceName,
 			Namespace: config.CollectorNamespace,
 			Labels:    labels,
 		},
@@ -192,7 +193,7 @@ func makeMetricsService(config Config) *corev1.Service {
 	labels := getLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.CollectorDeploymentName + "-metrics",
+			Name:      config.ResourceName + "-metrics",
 			Namespace: config.CollectorNamespace,
 			Labels:    labels,
 		},
@@ -215,7 +216,7 @@ func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 	labels := getLabels(config)
 	return &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.CollectorDeploymentName,
+			Name:      config.ResourceName,
 			Namespace: config.CollectorNamespace,
 			Labels:    labels,
 		},

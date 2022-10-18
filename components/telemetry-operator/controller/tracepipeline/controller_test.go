@@ -26,12 +26,8 @@ var _ = Describe("Deploying a TracePipeline", func() {
 				Name: "kyma-system",
 			},
 		}
-		otelCollectorDeploymentLookupKey := types.NamespacedName{
+		otelCollectorResourceLookupKey := types.NamespacedName{
 			Name:      "telemetry-trace-collector",
-			Namespace: "kyma-system",
-		}
-		otelCollectorConfigMapLookupKey := types.NamespacedName{
-			Name:      "telemetry-trace-collector-config",
 			Namespace: "kyma-system",
 		}
 		tracePipeline := &telemetryv1alpha1.TracePipeline{
@@ -53,17 +49,17 @@ var _ = Describe("Deploying a TracePipeline", func() {
 
 			Eventually(func() error {
 				var otelCollectorDeployment appsv1.Deployment
-				return k8sClient.Get(ctx, otelCollectorDeploymentLookupKey, &otelCollectorDeployment)
+				return k8sClient.Get(ctx, otelCollectorResourceLookupKey, &otelCollectorDeployment)
 			}, timeout, interval).Should(BeNil())
 
 			Eventually(func() error {
 				var otelCollectorService v1.Service
-				return k8sClient.Get(ctx, otelCollectorDeploymentLookupKey, &otelCollectorService)
+				return k8sClient.Get(ctx, otelCollectorResourceLookupKey, &otelCollectorService)
 			}, timeout, interval).Should(BeNil())
 
 			Eventually(func() error {
 				var otelCollectorConfigMap v1.ConfigMap
-				return k8sClient.Get(ctx, otelCollectorConfigMapLookupKey, &otelCollectorConfigMap)
+				return k8sClient.Get(ctx, otelCollectorResourceLookupKey, &otelCollectorConfigMap)
 			}, timeout, interval).Should(BeNil())
 
 			Expect(k8sClient.Delete(ctx, tracePipeline)).Should(Succeed())

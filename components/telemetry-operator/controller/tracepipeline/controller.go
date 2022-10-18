@@ -33,12 +33,10 @@ import (
 )
 
 type Config struct {
-	CreateServiceMonitor    bool
-	CollectorNamespace      string
-	CollectorDeploymentName string
-	CollectorConfigMapName  string
-	CollectorImage          string
-	ConfigMapKey            string
+	CreateServiceMonitor bool
+	CollectorNamespace   string
+	ResourceName         string
+	CollectorImage       string
 }
 
 // Reconciler reconciles a TracePipeline object
