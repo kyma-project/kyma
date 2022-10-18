@@ -38,7 +38,10 @@ openShift:
     create: true
     annotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  runAsNonRoot: false
+  seccompProfile:
+    type: RuntimeDefault
 #   fsGroup: 2000
 
 hostNetwork: false
@@ -61,13 +64,15 @@ hostAliases: []
 #     - "foo.local"
 #     - "bar.local"
 
-securityContext: {}
-#   capabilities:
-#     drop:
-#     - ALL
-#   readOnlyRootFilesystem: true
-#   runAsNonRoot: true
-#   runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - FOWNER
+  readOnlyRootFilesystem: true
 
 service:
   type: ClusterIP
@@ -262,6 +267,13 @@ extraContainers: |
       - name: http-metrics
         containerPort: 2021
         protocol: TCP
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
     volumeMounts:
       - name: varfluentbit
         mountPath: /data
@@ -475,6 +487,13 @@ initContainers: |-
   - name: prep-fluent-bit-config
     image: "{{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}"
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
     volumeMounts:
     - mountPath: /fluent-bit/etc/
       name: shared-fluent-bit-config

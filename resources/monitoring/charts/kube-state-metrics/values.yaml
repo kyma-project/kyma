@@ -91,7 +91,7 @@ prometheus:
 ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
 ##
 podSecurityPolicy:
-  enabled: true
+  enabled: false
   annotations: {}
     ## Specify pod annotations
     ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
@@ -109,6 +109,9 @@ securityContext:
   runAsGroup: 65534
   runAsUser: 65534
   fsGroup: 65534
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
 ## Specify security settings for a Container
 ## Allows overrides and additional options compared to (Pod) securityContext
@@ -116,6 +119,10 @@ securityContext:
 containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
