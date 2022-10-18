@@ -19,7 +19,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 	t.Run("should get token from cache if present", func(t *testing.T) {
 		// given
 		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Get", "testID").Return("123456789", true)
+		tokenCache.On("Get", "testIDtestSecret").Return("123456789", true)
 
 		oauthClient := NewOauthClient(10, &tokenCache)
 
@@ -45,7 +45,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		tokenKey := "testID" + ts.URL
+		tokenKey := "testID" + "testSecret" + ts.URL
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)
@@ -77,7 +77,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		ts.StartTLS()
 		defer ts.Close()
 
-		tokenKey := "testID" + ts.URL
+		tokenKey := "testID" + "testSecret" + ts.URL
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)
@@ -115,7 +115,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		tokenKey := "testID" + ts.URL
+		tokenKey := "testID" + "testSecret" + ts.URL
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)
@@ -140,7 +140,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		tokenKey := "testID" + ts.URL
+		tokenKey := "testID" + "testSecret" + ts.URL
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)
@@ -166,7 +166,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		tokenKey := "testID" + ts.URL
+		tokenKey := "testID" + "testSecret" + ts.URL
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)
@@ -184,7 +184,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 
 	t.Run("should fail if OAuth address is incorrect", func(t *testing.T) {
 		// given
-		tokenKey := "testID" + "http://some_no_existent_address.com/token"
+		tokenKey := "testID" + "testSecret" + "http://some_no_existent_address.com/token"
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)
@@ -209,7 +209,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		ts.StartTLS()
 		defer ts.Close()
 
-		tokenKey := "testID" + ts.URL
+		tokenKey := "testID" + "testSecret" + ts.URL
 
 		tokenCache := mocks.TokenCache{}
 		tokenCache.On("Get", tokenKey).Return("", false)

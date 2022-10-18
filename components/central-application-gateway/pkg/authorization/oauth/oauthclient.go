@@ -27,8 +27,8 @@ type oauthResponse struct {
 //go:generate mockery --name=Client
 type Client interface {
 	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
-	GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
-	InvalidateTokenCache(clientID string, authURL string)
+	GetTokenMTLS(clientID, clientSecret string, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
+	InvalidateTokenCache(clientID string, clientSecret string, authURL string)
 }
 
 type client struct {
@@ -44,7 +44,7 @@ func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Clien
 }
 
 func (c *client) GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
-	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
+	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL))
 	if found {
 		return token, nil
 	}
@@ -54,13 +54,13 @@ func (c *client) GetToken(clientID, clientSecret, authURL string, headers, query
 		return "", err
 	}
 
-	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
-	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
+func (c *client) GetTokenMTLS(clientID, clientSecret string, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
+	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL))
 	if found {
 		return token, nil
 	}
@@ -70,18 +70,18 @@ func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, he
 		return "", err
 	}
 
-	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) InvalidateTokenCache(clientID, authURL string) {
-	c.tokenCache.Remove(c.makeOAuthTokenCacheKey(clientID, authURL))
+func (c *client) InvalidateTokenCache(clientID, clientSecret, authURL string) {
+	c.tokenCache.Remove(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL))
 }
 
 // to avoid case of single clientID and different endpoints for MTLS and standard oauth
-func (c *client) makeOAuthTokenCacheKey(clientID, authURL string) string {
-	return clientID + authURL
+func (c *client) makeOAuthTokenCacheKey(clientID, clientSecret, authURL string) string {
+	return clientID + clientSecret + authURL
 }
 
 func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (*oauthResponse, apperrors.AppError) {

@@ -15,6 +15,7 @@ import (
 type oauthWithCertStrategy struct {
 	oauthClient            OAuthClient
 	clientId               string
+	clientSecret           string
 	certificate            []byte
 	privateKey             []byte
 	url                    string
@@ -22,10 +23,11 @@ type oauthWithCertStrategy struct {
 	tokenRequestSkipVerify bool
 }
 
-func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, certificate, privateKey []byte, url string, requestParameters *RequestParameters) oauthWithCertStrategy {
+func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, clientSecret string, certificate, privateKey []byte, url string, requestParameters *RequestParameters) oauthWithCertStrategy {
 	return oauthWithCertStrategy{
 		oauthClient:       oauthClient,
 		clientId:          clientId,
+		clientSecret:      clientSecret,
 		certificate:       certificate,
 		privateKey:        privateKey,
 		url:               url,
@@ -40,7 +42,7 @@ func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.Se
 		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())
 	}
 	headers, queryParameters := o.requestParameters.unpack()
-	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.url, cert, headers, queryParameters, skipTLSVerification)
+	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.clientSecret, o.url, cert, headers, queryParameters, skipTLSVerification)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
 		return apperrors.Internal("Failed to get token: %s", err.Error())
@@ -52,7 +54,7 @@ func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.Se
 }
 
 func (o oauthWithCertStrategy) Invalidate() {
-	o.oauthClient.InvalidateTokenCache(o.clientId, o.url)
+	o.oauthClient.InvalidateTokenCache(o.clientId, o.clientSecret, o.url)
 }
 
 func (o oauthWithCertStrategy) prepareCertificate() (tls.Certificate, error) {
