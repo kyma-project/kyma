@@ -62,11 +62,10 @@ loop:
 		case <-ctx.Done():
 			err = ctx.Err()
 			break loop
+
 		default:
 			m.log.With("stateFn", m.stateFnName()).Info("next state")
-
 			m.fn, err = m.fn(ctx, m, &state)
-
 		}
 	}
 
