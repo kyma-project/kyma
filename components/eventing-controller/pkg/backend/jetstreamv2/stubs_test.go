@@ -220,3 +220,31 @@ func (j jetStreamContextStub) DeleteObjectStore(_ string) error {
 	// TODO implement me
 	panic("implement me")
 }
+
+type subscriberStub struct {
+	isValid bool
+}
+
+func (s subscriberStub) IsValid() bool {
+	return s.isValid
+}
+
+func (s subscriberStub) ConsumerInfo() (*nats.ConsumerInfo, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (s subscriberStub) Unsubscribe() error {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (s subscriberStub) SetPendingLimits(i int, i2 int) error {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (s subscriberStub) PendingLimits() (int, int, error) {
+	// TODO implement me
+	panic("implement me")
+}

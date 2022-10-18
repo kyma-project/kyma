@@ -26,7 +26,7 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 			wantErr:    nil,
 		},
 		{
-			name: "function should give the default MaxInFlight if the it is missing in the Subscription config",
+			name: "function should give the default MaxInFlight if it is missing in the Subscription config",
 			givenSubscription: &Subscription{
 				Spec: SubscriptionSpec{
 					Config: map[string]string{
