@@ -26,16 +26,16 @@ const (
 	MinimumReplicasUnavailable = "MinimumReplicasUnavailable"
 )
 
-func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	labels := s.internalFunctionLabels()
 
-	r.err = r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
-	if r.err != nil {
-		return nil
+	err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
+	if err != nil {
+		return nil, err
 	}
 
-	if r.err = ctx.Err(); r.err != nil {
-		return nil
+	if err = ctx.Err(); err != nil {
+		return nil, err
 	}
 
 	args := buildDeploymentArgs{
@@ -50,29 +50,29 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 	deploymentChanged := !s.deploymentEqual(expectedDeployment)
 
 	if !deploymentChanged {
-		return stateFnCheckService
+		return stateFnCheckService, nil
 	}
 
 	if len(s.deployments.Items) == 0 {
-		return buildStateFnCreateDeployment(expectedDeployment)
+		return buildStateFnCreateDeployment(expectedDeployment), nil
 	}
 
 	if len(s.deployments.Items) > 1 {
-		return stateFnDeleteDeployments
+		return stateFnDeleteDeployments, nil
 	}
 
 	if !equalDeployments(s.deployments.Items[0], expectedDeployment) {
-		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels)
+		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels), nil
 	}
 
-	return stateFnUpdateDeploymentStatus
+	return stateFnUpdateDeploymentStatus, nil
 }
 
 func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
-	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
-		r.err = r.client.CreateWithReference(ctx, &s.instance, &d)
-		if r.err != nil {
-			return nil
+	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
+		err := r.client.CreateWithReference(ctx, &s.instance, &d)
+		if err != nil {
+			return nil, err
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -83,22 +83,21 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 			Message:            fmt.Sprintf("Deployment %s created", d.GetName()),
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 }
 
-func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	r.log.Info("deleting function")
 
 	labels := s.internalFunctionLabels()
 	selector := apilabels.SelectorFromSet(labels)
 
-	r.err = r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
-	return nil
+	return nil, r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
 }
 
 func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLabels map[string]string) stateFn {
-	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 
 		s.deployments.Items[0].Spec = expectedSpec
 		s.deployments.Items[0].Labels = expectedLabels
@@ -106,9 +105,9 @@ func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLa
 
 		r.log.Info(fmt.Sprintf("updating Deployment %s", deploymentName))
 
-		r.err = r.client.Update(ctx, &s.deployments.Items[0])
-		if r.err != nil {
-			return nil
+		err := r.client.Update(ctx, &s.deployments.Items[0])
+		if err != nil {
+			return nil, err
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -119,13 +118,13 @@ func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLa
 			Message:            fmt.Sprintf("Deployment %s updated", deploymentName),
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 }
 
-func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	if r.err = ctx.Err(); r.err != nil {
-		return nil
+func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
 	}
 
 	deploymentName := s.deployments.Items[0].GetName()
@@ -146,7 +145,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			RequeueAfter: r.cfg.fn.FunctionReadyRequeueDuration,
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 
 	// unhealthy deployment
@@ -161,7 +160,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deploymentName),
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 
 	// deployment not ready
@@ -176,17 +175,15 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 			Message:            fmt.Sprintf("Deployment %s is not ready yet", deploymentName),
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 
 	// deployment failed
 	r.log.Info(fmt.Sprintf("deployment %q failed", deploymentName))
 
-	var yamlConditions []byte
-	yamlConditions, r.err = yaml.Marshal(s.deployments.Items[0].Status.Conditions)
-
-	if r.err != nil {
-		return nil
+	yamlConditions, err := yaml.Marshal(s.deployments.Items[0].Status.Conditions)
+	if err != nil {
+		return nil, err
 	}
 
 	msg := fmt.Sprintf("Deployment %s failed with condition: \n%s", deploymentName, yamlConditions)
@@ -199,5 +196,5 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 		Message:            msg,
 	}
 
-	return buildStatusUpdateStateFnWithCondition(condition)
+	return buildStatusUpdateStateFnWithCondition(condition), nil
 }

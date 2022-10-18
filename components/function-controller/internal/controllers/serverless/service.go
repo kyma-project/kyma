@@ -9,36 +9,36 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	r.err = r.client.ListByLabel(
+func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
+	err := r.client.ListByLabel(
 		ctx,
 		s.instance.GetNamespace(),
 		s.internalFunctionLabels(),
 		&s.services)
 
-	if r.err != nil {
-		return nil
+	if err != nil {
+		return nil, err
 	}
 
 	expectedSvc := s.buildService()
 
 	if len(s.services.Items) == 0 {
-		return buildStateFnCreateNewService(expectedSvc)
+		return buildStateFnCreateNewService(expectedSvc), nil
 	}
 
 	if len(s.services.Items) > 1 {
-		return stateFnDeleteServices
+		return stateFnDeleteServices, nil
 	}
 
 	if s.svcChanged(expectedSvc) {
-		return buildStateFnUpdateService(expectedSvc)
+		return buildStateFnUpdateService(expectedSvc), nil
 	}
 
-	return stateFnCheckScaling
+	return stateFnCheckScaling, nil
 }
 
 func buildStateFnUpdateService(newService corev1.Service) stateFn {
-	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 
 		svc := &s.services.Items[0]
 
@@ -51,9 +51,9 @@ func buildStateFnUpdateService(newService corev1.Service) stateFn {
 
 		r.log.Info(fmt.Sprintf("Updating Service %s", svc.GetName()))
 
-		r.err = r.client.Update(ctx, svc)
-		if r.err != nil {
-			return nil
+		err := r.client.Update(ctx, svc)
+		if err != nil {
+			return nil, err
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -64,17 +64,17 @@ func buildStateFnUpdateService(newService corev1.Service) stateFn {
 			Message:            fmt.Sprintf("Service %s updated", svc.GetName()),
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 }
 
 func buildStateFnCreateNewService(svc corev1.Service) stateFn {
-	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		r.log.Info(fmt.Sprintf("Creating Service %s", svc.GetName()))
 
-		r.err = r.client.CreateWithReference(ctx, &s.instance, &svc)
-		if r.err != nil {
-			return nil
+		err := r.client.CreateWithReference(ctx, &s.instance, &svc)
+		if err != nil {
+			return nil, err
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -85,11 +85,11 @@ func buildStateFnCreateNewService(svc corev1.Service) stateFn {
 			Message:            fmt.Sprintf("Service %s created", svc.GetName()),
 		}
 
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 }
 
-func stateFnDeleteServices(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnDeleteServices(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	// services do not support deletecollection
 	// you can check this by `kubectl api-resources -o wide | grep services`
 	// also https://github.com/kubernetes/kubernetes/issues/68468#issuecomment-419981870
@@ -105,11 +105,11 @@ func stateFnDeleteServices(ctx context.Context, r *reconciler, s *systemState) s
 		r.log.Info(fmt.Sprintf("deleting Service %s", svc.GetName()))
 
 		// TODO consider implementing mechanism to collect errors
-		r.err = r.client.Delete(ctx, &s.services.Items[i])
-		if r.err != nil {
-			return nil
+		err := r.client.Delete(ctx, &s.services.Items[i])
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	return nil, nil
 }
