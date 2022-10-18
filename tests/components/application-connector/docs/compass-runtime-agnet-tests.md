@@ -77,6 +77,13 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 
 ### Run the tests
 
+1. Before running the test export the following environment variables
+- COMPASS_HOST - points to the host running Compass 
+- COMPASS_CLIENT_ID - client id used for fetching authorisation tokens
+- COMPASS_CLIENT_SECRET - client secret used for fetching authorisation tokens 
+
+2. To start the tests, run:
+
 ``` sh
 make test-compass-runtime-agent
 ```
@@ -98,6 +105,30 @@ To run the tests without removing all the created resources afterwards, run them
    ```
 
 2. Once you've finished debugging, run:
+
+   ``` shell
+   make clean-test-compass-runtime-agent-test
+   ```
+### Debugging in the IDE
+
+To run the test in your IDE you must perform the following steps.
+
+1. To prepare the cluster for debugging, run the test without cleanup:
+
+   ``` shell
+   make test-compass-runtime-agent-debug
+   ```
+
+2. Before starting debugger in your IDE export the following environment variables:
+- KUBECONFIG={Your cluster kubeconfig}
+- APP_DIRECTOR_URL=https://compass-gateway-auth-oauth.{COMPASS_HOST}/director/graphql
+- APP_TESTING_TENANT=3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+- APP_OAUTH_CREDENTIALS_SECRET_NAME=oauth-compass-credentials
+- APP_OAUTH_CREDENTIALS_NAMESPACE=test
+
+3. Start debugging session
+
+4. Once you've finished debugging, run:
 
    ``` shell
    make clean-test-compass-runtime-agent-test
