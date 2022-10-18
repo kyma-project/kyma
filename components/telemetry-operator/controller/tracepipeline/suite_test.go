@@ -50,13 +50,13 @@ var cancel context.CancelFunc
 var testConfig = Config{
 	CreateServiceMonitor:    false,
 	CollectorNamespace:      "kyma-system",
-	CollectorDeploymentName: "telemetry-tracing-collector",
-	CollectorConfigMapName:  "telemetry-tracing-collector-config",
+	CollectorDeploymentName: "telemetry-trace-collector",
+	CollectorConfigMapName:  "telemetry-trace-collector-config",
 	CollectorImage:          "otel/opentelemetry-collector-contrib:0.60.0",
 	ConfigMapKey:            "relay.conf",
 	Replicas:                1,
 	PodSelectorLabels: map[string]string{
-		"app.kubernetes.io/name": "telemetry-tracing-collector",
+		"app.kubernetes.io/name": "telemetry-trace-collector",
 	},
 	PodAnnotations: map[string]string{
 		"sidecar.istio.io/inject": "false",

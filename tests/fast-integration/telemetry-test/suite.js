@@ -320,7 +320,7 @@ describe('Telemetry Operator', function() {
       });
 
       it('Should have ready trace collector pods', async () => {
-        await waitForPodWithLabel('app.kubernetes.io/name', 'telemetry-tracing-collector', 'kyma-system');
+        await waitForPodWithLabel('app.kubernetes.io/name', 'telemetry-trace-collector', 'kyma-system');
       });
     });
   });

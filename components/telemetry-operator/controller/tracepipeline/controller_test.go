@@ -27,11 +27,11 @@ var _ = Describe("Deploying a TracePipeline", func() {
 			},
 		}
 		otelCollectorDeploymentLookupKey := types.NamespacedName{
-			Name:      "telemetry-tracing-collector",
+			Name:      "telemetry-trace-collector",
 			Namespace: "kyma-system",
 		}
 		otelCollectorConfigMapLookupKey := types.NamespacedName{
-			Name:      "telemetry-tracing-collector-config",
+			Name:      "telemetry-trace-collector-config",
 			Namespace: "kyma-system",
 		}
 		tracePipeline := &telemetryv1alpha1.TracePipeline{

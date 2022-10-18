@@ -72,9 +72,9 @@ var (
 	syncPeriod           time.Duration
 	telemetryNamespace   string
 
-	createServiceMonitor           bool
-	tracingCollectorDeploymentName string
-	tracingCollectorImage          string
+	createServiceMonitor         bool
+	traceCollectorDeploymentName string
+	traceCollectorImage          string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -120,8 +120,8 @@ func main() {
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
 	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
-	flag.StringVar(&tracingCollectorDeploymentName, "tracing-collector-deployment-name", "telemetry-tracing-collector", "Deployment name for tracing OpenTelemetry Collector")
-	flag.StringVar(&tracingCollectorImage, "tracing-collector-image", "otel/opentelemetry-collector-contrib:0.60.0", "Image for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorImage, "trace-collector-image", "otel/opentelemetry-collector-contrib:0.60.0", "Image for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -293,13 +293,13 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 	config := tracepipelinereconciler.Config{
 		CreateServiceMonitor:    createServiceMonitor,
 		CollectorNamespace:      telemetryNamespace,
-		CollectorDeploymentName: tracingCollectorDeploymentName,
-		CollectorConfigMapName:  tracingCollectorDeploymentName + "-config",
-		CollectorImage:          tracingCollectorImage,
+		CollectorDeploymentName: traceCollectorDeploymentName,
+		CollectorConfigMapName:  traceCollectorDeploymentName + "-config",
+		CollectorImage:          traceCollectorImage,
 		ConfigMapKey:            "relay.conf",
 		Replicas:                1,
 		PodSelectorLabels: map[string]string{
-			"app.kubernetes.io/name": tracingCollectorDeploymentName,
+			"app.kubernetes.io/name": traceCollectorDeploymentName,
 		},
 		PodAnnotations: map[string]string{
 			"sidecar.istio.io/inject": "false",
