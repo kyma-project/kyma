@@ -44,7 +44,7 @@ spec:
       {{- end }}
     spec:
       volumes:
-        - name: {{ template "fullname" . }}-configuration
+        - name: configuration
           configMap:
             name: "{{ .Values.global.configuration.configmapName }}"
       serviceAccountName: {{ template "fullname" . }}-controller-manager
@@ -54,7 +54,7 @@ spec:
       containers:
         - name: manager
           volumeMounts:
-            - name: {{ template "fullname" . }}-configuration
+            - name: configuration
               mountPath: {{ .Values.global.configuration.targetDir }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
           imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
