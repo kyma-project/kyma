@@ -39,10 +39,6 @@ type Config struct {
 	CollectorConfigMapName  string
 	CollectorImage          string
 	ConfigMapKey            string
-	PodSelectorLabels       map[string]string
-	PodAnnotations          map[string]string
-	Replicas                int32
-	CollectorResources      corev1.ResourceRequirements
 }
 
 // Reconciler reconciles a TracePipeline object
@@ -122,7 +118,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeService(r.config)
+	service := makeCollectorService(r.config)
 	if err := controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
 		return err
 	}
@@ -138,6 +134,14 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 
 		if err := createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
 			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
+		}
+
+		metricsService := makeMetricsService(r.config)
+		if err := controllerutil.SetControllerReference(tracing, metricsService, r.Scheme); err != nil {
+			return err
+		}
+		if err := createOrUpdateService(ctx, r.Client, metricsService); err != nil {
+			return fmt.Errorf("failed to create otel collector metrics service: %w", err)
 		}
 	}
 

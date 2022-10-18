@@ -24,8 +24,6 @@ import (
 	"time"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -297,23 +295,6 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 		CollectorConfigMapName:  traceCollectorDeploymentName + "-config",
 		CollectorImage:          traceCollectorImage,
 		ConfigMapKey:            "relay.conf",
-		Replicas:                1,
-		PodSelectorLabels: map[string]string{
-			"app.kubernetes.io/name": traceCollectorDeploymentName,
-		},
-		PodAnnotations: map[string]string{
-			"sidecar.istio.io/inject": "false",
-		},
-		CollectorResources: corev1.ResourceRequirements{
-			Requests: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("10m"),
-				corev1.ResourceMemory: resource.MustParse("64Mi"),
-			},
-			Limits: map[corev1.ResourceName]resource.Quantity{
-				corev1.ResourceCPU:    resource.MustParse("256m"),
-				corev1.ResourceMemory: resource.MustParse("512Mi"),
-			},
-		},
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)
 }

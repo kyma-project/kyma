@@ -7,9 +7,33 @@ import (
 	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
+
+var (
+	podAnnotations = map[string]string{
+		"sidecar.istio.io/inject": "false",
+	}
+	replicas           = int32(1)
+	collectorResources = corev1.ResourceRequirements{
+		Requests: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    resource.MustParse("10m"),
+			corev1.ResourceMemory: resource.MustParse("64Mi"),
+		},
+		Limits: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    resource.MustParse("250m"),
+			corev1.ResourceMemory: resource.MustParse("512Mi"),
+		},
+	}
+)
+
+func getLabels(config Config) map[string]string {
+	return map[string]string{
+		"app.kubernetes.io/name": config.CollectorDeploymentName,
+	}
+}
 
 func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
 	exporterConfig := makeExporterConfig(output)
@@ -47,7 +71,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorConfigMapName,
 			Namespace: config.CollectorNamespace,
-			Labels:    config.PodSelectorLabels,
+			Labels:    getLabels(config),
 		},
 		Data: map[string]string{
 			config.ConfigMapKey: confYAML,
@@ -72,21 +96,22 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 }
 
 func makeDeployment(config Config) *appsv1.Deployment {
+	labels := getLabels(config)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorDeploymentName,
 			Namespace: config.CollectorNamespace,
-			Labels:    config.PodSelectorLabels,
+			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &config.Replicas,
+			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: config.PodSelectorLabels,
+				MatchLabels: labels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      config.PodSelectorLabels,
-					Annotations: config.PodAnnotations,
+					Labels:      labels,
+					Annotations: podAnnotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -105,7 +130,7 @@ func makeDeployment(config Config) *appsv1.Deployment {
 									},
 								},
 							},
-							Resources:    config.CollectorResources,
+							Resources:    collectorResources,
 							VolumeMounts: []corev1.VolumeMount{{Name: "config", MountPath: "/conf"}},
 						},
 					},
@@ -128,12 +153,13 @@ func makeDeployment(config Config) *appsv1.Deployment {
 	}
 }
 
-func makeService(config Config) *corev1.Service {
+func makeCollectorService(config Config) *corev1.Service {
+	labels := getLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorDeploymentName,
 			Namespace: config.CollectorNamespace,
-			Labels:    config.PodSelectorLabels,
+			Labels:    labels,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -155,6 +181,23 @@ func makeService(config Config) *corev1.Service {
 					Port:       55678,
 					TargetPort: intstr.FromInt(55678),
 				},
+			},
+			Selector: labels,
+			Type:     corev1.ServiceTypeClusterIP,
+		},
+	}
+}
+
+func makeMetricsService(config Config) *corev1.Service {
+	labels := getLabels(config)
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      config.CollectorDeploymentName + "-metrics",
+			Namespace: config.CollectorNamespace,
+			Labels:    labels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
 				{
 					Name:       "http-metrics",
 					Protocol:   corev1.ProtocolTCP,
@@ -162,18 +205,19 @@ func makeService(config Config) *corev1.Service {
 					TargetPort: intstr.FromInt(8888),
 				},
 			},
-			Selector: config.PodSelectorLabels,
+			Selector: labels,
 			Type:     corev1.ServiceTypeClusterIP,
 		},
 	}
 }
 
 func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
+	labels := getLabels(config)
 	return &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.CollectorDeploymentName,
 			Namespace: config.CollectorNamespace,
-			Labels:    config.PodSelectorLabels,
+			Labels:    labels,
 		},
 		Spec: monitoringv1.ServiceMonitorSpec{
 			Endpoints: []monitoringv1.Endpoint{
@@ -187,7 +231,7 @@ func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 				},
 			},
 			Selector: metav1.LabelSelector{
-				MatchLabels: config.PodSelectorLabels,
+				MatchLabels: labels,
 			},
 		},
 	}

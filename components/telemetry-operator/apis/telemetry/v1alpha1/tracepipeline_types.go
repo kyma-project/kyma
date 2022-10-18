@@ -20,14 +20,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-type OtlpOutput struct {
-	// Protocol defines the OTLP protocol (http or grpc).
-	Protocol string `json:"protocol,omitempty"`
-	// Endpoint defines the host and port (<host>:<port>) of an OTLP endpoint.
-	Endpoint ValueType `json:"endpoint,omitempty"`
+// TracePipelineSpec defines the desired state of TracePipeline
+type TracePipelineSpec struct {
+	// Output configures the trace receiver of a TracePipeline.
+	Output TracePipelineOutput `json:"output,omitempty"`
 }
 
 type TracePipelineOutput struct {
@@ -35,10 +31,11 @@ type TracePipelineOutput struct {
 	Otlp OtlpOutput `json:"otlp,omitempty"`
 }
 
-// TracePipelineSpec defines the desired state of TracePipeline
-type TracePipelineSpec struct {
-	// Output configures the trace receiver of a TracePipeline.
-	Output TracePipelineOutput `json:"output,omitempty"`
+type OtlpOutput struct {
+	// Protocol defines the OTLP protocol (http or grpc).
+	Protocol string `json:"protocol,omitempty"`
+	// Endpoint defines the host and port (<host>:<port>) of an OTLP endpoint.
+	Endpoint ValueType `json:"endpoint,omitempty"`
 }
 
 // TracePipelineStatus defines the observed state of TracePipeline

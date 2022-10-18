@@ -13,10 +13,6 @@ var (
 		CollectorDeploymentName: "collector",
 		CollectorNamespace:      "kyma-system",
 		ConfigMapKey:            "key",
-		Replicas:                1,
-		PodSelectorLabels: map[string]string{
-			"app.kubernetes.io/name": "collector",
-		},
 	}
 	tracePipeline = v1alpha1.TracePipelineOutput{
 		Otlp: v1alpha1.OtlpOutput{
@@ -38,32 +34,46 @@ func TestMakeConfigMap(t *testing.T) {
 
 func TestMakeDeployment(t *testing.T) {
 	deployment := makeDeployment(config)
+	labels := getLabels(config)
 
 	require.NotNil(t, deployment)
 	require.Equal(t, deployment.Name, config.CollectorDeploymentName)
 	require.Equal(t, deployment.Namespace, config.CollectorNamespace)
-	require.Equal(t, *deployment.Spec.Replicas, config.Replicas)
-	require.Equal(t, deployment.Spec.Selector.MatchLabels, config.PodSelectorLabels)
-	require.Equal(t, deployment.Spec.Template.ObjectMeta.Labels, config.PodSelectorLabels)
-	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations, config.PodAnnotations)
+	require.Equal(t, *deployment.Spec.Replicas, int32(1))
+	require.Equal(t, deployment.Spec.Selector.MatchLabels, labels)
+	require.Equal(t, deployment.Spec.Template.ObjectMeta.Labels, labels)
+	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations, podAnnotations)
 }
 
-func TestMakeService(t *testing.T) {
-	service := makeService(config)
+func TestMakeCollectorService(t *testing.T) {
+	service := makeCollectorService(config)
+	labels := getLabels(config)
 
 	require.NotNil(t, service)
 	require.Equal(t, service.Name, config.CollectorDeploymentName)
 	require.Equal(t, service.Namespace, config.CollectorNamespace)
-	require.Equal(t, service.Spec.Selector, config.PodSelectorLabels)
+	require.Equal(t, service.Spec.Selector, labels)
 	require.NotEmpty(t, service.Spec.Ports)
 }
 
 func TestMakeServiceMonitor(t *testing.T) {
 	serviceMonitor := makeServiceMonitor(config)
+	labels := getLabels(config)
 
 	require.NotNil(t, serviceMonitor)
 	require.Equal(t, serviceMonitor.Name, config.CollectorDeploymentName)
 	require.Equal(t, serviceMonitor.Namespace, config.CollectorNamespace)
 	require.Contains(t, serviceMonitor.Spec.NamespaceSelector.MatchNames, config.CollectorNamespace)
-	require.Equal(t, serviceMonitor.Spec.Selector.MatchLabels, config.PodSelectorLabels)
+	require.Equal(t, serviceMonitor.Spec.Selector.MatchLabels, labels)
+}
+
+func TestMakeMetricsService(t *testing.T) {
+	service := makeMetricsService(config)
+	labels := getLabels(config)
+
+	require.NotNil(t, service)
+	require.Equal(t, service.Name, config.CollectorDeploymentName+"-metrics")
+	require.Equal(t, service.Namespace, config.CollectorNamespace)
+	require.Equal(t, service.Spec.Selector, labels)
+	require.NotEmpty(t, service.Spec.Ports)
 }
