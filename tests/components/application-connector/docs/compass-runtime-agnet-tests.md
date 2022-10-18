@@ -69,18 +69,18 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 
 [The values.yaml](../resources/charts/compass-runtime-agent-test/values.yaml) file contains environment variables that are used in Compass tests. These values can be modified as needed.
 
-- APP_DIRECTOR_URL - Compass Director URL
-- APP_TESTING_TENANT - Tenant used in GraphQL calls
-- APP_SKIP_DIRECTOR_CERT_VERIFICATION - Skip certificate verification on the Director side
-- APP_OAUTH_CREDENTIALS_SECRET_NAME - Secret name for Compass OAuth credentials
-- APP_OAUTH_CREDENTIALS_NAMESPACE - Namespace for Compass OAuth credentials
+- `APP_DIRECTOR_URL` - Compass Director URL
+- `APP_TESTING_TENANT` - Tenant used in GraphQL calls
+- `APP_SKIP_DIRECTOR_CERT_VERIFICATION` - Skip certificate verification on the Director side
+- `APP_OAUTH_CREDENTIALS_SECRET_NAME` - Secret name for Compass OAuth credentials
+- `APP_OAUTH_CREDENTIALS_NAMESPACE` - Namespace for Compass OAuth credentials
 
 ### Run the tests
 
 1. Before running the test export the following environment variables
-- COMPASS_HOST - points to the host running Compass 
-- COMPASS_CLIENT_ID - client id used for fetching authorisation tokens
-- COMPASS_CLIENT_SECRET - client secret used for fetching authorisation tokens 
+- `COMPASS_HOST` - points to the host running Compass 
+- `COMPASS_CLIENT_ID` - client id used for fetching authorisation tokens
+- `COMPASS_CLIENT_SECRET` - client secret used for fetching authorisation tokens 
 
 2. To start the tests, run:
 
@@ -120,11 +120,11 @@ To run the test in your IDE you must perform the following steps.
    ```
 
 2. Before starting debugger in your IDE export the following environment variables:
-- KUBECONFIG={Your cluster kubeconfig}
-- APP_DIRECTOR_URL=https://compass-gateway-auth-oauth.{COMPASS_HOST}/director/graphql
-- APP_TESTING_TENANT=3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
-- APP_OAUTH_CREDENTIALS_SECRET_NAME=oauth-compass-credentials
-- APP_OAUTH_CREDENTIALS_NAMESPACE=test
+- `KUBECONFIG={Your cluster kubeconfig}`
+- `APP_DIRECTOR_URL=https://compass-gateway-auth-oauth.{COMPASS_HOST}/director/graphql`
+- `APP_TESTING_TENANT=3e64ebae-38b5-46a0-b1ed-9ccee153a0ae`
+- `APP_OAUTH_CREDENTIALS_SECRET_NAME=oauth-compass-credentials`
+- `APP_OAUTH_CREDENTIALS_NAMESPACE=test`
 
 3. Start debugging session
 
