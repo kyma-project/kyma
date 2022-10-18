@@ -182,7 +182,7 @@ global:
     ## Create ClusterRoles that extend the existing view, edit and admin ClusterRoles to interact with prometheus-operator CRDs
     ## Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles
     createAggregateClusterRoles: false
-    pspEnabled: true
+    pspEnabled: false
     pspAnnotations: {}
       ## Specify pod annotations
       ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
@@ -750,6 +750,8 @@ alertmanager:
       runAsNonRoot: true
       runAsUser: 1000
       fsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
 
     ## ListenLocal makes the Alertmanager server listen on loopback, so that it does not bind against the Pod IP.
     ## Note this is only for the Alertmanager UI, not the gossip communication.
@@ -849,7 +851,7 @@ grafana:
   rbac:
     ## If true, Grafana PSPs will be created
     ##
-    pspEnabled: true
+    pspEnabled: false
 
   ingress:
     ## If true, Grafana Ingress will be created
@@ -1698,7 +1700,7 @@ prometheus-node-exporter:
   rbac:
     ## If true, create PSPs for node-exporter
     ##
-    pspEnabled: true
+    pspEnabled: false
 
 ## Manages Prometheus and Alertmanager components
 ##
@@ -1961,6 +1963,8 @@ prometheusOperator:
     runAsGroup: 65534
     runAsNonRoot: true
     runAsUser: 65534
+    seccompProfile:
+      type: RuntimeDefault
 
   ## Container-specific security context configuration
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -1969,6 +1973,9 @@ prometheusOperator:
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
     privileged: false
+    capabilities:
+      drop:
+        - ALL
 
   ## Prometheus-operator image
   ##
@@ -2905,6 +2912,8 @@ prometheus:
       runAsNonRoot: true
       runAsUser: 1000
       fsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
 
     ## Priority class assigned to the Pods
     ##
