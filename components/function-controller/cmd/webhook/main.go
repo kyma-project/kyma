@@ -28,7 +28,7 @@ type config struct {
 	WebhookServiceName string `envconfig:"default=serverless-webhook"`
 	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
 	WebhookPort        int    `envconfig:"default=8443"`
-	FileConfigPath     string `envconfig:"default=/appdata/config.yaml"`
+	WebhookConfigPath  string `envconfig:"default=/appdata/config.yaml"`
 }
 
 var (
@@ -53,7 +53,7 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	logCfg, err := fileconfig.Load(cfg.FileConfigPath)
+	logCfg, err := fileconfig.Load(cfg.WebhookConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to load configuration file")
 		os.Exit(1)
@@ -68,7 +68,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, cfg.FileConfigPath)
+	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, cfg.WebhookConfigPath)
 
 	logrZap := zapr.NewLogger(loggerRegistry.CreateDesugared())
 	ctrl.SetLogger(logrZap)

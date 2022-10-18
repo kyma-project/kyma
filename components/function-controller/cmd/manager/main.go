@@ -52,7 +52,7 @@ type config struct {
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
-	FileConfigPath            string `envconfig:"default=/appdata/config.yaml"`
+	ConfigPath                string `envconfig:"default=/appdata/config.yaml"`
 }
 
 type healthzConfig struct {
@@ -67,7 +67,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logCfg, err := fileconfig.Load(config.FileConfigPath)
+	logCfg, err := fileconfig.Load(config.ConfigPath)
 	if err != nil {
 		setupLog.Error(err, "unable to load configuration file")
 		os.Exit(1)
@@ -82,7 +82,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, config.FileConfigPath)
+	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, config.ConfigPath)
 
 	ctrl.SetLogger(zapr.NewLogger(loggerRegistry.CreateDesugared()))
 

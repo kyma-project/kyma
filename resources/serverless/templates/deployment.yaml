@@ -132,7 +132,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE" "value" (dict "value" $function_build_init_image) "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_HEALTHZ_LIVENESS_TIMEOUT" "value" .Values.containers.manager.envs.healthzLivenessTimeout "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FILE_CONFIG_PATH" "value" .Values.containers.manager.envs.fileConfigPath "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_CONFIG_PATH" "value" .Values.containers.manager.envs.configPath "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
           {{- end }}

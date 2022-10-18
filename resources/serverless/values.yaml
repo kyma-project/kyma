@@ -180,7 +180,7 @@ containers:
         logLevel: "info"
         logFormat: "json"
     envs:
-      fileConfigPath:
+      configPath:
         value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m

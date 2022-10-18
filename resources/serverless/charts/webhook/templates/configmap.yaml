@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 data:
-  APP_FILE_CONFIG_PATH: {{ include "tplValue" ( dict "value" .Values.container.envs.fileConfigPath "context" . ) | quote }}
+  WEBHOOK_CONFIG_PATH: {{ include "tplValue" ( dict "value" .Values.container.envs.configPath "context" . ) | quote }}
   WEBHOOK_SERVICE_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookServiceName.value "context" . ) | quote }}
   WEBHOOK_SECRET_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName.value "context" . ) | quote }}
   WEBHOOK_PORT: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort.value "context" . ) | quote }}
