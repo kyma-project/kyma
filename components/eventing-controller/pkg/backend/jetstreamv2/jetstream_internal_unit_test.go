@@ -232,7 +232,10 @@ func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T
 
 			// setup the mocks
 			eventType := subWithOneType.Status.Types[0]
-			jsSubject := js.getJetStreamSubject(subWithOneType.Spec.Source, eventType.CleanType, subWithOneType.Spec.TypeMatching)
+			jsSubject := js.getJetStreamSubject(subWithOneType.Spec.Source,
+				eventType.CleanType,
+				subWithOneType.Spec.TypeMatching,
+			)
 			jsSubKey := NewSubscriptionSubjectIdentifier(subWithOneType, jsSubject)
 			tc.givenMocks(subWithOneType, js, jsCtxMock, jsSubKey)
 
