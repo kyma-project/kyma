@@ -1,0 +1,9 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: TracePipeline
+metadata:
+  name: simple
+spec:
+  output:
+    otlp:
+      endpoint:
+        value: http://no-endpoint
