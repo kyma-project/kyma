@@ -239,7 +239,7 @@ func (s subscriberStub) Unsubscribe() error {
 	panic("implement me")
 }
 
-func (s subscriberStub) SetPendingLimits(i int, i2 int) error {
+func (s subscriberStub) SetPendingLimits(_ int, _ int) error {
 	// TODO implement me
 	panic("implement me")
 }
