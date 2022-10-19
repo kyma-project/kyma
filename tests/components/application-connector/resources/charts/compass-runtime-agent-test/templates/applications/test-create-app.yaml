@@ -1,0 +1,13 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    applicationconnector.kyma-project.io/managed-by: compass-runtime-agent
+  name: app1
+spec:
+  description: Test Application for testing Compass Runtime Agent
+  displayName: ""
+  longDescription: ""
+  providerDisplayName: ""
+  services: []
+  skipVerify: true
