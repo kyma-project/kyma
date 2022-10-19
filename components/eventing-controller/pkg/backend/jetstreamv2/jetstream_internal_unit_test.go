@@ -2,9 +2,10 @@ package jetstreamv2
 
 import (
 	"fmt"
+	"testing"
+
 	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
 	"github.com/nats-io/nats.go"
-	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/stretchr/testify/assert"
