@@ -58,15 +58,6 @@ linters-settings:
         # Whether to skip (*x).method() calls where x is a pointer receiver.
         # Default: true
         skipRecvDeref: false
-  testpackage:
-    # Regexp pattern to skip files.
-    # Default: "(export|internal)_test\\.go"
-    skip-regexp: internal_(integration|unit)_test\.go
-    # List of packages that don't end with _test that tests are allowed to be in.
-    # Default: "main"
-    allow-packages:
-      - example
-      - main
 
   gomnd:
     # List of function patterns to exclude from analysis.
@@ -209,7 +200,7 @@ linters:
     - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
     - stylecheck # is a replacement for golint
     - tenv # detects using os.Setenv instead of t.Setenv since Go1.17
-    - testpackage # makes you use a separate _test package
+    # - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
     - unconvert # removes unnecessary type conversions
     - unparam # reports unused function parameters

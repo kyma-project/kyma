@@ -18,6 +18,11 @@ type jetStreamContextStub struct {
 	updateError error
 }
 
+func (j jetStreamContextStub) ObjectStores(_ ...nats.ObjectOpt) <-chan nats.ObjectStoreStatus {
+	// TODO implement me
+	panic("implement me")
+}
+
 func (j jetStreamContextStub) KeyValueStoreNames() <-chan string {
 	// TODO implement me
 	panic("implement me")
@@ -39,11 +44,6 @@ func (j jetStreamContextStub) Consumers(_ string, _ ...nats.JSOpt) <-chan *nats.
 }
 
 func (j jetStreamContextStub) ObjectStoreNames(_ ...nats.ObjectOpt) <-chan string {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (j jetStreamContextStub) ObjectStores(_ ...nats.ObjectOpt) <-chan nats.ObjectStore {
 	// TODO implement me
 	panic("implement me")
 }

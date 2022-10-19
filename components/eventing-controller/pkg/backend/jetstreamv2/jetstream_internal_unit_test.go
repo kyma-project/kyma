@@ -244,7 +244,9 @@ func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T)
 			givenSubMaxInFlight:        DefaultMaxInFlights,
 			givenConsumerMaxAckPending: DefaultMaxInFlights,
 			// no updateConsumer calls expected
-			givenjetstreamv2mocks: func(jsBackend *JetStream, jsCtx *jetstreamv2mocks.JetStreamContext, consumerConfigToUpdate *nats.ConsumerConfig) {
+			givenjetstreamv2mocks: func(jsBackend *JetStream,
+				jsCtx *jetstreamv2mocks.JetStreamContext,
+				consumerConfigToUpdate *nats.ConsumerConfig) {
 			},
 			wantConfigToUpdate: nil,
 		},
@@ -252,7 +254,10 @@ func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T)
 			name:                       "non-up-to-date consumer should be updated with the expected MaxAckPending value",
 			givenSubMaxInFlight:        10,
 			givenConsumerMaxAckPending: 20,
-			givenjetstreamv2mocks: func(jsBackend *JetStream, jsCtx *jetstreamv2mocks.JetStreamContext, consumerConfigToUpdate *nats.ConsumerConfig) {
+			givenjetstreamv2mocks: func(jsBackend *JetStream,
+				jsCtx *jetstreamv2mocks.JetStreamContext,
+				consumerConfigToUpdate *nats.ConsumerConfig,
+			) {
 				jsCtx.On("UpdateConsumer", jsBackend.Config.JSStreamName, consumerConfigToUpdate).Return(&nats.ConsumerInfo{
 					Config: *consumerConfigToUpdate,
 				}, nil)
@@ -385,7 +390,6 @@ func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			callback := func(m *nats.Msg) {}
-			subWithOneType := NewSubscriptionWithOneType()
 			js := JetStream{
 				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
 				metricsCollector: metrics.NewCollector(),
