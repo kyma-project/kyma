@@ -26,6 +26,7 @@ func TestGetNatsConfig(t *testing.T) {
 		{name: "Required values only gives valid config",
 			args: args{
 				envs: map[string]string{
+					"NATS_URL":          "natsurl",
 					"EVENT_TYPE_PREFIX": "etp",
 					"JS_STREAM_NAME":    "jsn",
 				},
@@ -33,7 +34,7 @@ func TestGetNatsConfig(t *testing.T) {
 				reconnectWait: 1 * time.Second,
 			},
 			want: NatsConfig{
-				URL:                     "nats.nats.svc.cluster.local",
+				URL:                     "natsurl",
 				MaxReconnects:           1,
 				ReconnectWait:           1 * time.Second,
 				EventTypePrefix:         "etp",
