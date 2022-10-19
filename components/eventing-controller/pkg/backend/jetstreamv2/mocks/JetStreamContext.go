@@ -480,6 +480,38 @@ func (_m *JetStreamContext) KeyValue(bucket string) (nats.KeyValue, error) {
 	return r0, r1
 }
 
+// KeyValueStoreNames provides a mock function with given fields:
+func (_m *JetStreamContext) KeyValueStoreNames() <-chan string {
+	ret := _m.Called()
+
+	var r0 <-chan string
+	if rf, ok := ret.Get(0).(func() <-chan string); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan string)
+		}
+	}
+
+	return r0
+}
+
+// KeyValueStores provides a mock function with given fields:
+func (_m *JetStreamContext) KeyValueStores() <-chan nats.KeyValueStatus {
+	ret := _m.Called()
+
+	var r0 <-chan nats.KeyValueStatus
+	if rf, ok := ret.Get(0).(func() <-chan nats.KeyValueStatus); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan nats.KeyValueStatus)
+		}
+	}
+
+	return r0
+}
+
 // ObjectStore provides a mock function with given fields: bucket
 func (_m *JetStreamContext) ObjectStore(bucket string) (nats.ObjectStore, error) {
 	ret := _m.Called(bucket)
@@ -526,7 +558,7 @@ func (_m *JetStreamContext) ObjectStoreNames(opts ...nats.ObjectOpt) <-chan stri
 }
 
 // ObjectStores provides a mock function with given fields: opts
-func (_m *JetStreamContext) ObjectStores(opts ...nats.ObjectOpt) <-chan nats.ObjectStore {
+func (_m *JetStreamContext) ObjectStores(opts ...nats.ObjectOpt) <-chan nats.ObjectStoreStatus {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -535,12 +567,12 @@ func (_m *JetStreamContext) ObjectStores(opts ...nats.ObjectOpt) <-chan nats.Obj
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 <-chan nats.ObjectStore
-	if rf, ok := ret.Get(0).(func(...nats.ObjectOpt) <-chan nats.ObjectStore); ok {
+	var r0 <-chan nats.ObjectStoreStatus
+	if rf, ok := ret.Get(0).(func(...nats.ObjectOpt) <-chan nats.ObjectStoreStatus); ok {
 		r0 = rf(opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(<-chan nats.ObjectStore)
+			r0 = ret.Get(0).(<-chan nats.ObjectStoreStatus)
 		}
 	}
 
