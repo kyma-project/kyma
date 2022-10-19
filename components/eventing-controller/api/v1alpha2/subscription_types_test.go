@@ -1,9 +1,10 @@
 package v1alpha2_test
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"strconv"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/stretchr/testify/assert"
