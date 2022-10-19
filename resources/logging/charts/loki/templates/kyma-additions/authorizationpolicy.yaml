@@ -26,10 +26,7 @@ spec:
   - from:
     - source:
         principals:
-        - "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
-{{ if .Values.global.telemetry.enabled }}
         - "cluster.local/ns/kyma-system/sa/telemetry-fluent-bit"
-{{ end }}
     to:
     - operation:
         paths: ["/loki/api/v1/push"]
