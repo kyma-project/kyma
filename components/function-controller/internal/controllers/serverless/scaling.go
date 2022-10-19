@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +18,7 @@ func stateFnCheckScaling(ctx context.Context, r *reconciler, s *systemState) (st
 
 	err := r.client.ListByLabel(ctx, namespace, labels, &s.hpas)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing HPAs")
 	}
 
 	if !isScalingEnabled(&s.instance) {
@@ -75,7 +76,7 @@ func buildStateFnCreateHorizontalPodAutoscaler(hpa autoscalingv1.HorizontalPodAu
 
 		err := r.client.CreateWithReference(ctx, &s.instance, &hpa)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while creating HPA")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -94,7 +95,8 @@ func stateFnDeleteAllHorizontalPodAutoscalers(ctx context.Context, r *reconciler
 	r.log.Info("Deleting all HorizontalPodAutoscalers attached to function")
 	selector := apilabels.SelectorFromSet(s.internalFunctionLabels())
 
-	return nil, r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, s.instance.GetNamespace(), selector)
+	err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, s.instance.GetNamespace(), selector)
+	return nil, errors.Wrap(err, "while deleting HPAs")
 }
 
 func buildStateFnUpdateHorizontalPodAutoscaler(expectd autoscalingv1.HorizontalPodAutoscaler) stateFn {
@@ -110,7 +112,7 @@ func buildStateFnUpdateHorizontalPodAutoscaler(expectd autoscalingv1.HorizontalP
 
 		err := r.client.Update(ctx, hpa)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while updating HPA")
 		}
 
 		condition := serverlessv1alpha2.Condition{

@@ -2,7 +2,6 @@ package serverless
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -14,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -103,14 +103,14 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 
 		err := r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: s.instance.Name}, existingFunction)
 		if err != nil {
-			return nil, client.IgnoreNotFound(err)
+			return nil, errors.Wrap(client.IgnoreNotFound(err), "while getting function instance")
 		}
 
 		updatedStatus := existingFunction.Status.DeepCopy()
 		updatedStatus.Conditions = updateCondition(existingFunction.Status.Conditions, condition)
 
 		if err := r.populateStatusFromSystemState(updatedStatus, s); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while setting up Status")
 		}
 
 		isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
@@ -121,7 +121,7 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 
 		if err := r.updateFunctionStatusWithEvent(ctx, existingFunction, updatedStatus, condition); err != nil {
 			r.log.Warnf("while updating function status: %s", err)
-			return nil, err
+			return nil, errors.Wrap(err, "while updating function status")
 		}
 		r.statsCollector.UpdateReconcileStats(&s.instance, condition)
 		return nil, nil
@@ -136,7 +136,7 @@ func (m *reconciler) populateStatusFromSystemState(status *serverlessv1alpha2.Fu
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})
 	if err != nil {
 		m.log.Warnf("failed to get selector for labelSelector: %w", err)
-		return err
+		return errors.Wrap(err, "while getting selectors")
 	}
 	status.PodSelector = selector.String()
 
@@ -153,7 +153,7 @@ func (m *reconciler) updateFunctionStatusWithEvent(ctx context.Context, f *serve
 	}
 	f.Status = *s
 	if err := m.client.Status().Update(ctx, f); err != nil {
-		return err
+		return errors.Wrap(err, "while updating function status")
 	}
 	eventType := "Normal"
 	if condition.Status == corev1.ConditionFalse {
@@ -178,7 +178,7 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		}
 
 		if err := r.client.Get(ctx, key, &secret); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while getting secret")
 		}
 
 		auth = &git.AuthOptions{
@@ -242,7 +242,7 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 
 func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "context error")
 	}
 
 	isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)

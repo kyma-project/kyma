@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -17,7 +18,7 @@ func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) (st
 		&s.services)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing services")
 	}
 
 	expectedSvc := s.buildService()
@@ -53,7 +54,7 @@ func buildStateFnUpdateService(newService corev1.Service) stateFn {
 
 		err := r.client.Update(ctx, svc)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while updating service")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -74,7 +75,7 @@ func buildStateFnCreateNewService(svc corev1.Service) stateFn {
 
 		err := r.client.CreateWithReference(ctx, &s.instance, &svc)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while creating service")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -107,7 +108,7 @@ func stateFnDeleteServices(ctx context.Context, r *reconciler, s *systemState) (
 		// TODO consider implementing mechanism to collect errors
 		err := r.client.Delete(ctx, &s.services.Items[i])
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while deleting service")
 		}
 	}
 

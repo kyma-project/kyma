@@ -7,6 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
@@ -17,12 +18,12 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 
 	err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.configMaps)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing configMaps")
 	}
 
 	err = r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing deployments")
 	}
 
 	srcChanged := s.inlineFnSrcChanged(r.cfg.docker.PullAddress)
@@ -55,7 +56,7 @@ func stateFnInlineDeleteConfigMap(ctx context.Context, r *reconciler, s *systemS
 
 	err := r.client.DeleteAllBySelector(ctx, &corev1.ConfigMap{}, s.instance.GetNamespace(), selector)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while deleting configMaps")
 	}
 
 	return nil, nil
@@ -66,7 +67,7 @@ func stateFnInlineCreateConfigMap(ctx context.Context, r *reconciler, s *systemS
 
 	err := r.client.CreateWithReference(ctx, &s.instance, &configMap)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while creating configMaps")
 	}
 
 	currentCondition := serverlessv1alpha2.Condition{
@@ -92,7 +93,7 @@ func stateFnInlineUpdateConfigMap(ctx context.Context, r *reconciler, s *systemS
 
 	err := r.client.Update(ctx, &s.configMaps.Items[0])
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while updating configMap")
 	}
 
 	condition := serverlessv1alpha2.Condition{

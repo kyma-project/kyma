@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -31,11 +32,11 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 
 	err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while Listing deployments")
 	}
 
 	if err = ctx.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "context error")
 	}
 
 	args := buildDeploymentArgs{
@@ -72,7 +73,7 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		err := r.client.CreateWithReference(ctx, &s.instance, &d)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while creating deployment")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -93,7 +94,8 @@ func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState
 	labels := s.internalFunctionLabels()
 	selector := apilabels.SelectorFromSet(labels)
 
-	return nil, r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
+	err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
+	return nil, errors.Wrap(err, "while deleting delpoyments")
 }
 
 func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLabels map[string]string) stateFn {
@@ -107,7 +109,7 @@ func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLa
 
 		err := r.client.Update(ctx, &s.deployments.Items[0])
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while updating deployment")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -124,7 +126,7 @@ func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLa
 
 func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "context error")
 	}
 
 	deploymentName := s.deployments.Items[0].GetName()
@@ -183,7 +185,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 
 	yamlConditions, err := yaml.Marshal(s.deployments.Items[0].Status.Conditions)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while parsing deployment status")
 	}
 
 	msg := fmt.Sprintf("Deployment %s failed with condition: \n%s", deploymentName, yamlConditions)

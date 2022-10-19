@@ -12,6 +12,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 )
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha2.FunctionManagedByLabel: serverlessv1alpha2.FunctionControllerValue}
@@ -28,7 +29,7 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 
 		err := r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.jobs)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while listing jobs")
 		}
 
 		jobLen := len(s.jobs.Items)
@@ -94,7 +95,7 @@ func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
 
 		err := r.client.ListByLabel(ctx, "", fcManagedByLabel, &allJobs)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while listing jobs")
 		}
 
 		activeJobsCount := countJobs(allJobs, didNotFail, didNotSucceed)
@@ -107,7 +108,7 @@ func buildStateFnInlineCreateJob(expectedJob batchv1.Job) stateFn {
 
 		err = r.client.CreateWithReference(ctx, &s.instance, &expectedJob)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while creating job")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -130,7 +131,7 @@ func stateFnInlineDeleteJobs(ctx context.Context, r *reconciler, s *systemState)
 
 	err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, s.instance.GetNamespace(), selector)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while deleting jobs")
 	}
 
 	condition := serverlessv1alpha2.Condition{
@@ -154,7 +155,7 @@ func buildStateFnInlineUpdateJobLabels(m map[string]string) stateFn {
 
 		err := r.client.Update(ctx, &s.jobs.Items[0])
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while updating job")
 		}
 
 		condition := serverlessv1alpha2.Condition{
@@ -171,7 +172,7 @@ func buildStateFnInlineUpdateJobLabels(m map[string]string) stateFn {
 
 func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "context error")
 	}
 
 	job := &s.jobs.Items[0]
