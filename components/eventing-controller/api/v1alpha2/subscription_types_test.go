@@ -1,4 +1,4 @@
-package v1alpha2 //nolint:nolintlint,testpackage
+package v1alpha2
 
 import (
 	"strconv"

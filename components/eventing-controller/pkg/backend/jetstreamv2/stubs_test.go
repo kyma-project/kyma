@@ -1,4 +1,4 @@
-package jetstreamv2 //nolint:nolintlint,testpackage
+package jetstreamv2
 
 import (
 	"github.com/nats-io/nats.go"
@@ -16,6 +16,16 @@ type jetStreamContextStub struct {
 
 	update      *nats.ConsumerInfo
 	updateError error
+}
+
+func (j jetStreamContextStub) KeyValueStoreNames() <-chan string {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (j jetStreamContextStub) KeyValueStores() <-chan nats.KeyValueStatus {
+	// TODO implement me
+	panic("implement me")
 }
 
 func (j jetStreamContextStub) Streams(_ ...nats.JSOpt) <-chan *nats.StreamInfo {
