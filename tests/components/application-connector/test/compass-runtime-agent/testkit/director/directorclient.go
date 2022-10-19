@@ -163,7 +163,7 @@ func (cc *directorClient) AssignApplicationToFormation(appId, formationName stri
 }
 
 func (cc *directorClient) UnassignApplication(appId, formationName string) error {
-	log.Infof("Unssigning Application")
+	log.Infof("Unregistering Application from Formation")
 
 	queryFunc := func() string { return cc.queryProvider.unassignFormation(appId, formationName) }
 	execFunc := getExecGraphQLFunc[graphql.Formation](cc)
@@ -185,12 +185,12 @@ func (cc *directorClient) AssignRuntimeToFormation(runtimeId, formationName stri
 }
 
 func (cc *directorClient) UnregisterApplication(appID string) error {
-	log.Infof("Unregistering Runtime")
+	log.Infof("Unregistering Application")
 
 	queryFunc := func() string { return cc.queryProvider.unregisterApplicationMutation(appID) }
 	execFunc := getExecGraphQLFunc[graphql.Application](cc)
-	operationDescription := "assign Runtime to Formation"
-	successfulLogMessage := fmt.Sprintf("Failed to unregister application %s in Director: received unexpected applicationID.", appID)
+	operationDescription := "Unregistering Application"
+	successfulLogMessage := fmt.Sprintf("Successfully unregister application %s in Directorfor tenant %s", appID, cc.tenant)
 
 	response, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
 	if err != nil {
