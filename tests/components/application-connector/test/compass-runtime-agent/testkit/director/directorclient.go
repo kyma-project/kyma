@@ -190,7 +190,7 @@ func (cc *directorClient) UnregisterApplication(appID string) error {
 	queryFunc := func() string { return cc.queryProvider.unregisterApplicationMutation(appID) }
 	execFunc := getExecGraphQLFunc[graphql.Application](cc)
 	operationDescription := "Unregistering Application"
-	successfulLogMessage := fmt.Sprintf("Successfully unregister application %s in Directorfor tenant %s", appID, cc.tenant)
+	successfulLogMessage := fmt.Sprintf("Successfully unregister application %s in Director for tenant %s", appID, cc.tenant)
 
 	response, err := executeQuery(queryFunc, execFunc, operationDescription, successfulLogMessage)
 	if err != nil {
