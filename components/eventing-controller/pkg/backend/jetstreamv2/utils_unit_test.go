@@ -282,6 +282,7 @@ func TestGetCleanEventTypes(t *testing.T) {
 }
 
 func TestGetBackendJetStreamTypes(t *testing.T) {
+	t.Parallel()
 	jsCleaner := cleaner.NewJetStreamCleaner(nil)
 	defaultSub := evtestingv2.NewSubscription(subName, subNamespace)
 	js := NewJetStream(env.NatsConfig{}, nil, jsCleaner, nil, env.DefaultSubscriptionConfig{})
@@ -575,6 +576,7 @@ func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 
 // TestJetStream_isJsSubAssociatedWithKymaSub tests the isJsSubAssociatedWithKymaSub method.
 func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
+	t.Parallel()
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -628,6 +630,7 @@ func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
 			gotResult := isJsSubAssociatedWithKymaSub(tC.givenJSSubKey, tC.givenKymaSubKey)
 			require.Equal(t, tC.wantResult, gotResult)
 		})

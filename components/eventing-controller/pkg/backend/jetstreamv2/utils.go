@@ -203,6 +203,8 @@ func GetCleanEventTypes(sub *eventingv1alpha2.Subscription,
 	return cleanEventTypes, nil
 }
 
+// GetBackendJetStreamTypes gets the original event type and the consumer name for all the subscriptions
+// and this slice is set as the backend specific status for JetStream.
 func GetBackendJetStreamTypes(subscription *eventingv1alpha2.Subscription, jsSubjects []string) []eventingv1alpha2.JetStreamTypes {
 	var jsTypes []eventingv1alpha2.JetStreamTypes
 	for i, ot := range subscription.Spec.Types {
