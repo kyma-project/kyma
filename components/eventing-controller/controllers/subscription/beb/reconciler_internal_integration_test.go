@@ -23,8 +23,8 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
@@ -912,7 +912,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 // testEnvironment provides mocked resources for tests.
 type testEnvironment struct {
 	fakeClient  client.Client
-	backend     *mocks.BEBBackend
+	backend     *mocks.Backend
 	logger      *eventinglogger.Logger
 	recorder    *record.FakeRecorder
 	cfg         env.Config
@@ -923,7 +923,7 @@ type testEnvironment struct {
 
 // setupTestEnvironment is a testEnvironment constructor.
 func setupTestEnvironment(t *testing.T, objs ...client.Object) *testEnvironment {
-	mockedBackend := &mocks.BEBBackend{}
+	mockedBackend := &mocks.Backend{}
 	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()
 	recorder := &record.FakeRecorder{}
 	defaultLogger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
