@@ -8,7 +8,7 @@
 * @pbochynski @PK85 @a-thaler
 
 /.github @kyma-project/prow
-/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @kyma-project/prow @voigt
+/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow @voigt
 /.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 
@@ -55,7 +55,7 @@
 /resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
 /resources/cluster-essentials @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85
-/resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
 /resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
 /resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
@@ -79,13 +79,13 @@
 /tests/fast-integration @lindnerby @skhalash @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
 /tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
-/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @jaroslaw-pieszka
-/tests/fast-integration/skr-aws-upgrade-integration @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-nightly @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
-/tests/fast-integration/skr-svcat-migration-test @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
-/tests/fast-integration/skr-test @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
-/tests/fast-integration/smctl @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
+/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
+/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
+/tests/fast-integration/skr-aws-upgrade-integration @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
+/tests/fast-integration/skr-nightly @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
+/tests/fast-integration/skr-svcat-migration-test @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
+/tests/fast-integration/skr-test @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
+/tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
 
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
