@@ -95,10 +95,17 @@ podSecurityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
 containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 extraConfigmapMounts:
   []
   # - name: certs-configmap
@@ -130,6 +137,7 @@ downloadDashboards:
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
+    readOnlyRootFilesystem: true
 
 ## Pod Annotations
 # podAnnotations: {}
@@ -307,7 +315,7 @@ initChownData:
   ## If false, data ownership will not be reset at startup
   ## This allows the prometheus-server to be run with an arbitrary user
   ##
-  enabled: true
+  enabled: false
 
   ## initChownData container image
   ##
@@ -637,6 +645,10 @@ sidecar:
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   # skipTlsVerify Set to true to skip tls verification for kube api calls
   # skipTlsVerify: true
   enableUniqueFilenames: false
@@ -798,9 +810,19 @@ kyma:
     env: {}
     nodeSelector: {}
     securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
       allowPrivilegeEscalation: false
       privileged: false
-      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
     port: 3000
     image:
       pullPolicy: IfNotPresent

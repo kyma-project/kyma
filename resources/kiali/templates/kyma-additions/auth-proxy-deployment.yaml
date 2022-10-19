@@ -32,6 +32,10 @@ spec:
       {{- if or .Values.authProxy.priorityClassName .Values.global.highPriorityClassName }}
       priorityClassName: {{ coalesce .Values.authProxy.priorityClassName .Values.global.highPriorityClassName }}
       {{- end }}
+      {{- if .Values.authProxy.securityContext }}
+      securityContext:
+{{ toYaml .Values.authProxy.securityContext | nindent 8 }}
+      {{- end }}
       containers:
       - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
@@ -66,9 +70,9 @@ spec:
           httpGet:
             path: /ping
             port: http
-        {{- if .Values.authProxy.securityContext }}
+        {{- if .Values.authProxy.containerSecurityContext }}
         securityContext:
-{{ toYaml .Values.authProxy.securityContext | nindent 10 }}
+{{ toYaml .Values.authProxy.containerSecurityContext | nindent 10 }}
         {{- end }}
         resources:
 {{ toYaml .Values.authProxy.resources | indent 10 }}

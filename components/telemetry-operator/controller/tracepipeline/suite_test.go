@@ -14,58 +14,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package logpipeline
+package tracepipeline
 
 import (
 	"context"
 	"path/filepath"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	//+kubebuilder:scaffold:imports
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var (
-	k8sClient client.Client
-	testEnv   *envtest.Environment
-	ctx       context.Context
-	cancel    context.CancelFunc
-)
+var cfg *rest.Config
+var k8sClient client.Client
+var testEnv *envtest.Environment
+var ctx context.Context
+var cancel context.CancelFunc
 
-var (
-	testConfig = Config{
-		DaemonSet:         types.NamespacedName{Name: "test-telemetry-fluent-bit", Namespace: "default"},
-		SectionsConfigMap: types.NamespacedName{Name: "test-telemetry-fluent-bit-sections", Namespace: "default"},
-		FilesConfigMap:    types.NamespacedName{Name: "test-telemetry-fluent-bit-files", Namespace: "default"},
-		EnvSecret:         types.NamespacedName{Name: "test-telemetry-fluent-bit-env", Namespace: "default"},
-		PipelineDefaults: builder.PipelineDefaults{
-			InputTag:          "kube",
-			MemoryBufferLimit: "10M",
-			StorageType:       "filesystem",
-			FsBufferLimit:     "1G",
-		},
-	}
-)
+var testConfig = Config{
+	CreateServiceMonitor: false,
+	CollectorNamespace:   "kyma-system",
+	ResourceName:         "telemetry-trace-collector",
+	CollectorImage:       "otel/opentelemetry-collector-contrib:0.60.0",
+}
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecs(t, "LogPipeline Controller Suite")
+	RunSpecs(t, "TracePipeline Controller Suite")
 }
 
 var _ = BeforeSuite(func() {
@@ -79,7 +69,9 @@ var _ = BeforeSuite(func() {
 		ErrorIfCRDPathMissing: true,
 	}
 
-	cfg, err := testEnv.Start()
+	var err error
+	// cfg is defined in this file globally.
+	cfg, err = testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
 
@@ -94,15 +86,15 @@ var _ = BeforeSuite(func() {
 
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
-		MetricsBindAddress:     ":8080",
-		Port:                   9443,
-		HealthProbeBindAddress: ":8081",
+		MetricsBindAddress:     ":9083",
+		Port:                   10449,
+		HealthProbeBindAddress: ":9085",
 		LeaderElection:         false,
-		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
+		LeaderElectionID:       "ddd7ef0b.kyma-project.io",
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	reconciler := NewReconciler(mgr.GetClient(), testConfig)
+	reconciler := NewReconciler(mgr.GetClient(), testConfig, scheme.Scheme)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

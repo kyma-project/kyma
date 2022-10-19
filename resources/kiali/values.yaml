@@ -48,9 +48,19 @@ authProxy:
   env: {}
   nodeSelector: {}
   securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
     allowPrivilegeEscalation: false
     privileged: false
-    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   image:
     pullPolicy: IfNotPresent
   priorityClassName: "kyma-system-priority"
@@ -136,6 +146,13 @@ deployment:
       cpu: 100m
       memory: 140Mi
   secret_name: "kiali"
+  security_context:
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   service_annotations: {}
   service_type: ""
   tolerations: []
