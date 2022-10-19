@@ -1,6 +1,7 @@
-package v1alpha2
+package v1alpha2_test
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"strconv"
 	"testing"
 
@@ -11,14 +12,14 @@ import (
 func TestGetMaxInFlightMessages(t *testing.T) {
 	testCases := []struct {
 		name              string
-		givenSubscription *Subscription
+		givenSubscription *v1alpha2.Subscription
 		wantResult        int
 		wantErr           error
 	}{
 		{
 			name: "function should give the default MaxInFlight if the Subscription config is missing",
-			givenSubscription: &Subscription{
-				Spec: SubscriptionSpec{
+			givenSubscription: &v1alpha2.Subscription{
+				Spec: v1alpha2.SubscriptionSpec{
 					Config: nil,
 				},
 			},
@@ -27,8 +28,8 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 		},
 		{
 			name: "function should give the default MaxInFlight if it is missing in the Subscription config",
-			givenSubscription: &Subscription{
-				Spec: SubscriptionSpec{
+			givenSubscription: &v1alpha2.Subscription{
+				Spec: v1alpha2.SubscriptionSpec{
 					Config: map[string]string{
 						"otherConfigKey": "20"},
 				},
@@ -38,10 +39,10 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 		},
 		{
 			name: "function should give the expectedConfig",
-			givenSubscription: &Subscription{
-				Spec: SubscriptionSpec{
+			givenSubscription: &v1alpha2.Subscription{
+				Spec: v1alpha2.SubscriptionSpec{
 					Config: map[string]string{
-						MaxInFlightMessages: "20"},
+						v1alpha2.MaxInFlightMessages: "20"},
 				},
 			},
 			wantResult: 20,
@@ -49,10 +50,10 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 		},
 		{
 			name: "function should result into an error",
-			givenSubscription: &Subscription{
-				Spec: SubscriptionSpec{
+			givenSubscription: &v1alpha2.Subscription{
+				Spec: v1alpha2.SubscriptionSpec{
 					Config: map[string]string{
-						MaxInFlightMessages: "nonInt"},
+						v1alpha2.MaxInFlightMessages: "nonInt"},
 				},
 			},
 			wantResult: -1,
