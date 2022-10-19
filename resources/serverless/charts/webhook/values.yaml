@@ -59,6 +59,8 @@ container:
   privileged: false
   runAsUser: 1000
   envs:
+    configPath:
+      value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
     metricsDomain:
       value: "kyma-project.io/serverless"
     configObservabilityName:
@@ -69,10 +71,6 @@ container:
       value: serverless-webhook
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
-    logLevel:
-      value: "info"
-    logFormat:
-      value: "json"
 
 values:
   reservedEnvs:

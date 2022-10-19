@@ -5,7 +5,8 @@ import (
 	"os"
 
 	"github.com/go-logr/zapr"
-	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
+	fileconfig "github.com/kyma-project/kyma/components/function-controller/internal/config"
+	"github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -27,8 +28,7 @@ type config struct {
 	WebhookServiceName string `envconfig:"default=serverless-webhook"`
 	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
 	WebhookPort        int    `envconfig:"default=8443"`
-	LogFormat          string `envconfig:"default=text"`
-	LogLevel           string `envconfig:"default=debug"`
+	WebhookConfigPath  string `envconfig:"default=/appdata/config.yaml"`
 }
 
 var (
@@ -53,16 +53,27 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	l, err := serverlessLogging.ConfigureLogger(cfg.LogLevel, cfg.LogFormat)
+	logCfg, err := fileconfig.Load(cfg.WebhookConfigPath)
+	if err != nil {
+		setupLog.Error(err, "unable to load configuration file")
+		os.Exit(1)
+	}
+
+	loggerRegistry, err := logging.ConfigureRegisteredLogger(logCfg.LogLevel, logCfg.LogFormat)
 	if err != nil {
 		setupLog.Error(err, "unable to configure log")
 		os.Exit(1)
 	}
 
-	logrZap := zapr.NewLogger(l.WithContext().Desugar())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, cfg.WebhookConfigPath)
+
+	logrZap := zapr.NewLogger(loggerRegistry.CreateDesugared())
 	ctrl.SetLogger(logrZap)
 
-	log := l.WithContext()
+	initLog := loggerRegistry.CreateUnregistered()
 
 	validationConfigv1alpha1 := webhook.ReadValidationConfigV1Alpha1OrDie()
 	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
@@ -70,7 +81,7 @@ func main() {
 	defaultingConfigv1alpha2 := webhook.ReadDefaultingConfigV1Alpha2OrDie()
 
 	// manager setup
-	log.Info("setting up controller-manager")
+	initLog.Info("setting up controller-manager")
 
 	mgr, err := manager.New(ctrl.GetConfigOrDie(), manager.Options{
 		Scheme:             scheme,
@@ -79,11 +90,11 @@ func main() {
 		Logger:             logrZap,
 	})
 	if err != nil {
-		log.Error(err, "failed to setup controller-manager")
+		initLog.Error(err, "failed to setup controller-manager")
 		os.Exit(1)
 	}
 
-	log.Info("setting up webhook certificates and webhook secret")
+	initLog.Info("setting up webhook certificates and webhook secret")
 	// we need to ensure the certificates and the webhook secret as early as possible
 	// because the webhook server needs to read it from disk to start.
 	if err := resources.SetupCertificates(
@@ -91,12 +102,12 @@ func main() {
 		cfg.WebhookSecretName,
 		cfg.SystemNamespace,
 		cfg.WebhookServiceName,
-		log.Named("setup-certificates")); err != nil {
-		log.Error(err, "failed to setup certificates and webhook secret")
+		loggerRegistry.CreateNamed("setup-certificates")); err != nil {
+		initLog.Error(err, "failed to setup certificates and webhook secret")
 		os.Exit(1)
 	}
 
-	log.Info("setting up webhook server")
+	initLog.Info("setting up webhook server")
 	// webhook server setup
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
@@ -105,7 +116,7 @@ func main() {
 		webhook.NewConvertingWebhook(
 			mgr.GetClient(),
 			scheme,
-			log.Named("converting-webhook")),
+			loggerRegistry.CreateNamed("converting-webhook")),
 	)
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(defaultingConfigv1alpha1, defaultingConfigv1alpha2, mgr.GetClient()),
@@ -117,7 +128,7 @@ func main() {
 
 	whs.Register(resources.RegistryConfigDefaultingWebhookPath, &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()})
 
-	log.Info("setting up webhook resources controller")
+	initLog.Info("setting up webhook resources controller")
 	// apply and monitor configuration
 	if err := resources.SetupResourcesController(
 		context.Background(),
@@ -125,16 +136,16 @@ func main() {
 		cfg.WebhookServiceName,
 		cfg.SystemNamespace,
 		cfg.WebhookSecretName,
-		log.Named("resource-ctrl")); err != nil {
-		log.Error(err, "failed to setup webhook resources controller")
+		loggerRegistry); err != nil {
+		initLog.Error(err, "failed to setup webhook resources controller")
 		os.Exit(1)
 	}
 
-	log.Info("starting the controller-manager")
+	initLog.Info("starting the controller-manager")
 	// start the server manager
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
-		log.Error(err, "failed to start controller-manager")
+		initLog.Error(err, "failed to start controller-manager")
 		os.Exit(1)
 	}
 }
