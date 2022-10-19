@@ -13,6 +13,10 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
+const (
+	natsURL = "eventing-nats.kyma-system.svc.cluster.local"
+)
+
 func TestNewDeployment(t *testing.T) {
 	publisherConfig := env.PublisherConfig{
 		RequestsCPU:     "32m",
@@ -51,6 +55,7 @@ func TestNewDeployment(t *testing.T) {
 			case "NATS":
 				natsConfig = env.NatsConfig{
 					JSStreamName: "kyma",
+					URL:          natsURL,
 				}
 				deployment = NewNATSPublisherDeployment(natsConfig, publisherConfig)
 			case "BEB":
