@@ -91,7 +91,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 	continuousGitCheckout := true
 
 	g := gomega.NewGomegaWithT(t)
-	rtm := serverlessv1alpha2.NodeJs12
+	rtm := serverlessv1alpha2.NodeJs16
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
@@ -415,7 +415,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 	continuousGitCheckout := false
 
 	g := gomega.NewGomegaWithT(t)
-	rtm := serverlessv1alpha2.NodeJs12
+	rtm := serverlessv1alpha2.NodeJs16
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
