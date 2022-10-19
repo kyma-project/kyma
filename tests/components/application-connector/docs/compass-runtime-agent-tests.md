@@ -78,7 +78,7 @@ Pipelines run the tests using the **test-compass-runtime-agent** target from the
 ### Run the tests
 
 1. Before running the test export the following environment variables
-- `COMPASS_HOST` - points to the host running Compass 
+- `COMPASS_HOST` - host running Compass 
 - `COMPASS_CLIENT_ID` - client id used for fetching authorisation tokens
 - `COMPASS_CLIENT_SECRET` - client secret used for fetching authorisation tokens 
 
