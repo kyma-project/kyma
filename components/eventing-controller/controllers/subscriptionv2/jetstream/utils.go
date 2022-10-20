@@ -2,9 +2,7 @@ package jetstream
 
 import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -16,11 +14,6 @@ func isInDeletion(subscription *eventingv1alpha2.Subscription) bool {
 // containsFinalizer checks if the subscription contains our Finalizer.
 func containsFinalizer(sub *eventingv1alpha2.Subscription) bool {
 	return utils.ContainsString(sub.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer)
-}
-
-// missingSubscriptionErr checks if the error reports about missing NATS subscription in js.subscriptions map.
-func missingSubscriptionErr(err error) bool {
-	return errors.Is(err, jetstreamv2.ErrMissingSubscription)
 }
 
 // setSubReadyStatus returns true if the subscription ready status has changed.
@@ -46,14 +39,14 @@ func initializeDesiredConditions() []eventingv1alpha2.Condition {
 }
 
 // setConditionSubscriptionActive updates the ConditionSubscriptionActive condition if the error is nil.
-func setConditionSubscriptionActive(desiredConditions []eventingv1alpha2.Condition, error error) {
+func setConditionSubscriptionActive(desiredConditions []eventingv1alpha2.Condition, err error) {
 	for key, c := range desiredConditions {
 		if c.Type == eventingv1alpha2.ConditionSubscriptionActive {
-			if error == nil {
+			if err == nil {
 				desiredConditions[key].Status = corev1.ConditionTrue
 				desiredConditions[key].Reason = eventingv1alpha2.ConditionReasonNATSSubscriptionActive
 			} else {
-				desiredConditions[key].Message = error.Error()
+				desiredConditions[key].Message = err.Error()
 			}
 		}
 	}

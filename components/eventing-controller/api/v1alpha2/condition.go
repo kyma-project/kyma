@@ -32,7 +32,7 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	// JetStream Conditions
+	// JetStream Conditions.
 	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
 	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
 

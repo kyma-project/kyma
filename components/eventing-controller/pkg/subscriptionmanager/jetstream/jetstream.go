@@ -105,7 +105,8 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	if sm.envCfg.EnableNewCRDVersion {
 		jsCleaner := cleaner.NewJetStreamCleaner(sm.logger)
-		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, jsCleaner, defaultSubsConfig, sm.logger)
+		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg,
+			sm.metricsCollector, jsCleaner, defaultSubsConfig, sm.logger)
 		jetStreamReconciler := jetstreamv2.NewReconciler(
 			ctx,
 			client,
@@ -216,7 +217,8 @@ func cleanupv2(backend backendjetstreamv2.Backend, dynamicClient dynamic.Interfa
 	}
 
 	// fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(eventingv1alpha2.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(
+		eventingv1alpha2.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "list subscriptions failed")
 	}
@@ -234,14 +236,14 @@ func cleanupv2(backend backendjetstreamv2.Backend, dynamicClient dynamic.Interfa
 		log := logger.With("key", subKey.String())
 
 		desiredSub := sub.DuplicateWithStatusDefaults()
-		if err := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+		if updateErr := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); updateErr != nil {
 			isCleanupSuccessful = false
 			log.Errorw("Failed to update JetStream v2 subscription status", "error", err)
 		}
 
 		// clean subscriptions from JetStream.
 		if jsBackend != nil {
-			if err := jsBackend.DeleteSubscription(&sub); err != nil {
+			if delErr := jsBackend.DeleteSubscription(&sub); delErr != nil {
 				isCleanupSuccessful = false
 				log.Errorw("Failed to delete JetStream v2 subscription", "error", err)
 			}

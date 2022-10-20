@@ -31,8 +31,10 @@ const (
 
 // Test_Reconcile tests the return values of the Reconcile() method of the reconciler.
 // This is important, as it dictates whether the reconciliation should be requeued by Controller Runtime,
-// and if so with how much initial delay. Returning error or a `Result{Requeue: true}` would cause the reconciliation to be requeued.
-// Everything else is mocked since we are only interested in the logic of the Reconcile method and not the reconciler dependencies.
+// and if so with how much initial delay.
+// Returning error or a `Result{Requeue: true}` would cause the reconciliation to be requeued.
+// Everything else is mocked since we are only interested in the logic of the Reconcile method
+// and not the reconciler dependencies.
 func Test_Reconcile(t *testing.T) {
 	ctx := context.Background()
 	req := require.New(t)
@@ -72,7 +74,8 @@ func Test_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
-				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
+					[]string{controllertesting.JetStreamSubject})
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
@@ -107,20 +110,23 @@ func Test_Reconcile(t *testing.T) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
-				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
+					[]string{controllertesting.JetStreamSubject})
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendSyncErr,
 		},
 		{
-			name:              "Return nil and RequeueAfter with requeue duration when backend sync returns missingSubscriptionErr",
+			name: "Return nil and RequeueAfter with requeue duration when " +
+				"backend sync returns missingSubscriptionErr",
 			givenSubscription: testSub,
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(missingSubSyncErr)
-				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
+					[]string{controllertesting.JetStreamSubject})
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{RequeueAfter: requeueDuration},
@@ -144,7 +150,8 @@ func Test_Reconcile(t *testing.T) {
 			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
+				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return(
+					[]string{controllertesting.JetStreamSubject})
 				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
@@ -204,7 +211,8 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			wantError:       nil,
 		},
 		{
-			name:            "With eventing finalizer the NATS subscription should be deleted and the finalizer should be cleared",
+			name: "With eventing finalizer the NATS subscription should be deleted" +
+				" and the finalizer should be cleared",
 			givenFinalizers: []string{eventingv1alpha2.Finalizer},
 			wantDeleteCall:  true,
 			wantFinalizers:  []string{},
@@ -243,12 +251,12 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			err := r.Client.Create(testEnvironment.Context, sub)
 			require.NoError(t, err)
 
-			if testCase.wantError == errFailedToRemoveFinalizer {
+			if errors.Is(testCase.wantError, errFailedToRemoveFinalizer) {
 				sub.ObjectMeta.ResourceVersion = ""
 			}
 
 			if testCase.wantDeleteCall {
-				if testCase.wantError == errFailedToDeleteSub {
+				if errors.Is(testCase.wantError, errFailedToDeleteSub) {
 					mockedBackend.On("DeleteSubscription", sub).Return(errors.New("deletion error"))
 				} else {
 					mockedBackend.On("DeleteSubscription", sub).Return(nil)
@@ -262,7 +270,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			// then
 			mockedBackend.AssertExpectations(t)
 
-			if testCase.wantError == errFailedToRemoveFinalizer {
+			if errors.Is(testCase.wantError, errFailedToRemoveFinalizer) {
 				ensureFinalizerMatch(t, sub, nil)
 			} else {
 				ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
@@ -624,7 +632,8 @@ func fetchTestSubscription(ctx context.Context, r *Reconciler) (eventingv1alpha2
 	return fetchedSub, err
 }
 
-func ensureSubscriptionMatchesConditionsAndStatus(t *testing.T, subscription eventingv1alpha2.Subscription, wantConditions []eventingv1alpha2.Condition, wantStatus bool) {
+func ensureSubscriptionMatchesConditionsAndStatus(t *testing.T,
+	subscription eventingv1alpha2.Subscription, wantConditions []eventingv1alpha2.Condition, wantStatus bool) {
 	require.Equal(t, len(wantConditions), len(subscription.Status.Conditions))
 	comparisonResult := eventingv1alpha2.ConditionsEquals(wantConditions, subscription.Status.Conditions)
 	require.True(t, comparisonResult)
