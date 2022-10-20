@@ -2,7 +2,6 @@ package serverless
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -14,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type stateFn func(context.Context, *reconciler, *systemState) stateFn
+type stateFn func(context.Context, *reconciler, *systemState) (stateFn, error)
 
 type k8s struct {
 	client         resource.Client
@@ -37,7 +37,6 @@ type cfg struct {
 
 // nolint
 type out struct {
-	err    error
 	result ctrl.Result
 }
 
@@ -56,27 +55,26 @@ const (
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha2.Function) (ctrl.Result, error) {
 	state := systemState{instance: f}
-
+	var err error
 loop:
 	for m.fn != nil {
 		select {
 		case <-ctx.Done():
-			m.err = ctx.Err()
+			err = ctx.Err()
 			break loop
+
 		default:
 			m.log.With("stateFn", m.stateFnName()).Info("next state")
-
-			m.fn = m.fn(ctx, m, &state)
-
+			m.fn, err = m.fn(ctx, m, &state)
 		}
 	}
 
 	m.log.With("requeueAfter", m.result.RequeueAfter).
 		With("requeue", m.result.Requeue).
-		With("err", m.err).
+		With("error", err).
 		Info("reconciliation result")
 
-	return m.result, m.err
+	return m.result, err
 }
 
 func (m *reconciler) stateFnName() string {
@@ -97,25 +95,22 @@ var (
 
 // this function is a terminator
 func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, repo *serverlessv1alpha2.Repository, commit string) stateFn {
-	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		if condition.LastTransitionTime.IsZero() {
-			r.err = fmt.Errorf("LastTransitionTime for condition %s is not set", condition.Type)
-			return nil
+			return nil, fmt.Errorf("LastTransitionTime for condition %s is not set", condition.Type)
 		}
 		existingFunction := &serverlessv1alpha2.Function{}
 
-		r.err = r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: s.instance.Name}, existingFunction)
-		if r.err != nil {
-			r.err = client.IgnoreNotFound(r.err)
-			return nil
+		err := r.client.Get(ctx, types.NamespacedName{Namespace: s.instance.Namespace, Name: s.instance.Name}, existingFunction)
+		if err != nil {
+			return nil, errors.Wrap(client.IgnoreNotFound(err), "while getting function instance")
 		}
 
 		updatedStatus := existingFunction.Status.DeepCopy()
 		updatedStatus.Conditions = updateCondition(existingFunction.Status.Conditions, condition)
 
 		if err := r.populateStatusFromSystemState(updatedStatus, s); err != nil {
-			r.err = err
-			return nil
+			return nil, errors.Wrap(err, "while setting up Status")
 		}
 
 		isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
@@ -126,11 +121,10 @@ func buildGenericStatusUpdateStateFn(condition serverlessv1alpha2.Condition, rep
 
 		if err := r.updateFunctionStatusWithEvent(ctx, existingFunction, updatedStatus, condition); err != nil {
 			r.log.Warnf("while updating function status: %s", err)
-			r.err = err
-			return nil
+			return nil, errors.Wrap(err, "while updating function status")
 		}
 		r.statsCollector.UpdateReconcileStats(&s.instance, condition)
-		return nil
+		return nil, nil
 	}
 }
 
@@ -142,7 +136,7 @@ func (m *reconciler) populateStatusFromSystemState(status *serverlessv1alpha2.Fu
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: s.podLabels()})
 	if err != nil {
 		m.log.Warnf("failed to get selector for labelSelector: %w", err)
-		return err
+		return errors.Wrap(err, "while getting selectors")
 	}
 	status.PodSelector = selector.String()
 
@@ -159,7 +153,7 @@ func (m *reconciler) updateFunctionStatusWithEvent(ctx context.Context, f *serve
 	}
 	f.Status = *s
 	if err := m.client.Status().Update(ctx, f); err != nil {
-		return err
+		return errors.Wrap(err, "while updating function status")
 	}
 	eventType := "Normal"
 	if condition.Status == corev1.ConditionFalse {
@@ -174,7 +168,7 @@ func buildStatusUpdateStateFnWithCondition(condition serverlessv1alpha2.Conditio
 	return buildGenericStatusUpdateStateFn(condition, nil, "")
 }
 
-func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) stateFn {
+func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
 	var auth *git.AuthOptions
 	if s.instance.Spec.Source.GitRepository.Auth != nil {
 		var secret corev1.Secret
@@ -183,8 +177,8 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 			Name:      s.instance.Spec.Source.GitRepository.Auth.SecretName,
 		}
 
-		if r.err = r.client.Get(ctx, key, &secret); r.err != nil {
-			return nil
+		if err := r.client.Get(ctx, key, &secret); err != nil {
+			return nil, errors.Wrap(err, "while getting secret")
 		}
 
 		auth = &git.AuthOptions{
@@ -203,15 +197,16 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 	if skipGitSourceCheck(s.instance, r.cfg) {
 		r.log.Info(fmt.Sprintf("skipping function [%s] source check", s.instance.Name))
 		expectedJob := s.buildGitJob(options, r.cfg)
-		return buildStateFnCheckImageJob(expectedJob)
+		return buildStateFnCheckImageJob(expectedJob), nil
 	}
 
 	var revision string
-	revision, r.err = r.gitClient.LastCommit(options)
-	if r.err != nil {
-		r.log.Error(r.err, " while fetching last commit")
+	var err error
+	revision, err = r.gitClient.LastCommit(options)
+	if err != nil {
+		r.log.Error(err, " while fetching last commit")
 		var errMsg string
-		r.result, errMsg = NextRequeue(r.err)
+		r.result, errMsg = NextRequeue(err)
 		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
 		condition := serverlessv1alpha2.Condition{
 			Type:               serverlessv1alpha2.ConditionConfigurationReady,
@@ -220,13 +215,13 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 			Reason:             serverlessv1alpha2.ConditionReasonSourceUpdateFailed,
 			Message:            errMsg,
 		}
-		return buildStatusUpdateStateFnWithCondition(condition)
+		return buildStatusUpdateStateFnWithCondition(condition), nil
 	}
 
 	srcChanged := s.gitFnSrcChanged(revision)
 	if !srcChanged {
 		expectedJob := s.buildGitJob(options, r.cfg)
-		return buildStateFnCheckImageJob(expectedJob)
+		return buildStateFnCheckImageJob(expectedJob), nil
 	}
 
 	condition := serverlessv1alpha2.Condition{
@@ -242,20 +237,20 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		BaseDir:   s.instance.Spec.Source.GitRepository.BaseDir,
 	}
 
-	return buildGenericStatusUpdateStateFn(condition, &repository, revision)
+	return buildGenericStatusUpdateStateFn(condition, &repository, revision), nil
 }
 
-func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	if r.err = ctx.Err(); r.err != nil {
-		return nil
+func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) (stateFn, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, errors.Wrap(err, "context error")
 	}
 
 	isGitType := s.instance.TypeOf(serverlessv1alpha2.FunctionTypeGit)
 	if isGitType {
-		return stateFnGitCheckSources
+		return stateFnGitCheckSources, nil
 	}
 
-	return stateFnInlineCheckSources
+	return stateFnInlineCheckSources, nil
 }
 
 func skipGitSourceCheck(f serverlessv1alpha2.Function, cfg cfg) bool {
