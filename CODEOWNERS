@@ -8,23 +8,23 @@
 * @pbochynski @PK85 @a-thaler
 
 /.github @kyma-project/prow
-/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow @voigt
+/.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
 /.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @wchrapka @mrCherry97 @Lyczeq
 
-/common @Tomasz-Smelcerz-SAP @strekm @akgalwas @janmedrek @piotrmiskiewicz
+/common @Tomasz-Smelcerz-SAP @strekm @akgalwas @piotrmiskiewicz
 # Logging library
-/common/logging @franpog859 @dbadura @janmedrek
+/common/logging @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 
-/components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/components/application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/components/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/components/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao @PK85 @dbadura
+/components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/components/application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/components/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/components/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao @PK85 @dbadura
 /components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
@@ -39,8 +39,8 @@
 
 /installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 /installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
@@ -49,15 +49,15 @@
 /installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 
 /resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
-/resources/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
-/resources/cluster-essentials @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85
+/resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
 /resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw
-/resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @barchw
@@ -70,8 +70,8 @@
 /resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 
-/tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
-/tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 
@@ -91,7 +91,7 @@
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72
-/tests/components/application-connector @VOID404 @akgalwas @koala7659 @janmedrek @franpog859 @mvshao
+/tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # performance tests
