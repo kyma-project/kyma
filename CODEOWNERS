@@ -38,35 +38,35 @@
 /hack @clebs
 
 /installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
-/installation/resources/crds/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/installation/resources/crds/api-gateway @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/installation/resources/crds/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/installation/resources/crds/ory @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
-/resources/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/api-gateway @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/resources/certificates @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc @strekm @werdes72
+/resources/certificates @veichtj @dariusztutaj @cnvergence @piotrkpc @strekm @werdes72
 /resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc @PK85
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
-/resources/cluster-users @cnvergence @piotrkpc @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj
+/resources/cluster-users @cnvergence @piotrkpc @strekm @werdes72 @veichtj @dariusztutaj
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/resources/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
-/resources/istio-resources @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/istio @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/istio-resources @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
 /resources/istio-resources/files/dashboards @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/kiali @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/resources/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/ory @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
 /resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
@@ -90,8 +90,8 @@
 
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/tests/components/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
-/tests/components/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/tests/components/api-gateway @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
+/tests/components/istio @strekm @werdes72 @veichtj @dariusztutaj @cnvergence @piotrkpc
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 
 # performance tests
