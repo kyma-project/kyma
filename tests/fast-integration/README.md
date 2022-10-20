@@ -70,50 +70,6 @@ npm run test-eventing
 > Using a different Namespace changes the host used for the Commerce Mock APIRule as well.
 > This allows different Commerce Mocks to co-exist in different Namespaces.
 
-## Local development
-
-Here you have sample development tasks you can execute on your local machine working with the Kyma source code.
-
-1. Install `kyma-js` as a global package:
-    ```
-    npm install -g kyma-js
-    ```
-    Another option is to navigate to the `fast-integration` folder, where the `kyma.js` file is located, and symlink the package folder:
-    ```
-    npm link
-    ```
-    The second option allows you to change the code of the installer and use it without building, publishing, and updating.
-
-2. Create the local cluster:
-    ```
-    kyma-js provision k3d
-    ```
-
-3. Install Kyma without some components:
-    ```
-    kyma-js install -v --skip-components=monitoring,tracing,logging,kiali
-    ```
-
-4. Execute the Commerce Mock test with `DEBUG` enabled:
-    ```
-    DEBUG=true mocha test/2-commerce-mock.js
-    ```
-
-5. Upgrade some components:
-    ```
-    kyma-js install -v --component=application-connector
-    ```
-
-6. Delete the cluster and start from scratch:
-    ```
-    kyma-js deprovision k3d
-    ```
-
-To learn more about `kyma-js` possibilities, run:
-```
-kyma-js <command> --help
-```
-
 ## FAQ
 
 ### Why don't you use Octopus?
