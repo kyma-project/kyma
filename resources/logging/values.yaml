@@ -23,7 +23,7 @@ global:
   images:
     loki:
       name: loki
-      version: 2.2.1-2e513b00
+      version: 2.2.1-cf0a130c
       directory: tpi
     alpine:
       name: "alpine"

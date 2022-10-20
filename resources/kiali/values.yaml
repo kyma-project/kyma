@@ -9,11 +9,11 @@ global:
   images:
     kiali:
       name: kiali
-      version: 1.51.1-4256edd8
+      version: 1.51.1-cf0a130c
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.3.0-c54bc74b
+      version: 7.3.0-cf0a130c
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
