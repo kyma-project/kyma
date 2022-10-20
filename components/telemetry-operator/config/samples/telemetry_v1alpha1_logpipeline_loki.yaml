@@ -1,37 +1,12 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LogPipeline
 metadata:
-  name: loki
+  name: logpipeline-loki-sample
 spec:
-  parsers: [ ]
-  multilineParsers: []
-  filters: []
   output:
-    custom: |
-      Name               grafana-loki
-      Alias              loki-output
-      Url                http://logging-loki:3100/loki/api/v1/push
-      Labels             {job="telemetry-fluent-bit"}
-      RemoveKeys         kubernetes, stream
-      LineFormat         json
-      LogLevel           warn
-      LabelMapPath       /files/labelmap.json
-  files:
-    - name: labelmap.json
-      content: |
-        {
-          "kubernetes": {
-            "container_name": "container",
-            "host": "node",
-            "labels": {
-              "app": "app",
-              "app.kubernetes.io/component": "component",
-              "app.kubernetes.io/name": "app",
-              "serverless.kyma-project.io/function-name": "function"
-            },
-            "namespace_name": "namespace",
-            "pod_name": "pod"
-          },
-          "stream": "stream"
-        }
-  variables: [ ]
+    grafana-loki:
+      url:
+        value: "http://logging-loki:3100/loki/api/v1/push"
+      labels:
+        job: "sample-fluent-bit"
+      removeKeys: ["kubernetes", "stream"]

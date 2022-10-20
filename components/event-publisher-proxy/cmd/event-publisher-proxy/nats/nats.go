@@ -3,14 +3,15 @@ package nats
 import (
 	"context"
 
+	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -37,27 +38,24 @@ type Commander struct {
 	cancel           context.CancelFunc
 	metricsCollector *metrics.Collector
 	logger           *logger.Logger
-	envCfg           *env.NatsConfig
+	envCfg           *env.NATSConfig
 	opts             *options.Options
-	jetstreamMode    bool
 }
 
 // NewCommander creates the Commander for publisher to NATS.
-func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger, jetstreamMode bool) *Commander {
+func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
-		envCfg:           new(env.NatsConfig),
+		envCfg:           new(env.NATSConfig),
 		logger:           logger,
 		metricsCollector: metricsCollector,
 		opts:             opts,
-		jetstreamMode:    jetstreamMode,
 	}
 }
 
 // Init implements the Commander interface and initializes the publisher to NATS.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		c.namedLogger().Errorw("Failed to read configuration", "error", err)
-		return err
+		return xerrors.Errorf("failed to read configuration for %s : %v", natsCommanderName, err)
 	}
 	return nil
 }
@@ -80,18 +78,12 @@ func (c *Commander) Start() error {
 		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
 	)
 	if err != nil {
-		c.namedLogger().Errorw("Failed to connect to backend server", "error", err)
-		return err
+		return xerrors.Errorf("failed to connect to backend server for %s : %v", natsCommanderName, err)
 	}
 	defer connection.Close()
 
 	// configure the message sender
-	var messageSenderToNats sender.GenericSender
-	if c.jetstreamMode {
-		messageSenderToNats = sender.NewJetstreamMessageSender(ctx, connection, c.envCfg, c.logger)
-	} else {
-		messageSenderToNats = sender.NewNatsMessageSender(ctx, connection, c.logger)
-	}
+	messageSender := sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -125,10 +117,9 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewHandler(messageReceiver, &messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := nats.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
-		c.namedLogger().Errorw("Failed to start handler", "error", err)
-		return err
+		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
 
 	c.namedLogger().Infof("Event Publisher was shut down")
@@ -143,5 +134,5 @@ func (c *Commander) Stop() error {
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(natsCommanderName).With("backend", natsBackend, "jestream mode", c.jetstreamMode)
+	return c.logger.WithContext().Named(natsCommanderName).With("backend", natsBackend)
 }

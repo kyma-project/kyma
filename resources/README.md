@@ -26,10 +26,9 @@ The version of the actual component image is located under the **global.{name_of
 
 ### Add monitoring to components
 
-Include configuration files for Service Monitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component.
+Include configuration files for ServiceMonitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component.
 
-
-When creating a Service Monitor resource, follow this naming convention:
+When creating a ServiceMonitor resource, follow this naming convention:
 
 | Resource | Name/Pattern | Value/Example | Description |
 |-----------|-------------|---------------| --------|

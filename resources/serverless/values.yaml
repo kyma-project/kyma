@@ -65,6 +65,10 @@ global:
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
+  configuration:
+    configmapName: 'serverless-configuration'
+    targetDir: "/appdata"
+    filename: "config.yaml"
   ingress:
     domainName:
   containerRegistry:
@@ -72,36 +76,36 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220525-4bd6d72e"
+      version: "20220819-0c178fc7"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14796"
+      version: "PR-15841"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14796"
+      version: "PR-15841"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14796"
+      version: "PR-15841"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "edd4cc71"
+      version: "v20221011-831da39d"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "edd4cc71"
+      version: "v20221011-831da39d"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "edd4cc71"
+      version: "v20221011-831da39d"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "edd4cc71"
+      version: "v20221011-831da39d"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.8.0-a0c08196"
+      version: "1.9.0-a550386f"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-c33cdde0"
+      version: "2.7.1-981f40fb"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -110,7 +114,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "631efc81"
+      version: "v20221013-5a653721"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -160,7 +164,7 @@ containers:
     resources:
       limits:
         cpu: 300m
-        memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
+        memory: 160Mi
       requests:
         cpu: 10m
         memory: 32Mi
@@ -171,7 +175,13 @@ containers:
     healthz:
       port: "8090"
     extraProperties: {}
+    configuration:
+      data:
+        logLevel: "info"
+        logFormat: "json"
     envs:
+      configPath:
+        value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -196,8 +206,12 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      # Deprecated as of kyma 2.8
+      # TODO : remove this ENV in 2.10 (two version compatibility rule for open source)
       functionJaegerServiceEndpoint:
         value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
+      functionTraceCollectorEndpoint:
+        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
         value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
@@ -206,10 +220,6 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildMaxSimultaneousJobs:
         value: "5"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 

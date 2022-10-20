@@ -6,6 +6,9 @@ import (
 	"path"
 	"time"
 
+	"go.uber.org/zap"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"github.com/pkg/errors"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -18,8 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string) error {
-	logger := ctrl.LoggerFrom(ctx)
+func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, loggingRegistry *logging.Registry) error {
+	logger := loggingRegistry.CreateUnregistered().Named("resource-ctrl")
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
@@ -56,6 +59,7 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 			webhookConfig: webhookConfig,
 			client:        mgr.GetClient(),
 			secretName:    secretName,
+			logger:        loggingRegistry.CreateNamed("webhook-resource-controller"),
 		},
 	})
 	if err != nil {
@@ -88,6 +92,7 @@ type resourceReconciler struct {
 	webhookConfig WebhookConfig
 	secretName    string
 	client        ctrlclient.Client
+	logger        *zap.SugaredLogger
 }
 
 func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
@@ -99,27 +104,26 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 		return reconcile.Result{}, nil
 	}
 
-	ctrl.LoggerFrom(ctx).Info("reconciling webhook resources")
+	r.logger.With("name", request.Name).Info("reconciling webhook resources")
 	if err := r.reconcilerWebhooks(ctx, request); err != nil {
 		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
 	if err := r.reconcilerSecret(ctx, request); err != nil {
 		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
-	ctrl.LoggerFrom(ctx).Info("webhook resources reconciled successfully")
+	r.logger.With("name", request.Name).Info("webhook resources reconciled successfully")
 	return reconcile.Result{RequeueAfter: 1 * time.Hour}, nil
 }
 
 func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request reconcile.Request) error {
-	logger := ctrl.LoggerFrom(ctx)
 	if request.Name == DefaultingWebhookName {
-		logger.Info("reconciling webhook defaulting webhook configuration")
+		r.logger.Info("reconciling webhook defaulting webhook configuration")
 		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, MutatingWebhook); err != nil {
 			return errors.Wrap(err, "failed to ensure defaulting webhook configuration")
 		}
 	}
 	if request.Name == ValidationWebhookName {
-		logger.Info("reconciling webhook validating webhook configuration")
+		r.logger.Info("reconciling webhook validating webhook configuration")
 		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, ValidatingWebHook); err != nil {
 			return errors.Wrap(err, "failed to ensure validating webhook configuration")
 		}
@@ -133,7 +137,7 @@ func (r *resourceReconciler) reconcilerSecret(ctx context.Context, request recon
 	if request.NamespacedName.String() != secretNamespaced.String() {
 		return nil
 	}
-	if err := EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName); err != nil {
+	if err := EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName, r.logger); err != nil {
 		return errors.Wrap(err, "failed to reconcile webhook secret")
 	}
 	return nil

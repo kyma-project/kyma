@@ -1,5 +1,5 @@
 #TODO: remove https://dashboard.kyma-project, https://kiali.kyma.example.com/oauth2/callback  after it's available
-external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com" ]
+external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com", "https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration" ]
 files-to-ignore: [ "/vendor/", "/testdata/" ]
 timeout: 60
 request-repeats: 5
@@ -43,7 +43,8 @@ files:
       external-links-to-ignore: [ "https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration" ]
   - path: "./kyma/docs/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md"
     config:
-      external-links-to-ignore: [ "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces",
+      external-links-to-ignore: [ "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces",
+                                  "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces",
                                   "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish" ]
   - path: "./kyma/docs/04-operation-guides/troubleshooting/evnt-02-jetstream-troubleshooting.md"
     config:
@@ -52,3 +53,6 @@ files:
     config:
       external-links-to-ignore: [ "http://central-application-gateway.kyma-system:8080/{APP_NAME}/{SERVICE_NAME}/{TARGET_PATH",
       "http://central-application-gateway.kyma-system:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}/{TARGET_PATH"]
+  - path: "./kyma/tests/components/application-connector/README.md"
+    config:
+      internal-links-to-ignore: [ "./resources/charts/gateway-test/templates/service-account.yml#L2" ]

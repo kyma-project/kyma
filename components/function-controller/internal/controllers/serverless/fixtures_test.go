@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"math/rand"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int, continuousGitCheckout bool) *serverlessv1alpha1.Function {
+func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.RepositoryAuth, minReplicas, maxReplicas int, continuousGitCheckout bool) *serverlessv1alpha2.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)
 	//nolint:gosec
@@ -19,20 +19,24 @@ func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int, co
 		annotations[continuousGitCheckoutAnnotation] = "true"
 	}
 
-	return &serverlessv1alpha1.Function{
+	return &serverlessv1alpha2.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        fmt.Sprintf("%s-%d", name, suffix),
 			Namespace:   namespace,
 			Annotations: annotations,
 		},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			Type:    serverlessv1alpha1.SourceTypeGit,
-			Source:  fmt.Sprintf("%s-%d", name, suffix),
-			Runtime: serverlessv1alpha1.Nodejs12,
-			Repository: serverlessv1alpha1.Repository{
-				BaseDir:   "/",
-				Reference: "main",
+		Spec: serverlessv1alpha2.FunctionSpec{
+			Source: serverlessv1alpha2.Source{
+				GitRepository: &serverlessv1alpha2.GitRepositorySource{
+					URL: "https://mock.repo/kyma/test",
+					Repository: serverlessv1alpha2.Repository{
+						BaseDir:   "/",
+						Reference: "main",
+					},
+					Auth: auth,
+				},
 			},
+			Runtime: serverlessv1alpha2.NodeJs12,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -43,39 +47,51 @@ func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int, co
 					Value: "VAL_2",
 				},
 			},
-			Resources:   corev1.ResourceRequirements{},
-			MinReplicas: &one,
-			MaxReplicas: &two,
-			Labels: map[string]string{
-				testBindingLabel1: "foobar",
-				testBindingLabel2: testBindingLabelValue,
-				"foo":             "bar",
+			ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+				Function: &serverlessv1alpha2.ResourceRequirements{
+					Resources: &corev1.ResourceRequirements{},
+				},
+			},
+			ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: &one,
+				MaxReplicas: &two,
+			},
+			Template: &serverlessv1alpha2.Template{
+				Labels: map[string]string{
+					testBindingLabel1: "foobar",
+					testBindingLabel2: testBindingLabelValue,
+					"foo":             "bar",
+				},
 			},
 		},
 	}
 }
 
-func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
+func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
 	fn := newFixFunction(namespace, name, minReplicas, maxReplicas)
 	fn.Spec.RuntimeImageOverride = runtimeImageOverride
 	return fn
 }
 
-func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
+func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha2.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)
 	//nolint:gosec
 	suffix := rand.Int()
 
-	return &serverlessv1alpha1.Function{
+	return &serverlessv1alpha2.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-%d", name, suffix),
 			Namespace: namespace,
 		},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			Source:  "module.exports = {main: function(event, context) {return 'Hello World.'}}",
-			Deps:    "   ",
-			Runtime: serverlessv1alpha1.Nodejs12,
+		Spec: serverlessv1alpha2.FunctionSpec{
+			Source: serverlessv1alpha2.Source{
+				Inline: &serverlessv1alpha2.InlineSource{
+					Source:       "module.exports = {main: function(event, context) {return 'Hello World.'}}",
+					Dependencies: "   ",
+				},
+			},
+			Runtime: serverlessv1alpha2.NodeJs12,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -86,27 +102,22 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					Value: "VAL_2",
 				},
 			},
-			Resources:   corev1.ResourceRequirements{},
-			MinReplicas: &one,
-			MaxReplicas: &two,
-			Labels: map[string]string{
-				testBindingLabel1: "foobar",
-				testBindingLabel2: testBindingLabelValue,
-				"foo":             "bar",
+			ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+				Function: &serverlessv1alpha2.ResourceRequirements{
+					Resources: &corev1.ResourceRequirements{},
+				},
 			},
-		},
-	}
-}
-
-func newTestRepository(name, namespace string, auth *serverlessv1alpha1.RepositoryAuth) *serverlessv1alpha1.GitRepository {
-	return &serverlessv1alpha1.GitRepository{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: serverlessv1alpha1.GitRepositorySpec{
-			URL:  "https://mock.repo/kyma/test",
-			Auth: auth,
+			ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: &one,
+				MaxReplicas: &two,
+			},
+			Template: &serverlessv1alpha2.Template{
+				Labels: map[string]string{
+					testBindingLabel1: "foobar",
+					testBindingLabel2: testBindingLabelValue,
+					"foo":             "bar",
+				},
+			},
 		},
 	}
 }

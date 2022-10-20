@@ -1,4 +1,5 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.18.1-alpine3.15 as builder
+# image builder base on golang:1.19.1-alpine3.16
+FROM eu.gcr.io/kyma-project/external/golang@sha256:ca4f0513119dfbdc65ae7b76b69688f0723ed00d9ecf9de68abbf6ed01ef11bf as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -20,12 +21,14 @@ RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
     && mkdir /app \
     && mv ./manager /app/manager
 
-# get latest CA certs
-FROM alpine:3.14.2 as certs
+# get latest CA certs from alpine:3.16.2
+FROM eu.gcr.io/kyma-project/external/alpine@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870 as certs
+
 RUN apk add --no-cache ca-certificates
 
-# result container
-FROM eu.gcr.io/kyma-project/external/alpine:3.15.4
+# result container base on alpine:3.16.2
+FROM eu.gcr.io/kyma-project/external/alpine@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870
+
 ENV LIBGIT2_VERSION=1.1.0-r2
 
 RUN apk update --no-cache && apk upgrade --no-cache

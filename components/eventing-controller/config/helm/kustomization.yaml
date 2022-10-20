@@ -4,6 +4,7 @@ namespace: kyma-system
 # Include CRDs because they are not part of eventing-controller helm chart.
 bases:
   - ../crd
+  - ../certmanager
 
 resources:
   - manifests/eventing/charts/controller/templates/clusterrole.yaml

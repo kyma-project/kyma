@@ -96,7 +96,9 @@ spec:
         port:
           number: 80
 EOF
+  kubectl wait deployment/istiod -n istio-system --timeout=60s --for condition=available
   kubectl apply -f "$PWD/ory-hydra-login-consent.yaml"
+  kubectl wait deployment ory-hydra-login-consent -n kyma-system --timeout=60s --for condition=available
   echo "App deployed"
   rm "$PWD/ory-hydra-login-consent.yaml"
 }

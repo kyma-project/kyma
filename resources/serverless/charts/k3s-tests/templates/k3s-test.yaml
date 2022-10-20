@@ -33,6 +33,7 @@ rules:
   verbs:
   - create
   - delete
+  - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -67,7 +68,7 @@ spec:
           command:
           - sh
           - -c
-          - "/app/main.test {{ .Values.testSuite }} ; pkill -f /usr/local/bin/pilot-agent"
+          - "/app/main.test {{ .Values.testSuite }}"
           {{- else }}
           args: ["{{ .Values.testSuite }}"]
           {{- end }}

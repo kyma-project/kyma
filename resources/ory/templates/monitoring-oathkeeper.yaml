@@ -1,3 +1,4 @@
+{{- if .Values.oathkeeper.enabled }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -43,3 +44,4 @@ spec:
   portLevelMtls:
     {{ .Values.oathkeeper.sidecar.port.metrics }}:
       mode: PERMISSIVE
+{{- end }}

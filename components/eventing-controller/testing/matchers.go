@@ -3,7 +3,7 @@ package testing
 import (
 	"reflect"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	"github.com/nats-io/nats.go"
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
@@ -75,19 +75,19 @@ func HaveBackendType(backendType eventingv1alpha1.BackendType) gomegatypes.Gomeg
 //
 
 func HaveNotEmptyAPIRule() gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) types.UID {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) types.UID {
 		return a.UID
 	}, Not(BeEmpty()))
 }
 
 func HaveNotEmptyHost() gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) bool {
-		return a.Spec.Service != nil && a.Spec.Service.Host != nil
+	return WithTransform(func(a apigatewayv1beta1.APIRule) bool {
+		return a.Spec.Service != nil && a.Spec.Host != nil
 	}, BeTrue())
 }
 
 func HaveAPIRuleGateway(gateway string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) string {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) string {
 		if a.Spec.Gateway == nil {
 			return ""
 		}
@@ -96,15 +96,15 @@ func HaveAPIRuleGateway(gateway string) gomegatypes.GomegaMatcher {
 }
 
 func HaveAPIRuleLabels(labels map[string]string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) map[string]string {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) map[string]string {
 		return a.Labels
 	}, Equal(labels))
 }
 
 func HaveAPIRuleService(serviceName string, port uint32, domain string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) apigatewayv1alpha1.Service {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) apigatewayv1beta1.Service {
 		if a.Spec.Service == nil {
-			return apigatewayv1alpha1.Service{}
+			return apigatewayv1beta1.Service{}
 		}
 		return *a.Spec.Service
 	}, MatchFields(IgnoreMissing|IgnoreExtras, Fields{
@@ -117,7 +117,7 @@ func HaveAPIRuleService(serviceName string, port uint32, domain string) gomegaty
 }
 
 func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, path string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) []apigatewayv1alpha1.Rule {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) []apigatewayv1beta1.Rule {
 		return a.Spec.Rules
 	}, ContainElement(
 		MatchFields(IgnoreExtras|IgnoreMissing, Fields{
@@ -130,13 +130,13 @@ func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, path string) gom
 }
 
 func haveAPIRuleAccessStrategies(accessStrategy string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a *apigatewayv1alpha1.Authenticator) string {
+	return WithTransform(func(a *apigatewayv1beta1.Authenticator) string {
 		return a.Name
 	}, Equal(accessStrategy))
 }
 
 func HaveAPIRuleOwnersRefs(uids ...types.UID) gomegatypes.GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) []types.UID {
+	return WithTransform(func(a apigatewayv1beta1.APIRule) []types.UID {
 		ownerRefUIDs := make([]types.UID, 0, len(a.OwnerReferences))
 		for _, ownerRef := range a.OwnerReferences {
 			ownerRefUIDs = append(ownerRefUIDs, ownerRef.UID)
@@ -194,7 +194,7 @@ func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
 	condition := eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, nats.ErrBadSubject.Error(),
+		corev1.ConditionFalse, "failed to get clean subjects: "+nats.ErrBadSubject.Error(),
 	)
 	return HaveCondition(condition)
 }
@@ -203,7 +203,7 @@ func HaveConditionInvalidPrefix() gomegatypes.GomegaMatcher {
 	condition := eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, "prefix not found",
+		corev1.ConditionFalse, "failed to get clean subjects: prefix not found",
 	)
 	return HaveCondition(condition)
 }

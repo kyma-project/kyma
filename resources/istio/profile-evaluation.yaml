@@ -14,7 +14,7 @@ helmValues:
     proxy:
       resources:
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 32Mi
         limits:
           cpu: 250m
@@ -34,6 +34,20 @@ helmValues:
       autoscaleEnabled: false
 
 components:
+  cni:
+    enabled: true
+    config:
+      hpaSpec:
+        maxReplicas: 1
+        minReplicas: 1
+      resources:
+        limits:
+          cpu: 250m
+          memory: 384Mi
+        requests:
+          cpu: 10m
+          memory: 128Mi
+
   ingressGateways:
     enabled: true
     config:
@@ -42,7 +56,7 @@ components:
           cpu: 500m
           memory: 128Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 32Mi
 
   pilot:
@@ -56,7 +70,7 @@ components:
             cpu: 250m
             memory: 384Mi
           requests:
-            cpu: 100m
+            cpu: 10m
             memory: 128Mi
 
 monitoring:

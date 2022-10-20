@@ -16,15 +16,15 @@ Make sure that the following conditions are met:
   kubectl get rules.oathkeeper.ory.sh -n {NAMESPACE}
   ```
 
-  >**TIP:** Name of the Rule consists of the name of the API Rule and a random suffix.
+  >**TIP:** Name of the Rule consists of the name of the APIRule and a random suffix.
 
-- Proper Virtual Service has been created:
+- Proper VirtualService has been created:
 
   ```bash
   kubectl get virtualservices.networking.istio.io -n {NAMESPACE}
   ```
 
-  >**TIP:** Name of the Virtual Service consists of the name of the API Rule and a random suffix.
+  >**TIP:** Name of the VirtualService consists of the name of the APIRule and a random suffix.
 
 Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living clusters. This can result in random `404 Not Found` responses, because Oathkeeper does not contain Rules reflecting the actual state of the cluster. A simple restart of the Pod resolves the issue, but you might want to verify if that is the issue you have encountered. To do so, follow these steps:
 

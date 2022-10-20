@@ -14,9 +14,6 @@ serviceAccount:
 tracing:
   jaegerAgentHost:
 
-fluent-bit:
-  enabled: true
-
 loki:
   enabled: true
 
@@ -24,13 +21,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    fluent_bit:
-      name: fluent-bit
-      version: 1.9.6-fdfefada
-      directory: tpi
     loki:
       name: loki
-      version: 2.2.1-0f8bfdfb
+      version: 2.2.1-cf0a130c
       directory: tpi
     alpine:
       name: "alpine"
@@ -46,7 +39,7 @@ global:
       name: kyma-gateway
       namespace: kyma-system
   telemetry:
-    enabled: false
+    enabled: true
   tracing:
     enabled: true
   highPriorityClassName: "kyma-system-priority"

@@ -23,7 +23,7 @@ webhooks:
       port: 443
   failurePolicy: Fail
   matchPolicy: Exact
-  name: validation.webhook.telemetry.kyma-project.io
+  name: validation.logpipelines.telemetry.kyma-project.io
   rules:
   - apiGroups:
     - telemetry.kyma-project.io
@@ -36,7 +36,33 @@ webhooks:
     - logpipelines
     scope: '*'
   sideEffects: None
-  timeoutSeconds: 30
+  timeoutSeconds: {{ .Values.webhook.timeout }}
+- admissionReviewVersions:
+  - v1beta1
+  - v1
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ include "operator.fullname" . }}-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /validate-logparser
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Exact
+  name: validation.logparsers.telemetry.kyma-project.io
+  rules:
+  - apiGroups:
+    - telemetry.kyma-project.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - logparsers
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: v1
 kind: Secret

@@ -75,9 +75,7 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "mappings": [],
-          "nullValueMode": "connected",
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -97,7 +95,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 24,
+        "w": 19,
         "x": 0,
         "y": 1
       },
@@ -117,9 +115,10 @@
           "fields": "",
           "values": false
         },
+        "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "targets": [
         {
           "expr": "sum(kube_pod_info{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\"})",
@@ -142,7 +141,77 @@
           "refId": "C"
         }
       ],
-      "title": "",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "$DS_PROMETHEUS",
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "Unsupported Mode",
+          "mappings": [
+            {
+              "from": "1",
+              "id": 1,
+              "text": "1",
+              "to": "10",
+              "type": 2
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 19,
+        "y": 1
+      },
+      "id": 58,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "telemetry_unsupported_logpipelines{service=\"telemetry-operator-metrics\"}",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
       "transparent": true,
       "type": "stat"
     },
@@ -168,7 +237,6 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "links": []
         },
         "overrides": []
@@ -184,15 +252,15 @@
       "hiddenSeries": false,
       "id": 2,
       "legend": {
-        "alignAsTable": false,
+        "alignAsTable": true,
         "avg": false,
         "current": true,
         "hideEmpty": false,
         "hideZero": false,
         "max": false,
         "min": false,
-        "rightSide": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "sort": "current",
         "sortDesc": true,
         "total": false,
@@ -206,7 +274,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -221,7 +289,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}}name{{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -274,7 +342,6 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "links": []
         },
         "overrides": []
@@ -290,13 +357,13 @@
       "hiddenSeries": false,
       "id": 9,
       "legend": {
-        "alignAsTable": false,
+        "alignAsTable": true,
         "avg": false,
         "current": true,
         "max": false,
         "min": false,
-        "rightSide": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "sort": "current",
         "sortDesc": true,
         "total": false,
@@ -310,7 +377,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -325,7 +392,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}}name{{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -378,7 +445,6 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "links": []
         },
         "overrides": []
@@ -394,13 +460,13 @@
       "hiddenSeries": false,
       "id": 40,
       "legend": {
-        "alignAsTable": false,
+        "alignAsTable": true,
         "avg": false,
         "current": true,
         "max": false,
         "min": false,
-        "rightSide": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "sort": "current",
         "sortDesc": true,
         "total": false,
@@ -414,7 +480,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -429,7 +495,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}}name{{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -482,7 +548,6 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "links": []
         },
         "overrides": []
@@ -498,15 +563,15 @@
       "hiddenSeries": false,
       "id": 41,
       "legend": {
-        "alignAsTable": false,
+        "alignAsTable": true,
         "avg": false,
         "current": true,
         "hideEmpty": false,
         "hideZero": false,
         "max": false,
         "min": false,
-        "rightSide": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "sort": "current",
         "sortDesc": true,
         "total": false,
@@ -520,7 +585,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -535,7 +600,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}}name{{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -588,7 +653,6 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "links": []
         },
         "overrides": []
@@ -604,15 +668,15 @@
       "hiddenSeries": false,
       "id": 11,
       "legend": {
-        "alignAsTable": false,
-        "avg": true,
+        "alignAsTable": true,
+        "avg": false,
         "current": true,
         "hideEmpty": true,
         "hideZero": true,
-        "max": true,
+        "max": false,
         "min": false,
-        "rightSide": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "sort": "current",
         "sortDesc": true,
         "total": false,
@@ -626,7 +690,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -641,7 +705,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{"{{"}}pod{{"}}"}} Retries to {{"{{"}}name{{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} Retries to {{"{{"}} name {{"}}"}}",
           "refId": "A"
         },
         {
@@ -649,7 +713,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{"{{"}}pod{{"}}"}} Failed Retries to {{"{{"}} name {{"}}"}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} Failed Retries to {{"{{"}} name {{"}}"}}",
           "refId": "B"
         }
       ],
@@ -703,7 +767,6 @@
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
           "links": []
         },
         "overrides": []
@@ -719,14 +782,14 @@
       "hiddenSeries": false,
       "id": 10,
       "legend": {
-        "alignAsTable": false,
+        "alignAsTable": true,
         "avg": false,
         "current": true,
         "hideEmpty": true,
         "hideZero": true,
         "max": false,
         "min": false,
-        "rightSide": false,
+        "rightSide": true,
         "show": true,
         "sort": "current",
         "sortDesc": true,
@@ -741,7 +804,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -808,9 +871,7 @@
       "dashes": false,
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
+        "defaults": {},
         "overrides": []
       },
       "fill": 1,
@@ -824,13 +885,19 @@
       "hiddenSeries": false,
       "id": 47,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
-        "current": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": false,
         "min": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -839,7 +906,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -875,6 +942,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:832",
           "format": "short",
           "label": "",
           "logBase": 1,
@@ -883,6 +951,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:833",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -903,9 +972,7 @@
       "dashes": false,
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
+        "defaults": {},
         "overrides": []
       },
       "fill": 1,
@@ -919,13 +986,19 @@
       "hiddenSeries": false,
       "id": 48,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
-        "current": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": false,
         "min": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -934,7 +1007,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -992,13 +1065,235 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "hiddenSeries": false,
+      "id": 55,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "telemetry_fsbuffer_usage_bytes{pod=~\"$pod\"}",
+          "interval": "",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - {{"{{"}} directory {{"}}"}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Filesystem Buffer Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:106",
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:107",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "hiddenSeries": false,
+      "id": 57,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "increase(fluentbit_input_files_opened_total{pod=~\"$pod\"}[1m])",
+          "interval": "",
+          "legendFormat": "Opened Files - {{"{{"}} pod {{"}}"}}",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "increase(fluentbit_input_files_closed_total{pod=~\"$pod\"}[1m])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Closed Files - {{"{{"}} pod {{"}}"}}",
+          "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "increase(fluentbit_input_files_rotated_total{pod=~\"$pod\"}[1m])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Rotated Files - {{"{{"}} pod {{"}}"}}",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Open/Closed/Rotated Files",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:106",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:107",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 39
       },
       "id": 53,
       "panels": [],
@@ -1012,9 +1307,7 @@
       "dashes": false,
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
+        "defaults": {},
         "overrides": []
       },
       "fill": 1,
@@ -1023,18 +1316,24 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 40
       },
       "hiddenSeries": false,
       "id": 51,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
-        "current": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": false,
         "min": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -1043,12 +1342,13 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
+          "$$hashKey": "object:272",
           "alias": "/.* request/",
           "color": "#F2CC0C",
           "fill": 0
@@ -1059,15 +1359,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "container_memory_working_set_bytes{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\",pod=~\"$pod\", image!=\"\", container!=\"POD\"}\n",
+          "exemplar": true,
+          "expr": "container_memory_working_set_bytes{pod=~\"$pod\", image!=\"\", container!=\"POD\", container!=\"\"}\n",
           "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}}",
+          "legendFormat": "{{"{{"}} container {{"}}"}} - {{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
-          "expr": "avg(kube_pod_container_resource_requests_memory_bytes{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\",pod=~\"$pod\"}) by (pod)",
+          "exemplar": true,
+          "expr": "sum(kube_pod_container_resource_limits{pod=~\"$pod\", resource=\"memory\"}) by (pod)",
           "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}} request",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} limits",
           "refId": "B"
         }
       ],
@@ -1091,6 +1393,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:281",
           "format": "decbytes",
           "label": null,
           "logBase": 1,
@@ -1099,6 +1402,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:282",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1119,9 +1423,7 @@
       "dashes": false,
       "datasource": "$DS_PROMETHEUS",
       "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
+        "defaults": {},
         "overrides": []
       },
       "fill": 1,
@@ -1130,18 +1432,24 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 40
       },
       "hiddenSeries": false,
       "id": 50,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
-        "current": false,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": false,
         "min": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -1150,12 +1458,13 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.2.1",
+      "pluginVersion": "",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
+          "$$hashKey": "object:736",
           "alias": "/.* request/",
           "color": "#F2CC0C",
           "fill": 0
@@ -1166,15 +1475,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(container_cpu_usage_seconds_total{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\",pod=~\"$pod\",image!=\"\",container!=\"POD\"}[5m])",
+          "exemplar": true,
+          "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"$pod\",container!=\"POD\",container!=\"\"}) by (container, pod)",
           "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}}",
+          "legendFormat": "{{"{{"}} container {{"}}"}} - {{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
-          "expr": "avg(kube_pod_container_resource_requests_cpu_cores{pod=~\"$pod\"}) by (pod)",
+          "exemplar": true,
+          "expr": "sum(kube_pod_container_resource_limits{pod=~\"$pod\", resource=\"cpu\"}) by (pod)",
           "interval": "",
-          "legendFormat": "{{"{{"}} pod {{"}}"}} request",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} limits",
           "refId": "B"
         }
       ],
@@ -1198,6 +1509,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:745",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1206,6 +1518,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:746",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1220,18 +1533,20 @@
       }
     }
   ],
-  "refresh": "5s",
-  "schemaVersion": 26,
+  "refresh": "10s",
+  "schemaVersion": 27,
   "style": "dark",
   "tags": ["kyma", "telemetry"],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": true,
-          "text": "prometheus",
-          "value": "prometheus"
+          "selected": false,
+          "text": "Prometheus",
+          "value": "Prometheus"
         },
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -1247,9 +1562,15 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": "$DS_PROMETHEUS",
         "definition": "label_values(kube_pod_info{pod=~\".*{{ include "fluent-bit.fullname" . }}.*\"}, pod)",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": true,
         "label": "pod",
@@ -1302,4 +1623,4 @@
   "title": "Kyma / Telemetry / Fluent Bit",
   "uid": "{{ include "fluent-bit.fullname" . }}",
   "version": 2
-}
+ }

@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"log"
 	"testing"
 
 	"go.uber.org/zap"
@@ -13,7 +14,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -68,33 +69,29 @@ var testDataScenarios = []testDataScenario{
 	},
 }
 
+var newMockedGitClient = func(auth *git.AuthOptions) *automock.GitClient {
+	options := git.Options{
+		URL:       "https://mock.repo/kyma/test",
+		Reference: "main",
+	}
+
+	options.Auth = auth
+	log.Println(options)
+	m := new(automock.GitClient)
+
+	m.On("LastCommit", options).Return("pierwszy-hash", nil)
+	options.Reference = "newone"
+	m.On("LastCommit", options).Return("a376218bdcd705cc39aa7ce7f310769fab6d51c9", nil)
+
+	return m
+}
+
 func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 	//GIVEN
 	continuousGitCheckout := true
-	var newMockedGitOperator = func(secretName string, credentials map[string]string, auth *string) *automock.GitOperator {
-		options := git.Options{
-			URL:       "https://mock.repo/kyma/test",
-			Reference: "main",
-		}
-
-		if auth != nil {
-			options.Auth = &git.AuthOptions{
-				Type:        git.RepositoryAuthType(*auth),
-				Credentials: credentials,
-				SecretName:  secretName,
-			}
-		}
-
-		mock := new(automock.GitOperator)
-		mock.On("LastCommit", options).Return("pierwszy-hash", nil)
-		options.Reference = "newone"
-		mock.On("LastCommit", options).Return("a376218bdcd705cc39aa7ce7f310769fab6d51c9", nil)
-
-		return mock
-	}
 
 	g := gomega.NewGomegaWithT(t)
-	rtm := serverlessv1alpha1.Nodejs12
+	rtm := serverlessv1alpha2.NodeJs12
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
@@ -104,26 +101,25 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	for _, testData := range testDataScenarios {
+	for i, testData := range testDataScenarios {
 		t.Run(fmt.Sprintf("[%s] should successfully update Function]", testData.info), func(t *testing.T) {
 			//GIVEN
 			g := gomega.NewGomegaWithT(t)
-			inFunction := newTestGitFunction(testNamespace, "ah-tak-przeciez", 1, 2, continuousGitCheckout)
-			g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+			name := fmt.Sprintf("test-me-plz-%d", i)
 
-			var auth *serverlessv1alpha1.RepositoryAuth
+			var auth *serverlessv1alpha2.RepositoryAuth
 			if testData.authType != nil {
-				auth = &serverlessv1alpha1.RepositoryAuth{
-					Type:       serverlessv1alpha1.RepositoryAuthType(*testData.authType),
-					SecretName: inFunction.Name,
+				auth = &serverlessv1alpha2.RepositoryAuth{
+					Type:       serverlessv1alpha2.RepositoryAuthType(*testData.authType),
+					SecretName: name,
 				}
-
-				secret := newTestSecret(inFunction.Name, testNamespace, testData.stringData)
+				secret := newTestSecret(name, testNamespace, testData.stringData)
 				g.Expect(resourceClient.Create(context.TODO(), secret)).To(gomega.Succeed())
+
 			}
 
-			repo := newTestRepository(inFunction.GetName(), testNamespace, auth)
-			g.Expect(resourceClient.Create(context.TODO(), repo)).To(gomega.Succeed())
+			inFunction := newTestGitFunction(testNamespace, name, auth, 1, 2, continuousGitCheckout)
+			g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 
 			request := ctrl.Request{
 				NamespacedName: types.NamespacedName{
@@ -131,7 +127,21 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 					Name:      inFunction.GetName(),
 				},
 			}
-			operator := newMockedGitOperator(inFunction.Name, testData.stringData, testData.authType)
+
+			var gitAuthOpts *git.AuthOptions
+			if testData.authType != nil {
+				gitAuthOpts = &git.AuthOptions{
+					Type:        git.RepositoryAuthType(*testData.authType),
+					Credentials: testData.stringData,
+					SecretName:  name,
+				}
+			}
+
+			gitClient := newMockedGitClient(gitAuthOpts)
+			factory := automock.NewGitClientFactory(t)
+			factory.On("GetGitClient", mock.Anything).Return(gitClient)
+			defer factory.AssertExpectations(t)
+
 			statsCollector := &automock.StatsCollector{}
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
@@ -140,7 +150,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 				client:            resourceClient,
 				recorder:          record.NewFakeRecorder(100),
 				config:            testCfg,
-				gitOperator:       operator,
+				gitFactory:        factory,
 				statsCollector:    statsCollector,
 				initStateFunction: stateFnGitCheckSources,
 			}
@@ -151,7 +161,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("creating the Function")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 			// verify function
-			function := &serverlessv1alpha1.Function{}
+			function := &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(1))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -162,7 +172,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("creating the Job")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -177,7 +187,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("build in progress")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -200,7 +210,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -209,7 +219,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			g.Expect(function).To(haveConditionReasonJobFinished)
 
 			t.Log("change function branch")
-			function.Spec.Reference = "newone"
+			function.Spec.Source.GitRepository.Reference = "newone"
 			g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
@@ -226,7 +236,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("delete the old Job")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveUnknownConditionBuildRdy)
@@ -241,7 +251,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("creating the Job")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -256,7 +266,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("build in progress")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -278,7 +288,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -289,7 +299,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("deploy started")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -313,11 +323,11 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 			g.Expect(deployment).To(haveLabelLen(7))
-			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionNameLabel, function.Name))
-			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionManagedByLabel, serverlessv1alpha1.FunctionControllerValue))
-			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionUUIDLabel, string(function.UID)))
+			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionNameLabel, function.Name))
+			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionManagedByLabel, serverlessv1alpha2.FunctionControllerValue))
+			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionUUIDLabel, string(function.UID)))
 			g.Expect(deployment).To(haveLabelWithValue(
-				serverlessv1alpha1.FunctionResourceLabel, serverlessv1alpha1.FunctionResourceLabelDeploymentValue))
+				serverlessv1alpha2.FunctionResourceLabel, serverlessv1alpha2.FunctionResourceLabelDeploymentValue))
 
 			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel1, "foobar"))
 			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel2, testBindingLabelValue))
@@ -326,7 +336,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("service creation")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -347,10 +357,10 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(svc.Spec.Selector).To(gomega.Equal(deployment.Spec.Selector.MatchLabels))
 
-			t.Log("hpa creation")
+			t.Log("HPA creation")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -365,9 +375,9 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			hpaSpec := hpaList.Items[0].Spec
 
-			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()))
+			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal(serverlessv1alpha2.FunctionKind))
+			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(serverlessv1alpha2.GroupVersion.String()))
 
 			t.Log("deployment ready")
 			deployment.Status.Conditions = []appsv1.DeploymentCondition{
@@ -378,7 +388,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beFinishedReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -389,7 +399,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 			t.Log("should not change state on reconcile")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beFinishedReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -404,30 +414,8 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 	//GIVEN
 	continuousGitCheckout := false
 
-	var newMockedGitOperator = func(secretName string, credentials map[string]string, auth *string) *automock.GitOperator {
-		options := git.Options{
-			URL:       "https://mock.repo/kyma/test",
-			Reference: "main",
-		}
-
-		if auth != nil {
-			options.Auth = &git.AuthOptions{
-				Type:        git.RepositoryAuthType(*auth),
-				Credentials: credentials,
-				SecretName:  secretName,
-			}
-		}
-
-		mock := new(automock.GitOperator)
-		mock.On("LastCommit", options).Return("pierwszy-hash", nil)
-		options.Reference = "newone"
-		mock.On("LastCommit", options).Return("a376218bdcd705cc39aa7ce7f310769fab6d51c9", nil)
-
-		return mock
-	}
-
 	g := gomega.NewGomegaWithT(t)
-	rtm := serverlessv1alpha1.Nodejs12
+	rtm := serverlessv1alpha2.NodeJs12
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
@@ -437,26 +425,25 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	for _, testData := range testDataScenarios {
+	for i, testData := range testDataScenarios {
 		t.Run(fmt.Sprintf("[%s] should successfully update Function]", testData.info), func(t *testing.T) {
 			//GIVEN
 			g := gomega.NewGomegaWithT(t)
-			inFunction := newTestGitFunction(testNamespace, "ah-tak-przeciez", 1, 2, continuousGitCheckout)
-			g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+			name := fmt.Sprintf("test-me-plz-%d", i)
 
-			var auth *serverlessv1alpha1.RepositoryAuth
+			var auth *serverlessv1alpha2.RepositoryAuth
 			if testData.authType != nil {
-				auth = &serverlessv1alpha1.RepositoryAuth{
-					Type:       serverlessv1alpha1.RepositoryAuthType(*testData.authType),
-					SecretName: inFunction.Name,
+				auth = &serverlessv1alpha2.RepositoryAuth{
+					Type:       serverlessv1alpha2.RepositoryAuthType(*testData.authType),
+					SecretName: name,
 				}
-
-				secret := newTestSecret(inFunction.Name, testNamespace, testData.stringData)
+				secret := newTestSecret(name, testNamespace, testData.stringData)
 				g.Expect(resourceClient.Create(context.TODO(), secret)).To(gomega.Succeed())
+
 			}
 
-			repo := newTestRepository(inFunction.GetName(), testNamespace, auth)
-			g.Expect(resourceClient.Create(context.TODO(), repo)).To(gomega.Succeed())
+			inFunction := newTestGitFunction(testNamespace, name, auth, 1, 2, continuousGitCheckout)
+			g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 
 			request := ctrl.Request{
 				NamespacedName: types.NamespacedName{
@@ -464,7 +451,21 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 					Name:      inFunction.GetName(),
 				},
 			}
-			operator := newMockedGitOperator(inFunction.Name, testData.stringData, testData.authType)
+
+			var gitAuthOpts *git.AuthOptions
+			if testData.authType != nil {
+				gitAuthOpts = &git.AuthOptions{
+					Type:        git.RepositoryAuthType(*testData.authType),
+					Credentials: testData.stringData,
+					SecretName:  name,
+				}
+			}
+
+			gitClient := newMockedGitClient(gitAuthOpts)
+			factory := automock.NewGitClientFactory(t)
+			factory.On("GetGitClient", mock.Anything).Return(gitClient)
+			defer factory.AssertExpectations(t)
+
 			statsCollector := &automock.StatsCollector{}
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
@@ -473,7 +474,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 				client:            resourceClient,
 				recorder:          record.NewFakeRecorder(100),
 				config:            testCfg,
-				gitOperator:       operator,
+				gitFactory:        factory,
 				statsCollector:    statsCollector,
 				initStateFunction: stateFnGitCheckSources,
 			}
@@ -485,7 +486,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 			// verify function
-			function := &serverlessv1alpha1.Function{}
+			function := &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(1))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -496,7 +497,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			t.Log("creating the Job")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -511,7 +512,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			t.Log("build in progress")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -534,7 +535,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(2))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -545,7 +546,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			t.Log("Deployment is created")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -569,18 +570,18 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 			g.Expect(deployment).To(haveLabelLen(7))
-			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionNameLabel, function.Name))
-			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionManagedByLabel, serverlessv1alpha1.FunctionControllerValue))
-			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionUUIDLabel, string(function.UID)))
+			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionNameLabel, function.Name))
+			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionManagedByLabel, serverlessv1alpha2.FunctionControllerValue))
+			g.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha2.FunctionUUIDLabel, string(function.UID)))
 			g.Expect(deployment).To(haveLabelWithValue(
-				serverlessv1alpha1.FunctionResourceLabel, serverlessv1alpha1.FunctionResourceLabelDeploymentValue))
+				serverlessv1alpha2.FunctionResourceLabel, serverlessv1alpha2.FunctionResourceLabelDeploymentValue))
 
 			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel1, "foobar"))
 			g.Expect(deployment).To(haveLabelWithValue(testBindingLabel2, testBindingLabelValue))
 			g.Expect(deployment).To(haveLabelWithValue("foo", "bar"))
 
 			t.Log("change function branch")
-			function.Spec.Reference = "newone"
+			function.Spec.Source.GitRepository.Reference = "newone"
 			g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
@@ -596,7 +597,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			t.Log("Build job shouldn't be deleted")
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(3))
 			g.Expect(function).To(haveConditionBuildRdy)
@@ -609,7 +610,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			g.Expect(jobList.Items).To(gomega.HaveLen(1))
 
 			t.Log("Service is created")
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 
 			g.Expect(function).To(haveConditionLen(conditionLen))
@@ -634,7 +635,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			t.Log("HPA is created")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -649,9 +650,9 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			hpaSpec := hpaList.Items[0].Spec
 
-			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()))
+			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal(serverlessv1alpha2.FunctionKind))
+			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(serverlessv1alpha2.GroupVersion.String()))
 
 			t.Log("Deployment is ready")
 			deployment.Status.Conditions = []appsv1.DeploymentCondition{
@@ -662,7 +663,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beFinishedReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -673,7 +674,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			t.Log("should not change state on reconcile")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beFinishedReconcileResult)
 
-			function = &serverlessv1alpha1.Function{}
+			function = &serverlessv1alpha2.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 			g.Expect(function).To(haveConditionLen(conditionLen))
 			g.Expect(function).To(haveConditionCfgRdy)
@@ -687,12 +688,16 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 func TestGitOps_GitErrorHandling(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	testRepoName := "test-repo"
-	rtm := serverlessv1alpha1.Nodejs14
+
+	rtm := serverlessv1alpha2.NodeJs14
+
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
+
 	testCfg := setUpControllerConfig(g)
+
 	initializeServerlessResources(g, resourceClient)
+
 	createDockerfileForRuntime(g, resourceClient, rtm)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -701,29 +706,33 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 	t.Run("Check if Requeue is set to true in case of recoverable error", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
-		gitRepo := serverlessv1alpha1.GitRepository{
-			ObjectMeta: metav1.ObjectMeta{Name: testRepoName, Namespace: testNamespace},
-			Spec:       serverlessv1alpha1.GitRepositorySpec{},
-		}
-		err := resourceClient.Create(context.TODO(), &gitRepo)
-		g.Expect(err).To(gomega.BeNil())
 
-		function := &serverlessv1alpha1.Function{
+		function := &serverlessv1alpha2.Function{
 			ObjectMeta: metav1.ObjectMeta{Name: "git-fn", Namespace: testNamespace},
-			Spec: serverlessv1alpha1.FunctionSpec{
-				Source:     testRepoName,
-				Runtime:    rtm,
-				Type:       serverlessv1alpha1.SourceTypeGit,
-				Repository: serverlessv1alpha1.Repository{BaseDir: "dir", Reference: "ref"},
+			Spec: serverlessv1alpha2.FunctionSpec{
+				Source: serverlessv1alpha2.Source{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
+						Repository: serverlessv1alpha2.Repository{
+							BaseDir:   "dir",
+							Reference: "ref",
+						},
+					},
+				},
+				Runtime: rtm,
 			},
 		}
+
 		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 		// We don't use MakeGitError2 function because: https://github.com/libgit2/git2go/issues/873
 		gitErr := &git2go.GitError{Message: "NotFound", Class: 0, Code: git2go.ErrorCodeNotFound}
 		gitOpts := git.Options{URL: "", Reference: "ref"}
-		operator := &automock.GitOperator{}
-		operator.On("LastCommit", gitOpts).Return("", gitErr)
-		defer operator.AssertExpectations(t)
+		gitClient := &automock.GitClient{}
+		gitClient.On("LastCommit", gitOpts).Return("", gitErr)
+		defer gitClient.AssertExpectations(t)
+
+		factory := automock.NewGitClientFactory(t)
+		factory.On("GetGitClient", mock.Anything).Return(gitClient)
+		defer factory.AssertExpectations(t)
 
 		prometheusCollector := &automock.StatsCollector{}
 		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
@@ -739,7 +748,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 			client:            resourceClient,
 			recorder:          record.NewFakeRecorder(100),
 			config:            testCfg,
-			gitOperator:       operator,
+			gitFactory:        factory,
 			statsCollector:    prometheusCollector,
 			initStateFunction: stateFnGitCheckSources,
 		}
@@ -751,7 +760,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res.Requeue).To(gomega.BeFalse())
 
-		var updatedFn serverlessv1alpha1.Function
+		var updatedFn serverlessv1alpha2.Function
 		err = resourceClient.Get(context.TODO(), request.NamespacedName, &updatedFn)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(updatedFn.Status.Conditions).To(gomega.HaveLen(1))
@@ -761,28 +770,38 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 
 func Test_stateFnGitCheckSources(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	testRepoName := "non-existing-repo"
-	rtm := serverlessv1alpha1.Nodejs14
+
+	rtm := serverlessv1alpha2.NodeJs14
+
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
+
 	testCfg := setUpControllerConfig(g)
+
 	initializeServerlessResources(g, resourceClient)
+
 	createDockerfileForRuntime(g, resourceClient, rtm)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//TODO
 	t.Run("Check if requeue in-case of non-existing git-repo-cr", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 
-		function := &serverlessv1alpha1.Function{
+		function := &serverlessv1alpha2.Function{
 			ObjectMeta: metav1.ObjectMeta{Name: "git-fn", Namespace: testNamespace},
-			Spec: serverlessv1alpha1.FunctionSpec{
-				Source:     testRepoName,
-				Runtime:    rtm,
-				Type:       serverlessv1alpha1.SourceTypeGit,
-				Repository: serverlessv1alpha1.Repository{BaseDir: "dir", Reference: "ref"},
+			Spec: serverlessv1alpha2.FunctionSpec{
+				Runtime: rtm,
+				Source: serverlessv1alpha2.Source{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
+						Repository: serverlessv1alpha2.Repository{
+							BaseDir:   "dir",
+							Reference: "ref",
+						},
+					},
+				},
 			},
 		}
 		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
@@ -796,10 +815,19 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 			},
 		}
 
+		gitClient := new(automock.GitClient)
+		gitClient.On("LastCommit", mock.Anything).Return("", fmt.Errorf("test error")).Once()
+		defer gitClient.AssertExpectations(t)
+
+		factory := automock.NewGitClientFactory(t)
+		factory.On("GetGitClient", mock.Anything).Return(gitClient)
+		defer factory.AssertExpectations(t)
+
 		reconciler := &FunctionReconciler{
 			Log:               zap.NewNop().Sugar(),
 			client:            resourceClient,
 			recorder:          record.NewFakeRecorder(100),
+			gitFactory:        factory,
 			config:            testCfg,
 			statsCollector:    prometheusCollector,
 			initStateFunction: stateFnGitCheckSources,
@@ -809,9 +837,9 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 		res, err := reconciler.Reconcile(ctx, request)
 
 		//THEN
-		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(err).To(gomega.BeNil())
 		// this is expected to be false, because returning an error is enough to requeue
-		g.Expect(res.Requeue).To(gomega.BeFalse())
+		g.Expect(res.Requeue).To(gomega.BeTrue())
 	})
 }
 

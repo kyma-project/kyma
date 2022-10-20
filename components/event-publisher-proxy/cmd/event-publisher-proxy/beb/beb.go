@@ -3,13 +3,14 @@ package beb
 import (
 	"context"
 
+	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only used in a development setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -34,7 +35,7 @@ const (
 // Commander implements the Commander interface.
 type Commander struct {
 	cancel           context.CancelFunc
-	envCfg           *env.BebConfig
+	envCfg           *env.BEBConfig
 	logger           *logger.Logger
 	metricsCollector *metrics.Collector
 	opts             *options.Options
@@ -45,7 +46,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 	return &Commander{
 		metricsCollector: metricsCollector,
 		logger:           logger,
-		envCfg:           new(env.BebConfig),
+		envCfg:           new(env.BEBConfig),
 		opts:             opts,
 	}
 }
@@ -53,8 +54,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 // Init implements the Commander interface and initializes the publisher to BEB.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		c.namedLogger().Errorw("Failed to read configuration", "error", err)
-		return err
+		return xerrors.Errorf("failed to read configuration for %s : %v", bebCommanderName, err)
 	}
 	return nil
 }
@@ -75,7 +75,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := sender.NewBebMessageSender(c.envCfg.EmsPublishURL, client)
+	messageSender := sender.NewBEBMessageSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -110,8 +110,7 @@ func (c *Commander) Start() error {
 	// start handler which blocks until it receives a shutdown signal
 	if err := beb.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
-		c.namedLogger().Errorw("Failed to start handler", "error", err)
-		return err
+		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
 	}
 	c.namedLogger().Info("Event Publisher was shut down")
 	return nil

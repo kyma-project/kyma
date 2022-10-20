@@ -23,6 +23,16 @@ ci-skr:
 	npm install
 	npm run test-skr
 
+.PHONY: ci-skr-provision
+ci-skr-provision:
+	npm install
+	npm run test-skr-provision
+
+.PHONY: ci-skr-deprovision
+ci-skr-deprovision:
+	npm install
+	npm run test-skr-deprovision
+
 .PHONY: ci-skr-nightly
 ci-skr-nightly:
 	npm install
@@ -93,3 +103,8 @@ ci-test-eventing-provision-skr:
 ci-test-eventing-deprovision-skr:
 	npm ci
 	npm run test-eventing-deprovision-skr
+
+.PHONY: telemetry
+telemetry:
+	npm install
+	npm run test-telemetry

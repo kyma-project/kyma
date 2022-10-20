@@ -30,21 +30,17 @@ nats:
   # The number of connect attempts against discovered routes.
   connectRetries: 30
 
-  # How many seconds should pass before sending a PING
-  # to a client that has no activity.
-  pingInterval: 
-
   # Server settings.
   limits:
-    maxConnections: 
-    maxSubscriptions: 
-    maxControlLine: 
-    maxPayload: 
+    maxConnections:
+    maxSubscriptions:
+    maxControlLine:
+    maxPayload:
 
-    writeDeadline: 
-    maxPending: 
-    maxPings: 
-    lameDuckDuration: 
+    writeDeadline:
+    maxPending:
+    maxPings:
+    lameDuckDuration:
 
   # Number of seconds to wait for client connections to end after the pod termination is requested
   terminationGracePeriodSeconds: 60
@@ -52,29 +48,34 @@ nats:
 
 ### Logging
 
-> **NOTE**: It is not recommended to enable trace or debug in production, since enabling it will significantly degrade performance.
+*Note*: It is not recommended to enable trace or debug in production since enabling it will significantly degrade performance.
 
 ```yaml
 nats:
   logging:
-    debug: 
-    trace: 
-    logtime: 
-    connectErrorReports: 
-    reconnectErrorReports: 
+    debug:
+    trace:
+    logtime:
+    connectErrorReports:
+    reconnectErrorReports:
 ```
-### Clustering
 
-If clustering is enabled, then a 3-node cluster will be set up. You can find more information in the [NATS documentation](https://docs.nats.io/running-a-nats-service/introduction/running/nats-kubernetes/helm-charts#clustering).
+## Clustering
+
+If clustering is enabled, then a 3-node cluster will be setup. More info at:
+https://docs.nats.io/nats-server/configuration/clustering#nats-server-clustering
 
 ```yaml
 cluster:
   enabled: true
   replicas: 3
 ```
-### JetStream
 
-To set up memory and file storage with JetStream, use this configuration: 
+## JetStream
+
+### Setting up Memory and File Storage
+
+File Storage is **always** recommended, since JetStream's RAFT Meta Group will be persisted to file storage.  The Storage Class used should be block storage.  NFS is not recommended.
 
 ```yaml
 nats:

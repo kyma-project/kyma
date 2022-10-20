@@ -4,7 +4,7 @@ title: Create a Grafana dashboard
 
 Kyma comes with a set of dashboards for monitoring Kubernetes clusters. These dashboards display metrics that the Prometheus server collects.
 
-You can create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/next/visualizations/gauge-panel/#gauge) type. On the dashboard, you see how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
+You can create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/next/panels-visualizations/visualizations/gauge/) type. On the dashboard, you see how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
 
 In addition to creating a dashboard during runtime, you can also add it to the Kubernetes resources in your repository. This way, the dashboard configuration is portable and you can deploy it together with the application in any new cluster.
 
@@ -16,7 +16,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 ## Create the dashboard
 
-1. [Access Grafana](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md).
+1. [Access Grafana](../../04-operation-guides/security/sec-06-access-expose-grafana.md).
 2. Add a new dashboard with a new panel.
 3. For your new query, select **Prometheus** from the data source selector.
 4. Pick the `cpu_temperature_celsius` metric.
@@ -43,7 +43,7 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 ## Add the dashboard as Kubernetes resource
 
-When you create a dashboard to monitor one of your applications (Function, microservice,...), we recommend that you define the dashboard as a Kubernetes Config Map resource. In this case, a Grafana sidecar automatically loads the Dashboard on Grafana startup. Following that approach, you can easily keep the dashboard definition together with the Kubernetes resource definitions of your application and port it to different clusters.
+When you create a dashboard to monitor one of your applications (Function, microservice,...), we recommend that you define the dashboard as a Kubernetes ConfigMap resource. In this case, a Grafana sidecar automatically loads the Dashboard on Grafana startup. Following that approach, you can easily keep the dashboard definition together with the Kubernetes resource definitions of your application and port it to different clusters.
 
 1. Create a JSON document with the dashboard definition; for example, by exporting it from Grafana.
 2. Create a Kubernetes resource with a unique name for your dashboard and the JSON content, like the following example:

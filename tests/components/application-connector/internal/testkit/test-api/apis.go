@@ -10,15 +10,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials) http.Handler {
+func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oAuthCredentials OAuthCredentials, expectedRequestParameters ExpectedRequestParameters, oauthTokens map[string]OAuthToken, csrfTokens CSRFTokens) http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
 	api := router.PathPrefix("/v1/api").Subrouter()
 	api.Use(Logger(logOut, logger.DevLoggerType))
 
-	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret)
-	csrf := NewCSRF()
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, oauthTokens)
+	csrf := NewCSRF(csrfTokens)
 
 	{
 		api.HandleFunc("/oauth/token", oauth.Token).Methods(http.MethodPost)
@@ -30,34 +30,89 @@ func SetupRoutes(logOut io.Writer, basicAuthCredentials BasicAuthCredentials, oA
 	{
 		r := api.PathPrefix("/unsecure").Subrouter()
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
+		r.HandleFunc("/echo", echo).Methods(http.MethodPut, http.MethodPost, http.MethodDelete)
+		r.HandleFunc("/code/{code:[0-9]+}", resCode).Methods(http.MethodGet)
+		r.HandleFunc("/timeout", timeout).Methods(http.MethodGet)
 	}
 	{
 		r := api.PathPrefix("/basic").Subrouter()
-		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/oauth").Subrouter()
 		r.Use(oauth.Middleware())
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
 	}
 	{
 		r := api.PathPrefix("/csrf-basic").Subrouter()
 		r.Use(csrf.Middleware())
-		r.Use(BasicAuth(basicAuthCredentials.User, basicAuthCredentials.Password))
+		r.Use(BasicAuth(basicAuthCredentials))
 		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
-		r.HandleFunc("/echo", echo)
+	}
+	{
+		r := api.PathPrefix("/csrf-oauth").Subrouter()
+		r.Use(csrf.Middleware())
+		r.Use(oauth.Middleware())
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+	}
+	{
+		r := api.PathPrefix("/request-parameters-basic").Subrouter()
+		r.Use(RequestParameters(expectedRequestParameters))
+		r.Use(BasicAuth(basicAuthCredentials))
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+	}
+	{
+		r := api.PathPrefix("/redirect").Subrouter()
+
+		r.HandleFunc("/ok/target", alwaysOk).Methods(http.MethodGet)
+
+		r.Handle("/ok", http.RedirectHandler("/v1/api/redirect/ok/target", http.StatusTemporaryRedirect))
+
+		ba := BasicAuth(basicAuthCredentials)
+		ok := http.HandlerFunc(alwaysOk)
+		r.Handle("/basic/target", ba(ok)).Methods(http.MethodGet)
+		r.Handle("/basic", http.RedirectHandler("/v1/api/redirect/basic/target", http.StatusTemporaryRedirect))
+
+		r.Handle("/external", http.RedirectHandler("http://central-application-gateway.kyma-system:8081/v1/health", http.StatusTemporaryRedirect))
 	}
 
 	return router
 }
 
-type BasicAuthCredentials struct {
-	User     string
-	Password string
+func SetupMTLSRoutes(logOut io.Writer, oAuthCredentials OAuthCredentials, oauthTokens map[string]OAuthToken, csrfTokens CSRFTokens) http.Handler {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/v1/health", alwaysOk).Methods("GET")
+	api := router.PathPrefix("/v1/api").Subrouter()
+	api.Use(Logger(logOut, logger.DevLoggerType))
+
+	oauth := NewOAuth(oAuthCredentials.ClientID, oAuthCredentials.ClientSecret, oauthTokens)
+	csrf := NewCSRF(csrfTokens)
+
+	{
+		r := api.PathPrefix("/mtls").Subrouter()
+		r.Use(oauth.Middleware())
+		api.HandleFunc("/mtls-oauth/token", oauth.MTLSToken).Methods(http.MethodPost)
+	}
+
+	{
+		r := api.PathPrefix("/mtls").Subrouter()
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+	}
+	{
+		r := api.PathPrefix("/csrf-mtls").Subrouter()
+		r.Use(csrf.Middleware())
+		r.HandleFunc("/ok", alwaysOk).Methods(http.MethodGet)
+	}
+
+	return router
+}
+
+func Logger(out io.Writer, t logger.Type) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return logger.Handler(next, out, t)
+	}
 }
 
 func handleError(w http.ResponseWriter, code int, format string, a ...interface{}) {

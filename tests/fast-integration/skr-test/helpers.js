@@ -1,15 +1,17 @@
 const uuid = require('uuid');
-const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
-const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
 const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const fs = require('fs');
+const os = require('os');
+const {expect} = require('chai');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
-
 const testNS = 'skr-test';
+const DEBUG = process.env.DEBUG === 'true';
+const {initializeK8sClient} = require('../utils/index.js');
 
 function withInstanceID(instanceID) {
   return function(options) {
@@ -96,7 +98,12 @@ function gatherOptions(...opts) {
   return options;
 }
 
-// gets the skr config by it's instance id
+async function getSKRRuntimeStatus(instanceID) {
+  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  return JSON.parse(runtimeStatus);
+}
+
+// gets the skr config by its instance id
 async function getSKRConfig(instanceID) {
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
@@ -105,6 +112,49 @@ async function getSKRConfig(instanceID) {
 
   console.log(`Fetching SKR info for shoot: ${shootName}`);
   return await gardener.getShoot(shootName);
+}
+
+function getEnvOrThrow(key) {
+  if (!process.env[key]) {
+    throw new Error(`Env ${key} not present`);
+  }
+
+  return process.env[key];
+}
+
+function genRandom(len) {
+  let res = '';
+  const chrs = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < len; i++) {
+    res += chrs.charAt(Math.floor(Math.random() * chrs.length));
+  }
+
+  return res;
+}
+
+function debug(...args) {
+  if (!DEBUG) {
+    return;
+  }
+  log('DEBUG', ...args);
+}
+
+function log(prefix, ...args) {
+  if (args.length === 0) {
+    return;
+  }
+
+  args = [...args];
+  const fmt = `[${prefix}] ` + args[0];
+  args = args.slice(1);
+  console.log.apply(console, [fmt, ...args]);
+}
+
+async function saveKubeconfig(kubeconfig) {
+  if (!fs.existsSync(`${os.homedir()}/.kube`)) {
+    fs.mkdirSync(`${os.homedir()}/.kube`, true);
+  }
+  fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig);
 }
 
 async function initK8sConfig(shoot) {
@@ -119,9 +169,8 @@ module.exports = {
   keb,
   kcp,
   gardener,
-  testNS,
   getSKRConfig,
-  initK8sConfig,
+  getSKRRuntimeStatus,
   gatherOptions,
   withInstanceID,
   withAppName,
@@ -130,4 +179,10 @@ module.exports = {
   withTestNS,
   withSuffix,
   withCustomParams,
+  getEnvOrThrow,
+  genRandom,
+  debug,
+  saveKubeconfig,
+  log,
+  initK8sConfig,
 };

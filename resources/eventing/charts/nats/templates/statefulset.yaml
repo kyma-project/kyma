@@ -6,11 +6,9 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "nats.labels" . | nindent 4 }}
-    {{- if .Values.statefulSetAnnotations}}
+  {{- if .Values.statefulSetAnnotations }}
   annotations:
-  {{- range $key, $value := .Values.statefulSetAnnotations }}
-    {{ $key }}: {{ $value | quote }}
-  {{- end }}
+    {{- toYaml .Values.statefulSetAnnotations | nindent 4 }}
   {{- end }}
 spec:
   selector:
@@ -22,19 +20,23 @@ spec:
   replicas: 1
   {{- end }}
   serviceName: {{ include "nats.fullname" . }}
+
+  podManagementPolicy: {{ .Values.podManagementPolicy }}
+
   template:
     metadata:
-      {{- if or .Values.exporter.enabled .Values.podAnnotations }}
+      {{- if or .Values.exporter.enabled .Values.nats.configChecksumAnnotation .Values.podAnnotations }}
       annotations:
       {{- if .Values.exporter.enabled }}
         prometheus.io/path: /metrics
         prometheus.io/port: "7777"
         prometheus.io/scrape: "true"
       {{- end }}
-      {{- if .Values.podAnnotations }}
-      {{- range $key, $value := .Values.podAnnotations }}
-        {{ $key }}: {{ $value | quote }}
+      {{- if .Values.nats.configChecksumAnnotation }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       {{- end }}
+      {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
       {{- end }}
       {{- end }}
       labels:
@@ -57,19 +59,14 @@ spec:
       # Common volumes for the containers.
       volumes:
       - name: config-volume
-        {{ if .Values.nats.customConfigSecret }}
-        secret:
-          secretName: {{ .Values.nats.customConfigSecret.name }}
-        {{ else }}
         configMap:
           name: {{ include "nats.fullname" . }}-config
-        {{ end }}
 
       # Local volume shared with the reloader.
       - name: pid
         emptyDir: {}
 
-      {{- if and .Values.global.jetstream.enabled (eq .Values.global.jetstream.storage "file") .Values.nats.jetstream.fileStorage.existingClaim }}
+      {{- if and (eq .Values.global.jetstream.storage "file") .Values.nats.jetstream.fileStorage.existingClaim }}
       # Persistent volume for jetstream running with file storage option
       - name: {{ include "nats.fullname" . }}-js-pvc
         persistentVolumeClaim:
@@ -112,7 +109,7 @@ spec:
       #  NATS Prometheus Exporter  #
       #                            #
       ##############################
-      {{- if and .Values.exporter.enabled .Values.global.jetstream.enabled }}
+      {{- if .Values.exporter.enabled }}
       - name: metrics
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
         imagePullPolicy: {{ .Values.exporter.pullPolicy }}
@@ -185,7 +182,6 @@ spec:
         - name: CLUSTER_ADVERTISE
           value: {{ include "nats.clusterAdvertise" . }}
 
-        {{- if .Values.global.jetstream.enabled }}
         {{- with .Values.nats.jetstream.encryption }}
         {{- with .secret }}
         - name: JS_KEY
@@ -195,48 +191,84 @@ spec:
               key: {{ .key }}
         {{- end }}
         {{- end }}
-        {{- end }}
         volumeMounts:
           - name: config-volume
             mountPath: /etc/nats-config
           - name: pid
             mountPath: /var/run/nats
-          {{- if and .Values.global.jetstream.enabled (eq .Values.global.jetstream.storage "file") }}
+          {{- if (eq .Values.global.jetstream.storage "file") }}
           - name: {{ include "nats.fullname" . }}-js-pvc
             mountPath: {{ .Values.nats.jetstream.fileStorage.storageDirectory }}
           {{- end }}
 
-        # Liveness/Readiness probes against the monitoring.
-        #
+        #######################
+        #                     #
+        # Healthcheck Probes  #
+        #                     #
+        #######################
+        {{- if .Values.nats.healthcheck }}
+
+        {{- with .Values.nats.healthcheck.liveness }}
+        {{- if .enabled }}
         livenessProbe:
           httpGet:
             path: /
             port: 8222
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+          {{- if .terminationGracePeriodSeconds }}
+          terminationGracePeriodSeconds: {{ .terminationGracePeriodSeconds }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
+
+        {{- with .Values.nats.healthcheck.readiness }}
+        {{- if .enabled }}
         readinessProbe:
           httpGet:
             path: /
             port: 8222
-          initialDelaySeconds: 10
-          timeoutSeconds: 5
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+        {{- end }}
+        {{- end }}
+
+        {{- if .Values.nats.healthcheck.startup.enabled }}
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 8222
+        {{- with .Values.nats.healthcheck.startup }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          failureThreshold: {{ .failureThreshold }}
+        {{- end }}
+        {{- end }}
+
+        {{- end }}
 
         # Gracefully stop NATS Server on pod deletion or image upgrade.
         #
         lifecycle:
           preStop:
             exec:
-              # Using the alpine based NATS image, we add an extra sleep that is
-              # the same amount as the terminationGracePeriodSeconds to allow
-              # the NATS Server to gracefully terminate the client connections.
+              # send the lame duck shutdown signal to trigger a graceful shutdown
+              # nats-server will ignore the TERM signal it receives after this
               #
               command:
-              - "/bin/sh"
-              - "-c"
-              - "nats-server -sl=ldm=/var/run/nats/nats.pid && /bin/sleep {{ .Values.nats.terminationGracePeriodSeconds }}"
+              - "nats-server"
+              - "-sl=ldm=/var/run/nats/nats.pid"
 
   volumeClaimTemplates:
-  {{- if and .Values.global.jetstream.enabled (eq .Values.global.jetstream.storage "file") (not .Values.nats.jetstream.fileStorage.existingClaim) }}
+  {{- if and (eq .Values.global.jetstream.storage "file") (not .Values.nats.jetstream.fileStorage.existingClaim) }}
   #####################################
   #                                   #
   #  Jetstream New Persistent Volume  #
@@ -246,15 +278,11 @@ spec:
         name: {{ include "nats.fullname" . }}-js-pvc
         {{- if .Values.nats.jetstream.fileStorage.annotations }}
         annotations:
-        {{- range $key, $value := .Values.nats.jetstream.fileStorage.annotations }}
-          {{ $key }}: {{ $value | quote }}
-        {{- end }}
+          {{- toYaml .Values.nats.jetstream.fileStorage.annotations | nindent 10 }}
         {{- end }}
       spec:
         accessModes:
-        {{- range .Values.nats.jetstream.fileStorage.accessModes }}
-          - {{ . | quote }}
-        {{- end }}
+          {{- toYaml .Values.nats.jetstream.fileStorage.accessModes | nindent 10 }}
         resources:
           requests:
             storage: {{ .Values.nats.jetstream.fileStorage.size }}

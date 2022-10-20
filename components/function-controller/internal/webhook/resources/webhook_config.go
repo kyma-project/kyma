@@ -4,6 +4,9 @@ import (
 	"context"
 	"reflect"
 
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
+
 	"github.com/pkg/errors"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -24,22 +27,31 @@ const (
 	MutatingWebhook   WebHookType = "Mutating"
 	ValidatingWebHook WebHookType = "Validating"
 
-	serverlessAPIGroup   = "serverless.kyma-project.io"
-	serverlessAPIVersion = "v1alpha1"
+	serverlessAPIGroup          = "serverless.kyma-project.io"
+	ServerlessCurrentAPIVersion = serverlessv1alpha2.FunctionVersion
 
-	DefaultingWebhookName     = "defaulting.webhook.serverless.kyma-project.io"
-	SecretMutationWebhookName = "mutating.secret.webhook.serverless.kyma-project.io"
-	ValidationWebhookName     = "validation.webhook.serverless.kyma-project.io"
+	DeprecatedServerlessAPIVersion = serverlessv1alpha1.FunctionVersion
+	DefaultingWebhookName          = "defaulting.webhook.serverless.kyma-project.io"
+	SecretMutationWebhookName      = "mutating.secret.webhook.serverless.kyma-project.io"
+	ValidationWebhookName          = "validation.webhook.serverless.kyma-project.io"
+	ConvertingWebHookName          = "converting.webhook.serverless.kyma-project.io"
+
+	WebhookTimeout = 15
 
 	FunctionDefaultingWebhookPath       = "/defaulting/functions"
 	RegistryConfigDefaultingWebhookPath = "/defaulting/registry-config-secrets"
 	FunctionValidationWebhookPath       = "/validation/function"
+
+	FunctionConvertWebhookPath = "/convert/functions"
 
 	RemoteRegistryLabelKey = "serverless.kyma-project.io/remote-registry"
 )
 
 func EnsureWebhookConfigurationFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig, wt WebHookType) error {
 	if wt == MutatingWebhook {
+		if err := ensureConvertingWebhookConfigFor(ctx, client, config); err != nil {
+			return err
+		}
 		return ensureMutatingWebhookConfigFor(ctx, client, config)
 	}
 	return ensureValidatingWebhookConfigFor(ctx, client, config)
@@ -49,14 +61,14 @@ func ensureMutatingWebhookConfigFor(ctx context.Context, client ctlrclient.Clien
 	mwhc := &admissionregistrationv1.MutatingWebhookConfiguration{}
 	if err := client.Get(ctx, types.NamespacedName{Name: DefaultingWebhookName}, mwhc); err != nil {
 		if apiErrors.IsNotFound(err) {
-			return client.Create(ctx, createMutatingWebhookConfiguration(config))
+			return errors.Wrap(client.Create(ctx, createMutatingWebhookConfiguration(config)), "while creating webhook mutation configuration")
 		}
 		return errors.Wrapf(err, "failed to get defaulting MutatingWebhookConfiguration: %s", DefaultingWebhookName)
 	}
 	ensuredMwhc := createMutatingWebhookConfiguration(config)
 	if !reflect.DeepEqual(ensuredMwhc.Webhooks, mwhc.Webhooks) {
 		ensuredMwhc.ObjectMeta = *mwhc.ObjectMeta.DeepCopy()
-		return client.Update(ctx, ensuredMwhc)
+		return errors.Wrap(client.Update(ctx, ensuredMwhc), "while updating webhook mutation configuration")
 	}
 	return nil
 }
@@ -121,7 +133,7 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 						serverlessAPIGroup,
 					},
 					APIVersions: []string{
-						serverlessAPIVersion,
+						ServerlessCurrentAPIVersion, DeprecatedServerlessAPIVersion,
 					},
 					Resources: []string{"functions", "functions/status"},
 					Scope:     &scope,
@@ -133,7 +145,7 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 			},
 		},
 		SideEffects:    &sideEffects,
-		TimeoutSeconds: pointer.Int32(30),
+		TimeoutSeconds: pointer.Int32(WebhookTimeout),
 	}
 }
 
@@ -158,7 +170,7 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 		},
 		FailurePolicy:           &failurePolicy,
 		MatchPolicy:             &matchPolicy,
-		TimeoutSeconds:          pointer.Int32(30),
+		TimeoutSeconds:          pointer.Int32(WebhookTimeout),
 		SideEffects:             &sideEffects,
 		AdmissionReviewVersions: []string{"v1beta1", "v1"},
 		ObjectSelector: &metav1.LabelSelector{
@@ -215,7 +227,7 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 								serverlessAPIGroup,
 							},
 							APIVersions: []string{
-								serverlessAPIVersion,
+								ServerlessCurrentAPIVersion, DeprecatedServerlessAPIVersion,
 							},
 							Resources: []string{"functions", "functions/status"},
 							Scope:     &scope,
@@ -231,7 +243,7 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 								serverlessAPIGroup,
 							},
 							APIVersions: []string{
-								serverlessAPIVersion,
+								ServerlessCurrentAPIVersion,
 							},
 							Resources: []string{"gitrepositories", "gitrepositories/status"},
 							Scope:     &scope,
@@ -244,8 +256,65 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 					},
 				},
 				SideEffects:    &sideEffects,
-				TimeoutSeconds: pointer.Int32(30),
+				TimeoutSeconds: pointer.Int32(WebhookTimeout),
 			},
 		},
 	}
+}
+
+func getFunctionConvertingWebhookCfg(config WebhookConfig) admissionregistrationv1.MutatingWebhook {
+	failurePolicy := admissionregistrationv1.Fail
+	matchPolicy := admissionregistrationv1.Equivalent
+	reinvocationPolicy := admissionregistrationv1.NeverReinvocationPolicy
+	sideEffects := admissionregistrationv1.SideEffectClassNone
+
+	return admissionregistrationv1.MutatingWebhook{
+		Name: ConvertingWebHookName,
+		AdmissionReviewVersions: []string{
+			"v1beta1",
+			"v1",
+		},
+		ClientConfig: admissionregistrationv1.WebhookClientConfig{
+			CABundle: config.CABundel,
+			Service: &admissionregistrationv1.ServiceReference{
+				Namespace: config.ServiceNamespace,
+				Name:      config.ServiceName,
+				Path:      pointer.String(FunctionConvertWebhookPath),
+				Port:      pointer.Int32(443),
+			},
+		},
+		FailurePolicy:      &failurePolicy,
+		MatchPolicy:        &matchPolicy,
+		ReinvocationPolicy: &reinvocationPolicy,
+		SideEffects:        &sideEffects,
+		TimeoutSeconds:     pointer.Int32(WebhookTimeout),
+	}
+}
+
+func createConvertingWebhookConfiguration(config WebhookConfig) *admissionregistrationv1.MutatingWebhookConfiguration {
+	return &admissionregistrationv1.MutatingWebhookConfiguration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ConvertingWebHookName,
+		},
+		Webhooks: []admissionregistrationv1.MutatingWebhook{
+
+			getFunctionConvertingWebhookCfg(config),
+		},
+	}
+}
+
+func ensureConvertingWebhookConfigFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
+	mwhc := &admissionregistrationv1.MutatingWebhookConfiguration{}
+	if err := client.Get(ctx, types.NamespacedName{Name: ConvertingWebHookName}, mwhc); err != nil {
+		if apiErrors.IsNotFound(err) {
+			return client.Create(ctx, createConvertingWebhookConfiguration(config))
+		}
+		return errors.Wrapf(err, "failed to get converting MutatingWebhookConfiguration: %s", ConvertingWebHookName)
+	}
+	ensuredMwhc := createConvertingWebhookConfiguration(config)
+	if !reflect.DeepEqual(ensuredMwhc.Webhooks, mwhc.Webhooks) {
+		ensuredMwhc.ObjectMeta = *mwhc.ObjectMeta.DeepCopy()
+		return client.Update(ctx, ensuredMwhc)
+	}
+	return nil
 }

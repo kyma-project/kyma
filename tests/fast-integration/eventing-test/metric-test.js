@@ -10,6 +10,7 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   debug,
   retryPromise,
+  testCompassFlow,
   replaceAllInString,
 } = require('../utils');
 
@@ -48,7 +49,7 @@ const dashboards = {
   delivery_per_subscription: {
     title: 'Delivery per Subscription',
     query: `
-         sum (delivery_per_subscription{response_code=~"[245].*"}) 
+         sum (nats_ec_delivery_per_subscription_total{response_code=~"[245].*"}) 
           by (namespace, subscription_name,event_type,sink,response_code)`,
     backends: ['nats'],
     assert: function(result) {
@@ -62,7 +63,7 @@ const dashboards = {
   },
   latency_eventPublisherToMessagingServer: {
     title: 'Latency of Event Publisher -> Messaging Server',
-    query: 'histogram_quantile(0.99999, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
+    query: 'histogram_quantile(0.99999, sum(rate(eventing_epp_messaging_server_latency_duration_milliseconds_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
     backends: ['nats', 'beb'],
     assert: function(result) {
       const foundMetric = result.find((res) =>
@@ -199,12 +200,10 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-async function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
+async function eventingMonitoringTest(backend, isSkr) {
   let allDashboards = dashboards;
-  if (isJetStreamEnabled) {
-    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
-  }
-  if (isSkr) {
+  allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
+  if (isSkr && testCompassFlow) {
     allDashboards = Object.assign(allDashboards, skrDashboards);
   }
 

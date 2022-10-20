@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"github.com/stretchr/testify/require"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -15,6 +17,7 @@ import (
 )
 
 func Test_resourceReconciler_Reconcile(t *testing.T) {
+	fakeLogger := zap.NewNop().Sugar()
 	t.Run("should update misconfigured mutation webhook config", func(t *testing.T) {
 		ctx := context.Background()
 		client := fake.NewClientBuilder().Build()
@@ -28,6 +31,7 @@ func Test_resourceReconciler_Reconcile(t *testing.T) {
 			webhookConfig: webhookConfig,
 			secretName:    "test-secret-name",
 			client:        client,
+			logger:        fakeLogger,
 		}
 
 		oldMc := createMutatingWebhookConfiguration(webhookConfig)
@@ -57,6 +61,7 @@ func Test_resourceReconciler_Reconcile(t *testing.T) {
 			webhookConfig: webhookConfig,
 			secretName:    "test-secret-name",
 			client:        client,
+			logger:        fakeLogger,
 		}
 		err := createTestResources(ctx, client)
 		require.NoError(t, err)

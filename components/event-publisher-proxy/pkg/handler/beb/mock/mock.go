@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/xerrors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,10 +47,10 @@ const (
 	defaultEventsHTTP400Endpoint = "/events400"
 )
 
-// BebHandlerMock represents a mock for the beb.Handler.
-type BebHandlerMock struct {
+// BEBHandlerMock represents a mock for the beb.Handler.
+type BEBHandlerMock struct {
 	ctx                 context.Context
-	cfg                 *env.BebConfig
+	cfg                 *env.BEBConfig
 	logger              *logger.Logger
 	collector           *metrics.Collector
 	livenessEndpoint    string
@@ -59,38 +61,38 @@ type BebHandlerMock struct {
 	eventTypeCleaner    eventtype.Cleaner
 }
 
-// BebHandlerMockOpt represents a BebHandlerMock option.
-type BebHandlerMockOpt func(*BebHandlerMock)
+// BEBHandlerMockOpt represents a BEBHandlerMock option.
+type BEBHandlerMockOpt func(*BEBHandlerMock)
 
-// GetPort returns the port used by the BebHandlerMock.
-func (m *BebHandlerMock) GetPort() int {
+// GetPort returns the port used by the BEBHandlerMock.
+func (m *BEBHandlerMock) GetPort() int {
 	return m.cfg.Port
 }
 
-// GetMetricsCollector returns the metrics.Collector used by the BebHandlerMock.
-func (m *BebHandlerMock) GetMetricsCollector() *metrics.Collector {
+// GetMetricsCollector returns the metrics.Collector used by the BEBHandlerMock.
+func (m *BEBHandlerMock) GetMetricsCollector() *metrics.Collector {
 	return m.collector
 }
 
-// Close closes the testing.MockServer used by the BebHandlerMock.
-func (m *BebHandlerMock) Close() {
+// Close closes the testing.MockServer used by the BEBHandlerMock.
+func (m *BEBHandlerMock) Close() {
 	m.mockServer.Close()
 }
 
-// GetLivenessEndpoint returns the liveness endpoint used by the BebHandlerMock.
-func (m *BebHandlerMock) GetLivenessEndpoint() string {
+// GetLivenessEndpoint returns the liveness endpoint used by the BEBHandlerMock.
+func (m *BEBHandlerMock) GetLivenessEndpoint() string {
 	return m.livenessEndpoint
 }
 
-// GetReadinessEndpoint returns the readiness endpoint used by the BebHandlerMock.
-func (m *BebHandlerMock) GetReadinessEndpoint() string {
+// GetReadinessEndpoint returns the readiness endpoint used by the BEBHandlerMock.
+func (m *BEBHandlerMock) GetReadinessEndpoint() string {
 	return m.readinessEndpoint
 }
 
-// StartOrDie starts a new BebHandlerMock instance or die if a precondition fails.
+// StartOrDie starts a new BEBHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) beb.Handler started without errors.
 func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePrefix, eventsEndpoint string,
-	requestTimeout, serverResponseTime time.Duration, opts ...BebHandlerMockOpt) *BebHandlerMock {
+	requestTimeout, serverResponseTime time.Duration, opts ...BEBHandlerMockOpt) *BEBHandlerMock {
 	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
 	mockServer.Start(t, defaultTokenEndpoint, defaultEventsEndpoint, defaultEventsHTTP400Endpoint)
 
@@ -106,7 +108,7 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 	mockedLogger, err := logger.New("json", "info")
 	require.NoError(t, err)
 
-	mock := &BebHandlerMock{
+	mock := &BEBHandlerMock{
 		ctx:                 ctx,
 		cfg:                 cfg,
 		logger:              mockedLogger,
@@ -127,7 +129,7 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 	defer client.CloseIdleConnections()
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.cfg.Port)
-	msgSender := sender.NewBebMessageSender(mock.cfg.EmsPublishURL, client)
+	msgSender := sender.NewBEBMessageSender(mock.cfg.EmsPublishURL, client)
 	msgHandlerOpts := &options.Options{MaxRequestSize: int64(requestSize)}
 	msgHandler := beb.NewHandler(
 		msgReceiver,
@@ -156,7 +158,7 @@ func validateEventTypeContainsApplicationName(name string) testingutils.Validato
 			return err
 		}
 		if !strings.Contains(eventType, name) {
-			return fmt.Errorf("event-type:%s does not contain application name:%s", eventType, name)
+			return xerrors.Errorf("event-type:%s does not contain application name:%s", eventType, name)
 		}
 		return nil
 	}
@@ -183,16 +185,16 @@ func extractEventTypeFromRequest(r *http.Request) (string, error) {
 	return eventType, nil
 }
 
-// WithEventTypePrefix returns BebHandlerMockOpt which sets the eventTypePrefix for the given BebHandlerMock.
-func WithEventTypePrefix(eventTypePrefix string) BebHandlerMockOpt {
-	return func(m *BebHandlerMock) {
+// WithEventTypePrefix returns BEBHandlerMockOpt which sets the eventTypePrefix for the given BEBHandlerMock.
+func WithEventTypePrefix(eventTypePrefix string) BEBHandlerMockOpt {
+	return func(m *BEBHandlerMock) {
 		m.cfg.EventTypePrefix = eventTypePrefix
 	}
 }
 
-// WithApplication returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
-func WithApplication(applicationNameToCreate, applicationNameToValidate string) BebHandlerMockOpt {
-	return func(m *BebHandlerMock) {
+// WithApplication returns BEBHandlerMockOpt which sets the subscribed.Processor for the given BEBHandlerMock.
+func WithApplication(applicationNameToCreate, applicationNameToValidate string) BEBHandlerMockOpt {
+	return func(m *BEBHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationNameToCreate)
 		m.legacyTransformer = legacy.NewTransformer(m.cfg.BEBNamespace, m.cfg.EventTypePrefix, applicationLister)
 		validator := validateEventTypeContainsApplicationName(applicationNameToValidate)
@@ -201,9 +203,9 @@ func WithApplication(applicationNameToCreate, applicationNameToValidate string) 
 	}
 }
 
-// WithSubscription returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
-func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) BebHandlerMockOpt {
-	return func(m *BebHandlerMock) {
+// WithSubscription returns BEBHandlerMockOpt which sets the subscribed.Processor for the given BEBHandlerMock.
+func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) BEBHandlerMockOpt {
+	return func(m *BEBHandlerMock) {
 		dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		informerFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicClient, time.Second, v1.NamespaceAll, nil)
 		genericInformer := informerFactory.ForResource(subscribed.GVR)

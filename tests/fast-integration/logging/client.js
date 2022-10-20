@@ -1,3 +1,10 @@
+module.exports = {
+  logsPresentInLoki,
+  tryGetLokiPersistentVolumeClaim,
+  lokiSecretData,
+  queryLoki,
+};
+
 const {
   convertAxiosError,
   getPersistentVolumeClaim,
@@ -6,9 +13,15 @@ const {
 } = require('../utils');
 const {proxyGrafanaDatasource} = require('../monitoring/client');
 
-
-async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
-  return await proxyGrafanaDatasource('Loki', path, retries, interval, timeout);
+async function logsPresentInLoki(query, startTimestamp, iterations = 20) {
+  for (let i = 0; i < iterations; i++) {
+    const responseBody = await queryLoki(query, startTimestamp);
+    if (responseBody.data.result.length > 0) {
+      return true;
+    }
+    await sleep(5 * 1000);
+  }
+  return false;
 }
 
 async function tryGetLokiPersistentVolumeClaim() {
@@ -24,29 +37,12 @@ async function lokiSecretData() {
   return secretData['loki.yaml'];
 }
 
-async function logsPresentInLoki(query, startTimestamp) {
-  for (let i = 0; i < 20; i++) {
-    const responseBody = await queryLoki(query, startTimestamp);
-    if (responseBody.data.result.length > 0) {
-      return true;
-    }
-    await sleep(5 * 1000);
-  }
-  return false;
-}
-
 async function queryLoki(query, startTimestamp) {
   const path = `loki/api/v1/query_range?query=${query}&start=${startTimestamp}`;
   try {
-    const response = await getLokiViaGrafana(path);
+    const response = await proxyGrafanaDatasource('Loki', path, 5, 30, 10000);
     return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
   }
 }
-
-module.exports = {
-  logsPresentInLoki,
-  tryGetLokiPersistentVolumeClaim,
-  lokiSecretData,
-};

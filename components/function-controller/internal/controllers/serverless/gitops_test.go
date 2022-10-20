@@ -9,69 +9,80 @@ import (
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 )
 
 func Test_isOnSourceChange(t *testing.T) {
 	testCases := []struct {
 		desc           string
-		fn             v1alpha1.Function
+		fn             v1alpha2.Function
 		revision       string
 		expectedResult bool
 	}{
 		{
 			desc: "new function",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type:    v1alpha1.SourceTypeGit,
-					Runtime: v1alpha1.Nodejs12,
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{},
+					},
+					Runtime: v1alpha2.NodeJs12,
 				},
 			},
 			expectedResult: true,
 		},
 		{
 			desc: "new function fixed on commit",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "1",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "1",
+							},
+						},
 					},
-					Runtime: v1alpha1.Nodejs12,
+					Runtime: v1alpha2.NodeJs12,
 				},
 			},
 			expectedResult: true,
 		},
 		{
 			desc: "new function follow head",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "1",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "1",
+							},
+						},
 					},
-					Runtime: v1alpha1.Nodejs12,
+					Runtime: v1alpha2.NodeJs12,
 				},
 			},
 			expectedResult: true,
 		},
 		{
 			desc: "function did not change",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "1",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "1",
+							},
+						},
 					},
-					Runtime: v1alpha1.Nodejs12,
+					Runtime: v1alpha2.NodeJs12,
 				},
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
+				Status: v1alpha2.FunctionStatus{
+					Repository: v1alpha2.Repository{
 						Reference: "1",
 					},
 					Commit:  "1",
-					Runtime: v1alpha1.RuntimeExtendedNodejs12,
+					Runtime: v1alpha2.NodeJs12,
 				},
 			},
 			revision:       "1",
@@ -79,16 +90,19 @@ func Test_isOnSourceChange(t *testing.T) {
 		},
 		{
 			desc: "function change fixed revision",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "2",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "2",
+							},
+						},
 					},
-					Runtime: v1alpha1.Nodejs12,
+					Runtime: v1alpha2.NodeJs12,
 				},
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
+				Status: v1alpha2.FunctionStatus{
+					Repository: v1alpha2.Repository{
 						Reference: "1",
 					},
 				},
@@ -97,9 +111,9 @@ func Test_isOnSourceChange(t *testing.T) {
 		},
 		{
 			desc: "function change",
-			fn: v1alpha1.Function{
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
+			fn: v1alpha2.Function{
+				Status: v1alpha2.FunctionStatus{
+					Repository: v1alpha2.Repository{
 						Reference: "1",
 					},
 				},
@@ -108,35 +122,20 @@ func Test_isOnSourceChange(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			desc: "function change source",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "1",
-					},
-					Source: "new_src",
-				},
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
-						Reference: "1",
-					},
-				},
-			},
-			expectedResult: true,
-		},
-		{
 			desc: "function change base dir",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "2",
-						BaseDir:   "base_dir",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "2",
+								BaseDir:   "base_dir",
+							},
+						},
 					},
 				},
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
+				Status: v1alpha2.FunctionStatus{
+					Repository: v1alpha2.Repository{
 						Reference: "2",
 					},
 				},
@@ -145,15 +144,18 @@ func Test_isOnSourceChange(t *testing.T) {
 		},
 		{
 			desc: "function change branch",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type: v1alpha1.SourceTypeGit,
-					Repository: v1alpha1.Repository{
-						Reference: "branch",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "branch",
+							},
+						},
 					},
 				},
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
+				Status: v1alpha2.FunctionStatus{
+					Repository: v1alpha2.Repository{
 						Reference: "2",
 					},
 				},
@@ -162,16 +164,19 @@ func Test_isOnSourceChange(t *testing.T) {
 		},
 		{
 			desc: "function change dockerfile",
-			fn: v1alpha1.Function{
-				Spec: v1alpha1.FunctionSpec{
-					Type:    v1alpha1.SourceTypeGit,
-					Runtime: v1alpha1.Nodejs12,
-					Repository: v1alpha1.Repository{
-						Reference: "2",
+			fn: v1alpha2.Function{
+				Spec: v1alpha2.FunctionSpec{
+					Source: v1alpha2.Source{
+						GitRepository: &v1alpha2.GitRepositorySource{
+							Repository: v1alpha2.Repository{
+								Reference: "2",
+							},
+						},
 					},
+					Runtime: v1alpha2.NodeJs12,
 				},
-				Status: v1alpha1.FunctionStatus{
-					Repository: v1alpha1.Repository{
+				Status: v1alpha2.FunctionStatus{
+					Repository: v1alpha2.Repository{
 						Reference: "2",
 					},
 				},

@@ -38,21 +38,20 @@ func (o *oauthJWTOnePathScenario) callingTheEndpointWithValidTokenShouldResultIn
 	case "JWT":
 		tokenJWT, err := jwt.Authenticate(oauth2Cfg.ClientID, jwtConfig.OidcHydraConfig)
 		if err != nil {
-			return fmt.Errorf("failed to fetch and id_token. %s", err.Error())
+			return fmt.Errorf("failed to fetch an id_token: %s", err.Error())
 		}
-
 		headerVal := fmt.Sprintf("Bearer %s", tokenJWT)
 
 		return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 	case "OAuth2":
 		token, err := getOAUTHToken(*oauth2Cfg)
-		if err != nil {
-			return err
-		}
+ 		if err != nil {
+ 			return err
+ 		}
 
-		headerVal := token.AccessToken
+ 		headerVal := token.AccessToken
 
-		return helper.CallEndpointWithHeadersWithRetries(headerVal, "oauth2-access-token", fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
+ 		return helper.CallEndpointWithHeadersWithRetries(headerVal, "oauth2-access-token", fmt.Sprintf("%s%s", o.url, path), &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 	}
 	return errors.New("should not happen")
 }

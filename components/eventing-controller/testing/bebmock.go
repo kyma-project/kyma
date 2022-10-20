@@ -28,7 +28,7 @@ const (
 	MessagingURLPath = "/messaging"
 )
 
-// BEBMock implements a programmable mock for BEB
+// BEBMock implements a programmable mock for BEB.
 type BEBMock struct {
 	Requests       *SafeRequests
 	Subscriptions  *SafeSubscriptions
@@ -142,7 +142,7 @@ func (m *BEBMock) Stop() {
 	m.server.Close()
 }
 
-// GetSubscriptionResponse checks if a subscription exists in the mock
+// GetSubscriptionResponse checks if a subscription exists in the mock.
 func GetSubscriptionResponse(m *BEBMock) ResponseWithName {
 	return func(w http.ResponseWriter, key string) {
 		subscriptionSaved := m.Subscriptions.GetSubscription(key)
@@ -220,8 +220,8 @@ func IsBEBSubscriptionDelete(r *http.Request) bool {
 	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, MessagingURLPath)
 }
 
-// GetRestAPIObject gets the name of the involved object in a REST url
-// e.g. "/messaging/events/subscriptions/{subscriptionName}" => "{subscriptionName}"
+// GetRestAPIObject gets the name of the involved object in a REST url.
+// e.g. "/messaging/events/subscriptions/{subscriptionName}" => "{subscriptionName}".
 func GetRestAPIObject(u *url.URL) string {
 	return path.Base(u.Path)
 }

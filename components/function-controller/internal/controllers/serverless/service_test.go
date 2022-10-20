@@ -7,11 +7,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
 func TestFunctionReconciler_equalServices(t *testing.T) {
@@ -414,7 +415,7 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
-		instance := &serverlessv1alpha1.Function{
+		instance := &serverlessv1alpha2.Function{
 			ObjectMeta: metav1.ObjectMeta{Name: "fn-name"},
 		}
 
@@ -441,16 +442,16 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 			},
 		}
 
-		stateFnDeleteServices(context.Background(), &r, &s)
+		_, err := stateFnDeleteServices(context.Background(), &r, &s)
 
-		g.Expect(r.err).To(gomega.Succeed())
+		g.Expect(err).To(gomega.Succeed())
 		g.Expect(client.Calls).To(gomega.HaveLen(1), "delete should happen only for service which has different name than it's parent fn")
 	})
 
 	t.Run("should delete both svc that have different name than fn", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
-		instance := &serverlessv1alpha1.Function{
+		instance := &serverlessv1alpha2.Function{
 			ObjectMeta: metav1.ObjectMeta{Name: "fn-name"},
 		}
 
@@ -478,9 +479,9 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 			},
 		}
 
-		stateFnDeleteServices(context.Background(), &r, &s)
+		_, err := stateFnDeleteServices(context.Background(), &r, &s)
 
-		g.Expect(r.err).To(gomega.Succeed())
+		g.Expect(err).To(gomega.Succeed())
 		g.Expect(client.Calls).To(gomega.HaveLen(2), "delete should happen only for service which has different name than it's parent fn")
 	})
 }

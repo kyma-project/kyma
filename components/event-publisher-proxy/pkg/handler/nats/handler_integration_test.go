@@ -4,23 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats/mock"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 func TestHandlerForCloudEvents(t *testing.T) {
@@ -97,46 +96,40 @@ func TestHandlerForCloudEvents(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
-				t.Run(serverMode.Name, func(t *testing.T) {
-					handlerMock := mock.StartOrDie(ctx, t,
-						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
-						mock.WithApplication(tc.givenApplicationName),
-						mock.WithJetstream(serverMode.JetstreamEnabled),
-					)
-					defer handlerMock.Stop()
+			handlerMock := mock.StartOrDie(ctx, t,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
+				mock.WithApplication(tc.givenApplicationName),
+			)
+			defer handlerMock.Stop()
 
-					// run the tests for publishing cloudevents
-					publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNatsConfig().Port)
-					for _, testCase := range handlertest.TestCasesForCloudEvents {
-						testCase := testCase
-						t.Run(testCase.Name, func(t *testing.T) {
-							// connect to nats
-							connection, err := testingutils.ConnectToNatsServer(handlerMock.GetNatsURL())
-							assert.Nil(t, err)
-							assert.NotNil(t, connection)
-							defer connection.Close()
+			// run the tests for publishing cloudevents
+			publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNATSConfig().Port)
+			for _, testCase := range handlertest.TestCasesForCloudEvents {
+				testCase := testCase
+				t.Run(testCase.Name, func(t *testing.T) {
+					// connect to nats
+					connection, err := testingutils.ConnectToNATSServer(handlerMock.GetNATSURL())
+					assert.Nil(t, err)
+					assert.NotNil(t, connection)
+					defer connection.Close()
 
-							// validator to check NATS received events
-							notify := make(chan bool)
-							defer close(notify)
-							validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantEventType, notify)
-							testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
+					// validator to check NATS received events
+					notify := make(chan bool)
+					defer close(notify)
+					validator := testingutils.ValidateNATSSubjectOrFail(t, tc.wantEventType, notify)
+					testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
 
-							body, headers := testCase.ProvideMessage(tc.wantEventType)
-							resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
-							assert.NoError(t, err)
-							assert.NoError(t, resp.Body.Close())
-							assert.Equal(t, testCase.WantStatusCode, resp.StatusCode)
-							if testingutils.IsNot4XX(resp.StatusCode) {
-								metricstest.EnsureMetricEventTypePublished(t, handlerMock.GetMetricsCollector())
-							}
-							if testingutils.Is2XX(resp.StatusCode) {
-								metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
-								assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))
-							}
-						})
+					body, headers := testCase.ProvideMessage(tc.wantEventType)
+					resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
+					assert.NoError(t, err)
+					assert.NoError(t, resp.Body.Close())
+					assert.Equal(t, testCase.WantStatusCode, resp.StatusCode)
+					if testingutils.IsNot4XX(resp.StatusCode) {
+						metricstest.EnsureMetricEventTypePublished(t, handlerMock.GetMetricsCollector())
+					}
+					if testingutils.Is2XX(resp.StatusCode) {
+						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
+						assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))
 					}
 				})
 			}
@@ -218,51 +211,45 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
-				t.Run(serverMode.Name, func(t *testing.T) {
-					handlerMock := mock.StartOrDie(ctx, t,
-						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
-						mock.WithApplication(tc.givenApplicationName),
-						mock.WithJetstream(serverMode.JetstreamEnabled),
-					)
-					defer handlerMock.Stop()
+			handlerMock := mock.StartOrDie(ctx, t,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
+				mock.WithApplication(tc.givenApplicationName),
+			)
+			defer handlerMock.Stop()
 
-					// run the tests for publishing legacy events
-					publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNatsConfig().Port, tc.givenApplicationName)
-					for _, testCase := range handlertest.TestCasesForLegacyEvents {
-						testCase := testCase
-						t.Run(testCase.Name, func(t *testing.T) {
-							// connect to nats
-							connection, err := testingutils.ConnectToNatsServer(handlerMock.GetNatsURL())
-							assert.Nil(t, err)
-							assert.NotNil(t, connection)
-							defer connection.Close()
+			// run the tests for publishing legacy events
+			publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNATSConfig().Port, tc.givenApplicationName)
+			for _, testCase := range handlertest.TestCasesForLegacyEvents {
+				testCase := testCase
+				t.Run(testCase.Name, func(t *testing.T) {
+					// connect to nats
+					connection, err := testingutils.ConnectToNATSServer(handlerMock.GetNATSURL())
+					assert.Nil(t, err)
+					assert.NotNil(t, connection)
+					defer connection.Close()
 
-							// publish a message to NATS and validate it
-							notify := make(chan bool)
-							defer close(notify)
-							validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantEventType, notify)
-							testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
+					// publish a message to NATS and validate it
+					notify := make(chan bool)
+					defer close(notify)
+					validator := testingutils.ValidateNATSSubjectOrFail(t, tc.wantEventType, notify)
+					testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
 
-							body, headers := testCase.ProvideMessage()
-							resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
-							require.NoError(t, err)
-							require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
+					body, headers := testCase.ProvideMessage()
+					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
+					require.NoError(t, err)
+					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
-							if testCase.WantStatusCode == http.StatusOK {
-								handlertest.ValidateLegacyOkResponse(t, *resp, &testCase.WantResponse)
-							} else {
-								handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
-							}
-							if testingutils.IsNot4XX(resp.StatusCode) {
-								metricstest.EnsureMetricEventTypePublished(t, handlerMock.GetMetricsCollector())
-							}
-							if testingutils.Is2XX(resp.StatusCode) {
-								metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
-								assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))
-							}
-						})
+					if testCase.WantStatusCode == http.StatusOK {
+						handlertest.ValidateLegacyOkResponse(t, *resp, &testCase.WantResponse)
+					} else {
+						handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
+					}
+					if testingutils.IsNot4XX(resp.StatusCode) {
+						metricstest.EnsureMetricEventTypePublished(t, handlerMock.GetMetricsCollector())
+					}
+					if testingutils.Is2XX(resp.StatusCode) {
+						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
+						assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*10))
 					}
 				})
 			}
@@ -304,36 +291,29 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 				testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, tc.givenEventType),
 			)
 
-			// test in both default and jetstream NATS modes
-			for _, serverMode := range testingutils.NatsServerModes {
-				t.Run(serverMode.Name, func(t *testing.T) {
-					handlerMock := mock.StartOrDie(ctx, t,
-						mock.WithEventTypePrefix(tc.givenEventTypePrefix),
-						mock.WithSubscription(scheme, subscription),
-						mock.WithApplication(testingutils.ApplicationName),
-						mock.WithJetstream(serverMode.JetstreamEnabled),
-					)
-					defer handlerMock.Stop()
+			handlerMock := mock.StartOrDie(ctx, t,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
+				mock.WithSubscription(scheme, subscription),
+				mock.WithApplication(testingutils.ApplicationName),
+			)
+			defer handlerMock.Stop()
 
-					// run the tests for subscribed endpoint
-					for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
-						testCase := testCase
-						t.Run(testCase.Name, func(t *testing.T) {
-							subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNatsConfig().Port, testCase.AppName)
-							resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
-							require.NoError(t, err)
-							require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
+			for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
+				testCase := testCase
+				t.Run(testCase.Name, func(t *testing.T) {
+					subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNATSConfig().Port, testCase.AppName)
+					resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
+					require.NoError(t, err)
+					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
-							respBodyBytes, err := ioutil.ReadAll(resp.Body)
-							require.NoError(t, err)
-							require.NoError(t, resp.Body.Close())
+					respBodyBytes, err := io.ReadAll(resp.Body)
+					require.NoError(t, err)
+					require.NoError(t, resp.Body.Close())
 
-							gotEventsResponse := subscribed.Events{}
-							err = json.Unmarshal(respBodyBytes, &gotEventsResponse)
-							require.NoError(t, err)
-							require.Equal(t, testCase.WantResponse, gotEventsResponse)
-						})
-					}
+					gotEventsResponse := subscribed.Events{}
+					err = json.Unmarshal(respBodyBytes, &gotEventsResponse)
+					require.NoError(t, err)
+					require.Equal(t, testCase.WantResponse, gotEventsResponse)
 				})
 			}
 		})

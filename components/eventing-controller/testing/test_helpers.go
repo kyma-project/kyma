@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	ce "github.com/cloudevents/sdk-go/v2"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 )
 
@@ -37,7 +38,9 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
+	OrderCreatedV2Event                      = "order.created.v2"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	NewOrderCreatedEventType                 = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV2Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -79,7 +82,7 @@ func CloudEvent() (*ce.Event, error) {
 	)
 }
 
-type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+type APIRuleOption func(r *apigatewayv1beta1.APIRule)
 
 // GetFreePort determines a free port on the host. It does so by delegating the job to net.ListenTCP.
 // Then providing a port of 0 to net.ListenTCP, it will automatically choose a port for us.
@@ -96,9 +99,9 @@ func GetFreePort() (port int, err error) {
 	return
 }
 
-// NewAPIRule returns a valid APIRule
-func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
-	apiRule := &apigatewayv1alpha1.APIRule{
+// NewAPIRule returns a valid APIRule.
+func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1beta1.APIRule {
+	apiRule := &apigatewayv1beta1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "foo",
 			OwnerReferences: []metav1.OwnerReference{
@@ -119,35 +122,35 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 }
 
 func WithService(name, host string) APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
+	return func(r *apigatewayv1beta1.APIRule) {
 		port := uint32(443)
 		isExternal := true
-		r.Spec.Service = &apigatewayv1alpha1.Service{
+		r.Spec.Host = &host
+		r.Spec.Service = &apigatewayv1beta1.Service{
 			Name:       &name,
 			Port:       &port,
-			Host:       &host,
 			IsExternal: &isExternal,
 		}
 	}
 }
 
 func WithPath() APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
+	return func(r *apigatewayv1beta1.APIRule) {
 		handlerOAuth := object.OAuthHandlerName
-		handler := apigatewayv1alpha1.Handler{
+		handler := apigatewayv1beta1.Handler{
 			Name: handlerOAuth,
 		}
-		authenticator := &apigatewayv1alpha1.Authenticator{
+		authenticator := &apigatewayv1beta1.Authenticator{
 			Handler: &handler,
 		}
-		r.Spec.Rules = []apigatewayv1alpha1.Rule{
+		r.Spec.Rules = []apigatewayv1beta1.Rule{
 			{
 				Path: "/path",
 				Methods: []string{
 					http.MethodPost,
 					http.MethodOptions,
 				},
-				AccessStrategies: []*apigatewayv1alpha1.Authenticator{
+				AccessStrategies: []*apigatewayv1beta1.Authenticator{
 					authenticator,
 				},
 			},
@@ -155,13 +158,13 @@ func WithPath() APIRuleOption {
 	}
 }
 
-func MarkReady(r *apigatewayv1alpha1.APIRule) {
-	statusOK := &apigatewayv1alpha1.APIRuleResourceStatus{
-		Code:        apigatewayv1alpha1.StatusOK,
+func MarkReady(r *apigatewayv1beta1.APIRule) {
+	statusOK := &apigatewayv1beta1.APIRuleResourceStatus{
+		Code:        apigatewayv1beta1.StatusOK,
 		Description: "",
 	}
 
-	r.Status = apigatewayv1alpha1.APIRuleStatus{
+	r.Status = apigatewayv1beta1.APIRuleStatus{
 		APIRuleStatus:        statusOK,
 		VirtualServiceStatus: statusOK,
 		AccessRuleStatus:     statusOK,
@@ -293,7 +296,11 @@ func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt
 
 func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
-		sub.Status.CleanEventTypes = cleanEventTypes
+		if cleanEventTypes == nil {
+			sub.Status.InitializeCleanEventTypes()
+		} else {
+			sub.Status.CleanEventTypes = cleanEventTypes
+		}
 	}
 }
 
@@ -378,13 +385,13 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 }
 
 // WithNotCleanFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters
+// A not clean event-type means it contains none-alphanumeric characters.
 func WithNotCleanFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventTypeNotClean)
 }
 
 // WithEmptyFilter is a SubscriptionOpt for creating a subscription with an empty event type filter.
-//  Note that this is different from setting Filter to nil.
+// Note that this is different from setting Filter to nil.
 func WithEmptyFilter() SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
@@ -407,17 +414,17 @@ func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svcNamespace, svcName))
 }
 
-// WithSinkURLFromSvcAndPath sets a kubernetes service as the sink
+// WithSinkURLFromSvcAndPath sets a kubernetes service as the sink.
 func WithSinkURLFromSvcAndPath(svc *corev1.Service, path string) SubscriptionOpt {
 	return WithSinkURL(fmt.Sprintf("%s%s", ValidSinkURL(svc.Namespace, svc.Name), path))
 }
 
-// WithSinkURLFromSvc sets a kubernetes service as the sink
+// WithSinkURLFromSvc sets a kubernetes service as the sink.
 func WithSinkURLFromSvc(svc *corev1.Service) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svc.Namespace, svc.Name))
 }
 
-// ValidSinkURL converts a namespace and service name to a valid sink url
+// ValidSinkURL converts a namespace and service name to a valid sink url.
 func ValidSinkURL(namespace, svcName string) string {
 	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, namespace)
 }
@@ -427,7 +434,7 @@ func WithSinkURL(sinkURL string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
 }
 
-// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now()
+// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now().
 func WithNonZeroDeletionTimestamp() SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		now := metav1.Now()
@@ -592,17 +599,17 @@ func DefaultReadyCondition() eventingv1alpha1.Condition {
 		corev1.ConditionTrue, "")
 }
 
-// ToSubscription converts an unstructured subscription into a typed one
+// ToSubscription converts an unstructured subscription into a typed one.
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
-	subscription := new(eventingv1alpha1.Subscription)
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
+	sub := new(eventingv1alpha1.Subscription)
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, sub)
 	if err != nil {
 		return nil, err
 	}
-	return subscription, nil
+	return sub, nil
 }
 
-// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
+// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule.
 func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
 	u := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
@@ -613,7 +620,7 @@ func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) 
 	return u, nil
 }
 
-// SetupSchemeOrDie add a scheme to eventing API schemes
+// SetupSchemeOrDie add a scheme to eventing API schemes.
 func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {
@@ -626,7 +633,7 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	return scheme, nil
 }
 
-// SubscriptionGroupVersionResource returns the GVR of a subscription
+// SubscriptionGroupVersionResource returns the GVR of a subscription.
 func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
@@ -635,7 +642,7 @@ func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-// NewFakeSubscriptionClient returns a fake dynamic subscription client
+// NewFakeSubscriptionClient returns a fake dynamic subscription client.
 func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error) {
 	scheme, err := SetupSchemeOrDie()
 	if err != nil {

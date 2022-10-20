@@ -1,6 +1,7 @@
 domain: kyma-project.io
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 projectName: telemetry-operator
 repo: github.com/kyma-project/kyma/components/telemetry-operator
 resources:
@@ -10,9 +11,30 @@ resources:
   domain: kyma-project.io
   group: telemetry
   kind: LogPipeline
-  path: github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1
+  path: github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1
   version: v1alpha1
   webhooks:
     validation: true
     webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kyma-project.io
+  group: telemetry
+  kind: LogParser
+  path: github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1
+  version: v1alpha1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kyma-project.io
+  group: telemetry
+  kind: TracePipeline
+  path: github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1
+  version: v1alpha1
 version: "3"

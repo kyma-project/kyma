@@ -7,11 +7,11 @@ This tutorial shows how to reconnect Runtime Agent with Compass after the establ
 ## Prerequisites
 
 - [Compass](https://github.com/kyma-incubator/compass)
-- [Config Map created](ra-04-configure-runtime-agent-with-compass.md)
+- [ConfigMap created](ra-04-configure-runtime-agent-with-compass.md)
 
 ## Steps
 
-To force Runtime Agent to reconnect using the parameters from the Secret, delete the Compass Connection CR:
+To force Runtime Agent to reconnect using the parameters from the Secret, delete the CompassConnection CR:
 
 ```bash
 kubectl delete compassconnection compass-connection

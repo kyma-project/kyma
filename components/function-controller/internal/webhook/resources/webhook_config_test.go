@@ -123,19 +123,7 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		err = client.Get(ctx, types.NamespacedName{Name: ValidationWebhookName}, UpdateVwh)
 
 		require.NoError(t, err)
-		require.NotNil(t, UpdateVwh)
-		require.Equal(t, UpdateVwh.Name, ValidationWebhookName)
-		require.NotNil(t, UpdateVwh.Webhooks)
-		require.Contains(t, UpdateVwh.Labels, "dont-remove-me")
-
-		require.Equal(t, int32(443), *UpdateVwh.Webhooks[0].ClientConfig.Service.Port)
-		require.Equal(t, FunctionValidationWebhookPath, *UpdateVwh.Webhooks[0].ClientConfig.Service.Path)
-		require.Equal(t, wc.ServiceName, UpdateVwh.Webhooks[0].ClientConfig.Service.Name)
-		require.Equal(t, wc.ServiceNamespace, UpdateVwh.Webhooks[0].ClientConfig.Service.Namespace)
-		require.Contains(t, UpdateVwh.Webhooks[0].Rules[0].Resources, "functions")
-		require.Contains(t, UpdateVwh.Webhooks[0].Rules[0].Resources, "functions/status")
-		require.Contains(t, UpdateVwh.Webhooks[0].Rules[1].Resources, "gitrepositories")
-		require.Contains(t, UpdateVwh.Webhooks[0].Rules[1].Resources, "gitrepositories/status")
+		validateValidationWebhook(t, wc, UpdateVwh)
 	})
 }
 
@@ -152,6 +140,8 @@ func validateMutatingWebhook(t *testing.T, wc WebhookConfig, webhooks []admissio
 	require.Len(t, functionWebhook.Rules, 1)
 	require.Contains(t, functionWebhook.Rules[0].Resources, "functions")
 	require.Contains(t, functionWebhook.Rules[0].Resources, "functions/status")
+	require.Contains(t, functionWebhook.Rules[0].APIVersions, DeprecatedServerlessAPIVersion)
+	require.Contains(t, functionWebhook.Rules[0].APIVersions, ServerlessCurrentAPIVersion)
 
 	secretWebhook := webhooks[1]
 	require.NotNil(t, secretWebhook.ClientConfig.Service.Port)
@@ -163,4 +153,23 @@ func validateMutatingWebhook(t *testing.T, wc WebhookConfig, webhooks []admissio
 	require.Len(t, secretWebhook.Rules, 1)
 	require.Contains(t, secretWebhook.Rules[0].Resources, "secrets")
 
+}
+
+func validateValidationWebhook(t *testing.T, wc WebhookConfig, webhook *admissionregistrationv1.ValidatingWebhookConfiguration) {
+	require.Contains(t, webhook.Labels, "dont-remove-me")
+	require.Equal(t, webhook.Name, ValidationWebhookName)
+	require.Len(t, webhook.Webhooks, 1)
+	functionWebhook := webhook.Webhooks[0]
+
+	require.Equal(t, int32(443), *functionWebhook.ClientConfig.Service.Port)
+	require.Equal(t, FunctionValidationWebhookPath, *functionWebhook.ClientConfig.Service.Path)
+	require.Equal(t, wc.ServiceName, functionWebhook.ClientConfig.Service.Name)
+	require.Equal(t, wc.ServiceNamespace, functionWebhook.ClientConfig.Service.Namespace)
+	require.Len(t, functionWebhook.Rules, 2)
+	require.Contains(t, functionWebhook.Rules[0].Resources, "functions")
+	require.Contains(t, functionWebhook.Rules[0].Resources, "functions/status")
+	require.Contains(t, functionWebhook.Rules[0].APIVersions, DeprecatedServerlessAPIVersion)
+	require.Contains(t, functionWebhook.Rules[0].APIVersions, ServerlessCurrentAPIVersion)
+	require.Contains(t, functionWebhook.Rules[1].Resources, "gitrepositories")
+	require.Contains(t, functionWebhook.Rules[1].Resources, "gitrepositories/status")
 }

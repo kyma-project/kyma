@@ -2,7 +2,7 @@ package testing
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -10,8 +10,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 	"go.uber.org/atomic"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/testing/event/cehelper"
 
 	"github.com/avast/retry-go/v3"
 	pkgerrors "github.com/pkg/errors"
@@ -139,7 +140,7 @@ func getDataServeMux() *http.ServeMux {
 
 	// this Endpoint stores the data of the request body.
 	mux.HandleFunc(storeEndpoint, func(w http.ResponseWriter, r *http.Request) {
-		data, err := ioutil.ReadAll(r.Body)
+		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("read data failed: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -166,7 +167,7 @@ func getDataServeMux() *http.ServeMux {
 	})
 	// this Endpoint stores the request body as a string while returning an "Internal Server Error" (code: 500).
 	mux.HandleFunc(internalErrorEndpoint, func(w http.ResponseWriter, r *http.Request) {
-		if data, err := ioutil.ReadAll(r.Body); err != nil {
+		if data, err := io.ReadAll(r.Body); err != nil {
 			log.Printf("read data failed: %v", err)
 		} else {
 			store <- string(data)
@@ -215,7 +216,7 @@ func (s Subscriber) CheckEvent(expectedData string) error {
 
 			// try to read the response body
 			defer func() { _ = resp.Body.Close() }()
-			body, err = ioutil.ReadAll(resp.Body)
+			body, err = io.ReadAll(resp.Body)
 			if err != nil {
 				return pkgerrors.Wrapf(err, "read data failed")
 			}
@@ -254,7 +255,7 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData string) e
 				return fmt.Errorf("expected resonse code 2xx, actual response code: %d", resp.StatusCode)
 			}
 			defer func() { _ = resp.Body.Close() }()
-			body, err = ioutil.ReadAll(resp.Body)
+			body, err = io.ReadAll(resp.Body)
 			if err != nil {
 				return pkgerrors.Wrapf(err, "read data failed")
 			}

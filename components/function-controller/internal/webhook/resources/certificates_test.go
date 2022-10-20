@@ -12,6 +12,10 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
+
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,11 +65,12 @@ func TestEnsureWebhookSecret(t *testing.T) {
 	ctx := context.Background()
 	cert, key, err := generateWebhookCertificates(testServiceName, testNamespaceName)
 	require.NoError(t, err)
+	fakeLogger := zap.NewNop().Sugar()
 
 	t.Run("can ensure the secret if it doesn't exist", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
 
-		err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err := EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		secret := &corev1.Secret{}
@@ -93,7 +98,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -125,7 +130,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -160,7 +165,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err := client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -201,7 +206,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err = client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -242,7 +247,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		err = client.Create(ctx, secret)
 		require.NoError(t, err)
 
-		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName, fakeLogger)
 		require.NoError(t, err)
 
 		updatedSecret := &corev1.Secret{}
@@ -260,6 +265,84 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		require.Equal(t, elevenDaysCert, updatedSecret.Data[CertFile])
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
 	})
+}
+
+func TestUpdateCRD(t *testing.T) {
+
+	testCaBundle := []byte("test-ca-bundle")
+	testCases := map[string]struct {
+		input     *apiextensionsv1.CustomResourceDefinition
+		returnErr bool
+	}{
+		"Correct crd": {
+			input: &apiextensionsv1.CustomResourceDefinition{
+				ObjectMeta: v1.ObjectMeta{
+					Name: FunctionCRDName,
+				},
+				Spec: apiextensionsv1.CustomResourceDefinitionSpec{
+					Conversion: &apiextensionsv1.CustomResourceConversion{
+						Webhook: &apiextensionsv1.WebhookConversion{ClientConfig: &apiextensionsv1.WebhookClientConfig{}},
+					},
+				},
+			},
+			returnErr: false,
+		},
+		"CRD without conversion part": {
+			input: &apiextensionsv1.CustomResourceDefinition{
+				ObjectMeta: v1.ObjectMeta{
+					Name: FunctionCRDName,
+				},
+				Spec: apiextensionsv1.CustomResourceDefinitionSpec{},
+			},
+			returnErr: true,
+		},
+		"CRD without conversion webhook part": {
+			input: &apiextensionsv1.CustomResourceDefinition{
+				ObjectMeta: v1.ObjectMeta{
+					Name: FunctionCRDName,
+				},
+				Spec: apiextensionsv1.CustomResourceDefinitionSpec{
+					Conversion: &apiextensionsv1.CustomResourceConversion{},
+				},
+			},
+			returnErr: true,
+		},
+		"CRD without conversion webhook client config part": {
+			input: &apiextensionsv1.CustomResourceDefinition{
+				ObjectMeta: v1.ObjectMeta{
+					Name: FunctionCRDName,
+				},
+				Spec: apiextensionsv1.CustomResourceDefinitionSpec{
+					Conversion: &apiextensionsv1.CustomResourceConversion{
+						Webhook: &apiextensionsv1.WebhookConversion{},
+					},
+				},
+			},
+			returnErr: true,
+		},
+	}
+
+	for name, testCase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			ctx := context.TODO()
+			client := fake.NewClientBuilder().Build()
+			require.NoError(t, apiextensionsv1.AddToScheme(client.Scheme()))
+			require.NoError(t, client.Create(ctx, testCase.input))
+
+			//WHEN
+			err := AddCertToConversionWebhook(context.TODO(), client, testCaBundle)
+
+			//THEN
+			if testCase.returnErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				updatedCRD := &apiextensionsv1.CustomResourceDefinition{}
+				require.NoError(t, client.Get(ctx, types.NamespacedName{Name: FunctionCRDName}, updatedCRD))
+				require.Equal(t, testCaBundle, updatedCRD.Spec.Conversion.Webhook.ClientConfig.CABundle)
+			}
+		})
+	}
 }
 
 func generateShortLivedCertWithKey(keyBytes []byte, host string, age time.Duration) ([]byte, error) {

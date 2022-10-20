@@ -14,7 +14,7 @@ Central Application Connectivity Validator has the following parameters:
 - **eventingPathPrefixV2** is the path prefix for which requests are forwarded to the Eventing Publisher V2 API. The default value is `/v2/events`.
 - **eventingPublisherHost** is the host and the port of the Eventing Publisher Proxy. The default value is `events-api:8080`.
 - **eventingDestinationPath** is the destination path for the requests coming to the Eventing. The default value is `/`.
-- **eventingPathPrefixEvents** is the prefix of paths that is directed to the Cloud Events based Eventing. The default value is `/events`.
+- **eventingPathPrefixEvents** is the prefix of paths that is directed to the CloudEvents-based Eventing. The default value is `/events`.
 - **appNamePlaceholder**  is the path URL placeholder used for the application name. The default value is `%%APP_NAME%%`.
 - **cacheExpirationSeconds** is the expiration time for client IDs stored in cache expressed in seconds. The default value is `90`.
 - **cacheCleanupIntervalSeconds** is the clean-up interval controlling how often the client IDs stored in cache are removed. The default value is `15`.

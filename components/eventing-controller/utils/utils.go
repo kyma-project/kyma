@@ -1,14 +1,13 @@
 package utils
 
 import (
+	"math/rand"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 // GetPortNumberFromURL converts string port from url.URL to uint32 port.
@@ -77,12 +76,16 @@ func BoolPtrEqual(b1, b2 *bool) bool {
 	return false
 }
 
-// LoggerWithSubscription returns a logger with the given subscription details.
-func LoggerWithSubscription(log *zap.SugaredLogger, subscription *eventingv1alpha1.Subscription) *zap.SugaredLogger {
-	return log.With(
-		"kind", subscription.GetObjectKind().GroupVersionKind().Kind,
-		"version", subscription.GetGeneration(),
-		"namespace", subscription.GetNamespace(),
-		"name", subscription.GetName(),
-	)
+// for Random string generation.
+const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec,gochecknoglobals
+
+// GetRandString returns a random string of the given length.
+func GetRandString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }

@@ -4,7 +4,7 @@ title: Istio sidecars in Kyma and why you want them
 
 ## Purpose of Istio sidecars
 
-By default, Istio installed as part of Kyma [is configured](./smsh-02-default-istio-setup-in-kyma.md) with automatic Istio proxy sidecar injection enabled. This means that all Pods of your workloads (such as deployments and StatefulSets; except any workloads in the `istio-system` or `kube-system` Namespaces) get their own sidecar proxy container running next to your application.
+By default, Istio installed as part of Kyma [is configured](./smsh-02-default-istio-setup-in-kyma.md) with automatic Istio proxy sidecar injection disabled. This means that none of Pods of your workloads (such as deployments and StatefulSets; except any workloads in the `kyma-system` or `kyma-integration` Namespaces) get their own sidecar proxy container running next to your application.
 
 With an Istio sidecar, the resource becomes part of Istio service mesh, which brings the following benefits that would be complex to manage otherwise.
 
@@ -20,7 +20,7 @@ Another security benefit of having a sidecar proxy is that you can perform [requ
 
 Furthermore, Istio proxies improve tracing: Istio performs global tracing and forwards the data to [Kyma's tracing component](../../../01-overview/main-areas/observability/obsv-03-tracing-in-kyma.md) using the [Zipkin protocol](https://zipkin.io). Learn more about the process in [Tracing Architecture](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md).
 
-Kiali is another tool that comes as [separate Kyma component](../../../05-technical-reference/00-architecture/obsv-04-architecture-kiali.md); and Kyma configures Istio to export metrics necessary to support Kiali features that facilitate managing, visualizing, and troubleshooting your service mesh.
+Kiali is another tool to monitor the service mesh; and Kyma configures Istio to export metrics necessary to support Kiali features that facilitate managing, visualizing, and troubleshooting your service mesh. Learn more about deploying Kiali to your Kyma cluster in our [Kiali example](https://github.com/kyma-project/examples/tree/main/kiali).
 
 Moreover, Kyma provides [Istio-specific Grafana dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) for the [monitoring component](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md). Together with metrics exposed by the Istio sidecar, you get better visibility into workloads and the mesh control plane performance.
 
@@ -40,4 +40,4 @@ Application resiliency is an important topic within traffic management. Traditio
 
 ## Sidecar proxy behavior during Kyma upgrade
 
-For Kyma upgrades, it's a priority to have full compatibility of existing workloads with the upgraded version of Istio. To ensure that the newest version of sidecar proxy is injected into the Pods, the upgrade performs a `rollout restart` of the workloads whenever possible. To learn more about exceptions when it's impossible to restart workloads, read the troubleshooting guide [Pods stuck in `Pending/Failed/Unknown` state after upgrade](https://kyma-project.io/docs/kyma/latest/04-operation-guides/troubleshooting/apix-09-upgrade-sidecar-proxy#cause).
+For Kyma upgrades, it's a priority to have full compatibility of existing workloads with the upgraded version of Istio. To ensure that the newest version of sidecar proxy is injected into the Pods, the upgrade performs a `rollout restart` of the workloads whenever possible. To learn more about exceptions when it's impossible to restart workloads, read the troubleshooting guide [Pods stuck in `Pending/Failed/Unknown` state after upgrade](https://kyma-project.io/docs/kyma/latest/04-operation-guides/troubleshooting/api-exposure/apix-09-upgrade-sidecar-proxy#cause).

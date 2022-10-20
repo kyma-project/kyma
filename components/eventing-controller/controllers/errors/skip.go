@@ -22,7 +22,7 @@ type skippableError struct {
 }
 
 var (
-	// compile-time checks
+	// Perform compile-time checks.
 	_ error           = &skippableError{}
 	_ skippable       = &skippableError{}
 	_ xerrors.Wrapper = &skippableError{}

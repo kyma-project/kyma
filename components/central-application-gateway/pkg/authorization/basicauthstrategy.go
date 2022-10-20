@@ -20,7 +20,7 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 	}
 }
 
-func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc) apperrors.AppError {
+func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc, _ bool) apperrors.AppError {
 	util.AddBasicAuthHeader(r, b.username, b.password)
 	return nil
 }

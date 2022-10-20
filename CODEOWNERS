@@ -9,7 +9,7 @@
 
 /.github @kyma-project/prow
 /.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
-/.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952
+/.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 
 # Owners of the .kyma-project-io folder
@@ -22,64 +22,63 @@
 /components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/components/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao @PK85 @dbadura
-/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/components/telemetry-operator @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/components/telemetry-operator @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 
 # All files and subdirectories in /docs
-/docs @mmitoraj @majakurcius @NHingerl @grego952
+/docs @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 /hack @clebs
 
 /installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
-/installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
+/installation/resources/crds/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
-/installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
+/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
+/installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/installation/resources/crds/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @NHingerl @hisarbalik
+/installation/resources/crds/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 
-/resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
+/resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/resources/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/resources/certificates @dariusztutaj @cnvergence @piotrkpc @strekm @werdes72
-/resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @piotrkpc @PK85
+/resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
+/resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
-/resources/cluster-users @cnvergence @piotrkpc @strekm @werdes72 @dariusztutaj
+/resources/cluster-users @cnvergence @strekm @werdes72 @dariusztutaj @barchw
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
-/resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
-/resources/istio-resources/files/dashboards @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/resources/kiali @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/resources/ory @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
-/resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
-/resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
+/resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/resources/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw
+/resources/istio-resources @strekm @werdes72 @dariusztutaj @cnvergence @barchw
+/resources/istio-resources/files/dashboards @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/kiali @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw
+/resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 
 /tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
+/tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 
 # Fast Integration Tests
 /tests/fast-integration @lindnerby @skhalash @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
-/tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
 /tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
 /tests/fast-integration/skr-aws-upgrade-integration @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan @jaroslaw-pieszka
@@ -89,26 +88,27 @@
 /tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
 
 
-/tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
-/tests/components/istio @strekm @werdes72 @dariusztutaj @cnvergence @piotrkpc
+/tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
+/tests/components/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw
+/tests/components/istio @strekm @dariusztutaj @cnvergence @barchw @werdes72
 /tests/components/application-connector @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
+/tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # performance tests
-/tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
-/tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @muralov
 
 # The tools/gitserver directory
-/tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @mmitoraj @majakurcius @NHingerl @grego952
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @anoipm @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
 
 # VERSION file
 VERSION @kyma-project/prow
 
 # All .md files
-*.md @mmitoraj @majakurcius @NHingerl @grego952
+*.md @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  

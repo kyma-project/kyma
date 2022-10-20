@@ -23,7 +23,7 @@ The diagrams illustrate all three core status changes in the Function processing
 
 ## Configured
 
-This initial phase starts when you create a Function CR with configuration specifying the Function's setup. It ends with creating a Config Map that is used as a building block for a Function image.
+This initial phase starts when you create a Function CR with configuration specifying the Function's setup. It ends with creating a ConfigMap that is used as a building block for a Function image.
 
 ![Function configured](./assets/svls-configured.svg)
 
@@ -39,9 +39,9 @@ Updating an existing Function requires an image rebuild only if you change the F
 
 ## Running
 
-This stage revolves around creating a Deployment, Service and Horizontal Pod Autoscaler or updating them when configuration changes were made in the Function CR or the Function image was rebuilt.
+This stage revolves around creating a Deployment, Service and HorizontalPodAutoscaler or updating them when configuration changes were made in the Function CR or the Function image was rebuilt.
 
-In general, the Deployment is considered updated when both configuration and the image tag in the Deployment are up to date. Service and Horizontal Pod Autoscaler are considered updated when there are proper labels set and configuration is up to date.
+In general, the Deployment is considered updated when both configuration and the image tag in the Deployment are up to date. Service and HorizontalPodAutoscaler are considered updated when there are proper labels set and configuration is up to date.
 
 Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated resources. If it detects changes, it fetches the appropriate resource's status and only then updates the Function's status.
 

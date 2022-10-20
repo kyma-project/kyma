@@ -13,8 +13,8 @@ This tutorial shows only one possible use case. There are many more use cases on
 
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
-- Kyma installed locally or on a cluster
-
+- [Kyma installed](../../04-operation-guides/operations/02-install-kyma.md) locally or on a cluster
+- [Istio sidecar injection enabled](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md) in the Namespace in which you want to deploy the Functions
 ## Steps
 
 1. Export the `KUBECONFIG` variable:
@@ -41,7 +41,7 @@ This tutorial shows only one possible use case. There are many more use cases on
   
   - `package.json` with the Function's dependencies
 
-2. In the `config.yaml` file, configure an API Rule to expose your Function to the incoming traffic over HTTP. Provide the subdomain name in the `host` property:
+2. In the `config.yaml` file, configure an APIRule to expose your Function to the incoming traffic over HTTP. Provide the subdomain name in the `host` property:
 
     ```yaml
     apiRules:
@@ -88,7 +88,7 @@ This tutorial shows only one possible use case. There are many more use cases on
     ```bash
     kyma apply function
     ```
-   Your Function is now built and deployed in Kyma runtime. Kyma exposes it through the API Rule. The incoming payloads are processed by your emitter Function. It then sends the sanitized content to the workload that subscribes to the selected event type. In our case, it's the receiver Function.
+   Your Function is now built and deployed in Kyma runtime. Kyma exposes it through the APIRule. The incoming payloads are processed by your emitter Function. It then sends the sanitized content to the workload that subscribes to the selected event type. In our case, it's the receiver Function.
 
 5. Test the first Function. Send the payload and see if your HTTP traffic is accepted:
 
@@ -96,7 +96,7 @@ This tutorial shows only one possible use case. There are many more use cases on
       export KYMA_DOMAIN={KYMA_DOMAIN_VARIABLE}
       
       curl -X POST https://incoming.${KYMA_DOMAIN}
-      -H 'Content-Type: application/json'
+      -H 'Content-Type: application/cloudevents+json'
       -d '{"foo":"bar"}'
       ```
 ### Create the receiver Function

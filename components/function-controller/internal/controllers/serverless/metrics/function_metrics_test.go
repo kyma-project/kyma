@@ -6,7 +6,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
 
 	//"github.com/prometheus/client_golang/testutil"
@@ -19,20 +19,24 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 		//GIVEN
 		stas := NewPrometheusStatsCollector()
 		startTimestamp := v1.NewTime(time.Date(2000, 01, 01, 00, 00, 0, 0, time.Local))
-		f := &serverlessv1alpha1.Function{
+		f := &serverlessv1alpha2.Function{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "test-fn",
 				Namespace:         "test-namespace",
 				Generation:        1,
 				CreationTimestamp: startTimestamp,
 			},
-			Spec: serverlessv1alpha1.FunctionSpec{
-				Runtime: serverlessv1alpha1.Python39,
-				Type:    serverlessv1alpha1.SourceTypeGit,
+			Spec: serverlessv1alpha2.FunctionSpec{
+				Runtime: serverlessv1alpha2.Python39,
+				Source: serverlessv1alpha2.Source{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
+						URL: "repo-url",
+					},
+				},
 			},
 		}
-		cond := serverlessv1alpha1.Condition{
-			Type:   serverlessv1alpha1.ConditionRunning,
+		cond := serverlessv1alpha2.Condition{
+			Type:   serverlessv1alpha2.ConditionRunning,
 			Status: corev1.ConditionTrue,
 		}
 
@@ -62,20 +66,24 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 		//GIVEN
 		stas := NewPrometheusStatsCollector()
 		startTimestamp := v1.NewTime(time.Date(2000, 01, 01, 00, 00, 0, 0, time.Local))
-		f := &serverlessv1alpha1.Function{
+		f := &serverlessv1alpha2.Function{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "test-fn",
 				Namespace:         "test-namespace",
 				Generation:        1,
 				CreationTimestamp: startTimestamp,
 			},
-			Spec: serverlessv1alpha1.FunctionSpec{
-				Runtime: serverlessv1alpha1.Python39,
-				Type:    serverlessv1alpha1.SourceTypeGit,
+			Spec: serverlessv1alpha2.FunctionSpec{
+				Runtime: serverlessv1alpha2.Python39,
+				Source: serverlessv1alpha2.Source{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
+						URL: "repo-url",
+					},
+				},
 			},
 		}
-		cond := serverlessv1alpha1.Condition{
-			Type:   serverlessv1alpha1.ConditionConfigurationReady,
+		cond := serverlessv1alpha2.Condition{
+			Type:   serverlessv1alpha2.ConditionConfigurationReady,
 			Status: corev1.ConditionFalse,
 		}
 
@@ -91,20 +99,24 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 		//GIVEN
 		stas := NewPrometheusStatsCollector()
 		startTimestamp := v1.NewTime(time.Date(2000, 01, 01, 00, 00, 0, 0, time.Local))
-		f := &serverlessv1alpha1.Function{
+		f := &serverlessv1alpha2.Function{
 			ObjectMeta: v1.ObjectMeta{
 				Name:              "test-fn",
 				Namespace:         "test-namespace",
 				Generation:        1,
 				CreationTimestamp: startTimestamp,
 			},
-			Spec: serverlessv1alpha1.FunctionSpec{
-				Runtime: serverlessv1alpha1.Python39,
-				Type:    serverlessv1alpha1.SourceTypeGit,
+			Spec: serverlessv1alpha2.FunctionSpec{
+				Runtime: serverlessv1alpha2.Python39,
+				Source: serverlessv1alpha2.Source{
+					GitRepository: &serverlessv1alpha2.GitRepositorySource{
+						URL: "repo-url",
+					},
+				},
 			},
 		}
-		cond := serverlessv1alpha1.Condition{
-			Type:   serverlessv1alpha1.ConditionRunning,
+		cond := serverlessv1alpha2.Condition{
+			Type:   serverlessv1alpha2.ConditionRunning,
 			Status: corev1.ConditionFalse,
 		}
 

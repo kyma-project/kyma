@@ -8,7 +8,7 @@ Kyma uses the Kubernetes concept of roles. Assign roles to individual users or u
 
 ### Cluster-wide authorization
 
-Roles in Kyma are defined as Cluster Roles and use the Kubernetes mechanism of aggregation, which allows you to combine multiple Cluster Roles into a single Cluster Role. Kyma comes with a set of roles that are aggregated to the main end-user roles. You can use the aggregation mechanism to efficiently manage access to Kubernetes and Kyma-specific resources.
+Roles in Kyma are defined as ClusterRoles and use the Kubernetes mechanism of aggregation, which allows you to combine multiple ClusterRoles into a single ClusterRole. Kyma comes with a set of roles that are aggregated to the main end-user roles. You can use the aggregation mechanism to efficiently manage access to Kubernetes and Kyma-specific resources.
 
 >**NOTE:** Read the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) to learn more about the aggregation mechanism used to define Kyma roles.
 
@@ -20,7 +20,7 @@ The predefined end-user roles are:
 | **kyma-namespace-admin-essentials** | The role that allows the user to access Kyma Dashboard and create Namespaces, built on top of the **kyma-essentials** role. |
 | **kyma-view** | The role for listing Kubernetes and Kyma-specific resources. |
 | **kyma-edit** | The role for editing Kyma-specific resources. It's [aggregated](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) by other roles. |
-| **kyma-snapshots** | The role for managing Volume Snapshot CR for backups. |
+| **kyma-snapshots** | The role for managing VolumeSnapshot CR for backups. |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list, edit, and create Kubernetes and Kyma-specific resources. |
 | **kyma-namespace-admin** | The role which gives access to a specific Namespace with administrative rights. |
 
@@ -32,14 +32,14 @@ After creating a Kyma cluster, you become an admin of this instance and the Kube
 
 Assigning roles in Kyma is based on the Kubernetes RBAC concept. You can assign any of the predefined roles to a user or to a group of users in the context of:
 
-- The entire cluster by creating a [Cluster Role Binding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
-- A specific Namespace by creating a [Role Binding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
+- The entire cluster by creating a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
+- A specific Namespace by creating a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 
 You can use your own Identity Provider (IdP) using OpenID Connect to authenticate. Using a custom IdP enables assigning roles to a group of users. Custom IdP allows you to define user groups and assign roles to them in Kyma. In this case, a group claim from the access token is used to recognize permissions.
 
->**TIP:** The **Cluster Roles** and **Cluster Role Bindings** view in the **Configuration** section of Kyma Dashboard allow you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to **Roles** and **Role Bindings** in the **Configuration** section.
+>**TIP:** The **ClusterRoles** and **ClusterRoleBindings** view in the **Configuration** section of Kyma Dashboard allow you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to **Roles** and **Role Bindings** in the **Configuration** section.
 
->**TIP:** To ensure proper Namespace separation, use [Role Bindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
+>**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
 ## Service-to-service authorization
 

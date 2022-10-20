@@ -18,13 +18,10 @@ import (
 
 func New(timeoutDuration int, tokenCache TokenCache) csrf.Client {
 	clientCertificate := clientcert.NewClientCertificate(nil)
-	httpClient := &http.Client{
-		Transport: httptools.NewRoundTripper(httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate)),
-	}
+
 	return &client{
 		timeoutDuration:   timeoutDuration,
 		tokenCache:        tokenCache,
-		httpClient:        httpClient,
 		clientCertificate: clientCertificate,
 	}
 }
@@ -32,11 +29,10 @@ func New(timeoutDuration int, tokenCache TokenCache) csrf.Client {
 type client struct {
 	timeoutDuration   int
 	tokenCache        TokenCache
-	httpClient        *http.Client
 	clientCertificate clientcert.ClientCertificate
 }
 
-func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy authorization.Strategy) (*csrf.Response, apperrors.AppError) {
+func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy authorization.Strategy, skipTLSVerify bool) (*csrf.Response, apperrors.AppError) {
 
 	resp, found := c.tokenCache.Get(tokenEndpointURL)
 	if found {
@@ -44,7 +40,7 @@ func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy auth
 	}
 
 	log.Infof("CSRF Token not found in cache, fetching (Endpoint: %s)", tokenEndpointURL)
-	tokenResponse, err := c.requestToken(tokenEndpointURL, strategy, c.timeoutDuration)
+	tokenResponse, err := c.requestToken(tokenEndpointURL, strategy, c.timeoutDuration, skipTLSVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -60,14 +56,14 @@ func (c *client) InvalidateTokenCache(tokenEndpointURL string) {
 	c.tokenCache.Remove(tokenEndpointURL)
 }
 
-func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*csrf.Response, apperrors.AppError) {
+func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int, skipTLSVerify bool) (*csrf.Response, apperrors.AppError) {
 
 	tokenRequest, err := http.NewRequest(http.MethodGet, csrfEndpointURL, strings.NewReader(""))
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
-	err = addAuthorization(tokenRequest, c.clientCertificate, strategy)
+	err = addAuthorization(tokenRequest, c.clientCertificate, strategy, skipTLSVerify)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
@@ -78,7 +74,10 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 	defer cancel()
 	requestWithContext := tokenRequest.WithContext(ctx)
 
-	resp, err := c.httpClient.Do(requestWithContext)
+	httpClient := &http.Client{
+		Transport: httptools.NewRoundTripper(httptools.WithGetClientCertificate(c.clientCertificate.GetClientCertificate), httptools.WithTLSSkipVerify(skipTLSVerify)),
+	}
+	resp, err := httpClient.Do(requestWithContext)
 	if err != nil {
 		return nil, apperrors.UpstreamServerCallFailed("failed to make a request to '%s': %s", csrfEndpointURL, err.Error())
 	}
@@ -93,13 +92,12 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 	}
 
 	return tokenRes, nil
-
 }
 
-func addAuthorization(r *http.Request, clientCertificate clientcert.ClientCertificate, strategy authorization.Strategy) apperrors.AppError {
+func addAuthorization(r *http.Request, clientCertificate clientcert.ClientCertificate, strategy authorization.Strategy, skipTLSVerify bool) apperrors.AppError {
 	return strategy.AddAuthorization(r, func(cert *tls.Certificate) {
 		clientCertificate.SetCertificate(cert)
-	})
+	}, skipTLSVerify)
 }
 
 func setCSRFSpecificHeaders(r *http.Request) {

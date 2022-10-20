@@ -17,9 +17,13 @@ Every runtime provides its own unique environment configuration which can be rea
 | **FUNC_PORT** | `8080` | The right port, a server listens to. |
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
-| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs12`, `nodejs14`, `nodejs16`. |
-| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | Full address of the Jaeger service. |
+| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs14`, `nodejs16`. |
+| **TRACE_COLLECTOR_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces` | Full address of the Open-Telemetry Trace Collector. |
+| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | **Deprecated in 2.8** Full address of the Jaeger service. |
 | **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
+
+> **NOTE:** TRACE_COLLECTOR_ENDPOINT replaced JAEGER_SERVICE_ENDPOINT in Kyma 2.8. Functions built (or re-built) after 2.8 use OpenTelemetry protocol-compliant endpoint, as defined by TRACE_COLLECTOR_ENDPOINT. JAEGER_SERVICE_ENDPOINT will be removed in Kyma 2.10.
+
 
 ### Specific environments
 
@@ -40,11 +44,11 @@ There are a few environments that occur only for a specific runtimes. The follow
 
 ## Configure runtime
 
-You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a Config Map.
+You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a ConfigMap.
 
 ### Define environment variables in a Config Map
 
-Config Maps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a Config Map, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` Config Map as the `MY_VAR` environment variable.
+ConfigMaps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a ConfigMap, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` ConfigMap as the `MY_VAR` environment variable.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
