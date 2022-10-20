@@ -294,7 +294,7 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 	t.Parallel()
 	jsCleaner := cleaner.NewJetStreamCleaner(nil)
 	defaultSub := evtestingv2.NewSubscription(subName, subNamespace)
-	js := NewJetStream(env.NatsConfig{}, nil, jsCleaner, nil, env.DefaultSubscriptionConfig{})
+	js := NewJetStream(env.NatsConfig{}, nil, jsCleaner, env.DefaultSubscriptionConfig{}, nil)
 	testCases := []struct {
 		name              string
 		givenSubscription *eventingv1alpha2.Subscription

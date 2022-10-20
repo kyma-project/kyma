@@ -44,7 +44,7 @@ var (
 )
 
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector,
-	cleaner cleaner.Cleaner, logger *logger.Logger, subsConfig env.DefaultSubscriptionConfig) *JetStream {
+	cleaner cleaner.Cleaner, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
@@ -55,7 +55,7 @@ func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collec
 	}
 }
 
-func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
+func (js *JetStream) Initialize(connCloseHandler backendutilsv2.ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (js *JetStream) validateConfig() error {
 	return nil
 }
 
-func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
+func (js *JetStream) initNATSConn(connCloseHandler backendutilsv2.ConnClosedHandler) error {
 	if js.Conn == nil || js.Conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -302,7 +302,7 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub Subscriber,
 	if utils.ContainsString(
 		js.GetJetStreamSubjects(
 			subscription.Spec.Source,
-			getCleanEventTypesFromStatus(subscription.Status),
+			GetCleanEventTypesFromEventTypes(subscription.Status.Types),
 			subscription.Spec.TypeMatching),
 		info.Config.FilterSubject,
 	) {

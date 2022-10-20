@@ -52,7 +52,7 @@ func Test_Reconcile(t *testing.T) {
 	)
 
 	backendSyncErr := errors.New("backend sync error")
-	missingSubSyncErr := errors.New(jetstreamv2.MissingNATSSubscriptionMsg)
+	missingSubSyncErr := jetstreamv2.ErrMissingSubscription
 	backendDeleteErr := errors.New("backend delete error")
 	validatorErr := errors.New("invalid sink")
 	happyValidator := sinkv2.ValidatorFunc(func(s *eventingv1alpha2.Subscription) error { return nil })

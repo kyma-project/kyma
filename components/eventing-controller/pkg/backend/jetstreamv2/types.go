@@ -3,6 +3,8 @@ package jetstreamv2
 import (
 	"sync"
 
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -18,7 +20,7 @@ const (
 
 type Backend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
-	Initialize(connCloseHandler ConnClosedHandler) error
+	Initialize(connCloseHandler backendutilsv2.ConnClosedHandler) error
 
 	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of JetStream.
 	SyncSubscription(subscription *eventingv1alpha2.Subscription) error
@@ -38,14 +40,12 @@ type JetStream struct {
 	subscriptions map[SubscriptionSubjectIdentifier]Subscriber
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when Conn is closed and retry attempts are exhausted.
-	connClosedHandler ConnClosedHandler
+	connClosedHandler backendutilsv2.ConnClosedHandler
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector
 	cleaner           cleaner.Cleaner
 	subsConfig        env.DefaultSubscriptionConfig
 }
-
-type ConnClosedHandler func(conn *nats.Conn)
 
 type Subscriber interface {
 	ConsumerInfo() (*nats.ConsumerInfo, error)

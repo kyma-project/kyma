@@ -2,10 +2,11 @@ package jetstream
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
