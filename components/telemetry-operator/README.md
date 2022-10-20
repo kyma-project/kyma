@@ -2,7 +2,7 @@
 
 ## Overview
 
-To implement [Kyma's strategy](https://github.com/kyma-project/community/blob/main/concepts/observability-strategy/strategy.md) of moving from in-cluster observability backends to telemetry components that integrate with external backends, the telemetry operator provides APIs for configurable logging, tracing, and monitoring.
+To implement [Kyma's strategy](https://github.com/kyma-project/community/blob/main/concepts/observability-strategy/strategy.md) of moving from in-cluster observability backends to a Telemetry component that integrates with external backends, the telemetry operator provides APIs for configurable logging, tracing, and monitoring.
 
 The telemetry operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.6.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
 
@@ -16,19 +16,19 @@ The generated ConfigMap (by default, `telemetry-fluent-bit-sections` in the `kym
 
 See the flags that configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
 
-Further design decisions and test results are documented in the [Dynamic Logging Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-logging) concept documentation.
+Further design decisions and test results are documented in [Dynamic Logging Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-logging).
 
 ### Configurable Tracing
 
 >**Configurable tracing is still in development and not active with the default Kyma settings.**
 
-The trace controller creates a [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) deployment and related Kubernetes objects from a `TracePipeline` custom resource. The collector is configured to receive traces via the OTLP and OpenCensus protocols and forwards the received traces to a configurable OTLP backend.
+The trace controller creates an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) deployment and related Kubernetes objects from a `TracePipeline` custom resource. The collector is configured to receive traces using the OTLP and OpenCensus protocols, and forwards the received traces to a configurable OTLP backend.
 
 See [Dynamic Trace Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-tracing) for further information.
 
 ### Configurable Monitoring
 
-Configurable monitoring is not implemented yet. Future plans are documented in the [Dynamic Monitoring Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-monitoring) concept.
+Configurable monitoring is not implemented yet. Future plans are documented in [Dynamic Monitoring Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-monitoring).
 
 ## Development
 
@@ -90,7 +90,7 @@ kubectl -n kyma-system set image deployment telemetry-operator manager=<my conta
 
 ### Enable Tracing Controller
 
-Configurable tracing will be active when following the steps above to run the telemetry operator in your development environment. When deploying the operator with the [telemetry chart](https://github.com/kyma-project/kyma/tree/main/resources/telemetry), installing the `TracePipeline` CRD manually and setting a feature flag to enable tracing is required:
+To activate configurable tracing, follow the previous steps to run the telemetry operator in your development environment. When deploying the operator with the [telemetry chart](https://github.com/kyma-project/kyma/tree/main/resources/telemetry), you must install the `TracePipeline` CRD manually and set a feature flag to enable tracing:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/components/telemetry-operator/config/crd/bases/telemetry.kyma-project.io_tracepipelines.yaml
