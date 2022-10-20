@@ -205,6 +205,15 @@ func TestGetCleanEventTypes(t *testing.T) {
 			wantError:      true,
 		},
 		{
+			name: "Should throw an error if the eventType is empty",
+			givenSubscription: evtestingv2.NewSubscription("sub", "test",
+				evtestingv2.WithEventSource(evtestingv2.EventSourceUnclean),
+				evtestingv2.WithEventType(""),
+			),
+			wantEventTypes: []eventingv1alpha2.EventType{},
+			wantError:      true,
+		},
+		{
 			name: "Should not clean eventTypes if the typeMatching is set to Exact",
 			givenSubscription: evtestingv2.NewSubscription("sub", "test",
 				evtestingv2.WithNotCleanEventSourceAndType(),

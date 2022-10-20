@@ -61,19 +61,19 @@ func Test_Reconcile(t *testing.T) {
 	var testCases = []struct {
 		name                 string
 		givenSubscription    *eventingv1alpha2.Subscription
-		givenReconcilerSetup func() *Reconciler
+		givenReconcilerSetup func() (*Reconciler, *mocks.Backend)
 		wantReconcileResult  ctrl.Result
 		wantReconcileError   error
 	}{
 		{
 			name:              "Return nil and default Result{} when there is no error from the reconciler dependencies",
 			givenSubscription: testSub,
-			givenReconcilerSetup: func() *Reconciler {
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -81,10 +81,21 @@ func Test_Reconcile(t *testing.T) {
 		{
 			name:              "Return nil and default Result{} when the subscription does not exist on the cluster",
 			givenSubscription: testSub,
-			givenReconcilerSetup: func() *Reconciler {
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  nil,
+		},
+		{
+			name:              "Return nil and default Result{} when the subscription has no finalizer",
+			givenSubscription: controllertesting.NewSubscription(subscriptionName, namespaceName),
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
+				te := setupTestEnvironment(t, controllertesting.NewSubscription(subscriptionName, namespaceName))
+				te.Backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
@@ -92,12 +103,12 @@ func Test_Reconcile(t *testing.T) {
 		{
 			name:              "Return error and default Result{} when backend sync returns error",
 			givenSubscription: testSub,
-			givenReconcilerSetup: func() *Reconciler {
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  backendSyncErr,
@@ -105,12 +116,12 @@ func Test_Reconcile(t *testing.T) {
 		{
 			name:              "Return nil and RequeueAfter with requeue duration when backend sync returns missingSubscriptionErr",
 			givenSubscription: testSub,
-			givenReconcilerSetup: func() *Reconciler {
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("SyncSubscription", mock.Anything).Return(missingSubSyncErr)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{RequeueAfter: requeueDuration},
 			wantReconcileError:  nil,
@@ -118,11 +129,11 @@ func Test_Reconcile(t *testing.T) {
 		{
 			name:              "Return error and default Result{} when backend delete returns error",
 			givenSubscription: testSubUnderDeletion,
-			givenReconcilerSetup: func() *Reconciler {
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSubUnderDeletion)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
 				te.Backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  errFailedToDeleteSub,
@@ -130,15 +141,26 @@ func Test_Reconcile(t *testing.T) {
 		{
 			name:              "Return error and default Result{} when validator returns error",
 			givenSubscription: testSub,
-			givenReconcilerSetup: func() *Reconciler {
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
 				te := setupTestEnvironment(t, testSub)
 				te.Backend.On("Initialize", mock.Anything).Return(nil)
-				te.Backend.On("SyncSubscription", mock.Anything).Return(nil)
 				te.Backend.On("GetJetStreamSubjects", mock.Anything, mock.Anything, mock.Anything).Return([]string{controllertesting.JetStreamSubject})
-				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator), te.Backend
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  validatorErr,
+		},
+		{
+			name:              "Return error and default Result{} when syncInitialStatus returns error",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
+				testSub.Spec.Types = []string{}
+				te := setupTestEnvironment(t, testSub)
+				te.Backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, unhappyValidator), te.Backend
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  errFailedToGetCleanEventTypes,
 		},
 	}
 
@@ -146,7 +168,7 @@ func Test_Reconcile(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			// given
-			reconciler := tc.givenReconcilerSetup()
+			reconciler, mockedBackend := tc.givenReconcilerSetup()
 			r := ctrl.Request{NamespacedName: types.NamespacedName{
 				Namespace: tc.givenSubscription.Namespace,
 				Name:      tc.givenSubscription.Name,
@@ -158,6 +180,7 @@ func Test_Reconcile(t *testing.T) {
 			// then
 			req.Equal(res, tc.wantReconcileResult)
 			req.ErrorIs(err, tc.wantReconcileError)
+			mockedBackend.AssertExpectations(t)
 		})
 	}
 }
@@ -171,24 +194,42 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		givenFinalizers []string
 		wantDeleteCall  bool
 		wantFinalizers  []string
+		wantError       error
 	}{
 		{
 			name:            "With no finalizers the NATS subscription should not be deleted",
 			givenFinalizers: []string{},
 			wantDeleteCall:  false,
 			wantFinalizers:  []string{},
+			wantError:       nil,
 		},
 		{
 			name:            "With eventing finalizer the NATS subscription should be deleted and the finalizer should be cleared",
 			givenFinalizers: []string{eventingv1alpha2.Finalizer},
 			wantDeleteCall:  true,
 			wantFinalizers:  []string{},
+			wantError:       nil,
 		},
 		{
 			name:            "With wrong finalizer the NATS subscription should not be deleted",
 			givenFinalizers: []string{"eventing2.kyma-project.io"},
 			wantDeleteCall:  false,
 			wantFinalizers:  []string{"eventing2.kyma-project.io"},
+			wantError:       nil,
+		},
+		{
+			name:            "With Delete Subscription returning an error, the finalizer still remains",
+			givenFinalizers: []string{eventingv1alpha2.Finalizer},
+			wantDeleteCall:  true,
+			wantFinalizers:  []string{eventingv1alpha2.Finalizer},
+			wantError:       errFailedToDeleteSub,
+		},
+		{
+			name:            "With Update Subscription returning an error, the finalizer still remains",
+			givenFinalizers: []string{eventingv1alpha2.Finalizer},
+			wantDeleteCall:  true,
+			wantFinalizers:  []string{eventingv1alpha2.Finalizer},
+			wantError:       errFailedToRemoveFinalizer,
 		},
 	}
 
@@ -202,28 +243,41 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			err := r.Client.Create(testEnvironment.Context, sub)
 			require.NoError(t, err)
 
-			mockedBackend.On("DeleteSubscription", sub).Return(nil)
+			if testCase.wantError == errFailedToRemoveFinalizer {
+				sub.ObjectMeta.ResourceVersion = ""
+			}
+
+			if testCase.wantDeleteCall {
+				if testCase.wantError == errFailedToDeleteSub {
+					mockedBackend.On("DeleteSubscription", sub).Return(errors.New("deletion error"))
+				} else {
+					mockedBackend.On("DeleteSubscription", sub).Return(nil)
+				}
+			}
 
 			// when
 			err = r.handleSubscriptionDeletion(ctx, sub, r.namedLogger())
-			require.NoError(t, err)
+			require.ErrorIs(t, err, testCase.wantError)
 
 			// then
-			if testCase.wantDeleteCall {
-				mockedBackend.AssertCalled(t, "DeleteSubscription", sub)
-			} else {
-				mockedBackend.AssertNotCalled(t, "DeleteSubscription", sub)
-			}
+			mockedBackend.AssertExpectations(t)
 
-			ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
+			if testCase.wantError == errFailedToRemoveFinalizer {
+				ensureFinalizerMatch(t, sub, nil)
+			} else {
+				ensureFinalizerMatch(t, sub, testCase.wantFinalizers)
+			}
 
 			// check the changes were made on the kubernetes server
 			fetchedSub, err := fetchTestSubscription(ctx, r)
 			require.NoError(t, err)
 			ensureFinalizerMatch(t, &fetchedSub, testCase.wantFinalizers)
 
-			// clean up
-			err = r.Client.Delete(ctx, sub)
+			// clean up finalizers first before deleting sub
+			fetchedSub.ObjectMeta.Finalizers = nil
+			err = r.Client.Update(ctx, &fetchedSub)
+			require.NoError(t, err)
+			err = r.Client.Delete(ctx, &fetchedSub)
 			require.NoError(t, err)
 		})
 	}

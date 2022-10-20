@@ -179,7 +179,7 @@ func getUniqueEventTypes(eventTypes []string) []string {
 func GetCleanEventTypes(sub *eventingv1alpha2.Subscription,
 	cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
-	if sub.Spec.Types == nil {
+	if sub.Spec.Types == nil || len(sub.Spec.Types) == 0 {
 		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
 	}
 
