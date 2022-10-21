@@ -35,13 +35,13 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
-func init() {
-	godog.BindCommandLineFlags("godog.", &goDogOpts)
-}
-
-func TestMain(m *testing.M) {
+func InitApiGatewayTest() {
 	pflag.Parse()
 	goDogOpts.Paths = pflag.Args()
+
+	if os.Getenv(exportResultVar) == "true" {
+		goDogOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
+	}
 
 	if err := envconfig.Init(&conf); err != nil {
 		log.Fatalf("Unable to setup config: %v", err)
@@ -97,7 +97,7 @@ func TestMain(m *testing.M) {
 
 	helper = helpers.NewHelper(httpClient, commonRetryOpts)
 
-	client, err  := client.GetDynamicClient()
+	client, err := client.GetDynamicClient()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,15 +174,14 @@ func TestMain(m *testing.M) {
 	if len(errorStatus) != 0 {
 		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
 	}
-
-	os.Exit(m.Run())
 }
 
 func TestApiGateway(t *testing.T) {
+	InitApiGatewayTest()
 	apiGatewayOpts := goDogOpts
 
 	apiGatewayOpts.Paths = []string{}
-	err := filepath.Walk("features", func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk("features/api-gateway", func(path string, info fs.FileInfo, err error) error {
 		apiGatewayOpts.Paths = append(apiGatewayOpts.Paths, path)
 		return nil
 	})
@@ -230,4 +229,40 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
 	InitializeScenarioApiruleWithOverrides(ctx.ScenarioContext())
 	InitializeScenarioServicePerPath(ctx.ScenarioContext())
+}
+
+func TestCustomDomain(t *testing.T) {
+	customDomainOpts := goDogOpts
+	customDomainOpts.Paths = []string{"features/gardener/custom_domain.feature"}
+	customDomainOpts.Concurrency = conf.TestConcurency
+
+	if os.Getenv(exportResultVar) == "true" {
+		customDomainOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
+	}
+
+	customDomainSuite := godog.TestSuite{
+		Name:                "custom-domain",
+		ScenarioInitializer: InitializeScenarioCustomDomain,
+		Options:             &customDomainOpts,
+	}
+
+	testExitCode := customDomainSuite.Run()
+
+	podReport := getPodListReport()
+	apiRules := getApiRules()
+
+	//Remove namespace
+	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
+	err := k8sClient.Resource(res).Delete(context.Background(), "custom-domain-test", v1.DeleteOptions{})
+	if err != nil {
+		log.Print(err.Error())
+	}
+
+	if os.Getenv(exportResultVar) == "true" {
+		generateReport()
+	}
+
+	if testExitCode != 0 {
+		t.Fatalf("non-zero status returned, failed to run feature tests, Pod list: %s\n APIRules: %s\n", podReport, apiRules)
+	}
 }

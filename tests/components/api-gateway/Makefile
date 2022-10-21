@@ -21,11 +21,10 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
-ifeq ($(EXPORT_RESULT), true)
-	$(GOTEST) -v -race . --godog.format=pretty,junit:junit-report.xml,cucumber:cucumber-report.json
-else
-	$(GOTEST) -v -race .
-endif
+	$(GOTEST) -run TestApiGateway . -v -race
+
+test-custom-domain:
+	$(GOTEST) -run "^TestCustomDomain$$" . -v -race
 
 test-k3d: ## Prepare k3d and run tests
 	export KYMA_DOMAIN="local.kyma.dev"
