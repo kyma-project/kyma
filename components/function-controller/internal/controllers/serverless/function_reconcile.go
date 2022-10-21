@@ -23,6 +23,10 @@ import (
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
+const (
+	healthCheckTimeout = time.Second
+)
+
 //go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
 type GitClient interface {
 	LastCommit(options git.Options) (string, error)
@@ -98,11 +102,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 
 func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
-		r.Log.Debug("health check request received")
-		r.healthCh <- true
-
-		r.Log.Debug("health check request responded")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, r.sendHealthCheck()
 	}
 
 	r.Log.With(
@@ -154,6 +154,18 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	}
 
 	return stateReconciler.reconcile(ctx, instance)
+}
+
+func (r *FunctionReconciler) sendHealthCheck() error {
+	r.Log.Debug("health check request received")
+
+	select {
+	case r.healthCh <- true:
+		r.Log.Debug("health check request responded")
+		return nil
+	case <-time.After(healthCheckTimeout):
+		return errors.New("timeout when responding to health check")
+	}
 }
 
 func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha2.Function) (DockerConfig, error) {
