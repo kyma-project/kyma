@@ -176,6 +176,7 @@ function shouldIgnoreTarget(target) {
     // Ignore the pods that are created during tests.
     '-testsuite-',
     'test',
+    'nodejs16-',
     'nodejs12-',
     'nodejs14-',
     'upgrade',
