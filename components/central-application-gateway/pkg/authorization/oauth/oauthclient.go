@@ -65,6 +65,7 @@ func (c *client) GetTokenMTLS(clientID, clientSecret string, authURL string, cer
 		return token, nil
 	}
 
+	//tutaj zrobic keypar x509 cos tam na slacku mam
 	tokenResponse, err := c.requestTokenMTLS(clientID, authURL, cert, headers, queryParameters, skipVerify)
 	if err != nil {
 		return "", err
