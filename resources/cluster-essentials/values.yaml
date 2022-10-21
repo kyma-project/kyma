@@ -12,15 +12,6 @@ global:
   highPriorityClassValue: 2100000
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  images:
-    podpreset_webhook:
-      name: "podpreset-webhook"
-      version: "0c2fc208"
-      directory: "incubator"
-    podpreset_controller:
-      name: "podpreset-controller"
-      version: "0c2fc208"
-      directory: "incubator"
 
 image:
   pullPolicy: IfNotPresent
