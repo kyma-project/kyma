@@ -23,5 +23,8 @@ clean: resolve_clean
 resolve_clean:
 	rm -rf vendor
 
-build-local: test-local 
+build-local: test-local
 
+.PHONY: generate
+generate:
+	go generate ./...

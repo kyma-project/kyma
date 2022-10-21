@@ -9,19 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/xerrors"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic/dynamicinformer"
-	dynamicfake "k8s.io/client-go/dynamic/fake"
-
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/xerrors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic/dynamicinformer"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
@@ -32,6 +28,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
@@ -39,6 +36,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 const (
@@ -112,7 +110,7 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 		ctx:                 ctx,
 		cfg:                 cfg,
 		logger:              mockedLogger,
-		collector:           metrics.NewCollector(),
+		collector:           metrics.NewCollector(latency.NewBucketsProvider()),
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", cfg.Port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", cfg.Port, health.ReadinessURI),
 		legacyTransformer:   &legacy.Transformer{},
