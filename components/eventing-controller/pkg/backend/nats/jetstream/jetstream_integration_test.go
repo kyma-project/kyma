@@ -28,7 +28,7 @@ import (
 const (
 	defaultStreamName    = "kyma"
 	defaultMaxReconnects = 10
-	defaultMaxInFlights  = 10
+	defaultMaxInFlights  = env.DefaultMaxInFlight
 
 	// maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
 	// as per https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming

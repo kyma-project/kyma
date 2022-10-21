@@ -424,6 +424,10 @@ configmapReload:
     containerSecurityContext:
       allowPrivilegeEscalation: false
       privileged: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
 
     ## configmap-reload resource requests and limits
     ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -1110,11 +1114,17 @@ server:
     runAsNonRoot: true
     runAsGroup: 65534
     fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
 
   ## Security context to be added to server container
   containerSecurityContext:
     allowPrivilegeEscalation: false
     privileged: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
 
   service:
     ## If false, no Service will be created for the Prometheus server

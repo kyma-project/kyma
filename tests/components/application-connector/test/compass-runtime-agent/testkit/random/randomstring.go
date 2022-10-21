@@ -2,6 +2,7 @@ package random
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -20,5 +21,5 @@ func StringWithCharset(length int, charset string) string {
 }
 
 func RandomString(length int) string {
-	return StringWithCharset(length, charset)
+	return strings.ToLower(StringWithCharset(length, charset))
 }

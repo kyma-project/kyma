@@ -14,9 +14,6 @@ serviceAccount:
 tracing:
   jaegerAgentHost:
 
-fluent-bit:
-  enabled: false
-
 loki:
   enabled: true
 
@@ -24,13 +21,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    fluent_bit:
-      name: fluent-bit
-      version: 1.9.9-a2385ca5
-      directory: tpi
     loki:
       name: loki
-      version: 2.2.1-2e513b00
+      version: 2.2.1-cf0a130c
       directory: tpi
     alpine:
       name: "alpine"

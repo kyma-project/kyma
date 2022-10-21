@@ -23,6 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/histogram/mocks"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
@@ -461,6 +462,12 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 		metricLatency   int
 		metricPublished int
 	}
+
+	const bucketsFunc = "Buckets"
+	latency := new(mocks.BucketsProvider)
+	latency.On(bucketsFunc).Return(nil)
+	latency.Test(t)
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -479,7 +486,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 					},
 				},
 				Defaulter: nil,
-				collector: metrics.NewCollector(),
+				collector: metrics.NewCollector(latency),
 			},
 			args: args{
 				ctx:   context.Background(),
@@ -506,7 +513,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 					SleepDuration: 5,
 				},
 				Defaulter: nil,
-				collector: metrics.NewCollector(),
+				collector: metrics.NewCollector(latency),
 			},
 			args: args{
 				ctx:   context.Background(),
@@ -556,10 +563,15 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 		Result:        beb.HTTPPublishResult{Status: http.StatusInternalServerError},
 	}
 
+	const bucketsFunc = "Buckets"
+	latency := new(mocks.BucketsProvider)
+	latency.On(bucketsFunc).Return(nil)
+	latency.Test(t)
+
 	h := &Handler{
 		Sender:    stub,
 		Defaulter: nil,
-		collector: metrics.NewCollector(),
+		collector: metrics.NewCollector(latency),
 	}
 	header := http.Header{}
 	headers := []string{"traceparent", "X-B3-TraceId", "X-B3-ParentSpanId", "X-B3-SpanId", "X-B3-Sampled", "X-B3-Flags"}

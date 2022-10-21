@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 
@@ -64,7 +66,7 @@ type SubscriptionStatus struct {
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 //+kubebuilder:printcolumn:name="Clean Event Types",type="string",JSONPath=".status.cleanEventTypes"
 
-// Subscription is the Schema for the subscriptions API
+// Subscription is the Schema for the subscriptions API.
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -86,12 +88,20 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
-func (s *Subscription) GetMaxInFlightMessages() (*int, error) {
+// GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer
+// and returns the error in case the conversion is not successful.
+func (s *Subscription) GetMaxInFlightMessages() (int, error) {
+	if s.Spec.Config == nil {
+		return env.DefaultMaxInFlight, nil
+	}
+	if _, ok := s.Spec.Config[MaxInFlightMessages]; !ok {
+		return env.DefaultMaxInFlight, nil
+	}
 	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
 	if err != nil {
-		return nil, err
+		return -1, err
 	}
-	return &val, nil
+	return val, nil
 }
 
 // InitializeEventTypes initializes the SubscriptionStatus.Types with an empty slice of EventType.

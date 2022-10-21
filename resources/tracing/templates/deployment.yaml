@@ -53,6 +53,10 @@ spec:
             name: cert
             readOnly: true
           args: ["start"]
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+{{ toYaml . | indent 12 }}
+          {{- end }}
           env:
             - name: WATCH_NAMESPACE
               {{- if .Values.rbac.clusterRole }}

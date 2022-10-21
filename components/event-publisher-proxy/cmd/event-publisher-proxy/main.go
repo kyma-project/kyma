@@ -4,14 +4,15 @@ import (
 	golog "log"
 
 	"github.com/kelseyhightower/envconfig"
-	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 const (
@@ -52,7 +53,7 @@ func main() {
 	setupLogger := logger.WithContext().With("backend", cfg.Backend)
 
 	// metrics collector
-	metricsCollector := metrics.NewCollector()
+	metricsCollector := metrics.NewCollector(latency.NewBucketsProvider())
 	prometheus.MustRegister(metricsCollector)
 
 	// Instantiate configured commander.

@@ -101,6 +101,7 @@ func TestToJetStreamRetentionPolicy(t *testing.T) {
 }
 
 func TestGetStreamConfig(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name             string
 		givenNatsConfig  env.NatsConfig
@@ -126,7 +127,7 @@ func TestGetStreamConfig(t *testing.T) {
 		{
 			name: "Should return valid StreamConfig",
 			givenNatsConfig: env.NatsConfig{
-				JSStreamName:            defaultStreamName,
+				JSStreamName:            DefaultStreamName,
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
 				JSStreamReplicas:        3,
@@ -134,7 +135,7 @@ func TestGetStreamConfig(t *testing.T) {
 				JSStreamMaxBytes:        -1,
 			},
 			wantStreamConfig: &nats.StreamConfig{
-				Name:      defaultStreamName,
+				Name:      DefaultStreamName,
 				Storage:   nats.MemoryStorage,
 				Replicas:  3,
 				Retention: nats.LimitsPolicy,
@@ -157,16 +158,16 @@ func TestGetStreamConfig(t *testing.T) {
 }
 
 func TestCreateKeyPrefix(t *testing.T) {
-	//given
+	// given
 	sub := evtestingv2.NewSubscription(subName, subNamespace)
-	//when
+	// when
 	keyPrefix := createKeyPrefix(sub)
-	//then
+	// then
 	require.Equal(t, keyPrefix, fmt.Sprintf("%s/%s", subNamespace, subName))
 }
 
 func TestGetCleanEventTypesFromStatus(t *testing.T) {
-	//given
+	// given
 	sub := evtestingv2.NewSubscription(subName, subNamespace)
 	sub.Status.Types = []eventingv1alpha2.EventType{
 		{
@@ -178,9 +179,9 @@ func TestGetCleanEventTypesFromStatus(t *testing.T) {
 			CleanType:    evtestingv2.OrderCreatedEventType,
 		},
 	}
-	//when
+	// when
 	cleanTypes := getCleanEventTypesFromStatus(sub.Status)
-	//then
+	// then
 	require.Equal(t, cleanTypes, []string{evtestingv2.OrderCreatedCleanEvent, evtestingv2.OrderCreatedEventType})
 }
 
@@ -273,14 +274,15 @@ func TestGetCleanEventTypes(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			eventTypes, err := getCleanEventTypes(tc.givenSubscription, jscleaner)
-			require.Equal(t, tc.wantError, err != nil)
+			eventTypes, getCleanTypesErr := getCleanEventTypes(tc.givenSubscription, jscleaner)
+			require.Equal(t, tc.wantError, getCleanTypesErr != nil)
 			require.Equal(t, tc.wantEventTypes, eventTypes)
 		})
 	}
 }
 
 func TestCleanEventType(t *testing.T) {
+	t.Parallel()
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
@@ -313,14 +315,15 @@ func TestCleanEventType(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			cleanEventType, err := getCleanEventType(tc.givenEventType, jsCleaner)
-			require.Equal(t, tc.wantError, err != nil)
+			cleanEventType, getTypesErr := getCleanEventType(tc.givenEventType, jsCleaner)
+			require.Equal(t, tc.wantError, getTypesErr != nil)
 			require.Equal(t, tc.wantEventType, cleanEventType)
 		})
 	}
 }
 
-// TestSubscriptionSubjectIdentifierEqual checks the equality of two SubscriptionSubjectIdentifier instances and their consumer names.
+// TestSubscriptionSubjectIdentifierEqual checks the equality of two
+// SubscriptionSubjectIdentifier instances and their consumer names.
 func TestSubscriptionSubjectIdentifierEqual(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -453,7 +456,8 @@ func TestSubscriptionSubjectIdentifierConsumerNameLength(t *testing.T) {
 	}
 }
 
-// TestSubscriptionSubjectIdentifierNamespacedName checks the syntax of the SubscriptionSubjectIdentifier namespaced name.
+// TestSubscriptionSubjectIdentifierNamespacedName checks
+// the syntax of the SubscriptionSubjectIdentifier namespaced name.
 func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {

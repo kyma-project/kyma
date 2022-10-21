@@ -5,7 +5,5 @@ version: 1.0.0
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
 dependencies:
-  - name: fluent-bit
-    condition: fluent-bit.enabled
   - name: loki
     condition: loki.enabled
