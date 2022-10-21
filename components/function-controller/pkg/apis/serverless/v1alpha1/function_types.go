@@ -13,7 +13,7 @@ const (
 
 // Runtime enumerates runtimes that are currently supported by Function Controller
 // It is a subset of RuntimeExtended
-// +kubebuilder:validation:nodejs14;nodejs16;python39
+// +kubebuilder:validation:Enum=nodejs14;nodejs16;python39
 type Runtime string
 
 const (
