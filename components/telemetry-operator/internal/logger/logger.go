@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"fmt"
+
 	"github.com/kyma-project/kyma/common/logging/logger"
+	"k8s.io/klog"
 )
 
 type Logger struct {
@@ -10,6 +13,7 @@ type Logger struct {
 
 // New returns a new logger with the given format and level.
 func New(format, level string) (*Logger, error) {
+	fmt.Println(format)
 	logFormat, err := logger.MapFormat(format)
 	if err != nil {
 		return nil, err
@@ -28,6 +32,8 @@ func New(format, level string) (*Logger, error) {
 	if err = logger.InitKlog(log, logLevel); err != nil {
 		return nil, err
 	}
+
+	klog.CopyStandardLogTo("ERROR")
 
 	return &Logger{Logger: log}, nil
 }
