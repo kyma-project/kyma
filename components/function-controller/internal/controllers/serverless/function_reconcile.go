@@ -99,7 +99,11 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
 		r.Log.Debug("health check request received")
-		r.healthCh <- true
+		select {
+		case r.healthCh <- true:
+		case <-time.After(time.Second * 5):
+			r.Log.Error("timeout when sending check event")
+		}
 
 		r.Log.Debug("health check request responded")
 		return ctrl.Result{}, nil
