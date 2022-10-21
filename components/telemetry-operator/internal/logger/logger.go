@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 type Logger struct {
