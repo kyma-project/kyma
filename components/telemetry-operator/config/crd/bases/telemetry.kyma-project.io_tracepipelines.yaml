@@ -1,0 +1,76 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: tracepipelines.telemetry.kyma-project.io
+spec:
+  group: telemetry.kyma-project.io
+  names:
+    kind: TracePipeline
+    listKind: TracePipelineList
+    plural: tracepipelines
+    singular: tracepipeline
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: TracePipeline is the Schema for the tracepipelines API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TracePipelineSpec defines the desired state of TracePipeline
+            properties:
+              output:
+                description: Output configures the trace receiver of a TracePipeline.
+                properties:
+                  otlp:
+                    description: Otlp defines an output using the OpenTelmetry protocol.
+                    properties:
+                      endpoint:
+                        description: Endpoint defines the host and port (<host>:<port>)
+                          of an OTLP endpoint.
+                        properties:
+                          value:
+                            type: string
+                          valueFrom:
+                            properties:
+                              secretKeyRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      protocol:
+                        description: Protocol defines the OTLP protocol (http or grpc).
+                        type: string
+                    type: object
+                type: object
+            type: object
+          status:
+            description: TracePipelineStatus defines the observed state of TracePipeline
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

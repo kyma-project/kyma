@@ -44,7 +44,7 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 		return errors.Wrap(err, "while adding apiextensions.v1 schema to k8s client")
 	}
 
-	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName, logger.Named("webhook-secret")); err != nil {
+	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName, logger); err != nil {
 		return errors.Wrap(err, "failed to ensure webhook secret")
 	}
 

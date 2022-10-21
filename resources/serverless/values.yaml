@@ -65,6 +65,10 @@ global:
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
+  configuration:
+    configmapName: 'serverless-configuration'
+    targetDir: "/appdata"
+    filename: "config.yaml"
   ingress:
     domainName:
   containerRegistry:
@@ -76,13 +80,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "v20221017-5ff6d9b4"
+      version: "PR-15868"
     function_webhook:
       name: "function-webhook"
-      version: "v20221017-5ff6d9b4"
+      version: "PR-15868"
     function_build_init:
       name: "function-build-init"
-      version: "v20221017-5ff6d9b4"
+      version: "PR-15868"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "v20221011-831da39d"
@@ -172,14 +176,12 @@ containers:
       port: "8090"
     extraProperties: {}
     configuration:
-      targetDir: "/appdata"
-      filename: "config.yaml"
       data:
         logLevel: "info"
         logFormat: "json"
     envs:
-      fileConfigPath:
-        value: "{{ .Values.containers.manager.configuration.targetDir }}/{{ .Values.containers.manager.configuration.filename }}"
+      configPath:
+        value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:

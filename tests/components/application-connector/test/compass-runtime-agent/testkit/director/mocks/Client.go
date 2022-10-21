@@ -65,20 +65,20 @@ func (_m *Client) GetConnectionToken(runtimeID string) (string, string, error) {
 	return r0, r1, r2
 }
 
-// RegisterApplication provides a mock function with given fields: appName, scenario
-func (_m *Client) RegisterApplication(appName string, scenario string) (string, error) {
-	ret := _m.Called(appName, scenario)
+// RegisterApplication provides a mock function with given fields: appName, displayName
+func (_m *Client) RegisterApplication(appName string, displayName string) (string, error) {
+	ret := _m.Called(appName, displayName)
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(appName, scenario)
+		r0 = rf(appName, displayName)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(appName, scenario)
+		r1 = rf(appName, displayName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -119,6 +119,20 @@ func (_m *Client) RegisterRuntime(runtimeName string) (string, error) {
 	}
 
 	return r0, r1
+}
+
+// UnassignApplication provides a mock function with given fields: appId, formationName
+func (_m *Client) UnassignApplication(appId string, formationName string) error {
+	ret := _m.Called(appId, formationName)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(appId, formationName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UnregisterApplication provides a mock function with given fields: id

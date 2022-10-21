@@ -27,6 +27,24 @@ const (
 	ConsumerDeliverPolicyNew            = "new"
 )
 
+// getDefaultSubscriptionOptions builds the default nats.SubOpts by using the subscription/consumer configuration.
+func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier,
+	maxInFlightMessages int) DefaultSubOpts {
+	return DefaultSubOpts{
+		nats.Durable(consumer.consumerName),
+		nats.Description(consumer.namespacedSubjectName),
+		nats.ManualAck(),
+		nats.AckExplicit(),
+		nats.IdleHeartbeat(idleHeartBeatDuration),
+		nats.EnableFlowControl(),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
+		nats.MaxAckPending(maxInFlightMessages),
+		nats.MaxDeliver(jsConsumerMaxRedeliver),
+		nats.AckWait(jsConsumerAcKWait),
+		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
+	}
+}
+
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
 	case StorageTypeMemory:
@@ -64,6 +82,23 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 	return nats.DeliverNew()
 }
 
+// toJetStreamConsumerDeliverPolicy returns a nats.DeliverPolicy based on the given deliver policy string value.
+// It returns "DeliverNew" as the default nats.DeliverPolicy, if the given deliver policy value is not supported.
+// Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
+func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
+	switch deliverPolicy {
+	case ConsumerDeliverPolicyAll:
+		return nats.DeliverAllPolicy
+	case ConsumerDeliverPolicyLast:
+		return nats.DeliverLastPolicy
+	case ConsumerDeliverPolicyLastPerSubject:
+		return nats.DeliverLastPerSubjectPolicy
+	case ConsumerDeliverPolicyNew:
+		return nats.DeliverNewPolicy
+	}
+	return nats.DeliverNewPolicy
+}
+
 func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
@@ -88,6 +123,25 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		Subjects: []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 	}
 	return streamConfig, nil
+}
+
+// getConsumerConfig return the consumerConfig according to the default configuration.
+func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier,
+	jsSubject string, maxInFlight int) *nats.ConsumerConfig {
+	return &nats.ConsumerConfig{
+		Durable:        jsSubKey.ConsumerName(),
+		Description:    jsSubKey.namespacedSubjectName,
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.Config.JSConsumerDeliverPolicy),
+		FlowControl:    true,
+		MaxAckPending:  maxInFlight,
+		AckPolicy:      nats.AckExplicitPolicy,
+		AckWait:        jsConsumerAcKWait,
+		MaxDeliver:     jsConsumerMaxRedeliver,
+		FilterSubject:  jsSubject,
+		ReplayPolicy:   nats.ReplayInstantPolicy,
+		DeliverSubject: nats.NewInbox(),
+		Heartbeat:      idleHeartBeatDuration,
+	}
 }
 
 func createKeyPrefix(sub *eventingv1alpha2.Subscription) string {
@@ -122,7 +176,8 @@ func getUniqueEventTypes(eventTypes []string) []string {
 }
 
 // getCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
-func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
+func getCleanEventTypes(sub *eventingv1alpha2.Subscription,
+	cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
 	if sub.Spec.Types == nil {
 		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
@@ -160,7 +215,8 @@ func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
 // have the same namespaced name, otherwise returns false.
-func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha2.Subscription) bool {
+func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier,
+	subscription *eventingv1alpha2.Subscription) bool {
 	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
@@ -179,7 +235,8 @@ func (s SubscriptionSubjectIdentifier) ConsumerName() string {
 }
 
 // NewSubscriptionSubjectIdentifier returns a new SubscriptionSubjectIdentifier instance.
-func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha2.Subscription, subject string) SubscriptionSubjectIdentifier {
+func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha2.Subscription,
+	subject string) SubscriptionSubjectIdentifier {
 	cn := computeConsumerName(subscription, subject)          // compute the consumer name once
 	nn := computeNamespacedSubjectName(subscription, subject) // compute the namespaced name with the subject once
 	return SubscriptionSubjectIdentifier{consumerName: cn, namespacedSubjectName: nn}

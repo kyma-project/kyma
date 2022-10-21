@@ -100,6 +100,8 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	if IsHealthCheckRequest(request) {
 		r.Log.Debug("health check request received")
 		r.healthCh <- true
+
+		r.Log.Debug("health check request responded")
 		return ctrl.Result{}, nil
 	}
 

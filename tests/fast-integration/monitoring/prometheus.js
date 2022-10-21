@@ -124,12 +124,6 @@ async function assertMetricsExist() {
     },
 
     {
-      'logging-fluent-bit': [
-        {'fluentbit_input_bytes_total': [['name']]},
-        {'fluentbit_input_records_total': [[]]}],
-    },
-
-    {
       'logging-loki': [
         {'log_messages_total': [['level']]},
         {'loki_request_duration_seconds_bucket': [['route']]}],
@@ -182,6 +176,7 @@ function shouldIgnoreTarget(target) {
     // Ignore the pods that are created during tests.
     '-testsuite-',
     'test',
+    'nodejs16-',
     'nodejs12-',
     'nodejs14-',
     'upgrade',

@@ -5,9 +5,3 @@ loki:
       memory: 2.5Gi
   extraArgs:
     log.level: warn
-
-fluent-bit:
-  resources:
-    limits:
-      cpu: 800m
-      memory: 256Mi

@@ -52,7 +52,7 @@ type config struct {
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
-	FileConfigPath            string `envconfig:"default=/appdata/config.yaml"`
+	ConfigPath                string `envconfig:"default=/appdata/config.yaml"`
 }
 
 type healthzConfig struct {
@@ -67,26 +67,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	loggerRegistry, err := configureLogger(ctx, config.FileConfigPath)
+	logCfg, err := fileconfig.Load(config.ConfigPath)
 	if err != nil {
-		setupLog.Error(err, "unable to configure logger")
+		setupLog.Error(err, "unable to load configuration file")
 		os.Exit(1)
 	}
 
+	loggerRegistry, err := logging.ConfigureRegisteredLogger(logCfg.LogLevel, logCfg.LogFormat)
+	if err != nil {
+		setupLog.Error(err, "unable to configure log")
+		os.Exit(1)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, config.ConfigPath)
+
 	ctrl.SetLogger(zapr.NewLogger(loggerRegistry.CreateDesugared()))
 
-	zapLogger := loggerRegistry.CreateUnregistered()
-	zapLogger.Info("Generating Kubernetes client config")
+	initLog := loggerRegistry.CreateUnregistered()
+	initLog.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
 
-	zapLogger.Info("Registering Prometheus Stats Collector")
+	initLog.Info("Registering Prometheus Stats Collector")
 	prometheusCollector := metrics.NewPrometheusStatsCollector()
 	prometheusCollector.Register()
 
-	zapLogger.Info("Initializing controller manager")
+	initLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     config.MetricsAddress,
@@ -177,34 +185,12 @@ func main() {
 
 	// +kubebuilder:scaffold:builder
 
-	zapLogger.Info("Running manager")
+	initLog.Info("Running manager")
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
-}
-
-func configureLogger(ctx context.Context, cfgPath string) (*logging.Registry, error) {
-	cfg, err := fileconfig.Load(cfgPath)
-	if err != nil {
-		return nil, err
-	}
-
-	log, err := logging.ConfigureRegisteredLogger(cfg.LogLevel, cfg.LogFormat)
-	if err != nil {
-		return nil, err
-	}
-
-	notifyLog := log.CreateNamed("notifier")
-	go fileconfig.RunOnConfigChange(ctx, notifyLog, cfgPath, func(cfg fileconfig.Config) {
-		log, err = log.Reconfigure(cfg.LogLevel, cfg.LogFormat)
-		if err != nil {
-			notifyLog.Error(err)
-		}
-	})
-
-	return log, err
 }
 
 func loadConfig(prefix string) (config, error) {

@@ -57,6 +57,10 @@ spec:
       hostAliases:
       {{- toYaml .Values.deployment.host_aliases | nindent 6 }}
       {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kiali) }}
         imagePullPolicy: {{ .Values.deployment.image_pull_policy | default "Always" }}
@@ -69,7 +73,9 @@ spec:
           allowPrivilegeEscalation: false
           privileged: false
           readOnlyRootFilesystem: true
-          runAsNonRoot: true
+          capabilities:
+            drop:
+              - ALL
         ports:
         - name: api-port
           containerPort: {{ .Values.server.port | default 20001 }}

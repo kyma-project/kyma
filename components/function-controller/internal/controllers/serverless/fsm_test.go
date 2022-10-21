@@ -27,25 +27,24 @@ var (
 	testResult ctrl.Result
 	errTest    = errors.New("test error")
 
-	testStateFn1 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn1 = func(_ context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		r.log.Info("test state function #1")
-		return testStateFn2
+		return testStateFn2, nil
 	}
 
-	testStateFn2 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn2 = func(_ context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		r.log.Info("test state function #2")
-		return nil
+		return nil, nil
 	}
 
-	testStateFn3 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn3 = func(_ context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		r.log.Info("test state function #3")
-		return testStateFnErr
+		return testStateFnErr, nil
 	}
 
-	testStateFnErr = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFnErr = func(_ context.Context, r *reconciler, s *systemState) (stateFn, error) {
 		r.log.Info("test error state")
-		r.err = errTest
-		return nil
+		return nil, errTest
 	}
 )
 
@@ -111,13 +110,13 @@ func Test_reconciler_reconcile(t *testing.T) {
 	}
 }
 
-func dummyFunctionForTest_stateFnName(_ context.Context, r *reconciler, s *systemState) stateFn {
-	return nil
+func dummyFunctionForTest_stateFnName(_ context.Context, r *reconciler, s *systemState) (stateFn, error) {
+	return nil, nil
 }
 
 func dummyInlineFunctionForTest_stateFnName() stateFn {
-	return func(ctx context.Context, r *reconciler, ss *systemState) stateFn {
-		return nil
+	return func(ctx context.Context, r *reconciler, ss *systemState) (stateFn, error) {
+		return nil, nil
 	}
 }
 
@@ -173,12 +172,12 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		}
 
 		statusUpdateFunc := buildGenericStatusUpdateStateFn(givenCondition, nil, "")
-		nextStateFunc := statusUpdateFunc(ctx, stateReconciler, state)
+		nextStateFunc, err := statusUpdateFunc(ctx, stateReconciler, state)
 
 		require.Nil(t, nextStateFunc)
-		require.NoError(t, stateReconciler.err)
+		require.NoError(t, err)
 
-		err := stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
+		err = stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 
 		require.NoError(t, err)
 		require.NotEmpty(t, testFunction.Status)
@@ -207,9 +206,9 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		}
 
 		statusUpdateFunc := buildGenericStatusUpdateStateFn(updatedCondition, nil, "")
-		nextStateFunc := statusUpdateFunc(ctx, stateReconciler, state)
+		nextStateFunc, err := statusUpdateFunc(ctx, stateReconciler, state)
 		require.Nil(t, nextStateFunc)
-		require.NoError(t, stateReconciler.err)
+		require.NoError(t, err)
 
 		err = stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 		require.NoError(t, err)
@@ -242,12 +241,12 @@ func Test_buildStateFnGenericUpdateStatus(t *testing.T) {
 		}
 
 		statusUpdateFunc := buildGenericStatusUpdateStateFn(givenCondition, &testFunction.Spec.Source.GitRepository.Repository, "123456")
-		nextStateFunc := statusUpdateFunc(ctx, stateReconciler, state)
+		nextStateFunc, err := statusUpdateFunc(ctx, stateReconciler, state)
 
 		require.Nil(t, nextStateFunc)
-		require.NoError(t, stateReconciler.err)
+		require.NoError(t, err)
 
-		err := stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
+		err = stateReconciler.client.Get(ctx, types.NamespacedName{Namespace: "test-namespace", Name: testFunction.Name}, testFunction)
 		require.NoError(t, err)
 		require.NotEmpty(t, testFunction.Status)
 

@@ -19,7 +19,9 @@ func ConfigureRegisteredLogger(logLevel, logFormat string) (*Registry, error) {
 	r := &Registry{
 		namedLoggers: map[string]*zap.SugaredLogger{},
 	}
-	return r.Reconfigure(logLevel, logFormat)
+
+	err := r.Reconfigure(logLevel, logFormat)
+	return r, err
 }
 
 // CreateNamed - create and register zap.SugaredLogger. Sub-loggers of the created one would be not registered
@@ -42,10 +44,14 @@ func (r *Registry) CreateUnregistered() *zap.SugaredLogger {
 }
 
 // Reconfigure - apply new configuration for the logger and all registered sub-loggers
-func (r *Registry) Reconfigure(logLevel, logFormat string) (*Registry, error) {
+func (r *Registry) Reconfigure(logLevel, logFormat string) error {
+	if r == nil {
+		return errors.New("registry object is nil")
+	}
+
 	log, err := ConfigureLogger(logLevel, logFormat)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to configure logger")
+		return errors.Wrap(err, "unable to configure logger")
 	}
 
 	r.logger = log
@@ -57,7 +63,7 @@ func (r *Registry) Reconfigure(logLevel, logFormat string) (*Registry, error) {
 		*r.desugaredLoggers[i] = *r.createDesugared()
 	}
 
-	return r, nil
+	return nil
 }
 
 func (r *Registry) createNamed(name string) *zap.SugaredLogger {
