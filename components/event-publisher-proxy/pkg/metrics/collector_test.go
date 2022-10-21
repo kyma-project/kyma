@@ -28,8 +28,6 @@ func TestNewCollector(t *testing.T) {
 	assert.NotNil(t, collector.eventType.MetricVec)
 	assert.NotNil(t, collector.requests)
 	assert.NotNil(t, collector.requests.MetricVec)
-
-	// then
 	latency.AssertCalled(t, bucketsFunc)
 	latency.AssertNumberOfCalls(t, bucketsFunc, 1)
 	latency.AssertExpectations(t)
