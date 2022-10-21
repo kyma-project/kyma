@@ -18,8 +18,8 @@ func TestHealthChecker_Checker(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		//GIVEN
 		timeout := 10 * time.Second
-		inCh := make(chan event.GenericEvent, 1)
-		outCh := make(chan bool, 1)
+		inCh := make(chan event.GenericEvent)
+		outCh := make(chan bool)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		//WHEN
@@ -37,8 +37,8 @@ func TestHealthChecker_Checker(t *testing.T) {
 	t.Run("timeout", func(t *testing.T) {
 		//GIVEN
 		timeout := time.Second
-		inCh := make(chan event.GenericEvent, 1)
-		outCh := make(chan bool, 1)
+		inCh := make(chan event.GenericEvent)
+		outCh := make(chan bool)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		//WHEN
@@ -72,6 +72,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 
 		//THEN
 		require.Error(t, err)
+		require.Contains(t, err.Error(), "timeout")
 	})
 }
 

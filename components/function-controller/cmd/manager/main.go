@@ -115,8 +115,8 @@ func main() {
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
 
-	events := make(chan event.GenericEvent)
-	healthCh := make(chan bool)
+	events := make(chan event.GenericEvent, 1)
+	healthCh := make(chan bool, 1)
 	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, loggerRegistry.CreateNamed("healthz"))
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
@@ -143,7 +143,7 @@ func main() {
 
 	err = fnCtrl.Watch(&source.Channel{Source: events}, &handler.EnqueueRequestForObject{})
 	if err != nil {
-		setupLog.Error(err, "unable to watch something")
+		setupLog.Error(err, "unable to watch health events channel")
 		os.Exit(1)
 	}
 
