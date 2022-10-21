@@ -15,11 +15,11 @@ global:
   images:
     podpreset_webhook:
       name: "podpreset-webhook"
-      version: "663a99a3"
+      version: "0c2fc208"
       directory: "incubator"
     podpreset_controller:
       name: "podpreset-controller"
-      version: "663a99a3"
+      version: "0c2fc208"
       directory: "incubator"
 
 image:
