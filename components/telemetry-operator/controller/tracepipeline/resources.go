@@ -84,9 +84,13 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 }
 
 func makeSecret(config Config, output *v1alpha1.OtlpOutput) *corev1.Secret {
-	secretData := map[string][]byte{
-		basicAuthHeaderVariable: getBasicAuthHeader(output),
+	secretData := map[string][]byte{}
+
+	basicAuthHeader := getBasicAuthHeader(output)
+	if basicAuthHeader != nil {
+		secretData[basicAuthHeaderVariable] = basicAuthHeader
 	}
+
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.ResourceName,

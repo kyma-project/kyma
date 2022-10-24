@@ -62,6 +62,11 @@ var _ = Describe("Deploying a TracePipeline", func() {
 				return k8sClient.Get(ctx, otelCollectorResourceLookupKey, &otelCollectorConfigMap)
 			}, timeout, interval).Should(BeNil())
 
+			Eventually(func() error {
+				var otelCollectorSecret v1.Secret
+				return k8sClient.Get(ctx, otelCollectorResourceLookupKey, &otelCollectorSecret)
+			}, timeout, interval).Should(BeNil())
+
 			Expect(k8sClient.Delete(ctx, tracePipeline)).Should(Succeed())
 			Expect(k8sClient.Delete(ctx, kymaSystemNamespace)).Should(Succeed())
 		})
