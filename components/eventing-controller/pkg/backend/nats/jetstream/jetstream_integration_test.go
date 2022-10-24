@@ -28,7 +28,7 @@ import (
 const (
 	defaultStreamName    = "kyma"
 	defaultMaxReconnects = 10
-	defaultMaxInFlights  = env.DefaultMaxInFlight
+	defaultMaxInFlights  = 10
 
 	// maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
 	// as per https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming
@@ -1041,11 +1041,12 @@ func setupTestEnvironment(t *testing.T, newCRD bool) *TestEnvironment {
 
 	cleanerv2 := cleanerv1alpha2.NewJetStreamCleaner(defaultLogger)
 	cleaner := backendnats.CreateEventTypeCleaner(evtesting.EventTypePrefix, evtesting.ApplicationNameNotClean, defaultLogger)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInFlights}
 
 	var jsBackend *JetStream
 	var jsBackendNew *jetstreamv2.JetStream
 	if newCRD {
-		jsBackendNew = jetstreamv2.NewJetStream(natsConfig, metricsCollector, cleanerv2, defaultLogger)
+		jsBackendNew = jetstreamv2.NewJetStream(natsConfig, metricsCollector, cleanerv2, defaultSubsConfig, defaultLogger)
 	} else {
 		jsBackend = NewJetStream(natsConfig, metricsCollector, defaultLogger)
 	}
