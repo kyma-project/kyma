@@ -87,7 +87,7 @@ global:
     function_build_init:
       name: "function-build-init"
       version: "PR-15876"
-co    function_runtime_nodejs12:
+    function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "v20221011-831da39d"
     function_runtime_nodejs14:
