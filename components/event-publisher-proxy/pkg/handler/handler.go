@@ -111,8 +111,8 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 
 	result, err := h.sendEventAndRecordMetrics(ctx, event, request.URL.Host, request.Header)
 	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
 		h.namedLogger().With().Error(err)
+		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, http.StatusInternalServerError, event, err.Error())
 		return
 	}
 

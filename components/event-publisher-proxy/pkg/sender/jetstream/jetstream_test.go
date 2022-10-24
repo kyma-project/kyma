@@ -200,11 +200,11 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 // createCloudEvent build a cloud event.
 func createCloudEvent(t *testing.T) *event.Event {
 	builder := testingutils.NewCloudEventBuilder(
-		testingutils.WithCloudEventType(testingutils.CloudEventType),
+		testingutils.WithCloudEventType(testingutils.CloudEventTypeWithPrefix),
 	)
 	payload, _ := builder.BuildStructured()
 	newEvent := cloudevents.NewEvent()
-	newEvent.SetType(testingutils.CloudEventType)
+	newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
 	err := json.Unmarshal([]byte(payload), &newEvent)
 	assert.NoError(t, err)
 

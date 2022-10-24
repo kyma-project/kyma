@@ -16,19 +16,22 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "testapp_1-0+2=3"
 
-	MessagingNamespace       = "/messaging.namespace"
-	MessagingEventTypePrefix = "prefix"
+	MessagingNamespace = "/messaging.namespace"
+	Prefix             = "prefix"
+	EmptyPrefix        = ""
 
 	EventID      = "8945ec08-256b-11eb-9928-acde48001122"
 	EventData    = `{\"key\":\"value\"}`
 	EventName    = "order.created"
 	EventVersion = "v1"
 
-	CloudEventNameAndVersion = EventName + "." + EventVersion
-	CloudEventType           = MessagingEventTypePrefix + "." + ApplicationName + "." + CloudEventNameAndVersion
-	CloudEventTypeNotClean   = MessagingEventTypePrefix + "." + ApplicationNameNotClean + "." + CloudEventNameAndVersion
-	CloudEventSource         = "/default/sap.kyma/id"
-	CloudEventSpecVersion    = "1.0"
+	CloudEventNameAndVersion         = EventName + "." + EventVersion
+	CloudEventType                   = ApplicationName + "." + CloudEventNameAndVersion
+	CloudEventTypeNotClean           = ApplicationNameNotClean + "." + CloudEventNameAndVersion
+	CloudEventTypeWithPrefix         = Prefix + "." + CloudEventType
+	CloudEventTypeWithPrefixNotClean = Prefix + "." + CloudEventTypeNotClean
+	CloudEventSource                 = "/default/sap.kyma/id"
+	CloudEventSpecVersion            = "1.0"
 
 	LegacyEventTime = "2020-04-02T21:37:00Z"
 )
@@ -58,7 +61,7 @@ func NewCloudEventBuilder(opts ...CloudEventBuilderOpt) *CloudEventBuilder {
 			Event: Event{
 				id:        EventID,
 				data:      EventData,
-				eventType: CloudEventType,
+				eventType: CloudEventTypeWithPrefix,
 			},
 			specVersion:     CloudEventSpecVersion,
 			eventSource:     CloudEventSource,

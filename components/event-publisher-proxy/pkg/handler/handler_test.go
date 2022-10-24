@@ -21,6 +21,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/legacytest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/histogram/mocks"
@@ -304,7 +305,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 		fields     fields
 		args       args
 		wantStatus int
-		wantBody   []byte
+		wantOk     bool
 	}{
 		{
 			name: "Send valid legacy event",
@@ -322,7 +323,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 200,
-			wantBody:   nil,
+			wantOk:     true,
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend",
@@ -338,7 +339,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 500,
-			wantBody:   nil,
+			wantOk:     false,
 		},
 		{
 			name: "Send invalid legacy event",
@@ -356,7 +357,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				request: legacytest.InvalidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
 			},
 			wantStatus: 400,
-			wantBody:   nil,
+			wantOk:     false,
 		},
 	}
 	for _, tt := range tests {
@@ -381,9 +382,17 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			assert.Equal(t, tt.wantStatus, writer.Result().StatusCode)
 			body, err := io.ReadAll(writer.Result().Body)
 			assert.NoError(t, err)
-			if tt.wantBody != nil {
-				assert.Equal(t, tt.wantBody, body)
+
+			if tt.wantOk {
+				ok := &api.PublishResponse{}
+				err = json.Unmarshal(body, ok)
+				assert.NoError(t, err)
+			} else {
+				nok := &api.Error{}
+				err = json.Unmarshal(body, nok)
+				assert.NoError(t, err)
 			}
+
 		})
 	}
 }
@@ -597,13 +606,13 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 
 func CreateCloudEvent(t *testing.T) *cev2event.Event {
 	builder := testingutils.NewCloudEventBuilder(
-		testingutils.WithCloudEventType(testingutils.CloudEventType),
+		testingutils.WithCloudEventType(testingutils.CloudEventTypeWithPrefix),
 	)
 	payload, _ := builder.BuildStructured()
 	newEvent := cloudevents.NewEvent()
 	err := json.Unmarshal([]byte(payload), &newEvent)
 	assert.NoError(t, err)
-	newEvent.SetType(testingutils.CloudEventType)
+	newEvent.SetType(testingutils.CloudEventTypeWithPrefix)
 	err = newEvent.SetData("", map[string]interface{}{"foo": "bar"})
 	assert.NoError(t, err)
 

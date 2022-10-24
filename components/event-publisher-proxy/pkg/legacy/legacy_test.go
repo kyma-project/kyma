@@ -132,7 +132,7 @@ func applicationTypeLabel(label string) map[string]string {
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	givenEventID := EventID
 	givenApplicationName := ApplicationName
-	givenEventTypePrefix := MessagingEventTypePrefix
+	givenEventTypePrefix := Prefix
 	givenTimeNow := time.Now().Format(time.RFC3339)
 	givenLegacyEventVersion := EventVersion
 	givenPublishReqParams := &legacyapi.PublishEventParametersV1{
