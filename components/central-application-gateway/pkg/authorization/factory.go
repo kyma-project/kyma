@@ -1,7 +1,6 @@
 package authorization
 
 import (
-	"crypto/tls"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth"
@@ -29,7 +28,7 @@ type StrategyFactory interface {
 type OAuthClient interface {
 	// GetToken obtains OAuth token
 	GetToken(clientID string, clientSecret string, authURL string, headers, queryParameters *map[string][]string, skipTLSVerification bool) (string, apperrors.AppError)
-	GetTokenMTLS(clientID, clientSecret string, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipTLSVerification bool) (string, apperrors.AppError)
+	GetTokenMTLS(clientID, authURL string, certificate, privateKey []byte, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
 	// InvalidateTokenCache resets internal token cache
 	InvalidateTokenCache(clientID string, clientSecret string, authURL string)
 }

@@ -1,7 +1,6 @@
 package authorization
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 
@@ -37,12 +36,8 @@ func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, clientSe
 
 func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc, skipTLSVerification bool) apperrors.AppError {
 	log.Infof("Passing skipTLSVerification=%v to GetTokenMTLS", skipTLSVerification)
-	cert, err := o.prepareCertificate()
-	if err != nil {
-		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())
-	}
 	headers, queryParameters := o.requestParameters.unpack()
-	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.clientSecret, o.url, cert, headers, queryParameters, skipTLSVerification)
+	token, err := o.oauthClient.GetTokenMTLS(o.clientId, o.url, o.certificate, o.privateKey, headers, queryParameters, skipTLSVerification)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
 		return apperrors.Internal("Failed to get token: %s", err.Error())
@@ -55,8 +50,4 @@ func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.Se
 
 func (o oauthWithCertStrategy) Invalidate() {
 	o.oauthClient.InvalidateTokenCache(o.clientId, o.clientSecret, o.url)
-}
-
-func (o oauthWithCertStrategy) prepareCertificate() (tls.Certificate, error) {
-	return tls.X509KeyPair(o.certificate, o.privateKey)
 }

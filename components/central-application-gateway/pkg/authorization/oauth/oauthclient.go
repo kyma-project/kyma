@@ -2,8 +2,11 @@ package oauth
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -27,7 +30,7 @@ type oauthResponse struct {
 //go:generate mockery --name=Client
 type Client interface {
 	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
-	GetTokenMTLS(clientID, clientSecret string, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
+	GetTokenMTLS(clientID, authURL string, certificate, privateKey []byte, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
 	InvalidateTokenCache(clientID string, clientSecret string, authURL string)
 }
 
@@ -59,19 +62,23 @@ func (c *client) GetToken(clientID, clientSecret, authURL string, headers, query
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) GetTokenMTLS(clientID, clientSecret string, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
-	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL))
+func (c *client) GetTokenMTLS(clientID, authURL string, certificate, privateKey []byte, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError) {
+	token, found := c.tokenCache.Get(c.makeMTLSOAuthTokenCacheKey(clientID, authURL, certificate, privateKey))
 	if found {
 		return token, nil
 	}
 
-	//tutaj zrobic keypar x509 cos tam na slacku mam
-	tokenResponse, err := c.requestTokenMTLS(clientID, authURL, cert, headers, queryParameters, skipVerify)
+	cert, err := tls.X509KeyPair(certificate, privateKey)
 	if err != nil {
-		return "", err
+		return "", apperrors.Internal("Failed to prepare certificate, %s", err.Error())
 	}
 
-	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	tokenResponse, requestError := c.requestTokenMTLS(clientID, authURL, cert, headers, queryParameters, skipVerify)
+	if err != nil {
+		return "", requestError
+	}
+
+	c.tokenCache.Add(c.makeMTLSOAuthTokenCacheKey(clientID, authURL, certificate, privateKey), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
@@ -83,6 +90,15 @@ func (c *client) InvalidateTokenCache(clientID, clientSecret, authURL string) {
 // to avoid case of single clientID and different endpoints for MTLS and standard oauth
 func (c *client) makeOAuthTokenCacheKey(clientID, clientSecret, authURL string) string {
 	return clientID + clientSecret + authURL
+}
+
+func (c *client) makeMTLSOAuthTokenCacheKey(clientID, authURL string, certificate, privateKey []byte) string {
+	certificateSha := sha256.Sum256(certificate)
+	keySha := sha256.Sum256(privateKey)
+
+	hashedCertificate := hex.EncodeToString(certificateSha[:])
+	hashedKey := hex.EncodeToString(keySha[:])
+	return fmt.Sprintf("%v-%v-%v-%v", clientID, hashedCertificate, hashedKey, authURL)
 }
 
 func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (*oauthResponse, apperrors.AppError) {

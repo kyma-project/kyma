@@ -3,6 +3,7 @@ package oauth
 import (
 	"encoding/base64"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -222,6 +223,43 @@ func TestOauthClient_GetToken(t *testing.T) {
 
 		// then
 		require.Error(t, err)
+		tokenCache.AssertExpectations(t)
+	})
+}
+
+func TestOauthClient_GetTokenMTLS(t *testing.T) {
+	var certSHA = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+	var keySHA = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+
+	t.Run("should get token from cache if present", func(t *testing.T) {
+		// given
+		tokenCache := mocks.TokenCache{}
+		tokenCache.On("Get", "testID-"+certSHA+"-"+keySHA+"-testURL").Return("123456789", true)
+
+		oauthClient := NewOauthClient(10, &tokenCache)
+
+		// when
+		token, err := oauthClient.GetTokenMTLS("testID", "testURL", []byte("test"), []byte("test"), nil, nil, false)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "123456789", token)
+		tokenCache.AssertExpectations(t)
+	})
+
+	t.Run("should fail if Certificate and Private Key is not valid", func(t *testing.T) {
+		// given
+		tokenCache := mocks.TokenCache{}
+		tokenCache.On("Get", "testID-"+certSHA+"-"+keySHA+"-testURL").Return("", false)
+
+		oauthClient := NewOauthClient(10, &tokenCache)
+
+		// when
+		token, err := oauthClient.GetTokenMTLS("testID", "testURL", []byte("test"), []byte("test"), nil, nil, false)
+
+		// then
+		assert.Error(t, err, apperrors.Internal("Failed to prepare certificate, %s", err.Error()))
+		assert.Equal(t, "", token)
 		tokenCache.AssertExpectations(t)
 	})
 }

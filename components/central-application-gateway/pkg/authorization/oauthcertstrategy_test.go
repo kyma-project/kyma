@@ -1,6 +1,7 @@
 package authorization
 
 import (
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 	"net/http"
 	"testing"
 
@@ -20,10 +21,7 @@ func TestAuthWithCerStrategy(t *testing.T) {
 
 		oauthStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", "clientSecret", certificate, privateKey, "www.example.com/token", nil)
 
-		prepareCertificate, err := oauthStrategy.prepareCertificate()
-		require.NoError(t, err)
-
-		oauthClientMock.On("GetTokenMTLS", "clientId", "clientSecret", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil), true).Return("token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", []byte(testconsts.Certificate), []byte(testconsts.PrivateKey), (*map[string][]string)(nil), (*map[string][]string)(nil), true).Return("token", nil)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -56,11 +54,7 @@ func TestAuthWithCerStrategy(t *testing.T) {
 		oauthClientMock := &oauthMocks.Client{}
 
 		authWithCertStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", "clientSecret", certificate, privateKey, "www.example.com/token", nil)
-
-		prepareCertificate, err := authWithCertStrategy.prepareCertificate()
-		require.NoError(t, err)
-
-		oauthClientMock.On("GetTokenMTLS", "clientId", "clientSecret", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("", apperrors.Internal("failed")).Once()
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", []byte(testconsts.Certificate), []byte(testconsts.PrivateKey), (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("", apperrors.Internal("failed")).Once()
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
