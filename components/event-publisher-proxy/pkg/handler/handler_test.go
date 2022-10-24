@@ -219,6 +219,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateInvalidStructuredRequest(t),
 			},
 			wantStatus: 400,
+			wantBody:   []byte("type: MUST be a non-empty string\n"),
 		},
 		{
 			name: "Publish invalid binary CloudEvent",
@@ -246,6 +247,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 400,
+			wantBody:   []byte("I cannot clean"),
 		},
 		{
 			name: "Publish binary CloudEvent but cannot send",
