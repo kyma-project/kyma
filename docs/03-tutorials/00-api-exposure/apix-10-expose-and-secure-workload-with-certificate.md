@@ -162,7 +162,7 @@ These calls return the code `200` response. If you call the service without the 
   Call the secured Function
   </summary>
 
-Send a `GET` request to the Function with a token that has the `read` scope:
+Send a `GET` request to the Function with the client certificates that you used to create mTLS Gateway:
 
    ```shell
    curl --key ${CLIENT_CERT_KEY_FILE} \
