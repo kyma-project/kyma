@@ -245,7 +245,7 @@ func cleanupv2(backend backendjetstreamv2.Backend, dynamicClient dynamic.Interfa
 		if jsBackend != nil {
 			if delErr := jsBackend.DeleteSubscription(&sub); delErr != nil {
 				isCleanupSuccessful = false
-				log.Errorw("Failed to delete JetStream v2 subscription", "error", err)
+				log.Errorw("Failed to delete JetStream v2 subscription", "error", delErr)
 			}
 		}
 	}

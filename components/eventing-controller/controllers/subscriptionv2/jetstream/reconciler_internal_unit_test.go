@@ -529,17 +529,17 @@ func Test_addFinalizerToSubscription(t *testing.T) {
 	testCases := []struct {
 		name      string
 		givenSub  *eventingv1alpha2.Subscription
-		wantError bool
+		wantError error
 	}{
 		{
 			name:      "A new Subscription must be updated with cleanEventTypes and backend jstypes and return true",
 			givenSub:  sub,
-			wantError: false,
+			wantError: nil,
 		},
 		{
 			name:      "A new Subscription must be updated with cleanEventTypes and backend jstypes and return true",
 			givenSub:  fakeSub,
-			wantError: true,
+			wantError: errFailedToAddFinalizer,
 		},
 	}
 
@@ -550,10 +550,8 @@ func Test_addFinalizerToSubscription(t *testing.T) {
 			err = r.addFinalizerToSubscription(testCase.givenSub, r.namedLogger())
 
 			// then
-			if testCase.wantError {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
+			require.ErrorIs(t, err, testCase.wantError)
+			if testCase.wantError == nil {
 				fetchedSub, err = fetchTestSubscription(testEnvironment.Context, r)
 				require.NoError(t, err)
 				ensureFinalizerMatch(t, &fetchedSub, []string{eventingv1alpha2.Finalizer})

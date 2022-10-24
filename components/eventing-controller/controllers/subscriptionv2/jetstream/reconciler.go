@@ -14,8 +14,6 @@ import (
 	"github.com/nats-io/nats.go"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	controllererrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
-
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -115,8 +113,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if isInDeletion(desiredSubscription) {
 		// The object is being deleted
-		delErr := r.handleSubscriptionDeletion(ctx, desiredSubscription, log)
-		if delErr != nil {
+		if delErr := r.handleSubscriptionDeletion(ctx, desiredSubscription, log); delErr != nil {
 			log.Errorw("Failed to delete the Subscription", "error", delErr)
 			if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, delErr); syncErr != nil {
 				return ctrl.Result{}, syncErr
@@ -129,8 +126,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object.
 	if !containsFinalizer(desiredSubscription) {
-		finalizerErr := r.addFinalizerToSubscription(desiredSubscription, log)
-		if finalizerErr != nil {
+		if finalizerErr := r.addFinalizerToSubscription(desiredSubscription, log); finalizerErr != nil {
 			log.Errorw("Failed to add finalizer to Subscription", "error", finalizerErr)
 			if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, finalizerErr); syncErr != nil {
 				return ctrl.Result{}, syncErr
@@ -219,10 +215,9 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context,
 
 	// Update the status only if something needs to be updated
 	if updateStatus || readyStatusChanged {
-		updateErr := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
-		if updateErr != nil {
+		if updateErr := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{}); updateErr != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
-			return controllererrors.MakeError(errFailedToUpdateStatus, updateErr)
+			return utils.MakeError(errFailedToUpdateStatus, updateErr)
 		}
 		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
 	}
@@ -236,7 +231,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
-			return controllererrors.MakeError(errFailedToDeleteSub, err)
+			return utils.MakeError(errFailedToDeleteSub, err)
 		}
 
 		// remove our finalizer from the list and update it.
@@ -244,7 +239,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context,
 			eventingv1alpha2.Finalizer)
 		if err := r.Client.Update(ctx, subscription); err != nil {
 			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
-			return controllererrors.MakeError(errFailedToRemoveFinalizer, err)
+			return utils.MakeError(errFailedToRemoveFinalizer, err)
 		}
 		log.Debug("Removed finalizer from subscription")
 	}
@@ -256,7 +251,7 @@ func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha2.Subscripti
 	sub.ObjectMeta.Finalizers = append(sub.ObjectMeta.Finalizers, eventingv1alpha2.Finalizer)
 	// to avoid a dangling subscription, we update the subscription as soon as the finalizer is added to it
 	if err := r.Client.Update(context.Background(), sub); err != nil {
-		return controllererrors.MakeError(errFailedToAddFinalizer, err)
+		return utils.MakeError(errFailedToAddFinalizer, err)
 	}
 	log.Debug("Added finalizer to subscription")
 	return nil
@@ -268,7 +263,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscripti
 	cleanedTypes, err := jetstream.GetCleanEventTypes(subscription, r.cleaner)
 	if err != nil {
 		subscription.Status.InitializeEventTypes()
-		return true, controllererrors.MakeError(errFailedToGetCleanEventTypes, err)
+		return true, utils.MakeError(errFailedToGetCleanEventTypes, err)
 	}
 	if !reflect.DeepEqual(subscription.Status.Types, cleanedTypes) {
 		subscription.Status.Types = cleanedTypes

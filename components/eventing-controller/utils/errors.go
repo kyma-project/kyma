@@ -1,8 +1,6 @@
-package errors
+package utils
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // MakeError creates a new error and includes the underlyingError in the message.
 // However, it does not expose/wrap the underlyingError.
