@@ -56,7 +56,7 @@ func TestJetStreamMessageSender(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			// given
+			// arrange
 			testEnv := setupTestEnvironment(t)
 			natsServer, connection, mockedLogger := testEnv.Server, testEnv.Connection, testEnv.Logger
 
@@ -71,7 +71,6 @@ func TestJetStreamMessageSender(t *testing.T) {
 
 			ce := createCloudEvent(t)
 
-			// when
 			ctx := context.Background()
 			sender := NewSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
@@ -79,76 +78,16 @@ func TestJetStreamMessageSender(t *testing.T) {
 				connection.Close()
 			}
 
-			// then
+			// act
 			status, err := sender.Send(ctx, ce)
 
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
+
+			// assert
 			assert.Equal(t, tc.wantError, err != nil)
 			if !tc.wantError {
 				assert.Equal(t, tc.wantStatusCode, status.HTTPStatus())
 			}
-		})
-	}
-}
-
-func TestStreamExists(t *testing.T) {
-	testCases := []struct {
-		name                      string
-		givenStream               bool
-		givenNATSConnectionClosed bool
-		wantResult                bool
-		wantError                 error
-	}{
-		{
-			name:                      "Stream doesn't exist and should return false",
-			givenStream:               false,
-			givenNATSConnectionClosed: false,
-			wantResult:                false,
-			wantError:                 nats.ErrStreamNotFound,
-		},
-		{
-			name:                      "Stream exists and should return true",
-			givenStream:               true,
-			givenNATSConnectionClosed: false,
-			wantResult:                true,
-			wantError:                 nil,
-		},
-		{
-			name:                      "Connection closed and error should happen",
-			givenStream:               true,
-			givenNATSConnectionClosed: true,
-			wantResult:                false,
-			wantError:                 nats.ErrConnectionClosed,
-		},
-	}
-
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			// given
-			testEnv := setupTestEnvironment(t)
-			natsServer, connection, sender := testEnv.Server, testEnv.Connection, testEnv.Sender
-
-			defer func() {
-				connection.Close()
-				natsServer.Shutdown()
-			}()
-
-			if tc.givenStream {
-				addStream(t, connection, getStreamConfig())
-			}
-
-			// close the connection to provoke the error
-			if tc.givenNATSConnectionClosed {
-				connection.Close()
-			}
-
-			// when
-			result, err := sender.streamExists(connection)
-
-			// then
-			assert.Equal(t, result, tc.wantResult)
-			assert.Equal(t, err, tc.wantError)
 		})
 	}
 }

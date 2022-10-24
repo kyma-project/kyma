@@ -33,7 +33,8 @@ var _ sender.GenericSender = &Sender{}
 var _ health.Checker = &Sender{}
 
 var (
-	ErrNotConnected = errors.New("connection status: no connection to NATS JetStream server")
+	ErrNotConnected       = errors.New("no connection to NATS JetStream server")
+	ErrCannotSendToStream = errors.New("cannot send to stream")
 )
 
 // Sender is responsible for sending messages over HTTP.
@@ -60,19 +61,12 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 	if s.ConnectionStatus() != nats.CONNECTED {
 		return nil, ErrNotConnected
 	}
-	// ensure the stream exists
-	streamExists, err := s.streamExists(s.connection)
-	if err != nil {
-		return nil, err
-	}
-	if !streamExists {
-		return nil, nats.ErrStreamNotFound
-	}
 
 	jsCtx, jsError := s.connection.JetStream()
 	if jsError != nil {
 		return nil, jsError
 	}
+
 	msg, err := s.eventToNATSMsg(event)
 	if err != nil {
 		return nil, err
@@ -82,28 +76,15 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
+		if errors.Is(err, nats.ErrNoStreamResponse) {
+			return nil, fmt.Errorf("%w : %v", ErrCannotSendToStream, err)
+		}
 		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
 			return nil, err
 		}
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", ErrCannotSendToStream, err)
 	}
 	return beb.HTTPPublishResult{Status: http.StatusNoContent}, nil
-}
-
-// streamExists checks if the stream with the expected name exists.
-func (s *Sender) streamExists(connection *nats.Conn) (bool, error) {
-	jsCtx, err := connection.JetStream()
-	if err != nil {
-		return false, err
-	}
-	if info, err := jsCtx.StreamInfo(s.envCfg.JSStreamName); err == nil {
-		s.namedLogger().Infof("Stream %s exists, using it for publishing", info.Config.Name)
-		return true, nil
-	} else if !errors.Is(err, nats.ErrStreamNotFound) {
-		s.namedLogger().Debug("The connection to NATS server is not established!")
-		return false, err
-	}
-	return false, nats.ErrStreamNotFound
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
