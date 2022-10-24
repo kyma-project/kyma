@@ -24,6 +24,7 @@ global:
       directory: external
 
   jetstream:
+    enabled: true
     # Storage type of the stream, memory or file.
     storage: file
 
