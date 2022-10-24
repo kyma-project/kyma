@@ -11,7 +11,6 @@ import (
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -231,7 +230,6 @@ func Test_replaceStatusCondition(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	r := Reconciler{}
 
 	for _, tt := range testCases {
@@ -239,9 +237,9 @@ func Test_replaceStatusCondition(t *testing.T) {
 			sub := tt.giveSubscription
 			condition := tt.giveCondition
 			statusChanged := r.replaceStatusCondition(sub, condition)
-			g.Expect(statusChanged).To(BeEquivalentTo(tt.wantStatusChanged))
-			g.Expect(sub.Status.Conditions).To(ContainElement(condition))
-			g.Expect(sub.Status.Ready).To(BeEquivalentTo(tt.wantReady))
+			require.Equal(t, tt.wantStatusChanged, statusChanged)
+			require.Contains(t, sub.Status.Conditions, condition)
+			require.Equal(t, tt.wantReady, sub.Status.Ready)
 		})
 	}
 }
@@ -304,14 +302,11 @@ func Test_getRequiredConditions(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotConditions := getRequiredConditions(tc.subscriptionConditions, expectedConditions)
-			if !eventingv1alpha2.ConditionsEquals(gotConditions, tc.wantConditions) {
-				t.Errorf("ShouldUpdateReadyStatus is not valid, want: %v but got: %v", tc.wantConditions, gotConditions)
-			}
-			g.Expect(len(gotConditions)).To(BeEquivalentTo(len(expectedConditions)))
+			require.True(t, eventingv1alpha2.ConditionsEquals(gotConditions, tc.wantConditions))
+			require.Len(t, gotConditions, len(expectedConditions))
 		})
 	}
 }
@@ -389,7 +384,6 @@ func Test_syncConditionSubscribed(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	r := Reconciler{
 		nameMapper: backendutils.NewBEBSubscriptionNameMapper(domain, beb.MaxBEBSubscriptionNameLength),
 	}
@@ -404,8 +398,8 @@ func Test_syncConditionSubscribed(t *testing.T) {
 
 			// then
 			newCondition := sub.Status.FindCondition(tc.wantCondition.Type)
-			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			require.NotNil(t, newCondition)
+			require.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
 		})
 	}
 }
@@ -486,8 +480,6 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
-
 	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
 		t.Fatalf(`failed to initiate logger, %v`, err)
@@ -509,8 +501,8 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 
 			// then
 			newCondition := sub.Status.FindCondition(tc.wantCondition.Type)
-			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			require.NotNil(t, newCondition)
+			require.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
 		})
 	}
 }
@@ -639,7 +631,6 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
 		t.Fatalf(`failed to initiate logger, %v`, err)
@@ -659,8 +650,8 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 
 			// then
 			newCondition := sub.Status.FindCondition(tc.wantCondition.Type)
-			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			require.NotNil(t, newCondition)
+			require.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
 		})
 	}
 }
@@ -743,16 +734,15 @@ func Test_checkStatusActive(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	r := Reconciler{}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotStatus, err := r.checkStatusActive(tc.subscription)
-			g.Expect(gotStatus).To(BeEquivalentTo(tc.wantStatus))
+			require.Equal(t, tc.wantStatus, gotStatus)
 			if tc.wantError == nil {
-				g.Expect(err).To(BeNil())
+				require.NoError(t, err)
 			} else {
-				g.Expect(err.Error()).To(Equal(tc.wantError.Error()))
+				require.Error(t, tc.wantError, err)
 			}
 		})
 	}
@@ -842,7 +832,6 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 		},
 	}
 
-	g := NewGomegaWithT(t)
 	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
 		t.Fatalf(`failed to initiate logger, %v`, err)
@@ -855,11 +844,11 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result, err := r.checkLastFailedDelivery(tc.givenSubscription)
-			g.Expect(result).To(Equal(tc.wantResult))
+			require.Equal(t, tc.wantResult, result)
 			if tc.wantError == nil {
-				g.Expect(err).To(BeNil())
+				require.NoError(t, err)
 			} else {
-				g.Expect(err.Error()).To(Equal(tc.wantError.Error()))
+				require.Error(t, tc.wantError, err)
 			}
 		})
 	}
