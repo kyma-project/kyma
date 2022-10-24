@@ -13,7 +13,7 @@ var (
 		CollectorNamespace: "kyma-system",
 	}
 	tracePipeline = v1alpha1.TracePipelineOutput{
-		Otlp: v1alpha1.OtlpOutput{
+		Otlp: &v1alpha1.OtlpOutput{
 			Endpoint: v1alpha1.ValueType{
 				Value: "localhost",
 			},

@@ -36,7 +36,7 @@ var _ = Describe("Deploying a TracePipeline", func() {
 			},
 			Spec: telemetryv1alpha1.TracePipelineSpec{
 				Output: telemetryv1alpha1.TracePipelineOutput{
-					Otlp: telemetryv1alpha1.OtlpOutput{
+					Otlp: &telemetryv1alpha1.OtlpOutput{
 						Endpoint: telemetryv1alpha1.ValueType{Value: "localhost"},
 					},
 				},
