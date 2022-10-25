@@ -2,13 +2,15 @@
 title: Expose and secure a workload with a certificate
 ---
 
-This tutorial shows how to expose and secure a workload with mutual authentication using Kyma's mutual TLS Gateway.
+This tutorial shows how to expose and secure a workload with mutual authentication using a mutual TLS Gateway.
 
 ## Prerequisites
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-01-create-workload.md) tutorial.
 
-Before you start, Set up [mTLS Gateway](../00-security/sec-03-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-03-setup-mtls-gateway#steps).
+Before you start, set up:
+- [Custom Domain](./apix-02-setup-custom-domain-for-workload.md) - skip step 5 (Create a Gateway CR)
+- [mTLS Gateway](../00-security/sec-03-setup-mtls-gateway.md) to allow mutual authentication in Kyma and make sure that you exported the [bundle certificates](../00-security/sec-03-setup-mtls-gateway#steps).
 
 Optionally, take a look at the [How to create own self-signed Client Root CA and Certificate](../00-security/sec-02-mtls-selfsign-client-certicate.md) tutorial.
 
@@ -61,7 +63,7 @@ The following instructions describe how to further secure the mTLS service or Fu
    EOF
    ```
 
-2. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
+2. Create AuthorizationPolicy that verifies if the request contains a client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -113,7 +115,7 @@ The following instructions describe how to further secure the mTLS service or Fu
                X-CLIENT-SSL-ISSUER: "%DOWNSTREAM_PEER_ISSUER%"
    EOF
    ```
-2. Create AuthorizationPolicy that verifies if the request contains a new client certificate:
+2. Create AuthorizationPolicy that verifies if the request contains a client certificate:
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: security.istio.io/v1beta1
@@ -151,7 +153,7 @@ Send a `GET` request to the HttpBin service with the client certificates that yo
         -ik -X GET https://httpbin-vs.$DOMAIN_TO_EXPOSE_WORKLOADS/headers
    ```
 
-These calls return the code `200` response. If you call the service without the proper certificates or with old ones, you get the code `403` response.
+These calls return the code `200` response. If you call the service without the proper certificates or with invalid ones, you get the code `403` response.
 
   </details>
 
@@ -160,7 +162,7 @@ These calls return the code `200` response. If you call the service without the 
   Call the secured Function
   </summary>
 
-Send a `GET` request with a token that has the `read` scope to the Function:
+Send a `GET` request to the Function with the client certificates that you used to create mTLS Gateway:
 
    ```shell
    curl --key ${CLIENT_CERT_KEY_FILE} \
@@ -169,6 +171,6 @@ Send a `GET` request with a token that has the `read` scope to the Function:
         -ik -X GET https://function-vs.$DOMAIN_TO_EXPOSE_WORKLOADS/function
    ```
 
-This call returns the code `200` response. If you call the Function without the proper certificates or with old ones, you get the code `403` response.
+This call returns the code `200` response. If you call the Function without the proper certificates or with invalid ones, you get the code `403` response.
   </details>
 </div>
