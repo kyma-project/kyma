@@ -131,7 +131,7 @@ copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 		then rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR); mkdir $(HELM_TEMPLATE_CRD_PATCHES_DIR); kustomize build config/crd -o $(HELM_TEMPLATE_CRD_PATCHES_DIR); \
 		cp ./$(HELM_TEMPLATE_CRD_PATCHES_DIR)/apiextensions.k8s.io_v1_customresourcedefinition_subscriptions.eventing.kyma-project.io.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml;\
  		rm -rf $(HELM_TEMPLATE_CRD_PATCHES_DIR);\
- 		else \
+ 	else \
  		cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml; \
  	fi
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
