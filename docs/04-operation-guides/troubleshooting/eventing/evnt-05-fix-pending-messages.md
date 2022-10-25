@@ -93,10 +93,21 @@ Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-
 You can check the consumer now and confirm that the pending messages started to be dispatched.
 
 ### Restart the NATS pods and trigger the stream leader reelection
-Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case you should try to trigger leader reelection on the stream level.
+Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case you should try to trigger leader reelection on the stream level:
 
 ```bash
-k nats consumer cluster step-down
+nats stream cluster step-down $stream_name
+```
+As result, you will see:
+```bash
+11:08:22 Requesting leader step down of "eventing-nats-1" in a 3 peer RAFT group
+11:08:23 New leader elected "eventing-nats-0"
+
+Information for Stream $stream_name created 2022-10-24 15:47:19
+
+             Subjects: kyma.>
+             Replicas: 3
+              Storage: File
 ```
 
 
