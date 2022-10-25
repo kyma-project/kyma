@@ -18,7 +18,7 @@ All you need before you start is to have the following:
 
 ## Steps
 
-These sections will lead you through the whole installation, configuration, and synchronization process. You will first install k3d and create a cluster for your custom resources (CRs). Then, you will need to apply the necessary custom resource definition (CRD) from Kyma to be able to create Functions. Finally, you will install Flux and authorize it with the `write` access to your GitHub repository in which you store the resource files. Flux will automatically synchronize any new changes pushed to your repository with your k3d cluster.
+These sections will lead you through the whole installation, configuration, and synchronization process. You will first install k3d and create a cluster for your custom resources (CRs). Then, you will need to apply the necessary CustomResourceDefinition (CRD) from Kyma to be able to create Functions. Finally, you will install Flux and authorize it with the `write` access to your GitHub repository in which you store the resource files. Flux will automatically synchronize any new changes pushed to your repository with your k3d cluster.
 
 ### Install and configure a k3d cluster
 
@@ -87,6 +87,7 @@ You can now install the Flux operator, connect it with a specific Git repository
 
   ```bash
   kubectl create namespace flux
+  kubectl label namespace flux istio-injection=enabled --overwrite
   ```
 
 3. Export details of your GitHub repository - its name, the account name, and related e-mail address. You must also specify the name of the folder in your GitHub repository to which you will push the Function CR built from local sources. If you don't have this folder in your repository yet, you will create it in further steps. Flux will synchronize the cluster with the content of this folder on the `main` branch.

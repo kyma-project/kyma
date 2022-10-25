@@ -32,6 +32,7 @@ type Condition struct {
 type ConditionReason string
 
 const (
+	// BEB Conditions
 	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
 	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
 	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
@@ -39,10 +40,14 @@ const (
 	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
-	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
-	ConditionReasonNATSSubscriptionNotActive  ConditionReason = "NATS Subscription not active"
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
+	ConditionReasonOauth2ClientSyncFailed     ConditionReason = "Failed to sync OAuth2 Client Credentials"
 
+	// NATS Conditions
+	ConditionReasonNATSSubscriptionActive    ConditionReason = "NATS Subscription active"
+	ConditionReasonNATSSubscriptionNotActive ConditionReason = "NATS Subscription not active"
+
+	// Common backend Conditions
 	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription controller started"
 	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription controller not ready"
 	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
@@ -51,12 +56,11 @@ const (
 	ConditionReasonPublisherProxySyncFailed       ConditionReason = "Publisher Proxy deployment sync failed"
 	ConditionReasonControllerStartFailed          ConditionReason = "Starting the controller failed"
 	ConditionReasonControllerStopFailed           ConditionReason = "Stopping the controller failed"
-	ConditionReasonOauth2ClientSyncFailed         ConditionReason = "Failed to sync OAuth2 Client Credentials"
 	ConditionReasonPublisherProxySecretError      ConditionReason = "Publisher proxy secret sync failed"
 	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
-// initializeConditions sets unset conditions to Unknown
+// initializeConditions sets unset conditions to Unknown.
 func initializeConditions(initialConditions, currentConditions []Condition) []Condition {
 	givenConditions := make(map[ConditionType]Condition)
 
@@ -76,13 +80,13 @@ func initializeConditions(initialConditions, currentConditions []Condition) []Co
 	return finalConditions
 }
 
-// InitializeConditions sets unset Subscription conditions to Unknown
+// InitializeConditions sets unset Subscription conditions to Unknown.
 func (s *SubscriptionStatus) InitializeConditions() {
 	initialConditions := MakeSubscriptionConditions()
 	s.Conditions = initializeConditions(initialConditions, s.Conditions)
 }
 
-// InitializeConditions sets all the Backend conditions to true
+// InitializeConditions sets all the Backend conditions to true.
 func (b *EventingBackendStatus) InitializeConditions() {
 	initialConditions := makeBackendConditions()
 	b.Conditions = initializeConditions(initialConditions, b.Conditions)
@@ -121,7 +125,7 @@ func (b EventingBackendStatus) FindCondition(conditionType ConditionType) *Condi
 }
 
 // ShouldUpdateReadyStatus checks if there is a mismatch between the
-// subscription Ready Status and the Ready status of all the conditions
+// subscription Ready Status and the Ready status of all the conditions.
 func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
 	if !s.Ready && s.IsReady() || s.Ready && !s.IsReady() {
 		return true
@@ -334,7 +338,7 @@ func ConditionsEquals(existing, expected []Condition) bool {
 	return true
 }
 
-// ConditionsEquals checks if two conditions are equal.
+// ConditionEquals checks if two conditions are equal.
 func ConditionEquals(existing, expected Condition) bool {
 	isTypeEqual := existing.Type == expected.Type
 	isStatusEqual := existing.Status == expected.Status

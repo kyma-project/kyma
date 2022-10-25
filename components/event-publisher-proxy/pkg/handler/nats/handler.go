@@ -25,7 +25,9 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
 )
 
-const natsHandlerName = "nats-handler"
+const (
+	natsHandlerName = "nats-handler"
+)
 
 // Handler is responsible for receiving HTTP requests and dispatching them to NATS.
 // It also assures that the messages received are compliant with the Cloud Events spec.
@@ -33,14 +35,14 @@ type Handler struct {
 	// Receiver receives incoming HTTP requests
 	Receiver *receiver.HTTPMessageReceiver
 	// Sender sends requests to the broker
-	Sender *sender.GenericSender
+	Sender sender.GenericSender
 	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
 	// LegacyTransformer handles transformations needed to handle legacy events
 	LegacyTransformer *legacy.Transformer
 	// RequestTimeout timeout for outgoing requests
 	RequestTimeout time.Duration
-	//SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
+	// SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
 	SubscribedProcessor *subscribed.Processor
 	// Logger default logger
 	Logger *logger.Logger
@@ -53,7 +55,7 @@ type Handler struct {
 }
 
 // NewHandler returns a new NATS Handler instance.
-func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.GenericSender, requestTimeout time.Duration,
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
 	return &Handler{
@@ -218,15 +220,16 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 // send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	start := time.Now()
-	s := *h.Sender
+	s := h.Sender
 	resp, err := s.Send(ctx, event)
-	h.collector.RecordEventType(event.Type(), event.Source())
+	h.collector.RecordEventType(event.Type(), event.Source(), resp)
 	dispatchTime := time.Since(start)
 	if err != nil {
 		h.collector.RecordError()
 		return resp, dispatchTime, []byte(err.Error())
 	}
-	h.collector.RecordLatency(dispatchTime)
+	h.collector.RecordLatency(dispatchTime, resp, s.URL())
+	h.collector.RecordRequests(resp, s.URL())
 	return resp, dispatchTime, []byte{}
 }
 

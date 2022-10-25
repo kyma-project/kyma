@@ -127,12 +127,19 @@ func TestMain(m *testing.M) {
 	// delete test namespace if the previous test namespace persists
 	nsResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(globalCommonResources[0])
 	log.Printf("Delete test namespace, if exists: %s\n", name)
-	resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
+	err = resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
 	log.Printf("Creating common tests resources")
-	batch.CreateResources(k8sClient, globalCommonResources...)
+	_, err = batch.CreateResources(k8sClient, globalCommonResources...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
 	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(hydraClientFile, manifestsDirectory, resourceSeparator, struct {
@@ -148,7 +155,12 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 	log.Printf("Creating hydra client resources")
-	batch.CreateResources(k8sClient, hydraClientResource...)
+
+	_, err = batch.CreateResources(k8sClient, hydraClientResource...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
@@ -170,10 +182,14 @@ func TestApiGateway(t *testing.T) {
 	apiGatewayOpts := goDogOpts
 
 	apiGatewayOpts.Paths = []string{}
-	filepath.Walk("features", func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk("features", func(path string, info fs.FileInfo, err error) error {
 		apiGatewayOpts.Paths = append(apiGatewayOpts.Paths, path)
 		return nil
 	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	apiGatewayOpts.Concurrency = conf.TestConcurency
 
@@ -190,7 +206,10 @@ func TestApiGateway(t *testing.T) {
 
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
-	k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
+	err = k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
+	if err != nil {
+		log.Print(err.Error())
+	}
 
 	if os.Getenv(exportResultVar) == "true" {
 		generateReport()
@@ -209,4 +228,6 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioUnsecuredToSecuredEndpointJWT(ctx.ScenarioContext())
 	InitializeScenarioOAuth2JWTOnePath(ctx.ScenarioContext())
 	InitializeScenarioOAuth2JWTTwoPaths(ctx.ScenarioContext())
+	InitializeScenarioApiruleWithOverrides(ctx.ScenarioContext())
+	InitializeScenarioServicePerPath(ctx.ScenarioContext())
 }

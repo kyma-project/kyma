@@ -65,12 +65,12 @@ func equalConditions(existing, expected []serverlessv1alpha2.Condition) bool {
 		existingMap[value.Type] = value
 	}
 
-	for _, value := range expected {
-		if existingMap[value.Type].Status != value.Status || existingMap[value.Type].Reason != value.Reason || existingMap[value.Type].Message != value.Message {
+	for _, expectedCondition := range expected {
+		existingCondition := existingMap[expectedCondition.Type]
+		if !existingCondition.Equal(&expectedCondition) {
 			return false
 		}
 	}
-
 	return true
 }
 
@@ -178,10 +178,11 @@ processing_next_item:
 	return out
 }
 
-func buildDeploymentEnvs(namespace, jaegerServiceEndpoint, publisherProxyAddress string) []corev1.EnvVar {
+func buildDeploymentEnvs(namespace, jaegerServiceEndpoint, traceCollectorEndpoint, publisherProxyAddress string) []corev1.EnvVar {
 	return []corev1.EnvVar{
 		{Name: "SERVICE_NAMESPACE", Value: namespace},
 		{Name: "JAEGER_SERVICE_ENDPOINT", Value: jaegerServiceEndpoint},
+		{Name: "TRACE_COLLECTOR_ENDPOINT", Value: traceCollectorEndpoint},
 		{Name: "PUBLISHER_PROXY_ADDRESS", Value: publisherProxyAddress},
 		{Name: "FUNC_HANDLER", Value: "main"},
 		{Name: "MOD_NAME", Value: "handler"},
@@ -218,8 +219,8 @@ func mapsEqual(existing, expected map[string]string) bool {
 	return true
 }
 
-//TODO refactor to make this code more readable
-func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
+// TODO refactor to make this code more readable
+func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment) bool {
 	return len(existing.Spec.Template.Spec.Containers) == 1 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
@@ -227,7 +228,7 @@ func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, sc
 		mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
-		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
+		equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas)
 }
 
 func equalServices(existing corev1.Service, expected corev1.Service) bool {
@@ -266,7 +267,10 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 }
 
 func isScalingEnabled(instance *serverlessv1alpha2.Function) bool {
-	return !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas)
+	if instance.Spec.ScaleConfig == nil {
+		return false
+	}
+	return !equalInt32Pointer(instance.Spec.ScaleConfig.MinReplicas, instance.Spec.ScaleConfig.MaxReplicas)
 }
 
 func getConditionReason(conditions []serverlessv1alpha2.Condition, conditionType serverlessv1alpha2.ConditionType) serverlessv1alpha2.ConditionReason {

@@ -2,10 +2,10 @@ package v1alpha2
 
 import (
 	"encoding/json"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const DefaultingConfigKey = "defaulting-config"
@@ -58,177 +58,155 @@ type DefaultingConfig struct {
 }
 
 func (fn *Function) Default(config *DefaultingConfig) {
-	fn.Spec.defaultReplicas(config, fn)
+	fn.Spec.defaultScaling(config)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
-	fn.Spec.defaultRuntime(config)
 }
 
-func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
+func (spec *FunctionSpec) defaultScaling(config *DefaultingConfig) {
 	defaultingConfig := config.Function.Replicas
-	replicasPreset := mergeReplicasPreset(fn, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
+	replicasPreset := defaultingConfig.Presets[defaultingConfig.DefaultPreset]
 
-	if spec.MinReplicas == nil {
-		newMin := replicasPreset.Min
-		if spec.MaxReplicas != nil && *spec.MaxReplicas < newMin {
-			newMin = *spec.MaxReplicas
-		}
-
-		spec.MinReplicas = &newMin
+	if spec.Replicas == nil {
+		// TODO: The presets structure and docs should be updated to reflect the new behavior.
+		spec.Replicas = &replicasPreset.Min
 	}
-	if spec.MaxReplicas == nil {
+
+	if spec.ScaleConfig == nil {
+		return
+	}
+
+	// spec.ScaleConfig is SET, but not fully configured, for sanity, we will default MinReplicas, we will also use it as a default spec.Replica
+	if spec.ScaleConfig.MinReplicas == nil {
+		newMin := replicasPreset.Min
+		if spec.ScaleConfig.MaxReplicas != nil && *spec.ScaleConfig.MaxReplicas < newMin {
+			newMin = *spec.ScaleConfig.MaxReplicas
+		}
+		spec.ScaleConfig.MinReplicas = &newMin
+	}
+	spec.Replicas = spec.ScaleConfig.MinReplicas
+
+	if spec.ScaleConfig.MaxReplicas == nil {
 		newMax := replicasPreset.Max
-		if *spec.MinReplicas > newMax {
-			newMax = *spec.MinReplicas
+		if *spec.ScaleConfig.MinReplicas > newMax {
+			newMax = *spec.ScaleConfig.MinReplicas
 		}
 
-		spec.MaxReplicas = &newMax
+		spec.ScaleConfig.MaxReplicas = &newMax
 	}
 }
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {
-	resources := spec.ResourceConfiguration.Function.Resources
+	var resources *corev1.ResourceRequirements
+	var profile string
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil {
+		functionResourceCfg := *spec.ResourceConfiguration.Function
+		if functionResourceCfg.Resources != nil {
+			resources = functionResourceCfg.Resources
+		}
+		profile = functionResourceCfg.Profile
+	}
 	defaultingConfig := config.Function.Resources
-	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
+	calculatedResources := calculateResources(fn, resources, profile, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
+	setFunctionResources(spec, calculatedResources)
+}
 
-	spec.ResourceConfiguration.Function.Resources = defaultResources(&resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+func setFunctionResources(spec *FunctionSpec, resources *corev1.ResourceRequirements) {
+
+	if spec.ResourceConfiguration == nil {
+		spec.ResourceConfiguration = &ResourceConfiguration{}
+	}
+
+	if spec.ResourceConfiguration.Function == nil {
+		spec.ResourceConfiguration.Function = &ResourceRequirements{}
+	}
+
+	spec.ResourceConfiguration.Function.Resources = resources
 }
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
-	buildResourceCfg := spec.ResourceConfiguration.Build
 	// if build resources are not set by the user we don't default them.
 	// However, if only a part is set or the preset label is set, we should correctly set missing defaults.
 	if shouldSkipBuildResourcesDefault(fn) {
 		return
 	}
 
+	var buildResourceCfg ResourceRequirements
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Build != nil {
+		buildResourceCfg = *spec.ResourceConfiguration.Build
+	}
+
 	defaultingConfig := config.BuildJob.Resources
-	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
-	spec.ResourceConfiguration.Build.Resources = defaultResources(&buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	calculatedResources := calculateResources(fn, buildResourceCfg.Resources, buildResourceCfg.Profile, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
+
+	setBuildResources(spec, calculatedResources)
 }
 
-func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
-	if spec.Runtime == "" {
-		spec.Runtime = config.Runtime
+func setBuildResources(spec *FunctionSpec, resources *corev1.ResourceRequirements) {
+
+	if spec.ResourceConfiguration == nil {
+		spec.ResourceConfiguration = &ResourceConfiguration{}
 	}
+
+	if spec.ResourceConfiguration.Build == nil {
+		spec.ResourceConfiguration.Build = &ResourceRequirements{}
+	}
+
+	spec.ResourceConfiguration.Build.Resources = resources
 }
 
 func shouldSkipBuildResourcesDefault(fn *Function) bool {
 	resourceCfg := fn.Spec.ResourceConfiguration.Build
 	_, hasPresetLabel := fn.Labels[BuildResourcesPresetLabel]
-
-	if resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil && !hasPresetLabel {
-		return true
+	if hasPresetLabel {
+		return false
 	}
-	return false
+
+	if resourceCfg != nil {
+		if resourceCfg.Profile != "" {
+			return false
+		}
+		if resourceCfg.Resources != nil {
+			return resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil
+		}
+	}
+	return true
 }
 
-func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {
-	copiedRes := res.DeepCopy()
-
-	if copiedRes.Requests == nil {
-		copiedRes.Requests = corev1.ResourceList{}
-	}
-	if copiedRes.Requests.Memory().IsZero() {
-		newResource := resource.MustParse(requestMemory)
-		if !copiedRes.Limits.Memory().IsZero() && copiedRes.Limits.Memory().Cmp(newResource) == -1 {
-			newResource = *copiedRes.Limits.Memory()
-		}
-
-		copiedRes.Requests[corev1.ResourceMemory] = newResource
-	}
-	if copiedRes.Requests.Cpu().IsZero() {
-		newResource := resource.MustParse(requestCPU)
-		if !copiedRes.Limits.Cpu().IsZero() && copiedRes.Limits.Cpu().Cmp(newResource) == -1 {
-			newResource = *copiedRes.Limits.Cpu()
-		}
-
-		copiedRes.Requests[corev1.ResourceCPU] = newResource
-	}
-
-	if copiedRes.Limits == nil {
-		copiedRes.Limits = corev1.ResourceList{}
-	}
-	if copiedRes.Limits.Memory().IsZero() {
-		newResource := resource.MustParse(limitMemory)
-		if copiedRes.Requests.Memory().Cmp(newResource) == 1 {
-			newResource = *copiedRes.Requests.Memory()
-		}
-
-		copiedRes.Limits[corev1.ResourceMemory] = newResource
-	}
-	if copiedRes.Limits.Cpu().IsZero() {
-		newResource := resource.MustParse(limitCPU)
-		if copiedRes.Requests.Cpu().Cmp(newResource) == 1 {
-			newResource = *copiedRes.Requests.Cpu()
-		}
-
-		copiedRes.Limits[corev1.ResourceCPU] = newResource
-	}
-
-	return *copiedRes
-}
-
-func mergeReplicasPreset(fn *Function, presets map[string]ReplicasPreset, defaultPreset string) ReplicasPreset {
-	replicas := ReplicasPreset{}
-
-	preset := fn.GetLabels()[ReplicasPresetLabel]
+func calculateResources(fn *Function, resourceRequirements *corev1.ResourceRequirements, profile string, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) *corev1.ResourceRequirements {
+	// profile has the highest priority
+	preset := profile
+	// we can use profile from label (deprecated) instead of new profile
 	if preset == "" {
-		return presets[defaultPreset]
+		preset = fn.GetLabels()[presetLabel]
 	}
-
-	replicasPreset := presets[preset]
-	replicasDefaultPreset := presets[defaultPreset]
-
-	replicas.Min = replicasPreset.Min
-	if replicas.Min == 0 {
-		replicas.Min = replicasDefaultPreset.Min
+	if preset != "" {
+		return presetsToRequirements(presets[preset])
 	}
-
-	replicas.Max = replicasPreset.Max
-	if replicas.Max == 0 {
-		replicas.Max = replicasDefaultPreset.Max
+	// when no profile we use user defined resources
+	if resourceRequirements != nil {
+		return resourceRequirements
 	}
-
-	return replicas
+	// we use default preset only when no profile and no resources
+	rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
+	if ok {
+		return presetsToRequirements(presets[rtmPreset])
+	}
+	return presetsToRequirements(presets[defaultPreset])
 }
 
-func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) ResourcesPreset {
-	resources := ResourcesPreset{}
-
-	preset := fn.GetLabels()[presetLabel]
-	if preset == "" {
-		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
-		if ok {
-			return presets[rtmPreset]
-		}
-		return presets[defaultPreset]
+func presetsToRequirements(preset ResourcesPreset) *corev1.ResourceRequirements {
+	result := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse(preset.LimitCPU),
+			corev1.ResourceMemory: resource.MustParse(preset.LimitMemory),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse(preset.RequestCPU),
+			corev1.ResourceMemory: resource.MustParse(preset.RequestMemory),
+		},
 	}
-
-	resourcesPreset := presets[preset]
-	resourcesDefaultPreset := presets[defaultPreset]
-
-	resources.RequestCPU = resourcesPreset.RequestCPU
-	if resources.RequestCPU == "" {
-		resources.RequestCPU = resourcesDefaultPreset.RequestCPU
-	}
-
-	resources.RequestMemory = resourcesPreset.RequestMemory
-	if resources.RequestMemory == "" {
-		resources.RequestMemory = resourcesDefaultPreset.RequestMemory
-	}
-
-	resources.LimitCPU = resourcesPreset.LimitCPU
-	if resources.LimitCPU == "" {
-		resources.LimitCPU = resourcesDefaultPreset.LimitCPU
-	}
-
-	resources.LimitMemory = resourcesPreset.LimitMemory
-	if resources.LimitMemory == "" {
-		resources.LimitMemory = resourcesDefaultPreset.LimitMemory
-	}
-
-	return resources
+	return &result
 }
 
 func ParseReplicasPresets(presetsMap string) (map[string]ReplicasPreset, error) {

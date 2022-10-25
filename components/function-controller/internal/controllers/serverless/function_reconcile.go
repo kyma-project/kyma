@@ -4,9 +4,8 @@ import (
 	"context"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -24,12 +23,18 @@ import (
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-//go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
-type GitOperator interface {
+//go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
+type GitClient interface {
 	LastCommit(options git.Options) (string, error)
+	Clone(path string, options git.Options) (string, error)
 }
 
-//go:generate mockery -name=StatsCollector -output=automock -outpkg=automock -case=underscore
+//go:generate mockery --name=GitClientFactory --output=automock --outpkg=automock --case=underscore
+type GitClientFactory interface {
+	GetGitClient(logger *zap.SugaredLogger) git.GitClient
+}
+
+//go:generate mockery --name=StatsCollector --output=automock --outpkg=automock --case=underscore
 type StatsCollector interface {
 	UpdateReconcileStats(f *serverlessv1alpha2.Function, cond serverlessv1alpha2.Condition)
 }
@@ -39,19 +44,19 @@ type FunctionReconciler struct {
 	client            resource.Client
 	recorder          record.EventRecorder
 	config            FunctionConfig
-	gitOperator       GitOperator
+	gitFactory        GitClientFactory
 	statsCollector    StatsCollector
 	healthCh          chan bool
 	initStateFunction stateFn
 }
 
-func NewFunction(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
+func NewFunctionReconciler(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitFactory GitClientFactory, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		Log:               log.Named("controllers").Named("function"),
+		Log:               log,
 		client:            client,
 		recorder:          recorder,
 		config:            config,
-		gitOperator:       gitOperator,
+		gitFactory:        gitFactory,
 		healthCh:          healthCh,
 		statsCollector:    statsCollector,
 		initStateFunction: stateFnInitialize,
@@ -93,9 +98,17 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 
 func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
+		r.Log.Debug("health check request received")
 		r.healthCh <- true
+
+		r.Log.Debug("health check request responded")
 		return ctrl.Result{}, nil
 	}
+
+	r.Log.With(
+		"name", request.Name,
+		"namespace", request.Namespace).
+		Debug("starting pre-reconciliation steps")
 
 	var instance serverlessv1alpha2.Function
 
@@ -108,7 +121,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	zapLog := r.Log.With(
+	contextLogger := r.Log.With(
 		"kind", instance.GetObjectKind().GroupVersionKind().Kind,
 		"name", instance.GetName(),
 		"namespace", instance.GetNamespace(),
@@ -119,9 +132,11 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, err
 	}
 
+	contextLogger.Debug("starting state machine")
+
 	stateReconciler := reconciler{
 		fn:  r.initStateFunction,
-		log: zapLog,
+		log: contextLogger,
 		k8s: k8s{
 			client:         r.client,
 			recorder:       r.recorder,
@@ -131,7 +146,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 			fn:     r.config,
 			docker: dockerCfg,
 		},
-		operator: r.gitOperator,
+		gitClient: r.gitFactory.GetGitClient(contextLogger),
 	}
 
 	stateReconciler.result = ctrl.Result{

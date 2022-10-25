@@ -1,12 +1,20 @@
+module.exports = {
+  assertPodsExist,
+  assertAllTargetsAreHealthy,
+  assertNoCriticalAlertsExist,
+  assertScrapePoolTargetsExist,
+  assertAllRulesAreHealthy,
+  assertMetricsExist,
+  assertRulesAreRegistered,
+};
+
 const {assert} = require('chai');
 const util = require('util');
-
 const {
   listResources,
   sleep,
   waitForPodWithLabel,
 } = require('../utils');
-
 const {
   getPrometheusActiveTargets,
   getPrometheusAlerts,
@@ -25,6 +33,19 @@ async function assertPodsExist() {
   );
 }
 
+async function assertNoCriticalAlertsExist() {
+  const firingAlerts = await retry(async () => {
+    const allAlerts = await getPrometheusAlerts();
+    return allAlerts
+        .filter((a) => !shouldIgnoreAlert(a) && a.state === 'firing');
+  });
+
+  assert.isEmpty(
+      firingAlerts,
+      `Following alerts are firing: ${firingAlerts.map((a) => util.inspect(a, false, null, true)).join(', ')}`,
+  );
+}
+
 async function assertAllTargetsAreHealthy() {
   const unhealthyTargets = await retry(async () => {
     const activeTargets = await getPrometheusActiveTargets();
@@ -36,19 +57,6 @@ async function assertAllTargetsAreHealthy() {
   assert.isEmpty(
       unhealthyTargets,
       `Following targets are unhealthy: ${unhealthyTargets.join(', ')}`,
-  );
-}
-
-async function assertNoCriticalAlertsExist() {
-  const firingAlerts = await retry(async () => {
-    const allAlerts = await getPrometheusAlerts();
-    return allAlerts
-        .filter((a) => !shouldIgnoreAlert(a) && a.state === 'firing');
-  });
-
-  assert.isEmpty(
-      firingAlerts,
-      `Following alerts are firing: ${firingAlerts.map((a) => util.inspect(a, false, null, true)).join(', ')}`,
   );
 }
 
@@ -116,12 +124,6 @@ async function assertMetricsExist() {
     },
 
     {
-      'logging-fluent-bit': [
-        {'fluentbit_input_bytes_total': [['name']]},
-        {'fluentbit_input_records_total': [[]]}],
-    },
-
-    {
       'logging-loki': [
         {'log_messages_total': [['level']]},
         {'loki_request_duration_seconds_bucket': [['route']]}],
@@ -131,6 +133,17 @@ async function assertMetricsExist() {
       'monitoring-grafana': [
         {'grafana_stat_totals_dashboard': [[]]},
         {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}],
+    },
+
+    {
+      'telemetry-fluent-bit': [
+        {'telemetry_fsbuffer_usage_bytes': [[]]},
+        {'fluentbit_input_bytes_total ': [['pod']]}],
+    },
+
+    {
+      'telemetry-operator-metrics': [
+        {'telemetry_fluentbit_triggered_restarts_total': [[]]}],
     },
 
   ];
@@ -163,6 +176,7 @@ function shouldIgnoreTarget(target) {
     // Ignore the pods that are created during tests.
     '-testsuite-',
     'test',
+    'nodejs16-',
     'nodejs12-',
     'nodejs14-',
     'upgrade',
@@ -323,13 +337,3 @@ async function retry(getList, maxRetries = 20, interval = 5 * 1000) {
   }
   return list;
 }
-
-module.exports = {
-  assertPodsExist,
-  assertAllTargetsAreHealthy,
-  assertNoCriticalAlertsExist,
-  assertScrapePoolTargetsExist,
-  assertAllRulesAreHealthy,
-  assertMetricsExist,
-  assertRulesAreRegistered,
-};

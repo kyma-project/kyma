@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -26,6 +27,7 @@ type proxy struct {
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
 	extractPathFunc              pathExtractorFunc
+	extractGatewayFunc           gatewayURLExtractorFunc
 	apiExtractor                 APIExtractor
 }
 
@@ -42,7 +44,7 @@ type Config struct {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	apiIdentifier, path, err := p.extractPath(r.URL.Path)
+	apiIdentifier, path, gwURL, err := p.extractPath(r.URL)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -50,7 +52,13 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r.URL.Path = path
 
-	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier)
+	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
+	if err != nil {
+		handleErrors(w, err)
+		return
+	}
+
+	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier, *serviceAPI)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -59,38 +67,36 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.setRequestTimeout(r)
 	defer cancel()
 
-	err = p.addAuthorization(newRequest, cacheEntry)
+	err = p.addAuthorization(newRequest, cacheEntry, serviceAPI.SkipVerify)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
+
+	cacheEntry.Proxy.ModifyResponse = responseModifier(gwURL, serviceAPI.TargetUrl, urlRewriter)
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-func (p *proxy) extractPath(path string) (model.APIIdentifier, string, apperrors.AppError) {
-	apiIdentifier, path, err := p.extractPathFunc(path)
+func (p *proxy) extractPath(u *url.URL) (model.APIIdentifier, string, *url.URL, apperrors.AppError) {
+	apiIdentifier, path, gwURL, err := p.extractPathFunc(u)
 	if err != nil {
-		return model.APIIdentifier{}, "", apperrors.Internal("failed to extract API Identifier from path")
+		return model.APIIdentifier{}, "", nil, apperrors.WrongInput("failed to extract API Identifier from path")
 	}
 
-	return apiIdentifier, path, nil
+	return apiIdentifier, path, gwURL, nil
 }
 
-func (p *proxy) getOrCreateCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry, apperrors.AppError) {
+func (p *proxy) getOrCreateCacheEntry(apiIdentifier model.APIIdentifier, serviceAPI model.API) (*CacheEntry, apperrors.AppError) {
 	cacheObj, found := p.cache.Get(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry)
 
 	if found {
 		return cacheObj, nil
 	}
 
-	return p.createCacheEntry(apiIdentifier)
+	return p.createCacheEntry(apiIdentifier, serviceAPI)
 }
 
-func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry, apperrors.AppError) {
-	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
-	if err != nil {
-		return nil, err
-	}
+func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier, serviceAPI model.API) (*CacheEntry, apperrors.AppError) {
 	clientCertificate := clientcert.NewClientCertificate(nil)
 	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
@@ -129,15 +135,15 @@ func (p *proxy) setRequestTimeout(r *http.Request) (*http.Request, context.Cance
 	return newRequest, cancel
 }
 
-func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
+func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry, skipTLSVerify bool) apperrors.AppError {
 
-	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
+	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r, skipTLSVerify)
 
 	if err != nil {
 		return err
 	}
 
-	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
+	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r, skipTLSVerify)
 }
 
 func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {

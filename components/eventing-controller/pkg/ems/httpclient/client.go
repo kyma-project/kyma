@@ -4,42 +4,41 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
-	neturl "net/url"
+	"net/url"
 	"strings"
 )
 
-// compile time check
+// Perform a compile time check.
 var _ BaseURLAwareClient = Client{}
 
 // BaseURLAwareClient is a http client that can build requests not from a full URL, but from a path relative to a configured base url
-// this is useful for REST-APIs that always connect to the same host, but on different paths
+// this is useful for REST-APIs that always connect to the same host, but on different paths.
 type BaseURLAwareClient interface {
 	NewRequest(method, path string, body interface{}) (*http.Request, *Error)
 	Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error)
 }
 
 type Client struct {
-	baseURL    *neturl.URL
+	baseURL    *url.URL
 	httpClient *http.Client
 }
 
 // NewHTTPClient creates a new client and ensures that the given baseURL ends with a trailing '/'.
 // The trailing '/' is required later for constructing the full URL using a relative path.
 func NewHTTPClient(baseURL string, client *http.Client) (*Client, error) {
-	url, err := neturl.Parse(baseURL)
+	u, err := url.Parse(baseURL)
 
 	// add trailing '/' to the url path, so that we can combine the url with other paths according to standards
-	if !strings.HasSuffix(url.Path, "/") {
-		url.Path = url.Path + "/"
+	if !strings.HasSuffix(u.Path, "/") {
+		u.Path = u.Path + "/"
 	}
 	if err != nil {
 		return nil, err
 	}
 	return &Client{
 		httpClient: client,
-		baseURL:    url,
+		baseURL:    u,
 	}, nil
 }
 
@@ -56,7 +55,7 @@ func (c Client) NewRequest(method, path string, body interface{}) (*http.Request
 		}
 	}
 
-	pu, err := neturl.Parse(path)
+	pu, err := url.Parse(path)
 	if err != nil {
 		return nil, NewError(err)
 	}
@@ -74,8 +73,8 @@ func (c Client) NewRequest(method, path string, body interface{}) (*http.Request
 	return req, nil
 }
 
-func resolveReferenceAsRelative(base, ref *neturl.URL) *neturl.URL {
-	return base.ResolveReference(&neturl.URL{Path: strings.TrimPrefix(ref.Path, "/")})
+func resolveReferenceAsRelative(base, ref *url.URL) *url.URL {
+	return base.ResolveReference(&url.URL{Path: strings.TrimPrefix(ref.Path, "/")})
 }
 
 func (c Client) Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error) {
@@ -89,7 +88,7 @@ func (c Client) Do(req *http.Request, result interface{}) (*http.Response, *[]by
 	defer func() { _ = resp.Body.Close() }()
 	defer c.httpClient.CloseIdleConnections()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return resp, nil, NewError(err, WithStatusCode(resp.StatusCode))
 	}

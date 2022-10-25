@@ -143,6 +143,8 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 	if s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
+
+	resourceRequirements := getBuildResourceRequiremenets(s)
 	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
 
 	return batchv1.Job{
@@ -218,7 +220,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       resourceRequirements,
 							VolumeMounts:    s.getGitBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -244,6 +246,8 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 	if s.instance.Spec.RuntimeImageOverride != "" {
 		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
 	}
+
+	resourceRequirements := getBuildResourceRequiremenets(s)
 	labels := s.functionLabels()
 
 	return batchv1.Job{
@@ -309,7 +313,7 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 							Name:            "executor",
 							Image:           cfg.fn.Build.ExecutorImage,
 							Args:            args,
-							Resources:       s.instance.Spec.ResourceConfiguration.Build.Resources,
+							Resources:       resourceRequirements,
 							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -337,16 +341,31 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 	)
 }
 
+func getBuildResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
+	var resourceRequirements corev1.ResourceRequirements
+	if s.instance.Spec.ResourceConfiguration != nil &&
+		s.instance.Spec.ResourceConfiguration.Build != nil &&
+		s.instance.Spec.ResourceConfiguration.Build.Resources != nil {
+		resourceRequirements = *s.instance.Spec.ResourceConfiguration.Build.Resources
+	}
+	return resourceRequirements
+}
+
 func (s *systemState) podLabels() map[string]string {
 	selectorLabels := s.deploymentSelectorLabels()
-	return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
+	if s.instance.Spec.Template != nil && s.instance.Spec.Template.Labels != nil {
+		return mergeLabels(s.instance.Spec.Template.Labels, selectorLabels)
+	} else {
+		return selectorLabels
+	}
 }
 
 type buildDeploymentArgs struct {
-	DockerPullAddress     string
-	JaegerServiceEndpoint string
-	PublisherProxyAddress string
-	ImagePullAccountName  string
+	DockerPullAddress      string
+	JaegerServiceEndpoint  string
+	TraceCollectorEndpoint string
+	PublisherProxyAddress  string
+	ImagePullAccountName   string
 }
 
 func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment {
@@ -365,14 +384,10 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	deploymentEnvs := buildDeploymentEnvs(
 		s.instance.GetNamespace(),
 		cfg.JaegerServiceEndpoint,
+		cfg.TraceCollectorEndpoint,
 		cfg.PublisherProxyAddress,
 	)
 	envs = append(envs, deploymentEnvs...)
-
-	minReplicas := DefaultDeploymentReplicas
-	if s.instance.Spec.MinReplicas != nil {
-		minReplicas = *s.instance.Spec.MinReplicas
-	}
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -381,7 +396,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			Labels:       deploymentLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &minReplicas,
+			Replicas: s.getReplicas(DefaultDeploymentReplicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: s.deploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
@@ -408,7 +423,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 							Name:      functionContainerName,
 							Image:     imageName,
 							Env:       envs,
-							Resources: s.instance.Spec.ResourceConfiguration.Function.Resources,
+							Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name: volumeName,
 								/* needed in order to have python functions working:
@@ -481,10 +496,17 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	}
 }
 
-//TODO do not negate
+func (s *systemState) getReplicas(defaultVal int32) *int32 {
+	if s.instance.Spec.Replicas != nil {
+		return s.instance.Spec.Replicas
+	}
+	return &defaultVal
+}
+
+// TODO do not negate
 func (s *systemState) deploymentEqual(d appsv1.Deployment) bool {
 	return len(s.deployments.Items) == 1 &&
-		equalDeployments(s.deployments.Items[0], d, isScalingEnabled(&s.instance))
+		equalDeployments(s.deployments.Items[0], d)
 }
 
 func (s *systemState) hasDeploymentConditionTrueStatusWithReason(conditionType appsv1.DeploymentConditionType, reason string) bool {
@@ -562,22 +584,24 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 func (s *systemState) defaultReplicas() (int32, int32) {
 	var min = int32(1)
 	var max int32
+	if s.instance.Spec.ScaleConfig == nil {
+		return min, min
+	}
 	spec := s.instance.Spec
-	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
-		min = *spec.MinReplicas
+	if spec.ScaleConfig.MinReplicas != nil && *spec.ScaleConfig.MinReplicas > 0 {
+		min = *spec.ScaleConfig.MinReplicas
 	}
 	// special case
-	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+	if spec.ScaleConfig.MaxReplicas == nil || min > *spec.ScaleConfig.MaxReplicas {
 		max = min
 	} else {
-		max = *spec.MaxReplicas
+		max = *spec.ScaleConfig.MaxReplicas
 	}
 	return min, max
 }
 
 func (s *systemState) buildHorizontalPodAutoscaler(targetCPUUtilizationPercentage int32) autoscalingv1.HorizontalPodAutoscaler {
 	minReplicas, maxReplicas := s.defaultReplicas()
-	deploymentName := s.deployments.Items[0].GetName()
 	return autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -586,9 +610,9 @@ func (s *systemState) buildHorizontalPodAutoscaler(targetCPUUtilizationPercentag
 		},
 		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
 			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
-				Kind:       "Deployment",
-				Name:       deploymentName,
-				APIVersion: appsv1.SchemeGroupVersion.String(),
+				Kind:       serverlessv1alpha2.FunctionKind,
+				Name:       s.instance.Name,
+				APIVersion: serverlessv1alpha2.GroupVersion.String(),
 			},
 			MinReplicas:                    &minReplicas,
 			MaxReplicas:                    maxReplicas,
@@ -610,7 +634,7 @@ func (s *systemState) gitFnSrcChanged(commit string) bool {
 	return s.instance.Status.Commit == "" ||
 		commit != s.instance.Status.Commit ||
 		s.instance.Spec.Source.GitRepository.Reference != s.instance.Status.Reference ||
-		serverlessv1alpha2.RuntimeExtended(s.instance.Spec.Runtime) != s.instance.Status.Runtime ||
+		s.instance.Spec.Runtime != s.instance.Status.Runtime ||
 		s.instance.Spec.Source.GitRepository.BaseDir != s.instance.Status.BaseDir ||
 		getConditionStatus(s.instance.Status.Conditions, serverlessv1alpha2.ConditionConfigurationReady) == corev1.ConditionFalse
 

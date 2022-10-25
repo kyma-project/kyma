@@ -25,3 +25,18 @@ spec:
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}
+---
+{{- if .Values.enableNewCRDVersion }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "controller.fullname" . }}-webhook-service
+  labels: {{- include "controller.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "controller.selectorLabels" . | nindent 4 }}
+  ports:
+    - name:  {{ .Values.global.ports.namePrefix }}convert
+      port: {{ .Values.webhook.port }}
+      protocol: TCP
+      targetPort: {{ .Values.webhook.targetPort }}
+{{- end }}

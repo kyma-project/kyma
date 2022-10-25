@@ -45,9 +45,11 @@ const (
 	OauthClientIDLength            = 8
 	manifestsDirectory             = "manifests/"
 	testingAppFile                 = "testing-app.yaml"
+	twoServicesDeploymentFile      = "two-services-deployment.yaml"
 	globalCommonResourcesFile      = "global-commons.yaml"
 	hydraClientFile                = "hydra-client.yaml"
 	noAccessStrategyApiruleFile    = "no_access_strategy.yaml"
+	twoServicesApiruleFile         = "two-services.yaml"
 	oauthStrategyApiruleFile       = "oauth-strategy.yaml"
 	jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
@@ -119,18 +121,23 @@ func generateRandomString(length int) string {
 }
 
 func getOAUTHToken(oauth2Cfg clientcredentials.Config) (*oauth2.Token, error) {
-	var tokenOAUTH *oauth2.Token
+	var tokenOAUTH oauth2.Token
 	err := retry.Do(
 		func() error {
 			token, err := oauth2Cfg.Token(context.Background())
 			if err != nil {
 				return fmt.Errorf("error during Token retrival: %+v", err)
 			}
-			tokenOAUTH = token
+
+			if token == nil || token.AccessToken == "" {
+				return fmt.Errorf("got empty OAuth2 token")
+			}
+			tokenOAUTH = *token
+
 			return nil
 		},
 		retry.Delay(500*time.Millisecond), retry.Attempts(3))
-	return tokenOAUTH, err
+	return &tokenOAUTH, err
 }
 
 func generateReport() {
@@ -157,6 +164,10 @@ func generateReport() {
 	}
 
 	err = filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+		if path == "reports" {
+			return nil
+		}
+
 		data, err1 := os.ReadFile(path)
 		if err1 != nil {
 			return err
@@ -168,7 +179,11 @@ func generateReport() {
 			return []byte{b[0], ' ', b[1], b[2]}
 		})
 
-		os.WriteFile(path, formatted, fs.FileMode(02))
+		err = os.WriteFile(path, formatted, fs.FileMode(02))
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -177,11 +192,26 @@ func generateReport() {
 	}
 
 	if artifactsDir, ok := os.LookupEnv("ARTIFACTS"); ok {
-		filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
-			copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
+		err = filepath.Walk("reports", func(path string, info fs.FileInfo, err error) error {
+			if path == "reports" {
+				return nil
+			}
+
+			_, err1 := copy(path, fmt.Sprintf("%s/report.html", artifactsDir))
+			if err1 != nil {
+				return err1
+			}
 			return nil
 		})
-		copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+
+		_, err = copy("./junit-report.xml", fmt.Sprintf("%s/junit-report.xml", artifactsDir))
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
 	}
 
 }
@@ -195,11 +225,15 @@ func getApiRules() string {
 	return string(pretty.Pretty(toPrint))
 }
 
-func CreateScenario(templateFileName string, namePrefix string) (*Scenario, error) {
+func CreateScenario(templateFileName string, namePrefix string, deploymentFile ...string) (*Scenario, error) {
 	testID := generateRandomString(testIDLength)
+	deploymentFileName := testingAppFile
+	if len(deploymentFile) > 0 {
+		deploymentFileName = deploymentFile[0]
+	}
 
 	// create common resources from files
-	commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct {
+	commonResources, err := manifestprocessor.ParseFromFileWithTemplate(deploymentFileName, manifestsDirectory, resourceSeparator, struct {
 		Namespace string
 		TestID    string
 	}{
@@ -326,7 +360,10 @@ func getPodListReport() string {
 
 	p := returnedPodList{}
 	toMarshal, _ := json.Marshal(list)
-	json.Unmarshal(toMarshal, &p)
+	err := json.Unmarshal(toMarshal, &p)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 	toPrint, _ := json.Marshal(p)
 	return string(pretty.Pretty(toPrint))
 }

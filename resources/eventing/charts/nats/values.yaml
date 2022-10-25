@@ -20,22 +20,80 @@ nats:
     enabled: false
     port: 6000
 
+  # Toggle using health check probes to better detect failures.
+  healthcheck:
+    # Enable /healthz startupProbe for controlled upgrades of NATS JetStream
+    enableHealthz: true
+
+    # Enable liveness checks.  If this fails, then the NATS Server will restarted.
+    liveness:
+      enabled: true
+
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+      # NOTE: liveness check + terminationGracePeriodSeconds can introduce unecessarily long outages
+      # due to the coupling between liveness probe and terminationGracePeriodSeconds.
+      # To avoid this, we make the periodSeconds of the liveness check to be about half the default
+      # time that it takes for lame duck graceful stop.
+      #
+      # In case of using Kubernetes +1.22 with probe-level terminationGracePeriodSeconds
+      # we could revise this but for now keep a minimal liveness check.
+      #
+      # More info:
+      #
+      #  https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#probe-level-terminationgraceperiodseconds
+      #  https://github.com/kubernetes/kubernetes/issues/64715
+      #
+      periodSeconds: 30
+      successThreshold: 1
+      failureThreshold: 3
+      # Only for Kubernetes +1.22 that have pod level probes enabled.
+      terminationGracePeriodSeconds:
+
+    # Periodically check for the server to be ready for connections while
+    # the NATS container is running.
+    # Disabled by default since covered by startup probe and it is the same
+    # as the liveness check.
+    readiness:
+      enabled: true
+
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+
+    # Enable startup checks to confirm server is ready for traffic.
+    # This is recommended for JetStream deployments since in cluster mode
+    # it will try to ensure that the server is ready to serve streams.
+
+    # since this check is recommended to use in cluster mode and the cluster mode ist disabled per default
+    # this check is also defaulted to false
+    startup:
+      enabled: false
+
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 30
+
+  # Adds a hash of the ConfigMap as a pod annotation
+  # This will cause the StatefulSet to roll when the ConfigMap is updated
+  configChecksumAnnotation: false
+
   # securityContext for the nats container
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
 
   # Toggle to disable client advertisements (connect_urls),
-  # in case of running behind a load balancer (which is not recommended)
+  # in case of running behind a load balancer
   # it might be required to disable advertisements.
   advertise: true
 
   # The number of connect attempts against discovered routes.
   connectRetries: 120
-
-  # How many seconds should pass before sending a PING
-  # to a client that has no activity.
-  pingInterval:
 
   # selector matchLabels for the server and service.
   # If left empty defaults are used.
@@ -61,11 +119,19 @@ nats:
     maxPending:
     maxPings:
 
-    # NOTE: this should be at least the same as 'terminationGracePeriodSeconds'
+    # How many seconds should pass before sending a PING
+    # to a client that has no activity.
+    pingInterval:
+
+    # grace period after pod begins shutdown before starting to close client connections
+    lameDuckGracePeriod: "10s"
+
+    # duration over which to slowly close client connections after lameDuckGracePeriod has passed
     lameDuckDuration: "120s"
 
-  # Default lame duck duration in the server is 2 minutes.
-  terminationGracePeriodSeconds: 120
+  # terminationGracePeriodSeconds determines how long to wait for graceful shutdown
+  # this should be at least `lameDuckGracePeriod` + `lameDuckDuration` + 20s shutdown overhead
+  terminationGracePeriodSeconds: 150
 
   logging:
     debug: true
@@ -74,19 +140,12 @@ nats:
     connectErrorReports:
     reconnectErrorReports:
 
-  # customConfigSecret can be used to use an custom secret for the config
-  # of the NATS Server.
-  # NOTE: For this to work the name of the configuration has to be
-  # called `nats.conf`.
-  # e.g. kubectl create secret generic custom-nats-conf --from-file nats.conf
-  # customConfigSecret:
-  #  name:
-
   jetstream:
-    #enabled: JetStream can be enabled via .Values.global.jetstream.enabled
-
     # Jetstream Domain
     domain:
+
+    # Jetstream Unique Tag prevent placing a stream in the same availability zone twice.
+    uniqueTag:
 
     ##########################
     #                        #
@@ -186,6 +245,11 @@ k8sClusterDomain: cluster.local
 
 # Add labels to all the deployed resources
 commonLabels: {}
+
+
+# podManagementPolicy controls how pods are created during initial scale up,
+# when replacing pods on nodes, or when scaling down.
+podManagementPolicy: OrderedReady
 
 # Prometheus NATS Exporter configuration.
 exporter:

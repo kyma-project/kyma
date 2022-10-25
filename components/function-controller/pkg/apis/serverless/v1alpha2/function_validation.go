@@ -3,6 +3,7 @@ package v1alpha2
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -51,6 +52,7 @@ type validationFunction func(*ValidationConfig) error
 func (fn *Function) getBasicValidations() []validationFunction {
 	return []validationFunction{
 		fn.validateObjectMeta,
+		fn.Spec.validateRuntime,
 		fn.Spec.validateEnv,
 		fn.Spec.validateLabels,
 		fn.Spec.validateReplicas,
@@ -107,8 +109,10 @@ func (fn *Function) validateObjectMeta(_ *ValidationConfig) error {
 }
 
 func (spec *FunctionSpec) validateGitRepoURL(_ *ValidationConfig) error {
-	if _, err := url.ParseRequestURI(spec.Source.GitRepository.URL); err != nil {
-		return fmt.Errorf("invalid source.gitRepository.URL value: %w", err)
+	if urlIsSSH(spec.Source.GitRepository.URL) {
+		return nil
+	} else if _, err := url.ParseRequestURI(spec.Source.GitRepository.URL); err != nil {
+		return fmt.Errorf("invalid source.gitRepository.URL value: %v", err)
 	}
 	return nil
 }
@@ -159,6 +163,15 @@ func (spec *FunctionSpec) validateGitAuthType(_ *ValidationConfig) error {
 	}
 }
 
+func (spec *FunctionSpec) validateRuntime(_ *ValidationConfig) error {
+	runtimeName := spec.Runtime
+	switch runtimeName {
+	case Python39, NodeJs12, NodeJs14, NodeJs16:
+		return nil
+	}
+	return fmt.Errorf("spec.runtime contains unsupported value")
+}
+
 func (spec *FunctionSpec) validateEnv(vc *ValidationConfig) error {
 	var allErrs []string
 	envs := spec.Env
@@ -182,15 +195,19 @@ func (spec *FunctionSpec) validateEnv(vc *ValidationConfig) error {
 func (spec *FunctionSpec) validateFunctionResources(vc *ValidationConfig) error {
 	minMemory := resource.MustParse(vc.Function.Resources.MinRequestMemory)
 	minCPU := resource.MustParse(vc.Function.Resources.MinRequestCPU)
-
-	return validateResources(spec.ResourceConfiguration.Function.Resources, minMemory, minCPU, "spec.resourceConfiguration.function.resources")
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Function != nil && spec.ResourceConfiguration.Function.Resources != nil {
+		return validateResources(*spec.ResourceConfiguration.Function.Resources, minMemory, minCPU, "spec.resourceConfiguration.function.resources")
+	}
+	return nil
 }
 
 func (spec *FunctionSpec) validateBuildResources(vc *ValidationConfig) error {
 	minMemory := resource.MustParse(vc.BuildJob.Resources.MinRequestMemory)
 	minCPU := resource.MustParse(vc.BuildJob.Resources.MinRequestCPU)
-
-	return validateResources(spec.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.build.resources")
+	if spec.ResourceConfiguration != nil && spec.ResourceConfiguration.Build != nil && spec.ResourceConfiguration.Build.Resources != nil {
+		return validateResources(*spec.ResourceConfiguration.Build.Resources, minMemory, minCPU, "spec.resourceConfiguration.build.resources")
+	}
+	return nil
 }
 
 func (spec *FunctionSpec) validateSources(vc *ValidationConfig) error {
@@ -218,7 +235,7 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 	}
 
 	if limits != nil {
-		allErrs = append(allErrs, validateLimites(resources, minMemory, minCPU, parent)...)
+		allErrs = append(allErrs, validateLimits(resources, minMemory, minCPU, parent)...)
 	}
 	return returnAllErrs("invalid function resources", allErrs)
 }
@@ -253,7 +270,7 @@ func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU r
 	return allErrs
 }
 
-func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+func validateLimits(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
 	limits := resources.Limits
 	allErrs := []string{}
 
@@ -269,11 +286,21 @@ func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU re
 	}
 	return allErrs
 }
+
 func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 	minValue := vc.Function.Replicas.MinValue
-	maxReplicas := spec.MaxReplicas
-	minReplicas := spec.MinReplicas
+	var maxReplicas *int32
+	var minReplicas *int32
+	if spec.ScaleConfig == nil {
+		return nil
+	}
+	maxReplicas = spec.ScaleConfig.MaxReplicas
+	minReplicas = spec.ScaleConfig.MinReplicas
 	allErrs := []string{}
+
+	if spec.Replicas == nil && spec.ScaleConfig == nil {
+		allErrs = append(allErrs, "spec.replicas and spec.scaleConfig are empty at the same time")
+	}
 	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
 		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than spec.minReplicas(%d)",
 			*maxReplicas, *minReplicas))
@@ -290,7 +317,10 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 }
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
-	labels := spec.Template.Labels
+	var labels map[string]string
+	if spec.Template != nil && spec.Template.Labels != nil {
+		labels = spec.Template.Labels
+	}
 	fieldPath := field.NewPath("spec.labels")
 
 	errs := v1validation.ValidateLabels(labels, fieldPath)
@@ -307,4 +337,13 @@ func (spec *FunctionSpec) validateRepository(_ *ValidationConfig) error {
 		{name: "spec.source.gitRepository.baseDir", value: spec.Source.GitRepository.BaseDir},
 		{name: "spec.source.gitRepository.reference", value: spec.Source.GitRepository.Reference},
 	}...)
+}
+
+func urlIsSSH(repoURL string) bool {
+	exp, err := regexp.Compile(`((git|ssh?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(/)?`)
+	if err != nil {
+		panic(err)
+	}
+
+	return exp.MatchString(repoURL)
 }

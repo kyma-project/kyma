@@ -35,37 +35,30 @@ func TestConnect(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			// given
+			natsServer := publishertesting.StartNATSServer()
+			assert.NotNil(t, natsServer)
+			defer natsServer.Shutdown()
 
-			// test in both default and jetstream NATS modes
-			for _, serverMode := range publishertesting.NatsServerModes {
-				t.Run(serverMode.Name, func(t *testing.T) {
-					tc := tc
-					// given
-					natsServer := publishertesting.StartNatsServer(serverMode.JetstreamEnabled)
-					assert.NotNil(t, natsServer)
-					defer natsServer.Shutdown()
+			clientURL := natsServer.ClientURL()
+			assert.NotEmpty(t, clientURL)
 
-					clientURL := natsServer.ClientURL()
-					assert.NotEmpty(t, clientURL)
+			// when
+			connection, err := pkgnats.Connect(clientURL,
+				pkgnats.WithRetryOnFailedConnect(tc.givenRetryOnFailedConnect),
+				pkgnats.WithMaxReconnects(tc.givenMaxReconnect),
+				pkgnats.WithReconnectWait(tc.givenReconnectWait),
+			)
+			assert.Nil(t, err)
+			assert.NotNil(t, connection)
+			defer func() { connection.Close() }()
 
-					// when
-					connection, err := pkgnats.Connect(clientURL,
-						pkgnats.WithRetryOnFailedConnect(tc.givenRetryOnFailedConnect),
-						pkgnats.WithMaxReconnects(tc.givenMaxReconnect),
-						pkgnats.WithReconnectWait(tc.givenReconnectWait),
-					)
-					assert.Nil(t, err)
-					assert.NotNil(t, connection)
-					defer func() { connection.Close() }()
-
-					// then
-					assert.Equal(t, connection.Status(), nats.CONNECTED)
-					assert.Equal(t, clientURL, connection.Opts.Servers[0])
-					assert.Equal(t, tc.givenRetryOnFailedConnect, connection.Opts.RetryOnFailedConnect)
-					assert.Equal(t, tc.givenMaxReconnect, connection.Opts.MaxReconnect)
-					assert.Equal(t, tc.givenReconnectWait, connection.Opts.ReconnectWait)
-				})
-			}
+			// then
+			assert.Equal(t, connection.Status(), nats.CONNECTED)
+			assert.Equal(t, clientURL, connection.Opts.Servers[0])
+			assert.Equal(t, tc.givenRetryOnFailedConnect, connection.Opts.RetryOnFailedConnect)
+			assert.Equal(t, tc.givenMaxReconnect, connection.Opts.MaxReconnect)
+			assert.Equal(t, tc.givenReconnectWait, connection.Opts.ReconnectWait)
 		})
 	}
 }

@@ -4,7 +4,7 @@ title: Pods stuck in `Pending/Failed/Unknown` state after upgrade
 
 ## Symptom
 
-You cannot access services or Functions using the API Rules created. The Kyma Gateway refuses the connection.
+You cannot access services or Functions using the APIRules created. The Kyma Gateway refuses the connection.
 Some of your Pods are stuck in the Pending/Failed/Unknown state, or their sidecar proxy version differ from the installed Istio version.
 
 ## Cause

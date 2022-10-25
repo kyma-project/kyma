@@ -2,20 +2,22 @@
 title: Expose a Function with an API Rule
 ---
 
-This tutorial shows how you can expose your Function to access it outside the cluster, through an HTTP proxy. To expose it, use an API Rule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the API Rule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.
+This tutorial shows how you can expose your Function to access it outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio VirtualService and Oathkeeper Access Rules that specify your permissions for the exposed Function.
 
 When you complete this tutorial, you get a Function that:
 
-- Is available on an unsecured endpoint (**handler** set to `noop` in the API Rule CR).
+- Is available on an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
 - Accepts the `GET`, `POST`, `PUT`, and `DELETE` methods.
 
->**NOTE:** To learn more about securing your Function, see the [Expose and secure a workload with OAuth2](../00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [Expose and secure a workload with JWT](../00-api-exposure/apix-05-expose-and-secure-workload-jwt.md) tutorials.
+>**NOTE:** To learn more about securing your Function, see the [Expose and secure a workload with OAuth2](../00-api-exposure/apix-05-expose-and-secure-workload-oauth2.md) or [Expose and secure a workload with JWT](../00-api-exposure/apix-08-expose-and-secure-workload-jwt.md) tutorials.
 
 >**TIP:** Read also about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Prerequisites
 
 This tutorial is based on an existing Function. To create one, follow the [Create a Function](./svls-01-create-inline-function.md) tutorial.
+
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 ## Steps
 
@@ -34,7 +36,7 @@ Follow these steps:
       export NAME={FUNCTION_NAME}
       export NAMESPACE={NAMESPACE_NAME}
       ```
-   >**NOTE:** The Function takes the name from the Function CR name. The API Rule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+   >**NOTE:** The Function takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with the Function's code.
 
   ```bash
@@ -70,7 +72,7 @@ Follow these steps:
   kubectl get apirules $NAME -n $NAMESPACE
   ```
 
-6. Check that the API Rule was created successfully and has the status `OK`:
+6. Check that the APIRule was created successfully and has the status `OK`:
 
   ```bash
   kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -96,19 +98,20 @@ Follow these steps:
     export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
-    >**NOTE:** Function takes the name from the Function CR name. The API Rule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+    >**NOTE:** Function takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-2. Create an API Rule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../05-technical-reference/00-architecture/svls-01-architecture.md).
+2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../05-technical-reference/00-architecture/svls-01-architecture.md).
 
     ```yaml
     cat <<EOF | kubectl apply -f -
-    apiVersion: gateway.kyma-project.io/v1alpha1
+    apiVersion: gateway.kyma-project.io/v1beta1
     kind: APIRule
     metadata:
       name: $NAME
       namespace: $NAMESPACE
     spec:
       gateway: kyma-system/kyma-gateway
+      host: $NAME.$DOMAIN
       rules:
       - path: /.*
         accessStrategies:
@@ -120,13 +123,12 @@ Follow these steps:
         - PUT
         - DELETE
       service:
-        host: $NAME.$DOMAIN
         name: $NAME
         port: 80
     EOF
     ```
 
-3. Check that the API Rule was created successfully and has the status `OK`:
+3. Check that the APIRule was created successfully and has the status `OK`:
 
     ```bash
     kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -146,7 +148,7 @@ Follow these steps:
 
 >**NOTE:** Kyma Dashboard uses Busola, which is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
-1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.
+1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an APIRule.
 
 2. Go to **Workloads** > **Functions** and select the Function you want to expose.
 
@@ -154,9 +156,9 @@ Follow these steps:
 
 4. Under **General settings**, enter the following information:
 
-    - The API Rule's **Name** matching the Function's name.
+    - The APIRule's **Name** matching the Function's name.
 
-    >**NOTE:** The API Rule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
+    >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
 
     - **Subdomain** to determine the host on which you want to expose your Function.
 
@@ -164,7 +166,7 @@ Follow these steps:
 
 6. Select **Create** to confirm your changes.
 
-7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
+7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created APIRule.
 
     </details>
 </div>

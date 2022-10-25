@@ -18,7 +18,7 @@ Kyma collects telemetry data with the following in-cluster components:
 
 The collected telemetry data are exposed so that you can view and analyze them with observability tools.
 
-> **NOTE:** As an alpha feature, Kyma ships the [telemetry component](./obsv-04-telemetry-in-kyma.md). It supports providing your own output configuration for application logs, and connecting your own observability systems outside the Kyma cluster with the Kyma backend.
+> **NOTE:** Kyma's [telemetry component](./obsv-04-telemetry-in-kyma.md) supports providing your own output configuration for application logs. With this, you can connect your own observability systems outside the Kyma cluster with the Kyma backend.
 
 ## Data analysis
 
@@ -30,4 +30,3 @@ You can use the following in-cluster components to observe your applications' te
 
 - [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to receive and manage alerts coming from Prometheus. Alertmanager can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
 - [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics and logs collected from Prometheus and Loki.
-- [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and on connections between them.

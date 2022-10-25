@@ -38,7 +38,10 @@ openShift:
     create: true
     annotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  runAsNonRoot: false
+  seccompProfile:
+    type: RuntimeDefault
 #   fsGroup: 2000
 
 hostNetwork: false
@@ -61,13 +64,15 @@ hostAliases: []
 #     - "foo.local"
 #     - "bar.local"
 
-securityContext: {}
-#   capabilities:
-#     drop:
-#     - ALL
-#   readOnlyRootFilesystem: true
-#   runAsNonRoot: true
-#   runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - FOWNER
+  readOnlyRootFilesystem: true
 
 service:
   type: ClusterIP
@@ -82,6 +87,16 @@ service:
 
 serviceMonitor:
   enabled: true
+  serviceMonitorPorts:
+    - port: http-metrics
+      path: /metrics
+      scheme: https
+      tlsConfig:
+        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+        keyFile: /etc/prometheus/secrets/istio.default/key.pem
+        insecureSkipVerify: true
+
 #   namespace: monitoring
 #   interval: 10s
 #   scrapeTimeout: 10s
@@ -236,21 +251,43 @@ envFrom:
       name: telemetry-fluent-bit-env
       optional: true
 
-extraContainers: []
-#   - name: do-something
-#     image: busybox
-#     command: ['do', 'something']
+extraContainers: |
+  - name: exporter
+    image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.directory_size_exporter) }}
+    resources:
+      limits:
+        cpu: 100m
+        memory: 50Mi
+      requests:
+        memory: 5Mi
+    args:
+      - --storage-path=/data/flb-storage/
+      - --metric-name=telemetry_fsbuffer_usage_bytes
+    ports:
+      - name: http-metrics
+        containerPort: 2021
+        protocol: TCP
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+    volumeMounts:
+      - name: varfluentbit
+        mountPath: /data
 
 flush: 1
 
 metricsPort: 2020
 
-extraPorts: []
-#   - port: 5170
-#     containerPort: 5170
-#     protocol: TCP
-#     name: tcp
-#     nodePort: 30517
+extraPorts:
+  - name: http-metrics
+    containerPort: 2021
+    protocol: TCP
+    port: 2021
+
 
 extraVolumes:
   - name: shared-fluent-bit-config
@@ -290,7 +327,36 @@ networkPolicy:
 #   ingress:
 #     from: []
 
-luaScripts: {}
+luaScripts:
+  filter-script.lua: |
+    function kubernetes_map_keys(tag, timestamp, record)
+      if record.kubernetes == nil then
+        return 0
+      end
+      map_keys(record.kubernetes.annotations)
+      map_keys(record.kubernetes.labels)
+      return 1, timestamp, record
+    end
+    function map_keys(table)
+      if table == nil then
+        return
+      end
+      local new_table = {}
+      local changed_keys = {}
+      for key, val in pairs(table) do
+        local mapped_key = string.gsub(key, "[%/%.]", "_")
+        if mapped_key ~= key then
+            new_table[mapped_key] = val
+            changed_keys[key] = true
+        end
+      end
+      for key in pairs(changed_keys) do
+        table[key] = nil
+      end
+      for key, val in pairs(new_table) do
+        table[key] = val
+      end
+    end
 
 ## https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
 config:
@@ -305,13 +371,14 @@ config:
         HTTP_Server On
         HTTP_Listen 0.0.0.0
         HTTP_Port {{ .Values.metricsPort }}
-        Health_Check On
         storage.path /data/flb-storage/
+        storage.metrics on
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |
     [INPUT]
         Name tail
+        Alias tele-tail
         Path /var/log/containers/*.log
         multiline.parser docker, cri, go, python, java
         Tag tele.*
@@ -320,12 +387,12 @@ config:
         Refresh_Interval 10
         DB /data/flb_kube.db
         storage.type  filesystem
-
+ 
     [INPUT]
         Name tail
         Path /null.log
         Tag null.*
-        Alias dummy
+        Alias null-tail
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
@@ -342,7 +409,7 @@ config:
     [OUTPUT]
         Name null
         Match null.*
-        Alias dummy
+        Alias null-null
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]
@@ -354,12 +421,23 @@ config:
 
   # This allows adding more files with arbitary filenames to /fluent-bit/etc by providing key/value pairs.
   # The key becomes the filename, the value becomes the file content.
-  extraFiles: {}
-#     example.conf: |
-#       [OUTPUT]
-#           Name example
-#           Match foo.*
-#           Host bar
+  extraFiles:
+      loki-labelmap.json: |
+            {
+              "kubernetes": {
+                  "container_name": "container",
+                  "host": "node",
+                  "labels": {
+                    "app": "app",
+                    "app.kubernetes.io/component": "component",
+                    "app.kubernetes.io/name": "app",
+                    "serverless.kyma-project.io/function-name": "function"
+                  },
+                  "namespace_name": "namespace",
+                  "pod_name": "pod"
+                },
+              "stream": "stream"
+            }
 
 # The config volume is mounted by default, either to the existingConfigMap value, or the default of "fluent-bit.fullname"
 volumeMounts:
@@ -409,6 +487,13 @@ initContainers: |-
   - name: prep-fluent-bit-config
     image: "{{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}"
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
     volumeMounts:
     - mountPath: /fluent-bit/etc/
       name: shared-fluent-bit-config

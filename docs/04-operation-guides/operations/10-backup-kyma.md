@@ -20,7 +20,7 @@ If the etcd database experiences any problems, Gardener automatically restores t
 
 ### Volume backup
 
-We recommend that you back up your volumes periodically with the [Volume Snapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
+We recommend that you back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
 
 Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
@@ -43,7 +43,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 ### Steps
 
-  1. Create a Volume Snapshot Class with the correct driver:
+  1. Create a VolumeSnapshotClass with the correct driver:
     - for GCP: `pd.csi.storage.gke.io`
     - for AWS: `ebs.csi.aws.com`
     - for Azure: `disk.csi.azure.com`
@@ -59,7 +59,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   deletionPolicy: Delete
   ```
   
-  2. Create a Volume Snapshot resource:
+  2. Create a VolumeSnapshot resource:
 
   ```yaml
   apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -125,7 +125,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 ## Create a periodic snapshot job
 
-You can also create a Cron Job to handle taking volume snapshots periodically. A sample Cron Job definition that includes the required Service Account and roles looks as follows:
+You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition that includes the required ServiceAccount and roles looks as follows:
 
 ```yaml
 ---
@@ -171,7 +171,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220720-94f56c6a
+            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220819-0c178fc7
             command:
               - /bin/bash
               - -c

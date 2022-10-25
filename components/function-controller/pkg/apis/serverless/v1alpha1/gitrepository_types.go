@@ -41,7 +41,7 @@ const (
 
 // +kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.spec.url`
 // +kubebuilder:printcolumn:name="Auth",type=string,JSONPath=`.spec.auth.type`
-// +kubebuilder:deprecatedversion:warning="Git Repository CR will be removed in kyma version 2.x"
+// +kubebuilder:deprecatedversion:warning="Git Repository CR is deprecated and not supported in Function v1alpha2."
 //
 // GitRepository is the Schema for the gitrepositories API
 type GitRepository struct {
@@ -60,7 +60,7 @@ type GitRepositoryList struct {
 	Items           []GitRepository `json:"items"`
 }
 
-//nolint
+// nolint
 func init() {
 	SchemeBuilder.Register(&GitRepository{}, &GitRepositoryList{})
 }

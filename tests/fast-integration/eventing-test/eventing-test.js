@@ -31,8 +31,7 @@ const {
   isDebugEnabled,
   k8sApply,
   deleteK8sPod,
-  eventingSubscription,
-  waitForPodStatusWithLabel,
+  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -45,15 +44,16 @@ const {
   slowTime,
   mockNamespace,
   isSKR,
+  testCompassFlow,
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
-  isJetStreamEnabled,
   subscriptionNames,
 } = require('./utils');
 const {
   bebBackend,
   natsBackend, getEventMeshNamespace,
+  kymaSystem, telemetryOperatorLabel, conditionReady, jaegerLabel, jaegerEndpoint,
 } = require('./common/common');
 const {
   assert,
@@ -72,8 +72,16 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
+  before('Ensure tracing is ready', async function() {
+    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
+        conditionReady.status);
+    await waitForEndpoint(jaegerEndpoint, kymaSystem);
+  });
+
   before('Expose Grafana', async function() {
     await exposeGrafana();
+    await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
+        conditionReady.condition, conditionReady.status, 60_000);
   });
 
   before('Get stream config for JetStream', async function() {
@@ -82,7 +90,7 @@ describe('Eventing tests', function() {
   });
 
   // eventingTestSuite - Runs Eventing tests
-  function eventingTestSuite(backend, isSKR) {
+  function eventingTestSuite(backend, isSKR, testCompassFlow=false) {
     it('lastorder function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace, mockNamespace);
     });
@@ -91,7 +99,7 @@ describe('Eventing tests', function() {
       await checkInClusterEventDelivery(testNamespace);
     });
 
-    if (isSKR) {
+    if (isSKR && testCompassFlow) {
       eventingE2ETestSuiteWithCommerceMock(backend);
     }
 
@@ -224,12 +232,12 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
     // Running Eventing end-to-end tests
-    eventingTestSuite(natsBackend, isSKR);
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
 
     it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+      await eventingMonitoringTest(natsBackend, isSKR);
     });
   });
 
@@ -253,10 +261,10 @@ describe('Eventing tests', function() {
       }
     });
     // Running Eventing end-to-end tests
-    eventingTestSuite(bebBackend, isSKR);
+    eventingTestSuite(bebBackend, isSKR, testCompassFlow);
 
     it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(bebBackend, isSKR, isJetStreamEnabled());
+      await eventingMonitoringTest(bebBackend, isSKR);
     });
   });
 
@@ -272,12 +280,12 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
     // Running Eventing end-to-end tests
-    eventingTestSuite(natsBackend, isSKR);
+    eventingTestSuite(natsBackend, isSKR, testCompassFlow);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
 
     it('Run Eventing Monitoring tests', async function() {
-      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+      await eventingMonitoringTest(natsBackend, isSKR);
     });
   });
 

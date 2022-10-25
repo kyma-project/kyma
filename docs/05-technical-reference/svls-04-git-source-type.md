@@ -2,7 +2,7 @@
 title: Git source type
 ---
 
-Depending on a runtime you use to build your Function (Node.js 12, Node.js 14, or Python 3.9), your Git repository must contain at least a directory with these files:
+Depending on a runtime you use to build your Function (Node.js 14, Node.js 16, or Python 3.9), your Git repository must contain at least a directory with these files:
 
 - `handler.js` or `handler.py` with Function's code
 - `package.json` or `requirements.txt` with Function's dependencies
@@ -11,7 +11,7 @@ The Function CR must contain `type: git` to specify that you use a Git repositor
 
 To create a Function with the Git source, you must:
 
-1. Create a [Git Repository CR](./00-custom-resources/svls-02-gitrepository.md) with details of your Git repository.
+1. Create a [GitRepository CR](./00-custom-resources/svls-02-gitrepository.md) with details of your Git repository.
 2. Create a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) (optional, only if you must authenticate to the repository).
 3. Create a [Function CR](./00-custom-resources/svls-01-function.md) with your Function definition and references to the Git repository.
 
@@ -25,8 +25,8 @@ You can have various setups for your Function's Git source with different:
 
 - Authentication methods
 
-  You can define with the **spec.auth** parameter in the Git Repository CR that you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`).
+  You can define with the **spec.auth** parameter in the GitRepository CR that you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`).
 
 - Function's rebuild triggers
 
-  You can use the **reference** parameter in the Git Repository CR to define whether the Function Controller must monitor a given branch or commit in the Git repository to rebuild the Function upon their changes.
+  You can use the **reference** parameter in the GitRepository CR to define whether the Function Controller must monitor a given branch or commit in the Git repository to rebuild the Function upon their changes.

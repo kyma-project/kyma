@@ -179,6 +179,8 @@ class KEBClient {
   }
 
   async downloadKubeconfig(instanceID) {
+    const downloadUrl = `https://kyma-env-broker.${this.host}/kubeconfig/${instanceID}`;
+    debug(`Downloading kubeconfig from: ${downloadUrl}`);
     return new Promise(async (resolve, reject) => {
       const writeStream = fs
           .createWriteStream('./shoot-kubeconfig.yaml')
@@ -196,7 +198,7 @@ class KEBClient {
       try {
         const resp = await axios.request({
           method: 'get',
-          url: `https://kyma-env-broker.${this.host}/kubeconfig/${instanceID}`,
+          url: downloadUrl,
           responseType: 'stream',
         });
         if (resp.data.errors) {

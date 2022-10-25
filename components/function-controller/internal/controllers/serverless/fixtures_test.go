@@ -47,14 +47,16 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 					Value: "VAL_2",
 				},
 			},
-			ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-				Function: serverlessv1alpha2.ResourceRequirements{
-					Resources: corev1.ResourceRequirements{},
+			ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+				Function: &serverlessv1alpha2.ResourceRequirements{
+					Resources: &corev1.ResourceRequirements{},
 				},
 			},
-			MinReplicas: &one,
-			MaxReplicas: &two,
-			Template: serverlessv1alpha2.Template{
+			ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: &one,
+				MaxReplicas: &two,
+			},
+			Template: &serverlessv1alpha2.Template{
 				Labels: map[string]string{
 					testBindingLabel1: "foobar",
 					testBindingLabel2: testBindingLabelValue,
@@ -100,14 +102,16 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					Value: "VAL_2",
 				},
 			},
-			ResourceConfiguration: serverlessv1alpha2.ResourceConfiguration{
-				Function: serverlessv1alpha2.ResourceRequirements{
-					Resources: corev1.ResourceRequirements{},
+			ResourceConfiguration: &serverlessv1alpha2.ResourceConfiguration{
+				Function: &serverlessv1alpha2.ResourceRequirements{
+					Resources: &corev1.ResourceRequirements{},
 				},
 			},
-			MinReplicas: &one,
-			MaxReplicas: &two,
-			Template: serverlessv1alpha2.Template{
+			ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+				MinReplicas: &one,
+				MaxReplicas: &two,
+			},
+			Template: &serverlessv1alpha2.Template{
 				Labels: map[string]string{
 					testBindingLabel1: "foobar",
 					testBindingLabel2: testBindingLabelValue,

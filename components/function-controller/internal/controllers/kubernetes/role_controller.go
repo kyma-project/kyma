@@ -22,7 +22,7 @@ type RoleReconciler struct {
 func NewRole(client client.Client, log *zap.SugaredLogger, config Config, service RoleService) *RoleReconciler {
 	return &RoleReconciler{
 		client: client,
-		Log:    log.Named("controllers").Named("role"),
+		Log:    log,
 		config: config,
 		svc:    service,
 	}

@@ -4,13 +4,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
-
-	"github.com/onsi/gomega"
 )
 
 func TestFunctionSpec_validateResources(t *testing.T) {
@@ -46,12 +45,14 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
 								corev1.ResourceCPU:    resource.MustParse("100m"),
 								corev1.ResourceMemory: resource.MustParse("128Mi"),
 							},
@@ -61,8 +62,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -99,17 +100,19 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Value: "test",
 						},
 					},
-					Template: Template{
+					Template: &Template{
 						Labels: map[string]string{
 							"shoul-be-ok": "test",
 							"test":        "test",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -120,8 +123,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("300m"),
 									corev1.ResourceMemory: resource.MustParse("300Mi"),
@@ -136,6 +139,43 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.BeNil(),
+		},
+		"Should return error on unexpected runtime name": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: "unknown-runtime-name",
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.runtime",
+				),
+			),
+		},
+		"Should return error on empty runtime name": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring(
+					"spec.runtime",
+				),
+			),
 		},
 		"Should return error when more than one source is filled": {
 			givenFunc: Function{
@@ -235,7 +275,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					Template: Template{
+					Template: &Template{
 						Labels: map[string]string{
 							"shoul-be-ok":      "test",
 							"should BE not OK": "test",
@@ -260,8 +300,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(-1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(-1),
+					},
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -281,8 +323,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
-					MaxReplicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
+						MaxReplicas: pointer.Int32(1),
+					},
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -302,9 +346,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("50m"),
 									corev1.ResourceMemory: resource.MustParse("64Mi"),
@@ -338,9 +382,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							Source: "test-source",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -351,8 +395,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("50m"),
 									corev1.ResourceMemory: resource.MustParse("64Mi"),
@@ -378,17 +422,19 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
-					MinReplicas: pointer.Int32(0),
-					MaxReplicas: pointer.Int32(0),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(0),
+						MaxReplicas: pointer.Int32(0),
+					},
+					Runtime: NodeJs12,
 					Source: Source{
 						Inline: &InlineSource{
 							Source: "test-source",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("9m"),
 									corev1.ResourceMemory: resource.MustParse("10Mi"),
@@ -399,8 +445,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("9m"),
 									corev1.ResourceMemory: resource.MustParse("10Mi"),
@@ -441,9 +487,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -454,8 +500,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("400m"),
 									corev1.ResourceMemory: resource.MustParse("400Mi"),
@@ -467,9 +513,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -483,9 +531,9 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							URL: "testme",
 						},
 					},
-					ResourceConfiguration: ResourceConfiguration{
-						Function: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("100m"),
 									corev1.ResourceMemory: resource.MustParse("128Mi"),
@@ -496,8 +544,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 								},
 							},
 						},
-						Build: ResourceRequirements{
-							Resources: corev1.ResourceRequirements{
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("200m"),
 									corev1.ResourceMemory: resource.MustParse("200Mi"),
@@ -509,9 +557,11 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
-					MinReplicas: pointer.Int32(1),
-					MaxReplicas: pointer.Int32(1),
-					Runtime:     NodeJs12,
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs12,
 				},
 			},
 			specifiedExpectedError: gomega.And(
@@ -519,6 +569,93 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				gomega.ContainSubstring("spec.source.gitRepository.baseDir"),
 			),
 			expectedError: gomega.HaveOccurred(),
+		},
+		"Should not return error when replicas field is use together with scaleConfig": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					Replicas: pointer.Int32(1),
+					ScaleConfig: &ScaleConfig{
+						MinReplicas: pointer.Int32(1),
+						MaxReplicas: pointer.Int32(1),
+					},
+					Runtime: NodeJs14,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{Limits: corev1.ResourceList{
+								corev1.ResourceCPU:    resource.MustParse("100m"),
+								corev1.ResourceMemory: resource.MustParse("128Mi"),
+							},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+						Build: &ResourceRequirements{
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
+		},
+		"Should validate without error Resources and Profile occurring at once in ResourceConfiguration.Function/Build": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source: Source{
+						Inline: &InlineSource{
+							Source:       "test-source",
+							Dependencies: " { test }",
+						},
+					},
+					Runtime: NodeJs12,
+					ResourceConfiguration: &ResourceConfiguration{
+						Function: &ResourceRequirements{
+							Profile: "function-profile",
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("100m"),
+									corev1.ResourceMemory: resource.MustParse("128Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("50m"),
+									corev1.ResourceMemory: resource.MustParse("64Mi"),
+								},
+							},
+						},
+						Build: &ResourceRequirements{
+							Profile: "build-profile",
+							Resources: &corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("300m"),
+									corev1.ResourceMemory: resource.MustParse("300Mi"),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("200m"),
+									corev1.ResourceMemory: resource.MustParse("200Mi"),
+								},
+							},
+						},
+					},
+				},
+			},
+			expectedError: gomega.BeNil(),
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
@@ -537,6 +674,76 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			g.Expect(errs).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {
 				g.Expect(errs.Error()).To(testData.specifiedExpectedError)
+			}
+		})
+	}
+}
+
+func TestFunctionSpec_validateGitRepoURL(t *testing.T) {
+
+	tests := []struct {
+		name    string
+		spec    FunctionSpec
+		wantErr bool
+	}{
+		{
+			name: "Invalid http",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "github.com/kyma-project/kyma.git",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Valid http",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "https://github.com/kyma-project/kyma.git",
+					},
+				},
+			},
+		},
+		{
+			name: "Invalid ssh",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "g0t@github.com:kyma-project/kyma.git",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Valid ssh",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "git@github.com:kyma-project/kyma.git",
+					},
+				},
+			},
+		},
+		{
+			name: "Valid ssh without .git extension",
+			spec: FunctionSpec{
+				Source: Source{
+					GitRepository: &GitRepositorySource{
+						URL: "git@github.com:kyma-project/kyma",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if err := tt.spec.validateGitRepoURL(&ValidationConfig{}); (err != nil) != tt.wantErr {
+				t.Errorf("FunctionSpec.validateGitRepoURL() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

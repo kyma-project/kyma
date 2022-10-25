@@ -70,13 +70,13 @@ func (s *Subscription) Create(sinkUrl *url.URL) (subscription *kymaeventingv1alp
 		Property: "type",
 		Value:    eventType,
 	}
-	bebFilter := &kymaeventingv1alpha1.BebFilter{
+	bebFilter := &kymaeventingv1alpha1.BEBFilter{
 		EventSource: eventSource,
 		EventType:   eventType,
 	}
-	bebFilters := &kymaeventingv1alpha1.BebFilters{
+	bebFilters := &kymaeventingv1alpha1.BEBFilters{
 		Dialect: "",
-		Filters: []*kymaeventingv1alpha1.BebFilter{
+		Filters: []*kymaeventingv1alpha1.BEBFilter{
 			bebFilter,
 		},
 	}

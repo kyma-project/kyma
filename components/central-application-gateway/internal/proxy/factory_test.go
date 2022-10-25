@@ -5,6 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata"
 	metadatamocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/mocks"
@@ -12,9 +16,6 @@ import (
 	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 type createHandlerFunc func(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, csrfTokenStrategyFactory csrf.TokenStrategyFactory, config Config) http.Handler
@@ -26,7 +27,7 @@ func TestProxyFactory(t *testing.T) {
 	type testcase struct {
 		name                            string
 		url                             string
-		expectedTargetAPIUrl            string
+		expectedTargetAPIURL            string
 		createHandlerFunc               createHandlerFunc
 		createMockServiceDefServiceFunc createMockServiceDefServiceFunc
 		apiIdentifier                   metadatamodel.APIIdentifier
@@ -80,7 +81,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application and service name",
 			url:                             "/app/service/orders/123",
-			expectedTargetAPIUrl:            "/orders/123",
+			expectedTargetAPIURL:            "/orders/123",
 			createHandlerFunc:               New,
 			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
@@ -88,7 +89,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application and service name when accessing root path",
 			url:                             "/app/service",
-			expectedTargetAPIUrl:            "/",
+			expectedTargetAPIURL:            "/",
 			createHandlerFunc:               New,
 			createMockServiceDefServiceFunc: createMockServiceDeffService,
 			apiIdentifier:                   apiIdentifier,
@@ -96,7 +97,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application, service and entry name",
 			url:                             "/app/service/entry/orders/123",
-			expectedTargetAPIUrl:            "/orders/123",
+			expectedTargetAPIURL:            "/orders/123",
 			createHandlerFunc:               NewForCompass,
 			createMockServiceDefServiceFunc: createMockServiceDeffServiceForCompass,
 			apiIdentifier:                   apiIdentifierForCompass,
@@ -104,7 +105,7 @@ func TestProxyFactory(t *testing.T) {
 		{
 			name:                            "should proxy using application, service and entry name when accessing root path",
 			url:                             "/app/service/entry",
-			expectedTargetAPIUrl:            "/",
+			expectedTargetAPIURL:            "/",
 			createHandlerFunc:               NewForCompass,
 			createMockServiceDefServiceFunc: createMockServiceDeffServiceForCompass,
 			apiIdentifier:                   apiIdentifierForCompass,
@@ -112,13 +113,13 @@ func TestProxyFactory(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
-			ts := createTestServer(testCase.expectedTargetAPIUrl)
+			ts := createTestServer(testCase.expectedTargetAPIURL)
 			req, err := http.NewRequest(http.MethodGet, testCase.url, nil)
 			require.NoError(t, err)
 
 			authStrategyMock := &authMock.Strategy{}
 			authStrategyMock.
-				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc"), false).
 				Return(nil).
 				Once()
 
@@ -126,7 +127,7 @@ func TestProxyFactory(t *testing.T) {
 			authStrategyFactoryMock := &authMock.StrategyFactory{}
 			authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
-			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce, false)
 
 			serviceDefServiceMock := testCase.createMockServiceDefServiceFunc(testCase.apiIdentifier, ts.URL, credentials)
 
@@ -202,7 +203,7 @@ func TestPathExtractionErrors(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			// then
-			assert.Equal(t, http.StatusInternalServerError, rr.Code)
+			assert.Equal(t, http.StatusBadRequest, rr.Code)
 		})
 	}
 }

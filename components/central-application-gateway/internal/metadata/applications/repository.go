@@ -20,6 +20,7 @@ const (
 )
 
 // Manager contains operations for managing Application CRD
+//
 //go:generate mockery --name=Manager
 type Manager interface {
 	Get(ctx context.Context, name string, options v1.GetOptions) (*v1alpha1.Application, error)
@@ -65,8 +66,9 @@ type Service struct {
 	API *ServiceAPI
 }
 
-//go:generate mockery --name=ServiceRepository
 // ServiceRepository contains operations for managing services stored in Application CRD
+//
+//go:generate mockery --name=ServiceRepository
 type ServiceRepository interface {
 	GetByServiceName(appName, serviceName string) (Service, apperrors.AppError)
 	GetByEntryName(appName, serviceName, entryName string) (Service, apperrors.AppError)
@@ -128,7 +130,7 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application: %s not found.", appName)
 			log.Warn(message)
-			return nil, apperrors.Internal(message)
+			return nil, apperrors.NotFound(message)
 		}
 
 		message := fmt.Sprintf("failed to get Application '%s' : %s", appName, err.Error())

@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220720-94f56c6a"
+      version: "20220819-0c178fc7"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
@@ -61,7 +61,7 @@ global:
       directory: "external/oryd"
     postgres:
       name: "postgres"
-      version: "11.15-alpine3.15"
+      version: "11.17-alpine3.16"
       directory: "external"
     postgres_exporter:
       name: "postgres-exporter"
@@ -247,6 +247,8 @@ oathkeeper:
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80
+    annotations:
+      readiness.status.sidecar.istio.io/initialDelaySeconds: "10"
   oathkeeper-maester:
     deployment:
       annotations:

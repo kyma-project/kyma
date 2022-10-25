@@ -6,16 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-
+	"github.com/nats-io/nats-server/v2/server"
+	natsio "github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
-
-	"github.com/nats-io/nats-server/v2/server"
-	natsio "github.com/nats-io/nats.go"
-	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
@@ -26,16 +23,18 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
-// NatsHandlerMock represents a mock for the nats.Handler.
-type NatsHandlerMock struct {
+// NATSHandlerMock represents a mock for the nats.Handler.
+type NATSHandlerMock struct {
 	ctx                 context.Context
 	handler             *nats.Handler
 	livenessEndpoint    string
@@ -43,8 +42,7 @@ type NatsHandlerMock struct {
 	eventTypePrefix     string
 	logger              *logger.Logger
 	natsServer          *server.Server
-	jetstreamMode       bool
-	natsConfig          *env.NatsConfig
+	natsConfig          *env.NATSConfig
 	collector           *metrics.Collector
 	legacyTransformer   *legacy.Transformer
 	subscribedProcessor *subscribed.Processor
@@ -52,24 +50,24 @@ type NatsHandlerMock struct {
 	connection          *natsio.Conn
 }
 
-// NatsHandlerMockOpt represents a NatsHandlerMock option.
-type NatsHandlerMockOpt func(*NatsHandlerMock)
+// NATSHandlerMockOpt represents a NATSHandlerMock option.
+type NATSHandlerMockOpt func(*NATSHandlerMock)
 
-// StartOrDie starts a new NatsHandlerMock instance or die if a precondition fails.
+// StartOrDie starts a new NATSHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) NATS connection and 2) nats.Handler started without errors.
-func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *NatsHandlerMock {
+func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *NATSHandlerMock {
 	port := testingutils.GeneratePortOrDie()
 
 	mockedLogger, err := logger.New("json", "info")
 	require.NoError(t, err)
 
-	mock := &NatsHandlerMock{
+	mock := &NATSHandlerMock{
 		ctx:                 ctx,
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", port, health.ReadinessURI),
 		logger:              mockedLogger,
-		natsConfig:          newNatsConfig(port),
-		collector:           metrics.NewCollector(),
+		natsConfig:          newNATSConfig(port),
+		collector:           metrics.NewCollector(latency.NewBucketsProvider()),
 		legacyTransformer:   &legacy.Transformer{},
 		subscribedProcessor: &subscribed.Processor{},
 		eventTypeCleaner:    eventtypetest.CleanerFunc(eventtypetest.DefaultCleaner),
@@ -78,21 +76,23 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 	for _, opt := range opts {
 		opt(mock)
 	}
-	mock.natsServer = testingutils.StartNatsServer(mock.jetstreamMode)
+	mock.natsServer = testingutils.StartNATSServer()
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
-	connection, err := testingutils.ConnectToNatsServer(mock.GetNatsURL())
+	connection, err := testingutils.ConnectToNATSServer(mock.GetNATSURL())
 	require.NoError(t, err)
 	mock.connection = connection
+	js, err := connection.JetStream()
+	require.NoError(t, err)
+	_, err = js.AddStream(getStreamConfig())
+	require.NoError(t, err)
 
-	//nolint:gosimple
-	var msgSender sender.GenericSender
-	msgSender = sender.NewNatsMessageSender(ctx, mock.connection, mock.logger)
+	msgSender := sender.NewJetStreamMessageSender(ctx, mock.connection, mock.natsConfig, mock.logger)
 
 	mock.handler = nats.NewHandler(
 		msgReceiver,
-		&msgSender,
+		msgSender,
 		mock.natsConfig.RequestTimeout,
 		mock.legacyTransformer,
 		&options.Options{MaxRequestSize: 65536},
@@ -108,58 +108,58 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 	return mock
 }
 
-// Stop closes the sender.NatsMessageSender connection and calls the NatsHandlerMock.ShutdownNatsServerAndWait.
-func (m *NatsHandlerMock) Stop() {
+// Stop closes the sender.NATSMessageSender connection and calls the NATSHandlerMock.ShutdownNATSServerAndWait.
+func (m *NATSHandlerMock) Stop() {
 	m.connection.Close()
-	m.ShutdownNatsServerAndWait()
+	m.ShutdownNATSServerAndWait()
 }
 
-// ShutdownNatsServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
-func (m *NatsHandlerMock) ShutdownNatsServerAndWait() {
+// ShutdownNATSServerAndWait shuts down the NATS server used by the NATSHandlerMock and waits for the shutdown.
+func (m *NATSHandlerMock) ShutdownNATSServerAndWait() {
 	m.natsServer.Shutdown()
 	m.natsServer.WaitForShutdown()
 }
 
-// GetNatsURL returns the NATS server URL used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetNatsURL() string {
+// GetNATSURL returns the NATS server URL used by the NATSHandlerMock.
+func (m *NATSHandlerMock) GetNATSURL() string {
 	return m.natsServer.ClientURL()
 }
 
-// GetLivenessEndpoint returns the liveness endpoint used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetLivenessEndpoint() string {
+// GetLivenessEndpoint returns the liveness endpoint used by the NATSHandlerMock.
+func (m *NATSHandlerMock) GetLivenessEndpoint() string {
 	return m.livenessEndpoint
 }
 
-// GetReadinessEndpoint returns the readiness endpoint used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetReadinessEndpoint() string {
+// GetReadinessEndpoint returns the readiness endpoint used by the NATSHandlerMock.
+func (m *NATSHandlerMock) GetReadinessEndpoint() string {
 	return m.readinessEndpoint
 }
 
-// GetHandler returns the nats.Handler used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetHandler() *nats.Handler {
+// GetHandler returns the nats.Handler used by the NATSHandlerMock.
+func (m *NATSHandlerMock) GetHandler() *nats.Handler {
 	return m.handler
 }
 
-// GetMetricsCollector returns the metrics.Collector used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetMetricsCollector() *metrics.Collector {
+// GetMetricsCollector returns the metrics.Collector used by the NATSHandlerMock.
+func (m *NATSHandlerMock) GetMetricsCollector() *metrics.Collector {
 	return m.collector
 }
 
-// GetNatsConfig returns the env.NatsConfig used by the NatsHandlerMock.
-func (m *NatsHandlerMock) GetNatsConfig() *env.NatsConfig {
+// GetNATSConfig returns the env.NATSConfig used by the NATSHandlerMock.
+func (m *NATSHandlerMock) GetNATSConfig() *env.NATSConfig {
 	return m.natsConfig
 }
 
-// WithEventTypePrefix returns NatsHandlerMockOpt which sets the eventTypePrefix for the given NatsHandlerMock.
-func WithEventTypePrefix(eventTypePrefix string) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+// WithEventTypePrefix returns NATSHandlerMockOpt which sets the eventTypePrefix for the given NATSHandlerMock.
+func WithEventTypePrefix(eventTypePrefix string) NATSHandlerMockOpt {
+	return func(m *NATSHandlerMock) {
 		m.eventTypePrefix = eventTypePrefix
 	}
 }
 
-// WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
-func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+// WithSubscription returns NATSHandlerMockOpt which sets the subscribed.Processor for the given NATSHandlerMock.
+func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NATSHandlerMockOpt {
+	return func(m *NATSHandlerMock) {
 		m.natsConfig.EventTypePrefix = m.eventTypePrefix
 		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
@@ -175,9 +175,9 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 	}
 }
 
-// WithApplication returns NatsHandlerMockOpt which sets the legacy.Transformer for the given NatsHandlerMock.
-func WithApplication(applicationName string) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
+// WithApplication returns NATSHandlerMockOpt which sets the legacy.Transformer for the given NATSHandlerMock.
+func WithApplication(applicationName string) NATSHandlerMockOpt {
+	return func(m *NATSHandlerMock) {
 		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationName)
 		m.legacyTransformer = legacy.NewTransformer(
 			m.natsConfig.ToConfig().BEBNamespace,
@@ -188,18 +188,21 @@ func WithApplication(applicationName string) NatsHandlerMockOpt {
 	}
 }
 
-// WithJetstream returns NatsHandlerMockOpt which starts the NATS server in the jetstream mode for the given NatsHandlerMock.
-func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
-	return func(m *NatsHandlerMock) {
-		m.jetstreamMode = jsEnabled
-	}
-}
-
-func newNatsConfig(port int) *env.NatsConfig {
-	return &env.NatsConfig{
+func newNATSConfig(port int) *env.NATSConfig {
+	return &env.NATSConfig{
 		Port:            port,
 		LegacyNamespace: testingutils.MessagingNamespace,
 		EventTypePrefix: testingutils.MessagingEventTypePrefix,
 		JSStreamName:    testingutils.StreamName,
+	}
+}
+
+// getStreamConfig inits a testing stream config.
+func getStreamConfig() *natsio.StreamConfig {
+	return &natsio.StreamConfig{
+		Name:      testingutils.StreamName,
+		Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+		Storage:   natsio.MemoryStorage,
+		Retention: natsio.InterestPolicy,
 	}
 }

@@ -69,7 +69,7 @@ var testDataScenarios = []testDataScenario{
 	},
 }
 
-var newMockedGitOperator = func(auth *git.AuthOptions) *automock.GitOperator {
+var newMockedGitClient = func(auth *git.AuthOptions) *automock.GitClient {
 	options := git.Options{
 		URL:       "https://mock.repo/kyma/test",
 		Reference: "main",
@@ -77,7 +77,7 @@ var newMockedGitOperator = func(auth *git.AuthOptions) *automock.GitOperator {
 
 	options.Auth = auth
 	log.Println(options)
-	m := new(automock.GitOperator)
+	m := new(automock.GitClient)
 
 	m.On("LastCommit", options).Return("pierwszy-hash", nil)
 	options.Reference = "newone"
@@ -137,7 +137,11 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 				}
 			}
 
-			operator := newMockedGitOperator(gitAuthOpts)
+			gitClient := newMockedGitClient(gitAuthOpts)
+			factory := automock.NewGitClientFactory(t)
+			factory.On("GetGitClient", mock.Anything).Return(gitClient)
+			defer factory.AssertExpectations(t)
+
 			statsCollector := &automock.StatsCollector{}
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
@@ -146,7 +150,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 				client:            resourceClient,
 				recorder:          record.NewFakeRecorder(100),
 				config:            testCfg,
-				gitOperator:       operator,
+				gitFactory:        factory,
 				statsCollector:    statsCollector,
 				initStateFunction: stateFnGitCheckSources,
 			}
@@ -353,7 +357,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(svc.Spec.Selector).To(gomega.Equal(deployment.Spec.Selector.MatchLabels))
 
-			t.Log("hpa creation")
+			t.Log("HPA creation")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha2.Function{}
@@ -371,9 +375,9 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			hpaSpec := hpaList.Items[0].Spec
 
-			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()))
+			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal(serverlessv1alpha2.FunctionKind))
+			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(serverlessv1alpha2.GroupVersion.String()))
 
 			t.Log("deployment ready")
 			deployment.Status.Conditions = []appsv1.DeploymentCondition{
@@ -457,7 +461,11 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 				}
 			}
 
-			operator := newMockedGitOperator(gitAuthOpts)
+			gitClient := newMockedGitClient(gitAuthOpts)
+			factory := automock.NewGitClientFactory(t)
+			factory.On("GetGitClient", mock.Anything).Return(gitClient)
+			defer factory.AssertExpectations(t)
+
 			statsCollector := &automock.StatsCollector{}
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
@@ -466,7 +474,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 				client:            resourceClient,
 				recorder:          record.NewFakeRecorder(100),
 				config:            testCfg,
-				gitOperator:       operator,
+				gitFactory:        factory,
 				statsCollector:    statsCollector,
 				initStateFunction: stateFnGitCheckSources,
 			}
@@ -642,9 +650,9 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			hpaSpec := hpaList.Items[0].Spec
 
-			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()))
+			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal(serverlessv1alpha2.FunctionKind))
+			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(serverlessv1alpha2.GroupVersion.String()))
 
 			t.Log("Deployment is ready")
 			deployment.Status.Conditions = []appsv1.DeploymentCondition{
@@ -718,9 +726,13 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		// We don't use MakeGitError2 function because: https://github.com/libgit2/git2go/issues/873
 		gitErr := &git2go.GitError{Message: "NotFound", Class: 0, Code: git2go.ErrorCodeNotFound}
 		gitOpts := git.Options{URL: "", Reference: "ref"}
-		operator := &automock.GitOperator{}
-		operator.On("LastCommit", gitOpts).Return("", gitErr)
-		defer operator.AssertExpectations(t)
+		gitClient := &automock.GitClient{}
+		gitClient.On("LastCommit", gitOpts).Return("", gitErr)
+		defer gitClient.AssertExpectations(t)
+
+		factory := automock.NewGitClientFactory(t)
+		factory.On("GetGitClient", mock.Anything).Return(gitClient)
+		defer factory.AssertExpectations(t)
 
 		prometheusCollector := &automock.StatsCollector{}
 		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
@@ -736,7 +748,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 			client:            resourceClient,
 			recorder:          record.NewFakeRecorder(100),
 			config:            testCfg,
-			gitOperator:       operator,
+			gitFactory:        factory,
 			statsCollector:    prometheusCollector,
 			initStateFunction: stateFnGitCheckSources,
 		}
@@ -803,14 +815,19 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 			},
 		}
 
-		m := new(automock.GitOperator)
-		m.On("LastCommit", mock.Anything).Return("", fmt.Errorf("test error")).Once()
+		gitClient := new(automock.GitClient)
+		gitClient.On("LastCommit", mock.Anything).Return("", fmt.Errorf("test error")).Once()
+		defer gitClient.AssertExpectations(t)
+
+		factory := automock.NewGitClientFactory(t)
+		factory.On("GetGitClient", mock.Anything).Return(gitClient)
+		defer factory.AssertExpectations(t)
 
 		reconciler := &FunctionReconciler{
 			Log:               zap.NewNop().Sugar(),
 			client:            resourceClient,
 			recorder:          record.NewFakeRecorder(100),
-			gitOperator:       m,
+			gitFactory:        factory,
 			config:            testCfg,
 			statsCollector:    prometheusCollector,
 			initStateFunction: stateFnGitCheckSources,

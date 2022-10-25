@@ -22,9 +22,16 @@ podAnnotations: {}
 
 podSecurityContext:
   runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   allowPrivilegeEscalation: false
+  privileged: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
 
 livenessProbe:
   httpGet:
@@ -43,7 +50,7 @@ readinessProbe:
 resources:
   limits:
     cpu: 100m
-    memory: 100Mi
+    memory: 256Mi
   requests:
     cpu: 5m
     memory: 20Mi
@@ -59,6 +66,7 @@ service:
   portName: http-metrics
 
 webhook:
+  timeout: 15
   service:
     port: 443
     protocol: TCP
@@ -77,7 +85,7 @@ serviceMonitor:
       keyFile: /etc/prometheus/secrets/istio.default/key.pem
     metricRelabelings:
      - action: keep
-       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
+       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket|controller_runtime_reconcile_errors_total|telemetry_.*)$
        sourceLabels: [ __name__ ]
 
 logProcessor: fluent-bit
@@ -89,6 +97,12 @@ deniedPlugins:
     - multiline
   output: []
 
+controllers:
+  logging:
+    enabled: true
+  tracing:
+    enabled: false
+
 syncPeriod: 1h
 maxLogPipelines: 3
 
@@ -99,3 +113,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+dashboardExtension:
+  enabled: false

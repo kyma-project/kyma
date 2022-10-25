@@ -2,84 +2,42 @@
 
 ## Overview
 
-The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more `LogPipeline` custom resources. The controller ensures that all Fluent Bit Pods run the current configuration by deleting Pods after the configuration has changed. See all [CRD attributes](apis/telemetry/v1alpha1/logpipeline_types.go) and an [example](config/samples/telemetry_v1alpha1_logpipeline.yaml).
+To implement [Kyma's strategy](https://github.com/kyma-project/community/blob/main/concepts/observability-strategy/strategy.md) of moving from in-cluster observability backends to a Telemetry component that integrates with external backends, the telemetry operator provides APIs for configurable logging, tracing, and monitoring.
 
-For now, creating Fluent Bit Pods is out of scope of the operator. An existing Fluent Bit Daemon Set is expected.
+The telemetry operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.6.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
 
-The generated Config Map (by default, `telemetry-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit Pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file). Fluent Bit parsers, file references, and environment variables are available in an additional Config Map or Secret.
+### Configurable Logging
 
-See the flags that configure all Config Maps, Secret and Daemon Set names in [main.go](main.go).
+The logging controllers generate a Fluent Bit configuration from one or more LogPipeline and LogParser custom resources. The controllers ensure that all Fluent Bit Pods run the current configuration by restarting Pods after the configuration has changed. See all [CRD attributes](apis/telemetry/v1alpha1/logpipeline_types.go) and some [examples](config/samples).
 
-The operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.1.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
+For now, creating Fluent Bit Pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
 
-## Trying it out on a Kyma cluster
-You can try out the Telemetry Operator on your Kyma cluster. Learn here how to install and configure it. When you're finished testing the Telemetry Operator, you should disable it again.
-### Prerequisites
+The generated ConfigMap (by default, `telemetry-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit Pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file). Fluent Bit parsers, file references, and environment variables are available in an additional ConfigMap or Secret.
 
-- A Kyma Cluster with the latest Kyma version installed
+See the flags that configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
 
-### Enable Telemetry Operator integration
-1. Install the Telemetry Operator together with the Telemetry Fluent Bit Daemon Set with null output config: 
+Further design decisions and test results are documented in [Dynamic Logging Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-logging).
 
-   ```bash
-   kyma deploy --component=telemetry 
-   ```
+### Configurable Tracing
 
-2. Configure the Telemetry Fluent Bit component to push logs to the Loki backend. Loki comes with the Kyma out of the box:
+>**Configurable tracing is still in development and not active with the default Kyma settings.**
 
-   ```bash
-   kyma deploy --component logging --value global.telemetry.enabled=true
-   ```
+The trace controller creates an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) deployment and related Kubernetes objects from a `TracePipeline` custom resource. The collector is configured to receive traces using the OTLP and OpenCensus protocols, and forwards the received traces to a configurable OTLP backend.
 
-   The previous command also installs a Log Pipeline CR, which configures the Telemetry Fluent Bit to push logs to the Loki backend.
+See [Dynamic Trace Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-tracing) for further information.
 
-3. After disabling Fluent Bit from the logging chart, delete the unneeded resources:
+### Configurable Monitoring
 
-   ```bash
-   kubectl delete daemonset -n kyma-system logging-fluent-bit
-   kubectl delete configmap -n kyma-system logging-fluent-bit
-   kubectl delete servicemonitor -n kyma-system logging-fluent-bit
-   ```
-
-### Disable Telemetry Operator integration
-
-1. To disable the Telemetry Fluent Bit integration, simply deploy the default version of the logging component, which doesn't contain the Loki Log Pipeline:
-
-   ```bash
-   kyma deploy --component logging 
-   ```
-
-2. After installing the chart, disable the Telemetry component so that it does not collect the logs anymore:
-
-   ```bash
-   kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
-   kubectl delete servicemonitor -n kyma-system telemetry-operator-metrics
-   kubectl delete deployment -n kyma-system telemetry-operator
-   kubectl delete daemonset -n kyma-system telemetry-fluent-bit
-   kubectl delete service -n kyma-system telemetry-operator-webhook
-   kubectl delete service -n kyma-system telemetry-operator-metrics
-   kubectl delete service -n kyma-system telemetry-fluent-bit
-   kubectl delete rolebinding -n kyma-system telemetry-operator-leader-election-rolebinding
-   kubectl delete clusterrolebinding telemetry-operator-manager-rolebinding
-   kubectl delete clusterrolebinding telemetry-fluent-bit
-   kubectl delete clusterrole telemetry-operator-manager-role
-   kubectl delete clusterrole logpipeline-viewer-role
-   kubectl delete clusterrole logpipeline-editor-role
-   kubectl delete clusterrole telemetry-fluent-bit
-   kubectl delete configmap -n kyma-system telemetry-fluent-bit
-   kubectl delete secret -n kyma-system telemetry-operator-webhook-cert
-   kubectl delete serviceaccount -n kyma-system telemetry-operator
-   kubectl delete serviceaccount -n kyma-system telemetry-fluent-bit
-   ```
+Configurable monitoring is not implemented yet. Future plans are documented in [Dynamic Monitoring Backend Configuration](https://github.com/kyma-project/community/tree/main/concepts/observability-strategy/configurable-monitoring).
 
 ## Development
 
 ### Prerequisites
-- Install [kubebuilder 3.2.0](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
-- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
-- Install [Golang 1.18](https://golang.org/dl/) or newer (for local execution)
-- Install [Docker](https://www.docker.com/get-started)
-- Install [OpenSSL](https://www.openssl.org/) to generate webhook certificate for local execution
+- Install [kubebuilder 3.6.0](https://github.com/kubernetes-sigs/kubebuilder), which is the base framework for this controller.
+- Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free YAML files during local development.
+- Install [Golang 1.19](https://golang.org/dl/) or newer (for local execution).
+- Install [Docker](https://www.docker.com/get-started).
+- Install [OpenSSL](https://www.openssl.org/) to generate a webhook certificate for local execution.
 
 ### Available Commands
 
@@ -91,16 +49,16 @@ For development, you can use the following commands:
 make
 ```
 
-- Regenerate YAML manifests (CRD and Cluster Role)
+- Regenerate YAML manifests (CRDs and ClusterRole)
 
 ```bash
-make manifests
+make manifests-local
 ```
 
-- Copy CRDs to installation directory
+- Copy CRDs and ClusterRole to installation directory
 
 ```bash
-make copy-crds-local
+make copy-manifests-local
 ```
 
 - Install CRDs to cluster in current kubeconfig context
@@ -128,4 +86,13 @@ make run-local
 make build-image DOCKER_PUSH_DIRECTORY=<my container repo>
 make push-image DOCKER_PUSH_DIRECTORY=<my container repo> DOCKER_TAG=latest
 kubectl -n kyma-system set image deployment telemetry-operator manager=<my container repo>/telemetry-operator:latest
+```
+
+### Enable Tracing Controller
+
+To activate configurable tracing, follow the previous steps to run the telemetry operator in your development environment. When deploying the operator with the [telemetry chart](https://github.com/kyma-project/kyma/tree/main/resources/telemetry), you must install the `TracePipeline` CRD manually and set a feature flag to enable tracing:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/components/telemetry-operator/config/crd/bases/telemetry.kyma-project.io_tracepipelines.yaml
+kyma deploy -s main --value telemetry.operator.controllers.tracing.enabled=true
 ```

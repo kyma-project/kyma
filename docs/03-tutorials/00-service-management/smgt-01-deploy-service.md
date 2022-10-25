@@ -15,8 +15,6 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
 
 ## Steps
 
->**NOTE:** For the BTP service operator to work, you must [disable Istio sidecar proxy injection](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/smsh-01-istio-disable-sidecar-injection#documentation-content) which is enabled on the Kyma clusters by default. The commands in this tutorial already mark the created Namespaces with the `istio-injection=disabled` flag, so you don't have to do this manually.  
-
 1. Create a Namespace and install [cert-manager](https://cert-manager.io/docs/) in it. The SAP BTP operator requires cert-manager to work properly. You can skip this step if you have cert-manager already installed. Run:
 
     ```bash
@@ -37,7 +35,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     kubectl create ns sap-btp-operator
     kubectl label namespace sap-btp-operator istio-injection=disabled
     helm repo add sap-btp-operator https://sap.github.io/sap-btp-service-operator
-    helm upgrade --install btp-operator sap-btp-operator/sap-btp-operator --create-namespace --namespace=sap-btp-operator --set manager.secret.clientid="$(jq --raw-output '.clientid' creds.json)" --set manager.secret.clientsecret="$(jq --raw-output '.clientsecret' creds.json)" --set manager.secret.url="$(jq --raw-output '.sm_url' creds.json)" --set manager.secret.tokenurl="$(jq --raw-output '.url' creds.json)"
+    helm upgrade --install btp-operator sap-btp-operator/sap-btp-operator --create-namespace --namespace=sap-btp-operator --set manager.secret.clientid="$(jq --raw-output '.clientid' creds.json)" --set manager.secret.clientsecret="$(jq --raw-output '.clientsecret' creds.json)" --set manager.secret.sm_url="$(jq --raw-output '.sm_url' creds.json)" --set manager.secret.tokenurl="$(jq --raw-output '.url' creds.json)"
 
     echo "Wait 30 seconds to make btp-operator webhook ready"
     sleep 30
@@ -110,4 +108,4 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     kubectl delete ns sap-btp-operator
     ```
 
->**TIP:** You can use Kyma Dashboard to create and manage resources such as Service Instances and Service Bindings. To do so, navigate to your Namespace view and go to the **Service Management** tab in the left navigation. Still, you need to obtain service details, such as service name and plan, from the BTP Cockpit.
+>**TIP:** You can use Kyma Dashboard to create and manage resources such as ServiceInstances and ServiceBindings. To do so, navigate to your Namespace view and go to the **Service Management** tab in the left navigation. Still, you need to obtain service details, such as service name and plan, from the BTP Cockpit.

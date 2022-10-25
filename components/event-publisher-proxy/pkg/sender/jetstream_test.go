@@ -17,37 +17,38 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
+
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestJetstreamMessageSender(t *testing.T) {
+func TestJetStreamMessageSender(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
-		givenNatsConnectionClosed bool
+		givenNATSConnectionClosed bool
 		wantError                 bool
 		wantStatusCode            int
 	}{
 		{
 			name:                      "send in jetstream mode should not succeed if stream doesn't exist",
 			givenStream:               false,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantError:                 true,
 			wantStatusCode:            http.StatusNotFound,
 		},
 		{
 			name:                      "send in jetstream mode should succeed if NATS connection is open and the stream exists",
 			givenStream:               true,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantError:                 false,
 			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send in jetstream mode should fail if NATS connection is not open",
-			givenNatsConnectionClosed: true,
+			givenNATSConnectionClosed: true,
 			wantError:                 true,
 			wantStatusCode:            http.StatusBadGateway,
 		},
@@ -73,9 +74,9 @@ func TestJetstreamMessageSender(t *testing.T) {
 
 			// when
 			ctx := context.Background()
-			sender := NewJetstreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
+			sender := NewJetStreamMessageSender(context.Background(), connection, testEnv.Config, mockedLogger)
 
-			if tc.givenNatsConnectionClosed {
+			if tc.givenNATSConnectionClosed {
 				connection.Close()
 			}
 
@@ -93,28 +94,28 @@ func TestStreamExists(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
-		givenNatsConnectionClosed bool
+		givenNATSConnectionClosed bool
 		wantResult                bool
 		wantError                 error
 	}{
 		{
 			name:                      "Stream doesn't exist and should return false",
 			givenStream:               false,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantResult:                false,
 			wantError:                 nats.ErrStreamNotFound,
 		},
 		{
 			name:                      "Stream exists and should return true",
 			givenStream:               true,
-			givenNatsConnectionClosed: false,
+			givenNATSConnectionClosed: false,
 			wantResult:                true,
 			wantError:                 nil,
 		},
 		{
 			name:                      "Connection closed and error should happen",
 			givenStream:               true,
-			givenNatsConnectionClosed: true,
+			givenNATSConnectionClosed: true,
 			wantResult:                false,
 			wantError:                 nats.ErrConnectionClosed,
 		},
@@ -137,7 +138,7 @@ func TestStreamExists(t *testing.T) {
 			}
 
 			// close the connection to provoke the error
-			if tc.givenNatsConnectionClosed {
+			if tc.givenNATSConnectionClosed {
 				connection.Close()
 			}
 
@@ -155,23 +156,23 @@ func TestStreamExists(t *testing.T) {
 
 type TestEnvironment struct {
 	Connection *nats.Conn
-	Config     *env.NatsConfig
+	Config     *env.NATSConfig
 	Logger     *logger.Logger
-	Sender     *JetstreamMessageSender
+	Sender     *JetStreamMessageSender
 	Server     *server.Server
 	JsContext  *nats.JetStreamContext
 }
 
 // setupTestEnvironment sets up the resources and mocks required for testing.
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	natsServer := testingutils.StartNatsServer(true)
+	natsServer := testingutils.StartNATSServer()
 	require.NotNil(t, natsServer)
 
-	connection, err := testingutils.ConnectToNatsServer(natsServer.ClientURL())
+	connection, err := testingutils.ConnectToNATSServer(natsServer.ClientURL())
 	require.NotNil(t, connection)
 	require.NoError(t, err)
 
-	natsConfig := CreateNatsJsConfig(natsServer.ClientURL())
+	natsConfig := CreateNATSJsConfig(natsServer.ClientURL())
 
 	mockedLogger, err := logger.New("json", "info")
 	require.NoError(t, err)
@@ -179,7 +180,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	jsCtx, err := connection.JetStream()
 	require.NoError(t, err)
 
-	sender := &JetstreamMessageSender{
+	sender := &JetStreamMessageSender{
 		connection: connection,
 		envCfg:     natsConfig,
 		logger:     mockedLogger,
@@ -213,7 +214,7 @@ func createCloudEvent(t *testing.T) *event.Event {
 func getStreamConfig() *nats.StreamConfig {
 	return &nats.StreamConfig{
 		Name:      testingutils.StreamName,
-		Subjects:  []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
+		Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 		Storage:   nats.MemoryStorage,
 		Retention: nats.InterestPolicy,
 	}
@@ -227,8 +228,8 @@ func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 	assert.NoError(t, err)
 }
 
-func CreateNatsJsConfig(url string) *env.NatsConfig {
-	return &env.NatsConfig{
+func CreateNATSJsConfig(url string) *env.NATSConfig {
+	return &env.NATSConfig{
 		JSStreamName:  testingutils.StreamName,
 		URL:           url,
 		ReconnectWait: time.Second,

@@ -20,13 +20,13 @@ docker-registry:
 
 containers:
   manager:
+    configuration:
+      data:
+        logLevel: "info"
+        logFormat: "json"
     envs:
       functionBuildMaxSimultaneousJobs:
         value: "5"
-      logLevel:
-        value: "info"
-      logFormat:
-        value: "json"
     resources:
       limits:
         cpu: 500m

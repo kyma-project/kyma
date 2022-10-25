@@ -2,7 +2,7 @@ package beb
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -13,6 +13,7 @@ import (
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
@@ -49,14 +50,14 @@ type Handler struct {
 	// Receiver receives incoming HTTP requests
 	Receiver *receiver.HTTPMessageReceiver
 	// Sender sends requests to the broker
-	Sender *sender.BebMessageSender
+	Sender *sender.BEBMessageSender
 	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
 	// LegacyTransformer handles transformations needed to handle legacy events
 	LegacyTransformer *legacy.Transformer
 	// RequestTimeout timeout for outgoing requests
 	RequestTimeout time.Duration
-	//SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
+	// SubscribedProcessor processes requests for /:app/v1/events/subscribed endpoint
 	SubscribedProcessor *subscribed.Processor
 	// Logger default logger
 	Logger *logger.Logger
@@ -69,7 +70,7 @@ type Handler struct {
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BEBMessageSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logger.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
 	return &Handler{
@@ -250,9 +251,9 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 	defer func() { _ = resp.Body.Close() }()
-	h.collector.RecordLatency(dispatchTime)
-
-	body, err := ioutil.ReadAll(resp.Body)
+	h.collector.RecordLatency(dispatchTime, resp.StatusCode, request.URL.Host)
+	h.collector.RecordRequests(resp.StatusCode, request.URL.Host)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		h.namedLogger().Errorw("Failed to read response body", "error", err)
 		return http.StatusInternalServerError, dispatchTime, []byte{}

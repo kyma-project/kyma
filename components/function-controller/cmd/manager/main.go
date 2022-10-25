@@ -1,22 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
 	"time"
 
 	"github.com/go-logr/zapr"
+	fileconfig "github.com/kyma-project/kyma/components/function-controller/internal/config"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/gitrepo"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
+	"github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/vrischmann/envconfig"
-	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -35,7 +35,7 @@ var (
 	setupLog = ctrlzap.New().WithName("setup")
 )
 
-//nolint
+// nolint
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
@@ -50,10 +50,9 @@ type config struct {
 	LeaderElectionEnabled     bool   `envconfig:"default=false"`
 	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
-	LogLevel                  string `envconfig:"default=info"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
-	LogFormat                 string `envconfig:"default=text"`
+	ConfigPath                string `envconfig:"default=/appdata/config.yaml"`
 }
 
 type healthzConfig struct {
@@ -64,27 +63,38 @@ type healthzConfig struct {
 func main() {
 	config, err := loadConfig("APP")
 	if err != nil {
-		ctrl.SetLogger(ctrlzap.New())
 		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
-	l, err := serverlessLogging.ConfigureLogger(config.LogLevel, config.LogFormat)
+
+	logCfg, err := fileconfig.Load(config.ConfigPath)
 	if err != nil {
-		setupLog.Error(err, "unable to configure logger")
+		setupLog.Error(err, "unable to load configuration file")
 		os.Exit(1)
 	}
 
-	ctrl.SetLogger(zapr.NewLogger(l.WithContext().Desugar()))
+	loggerRegistry, err := logging.ConfigureRegisteredLogger(logCfg.LogLevel, logCfg.LogFormat)
+	if err != nil {
+		setupLog.Error(err, "unable to configure log")
+		os.Exit(1)
+	}
 
-	zapLogger := l.WithContext()
-	zapLogger.Info("Generating Kubernetes client config")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, config.ConfigPath)
+
+	ctrl.SetLogger(zapr.NewLogger(loggerRegistry.CreateDesugared()))
+
+	initLog := loggerRegistry.CreateUnregistered()
+	initLog.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
 
-	zapLogger.Info("Registering Prometheus Stats Collector")
+	initLog.Info("Registering Prometheus Stats Collector")
 	prometheusCollector := metrics.NewPrometheusStatsCollector()
 	prometheusCollector.Register()
 
-	zapLogger.Info("Initializing controller manager")
+	initLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     config.MetricsAddress,
@@ -107,7 +117,7 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
-	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz"))
+	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, loggerRegistry.CreateNamed("healthz"))
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
 		os.Exit(1)
@@ -118,13 +128,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), zapLogger).SetupWithManager(mgr)
+	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.gitrepo")).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create gitRepo controller")
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, zapLogger, config.Function, git.NewGit2Go(zapLogger), mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunctionReconciler(resourceClient, loggerRegistry.CreateNamed("controllers.function"), config.Function, &git.GitClientFactory{}, mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
@@ -137,37 +147,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewConfigMap(mgr.GetClient(), zapLogger, config.Kubernetes, configMapSvc).
+	if err := k8s.NewConfigMap(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.configmap"), config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewNamespace(mgr.GetClient(), zapLogger, config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
+	if err := k8s.NewNamespace(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.namespace"), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewSecret(mgr.GetClient(), zapLogger, config.Kubernetes, secretSvc).
+	if err := k8s.NewSecret(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.secret"), config.Kubernetes, secretSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Secret controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), zapLogger, config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.serviceaccount"), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRole(mgr.GetClient(), zapLogger, config.Kubernetes, roleSvc).
+	if err := k8s.NewRole(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.role"), config.Kubernetes, roleSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Role controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRoleBinding(mgr.GetClient(), zapLogger, config.Kubernetes, roleBindingSvc).
+	if err := k8s.NewRoleBinding(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.rolebinding"), config.Kubernetes, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create RoleBinding controller")
 		os.Exit(1)
@@ -175,7 +185,7 @@ func main() {
 
 	// +kubebuilder:scaffold:builder
 
-	setupLog.Info("Running manager")
+	initLog.Info("Running manager")
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
@@ -191,19 +201,4 @@ func loadConfig(prefix string) (config, error) {
 	}
 
 	return cfg, nil
-}
-
-func toZapLogLevel(level string) (zapcore.Level, error) {
-	switch level {
-	case "debug":
-		return zapcore.DebugLevel, nil
-	case "info":
-		return zapcore.InfoLevel, nil
-	case "warn":
-		return zapcore.WarnLevel, nil
-	case "error":
-		return zapcore.ErrorLevel, nil
-	default:
-		return 0, fmt.Errorf("Desired log level: %s not exist", level)
-	}
 }

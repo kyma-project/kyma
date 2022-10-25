@@ -34,6 +34,9 @@ spec:
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       volumes:
+        - name: configuration
+          configMap:
+            name: "{{ .Values.global.configuration.configmapName }}"
         - name: serverless-webhook
           secret:
             secretName: {{ .Values.container.envs.webhookSecretName.value }}
@@ -47,6 +50,8 @@ spec:
       containers:
         - name: webhook
           volumeMounts:
+            - name: configuration
+              mountPath: {{ .Values.global.configuration.targetDir }}
             - name: serverless-webhook
               mountPath: /tmp/k8s-webhook-server/serving-certs
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_webhook) }}"
@@ -73,7 +78,7 @@ spec:
               cpu: {{ .Values.deployment.resources.limits.cpu }}
               memory: {{ .Values.deployment.resources.limits.memory }}
           securityContext:
-            privileged:  {{ .Values.container.privileged }}
+            privileged: {{ .Values.container.privileged }}
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
             runAsUser: {{ .Values.container.runAsUser }}
           ports:
@@ -86,19 +91,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ template "webhook.fullname" . }}-envs
-          env:
-            # Because of the serverless webhook is based on the knative webhook we have to set the following configuration envs:
-            # SYSTEM_NAMESPACE, METRICS_DOMAIN, CONFIG_OBSERVABILITY_NAME
-            - name: SYSTEM_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: METRICS_DOMAIN
-              {{ include "tplValue" ( dict "value" .Values.container.envs.metricsDomain "context" . ) | nindent 14 }}
-            - name: CONFIG_OBSERVABILITY_NAME
-              {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
-            - name: KUBERNETES_MIN_VERSION # TODO: Delete this env after all CI pipelines are using k8s >1.17.0
-              value: "1.16.0"
     {{- if .Values.global.highPriorityClassName }}
       priorityClassName: {{ .Values.global.highPriorityClassName }}
     {{- end }}

@@ -16,7 +16,7 @@ const processorName = "processor"
 
 type Processor struct {
 	SubscriptionLister *cache.GenericLister
-	Config             *env.BebConfig
+	Config             *env.BEBConfig
 	Logger             *logger.Logger
 }
 
