@@ -2,7 +2,6 @@ package main
 
 import (
 	golog "log"
-	"os"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus"
@@ -53,11 +52,7 @@ func main() {
 	}
 
 	// init the logger
-	logLevel, ok := os.LookupEnv("APP_LOG_LEVEL")
-	if !ok {
-		golog.Fatal("Missing APP_LOG_LEVEL environment variable")
-	}
-	logger, err := kymalogger.New(cfg.AppLogFormat, logLevel)
+	logger, err := kymalogger.New(cfg.AppLogFormat, cfg.AppLogLevel)
 	if err != nil {
 		golog.Fatalf("Failed to initialize logger, error: %v", err)
 	}
