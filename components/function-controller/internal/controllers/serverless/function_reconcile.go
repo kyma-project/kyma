@@ -106,7 +106,8 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 
 func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
-		return ctrl.Result{}, r.sendHealthCheck()
+		r.sendHealthCheck()
+		return ctrl.Result{}, nil
 	}
 
 	r.Log.With(
@@ -160,15 +161,14 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	return stateReconciler.reconcile(ctx, instance)
 }
 
-func (r *FunctionReconciler) sendHealthCheck() error {
+func (r *FunctionReconciler) sendHealthCheck() {
 	r.Log.Debug("health check request received")
 
 	select {
 	case r.healthCh <- true:
 		r.Log.Debug("health check request responded")
-		return nil
 	case <-time.After(healthCheckTimeout):
-		return healthCheckErr
+		r.Log.Error(healthCheckErr)
 	}
 }
 
