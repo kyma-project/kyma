@@ -13,7 +13,7 @@ import (
 // It panics if the given NATS Handler is nil.
 func (s *Sender) ReadinessCheck(w http.ResponseWriter, _ *http.Request) {
 	if status := s.ConnectionStatus(); status != nats.CONNECTED {
-		s.namedLogger().Error("Readiness check failed: no connected to nats server")
+		s.namedLogger().Error("Readiness check failed: not connected to nats server")
 		w.WriteHeader(health.StatusCodeNotHealthy)
 		return
 	}

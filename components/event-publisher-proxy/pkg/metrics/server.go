@@ -43,10 +43,8 @@ func (s *Server) Start(address string) error {
 		s.namedLogger().Infof("Metrics server started on %v", address)
 		go func() {
 			err := s.srv.Serve(listener)
-			if err != nil {
-				if !errors.Is(err, http.ErrServerClosed) {
-					s.logger.WithContext().Fatal(err)
-				}
+			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+				s.logger.WithContext().Fatal(err)
 			}
 		}()
 	}
