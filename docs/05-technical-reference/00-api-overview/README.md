@@ -2,7 +2,9 @@
 title: API Overview
 ---
 
-## API versioning
+We are closely following the Kubernetes API versioning and deprecation policy and as such the following is based on the Kubernetes official documentation.
+
+## API versioning ([derived from](https://kubernetes.io/docs/reference/using-api/#api-versioning))
 
 Different API versions indicate different levels of stability and support.
 
@@ -28,7 +30,7 @@ Here's a summary of each level:
   - The version name is `vX` where `X` is an integer.
   - The stable versions of features appear in released software for many subsequent versions.
   
-## Deprecating parts of the API
+## Deprecating parts of the API ([derived from](https://kubernetes.io/docs/reference/using-api/deprecation-policy/#deprecating-parts-of-the-api))
 
 API versions fall into 3 main tracks, each of which has different policies for deprecation:
 
