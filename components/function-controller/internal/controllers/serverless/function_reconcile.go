@@ -27,10 +27,6 @@ const (
 	healthCheckTimeout = time.Second
 )
 
-var (
-	healthCheckErr = errors.New("timeout when responding to health check")
-)
-
 //go:generate mockery --name=GitClient --output=automock --outpkg=automock --case=underscore
 type GitClient interface {
 	LastCommit(options git.Options) (string, error)
@@ -168,7 +164,7 @@ func (r *FunctionReconciler) sendHealthCheck() {
 	case r.healthCh <- true:
 		r.Log.Debug("health check request responded")
 	case <-time.After(healthCheckTimeout):
-		r.Log.Warn(healthCheckErr)
+		r.Log.Warn(errors.New("timeout when responding to health check"))
 	}
 }
 
