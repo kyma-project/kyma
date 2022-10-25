@@ -31,7 +31,7 @@ func TestFunctionReconciler_Reconcile_HealthCheck(t *testing.T) {
 		g.Expect(<-healthCh).To(gomega.BeTrue())
 	})
 
-	t.Run("should receive health check and return error after timeout", func(t *testing.T) {
+	t.Run("should receive health check and return nil after timeout", func(t *testing.T) {
 		reconciler := NewFunctionReconciler(nil, zap.NewNop().Sugar(), FunctionConfig{}, nil, nil, nil, make(chan bool))
 
 		healthRequest := ctrl.Request{NamespacedName: types.NamespacedName{
