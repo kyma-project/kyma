@@ -1,4 +1,4 @@
-package events
+package cloudevents
 
 import (
 	"context"

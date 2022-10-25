@@ -9,7 +9,7 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
-	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"

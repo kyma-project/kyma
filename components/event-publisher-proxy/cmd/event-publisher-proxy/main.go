@@ -4,6 +4,7 @@ import (
 	golog "log"
 
 	"github.com/kelseyhightower/envconfig"
+	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/commander"
@@ -12,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
-	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 const (
