@@ -18,7 +18,7 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 
 ### Installation
 
-- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup). Then run:
+- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/ko-build/ko/blob/main/docs/install.md). Then run:
 > Make sure the environment variables are set. The make target `set-up-local-env` uses default values. Change them as per your needs. If you intend to push your images to dockerhub, set the env variable `KO_DOCKER_REPO` to `index.docker.io/<docker_id>`
 
 > Existing deployment for eventing-controller should be deleted from the Kyma cluster which can interfere with reconciliation process.
