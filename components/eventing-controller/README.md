@@ -209,6 +209,6 @@ Learn more about [Simplified Builder-Based Scaffolding](https://github.com/kuber
    make run
    ```
 
-4. To run the controller via your IDE, specify the buildtag `local`.
+4. To run the controller using your IDE, specify the buildtag `local`.
 
    > **NOTE:** We currently support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially, the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.
