@@ -18,6 +18,9 @@ import (
 	eclogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
@@ -682,4 +685,10 @@ func (g *GenericSenderStub) Send(_ context.Context, event *cev2event.Event) (sen
 
 func (g *GenericSenderStub) URL() string {
 	return ""
+}
+
+func NewApplicationListerOrDie(ctx context.Context, appName string) *application.Lister {
+	app := applicationtest.NewApplication(appName, nil)
+	appLister := fake.NewApplicationListerOrDie(ctx, app)
+	return appLister
 }
