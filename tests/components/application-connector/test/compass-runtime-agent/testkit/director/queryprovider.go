@@ -38,6 +38,18 @@ func (qp queryProvider) assignFormationForAppMutation(applicationId, formationNa
 	) { id } }`, applicationId, formationName)
 }
 
+func (qp queryProvider) unassignFormation(applicationId, formationName string) string {
+	return fmt.Sprintf(`mutation {
+		result: unassignFormation(
+		objectID: "%s"
+		objectType: APPLICATION
+		formation: { name: "%s" }
+		) {
+			name
+		}
+}`, applicationId, formationName)
+}
+
 func (qp queryProvider) assignFormationForRuntimeMutation(runtimeId, formationName string) string {
 	return fmt.Sprintf(`mutation {
 	result: assignFormation(

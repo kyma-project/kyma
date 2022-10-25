@@ -175,6 +175,13 @@ func (w *ConvertingWebhook) convertSpecV1Alpha1ToV1Alpha2(in *serverlessv1alpha1
 			MaxReplicas: in.Spec.MaxReplicas,
 		}
 	}
+	if in.Spec.MinReplicas != nil {
+		out.Spec.Replicas = in.Spec.MinReplicas
+	} else {
+		one := int32(1)
+		out.Spec.Replicas = &one
+
+	}
 	out.Spec.Runtime = serverlessv1alpha2.Runtime(in.Spec.Runtime)
 	out.Spec.RuntimeImageOverride = in.Spec.RuntimeImageOverride
 

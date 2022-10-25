@@ -84,10 +84,16 @@ securityContext:
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
+  seccompProfile:
+    type: RuntimeDefault
 
 containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 
 rbac:
   ## If true, create & use RBAC resources
@@ -95,7 +101,7 @@ rbac:
   create: true
   ## If true, create & use Pod Security Policy resources
   ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-  pspEnabled: true
+  pspEnabled: false
   pspAnnotations: {}
 
 # for deployments that have node_exporter deployed outside of the cluster, list

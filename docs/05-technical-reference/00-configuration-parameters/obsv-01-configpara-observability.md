@@ -20,7 +20,6 @@ To override the configuration, redefine the default values in your custom `value
 
 [Logging `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/values.yaml) and subcharts:
 
-- [Fluent Bit `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/fluent-bit/values.yaml)
 - [Loki `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml)
 
 ### Tracing
@@ -28,5 +27,7 @@ To override the configuration, redefine the default values in your custom `value
 [Tracing `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/tracing/values.yaml)
 
 ### Kiali
+
+> **NOTE:** Kiali is [deprecated](https://kyma-project.io/blog/kiali-deprecation) and is planned to be removed with Kyma release 2.11. If you want to use Kiali, follow the steps to deploy Kiali yourself from our [examples](https://github.com/kyma-project/examples/blob/main/kiali/README.md).
 
 [Kiali `values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/kiali/values.yaml)

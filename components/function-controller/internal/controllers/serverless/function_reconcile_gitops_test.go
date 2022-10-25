@@ -357,7 +357,7 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			g.Expect(svc.Spec.Selector).To(gomega.Equal(deployment.Spec.Selector.MatchLabels))
 
-			t.Log("hpa creation")
+			t.Log("HPA creation")
 			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha2.Function{}
@@ -375,9 +375,9 @@ func TestGitOpsWithContinuousGitCheckout(t *testing.T) {
 
 			hpaSpec := hpaList.Items[0].Spec
 
-			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()))
+			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal(serverlessv1alpha2.FunctionKind))
+			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(serverlessv1alpha2.GroupVersion.String()))
 
 			t.Log("deployment ready")
 			deployment.Status.Conditions = []appsv1.DeploymentCondition{
@@ -650,9 +650,9 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 
 			hpaSpec := hpaList.Items[0].Spec
 
-			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(deployment.GetName()))
-			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal("Deployment"))
-			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(appsv1.SchemeGroupVersion.String()))
+			g.Expect(hpaSpec.ScaleTargetRef.Name).To(gomega.Equal(function.GetName()))
+			g.Expect(hpaSpec.ScaleTargetRef.Kind).To(gomega.Equal(serverlessv1alpha2.FunctionKind))
+			g.Expect(hpaSpec.ScaleTargetRef.APIVersion).To(gomega.Equal(serverlessv1alpha2.GroupVersion.String()))
 
 			t.Log("Deployment is ready")
 			deployment.Status.Conditions = []appsv1.DeploymentCondition{

@@ -9,11 +9,11 @@ global:
   images:
     kiali:
       name: kiali
-      version: 1.51.1-4256edd8
+      version: 1.51.1-cf0a130c
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.3.0-4256edd8
+      version: 7.3.0-cf0a130c
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
@@ -30,7 +30,7 @@ authProxy:
   enabled: true
   replicaCount: 1
   port: 3000
-  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
+  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-grafana"
   config:
     clientId: "dummy"
     clientSecret: "dummy"
@@ -48,9 +48,19 @@ authProxy:
   env: {}
   nodeSelector: {}
   securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
     allowPrivilegeEscalation: false
     privileged: false
-    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   image:
     pullPolicy: IfNotPresent
   priorityClassName: "kyma-system-priority"
@@ -136,6 +146,13 @@ deployment:
       cpu: 100m
       memory: 140Mi
   secret_name: "kiali"
+  security_context:
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
   service_annotations: {}
   service_type: ""
   tolerations: []

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/applications/mocks"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +24,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 		applicationGetterMock.On("Get", mock.Anything, "expected", v1.GetOptions{}).Return(expectedApp, nil).Once()
 
 		//when
-		applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expectedNamespace", "actualNamespace")
+		applicationComparator, err := NewComparator(assert.New(t), secretComparatorMock, applicationGetterMock, "expectedNamespace", "actualNamespace")
 		err = applicationComparator.Compare("expected", "actual")
 
 		//then
@@ -39,7 +40,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 
 		{
 			//when
-			applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
+			applicationComparator, err := NewComparator(assert.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
 			err = applicationComparator.Compare("expected", "")
 
 			//then
@@ -48,7 +49,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 
 		{
 			//when
-			applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
+			applicationComparator, err := NewComparator(assert.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
 			err = applicationComparator.Compare("", "actual")
 
 			//then
@@ -66,7 +67,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 		applicationGetterMock.On("Get", mock.Anything, "actual", v1.GetOptions{}).Return(&actualApp, errors.New("failed to get actual app")).Once()
 
 		//when
-		applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
+		applicationComparator, err := NewComparator(assert.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
 		err = applicationComparator.Compare("expected", "actual")
 
 		//then
@@ -86,7 +87,7 @@ func TestApplicationCrdCompare(t *testing.T) {
 		applicationGetterMock.On("Get", mock.Anything, "expected", v1.GetOptions{}).Return(&expectedApp, errors.New("failed to get expected app")).Once()
 
 		//when
-		applicationComparator, err := NewComparator(require.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
+		applicationComparator, err := NewComparator(assert.New(t), secretComparatorMock, applicationGetterMock, "expected", "actual")
 		err = applicationComparator.Compare("expected", "actual")
 
 		//then

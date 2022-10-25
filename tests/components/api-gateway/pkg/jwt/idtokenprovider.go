@@ -41,6 +41,7 @@ func (f *OidcHydraTestFlow) fetchIdToken() (string, error) {
 
 func (f *OidcHydraTestFlow) GetToken() (string, error) {
 	loginResp, err := f.doLogin()
+
 	if err != nil {
 		return "", err
 	}
@@ -62,8 +63,13 @@ func (f *OidcHydraTestFlow) sentConsentToGetToken(response *http.Response, conse
 		}
 		return nil
 	}
-	_, _ = f.httpClient.PostForm(response.Request.URL.String(), consentForm)
-	return token, nil
+
+	resp, err := f.httpClient.PostForm(response.Request.URL.String(), consentForm)
+	if resp.StatusCode>399 {
+		return "", fmt.Errorf("could not fetch token, err_code=%d", resp.StatusCode)
+	}
+
+	return token, err
 }
 
 func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
@@ -71,10 +77,12 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	resp, err := f.httpClient.Get(u.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP GET on auth endpoint")
 	}
+
 	loginForm := url.Values{}
 	loginForm.Set("email", f.config.UserCredentials.Username)
 	loginForm.Set("password", f.config.UserCredentials.Password)
@@ -83,6 +91,11 @@ func (f *OidcHydraTestFlow) doLogin() (*http.Response, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
+
+	if resp.StatusCode>399 {
+		return nil, fmt.Errorf("could not doLogin, err_code=%d", resp.StatusCode)
+	}
+	
 	return resp, nil
 }
 

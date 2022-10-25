@@ -28,4 +28,13 @@ resources:
   webhooks:
     validation: true
     webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kyma-project.io
+  group: telemetry
+  kind: TracePipeline
+  path: github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1
+  version: v1alpha1
 version: "3"

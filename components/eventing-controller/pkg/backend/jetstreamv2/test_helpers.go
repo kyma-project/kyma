@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/nats-io/nats-server/v2/server"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	nats2 "github.com/cloudevents/sdk-go/protocol/nats/v2"
@@ -19,16 +23,37 @@ import (
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 )
 
+const (
+	DefaultStreamName    = "kyma"
+	DefaultMaxReconnects = 10
+	DefaultMaxInFlights  = 10
+)
+
+// TestEnvironment provides mocked resources for tests.
+type TestEnvironment struct {
+	jsBackend  *JetStream
+	logger     *logger.Logger
+	natsServer *server.Server
+	jsClient   *jetStreamClient
+	natsConfig env.NatsConfig
+	cleaner    cleaner.Cleaner
+	natsPort   int
+}
+
 func SendEventToJetStream(jsClient *JetStream, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
 	eventType := evtestingv2.OrderCreatedCleanEvent
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
-	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, v1alpha2.TypeMatchingStandard), []byte(sampleEvent))
+	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean,
+		eventType,
+		v1alpha2.TypeMatchingStandard,
+	), []byte(sampleEvent))
 }
 
-func sendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string, typeMatching v1alpha2.TypeMatching) error {
+func sendEventToJetStreamOnEventType(jsClient *JetStream,
+	eventType string, data string, typeMatching v1alpha2.TypeMatching) error {
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := natstesting.NewNatsMessagePayload(data, "id", evtestingv2.EventSourceClean, eventTime, eventType)
 	return jsClient.Conn.Publish(jsClient.getJetStreamSubject(evtestingv2.EventSourceClean, eventType, typeMatching), []byte(sampleEvent))
@@ -58,8 +83,8 @@ func sendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, c
 	if err != nil {
 		return err
 	}
-	if err := event.Validate(); err != nil {
-		return err
+	if validateErr := event.Validate(); validateErr != nil {
+		return validateErr
 	}
 	// get a CE sender for the embedded NATS using CE-SDK
 	natsOpts := nats2.NatsOptions()
@@ -85,7 +110,7 @@ func sendCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData, c
 }
 
 func AddJSCleanEventTypesToStatus(sub *v1alpha2.Subscription, cleaner cleaner.Cleaner) error {
-	cleanEventType, err := getCleanEventTypes(sub, cleaner)
+	cleanEventType, err := GetCleanEventTypes(sub, cleaner)
 	if err != nil {
 		return err
 	}

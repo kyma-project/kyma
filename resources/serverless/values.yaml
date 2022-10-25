@@ -65,6 +65,10 @@ global:
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
+  configuration:
+    configmapName: 'serverless-configuration'
+    targetDir: "/appdata"
+    filename: "config.yaml"
   ingress:
     domainName:
   containerRegistry:
@@ -76,25 +80,25 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15761"
+      version: "PR-15868"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15761"
+      version: "PR-15868"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15761"
+      version: "PR-15868"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-15671"
+      version: "v20221011-831da39d"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-15761"
+      version: "v20221011-831da39d"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-15671"
+      version: "v20221011-831da39d"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-15671"
+      version: "v20221011-831da39d"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-a550386f"
@@ -110,7 +114,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "05ca702a"
+      version: "v20221013-5a653721"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -172,14 +176,12 @@ containers:
       port: "8090"
     extraProperties: {}
     configuration:
-      targetDir: "/appdata"
-      filename: "config.yaml"
       data:
         logLevel: "info"
         logFormat: "json"
     envs:
-      fileConfigPath:
-        value: "{{ .Values.containers.manager.configuration.targetDir }}/{{ .Values.containers.manager.configuration.filename }}"
+      configPath:
+        value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -204,6 +206,10 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      # Deprecated as of kyma 2.8
+      # TODO : remove this ENV in 2.10 (two version compatibility rule for open source)
+      functionJaegerServiceEndpoint:
+        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
         value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:

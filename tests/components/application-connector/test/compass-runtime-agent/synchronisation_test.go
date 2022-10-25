@@ -10,57 +10,55 @@ import (
 	"time"
 )
 
-// TODO: those values needs to be carefully picked to be in line with Compass Runtime Agent's configuration
-const checkAppExistsPeriod = 30 * time.Second
+const checkAppExistsPeriod = 10 * time.Second
 const appCreationTimeout = 2 * time.Minute
 
 type ApplicationReader interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
 
-func (gs *CompassRuntimeAgentSuite) TestCreatingApplications() {
-	// Created in chart
+func (cs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	expectedAppName := "app1"
 	compassAppName := expectedAppName + random.RandomString(10)
 
-	//Create Application in Director and wait until it gets created
-	applicationInterface := gs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	applicationID, err := gs.createAppAndWaitForSync(applicationInterface, compassAppName, expectedAppName)
-	gs.Require().NoError(err)
+	//Create Application in Director
+	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
+	cs.Require().NoError(err)
+
+	synchronizedCompassAppName := fmt.Sprintf("mp-%s", compassAppName)
+
+	applicationInterface := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
+	err = cs.assignApplicationToFormationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
+	cs.Assert().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-	err = gs.appComparator.Compare(expectedAppName, compassAppName)
-	gs.Require().NoError(err)
+	err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
+	cs.Assert().NoError(err)
 
 	// Clean up
-	err = gs.directorClient.UnregisterApplication(applicationID)
-	gs.Require().NoError(err)
+	err = cs.directorClient.UnassignApplication(applicationID, cs.formationName)
+	cs.Assert().NoError(err)
+
+	err = cs.directorClient.UnregisterApplication(applicationID)
+	cs.Require().NoError(err)
 }
 
-func (gs *CompassRuntimeAgentSuite) createAppAndWaitForSync(appReader ApplicationReader, compassAppName, expectedAppName string) (string, error) {
-
-	var applicationID string
-
-	scenarioName := "auto-testing"
+func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
 
 	exec := func() error {
-		id, err := gs.directorClient.RegisterApplication(compassAppName, scenarioName)
-		if err != nil {
-			applicationID = id
-		}
-		return err
+		return cs.directorClient.AssignApplicationToFormation(applicationID, cs.formationName)
 	}
 
 	verify := func() bool {
-		_, err := appReader.Get(context.Background(), expectedAppName, v1.GetOptions{})
+		_, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
 		if err != nil {
-			gs.T().Log(fmt.Sprintf("Failed to get app: %v", err))
+			cs.T().Log(fmt.Sprintf("Failed to get app: %v", err))
 		}
 
-		return err != nil
+		return err == nil
 	}
 
-	return applicationID, executor.ExecuteAndWaitForCondition{
+	return executor.ExecuteAndWaitForCondition{
 		RetryableExecuteFunc: exec,
 		ConditionMetFunc:     verify,
 		Tick:                 checkAppExistsPeriod,

@@ -6,18 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-
+	"github.com/nats-io/nats-server/v2/server"
+	natsio "github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
-
-	"github.com/nats-io/nats-server/v2/server"
-	natsio "github.com/nats-io/nats.go"
-	"github.com/stretchr/testify/require"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
@@ -28,11 +23,14 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/latency"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 // NATSHandlerMock represents a mock for the nats.Handler.
@@ -69,7 +67,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NATSHandlerMockOpt) *
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", port, health.ReadinessURI),
 		logger:              mockedLogger,
 		natsConfig:          newNATSConfig(port),
-		collector:           metrics.NewCollector(),
+		collector:           metrics.NewCollector(latency.NewBucketsProvider()),
 		legacyTransformer:   &legacy.Transformer{},
 		subscribedProcessor: &subscribed.Processor{},
 		eventTypeCleaner:    eventtypetest.CleanerFunc(eventtypetest.DefaultCleaner),
