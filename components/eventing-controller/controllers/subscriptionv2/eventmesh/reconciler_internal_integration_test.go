@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -237,9 +239,9 @@ func Test_replaceStatusCondition(t *testing.T) {
 			sub := tt.giveSubscription
 			condition := tt.giveCondition
 			statusChanged := r.replaceStatusCondition(sub, condition)
-			require.Equal(t, tt.wantStatusChanged, statusChanged)
-			require.Contains(t, sub.Status.Conditions, condition)
-			require.Equal(t, tt.wantReady, sub.Status.Ready)
+			assert.Equal(t, tt.wantStatusChanged, statusChanged)
+			assert.Contains(t, sub.Status.Conditions, condition)
+			assert.Equal(t, tt.wantReady, sub.Status.Ready)
 		})
 	}
 }
@@ -305,8 +307,8 @@ func Test_getRequiredConditions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotConditions := getRequiredConditions(tc.subscriptionConditions, expectedConditions)
-			require.True(t, eventingv1alpha2.ConditionsEquals(gotConditions, tc.wantConditions))
-			require.Len(t, gotConditions, len(expectedConditions))
+			assert.True(t, eventingv1alpha2.ConditionsEquals(gotConditions, tc.wantConditions))
+			assert.Len(t, gotConditions, len(expectedConditions))
 		})
 	}
 }
@@ -398,8 +400,8 @@ func Test_syncConditionSubscribed(t *testing.T) {
 
 			// then
 			newCondition := sub.Status.FindCondition(tc.wantCondition.Type)
-			require.NotNil(t, newCondition)
-			require.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
+			assert.NotNil(t, newCondition)
+			assert.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
 		})
 	}
 }
@@ -501,8 +503,8 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 
 			// then
 			newCondition := sub.Status.FindCondition(tc.wantCondition.Type)
-			require.NotNil(t, newCondition)
-			require.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
+			assert.NotNil(t, newCondition)
+			assert.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
 		})
 	}
 }
@@ -650,8 +652,8 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 
 			// then
 			newCondition := sub.Status.FindCondition(tc.wantCondition.Type)
-			require.NotNil(t, newCondition)
-			require.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
+			assert.NotNil(t, newCondition)
+			assert.True(t, eventingv1alpha2.ConditionEquals(*newCondition, tc.wantCondition))
 		})
 	}
 }
@@ -738,11 +740,11 @@ func Test_checkStatusActive(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotStatus, err := r.checkStatusActive(tc.subscription)
-			require.Equal(t, tc.wantStatus, gotStatus)
+			assert.Equal(t, tc.wantStatus, gotStatus)
 			if tc.wantError == nil {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 			} else {
-				require.Error(t, tc.wantError, err)
+				assert.Error(t, tc.wantError, err)
 			}
 		})
 	}
@@ -844,11 +846,11 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result, err := r.checkLastFailedDelivery(tc.givenSubscription)
-			require.Equal(t, tc.wantResult, result)
+			assert.Equal(t, tc.wantResult, result)
 			if tc.wantError == nil {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 			} else {
-				require.Error(t, tc.wantError, err)
+				assert.Error(t, tc.wantError, err)
 			}
 		})
 	}
