@@ -64,11 +64,6 @@ spec:
             value: "{{ .Values.eventingBackend.defaultDispatcherMaxRetries }}"
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
-          - name: APP_LOG_LEVEL
-            valueFrom:
-              configMapKeyRef:
-                name: {{ .Values.global.configMap.name }}
-                key: {{ .Values.global.configMap.keys.appLogLevel }}
           - name: JS_STREAM_NAME
             value: {{ .Values.jetstream.streamName | quote }}
           - name: JS_STREAM_STORAGE_TYPE
@@ -130,7 +125,7 @@ spec:
               name: cert
               readOnly: true
             - mountPath: /ect/config
-              name: config
+              name: log-config
           {{- end }}
       {{- if .Values.enableNewCRDVersion }}
       volumes:
@@ -138,9 +133,9 @@ spec:
           secret:
             defaultMode: 420
             secretName: eventing-webhook-server-cert
-        - name: config
+        - name: log-config
           configMap:
-            name: {{ .Values.global.configMap.name }}
+            name: {{ .Values.global.log.configMap.name }}
       {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}

@@ -5,5 +5,4 @@ metadata:
   labels: {{ include "eventing.labels" . | nindent 4 }}
 data:
   {{ .Values.global.configMap.keys.eventTypePrefix }}: {{ .Values.global.configMap.values.eventTypePrefix | quote }}
-  {{ .Values.global.configMap.keys.appLogLevel }}: {{ .Values.global.configMap.values.appLogLevel | quote }}
 ---
