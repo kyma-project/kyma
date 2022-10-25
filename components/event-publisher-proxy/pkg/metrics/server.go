@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"strings"
@@ -43,7 +44,9 @@ func (s *Server) Start(address string) error {
 		go func() {
 			err := s.srv.Serve(listener)
 			if err != nil {
-				s.logger.WithContext().Fatal(err)
+				if !errors.Is(err, http.ErrServerClosed) {
+					s.logger.WithContext().Fatal(err)
+				}
 			}
 		}()
 	}

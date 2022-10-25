@@ -115,6 +115,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, http.StatusInternalServerError, event, err.Error())
 		return
 	}
+	h.namedLogger().With().Debug(result)
 
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), event, string(result.ResponseBody()))
@@ -153,6 +154,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		h.namedLogger().With().Error(err)
 		return
 	}
+	h.namedLogger().With().Debug(result)
 
 	err = writeResponse(writer, result.HTTPStatus(), result.ResponseBody())
 	if err != nil {
