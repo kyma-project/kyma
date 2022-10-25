@@ -4,8 +4,7 @@ title: Published events are pending in the stream
 
 ## Symptom
 
-You publish an event but the event is not received by the subscriber and stays pending in the stream. 
-Some events are reaching the sink, some are not.
+You publish events, but some of them are not received by the subscriber and stay pending in the stream.
 
 ## Cause
 
@@ -13,28 +12,28 @@ When NATS EventingBackend has more than 1 replica and the `Clustering` property 
 a leader-election is taking place on the stream and consumer levels (see [NATS Documentation](https://docs.nats.io/running-a-nats-service/configuration/clustering/jetstream_clustering)).
 Once the leader is elected, all the messages are being replicated across the replicas.
 
-Sometimes stream or consumer leaders can go out-of-sync with the other replicas. 
-As a result of this, messages on some consumers can stop being Acknowledged and start piling up in the stream.  
+Sometimes replicas can go out-of-sync with the other replicas.
+As a result of this, messages on some consumers can stop being acknowledged and start piling up in the stream.  
 
 ## Remedy
 
-There are two ways of how to fix the broken consumers with pending messages. You will need either to trigger a leader reelection on the consumers
-with pending messages. If that doesn't help, you should try trigger the leader reelection on the stream level.
+There are two ways of how to fix the "broken" consumers with pending messages. You will need either to trigger a leader reelection either on the consumers
+with pending messages or on the stream level.
 
 ### Trigger Consumer leader election
-First, you need to find out which consumer(s) have pending messages. For that you will need the latest version of NATS cli installed on your machine.
-You find the broken consumer in two ways: by using Grafana dashboard or by directly using the NATS cli command.
+First, you need to find out which consumer(s) have pending messages. For that you need the latest version of NATS cli installed on your machine.
+You can find the broken consumer in two ways: by using Grafana dashboard or by directly using the NATS cli command.
 
 #### Find the broken consumers using Grafana dashboard
 
 1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md)
 2. Find the NATS JetStream Dashboard and check the pending messages
    ![Pending consumer](./../../assets/grafana_pending_consumer.png)
-3. Find the consumer with pending messages and converts its name to md5 encoding
+3. Find the consumer with pending messages and encode it as md5 hash:
 ```bash
 echo -n "tunas-testing/test-noapp3/kyma.sap.kyma.custom.noapp.order.created.v1" | md5
 ```
-results in `6642d54a92f357ba28280b9cb609e79d`.
+this shell command results in `6642d54a92f357ba28280b9cb609e79d`.
 4. Then, you need to find consumer's leader:
 ```bash
 nats consumer info sap 6642d54a92f357ba28280b9cb609e79d
@@ -56,7 +55,7 @@ Cluster Information:
              Replica: eventing-nats-0, current, seen 0.96s ago
              Replica: eventing-nats-2, current, seen 0.96s ago
 ```
-You can see, that its leader is the eventing-nats-1 replica.
+You can see, that its leader is the `eventing-nats-1` replica.
 
 #### Find the broken consumers using the NATS cli
 If you have NATS cli installed on your machine, you can simply run this shell script:
@@ -75,22 +74,23 @@ here you can see, that the consumer `6bfe94b513b39fb348e97b959c632e28` has pendi
 is successfully processing events. 
 
 #### Trigger the consumer leader reelection
-Now, when we know the name of the broken consumer and its leader, we can reelect its new leader.
-First, you need to port-forward the leader replica and trigger the leader reelection for that broken consumer:
+Now, when we know the name of the broken consumer and its leader, we can trigger the reelection:
+
+1. You need to port-forward the leader replica and trigger the leader reelection for that broken consumer
 ```bash
 kubectl port-forward -n kyma-system eventing-nats-1 4222  
 ```
-and trigger the leader reelection:
+2. Trigger the leader reelection:
 ```bash
 nats consumer cluster step-down $stream_name 6642d54a92f357ba28280b9cb609e79d
 ```
-after execution, you see the following message:
+After execution, you see the following message:
 ```yaml
 New leader elected "eventing-nats-2"
 
 Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-24T15:49:43+02:00
 ```
-You can check the consumer now and confirm if the pending messages started to be dispatched.
+You can check the consumer now and confirm that the pending messages started to be dispatched.
 
 ### Restart the NATS pods and trigger the stream leader reelection
 Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case you should try to trigger leader reelection on the stream level.
