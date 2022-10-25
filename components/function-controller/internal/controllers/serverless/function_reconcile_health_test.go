@@ -41,6 +41,6 @@ func TestFunctionReconciler_Reconcile_HealthCheck(t *testing.T) {
 		result, err := reconciler.Reconcile(context.Background(), healthRequest)
 
 		g.Expect(result).To(gomega.Equal(ctrl.Result{}))
-		g.Expect(err).NotTo(gomega.BeNil())
+		g.Expect(err).To(gomega.MatchError(healthCheckErr))
 	})
 }
