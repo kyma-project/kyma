@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,9 +35,6 @@ func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeo
 func (h HealthChecker) Checker(req *http.Request) error {
 	h.log.Debug("Liveness handler triggered")
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.timeout)
-	defer cancel()
-
 	checkEvent := event.GenericEvent{
 		Object: &corev1.Event{
 			ObjectMeta: metav1.ObjectMeta{
@@ -48,27 +44,16 @@ func (h HealthChecker) Checker(req *http.Request) error {
 	}
 	select {
 	case h.checkCh <- checkEvent:
-	case <-ctx.Done():
+	case <-time.After(h.timeout):
 		return errors.New("timeout when sending check event")
 	}
 
 	h.log.Debug("check event send to reconcile loop")
-	return h.readHealthChannel(ctx)
-}
-
-func (h HealthChecker) readHealthChannel(ctx context.Context) error {
 	select {
 	case <-h.healthCh:
 		h.log.Debug("reconcile loop is healthy")
-
-		healthChQueue := len(h.healthCh)
-		if healthChQueue == 0 {
-			return nil
-		}
-
-		h.log.Debugf("found '%d' queued events left", healthChQueue)
-		return h.readHealthChannel(ctx)
-	case <-ctx.Done():
+		return nil
+	case <-time.After(h.timeout):
 		h.log.Debug("reconcile timeout")
 		return errors.New("reconcile didn't send confirmation")
 	}

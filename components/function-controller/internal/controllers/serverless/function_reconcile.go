@@ -168,7 +168,7 @@ func (r *FunctionReconciler) sendHealthCheck() {
 	case r.healthCh <- true:
 		r.Log.Debug("health check request responded")
 	case <-time.After(healthCheckTimeout):
-		r.Log.Error(healthCheckErr)
+		r.Log.Warn(healthCheckErr)
 	}
 }
 
@@ -199,7 +199,6 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 			PushAddress:                    data["registryAddress"],
 			PullAddress:                    data["registryAddress"],
 		}, nil
-
 	}
 
 	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)

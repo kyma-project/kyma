@@ -1,7 +1,6 @@
 package serverless_test
 
 import (
-	"sync"
 	"testing"
 	"time"
 
@@ -73,43 +72,6 @@ func TestHealthChecker_Checker(t *testing.T) {
 
 		//THEN
 		require.Error(t, err)
-	})
-
-	t.Run("send a few events", func(t *testing.T) {
-		//GIVEN
-		timeout := 10 * time.Second
-		inCh := make(chan event.GenericEvent, 1)
-		outCh := make(chan bool, 1)
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
-		var wg sync.WaitGroup
-
-		//WHEN
-
-		wg.Add(3)
-
-		go func() {
-			outCh <- true
-			wg.Done()
-		}()
-		go func() {
-			outCh <- true
-			wg.Done()
-		}()
-
-		go func() {
-			check := <-inCh
-			require.Equal(t, check.Object.GetName(), serverless.HealthEvent)
-			wg.Done()
-		}()
-
-		err := checker.Checker(nil)
-
-		//THEN
-
-		wg.Wait()
-
-		require.NoError(t, err)
-		require.Len(t, outCh, 0)
 	})
 }
 
