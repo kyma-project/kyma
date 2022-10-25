@@ -31,6 +31,7 @@ type OAuthClient interface {
 	GetTokenMTLS(clientID, authURL string, certificate, privateKey []byte, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
 	// InvalidateTokenCache resets internal token cache
 	InvalidateTokenCache(clientID string, clientSecret string, authURL string)
+	InvalidateTokenCacheMTLS(clientID, authURL string, certificate, privateKey []byte)
 }
 
 type authorizationStrategyFactory struct {

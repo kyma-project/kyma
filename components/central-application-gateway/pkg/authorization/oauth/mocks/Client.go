@@ -63,6 +63,11 @@ func (_m *Client) InvalidateTokenCache(clientID string, clientSecret string, aut
 	_m.Called(clientID, clientSecret, authURL)
 }
 
+// InvalidateTokenCacheMTLS provides a mock function with given fields: clientID, authURL, certificate, privateKey
+func (_m *Client) InvalidateTokenCacheMTLS(clientID string, authURL string, certificate []byte, privateKey []byte) {
+	_m.Called(clientID, authURL, certificate, privateKey)
+}
+
 type mockConstructorTestingTNewClient interface {
 	mock.TestingT
 	Cleanup(func())

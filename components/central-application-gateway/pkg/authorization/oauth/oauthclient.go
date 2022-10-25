@@ -32,6 +32,7 @@ type Client interface {
 	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
 	GetTokenMTLS(clientID, authURL string, certificate, privateKey []byte, headers, queryParameters *map[string][]string, skipVerify bool) (string, apperrors.AppError)
 	InvalidateTokenCache(clientID string, clientSecret string, authURL string)
+	InvalidateTokenCacheMTLS(clientID, authURL string, certificate, privateKey []byte)
 }
 
 type client struct {
@@ -85,6 +86,10 @@ func (c *client) GetTokenMTLS(clientID, authURL string, certificate, privateKey 
 
 func (c *client) InvalidateTokenCache(clientID, clientSecret, authURL string) {
 	c.tokenCache.Remove(c.makeOAuthTokenCacheKey(clientID, clientSecret, authURL))
+}
+
+func (c *client) InvalidateTokenCacheMTLS(clientID, authURL string, certificate, privateKey []byte) {
+	c.tokenCache.Remove(c.makeMTLSOAuthTokenCacheKey(clientID, authURL, certificate, privateKey))
 }
 
 // to avoid case of single clientID and different endpoints for MTLS and standard oauth
