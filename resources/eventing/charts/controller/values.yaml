@@ -47,6 +47,9 @@ metrics:
 webhook:
   port: 443
   targetPort: 9443
+  crdName: subscriptions.eventing.kyma-project.io
+  secretName: eventing-webhook-server-cert
+  certHandlerImage: eu.gcr.io/kyma-project/api-gateway-webhook-certificates:v20221027-987e5471
 
 clusterRoleBindingSuffix: ""
 
