@@ -8,7 +8,6 @@ import (
 
 const (
 	JetStreamSubjectPrefix = "kyma"
-	DefaultMaxInFlight     = 10
 )
 
 // NatsConfig represents the environment config for the Eventing Controller with Nats.

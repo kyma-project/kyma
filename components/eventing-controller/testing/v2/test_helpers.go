@@ -47,6 +47,8 @@ const (
 	OrderCreatedV2Event         = "order.created.v2"
 	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
 	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
+	JetStreamSubject            = "kyma" + "." + EventSourceClean + "." + OrderCreatedV1Event
+	JetStreamSubjectV2          = "kyma" + "." + EventSourceClean + "." + OrderCreatedCleanEvent
 
 	EventMeshExactType          = EventMeshPrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1EventNotClean
 	EventMeshOrderCreatedV1Type = EventMeshPrefix + "." + ApplicationName + "." + OrderCreatedV1Event
@@ -320,6 +322,12 @@ func WithStatusTypes(cleanEventTypes []eventingv1alpha2.EventType) SubscriptionO
 		} else {
 			sub.Status.Types = cleanEventTypes
 		}
+	}
+}
+
+func WithStatusJSBackendTypes(types []eventingv1alpha2.JetStreamTypes) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Status.Backend.Types = types
 	}
 }
 

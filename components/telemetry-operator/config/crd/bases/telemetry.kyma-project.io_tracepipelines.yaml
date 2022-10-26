@@ -41,6 +41,54 @@ spec:
                   otlp:
                     description: Otlp defines an output using the OpenTelmetry protocol.
                     properties:
+                      authentication:
+                        description: Authentication defines authentication options
+                          for the OTLP output
+                        properties:
+                          basic:
+                            description: Basic contains credentials for HTTP basic
+                              auth
+                            properties:
+                              password:
+                                description: Password contains the basic auth password
+                                  or a secret reference
+                                properties:
+                                  value:
+                                    type: string
+                                  valueFrom:
+                                    properties:
+                                      secretKeyRef:
+                                        properties:
+                                          key:
+                                            type: string
+                                          name:
+                                            type: string
+                                          namespace:
+                                            type: string
+                                        type: object
+                                    type: object
+                                type: object
+                              user:
+                                description: User contains the basic auth username
+                                  or a secret reference
+                                properties:
+                                  value:
+                                    type: string
+                                  valueFrom:
+                                    properties:
+                                      secretKeyRef:
+                                        properties:
+                                          key:
+                                            type: string
+                                          name:
+                                            type: string
+                                          namespace:
+                                            type: string
+                                        type: object
+                                    type: object
+                                type: object
+                            type: object
+                        type: object
                       endpoint:
                         description: Endpoint defines the host and port (<host>:<port>)
                           of an OTLP endpoint.

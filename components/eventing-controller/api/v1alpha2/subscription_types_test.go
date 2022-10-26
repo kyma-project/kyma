@@ -1,7 +1,6 @@
 package v1alpha2_test
 
 import (
-	"strconv"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -11,11 +10,11 @@ import (
 )
 
 func TestGetMaxInFlightMessages(t *testing.T) {
+	defaultSubConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
 	testCases := []struct {
 		name              string
 		givenSubscription *v1alpha2.Subscription
 		wantResult        int
-		wantErr           error
 	}{
 		{
 			name: "function should give the default MaxInFlight if the Subscription config is missing",
@@ -24,8 +23,7 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 					Config: nil,
 				},
 			},
-			wantResult: env.DefaultMaxInFlight,
-			wantErr:    nil,
+			wantResult: defaultSubConfig.MaxInFlightMessages,
 		},
 		{
 			name: "function should give the default MaxInFlight if it is missing in the Subscription config",
@@ -35,8 +33,7 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 						"otherConfigKey": "20"},
 				},
 			},
-			wantResult: env.DefaultMaxInFlight,
-			wantErr:    nil,
+			wantResult: defaultSubConfig.MaxInFlightMessages,
 		},
 		{
 			name: "function should give the expectedConfig",
@@ -47,7 +44,6 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 				},
 			},
 			wantResult: 20,
-			wantErr:    nil,
 		},
 		{
 			name: "function should result into an error",
@@ -57,18 +53,16 @@ func TestGetMaxInFlightMessages(t *testing.T) {
 						v1alpha2.MaxInFlightMessages: "nonInt"},
 				},
 			},
-			wantResult: -1,
-			wantErr:    &strconv.NumError{Func: "Atoi", Num: "nonInt", Err: strconv.ErrSyntax},
+			wantResult: defaultSubConfig.MaxInFlightMessages,
 		},
 	}
 
 	for _, testCase := range testCases {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := tc.givenSubscription.GetMaxInFlightMessages()
+			result := tc.givenSubscription.GetMaxInFlightMessages(&defaultSubConfig)
 
 			assert.Equal(t, tc.wantResult, result)
-			assert.Equal(t, err, tc.wantErr)
 		})
 	}
 }
