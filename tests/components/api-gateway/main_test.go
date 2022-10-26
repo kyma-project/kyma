@@ -97,6 +97,11 @@ func InitApiGatewayTest() {
 
 	helper = helpers.NewHelper(httpClient, commonRetryOpts)
 
+	mapper, err := client.GetDiscoveryMapper()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	client, err := client.GetDynamicClient()
 	if err != nil {
 		t.Fatal(err)
@@ -106,6 +111,7 @@ func InitApiGatewayTest() {
 
 	batch = &resource.Batch{
 		ResourceManager: resourceManager,
+		Mapper:          mapper,
 	}
 
 	// create common resources for all scenarios
@@ -125,7 +131,7 @@ func InitApiGatewayTest() {
 	}
 
 	// delete test namespace if the previous test namespace persists
-	nsResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(globalCommonResources[0])
+	nsResourceSchema, ns, name := batch.GetResourceSchemaAndNamespace(globalCommonResources[0])
 	log.Printf("Delete test namespace, if exists: %s\n", name)
 	err = resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
 	if err != nil {
@@ -165,7 +171,7 @@ func InitApiGatewayTest() {
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
 	// Get HydraClient Status
-	hydraClientResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(hydraClientResource[0])
+	hydraClientResourceSchema, ns, name := batch.GetResourceSchemaAndNamespace(hydraClientResource[0])
 	clientStatus, err := resourceManager.GetStatus(k8sClient, hydraClientResourceSchema, ns, name)
 	errorStatus, ok := clientStatus["reconciliationError"].(map[string]interface{})
 	if err != nil || !ok {
@@ -174,6 +180,61 @@ func InitApiGatewayTest() {
 	if len(errorStatus) != 0 {
 		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
 	}
+}
+
+func InitCustomDomainTest() {
+	pflag.Parse()
+	goDogOpts.Paths = pflag.Args()
+
+	if os.Getenv(exportResultVar) == "true" {
+		goDogOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
+	}
+
+	if err := envconfig.Init(&conf); err != nil {
+		log.Fatalf("Unable to setup config: %v", err)
+	}
+
+	if conf.IsMinikubeEnv {
+		var err error
+		log.Printf("Using dedicated ingress client")
+		httpClient, err = ingressgateway.FromEnv().Client()
+		if err != nil {
+			log.Fatalf("Unable to initialize ingress gateway client: %v", err)
+		}
+	} else {
+		log.Printf("Fallback to default http client")
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+			Timeout: conf.ClientTimeout,
+		}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	namespace = fmt.Sprintf("custom-domain-test-%s", generateRandomString(6))
+	log.Printf("Using namespace: %s\n", namespace)
+
+	commonRetryOpts := []retry.Option{
+		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
+		retry.Attempts(conf.ReqTimeout / conf.ReqDelay),
+		retry.DelayType(retry.FixedDelay),
+	}
+
+	helper = helpers.NewHelper(httpClient, commonRetryOpts)
+
+	client, err := client.GetDynamicClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	k8sClient = client
+	resourceManager = &resource.Manager{RetryOptions: commonRetryOpts}
+
+	batch = &resource.Batch{
+		ResourceManager: resourceManager,
+	}
+
 }
 
 func TestApiGateway(t *testing.T) {
@@ -232,6 +293,9 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 }
 
 func TestCustomDomain(t *testing.T) {
+	InitApiGatewayTest()
+	loadBalancerIP, _ := getLoadBalancerIP()
+	fmt.Println(loadBalancerIP)
 	customDomainOpts := goDogOpts
 	customDomainOpts.Paths = []string{"features/gardener/custom_domain.feature"}
 	customDomainOpts.Concurrency = conf.TestConcurency
@@ -253,7 +317,7 @@ func TestCustomDomain(t *testing.T) {
 
 	//Remove namespace
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}
-	err := k8sClient.Resource(res).Delete(context.Background(), "custom-domain-test", v1.DeleteOptions{})
+	err := k8sClient.Resource(res).Delete(context.Background(), namespace, v1.DeleteOptions{})
 	if err != nil {
 		log.Print(err.Error())
 	}

@@ -1,0 +1,76 @@
+apiVersion: dns.gardener.cloud/v1alpha1
+kind: DNSProvider
+metadata:
+  name: "{{.NamePrefix}}-{{.TestID}}"
+  namespace: "{{.Namespace}}"
+  annotations:
+    dns.gardener.cloud/class: garden
+spec:
+  type: google-clouddns
+  secretRef:
+    name: google-credentials
+    namespace: default
+  domains:
+    include:
+      - "{{.LoadBalancerIP}}"
+--- 
+apiVersion: dns.gardener.cloud/v1alpha1
+kind: DNSEntry
+metadata:
+  name: "{{.NamePrefix}}-{{.TestID}}"
+  namespace: "{{.Namespace}}"
+  annotations:
+    dns.gardener.cloud/class: garden
+spec:
+  dnsName: "*.{{.Subdomain}}"
+  ttl: 600
+  targets:
+    - "{{.LoadBalancerIP}}"
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Issuer
+metadata:
+  name: "{{.NamePrefix}}-{{.TestID}}"
+  namespace: "{{.Namespace}}"
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: goats@sap.com
+    autoRegistration: true
+    privateKeySecretRef:
+      name: "{{.NamePrefix}}-{{.TestID}}-secret"
+      namespace: "{{.Namespace}}"
+    domains:
+      include:
+        - "{{.Subdomain}}"
+--- 
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: "{{.NamePrefix}}-{{.TestID}}"
+  namespace: "{{.Namespace}}"
+spec:
+  commonName: "{{.Subdomain}}"
+  issuerRef:
+    name: "{{.NamePrefix}}-{{.TestID}}"
+    namespace: "{{.Namespace}}"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: "{{.NamePrefix}}-{{.TestID}}"
+  namespace: "{{.Namespace}}"
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - '*.{{.Subdomain}}'
+      port:
+        name: httpbin-{{.TestID}}
+        number: 443
+        protocol: HTTPS
+      tls:
+        credentialName: kyma-gateway-certs
+        mode: SIMPLE
+---

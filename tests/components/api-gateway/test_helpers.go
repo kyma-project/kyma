@@ -37,6 +37,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/client-go/restmapper"
 )
 
 const (
@@ -67,6 +68,7 @@ var (
 	conf            Config
 	httpClient      *http.Client
 	k8sClient       dynamic.Interface
+	mapper          *restmapper.DeferredDiscoveryRESTMapper
 	helper          *helpers.Helper
 	jwtConfig       *jwt.Config
 	oauth2Cfg       *clientcredentials.Config
