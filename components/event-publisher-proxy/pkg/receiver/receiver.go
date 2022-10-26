@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// defaultShutdownTimeout is the default timeout for the receiver to shutdown.
+	// defaultShutdownTimeout is the default timeout for the receiver to shut down.
 	defaultShutdownTimeout = 1 * time.Minute
 	readHeaderTimeout      = 5 * time.Second
 
@@ -22,34 +22,35 @@ const (
 
 // HTTPMessageReceiver is responsible for receiving messages over HTTP.
 type HTTPMessageReceiver struct {
-	port     int
+	Host     string
+	Port     int
 	handler  http.Handler
 	server   *http.Server
 	listener net.Listener
 }
 
-// NewHTTPMessageReceiver returns a new NewHTTPMessageReceiver instance with the given port.
+// NewHTTPMessageReceiver returns a new NewHTTPMessageReceiver instance with the given Port.
 func NewHTTPMessageReceiver(port int) *HTTPMessageReceiver {
-	return &HTTPMessageReceiver{port: port}
+	return &HTTPMessageReceiver{Port: port}
 }
 
 // StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal.
-func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Handler, logger *kymalogger.Logger) error {
+func (r *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Handler, logger *kymalogger.Logger) error {
 	var err error
-	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
+	if r.listener, err = net.Listen("tcp", fmt.Sprintf("%v:%d", r.Host, r.Port)); err != nil {
 		return err
 	}
 
-	recv.handler = createHandler(handler)
-	recv.server = &http.Server{
-		Addr:              recv.listener.Addr().String(),
-		Handler:           recv.handler,
+	r.handler = createHandler(handler)
+	r.server = &http.Server{
+		Addr:              r.listener.Addr().String(),
+		Handler:           r.handler,
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	errChan := make(chan error, 1)
 	go func() {
-		errChan <- recv.server.Serve(recv.listener)
+		errChan <- r.server.Serve(r.listener)
 	}()
 
 	// init the contexted logger
@@ -60,9 +61,10 @@ func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.H
 	// wait for the server to return or ctx.Done().
 	select {
 	case <-ctx.Done():
+		logger.WithContext().Info("shutdown")
 		ctx, cancel := context.WithTimeout(context.Background(), defaultShutdownTimeout)
 		defer cancel()
-		err := recv.server.Shutdown(ctx)
+		err := r.server.Shutdown(ctx)
 		<-errChan // Wait for server goroutine to exit
 		return err
 	case err := <-errChan:
@@ -73,4 +75,8 @@ func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.H
 // createHandler returns a new opentracing HTTP handler wrapper for the given HTTP handler.
 func createHandler(handler http.Handler) http.Handler {
 	return &ochttp.Handler{Handler: handler}
+}
+
+func (r *HTTPMessageReceiver) BaseURL() string {
+	return fmt.Sprintf("http://%s", r.listener.Addr())
 }

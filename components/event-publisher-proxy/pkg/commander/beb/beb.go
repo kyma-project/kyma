@@ -15,14 +15,15 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
@@ -75,7 +76,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := sender.NewBEBMessageSender(c.envCfg.EmsPublishURL, client)
+	messageSender := beb.NewSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -96,7 +97,8 @@ func (c *Commander) Start() error {
 	subLister := subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
-		Config:             c.envCfg,
+		Prefix:             c.envCfg.EventTypePrefix,
+		Namespace:          c.envCfg.BEBNamespace,
 		Logger:             c.logger,
 	}
 	// Sync informer cache or die
@@ -108,7 +110,7 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := beb.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := handler.NewHandler(messageReceiver, messageSender, health.NewChecker(), c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", bebCommanderName, err)
 	}
