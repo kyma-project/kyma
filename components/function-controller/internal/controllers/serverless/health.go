@@ -28,6 +28,12 @@ type HealthChecker struct {
 	log      *zap.SugaredLogger
 }
 
+func GetHealthChannels() (chan event.GenericEvent, chan bool) {
+	out := make(chan event.GenericEvent)
+	returnCh := make(chan bool)
+	return out, returnCh
+}
+
 func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeout time.Duration, logger *zap.SugaredLogger) HealthChecker {
 	return HealthChecker{checkCh: checkCh, healthCh: returnCh, timeout: timeout, log: logger}
 }
