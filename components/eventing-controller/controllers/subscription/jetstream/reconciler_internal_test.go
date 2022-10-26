@@ -358,8 +358,6 @@ func Test_syncInitialStatus(t *testing.T) {
 
 	cleanSubjects := []string{controllertesting.OrderCreatedEventType}
 	newSubjects := []string{controllertesting.OrderCreatedEventTypeNotClean}
-	testEnvironment.Backend.On("GetJetStreamSubjects", cleanSubjects).Return(cleanSubjects)
-	testEnvironment.Backend.On("GetJetStreamSubjects", newSubjects).Return(newSubjects)
 
 	wantSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &defaultSubsConfig)
 	newSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
