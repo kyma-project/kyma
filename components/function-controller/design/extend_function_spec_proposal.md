@@ -177,10 +177,12 @@ spec:
 ```
 ### Option 2
 
-- almost same as the `Option 1` (same pros)
-- dif1: move some fields from `.spec` to the new struct `.spec.runtimeSpec` to clearly distinguish fields desired to be used in the `build` and `running` pahses. For example in the `Option 1` users may have some question after seeing `.spec.env` and `.spec.build.env` fields for example "is .spec.env dedicated for the running function's pod? Would the field be merged with .spec.build.env for the building job?"
+- almost the same as `Option 1` (same pros)
+- dif1: move some fields from `.spec` to the new struct `.spec.runtimeSpec` to clearly distinguish fields desired to be used in the `build` and `running` phases. For example in `Option 1` users may have questions after seeing `.spec.env` and `.spec.build.env` fields for example "is .spec.env dedicated for the running function's pod? Would the field be merged with .spec.build.env for the building job?"
 - dif2: rename the `.spec.profile` to the `.spec.resourcesProfile` to make this field more intuitive
-- dif3: this solution is simple but not that simple as the `Option 1`
+- dif3: this solution is simple but not as simple as `Option 1`
+
+>NOTE: the main idea is to close a specific configuration in a field that represents the specific phase of the function's lifecycle. It would be intuitive and easy to understand for a user that the `.spec.build` field contains configuration for the building phase and `.spec.runtimeSpec` for the running phase.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -194,7 +196,7 @@ spec:
   runtime: nodejs16
   source:
     ...
-  runtime:
+  runtimeSpec: # this name is not perfect
     serviceBindings: 
     - source: my-secret
       mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
@@ -215,7 +217,7 @@ spec:
     - name: SERVICE_BINDING_ROOT
       value: /service_bindings
 
-  build:
+  buildSpec: # this name is not perfect
     resourcesProfile: S / M / L / XL / ... / Custom
     resources: # optional... required if spec.build.profile==Custom
       limits: ... #if_custom
