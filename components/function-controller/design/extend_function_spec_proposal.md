@@ -265,7 +265,7 @@ spec:
           key: URL
   volumeMounts:
     - name: config
-      mountPath: /etc/config.yaml
+      mountPath: /etc/config/
     - name: search-index
       mountPath: /etc/index
   volumes:
@@ -277,6 +277,9 @@ spec:
     - name: config
       configmap:
         name: function-configuration
+        items:
+          - key: config
+            path: config.yaml
   
   metadata:
     labels:
@@ -299,7 +302,13 @@ spec:
     envs:
     - name: RUNTIME_CACHE_OFF
       value: true
-    mounts:
+    volumes:
+      - name: private-deps-repo-configuration
+        secret:
+          secretName: private-repo
+    volumeMounts:
+      - name: private-deps-repo-configuration
+        path: /etc/my-dep-resolver.config
 
 ```
 ### Option 4
