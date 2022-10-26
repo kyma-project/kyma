@@ -4,12 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"go.uber.org/zap"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 )
 
@@ -18,8 +15,8 @@ func TestHealthChecker_Checker(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		//GIVEN
 		timeout := 10 * time.Second
-		inCh := make(chan event.GenericEvent, 1)
-		outCh := make(chan bool, 1)
+		inCh := make(chan event.GenericEvent)
+		outCh := make(chan bool)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		//WHEN
@@ -34,11 +31,11 @@ func TestHealthChecker_Checker(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("timeout", func(t *testing.T) {
+	t.Run("Timeout", func(t *testing.T) {
 		//GIVEN
 		timeout := time.Second
-		inCh := make(chan event.GenericEvent, 1)
-		outCh := make(chan bool, 1)
+		inCh := make(chan event.GenericEvent)
+		outCh := make(chan bool)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		//WHEN
@@ -50,28 +47,23 @@ func TestHealthChecker_Checker(t *testing.T) {
 
 		//THEN
 		require.Error(t, err)
+		require.Contains(t, err.Error(), "reconcile didn't send confirmation")
+
 	})
 
-	t.Run("can't send check event", func(t *testing.T) {
+	t.Run("Can't send check event", func(t *testing.T) {
 		//GIVEN
 		timeout := time.Second
-		inCh := make(chan event.GenericEvent, 1)
-		outCh := make(chan bool, 1)
+		inCh := make(chan event.GenericEvent)
+		outCh := make(chan bool)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
-		e := event.GenericEvent{
-			Object: &corev1.Event{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "",
-				},
-			},
-		}
-		inCh <- e
 		//WHEN
 		err := checker.Checker(nil)
 
 		//THEN
 		require.Error(t, err)
+		require.Contains(t, err.Error(), "timeout when sending check event")
 	})
 }
 
