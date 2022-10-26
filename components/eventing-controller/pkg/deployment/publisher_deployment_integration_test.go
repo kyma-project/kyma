@@ -25,7 +25,6 @@ func TestNewDeployment(t *testing.T) {
 		LimitsMemory:    "128Mi",
 		Image:           "testImage",
 		ImagePullPolicy: "Always",
-		AppLogLevel:     "info",
 		AppLogFormat:    "json",
 	}
 	testCases := []struct {
@@ -139,42 +138,35 @@ func Test_GetLogEnvVars(t *testing.T) {
 		wantEnvs  map[string]string
 	}{
 		{
-			name: "APP_LOG_FORMAT should be text and APP_LOG_LEVEL should become the default info value",
+			name: "APP_LOG_FORMAT should be text",
 			givenEnvs: map[string]string{
 				"APP_LOG_FORMAT": "text",
 			},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "text",
-				"APP_LOG_LEVEL":  "info",
 			},
 		},
 		{
-			name: "APP_LOG_FORMAT should become default json and APP_LOG_LEVEL should be warning",
-			givenEnvs: map[string]string{
-				"APP_LOG_LEVEL": "warning",
-			},
-			wantEnvs: map[string]string{
-				"APP_LOG_FORMAT": "json",
-				"APP_LOG_LEVEL":  "warning",
-			},
-		},
-		{
-			name:      "APP_LOG_FORMAT and APP_LOG_LEVEL should take the default values",
+			name:      "APP_LOG_FORMAT should become default json",
 			givenEnvs: map[string]string{},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "json",
-				"APP_LOG_LEVEL":  "info",
 			},
 		},
 		{
-			name: "APP_LOG_FORMAT should be testFormat and APP_LOG_LEVEL should be error",
+			name:      "APP_LOG_FORMAT should take the default values",
+			givenEnvs: map[string]string{},
+			wantEnvs: map[string]string{
+				"APP_LOG_FORMAT": "json",
+			},
+		},
+		{
+			name: "APP_LOG_FORMAT should be testFormat",
 			givenEnvs: map[string]string{
 				"APP_LOG_FORMAT": "text",
-				"APP_LOG_LEVEL":  "error",
 			},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "text",
-				"APP_LOG_LEVEL":  "error",
 			},
 		},
 	}
