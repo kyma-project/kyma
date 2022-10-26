@@ -177,6 +177,52 @@ spec:
 ```
 ### Option 2
 
+- almost same as the `Option 1` (same pros)
+- dif1: move some fields from `.spec` to the new struct `.spec.runtimeSpec` to clearly distinguish fields desired to be used in the `build` and `running` pahses. For example in the `Option 1` users may have some question after seeing `.spec.env` and `.spec.build.env` fields for example "is .spec.env dedicated for the running function's pod? Would the field be merged with .spec.build.env for the building job?"
+- dif2: rename the `.spec.profile` to the `.spec.resourcesProfile` to make this field more intuitive
+- dif3: this solution is simple but not that simple as the `Option 1`
+
+```yaml
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app.kubernetes.io/name: my-function
+spec:
+  runtime: nodejs16
+  source:
+    ...
+  runtime:
+    serviceBindings: 
+    - source: my-secret
+      mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
+
+    resourcesProfile: S / M / L / XL / ... / Custom #optional
+    resources: # optional... required if spec.profile==Custom
+      limits: ... #if_custom
+      requests: ... #if_custom
+
+
+    labels: 
+      app: my-app
+    annotations: 
+      fluentbit.io/parser: my-regex-parser
+      istio-injection: enabled
+  
+    env:
+    - name: SERVICE_BINDING_ROOT
+      value: /service_bindings
+
+  build:
+    resourcesProfile: S / M / L / XL / ... / Custom
+    resources: # optional... required if spec.build.profile==Custom
+      limits: ... #if_custom
+      requests: ... #if_custom
+
+```
+
 ### Option 3
 ### Option 4
 
