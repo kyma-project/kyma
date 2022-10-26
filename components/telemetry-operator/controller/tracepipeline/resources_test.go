@@ -22,7 +22,7 @@ var (
 		},
 	}
 
-	tracePipelineWithBaiscAuth = v1alpha1.TracePipelineOutput{
+	tracePipelineWithBasicAuth = v1alpha1.TracePipelineOutput{
 		Otlp: &v1alpha1.OtlpOutput{
 			Endpoint: v1alpha1.ValueType{
 				Value: "localhost",
@@ -51,7 +51,7 @@ func TestMakeConfigMap(t *testing.T) {
 }
 
 func TestMakeConfigMapWithBasicAuth(t *testing.T) {
-	cm := makeConfigMap(config, tracePipelineWithBaiscAuth)
+	cm := makeConfigMap(config, tracePipelineWithBasicAuth)
 
 	require.NotNil(t, cm)
 	collectorConfigString := cm.Data[configMapKey]
@@ -73,7 +73,7 @@ func TestMakeSecret(t *testing.T) {
 }
 
 func TestMakeSecretWithBasicAuth(t *testing.T) {
-	secret := makeSecret(config, tracePipelineWithBaiscAuth.Otlp)
+	secret := makeSecret(config, tracePipelineWithBasicAuth.Otlp)
 
 	require.NotNil(t, secret)
 	require.Equal(t, secret.Name, config.ResourceName)

@@ -14,9 +14,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-var (
+const (
 	basicAuthHeaderVariable = "BASIC_AUTH_HEADER"
-	collectorResources      = corev1.ResourceRequirements{
+)
+
+var (
+	collectorResources = corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("10m"),
 			corev1.ResourceMemory: resource.MustParse("64Mi"),
