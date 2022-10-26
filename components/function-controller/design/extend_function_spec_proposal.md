@@ -226,6 +226,82 @@ spec:
 ```
 
 ### Option 3
+
+This option expose runtime pod configuration over build pod because runtime pod is final result, the build is transient phase.
+Additionaly:
+- It allows to use full k8s volume api the similar way to k8s pods.
+
+```yaml
+apiVersion: serverless.kyma-project.io/v1alpha3
+kind: Function
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app.kubernetes.io/name: my-function
+spec:
+  sources:
+    inline:
+      source: aaaa
+      dependency: bbbb
+  replicas: 1
+  scalingConfig:
+    min: 1
+    max: 2
+
+  resourcesProfile: S / M / L / XL / ... | (empty)-> resources field has to be filled 
+  resources: #k8s limits and requests
+  
+  envs:
+    - name: PASSWORD
+      valueFrom:
+        secretRef:
+          name: mysvc-passwords
+          key: password
+    - name: EXTERNAL_API_URL
+      valueFrom:
+        configmapRef:
+          name: mysvc-configuration
+          key: URL
+  volumeMounts:
+    - name: config
+      mountPath: /etc/config.yaml
+    - name: search-index
+      mountPath: /etc/index
+  volumes:
+    - name: search-index
+        nfs:
+          path: /path-to-index
+          readOnly: true
+          server: localhost
+    - name: config
+      configmap:
+        name: function-configuration
+  
+  metadata:
+    labels:
+      app: my-app
+    annotations:
+      fluentbit.io/parser: my-regex-parser
+      istio-injection: enabled
+  
+  #build can share the same configuration options as function: 
+  # metadata, volumes, volumeMounts, envs, resourceProfile, resources, 
+  build:
+    metadata:
+      labels:
+        app: my-app
+      annotations:
+        fluentbit.io/parser: my-regex-parser
+        istio-injection: enabled
+    resourcesProfile: S / M / L / XL / ... | (empty)-> resources field has to be filled
+    resources: #k8s limits and requests
+    envs:
+    - name: RUNTIME_CACHE_OFF
+      value: true
+    mounts:
+
+```
 ### Option 4
 
 ### Precedence, defaulting and validation
