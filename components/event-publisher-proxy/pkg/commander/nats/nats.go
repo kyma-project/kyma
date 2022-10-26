@@ -16,14 +16,14 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/jetstream"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
@@ -83,7 +83,7 @@ func (c *Commander) Start() error {
 	defer connection.Close()
 
 	// configure the message sender
-	messageSender := sender.NewJetStreamMessageSender(ctx, connection, c.envCfg, c.logger)
+	messageSender := jetstream.NewSender(ctx, connection, c.envCfg, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -104,7 +104,8 @@ func (c *Commander) Start() error {
 	subLister := subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
-		Config:             c.envCfg.ToConfig(),
+		Prefix:             c.envCfg.ToConfig().EventTypePrefix,
+		Namespace:          c.envCfg.ToConfig().BEBNamespace,
 		Logger:             c.logger,
 	}
 
@@ -117,7 +118,7 @@ func (c *Commander) Start() error {
 	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := handler.NewHandler(messageReceiver, messageSender, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		return xerrors.Errorf("failed to start handler for %s : %v", natsCommanderName, err)
 	}
