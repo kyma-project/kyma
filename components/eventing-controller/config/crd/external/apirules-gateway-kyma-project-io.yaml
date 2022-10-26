@@ -199,14 +199,7 @@ spec:
     storage: false
     subresources:
       status: {}
-  - additionalPrinterColumns:
-    - jsonPath: .status.APIRuleStatus.code
-      name: Status
-      type: string
-    - jsonPath: .spec.host
-      name: Host
-      type: string
-    name: v1beta1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: APIRule is the Schema for the apis ApiRule
@@ -313,9 +306,7 @@ spec:
                           description: Name of the service
                           type: string
                         namespace:
-                          description: Namespace of the service, if omitted will default
-                            to the APIRule namespace
-                          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                          description: Namespace of the service, if you omit it, the default changes to APIRule Namespace 
                           type: string
                         port:
                           description: Port of the service to expose
@@ -345,9 +336,7 @@ spec:
                     description: Name of the service
                     type: string
                   namespace:
-                    description: Namespace of the service, if omitted will default
-                      to the APIRule namespace
-                    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                    description: Namespace of the service, if you omit it, the default changes to APIRule Namespace 
                     type: string
                   port:
                     description: Port of the service to expose
