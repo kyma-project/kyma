@@ -313,6 +313,78 @@ spec:
 ```
 ### Option 4
 
+Option presented before with separated configurations (templates) for build and function.
+
+```yaml
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app.kubernetes.io/name: my-function
+spec:
+  runtime: nodejs16
+  source:
+    ...
+  resourceProfiles:
+    function: S / M / L / XL / ... | (empty)-> resources field has to be filled
+    build: S / M / L / XL / ... | (empty)-> resources field has to be filled
+  replicas: 1
+  scalingConfig:
+    min: 1
+    max: 2
+  templates:
+    functionPod:
+      metadata: # labels and annotations only for function pod
+        labels: 
+          app: my-app
+        annotations: 
+          fluentbit.io/parser: my-regex-parser
+          istio-injection: enabled
+      spec: 
+        resources: # optional... required if spec.resourceProfiles.function is empty
+          limits: ... #if_custom
+          requests: ... #if_custom
+        env: # function pod envs
+          - name: PASSWORD
+            valueFrom:
+              secretRef:
+                name: mysvc-passwords
+                key: password
+          - name: EXTERNAL_API_URL
+            valueFrom:
+              configmapRef:
+                name: mysvc-configuration
+                key: URL
+        volumeMounts: ...
+          - name: config
+            mountPath: /etc/config/
+          - name: search-index
+            mountPath: /etc/index
+      volumes:
+        - name: search-index
+            nfs:
+              path: /path-to-index
+              readOnly: true
+              server: localhost
+        - name: config
+          configmap:
+            name: function-configuration
+            items:
+              - key: config
+                path: config.yaml
+    buildPod:
+      metadata: ...# labels and annotations only for build pod
+      spec: 
+        resources: # optional... required if spec.resourceProfiles.build is empty
+          limits: ... #if_custom
+          requests: ... #if_custom
+        env: ...
+        volumeMounts: ...
+      volumes: ...
+```
+
 ### Precedence, defaulting and validation
 
 `Profile` takes precedence over `resources`. If profile field is not set to "Custom" there should be no defaulting happening for the resources. Controller should fill the pod template resources accoriding to the selected profile preset.
