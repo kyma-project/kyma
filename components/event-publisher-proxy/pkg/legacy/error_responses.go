@@ -3,10 +3,10 @@ package legacy
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 )
 
-// An ErrorResponse represents an error with a status code and an error message
+// An HTTPErrorResponse represents an error with a status code and an error message
 type HTTPErrorResponse struct {
 	Code  int    `json:"code"`
 	Error string `json:"error"`

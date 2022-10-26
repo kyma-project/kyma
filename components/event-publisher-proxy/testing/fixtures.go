@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"testing"
+
+	cev2 "github.com/cloudevents/sdk-go/v2/event"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 )
@@ -12,23 +16,22 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "testapp_1-0+2=3"
 
-	MessagingNamespace            = "/messaging.namespace"
-	MessagingEventTypePrefix      = "prefix"
-	JSStreamPrefix                = "sap.kyma.custom"
-	MessagingEventTypePrefixEmpty = ""
+	MessagingNamespace = "/messaging.namespace"
+	Prefix             = "prefix"
+	EmptyPrefix        = ""
 
 	EventID      = "8945ec08-256b-11eb-9928-acde48001122"
 	EventData    = `{\"key\":\"value\"}`
 	EventName    = "order.created"
 	EventVersion = "v1"
 
-	CloudEventNameAndVersion          = EventName + "." + EventVersion
-	CloudEventType                    = MessagingEventTypePrefix + "." + ApplicationName + "." + CloudEventNameAndVersion
-	CloudEventTypePrefixEmpty         = ApplicationName + "." + CloudEventNameAndVersion
-	CloudEventTypeNotClean            = MessagingEventTypePrefix + "." + ApplicationNameNotClean + "." + CloudEventNameAndVersion
-	CloudEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + CloudEventNameAndVersion
-	CloudEventSource                  = "/default/sap.kyma/id"
-	CloudEventSpecVersion             = "1.0"
+	CloudEventNameAndVersion         = EventName + "." + EventVersion
+	CloudEventType                   = ApplicationName + "." + CloudEventNameAndVersion
+	CloudEventTypeNotClean           = ApplicationNameNotClean + "." + CloudEventNameAndVersion
+	CloudEventTypeWithPrefix         = Prefix + "." + CloudEventType
+	CloudEventTypeWithPrefixNotClean = Prefix + "." + CloudEventTypeNotClean
+	CloudEventSource                 = "/default/sap.kyma/id"
+	CloudEventSpecVersion            = "1.0"
 
 	LegacyEventTime = "2020-04-02T21:37:00Z"
 )
@@ -58,7 +61,7 @@ func NewCloudEventBuilder(opts ...CloudEventBuilderOpt) *CloudEventBuilder {
 			Event: Event{
 				id:        EventID,
 				data:      EventData,
-				eventType: CloudEventType,
+				eventType: CloudEventTypeWithPrefix,
 			},
 			specVersion:     CloudEventSpecVersion,
 			eventSource:     CloudEventSource,
@@ -115,7 +118,6 @@ func (b *CloudEventBuilder) BuildBinary() (string, http.Header) {
 func (b *CloudEventBuilder) BuildStructured() (string, http.Header) {
 	payload := `{
            "id":"` + b.id + `",
-           "data":"` + b.data + `",
            "type":"` + b.eventType + `",
            "source":"` + b.eventSource + `",
            "specversion":"` + b.specVersion + `",
@@ -123,6 +125,15 @@ func (b *CloudEventBuilder) BuildStructured() (string, http.Header) {
         }`
 	headers := http.Header{internal.HeaderContentType: []string{internal.ContentTypeApplicationCloudEventsJSON}}
 	return payload, headers
+}
+
+func (b *CloudEventBuilder) Build(t *testing.T) *cev2.Event {
+	e := cev2.New(b.specVersion)
+	assert.NoError(t, e.Context.SetID(b.id))
+	assert.NoError(t, e.Context.SetType(b.eventType))
+	assert.NoError(t, e.Context.SetSource(b.eventSource))
+	assert.NoError(t, e.SetData(b.dataContentType, b.data))
+	return &e
 }
 
 type LegacyEvent struct {
