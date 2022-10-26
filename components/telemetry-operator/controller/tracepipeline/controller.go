@@ -83,6 +83,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	newReconciler := ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.TracePipeline{}).
 		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Secret{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{})
 
@@ -100,6 +101,14 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	}
 	if err := createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
+	}
+
+	secret := makeSecret(r.config, tracing.Spec.Output.Otlp)
+	if err := controllerutil.SetControllerReference(tracing, secret, r.Scheme); err != nil {
+		return err
+	}
+	if err := createOrUpdateSecret(ctx, r.Client, secret); err != nil {
+		return err
 	}
 
 	deployment := makeDeployment(r.config)
