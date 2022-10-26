@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Eventing Controller component contains controllers for various CRDs related to Eventing in Kyma. The following controller comes with this container:
+The Eventing Controller components contain controllers for various CRDs related to Eventing in Kyma. The following controller comes with this container:
 
 - [`controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller/main.go), which lays down the Eventing infrastructure in Business Event Bus (BEB) or [NATS](https://docs.nats.io/nats-concepts/intro).
 
@@ -146,9 +146,9 @@ make resolve-local
 
 ### Generate code during local development
 
-Learn more about [Simplified Builder-Based Scaffolding](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
+If you want to know more about scaffolding code with kubebuilder, read [Simplified Builder-Based Scaffolding](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
 
-1. To add new APIs using the [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code, execute the following script:
+1. To add new APIs using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code, execute the following script:
 
    ```sh
    kubebuilder create api --group batch --version v1 --kind CronJob
