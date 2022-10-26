@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"fmt"
 	"log"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -19,7 +18,6 @@ func (b *Batch) CreateResources(k8sClient dynamic.Interface, resources ...unstru
 	gotRes := &unstructured.Unstructured{}
 	for _, res := range resources {
 		resourceSchema, ns, _ := b.GetResourceSchemaAndNamespace(res)
-		fmt.Println(resourceSchema, ns)
 		err := b.ResourceManager.CreateResource(k8sClient, resourceSchema, ns, res)
 		if err != nil {
 			return nil, err
@@ -28,7 +26,6 @@ func (b *Batch) CreateResources(k8sClient dynamic.Interface, resources ...unstru
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(gotRes)
 	}
 	return gotRes, nil
 }
@@ -61,14 +58,13 @@ func (b *Batch) DeleteResources(k8sClient dynamic.Interface, resources ...unstru
 }
 
 func (b *Batch) GetResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.GroupVersionResource, string, string) {
-	metadata := manifest.Object["metadata"].(map[string]interface{})
-	namespace := "default"
-	if metadata["namespace"] != nil {
-		namespace = fmt.Sprintf("%s", metadata["namespace"])
+	namespace := manifest.GetNamespace()
+	if namespace == "" {
+		namespace = "default"
 	}
-	resourceName := fmt.Sprintf("%s", metadata["name"])
-	resourceKind := fmt.Sprintf("%s", manifest.Object["kind"])
-	if resourceKind == "Namespace" {
+	resourceName := manifest.GetName()
+
+	if manifest.GroupVersionKind().Kind == "Namespace" {
 		namespace = ""
 	}
 

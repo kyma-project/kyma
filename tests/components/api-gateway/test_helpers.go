@@ -98,6 +98,7 @@ type Config struct {
 }
 
 type Scenario struct {
+	testID      string
 	namespace   string
 	url         string
 	apiResource []unstructured.Unstructured
@@ -264,7 +265,6 @@ func CreateScenario(templateFileName string, namePrefix string, deploymentFile .
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
 	}
-
 	return &Scenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), apiResource: accessRule}, nil
 }
 

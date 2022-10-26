@@ -292,10 +292,11 @@ func InitializeApiGatewayTests(ctx *godog.TestSuiteContext) {
 	InitializeScenarioServicePerPath(ctx.ScenarioContext())
 }
 
+func InitializeCustomDomainTests(ctx *godog.TestSuiteContext) {
+	InitializeScenarioCustomDomain(ctx.ScenarioContext())
+}
 func TestCustomDomain(t *testing.T) {
 	InitApiGatewayTest()
-	loadBalancerIP, _ := getLoadBalancerIP()
-	fmt.Println(loadBalancerIP)
 	customDomainOpts := goDogOpts
 	customDomainOpts.Paths = []string{"features/gardener/custom_domain.feature"}
 	customDomainOpts.Concurrency = conf.TestConcurency
@@ -305,9 +306,9 @@ func TestCustomDomain(t *testing.T) {
 	}
 
 	customDomainSuite := godog.TestSuite{
-		Name:                "custom-domain",
-		ScenarioInitializer: InitializeScenarioCustomDomain,
-		Options:             &customDomainOpts,
+		Name:                 "custom-domain",
+		TestSuiteInitializer: InitializeCustomDomainTests,
+		Options:              &customDomainOpts,
 	}
 
 	testExitCode := customDomainSuite.Run()

@@ -12,7 +12,7 @@ spec:
     namespace: default
   domains:
     include:
-      - "{{.LoadBalancerIP}}"
+      - "{{.Domain}}"
 --- 
 apiVersion: dns.gardener.cloud/v1alpha1
 kind: DNSEntry
