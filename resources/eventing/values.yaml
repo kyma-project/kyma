@@ -50,9 +50,9 @@ global:
   log:
     format: "json"
     configMap:
-      name: logging
+      name: eventing-logging
       keys:
-        appLogLevel: "appLogLevel"
+        appLogLevel: "APP_LOG_LEVEL"
       values:
         appLogLevel: "info"
 

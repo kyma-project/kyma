@@ -44,9 +44,10 @@ const (
 	PublisherSecretTokenEndpointKey = "token-endpoint"
 	PublisherSecretEMSURLKey        = "ems-publish-url"
 	PublisherSecretBEBNamespaceKey  = "beb-namespace"
+	LogVolumeName                   = "log-config"
 
 	configMapName               = "eventing"
-	loggingConfigMapName        = "logging"
+	LogConfigMapName            = "eventing-logging"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
 )
 
@@ -268,7 +269,7 @@ func getVolumeSource() v1.VolumeSource {
 	return v1.VolumeSource{
 		ConfigMap: &v1.ConfigMapVolumeSource{
 			LocalObjectReference: v1.LocalObjectReference{
-				Name: loggingConfigMapName,
+				Name: LogConfigMapName,
 			},
 		},
 	}
