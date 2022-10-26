@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	controllererrors "github.com/kyma-project/kyma/components/eventing-controller/pkg/errors"
-
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
@@ -35,27 +33,19 @@ const (
 	jsConsumerAcKWait      = 30 * time.Second
 )
 
-var (
-	ErrMissingSubscription = errors.New("failed to find a NATS subscription for a subject")
-	ErrAddConsumer         = errors.New("failed to add a consumer")
-	ErrGetConsumer         = errors.New("failed to get consumer info")
-	ErrUpdateConsumer      = errors.New("failed to update consumer")
-	ErrInvalidMaxInFlight  = errors.New("failed to parse the MaxInFlightMessages value from Subscription's Config")
-	ErrFailedSubscribe     = errors.New("failed to create NATS JetStream subscription")
-)
-
 func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector,
-	cleaner cleaner.Cleaner, logger *logger.Logger) *JetStream {
+	cleaner cleaner.Cleaner, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
 		subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
 		metricsCollector: metricsCollector,
 		cleaner:          cleaner,
+		subsConfig:       subsConfig,
 	}
 }
 
-func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
+func (js *JetStream) Initialize(connCloseHandler backendutilsv2.ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
@@ -75,6 +65,11 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 	subKeyPrefix := createKeyPrefix(subscription)
 	if err := js.checkJetStreamConnection(); err != nil {
 		return err
+	}
+
+	// TODO: move this to the validation webhook
+	if subscription.Spec.Source == "" {
+		return fmt.Errorf("%v", "source value cannot be empty")
 	}
 
 	if err := js.syncSubscriptionTypes(subscription); err != nil {
@@ -164,7 +159,7 @@ func (js *JetStream) validateConfig() error {
 	return nil
 }
 
-func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
+func (js *JetStream) initNATSConn(connCloseHandler backendutilsv2.ConnClosedHandler) error {
 	if js.Conn == nil || js.Conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -297,7 +292,7 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub Subscriber,
 	if utils.ContainsString(
 		js.GetJetStreamSubjects(
 			subscription.Spec.Source,
-			getCleanEventTypesFromStatus(subscription.Status),
+			GetCleanEventTypesFromEventTypes(subscription.Status.Types),
 			subscription.Spec.TypeMatching),
 		info.Config.FilterSubject,
 	) {
@@ -425,7 +420,7 @@ func (js *JetStream) syncConsumersAndSubscriptions(subscription *eventingv1alpha
 		}
 
 		if _, ok := js.subscriptions[jsSubKey]; !ok {
-			return controllererrors.MakeError(ErrMissingSubscription, err)
+			return utils.MakeError(ErrMissingSubscription, err)
 		}
 
 		// try to bind invalid NATS Subscriptions
@@ -448,23 +443,19 @@ func (js *JetStream) getOrCreateConsumer(subscription *eventingv1alpha2.Subscrip
 	subject eventingv1alpha2.EventType) (*nats.ConsumerInfo, error) {
 	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-	maxInFlight, err := subscription.GetMaxInFlightMessages()
-	if err != nil {
-		return nil, controllererrors.MakeError(ErrInvalidMaxInFlight, err)
-	}
 
 	consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
 	if err != nil {
 		if errors.Is(err, nats.ErrConsumerNotFound) {
 			consumerInfo, err = js.jsCtx.AddConsumer(
 				js.Config.JSStreamName,
-				js.getConsumerConfig(jsSubKey, jsSubject, maxInFlight),
+				js.getConsumerConfig(jsSubKey, jsSubject, subscription.GetMaxInFlightMessages(&js.subsConfig)),
 			)
 			if err != nil {
-				return nil, controllererrors.MakeError(ErrAddConsumer, err)
+				return nil, utils.MakeError(ErrAddConsumer, err)
 			}
 		} else {
-			return nil, controllererrors.MakeError(ErrGetConsumer, err)
+			return nil, utils.MakeError(ErrGetConsumer, err)
 		}
 	}
 	return consumerInfo, nil
@@ -475,18 +466,14 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 	subject eventingv1alpha2.EventType, asyncCallback func(m *nats.Msg)) error {
 	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-	maxInFlight, err := subscription.GetMaxInFlightMessages()
-	if err != nil {
-		return controllererrors.MakeError(ErrInvalidMaxInFlight, err)
-	}
 
 	jsSubscription, err := js.jsCtx.Subscribe(
 		jsSubject,
 		asyncCallback,
-		js.getDefaultSubscriptionOptions(jsSubKey, maxInFlight)...,
+		js.getDefaultSubscriptionOptions(jsSubKey, subscription.GetMaxInFlightMessages(&js.subsConfig))...,
 	)
 	if err != nil {
-		return controllererrors.MakeError(ErrFailedSubscribe, err)
+		return utils.MakeError(ErrFailedSubscribe, err)
 	}
 	// save created JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -512,7 +499,7 @@ func (js *JetStream) bindInvalidSubscriptions(subscription *eventingv1alpha2.Sub
 		nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
 	)
 	if err != nil {
-		return controllererrors.MakeError(ErrFailedSubscribe, err)
+		return utils.MakeError(ErrFailedSubscribe, err)
 	}
 	// save recreated JetStream subscription in storage
 	js.subscriptions[jsSubKey] = &Subscription{Subscription: jsSubscription}
@@ -523,10 +510,7 @@ func (js *JetStream) bindInvalidSubscriptions(subscription *eventingv1alpha2.Sub
 // is propagated to the NATS consumer as MaxAckPending.
 func (js *JetStream) syncConsumerMaxInFlight(subscription *eventingv1alpha2.Subscription,
 	consumerInfo nats.ConsumerInfo) error {
-	maxInFlight, err := subscription.GetMaxInFlightMessages()
-	if err != nil {
-		return controllererrors.MakeError(ErrInvalidMaxInFlight, err)
-	}
+	maxInFlight := subscription.GetMaxInFlightMessages(&js.subsConfig)
 
 	if consumerInfo.Config.MaxAckPending == maxInFlight {
 		return nil
@@ -538,7 +522,7 @@ func (js *JetStream) syncConsumerMaxInFlight(subscription *eventingv1alpha2.Subs
 
 	// update the consumer
 	if _, updateErr := js.jsCtx.UpdateConsumer(js.Config.JSStreamName, &consumerConfig); updateErr != nil {
-		return controllererrors.MakeError(ErrUpdateConsumer, updateErr)
+		return utils.MakeError(ErrUpdateConsumer, updateErr)
 	}
 	return nil
 }

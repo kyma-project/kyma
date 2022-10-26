@@ -152,9 +152,9 @@ func createKeyPrefix(sub *eventingv1alpha2.Subscription) string {
 	return namespacedName.String()
 }
 
-func getCleanEventTypesFromStatus(subscriptionStatus eventingv1alpha2.SubscriptionStatus) []string {
+func GetCleanEventTypesFromEventTypes(eventTypes []eventingv1alpha2.EventType) []string {
 	var cleantypes []string
-	for _, eventtypes := range subscriptionStatus.Types {
+	for _, eventtypes := range eventTypes {
 		cleantypes = append(cleantypes, eventtypes.CleanType)
 	}
 	return cleantypes
@@ -175,11 +175,11 @@ func getUniqueEventTypes(eventTypes []string) []string {
 	return unique
 }
 
-// getCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
-func getCleanEventTypes(sub *eventingv1alpha2.Subscription,
+// GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
+func GetCleanEventTypes(sub *eventingv1alpha2.Subscription,
 	cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
 	// TODO: Put this in the validation webhook
-	if sub.Spec.Types == nil {
+	if sub.Spec.Types == nil || len(sub.Spec.Types) == 0 {
 		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
 	}
 
@@ -201,6 +201,19 @@ func getCleanEventTypes(sub *eventingv1alpha2.Subscription,
 		cleanEventTypes = append(cleanEventTypes, newEventType)
 	}
 	return cleanEventTypes, nil
+}
+
+// GetBackendJetStreamTypes gets the original event type and the consumer name for all the subscriptions
+// and this slice is set as the backend specific status for JetStream.
+func GetBackendJetStreamTypes(subscription *eventingv1alpha2.Subscription,
+	jsSubjects []string) []eventingv1alpha2.JetStreamTypes {
+	var jsTypes []eventingv1alpha2.JetStreamTypes
+	for i, ot := range subscription.Spec.Types {
+		jt := eventingv1alpha2.JetStreamTypes{OriginalType: ot,
+			ConsumerName: computeConsumerName(subscription, jsSubjects[i])}
+		jsTypes = append(jsTypes, jt)
+	}
+	return jsTypes
 }
 
 func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error) {
