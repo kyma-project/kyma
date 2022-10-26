@@ -114,8 +114,7 @@ func main() {
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
 
-	healthEventsCh, healthResponseCh := serverless.GetHealthChannels()
-	healthHandler := serverless.NewHealthChecker(healthEventsCh, healthResponseCh, config.Healthz.LivenessTimeout, loggerRegistry.CreateNamed("healthz"))
+	healthHandler, healthEventsCh, healthResponseCh := serverless.NewHealthChecker(config.Healthz.LivenessTimeout, loggerRegistry.CreateNamed("healthz"))
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
 		os.Exit(1)

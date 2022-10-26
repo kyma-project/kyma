@@ -14,8 +14,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		//GIVEN
 		timeout := 10 * time.Second
-		inCh, outCh := serverless.GetHealthChannels()
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
+		checker, inCh, outCh := serverless.NewHealthChecker(timeout, log)
 
 		//WHEN
 		go func() {
@@ -32,8 +31,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 	t.Run("Timeout", func(t *testing.T) {
 		//GIVEN
 		timeout := time.Second
-		inCh, outCh := serverless.GetHealthChannels()
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
+		checker, inCh, _ := serverless.NewHealthChecker(timeout, log)
 
 		//WHEN
 		go func() {
@@ -51,8 +49,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 	t.Run("Can't send check event", func(t *testing.T) {
 		//GIVEN
 		timeout := time.Second
-		inCh, outCh := serverless.GetHealthChannels()
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
+		checker, _, _ := serverless.NewHealthChecker(timeout, log)
 
 		//WHEN
 		err := checker.Checker(nil)
