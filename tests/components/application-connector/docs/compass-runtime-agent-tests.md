@@ -106,9 +106,10 @@ To run the tests without removing all the created resources afterwards, run them
 
 2. Once you've finished debugging, run:
 
-   ``` shell
+   ```bash
    make clean-test-compass-runtime-agent-test
    ```
+
 ### Debugging in the IDE
 
 To run the test in your IDE you must perform the following steps.
