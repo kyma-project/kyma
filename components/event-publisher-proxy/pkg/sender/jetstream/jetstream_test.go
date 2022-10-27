@@ -175,3 +175,32 @@ func CreateNATSJsConfig(url string) *env.NATSConfig {
 		ReconnectWait: time.Second,
 	}
 }
+
+func TestSender_URL(t *testing.T) {
+	type fields struct {
+		envCfg *env.NATSConfig
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "URL is correct",
+			want: "FOO",
+			fields: fields{
+				envCfg: &env.NATSConfig{
+					URL: "FOO",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Sender{
+				envCfg: tt.fields.envCfg,
+			}
+			assert.Equalf(t, tt.want, s.URL(), "URL()")
+		})
+	}
+}
