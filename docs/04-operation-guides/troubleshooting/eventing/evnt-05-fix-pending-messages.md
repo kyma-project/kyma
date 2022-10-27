@@ -22,13 +22,13 @@ with pending messages or on the stream level.
 
 ### Trigger Consumer leader election
 First, you need to find out which consumer(s) have pending messages. For that you need the latest version of NATS cli installed on your machine.
-You can find the broken consumer in two ways: by using Grafana dashboard or by directly using the NATS cli command.
+You can find the broken consumer in two ways: by using Grafana dashboard or directly by using the NATS cli command.
 
 #### Find the broken consumers using Grafana dashboard
 
 1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md)
 2. Find the NATS JetStream Dashboard and check the pending messages
-   ![Pending consumer](./../../assets/grafana_pending_consumer.png)
+   ![Pending consumer](../../assets/grafana_pending_consumer.png)
 3. Find the consumer with pending messages and encode it as md5 hash:
 ```bash
 echo -n "tunas-testing/test-noapp3/kyma.sap.kyma.custom.noapp.order.created.v1" | md5
@@ -60,9 +60,9 @@ You can see, that its leader is the `eventing-nats-1` replica.
 #### Find the broken consumers using the NATS cli
 If you have NATS cli installed on your machine, you can simply run this shell script:
    ```bash
-   for consumer in $(nats consumer list -n $stream_name)
+   for consumer in $(nats consumer list -n sap) # sap is the stream name
    do
-     nats consumer info sap $consumer -j |jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader} '
+     nats consumer info sap $consumer -j | jq -c '{name: .name, pending: .num_pending, leader: .cluster.leader}'
    done
    ```
 this will output the following:
@@ -74,6 +74,7 @@ here you can see, that the consumer `6bfe94b513b39fb348e97b959c632e28` has pendi
 is successfully processing events. 
 
 #### Trigger the consumer leader reelection
+
 Now, when we know the name of the broken consumer and its leader, we can trigger the reelection:
 
 1. You need to port-forward the leader replica and trigger the leader reelection for that broken consumer
@@ -82,7 +83,7 @@ kubectl port-forward -n kyma-system eventing-nats-1 4222
 ```
 2. Trigger the leader reelection:
 ```bash
-nats consumer cluster step-down $stream_name 6642d54a92f357ba28280b9cb609e79d
+nats consumer cluster step-down sap 6642d54a92f357ba28280b9cb609e79d
 ```
 After execution, you see the following message:
 ```yaml
@@ -93,17 +94,18 @@ Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-
 You can check the consumer now and confirm that the pending messages started to be dispatched.
 
 ### Restart the NATS pods and trigger the stream leader reelection
+
 Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case you should try to trigger leader reelection on the stream level:
 
 ```bash
-nats stream cluster step-down $stream_name
+nats stream cluster step-down sap
 ```
 As result, you will see:
 ```bash
 11:08:22 Requesting leader step down of "eventing-nats-1" in a 3 peer RAFT group
 11:08:23 New leader elected "eventing-nats-0"
 
-Information for Stream $stream_name created 2022-10-24 15:47:19
+Information for Stream sap created 2022-10-24 15:47:19
 
              Subjects: kyma.>
              Replicas: 3
