@@ -95,53 +95,59 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
-	configMap := makeConfigMap(r.config, tracing.Spec.Output)
-	if err := controllerutil.SetControllerReference(tracing, configMap, r.Scheme); err != nil {
+	var err error
+
+	var secretData map[string][]byte
+	if secretData, err = fetchSecretData(ctx, r, tracing.Spec.Output.Otlp); err != nil {
 		return err
 	}
-	if err := createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
+	secret := makeSecret(r.config, secretData)
+	if err = controllerutil.SetControllerReference(tracing, secret, r.Scheme); err != nil {
+		return err
+	}
+	if err = createOrUpdateSecret(ctx, r.Client, secret); err != nil {
+		return err
+	}
+
+	configMap := makeConfigMap(r.config, tracing.Spec.Output)
+	if err = controllerutil.SetControllerReference(tracing, configMap, r.Scheme); err != nil {
+		return err
+	}
+	if err = createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
-	secret := makeSecret(r.config, tracing.Spec.Output.Otlp)
-	if err := controllerutil.SetControllerReference(tracing, secret, r.Scheme); err != nil {
-		return err
-	}
-	if err := createOrUpdateSecret(ctx, r.Client, secret); err != nil {
-		return err
-	}
-
 	deployment := makeDeployment(r.config)
-	if err := controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
+	if err = controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
 		return err
 	}
-	if err := createOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
+	if err = createOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
 	service := makeCollectorService(r.config)
-	if err := controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
+	if err = controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
 		return err
 	}
-	if err := createOrUpdateService(ctx, r.Client, service); err != nil {
+	if err = createOrUpdateService(ctx, r.Client, service); err != nil {
 		return fmt.Errorf("failed to create otel collector service: %w", err)
 	}
 
 	if r.config.CreateServiceMonitor {
 		serviceMonitor := makeServiceMonitor(r.config)
-		if err := controllerutil.SetControllerReference(tracing, serviceMonitor, r.Scheme); err != nil {
+		if err = controllerutil.SetControllerReference(tracing, serviceMonitor, r.Scheme); err != nil {
 			return err
 		}
 
-		if err := createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
+		if err = createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
 			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
 		}
 
 		metricsService := makeMetricsService(r.config)
-		if err := controllerutil.SetControllerReference(tracing, metricsService, r.Scheme); err != nil {
+		if err = controllerutil.SetControllerReference(tracing, metricsService, r.Scheme); err != nil {
 			return err
 		}
-		if err := createOrUpdateService(ctx, r.Client, metricsService); err != nil {
+		if err = createOrUpdateService(ctx, r.Client, metricsService); err != nil {
 			return fmt.Errorf("failed to create otel collector metrics service: %w", err)
 		}
 	}
