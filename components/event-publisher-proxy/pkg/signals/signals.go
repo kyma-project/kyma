@@ -51,12 +51,6 @@ func NewContext() context.Context {
 	return &signalContext{stopCh: SetupSignalHandler()}
 }
 
-// NewReusableContext creates a new context with setupStopChannel() as our Done() channel.
-// This method can be called multiple times, returning new contexts.
-func NewReusableContext() context.Context {
-	return &signalContext{stopCh: setupStopChannel()}
-}
-
 // Deadline implements context.Context.
 func (scc *signalContext) Deadline() (deadline time.Time, ok bool) {
 	return

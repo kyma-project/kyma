@@ -9,7 +9,7 @@ import (
 	kymalogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 )
 
 const (
