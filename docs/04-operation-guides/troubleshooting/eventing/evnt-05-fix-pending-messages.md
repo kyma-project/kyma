@@ -21,6 +21,7 @@ There are two ways of how to fix the "broken" consumers with pending messages. Y
 with pending messages or on the stream level.
 
 ### Trigger Consumer leader election
+
 First, you need to find out which consumer(s) have pending messages. For that you need the latest version of NATS cli installed on your machine.
 You can find the broken consumer in two ways: by using Grafana dashboard or directly by using the NATS cli command.
 
@@ -58,6 +59,7 @@ Cluster Information:
 You can see, that its leader is the `eventing-nats-1` replica.
 
 #### Find the broken consumers using the NATS cli
+
 If you have NATS cli installed on your machine, you can simply run this shell script:
    ```bash
    for consumer in $(nats consumer list -n sap) # sap is the stream name
