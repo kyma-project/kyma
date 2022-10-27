@@ -45,6 +45,10 @@ type Sender struct {
 	envCfg     *env.NATSConfig
 }
 
+func (s *Sender) URL() string {
+	return s.envCfg.URL
+}
+
 // NewSender returns a new NewSender instance with the given NATS connection.
 func NewSender(ctx context.Context, connection *nats.Conn, envCfg *env.NATSConfig, logger *logger.Logger) *Sender {
 	return &Sender{ctx: ctx, connection: connection, envCfg: envCfg, logger: logger}

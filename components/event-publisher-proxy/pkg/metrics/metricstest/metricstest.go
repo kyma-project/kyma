@@ -2,6 +2,7 @@
 package metricstest
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -13,27 +14,33 @@ import (
 
 // EnsureMetricErrors ensures metric eventing_epp_errors_total exists.
 func EnsureMetricErrors(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.ErrorsKey, count)
+	EnsureMetricCount(t, collector, metrics.ErrorsKey, count)
 }
 
-// EnsureMetricLatency ensures metric eventing_epp_messaging_server_latency_duration_milliseconds exists.
+// EnsureMetricLatency ensures metric eventing_epp_messaging_server_latency_duration_millisec
 func EnsureMetricLatency(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.LatencyKey, count)
+	EnsureMetricCount(t, collector, metrics.LatencyKey, count)
 }
 
 // EnsureMetricEventTypePublished ensures metric epp_event_type_published_total exists.
 func EnsureMetricEventTypePublished(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, count)
+	EnsureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, count)
 }
 
 // EnsureMetricTotalRequests ensures metric eventing_epp_requests_total exists.
 func EnsureMetricTotalRequests(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.EventRequestsKey, count)
+	EnsureMetricCount(t, collector, metrics.EventRequestsKey, count)
 }
 
-func ensureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollector, metric string, expectedCount int) {
+func EnsureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollector, metric string, expectedCount int) {
 	if count := testutil.CollectAndCount(collector, metric); count != expectedCount {
 		t.Fatalf("invalid count for metric:%s, want:%d, got:%d", metric, expectedCount, count)
+	}
+}
+
+func EnsureMetricMatchesTextExpositionFormat(t *testing.T, collector metrics.PublishingMetricsCollector, tef string, metricNames ...string) {
+	if err := testutil.CollectAndCompare(collector, strings.NewReader(tef), metricNames...); err != nil {
+		t.Fatalf("%v", err)
 	}
 }
 
