@@ -22,13 +22,13 @@ For eventing in NATS mode, Eventing Controller also acts as a dispatcher. It con
 
 ### Installation
 
-1. Delete any existing deployment for Eventing Controller from the Kyma cluster, because it could interfere with reconciliation process.
+1. Delete any existing deployment for Eventing Controller from the Kyma cluster, because it could interfere with the reconciliation process.
 
 1. Make sure the environment variables are set.
    The make target `set-up-local-env` uses default values. Change them as needed.
    If you want to push your images to Docker Hub, set the env variable `KO_DOCKER_REPO` to `index.docker.io/<docker_id>`
 
-1. To verify all the manifests after the processing by Kustomize without applying them to the cluster, use make target `deploy-dry-run`:
+1. To verify all the manifests after the processing by Kustomize without applying them to the cluster, use the make target `deploy-dry-run`:
 
    ```sh
    make DOMAIN=custom-domain.com deploy-dry-run
@@ -149,9 +149,9 @@ make resolve-local
 
 ### Generate code during local development
 
-If you want to know more about scaffolding code with kubebuilder, read [Simplified Builder-Based Scaffolding](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
+If you want to know more about scaffolding code with Kubebuilder, read [Simplified Builder-Based Scaffolding](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
 
-1. To add new APIs using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code, execute the following script:
+1. To add new APIs using [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code, run the following script:
 
    ```sh
    kubebuilder create api --group batch --version v1 --kind CronJob
@@ -160,7 +160,7 @@ If you want to know more about scaffolding code with kubebuilder, read [Simplifi
    ```
 
 1. Update fields in the `spec` of an existing CRD by modifying the Go file for the type, that is, `api/version/<crd>_types.go`. For example, to adjust the Subscriptions CRD, modify `api/v1alpha1/subscriptions_types.go`.
-   After that, execute the following command to generate boilerplate code:
+   After that, run the following command to generate boilerplate code:
 
    ```sh
    make manifests
@@ -172,9 +172,9 @@ If you want to know more about scaffolding code with kubebuilder, read [Simplifi
    make copy-crds
    ```
 
-1. After updating fields for an existing CRD, add the necessary changes manually in the sample custom resources inside the folder `config/samples/`. For example, for subscriptions, update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`
+1. After updating fields for an existing CRD, add the necessary changes manually in the sample custom resources inside the folder `config/samples/`. For example, for subscriptions, update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml`
 
-1. The kubebuilder bootstrapped files have been reduced to the bare minimum. If you need one of these files later (for example, for a webhook), get them either from [this PR](https://github.com/kyma-project/kyma/pull/9510/commits/6ce5b914c5ef175dea45c27ccca826becb1b5818) or create a sample kubebuilder project and copy all required files from there:
+1. The Kubebuilder bootstrapped files have been reduced to the bare minimum. If you need one of these files later (for example, for a webhook), get them either from [this PR](https://github.com/kyma-project/kyma/pull/9510/commits/6ce5b914c5ef175dea45c27ccca826becb1b5818) or create a sample Kubebuilder project and copy all required files from there:
 
    ```sh
    kubebuilder init --domain kyma-project.io
@@ -214,4 +214,4 @@ If you want to know more about scaffolding code with kubebuilder, read [Simplifi
 
 4. To run the controller using your IDE, specify the buildtag `local`.
 
-   > **NOTE:** We currently support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially, the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.
+   > **NOTE:** We currently support the buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially, the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.
