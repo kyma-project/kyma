@@ -18,7 +18,7 @@ metadata:
 rules:
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
-    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
+    verbs: ["get", "patch", "list", "watch", "update"]
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["create", "get", "patch", "list", "watch", "update"]
@@ -53,7 +53,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: init-certificates
-          image: {{ .Values.webhook.certHandlerImage }}
+          image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.webhook.certHandler) }}"
           imagePullPolicy: IfNotPresent
           env:
             - name: CRD_NAME
@@ -83,7 +83,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: update-certificates
-              image: {{ .Values.webhook.certHandlerImage }}
+              image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.webhook.certHandler) }}"
               imagePullPolicy: IfNotPresent
               env:
                 - name: CRD_NAME
