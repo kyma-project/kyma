@@ -14,7 +14,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
-	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
 )
 
@@ -27,6 +27,11 @@ const (
 	requestBodyTooLargeErrorMessage = "http: request body too large"
 	eventTypeVersionExtensionKey    = "eventtypeversion"
 )
+
+type RequestToCETransformer interface {
+	TransformLegacyRequestsToCE(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
+	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
+}
 
 type Transformer struct {
 	bebNamespace      string

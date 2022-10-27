@@ -5,5 +5,11 @@ metadata:
 spec:
   output:
     otlp:
+      authentication:
+        basic:
+          user:
+            value: "use"
+          password:
+            value: "qwer"
       endpoint:
         value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318

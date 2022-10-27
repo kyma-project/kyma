@@ -15,8 +15,8 @@ const (
 	// LatencyKey name of the latency metric
 	LatencyKey = "eventing_epp_messaging_server_latency_duration_milliseconds"
 	// EventTypePublishedMetricKey name of the eventTypeLabel metric
-	EventTypePublishedMetricKey = "nats_epp_event_type_published_total"
-	//EventRequestsKey name of the eventRequests metric
+	EventTypePublishedMetricKey = "epp_event_type_published_total"
+	// EventRequestsKey name of the eventRequests metric
 	EventRequestsKey = "eventing_epp_requests_total"
 	// errorsHelp help text for the errors metric
 	errorsHelp = "The total number of errors while sending events to the messaging server"
@@ -26,15 +26,27 @@ const (
 	eventTypePublishedMetricHelp = "The total number of events published for a given eventTypeLabel"
 	// eventRequestsHelp help text for event requests metric
 	eventRequestsHelp = "The total number of event requests"
-	//responseCodeLabel name of the status code labels used by multiple metrics
+	// responseCodeLabel name of the status code labels used by multiple metrics
 	responseCodeLabel = "response_code"
-	//destSvcLabel name of the destination service label used by multiple metrics
+	// destSvcLabel name of the destination service label used by multiple metrics
 	destSvcLabel = "destination_service"
 	// eventTypeLabel name of the event type label used by metrics
 	eventTypeLabel = "event_type"
 	// eventSourceLabel name of the event source label used by metrics
 	eventSourceLabel = "event_source"
 )
+
+// PublishingMetricsCollector interface provides a Prometheus compatible Collector with additional convenience methods
+// for recording epp specific metrics.
+type PublishingMetricsCollector interface {
+	prometheus.Collector
+	RecordError()
+	RecordLatency(duration time.Duration, statusCode int, destSvc string)
+	RecordEventType(eventType, eventSource string, statusCode int)
+	RecordRequests(statusCode int, destSvc string)
+}
+
+var _ PublishingMetricsCollector = &Collector{}
 
 // Collector implements the prometheus.Collector interface
 type Collector struct {

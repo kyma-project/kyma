@@ -34,6 +34,25 @@ func createOrUpdateConfigMap(ctx context.Context, c client.Client, desired *core
 	return c.Update(ctx, desired)
 }
 
+func createOrUpdateSecret(ctx context.Context, c client.Client, desired *corev1.Secret) error {
+	var existing corev1.Secret
+	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return err
+		}
+
+		return c.Create(ctx, desired)
+	}
+
+	mutated := existing.DeepCopy()
+	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
+	if apiequality.Semantic.DeepEqual(mutated, desired) {
+		return nil
+	}
+	return c.Update(ctx, desired)
+}
+
 func createOrUpdateDeployment(ctx context.Context, c client.Client, desired *appsv1.Deployment) error {
 	var existing appsv1.Deployment
 	err := c.Get(ctx, types.NamespacedName{Name: desired.Name, Namespace: desired.Namespace}, &existing)

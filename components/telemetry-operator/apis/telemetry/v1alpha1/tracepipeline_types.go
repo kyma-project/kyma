@@ -28,7 +28,7 @@ type TracePipelineSpec struct {
 
 type TracePipelineOutput struct {
 	// Otlp defines an output using the OpenTelmetry protocol.
-	Otlp OtlpOutput `json:"otlp,omitempty"`
+	Otlp *OtlpOutput `json:"otlp,omitempty"`
 }
 
 type OtlpOutput struct {
@@ -36,6 +36,24 @@ type OtlpOutput struct {
 	Protocol string `json:"protocol,omitempty"`
 	// Endpoint defines the host and port (<host>:<port>) of an OTLP endpoint.
 	Endpoint ValueType `json:"endpoint,omitempty"`
+	// Authentication defines authentication options for the OTLP output
+	Authentication *AuthenticationOptions `json:"authentication,omitempty"`
+}
+
+type AuthenticationOptions struct {
+	// Basic contains credentials for HTTP basic auth
+	Basic *BasicAuthOptions `json:"basic,omitempty"`
+}
+
+type BasicAuthOptions struct {
+	// User contains the basic auth username or a secret reference
+	User ValueType `json:"user,omitempty"`
+	// Password contains the basic auth password or a secret reference
+	Password ValueType `json:"password,omitempty"`
+}
+
+func (b *BasicAuthOptions) IsDefined() bool {
+	return b.User.IsDefined() && b.Password.IsDefined()
 }
 
 // TracePipelineStatus defines the observed state of TracePipeline
