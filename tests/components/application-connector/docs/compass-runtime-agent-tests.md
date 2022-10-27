@@ -130,6 +130,6 @@ To run the test in your IDE you must perform the following steps.
 
 4. Once you've finished debugging, run:
 
-   ``` shell
+   ```bash
    make clean-test-compass-runtime-agent-test
    ```
