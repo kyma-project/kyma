@@ -79,6 +79,10 @@ func (c *client) GetTokenMTLS(clientID, authURL string, certificate, privateKey 
 		return "", requestError
 	}
 
+	if tokenResponse == nil {
+		return "", apperrors.Internal("Failed to fetch token, possible certificate problem")
+	}
+
 	c.tokenCache.Add(c.makeMTLSOAuthTokenCacheKey(clientID, authURL, certificate, privateKey), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
