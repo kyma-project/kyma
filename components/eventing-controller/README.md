@@ -2,9 +2,12 @@
 
 ## Overview
 
-The Eventing Controller components contain controllers for various CRDs related to Eventing in Kyma. The following controller comes with this container:
+The Eventing Controller components contain reconcilers for various CRDs related to Eventing in Kyma:
 
-- [`controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller/main.go), which lays down the Eventing infrastructure in Business Event Bus (BEB) or [NATS](https://docs.nats.io/nats-concepts/intro).
+- Subscription reconciler, which lays down the Eventing infrastructure in Business Event Bus (BEB) or [NATS](https://docs.nats.io/nats-concepts/intro)
+- Backend reconciler, which updates the status of the currently active Eventing backend
+
+For eventing in NATS mode, Eventing Controller also acts as a dispatcher. It converts messages received from NATS to POST requests and forwards them to the configured sinks.
 
 ## Prerequisites
 
