@@ -1,12 +1,13 @@
 package internal
 
 import (
+	"context"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/common/logging/logger"
 )
 
-func InitLogger() logr.Logger {
+func InitLogger(ctx context.Context) logr.Logger {
 	logFormat, err := logger.MapFormat("text")
 	if err != nil {
 		panic(err)
@@ -23,5 +24,5 @@ func InitLogger() logr.Logger {
 		panic(err)
 	}
 
-	return zapr.NewLogger(kymaLogger.WithContext().Desugar())
+	return zapr.NewLogger(kymaLogger.WithTracing(ctx).Desugar())
 }

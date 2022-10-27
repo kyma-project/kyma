@@ -2,16 +2,21 @@ package main
 
 import (
 	"bytes"
+	"context"
 	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"github.com/go-logr/logr"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"math/big"
 	"os"
 	"telemetry-webhook-ca-init/internal"
 	"time"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // const certDir = "/etc/webhook/certs/"
@@ -19,12 +24,24 @@ const certDir = "./bin/"
 
 var log logr.Logger
 
-type certificateAuthority *bytes.Buffer
-type serverCertificate *bytes.Buffer
-type serverPrivateKey *bytes.Buffer
-
 func main() {
-	log = internal.InitLogger()
+	ctx := context.Background()
+	log = internal.InitLogger(ctx)
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	_, err = clientset.CoreV1().Secrets("kyma-system").Get(ctx, "test", v1.GetOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
 
 	var caPEM, serverCertPEM, serverPrivKeyPEM *bytes.Buffer
 
