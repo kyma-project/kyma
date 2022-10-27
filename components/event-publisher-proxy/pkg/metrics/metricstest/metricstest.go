@@ -17,7 +17,7 @@ func EnsureMetricErrors(t *testing.T, collector metrics.PublishingMetricsCollect
 	ensureMetricCount(t, collector, metrics.ErrorsKey, count)
 }
 
-// EnsureMetricLatency ensures metric eventing_epp_messaging_server_latency_duration_millisec
+// EnsureMetricLatency ensures metric eventing_epp_messaging_server_latency_duration_milliseconds exists.
 func EnsureMetricLatency(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
 	ensureMetricCount(t, collector, metrics.LatencyKey, count)
 }
