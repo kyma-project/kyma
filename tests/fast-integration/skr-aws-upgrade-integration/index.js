@@ -2,13 +2,13 @@ const {
   gatherOptions,
   oidcE2ETest,
   withCustomParams,
-} = require('../skr-test');
+} = require('../!skr-test');
 const {
   getEnvOrThrow,
   switchDebug,
 } = require('../utils');
-const {getOrProvisionSKR} = require('../skr-test/provision/provision-skr');
-const {deprovisionAndUnregisterSKR} = require('../skr-test/provision/deprovision-skr');
+const {getOrProvisionSKR} = require('../!skr-test/provision/provision-skr');
+const {deprovisionAndUnregisterSKR} = require('../!skr-test/provision/deprovision-skr');
 const {upgradeSKRInstance} = require('./upgrade/upgrade-skr');
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';

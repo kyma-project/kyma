@@ -66,9 +66,9 @@ describe('Eventing tests preparation', function() {
       this.skip();
     }
 
-    // 'skr-test/helpers' initializes KEB clients on import, that is why it is imported only if needed
-    const {getSKRConfig} = require('../skr-test/helpers');
-    const {initK8sConfig} = require('../skr-test/helpers');
+    // '!skr-test/helpers' initializes KEB clients on import, that is why it is imported only if needed
+    const {getSKRConfig} = require('../!skr-test/helpers');
+    const {initK8sConfig} = require('../!skr-test/helpers');
 
     debug(`Fetching SKR config for Instance Id: ${skrInstanceId}`);
     const shoot = await getSKRConfig(skrInstanceId);

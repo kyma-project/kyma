@@ -9,7 +9,7 @@ const {expect} = require('chai');
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
-const testNS = 'skr-test';
+const testNS = '!skr-test';
 const DEBUG = process.env.DEBUG === 'true';
 const {initializeK8sClient} = require('../utils/index.js');
 

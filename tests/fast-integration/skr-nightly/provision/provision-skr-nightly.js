@@ -16,7 +16,7 @@ const {
   gardener,
   keb,
   oidcE2ETest,
-} = require('../../skr-test');
+} = require('../../!skr-test');
 
 // Mocha root hook
 process.env.KCP_KEB_API_URL = 'https://kyma-env-broker.' + keb.host;
