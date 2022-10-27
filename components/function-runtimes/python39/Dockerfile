@@ -56,7 +56,7 @@ RUN set -ex \
 		bzip2-dev \
 		coreutils \
 		dpkg-dev dpkg \
-		expat-dev \
+		expat-dev=2.5.0-r0 \
 		findutils \
 		gcc \
 		gdbm-dev \
