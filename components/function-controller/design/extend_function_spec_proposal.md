@@ -65,7 +65,7 @@ spec:
 Under the hood the secret mount becomes a volume mount in the runtime pod.
 We could :
  - expose the k8s volume mount spec  in function spec
- - cover k8s volume mount spec via oor own [specialised](https://servicebinding.io/application-developer/) spec
+ - cover k8s volume mount spec via our own [specialized](https://servicebinding.io/application-developer/) spec
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
