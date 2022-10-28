@@ -52,6 +52,10 @@ func Test_Reconcile(t *testing.T) {
 		controllertesting.WithSource(controllertesting.EventSourceClean),
 		controllertesting.WithEventType(controllertesting.OrderCreatedV1Event),
 	)
+	// A subscription with empty source.
+	testSubEmptySrc := controllertesting.NewSubscription("sub2", namespaceName,
+		controllertesting.WithFinalizers([]string{eventingv1alpha2.Finalizer}),
+	)
 
 	backendSyncErr := errors.New("backend sync error")
 	missingSubSyncErr := jetstreamv2.ErrMissingSubscription
@@ -102,6 +106,17 @@ func Test_Reconcile(t *testing.T) {
 			},
 			wantReconcileResult: ctrl.Result{},
 			wantReconcileError:  nil,
+		},
+		{
+			name:              "Return error and default Result{} when sub has invalid source",
+			givenSubscription: testSubEmptySrc,
+			givenReconcilerSetup: func() (*Reconciler, *mocks.Backend) {
+				te := setupTestEnvironment(t, testSubEmptySrc)
+				te.Backend.On("Initialize", mock.Anything).Return(nil)
+				return NewReconciler(ctx, te.Client, te.Backend, te.Logger, te.Recorder, te.Cleaner, happyValidator), te.Backend
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  errEmptySourceValue,
 		},
 		{
 			name:              "Return error and default Result{} when backend sync returns error",
