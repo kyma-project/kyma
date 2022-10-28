@@ -117,7 +117,8 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
-	deployment := makeDeployment(r.config)
+	configHash := NewConfigHash().AddByteMap(secretData).AddStringMap(configMap.Data).Build()
+	deployment := makeDeployment(r.config, configHash)
 	if err = controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
 		return err
 	}
