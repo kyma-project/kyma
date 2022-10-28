@@ -409,8 +409,8 @@ spec:
 ### Compromise
 
  - clearly separate build and runtime stages in spec
- - add simple, purpose focused `secretBindings`
- - allow to add volume mounts once needed
+ - add simple, [purpose focused](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/) `secretBindings` 
+ - volume mounts separated to a different place, for more advanced case (implemented once requested) 
  - use metadata under buildSpec and runtimeSpec
 
 ```yaml
