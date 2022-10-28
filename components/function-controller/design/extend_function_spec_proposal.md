@@ -18,10 +18,11 @@ Give Serverless users the ability to:
 
 - Add more flexibility to the Serverless API - enable volume mounted secrets and pod annotations.
 - Organise spec attributes belonging to runtime and build-time configuration (?)
-- Provide a rollout plan to implement this functionality in small increments and avoid the need to roll out a new API version
+- Propose sample Function CR visualising different variants
+- Eventually, provide a rollout plan to implement the changes
 
-### Non-Goals
-- Define a new API version specification
+### Stretch Goals
+- Try to avoid a new API version specification
 
 ## Discussion points
 
@@ -65,7 +66,6 @@ spec:
 Under the hood the secret mount becomes a volume mount in the runtime pod.
 We could :
  - expose the k8s volume mount spec  in function spec
- - cover k8s volume mount spec via our own [specialized](https://servicebinding.io/application-developer/) spec
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -80,6 +80,7 @@ spec:
     secret:
       secretName: mysecret
 ```
+ - cover k8s volume mount spec via our own [specialized](https://servicebinding.io/application-developer/) spec
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -87,8 +88,9 @@ kind: Function
 spec:
   serviceBindings:
   - source: my-secret
+    mountPath: /bar # optional mount path
   env:
-  - name: SERVICE_BINDING_ROOT 
+  - name: SERVICE_BINDING_ROOT # default mount path for service bindings
     value: /foo
 ```
 
@@ -173,6 +175,8 @@ spec:
     resources: # optional... required if spec.build.profile==Custom
       limits: ... #if_custom
       requests: ... #if_custom
+    labels: #optional
+    annotations: #optional
 ​
 ```
 ### Option 2
