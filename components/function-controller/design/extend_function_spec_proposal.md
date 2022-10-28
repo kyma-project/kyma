@@ -11,8 +11,8 @@ Moreover users have no control over the annotations that are applied on the func
 ## Motivation
 
 Give Serverless users the ability to:
-- Configure volume mounted secrets (and config maps) for Function's subresources.
-- Configure labels and annotations for the  Function runtime pod.
+- Configure volume mounted secrets for Function's subresources.
+- Configure labels and annotations for the Function runtime pod.
 
 ### Goals
 
@@ -65,7 +65,13 @@ spec:
 
 Under the hood the secret mount becomes a volume mount in the runtime pod.
 We could :
- - expose the k8s volume mount spec  in function spec
+A) expose the k8s volume mount spec in function spec
+
+Pros: 
+ - Generic solution - Allows mounting anything : secrets, config maps, any volumes
+Cons: 
+ - Noone requested it yet
+ - Less compact ( elegant ) to configure requested service binding use case
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -80,19 +86,31 @@ spec:
     secret:
       secretName: mysecret
 ```
- - cover k8s volume mount spec via our own [specialized](https://servicebinding.io/application-developer/) spec
+ B) focus on [service binding case](https://servicebinding.io/application-developer/).
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
 kind: Function
 spec:
-  serviceBindings:
+  secretBindings: #serviceBindings will cause name clash with https://github.com/SAP/sap-btp-service-operator#service-binding
   - source: my-secret
     mountPath: /bar # optional mount path
   env:
   - name: SERVICE_BINDING_ROOT # default mount path for service bindings
     value: /foo
 ```
+ Pros: 
+ - Purpose focused  
+ - Compact configuration - easy to adopt
+ - Less confusing (as volume mounts cause confusion as serverless functions are considered stateless and should not claim any persistance volumes )
+ - Enables using service binding natively with dedicated SDKs (i.e @sap/xsenv) - [related read](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/)
+Cons: 
+ - Not allows to mount anything besides secrets
+
+A and B are not exclusive
+
+We could separate those cases. (See last 'compromise' option)
+
 
 ### Metadata for function pod
 
@@ -134,6 +152,7 @@ spec:
 ### Option 1
 
 - simplified mounts serving just for service binding purpose
+- stretch: volume mounts could be added as a separate feature
 - extract `build` object for any build-time specific config
 - runtime labels and annotations on the spec root level
 
@@ -149,7 +168,7 @@ spec:
   runtime: nodejs16
   source:
     ...
-  serviceBindings: 
+  secretBindings: 
   - source: my-secret
     mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
 
@@ -157,8 +176,7 @@ spec:
   resources: # optional... required if spec.profile==Custom
     limits: ... #if_custom
     requests: ... #if_custom
-​
-  
+​  
   labels: 
     app: my-app
   annotations: 
@@ -168,8 +186,7 @@ spec:
   env:
   - name: SERVICE_BINDING_ROOT
     value: /service_bindings
-​
-​
+​​
   build:
     profile: S / M / L / XL / ... / Custom
     resources: # optional... required if spec.build.profile==Custom
@@ -177,8 +194,7 @@ spec:
       requests: ... #if_custom
     labels: #optional
     annotations: #optional
-​
-```
+​```
 ### Option 2
 
 - almost the same as `Option 1` (same pros)
@@ -387,6 +403,87 @@ spec:
         env: ...
         volumeMounts: ...
       volumes: ...
+```
+
+
+### Compromise
+
+ - clearly separate build and runtime stages in spec
+ - add simple, purpose focused `secretBindings`
+ - allow to add volume mounts once needed
+ - use metadata under buildSpec and runtimeSpec
+
+```yaml
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app.kubernetes.io/name: my-function
+spec:
+  runtime: nodejs16
+  source:
+    ...
+  replicas: 1
+  scalingConfig:
+    min: 1
+    max: 2
+
+  runtimeSpec:
+
+    metadata: #optional
+      labels: 
+        app: my-app
+      annotations: 
+        fluentbit.io/parser: my-regex-parser
+        istio-injection: enabled
+
+    secretBindings: 
+    - source: my-secret
+      mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
+
+    profile: S / M / L / XL / ... / Custom #optional
+    resources: # optional... required if spec.profile==Custom
+      limits: ... #if_custom
+      requests: ... #if_custom
+​  
+​
+    env:
+    - name: SERVICE_BINDING_ROOT
+      value: /service_bindings
+    - name: MODE
+      value: modeA
+
+    # volumeMounts:  (add when requested)
+    # - name: config
+    #   mountPath: /etc/config/
+    # - name: search-index
+    #   mountPath: /etc/index
+
+    # volumes:
+    # - name: search-index
+    #     nfs:
+    #       path: /path-to-index
+    #       readOnly: true
+    #       server: localhost
+    # - name: config
+    #   configmap:
+    #     name: function-configuration
+    #     items:
+    #       - key: config
+    #         path: config.yaml
+​​
+  buildSpec:
+    metadata: #optional
+      labels: 
+      annotations: 
+    profile: S / M / L / XL / ... / Custom
+    resources: # optional... required if spec.build.profile==Custom
+      limits: ... #if_custom
+      requests: ... #if_custom
+
+
 ```
 
 ### Precedence, defaulting and validation
