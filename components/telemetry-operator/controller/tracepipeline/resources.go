@@ -1,6 +1,8 @@
 package tracepipeline
 
 import (
+	"encoding/base64"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"go.opentelemetry.io/collector/confmap"
@@ -12,11 +14,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	basicAuthHeaderVariable = "BASIC_AUTH_HEADER"
+)
+
 var (
-	podAnnotations = map[string]string{
-		"sidecar.istio.io/inject": "false",
-	}
-	replicas           = int32(1)
 	collectorResources = corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("10m"),
@@ -27,7 +29,11 @@ var (
 			corev1.ResourceMemory: resource.MustParse("512Mi"),
 		},
 	}
-	configMapKey = "relay.conf"
+	configMapKey   = "relay.conf"
+	podAnnotations = map[string]string{
+		"sidecar.istio.io/inject": "false",
+	}
+	replicas = int32(1)
 )
 
 func getLabels(config Config) map[string]string {
@@ -80,6 +86,33 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 	}
 }
 
+func makeSecret(config Config, output *v1alpha1.OtlpOutput) *corev1.Secret {
+	secretData := map[string][]byte{}
+
+	basicAuthHeader := getBasicAuthHeader(output)
+	if basicAuthHeader != nil {
+		secretData[basicAuthHeaderVariable] = basicAuthHeader
+	}
+
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      config.ResourceName,
+			Namespace: config.CollectorNamespace,
+			Labels:    getLabels(config),
+		},
+		Data: secretData,
+	}
+}
+
+func getBasicAuthHeader(output *v1alpha1.OtlpOutput) []byte {
+	if output.Authentication != nil && output.Authentication.Basic.IsDefined() {
+		username := output.Authentication.Basic.User.Value
+		password := output.Authentication.Basic.Password.Value
+		return []byte("Basic " + base64.StdEncoding.EncodeToString([]byte(username+":"+password)))
+	}
+	return nil
+}
+
 func getOutputType(output v1alpha1.TracePipelineOutput) string {
 	if output.Otlp.Protocol == "http" {
 		return "otlphttp"
@@ -89,15 +122,23 @@ func getOutputType(output v1alpha1.TracePipelineOutput) string {
 
 func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 	outputType := getOutputType(output)
+	var headers map[string]any
+	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
+		headers = map[string]any{
+			"Authorization": "${" + basicAuthHeaderVariable + "}",
+		}
+	}
 	return map[string]any{
 		outputType: map[string]any{
 			"endpoint": output.Otlp.Endpoint.Value,
+			"headers":  headers,
 		},
 	}
 }
 
 func makeDeployment(config Config) *appsv1.Deployment {
 	labels := getLabels(config)
+	optional := true
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.ResourceName,
@@ -128,6 +169,16 @@ func makeDeployment(config Config) *appsv1.Deployment {
 											APIVersion: "v1",
 											FieldPath:  "status.podIP",
 										},
+									},
+								},
+							},
+							EnvFrom: []corev1.EnvFromSource{
+								{
+									SecretRef: &corev1.SecretEnvSource{
+										LocalObjectReference: corev1.LocalObjectReference{
+											Name: config.ResourceName,
+										},
+										Optional: &optional,
 									},
 								},
 							},

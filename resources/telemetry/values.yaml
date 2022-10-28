@@ -4,10 +4,10 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "5f79928b"
+      version: "PR-15860"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-15857"
+      version: "PR-15886"
     telemetry_ca_init:
       name: "telemetry-webhook-ca-init"
       version: "PR-15934"

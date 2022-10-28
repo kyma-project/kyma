@@ -7,7 +7,6 @@ import (
 	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
 	"github.com/nats-io/nats.go"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -89,56 +88,6 @@ func Test_GetOrCreateConsumer(t *testing.T) {
 			// then
 			assert.Equal(t, tc.wantConsumerInfo, consumerInfo)
 			assert.ErrorIs(t, tc.wantError, err)
-		})
-	}
-}
-
-// Test_SyncConsumersAndSubscriptions_ForGetMaxInFlight test for valid/invalid maxInFlight values in the subscription.
-func Test_SyncConsumersAndSubscriptions_ForGetMaxInFlight(t *testing.T) {
-	testCases := []struct {
-		name             string
-		jetStreamContext *jetStreamContextStub
-		givenMaxInFlight string
-		wantErr          error
-	}{
-		{
-			name:             "invalid maxInFlight should return an error",
-			givenMaxInFlight: "nonInt",
-			jetStreamContext: &jetStreamContextStub{},
-			wantErr:          ErrInvalidMaxInFlight,
-		},
-		{
-			name:             "invalid maxInFlight should return an error",
-			givenMaxInFlight: "20",
-			jetStreamContext: &jetStreamContextStub{
-				consumerInfoError: nil,
-				consumerInfo:      &nats.ConsumerInfo{},
-				subscribe:         &nats.Subscription{},
-			},
-			wantErr: nil,
-		},
-	}
-
-	for _, testCase := range testCases {
-		tc := testCase
-		t.Run(tc.name, func(t *testing.T) {
-			// given
-			callback := func(m *nats.Msg) {}
-			sub := NewSubscriptionWithOneType()
-			sub.Spec.Config = map[string]string{
-				v1alpha2.MaxInFlightMessages: testCase.givenMaxInFlight,
-			}
-			js := JetStream{
-				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
-				metricsCollector: metrics.NewCollector(),
-				jsCtx:            *testCase.jetStreamContext,
-				cleaner:          &cleaner.JetStreamCleaner{},
-			}
-			// when
-			err := js.syncConsumersAndSubscriptions(sub, callback)
-
-			// then
-			require.ErrorIs(t, err, testCase.wantErr)
 		})
 	}
 }
@@ -439,7 +388,7 @@ func NewSubscriptionWithOneType() *v1alpha2.Subscription {
 	return subtesting.NewSubscription("test", "test",
 		subtesting.WithSourceAndType(subtesting.EventSource, subtesting.CloudEventType),
 		subtesting.WithTypeMatchingStandard(),
-		subtesting.WithMaxInFlight(env.DefaultMaxInFlight),
+		subtesting.WithMaxInFlight(DefaultMaxInFlights),
 		subtesting.WithStatusTypes([]v1alpha2.EventType{
 			{
 				OriginalType: subtesting.CloudEventType,

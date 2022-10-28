@@ -5,12 +5,13 @@ go 1.19
 require (
 	github.com/cloudevents/sdk-go/v2 v2.12.0
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221004144139-b69aea381b88
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20221004144139-b69aea381b88
-	github.com/nats-io/nats-server/v2 v2.9.2
-	github.com/nats-io/nats.go v1.17.0
-	github.com/onsi/gomega v1.20.2
+	github.com/nats-io/nats-server/v2 v2.9.3
+	github.com/nats-io/nats.go v1.18.0
+	github.com/onsi/gomega v1.21.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
@@ -18,9 +19,9 @@ require (
 	go.uber.org/zap v1.23.0
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
-	k8s.io/api v0.25.2
-	k8s.io/apimachinery v0.25.2
-	k8s.io/client-go v0.25.2
+	k8s.io/api v0.25.3
+	k8s.io/apimachinery v0.25.3
+	k8s.io/client-go v0.25.3
 	sigs.k8s.io/controller-runtime v0.13.0
 )
 
@@ -66,6 +67,7 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.4.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect

@@ -6,17 +6,18 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
 )
 
 const processorName = "processor"
 
 type Processor struct {
 	SubscriptionLister *cache.GenericLister
-	Config             *env.BEBConfig
+	Prefix             string
+	Namespace          string
 	Logger             *logger.Logger
 }
 
@@ -37,7 +38,7 @@ func (p Processor) ExtractEventsFromSubscriptions(writer http.ResponseWriter, re
 			continue
 		}
 		if sub.Spec.Filter != nil {
-			eventsForSub := FilterEventTypeVersions(p.Config.EventTypePrefix, p.Config.BEBNamespace, appName, sub.Spec.Filter)
+			eventsForSub := FilterEventTypeVersions(p.Prefix, p.Namespace, appName, sub.Spec.Filter)
 			eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
 		}
 	}

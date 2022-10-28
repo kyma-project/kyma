@@ -24,6 +24,12 @@ func TestParser(t *testing.T) {
 			wantError:      true,
 		},
 		{
+			name:           "should fail if prefix is duplicated",
+			givenEventType: "one.two.one.two.prefix.test.app.name.123.order.created.v1",
+			givenPrefix:    "one.two",
+			wantError:      true,
+		},
+		{
 			name:           "should fail if event-type is incomplete",
 			givenEventType: "prefix.order.created.v1",
 			givenPrefix:    "prefix",
@@ -68,6 +74,33 @@ func TestParser(t *testing.T) {
 				require.Equal(t, tc.wantEvent, event)
 				require.Equal(t, tc.wantVersion, version)
 			}
+		})
+	}
+}
+
+func Test_checkForEmptySegments(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name          string
+		givenSegments []string
+		wantResult    bool
+	}{
+		{
+			name:          "should pass if all segments are non-empty",
+			givenSegments: []string{"one", "two", "three"},
+			wantResult:    false,
+		},
+		{
+			name:          "should fail if any segment is empty",
+			givenSegments: []string{"one", "", "three"},
+			wantResult:    true,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tc.wantResult, checkForEmptySegments(tc.givenSegments))
 		})
 	}
 }
