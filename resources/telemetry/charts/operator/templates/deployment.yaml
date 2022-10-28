@@ -26,6 +26,17 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - command:
+            - /webhook-ca-init
+          args:
+            - --cert-dir=/var/run/telemetry-webhook
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_ca_init) }}"
+          imagePullPolicy: IfNotPresent
+          name: webhook-ca-init
+          volumeMounts:
+            - mountPath: /var/run/telemetry-webhook
+              name: telemetry-webhook-cert
       containers:
         - command:
             - /manager
@@ -75,10 +86,4 @@ spec:
             readOnly: true
       volumes:
       - name: telemetry-webhook-cert
-        secret:
-          secretName: {{ template "fullname" . }}-webhook-cert
-          items:
-          - key: tls.crt
-            path: tls.crt
-          - key: tls.key
-            path: tls.key
+        emptyDir: {}

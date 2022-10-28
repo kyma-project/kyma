@@ -8,6 +8,8 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
+	"flag"
 	"github.com/go-logr/logr"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"math/big"
@@ -19,12 +21,19 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-// const certDir = "/etc/webhook/certs/"
-const certDir = "./bin/"
+const caName = "telemetry-validating-webhook-ca"
+
+// const certDir = "/var/run/telemetry-webhook/"
+var certDir string
 
 var log logr.Logger
 
 func main() {
+	flag.StringVar(&certDir, "cert-dir", "", "Path to certificate bundle directory")
+	flag.Parse()
+	if err := validateFlags(); err != nil {
+		panic(err.Error())
+	}
 	ctx := context.Background()
 	log = internal.InitLogger(ctx)
 
@@ -135,6 +144,13 @@ func writeFile(filepath string, sCert *bytes.Buffer) error {
 	_, err = f.Write(sCert.Bytes())
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func validateFlags() error {
+	if certDir == "" {
+		return errors.New("--cert-dir flag is required")
 	}
 	return nil
 }
