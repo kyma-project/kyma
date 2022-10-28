@@ -77,7 +77,7 @@ If you have NATS cli installed on your machine, you can simply run this shell sc
    done
    ```
 
-this will output the following:
+You must get the following output:
 
 ```bash
 {"name":"6642d54a92f357ba28280b9cb609e79d","pending":25,"leader":"eventing-nats-1"}
@@ -92,7 +92,7 @@ is successfully processing events.
 
 Now, when we know the name of the broken consumer and its leader, we can trigger the reelection:
 
-1. You need to port-forward the leader replica and trigger the leader reelection for that broken consumer
+1. You must port-forward the leader replica and trigger the leader reelection for that broken consumer:
 
 ```bash
 kubectl port-forward -n kyma-system eventing-nats-1 4222  
@@ -116,14 +116,14 @@ You can check the consumer now and confirm that the pending messages started to 
 
 ### Restart the NATS Pods and trigger the stream leader reelection
 
-Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case you should try to trigger
+Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case, you must try to trigger
 leader reelection on the stream level:
 
 ```bash
 nats stream cluster step-down sap
 ```
 
-As result, you will see:
+You must get the following result:
 
 ```bash
 11:08:22 Requesting leader step down of "eventing-nats-1" in a 3 peer RAFT group
