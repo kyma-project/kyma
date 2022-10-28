@@ -65,13 +65,17 @@ spec:
 
 Under the hood the secret mount becomes a volume mount in the runtime pod.
 We could :
+
 A) expose the k8s volume mount spec in function spec
 
 Pros: 
  - Generic solution - Allows mounting anything : secrets, config maps, any volumes
+ - very easy to achieve (rewriting from function spec to pod teplate spec)
+
 Cons: 
- - Noone requested it yet
+ - Does not represent the service binging use case. User needs to translate service bindngs into volume mounts by themselves
  - Less compact ( elegant ) to configure requested service binding use case
+ - Noone requested it yet
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -104,10 +108,11 @@ spec:
  - Compact configuration - easy to adopt
  - Less confusing (as volume mounts cause confusion as serverless functions are considered stateless and should not claim any persistance volumes )
  - Enables using service binding natively with dedicated SDKs (i.e @sap/xsenv) - [related read](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/)
+
 Cons: 
  - Not allows to mount anything besides secrets
 
-A and B are not exclusive
+A) and B) are not exclusive
 
 We could separate those cases. (See last 'compromise' option)
 
@@ -455,7 +460,7 @@ spec:
     - name: MODE
       value: modeA
 
-    # volumeMounts:  (add when requested)
+    # volumeMounts:  (add when requested by users)
     # - name: config
     #   mountPath: /etc/config/
     # - name: search-index
