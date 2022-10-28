@@ -22,9 +22,9 @@ There are two ways of how to fix the "broken" consumers with pending messages. Y
 reelection either on the consumers
 with pending messages or on the stream level.
 
-### Trigger Consumer leader election
+### Trigger consumer leader election
 
-First, you need to find out which consumer(s) have pending messages. For that you need the latest version of NATS cli
+First, you need to find out which consumer(s) have pending messages. For that, you need the latest version of NATS cli
 installed on your machine.
 You can find the broken consumer in two ways: by using Grafana dashboard or directly by using the NATS cli command.
 
@@ -33,7 +33,7 @@ You can find the broken consumer in two ways: by using Grafana dashboard or dire
 1. [Access and Expose Grafana](../../security/sec-06-access-expose-grafana.md)
 2. Find the NATS JetStream Dashboard and check the pending messages
    ![Pending consumer](../../assets/grafana_pending_consumer.png)
-3. Find the consumer with pending messages and encode it as md5 hash:
+3. Find the consumer with pending messages and encode it as an `md5` hash:
 
 ```bash
 echo -n "tunas-testing/test-noapp3/kyma.sap.kyma.custom.noapp.order.created.v1" | md5
@@ -114,7 +114,7 @@ Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-
 
 You can check the consumer now and confirm that the pending messages started to be dispatched.
 
-### Restart the NATS pods and trigger the stream leader reelection
+### Restart the NATS Pods and trigger the stream leader reelection
 
 Sometimes triggering the leader reelection on the broken consumers doesn't work. In that case you should try to trigger
 leader reelection on the stream level:
