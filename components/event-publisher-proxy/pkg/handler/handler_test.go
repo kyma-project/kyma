@@ -168,12 +168,19 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 	type args struct {
 		request *http.Request
 	}
+
+	const bucketsFunc = "Buckets"
+	latency := new(mocks.BucketsProvider)
+	latency.On(bucketsFunc).Return(nil)
+	latency.Test(t)
+
 	tests := []struct {
 		name       string
 		fields     fields
 		args       args
 		wantStatus int
 		wantBody   []byte
+		wantTEF    string
 	}{
 		{
 			name: "Publish structured Cloudevent",
@@ -184,14 +191,39 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 						Status: 204,
 						Body:   []byte(""),
 					},
+					BackendURL: "FOO",
 				},
-				collector:        metricstest.PublishingMetricsCollectorStub{},
+				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: CreateValidStructuredRequest(t),
 			},
 			wantStatus: 204,
+			wantTEF: `
+				# HELP epp_event_type_published_total The total number of events published for a given eventTypeLabel
+				# TYPE epp_event_type_published_total counter
+				epp_event_type_published_total{event_source="/default/sap.kyma/id",event_type="",response_code="204"} 1
+				# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.005"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.01"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.025"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.05"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.1"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.25"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.5"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="1"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="2.5"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="5"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="10"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="+Inf"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="FOO",response_code="204"} 0
+				eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="FOO",response_code="204"} 1
+				# HELP eventing_epp_requests_total The total number of event requests
+				# TYPE eventing_epp_requests_total counter
+				eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+			`,
 		},
 		{
 			name: "Publish binary Cloudevent",
@@ -202,20 +234,45 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 						Status: 204,
 						Body:   []byte(""),
 					},
+					BackendURL: "FOO",
 				},
-				collector:        metricstest.PublishingMetricsCollectorStub{},
+				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 204,
+			wantTEF: `
+				# HELP epp_event_type_published_total The total number of events published for a given eventTypeLabel
+				# TYPE epp_event_type_published_total counter
+				epp_event_type_published_total{event_source="/default/sap.kyma/id",event_type="",response_code="204"} 1
+				# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.005"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.01"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.025"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.05"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.1"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.25"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.5"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="1"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="2.5"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="5"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="10"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="+Inf"} 1
+				eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="FOO",response_code="204"} 0
+				eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="FOO",response_code="204"} 1
+				# HELP eventing_epp_requests_total The total number of event requests
+				# TYPE eventing_epp_requests_total counter
+				eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+			`,
 		},
 		{
 			name: "Publish invalid structured CloudEvent",
 			fields: fields{
 				Sender:           &GenericSenderStub{},
-				collector:        metricstest.PublishingMetricsCollectorStub{},
+				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
 			},
 			args: args{
@@ -228,7 +285,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			name: "Publish invalid binary CloudEvent",
 			fields: fields{
 				Sender:           &GenericSenderStub{},
-				collector:        metricstest.PublishingMetricsCollectorStub{},
+				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
 			},
 			args: args{
@@ -240,7 +297,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			name: "Publish binary CloudEvent but cannot clean",
 			fields: fields{
 				Sender:    &GenericSenderStub{},
-				collector: metricstest.PublishingMetricsCollectorStub{},
+				collector: metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{
 					CleanType: "",
 					Error:     fmt.Errorf("I cannot clean"),
@@ -251,6 +308,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 400,
 			wantBody:   []byte("I cannot clean"),
+			wantTEF:    "", // client error will not be recorded as EPP internal error. So no metric will be updated.
 		},
 		{
 			name: "Publish binary CloudEvent but cannot send",
@@ -258,13 +316,18 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				Sender: &GenericSenderStub{
 					Err: fmt.Errorf("I cannot send"),
 				},
-				collector:        metricstest.PublishingMetricsCollectorStub{},
+				collector:        metrics.NewCollector(latency),
 				eventTypeCleaner: &eventtypetest.CleanerStub{},
 			},
 			args: args{
 				request: CreateValidBinaryRequest(t),
 			},
 			wantStatus: 500,
+			wantTEF: `
+				# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
+				# TYPE eventing_epp_errors_total counter
+				eventing_epp_errors_total 1
+			`,
 		},
 	}
 	for _, tt := range tests {
@@ -291,6 +354,8 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			if tt.wantBody != nil {
 				assert.Equal(t, tt.wantBody, body)
 			}
+
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
 		})
 	}
 }
@@ -305,12 +370,19 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 	type args struct {
 		request *http.Request
 	}
+
+	const bucketsFunc = "Buckets"
+	latency := new(mocks.BucketsProvider)
+	latency.On(bucketsFunc).Return(nil)
+	latency.Test(t)
+
 	tests := []struct {
 		name       string
 		fields     fields
 		args       args
 		wantStatus int
 		wantOk     bool
+		wantTEF    string
 	}{
 		{
 			name: "Send valid legacy event",
@@ -319,9 +391,10 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Result: beb.HTTPPublishResult{
 						Status: 204,
 					},
+					BackendURL: "FOO",
 				},
 				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metricstest.PublishingMetricsCollectorStub{},
+				collector:         metrics.NewCollector(latency),
 				eventTypeCleaner:  eventtypetest.CleanerStub{},
 			},
 			args: args{
@@ -329,15 +402,42 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: 200,
 			wantOk:     true,
+			wantTEF: `
+					# HELP epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE epp_event_type_published_total counter
+					epp_event_type_published_total{event_source="namespace",event_type="im.a.prefix.testapp.object.created.v1",response_code="204"} 1
+
+					# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.005"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.01"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.025"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.05"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.1"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.25"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.5"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="1"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="2.5"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="5"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="10"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="+Inf"} 1
+					eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="FOO",response_code="204"} 0
+					eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="FOO",response_code="204"} 1
+
+					# HELP eventing_epp_requests_total The total number of event requests
+					# TYPE eventing_epp_requests_total counter
+					eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+				`,
 		},
 		{
 			name: "Send valid legacy event but cannot send to backend",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Err: fmt.Errorf("i cannot send"),
+					Err:        fmt.Errorf("i cannot send"),
+					BackendURL: "FOO",
 				},
 				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metricstest.PublishingMetricsCollectorStub{},
+				collector:         metrics.NewCollector(latency),
 				eventTypeCleaner:  eventtypetest.CleanerStub{},
 			},
 			args: args{
@@ -345,6 +445,11 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: 500,
 			wantOk:     false,
+			wantTEF: `
+					# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
+					# TYPE eventing_epp_errors_total counter
+					eventing_epp_errors_total 1
+				`,
 		},
 		{
 			name: "Send invalid legacy event",
@@ -353,9 +458,10 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					Result: beb.HTTPPublishResult{
 						Status: 204,
 					},
+					BackendURL: "FOO",
 				},
 				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
-				collector:         metricstest.PublishingMetricsCollectorStub{},
+				collector:         metrics.NewCollector(latency),
 				eventTypeCleaner:  eventtypetest.CleanerStub{},
 			},
 			args: args{
@@ -363,6 +469,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			},
 			wantStatus: 400,
 			wantOk:     false,
+			wantTEF:    "", // this is a client error. We do record an error metric for requests that cannot even be decoded correctly.
 		},
 	}
 	for _, tt := range tests {
@@ -397,6 +504,8 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				err = json.Unmarshal(body, nok)
 				assert.NoError(t, err)
 			}
+
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wantTEF)
 
 		})
 	}
@@ -469,12 +578,13 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 		header http.Header
 	}
 	type wants struct {
-		result          sender.PublishResult
-		assertionFunc   assert.ErrorAssertionFunc
-		metricErrors    int
-		metricTotal     int
-		metricLatency   int
-		metricPublished int
+		result           sender.PublishResult
+		assertionFunc    assert.ErrorAssertionFunc
+		metricErrors     int
+		metricTotal      int
+		metricLatency    int
+		metricPublished  int
+		metricLatencyTEF string
 	}
 
 	const bucketsFunc = "Buckets"
@@ -517,6 +627,24 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				metricTotal:     1,
 				metricLatency:   1,
 				metricPublished: 1,
+				metricLatencyTEF: `
+# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.005"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.01"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.025"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.05"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.1"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.25"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.5"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="1"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="2.5"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="5"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="10"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="+Inf"} 1
+eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="foo",response_code="204"} 0
+eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="foo",response_code="204"} 1
+`,
 			},
 		},
 		{
@@ -565,6 +693,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 			metricstest.EnsureMetricTotalRequests(t, h.collector, tt.wants.metricTotal)
 			metricstest.EnsureMetricLatency(t, h.collector, tt.wants.metricLatency)
 			metricstest.EnsureMetricEventTypePublished(t, h.collector, tt.wants.metricPublished)
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricLatencyTEF, "eventing_epp_messaging_server_latency_duration_milliseconds")
 		})
 	}
 }
@@ -675,6 +804,7 @@ type GenericSenderStub struct {
 	SleepDuration time.Duration
 	Result        sender.PublishResult
 	ReceivedEvent *cev2event.Event
+	BackendURL    string
 }
 
 func (g *GenericSenderStub) Send(_ context.Context, event *cev2event.Event) (sender.PublishResult, error) {
@@ -684,7 +814,7 @@ func (g *GenericSenderStub) Send(_ context.Context, event *cev2event.Event) (sen
 }
 
 func (g *GenericSenderStub) URL() string {
-	return ""
+	return g.BackendURL
 }
 
 func NewApplicationListerOrDie(ctx context.Context, appName string) *application.Lister {
