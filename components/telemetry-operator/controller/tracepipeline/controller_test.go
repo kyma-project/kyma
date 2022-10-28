@@ -31,6 +31,17 @@ var _ = Describe("Deploying a TracePipeline", func() {
 			Name:      "telemetry-trace-collector",
 			Namespace: "kyma-system",
 		}
+		data := map[string][]byte{
+			"user":     []byte("secret-username"),
+			"password": []byte("secret-password"),
+		}
+		secret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "basic-auth-credentials",
+				Namespace: "default",
+			},
+			Data: data,
+		}
 		tracePipeline := &telemetryv1alpha1.TracePipeline{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "test-tracepipeline",
@@ -39,6 +50,28 @@ var _ = Describe("Deploying a TracePipeline", func() {
 				Output: telemetryv1alpha1.TracePipelineOutput{
 					Otlp: &telemetryv1alpha1.OtlpOutput{
 						Endpoint: telemetryv1alpha1.ValueType{Value: "localhost"},
+						Authentication: &telemetryv1alpha1.AuthenticationOptions{
+							Basic: &telemetryv1alpha1.BasicAuthOptions{
+								User: telemetryv1alpha1.ValueType{
+									ValueFrom: &telemetryv1alpha1.ValueFromSource{
+										SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+											Name:      "basic-auth-credentials",
+											Namespace: "default",
+											Key:       "user",
+										},
+									},
+								},
+								Password: telemetryv1alpha1.ValueType{
+									ValueFrom: &telemetryv1alpha1.ValueFromSource{
+										SecretKeyRef: &telemetryv1alpha1.SecretKeyRef{
+											Name:      "basic-auth-credentials",
+											Namespace: "default",
+											Key:       "password",
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -46,6 +79,7 @@ var _ = Describe("Deploying a TracePipeline", func() {
 
 		It("creates OpenTelemetry Collector resources", func() {
 			Expect(k8sClient.Create(ctx, kymaSystemNamespace)).Should(Succeed())
+			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
 			Expect(k8sClient.Create(ctx, tracePipeline)).Should(Succeed())
 
 			Eventually(func() error {
@@ -54,6 +88,9 @@ var _ = Describe("Deploying a TracePipeline", func() {
 					return err
 				}
 				if err := validateOwnerReferences(otelCollectorDeployment.OwnerReferences); err != nil {
+					return err
+				}
+				if err := validateEnvironment(otelCollectorDeployment); err != nil {
 					return err
 				}
 				return nil
@@ -97,6 +134,21 @@ var _ = Describe("Deploying a TracePipeline", func() {
 		})
 	})
 })
+
+func validateEnvironment(deployment appsv1.Deployment) error {
+	container := deployment.Spec.Template.Spec.Containers[0]
+	env := container.EnvFrom[0]
+
+	if env.SecretRef.LocalObjectReference.Name != "telemetry-trace-collector" {
+		return fmt.Errorf("unexpected secret name: %s", env.SecretRef.LocalObjectReference.Name)
+	}
+
+	if !*env.SecretRef.Optional {
+		return fmt.Errorf("secret reference for environment must be optional")
+	}
+
+	return nil
+}
 
 func validateOwnerReferences(ownerRefernces []metav1.OwnerReference) error {
 	if len(ownerRefernces) != 1 {
