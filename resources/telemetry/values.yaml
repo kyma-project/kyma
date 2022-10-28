@@ -7,7 +7,7 @@ global:
       version: "PR-15860"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-15886"
+      version: "PR-15935"
     telemetry_ca_init:
       name: "telemetry-webhook-ca-init"
       version: "PR-15934"
