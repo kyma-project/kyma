@@ -65,8 +65,7 @@ global:
       directory: "external"
     postgres_exporter:
       name: "postgres-exporter"
-      version: "0.8.0-debian-10-r28"
-      # version: "0.11.1-debian-11-r23"
+      version: "0.11.1-debian-11-r23"
       directory: "external/bitnami"
     alpine:
       name: "alpine"
