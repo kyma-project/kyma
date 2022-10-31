@@ -113,14 +113,15 @@ func (c *customDomainScenario) thereIsAnCloudCredentialsSecret(secretName string
 
 func (c *customDomainScenario) isDNSReady() error {
 	err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		ips, err := net.LookupIP(fmt.Sprintf("a.%s.%s", c.testID, c.domain))
+		testName := generateRandomString(3)
+		ips, err := net.LookupIP(fmt.Sprintf("%s.%s.%s", testName, c.testID, c.domain))
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if len(ips) != 0 {
 			for _, ip := range ips {
 				if ip.String() == c.loadBalancerIP {
-					fmt.Printf("Found a.%s.%s. IN A %s\n", c.testID, c.domain, ip.String())
+					fmt.Printf("Found %s.%s.%s. IN A %s\n", testName, c.testID, c.domain, ip.String())
 					return true, nil
 				}
 			}
