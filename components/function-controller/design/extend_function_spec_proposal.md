@@ -413,10 +413,10 @@ spec:
 
 ### Compromise
 
- - clearly separate build and runtime stages in spec
- - add simple, [purpose focused](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/) `secretBindings` 
+ - clearly separate configuration of the build stage in the spec.
+ - add simple, [purpose focused](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/) `serviceBindings` 
  - volume mounts separated to a different place, for more advanced case (implemented once requested) 
- - use metadata under buildSpec and runtimeSpec
+ - don't group labels and annotations under metadata. 
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -435,54 +435,51 @@ spec:
     min: 1
     max: 2
 
-  runtimeSpec:
+  labels: #?
+    app: my-app
+  annotations: #?
+    fluentbit.io/parser: my-regex-parser
+    istio-injection: enabled
 
-    metadata: #optional
-      labels: 
-        app: my-app
-      annotations: 
-        fluentbit.io/parser: my-regex-parser
-        istio-injection: enabled
+  serviceBindings: 
+  - secretName: my-secret
+    mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
 
-    secretBindings: 
-    - source: my-secret
-      mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
-
-    profile: S / M / L / XL / ... / Custom #optional
-    resources: # optional... required if spec.profile==Custom
-      limits: ... #if_custom
-      requests: ... #if_custom
-​  
+  profile: S / M / L / XL / ... / Custom #optional
+  resources: # optional... required if spec.profile==Custom
+    limits: ... #if_custom
+    requests: ... #if_custom
 ​
-    env:
-    - name: SERVICE_BINDING_ROOT
-      value: /service_bindings
-    - name: MODE
-      value: modeA
+  env:
+  - name: SERVICE_BINDING_ROOT
+    value: /service_bindings
+  - name: MODE
+    value: modeA
 
-    # volumeMounts:  (add when requested by users)
-    # - name: config
-    #   mountPath: /etc/config/
-    # - name: search-index
-    #   mountPath: /etc/index
+  # volumeMounts:  (add when requested by users)
+  # - name: config
+  #   mountPath: /etc/config/
+  # - name: search-index
+  #   mountPath: /etc/index
 
-    # volumes:
-    # - name: search-index
-    #     nfs:
-    #       path: /path-to-index
-    #       readOnly: true
-    #       server: localhost
-    # - name: config
-    #   configmap:
-    #     name: function-configuration
-    #     items:
-    #       - key: config
-    #         path: config.yaml
+  # volumes:
+  # - name: search-index
+  #     nfs:
+  #       path: /path-to-index
+  #       readOnly: true
+  #       server: localhost
+  # - name: config
+  #   configmap:
+  #     name: function-configuration
+  #     items:
+  #       - key: config
+  #         path: config.yaml
 ​​
-  buildSpec:
-    metadata: #optional
-      labels: 
-      annotations: 
+
+  # optional 
+  build:
+    labels: 
+    annotations: 
     profile: S / M / L / XL / ... / Custom
     resources: # optional... required if spec.build.profile==Custom
       limits: ... #if_custom
