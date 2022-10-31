@@ -202,8 +202,6 @@ containers:
         value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
-      buildServiceAccountName:
-        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
       # Deprecated as of kyma 2.8
