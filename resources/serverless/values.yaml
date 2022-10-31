@@ -97,11 +97,11 @@ global:
       version: "v20221011-831da39d"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.0-a550386f"
+      version: "1.9.0-4ced14d5"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-981f40fb"
+      version: "2.7.1-4ced14d5"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
