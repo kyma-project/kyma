@@ -46,44 +46,18 @@ type Config struct {
 	CollectorImage       string
 }
 
-// Reconciler reconciles a TracePipeline object
 type Reconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
 	config Config
+	Scheme *runtime.Scheme
 }
 
-func NewReconciler(
-	client client.Client,
-	config Config,
-	scheme *runtime.Scheme,
-) *Reconciler {
+func NewReconciler(client client.Client, config Config, scheme *runtime.Scheme) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
 	return &r
-}
-
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
-
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	logger := logf.FromContext(ctx)
-
-	logger.Info("Reconciliation triggered")
-
-	var tracePipeline telemetryv1alpha1.TracePipeline
-	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
-	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 }
 
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -108,7 +82,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s", secret.Name))
 
 	var pipelines *telemetryv1alpha1.TracePipelineList
 	err := r.List(context.Background(), pipelines)
@@ -121,26 +95,33 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	for _, p := range pipelines.Items {
 		if containsAnyRefToSecret(&p, secret) {
 			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p.Name}}
-			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Adding reconciliation request for pipeline: %s\n", p.Name))
+			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Adding reconciliation request for pipeline: %s", p.Name))
 			requests = append(requests, request)
 		}
 	}
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.", len(requests)))
 	return requests
 }
 
-func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
-	if pipeline.Spec.Output.Otlp != nil &&
-		pipeline.Spec.Output.Otlp.Authentication != nil &&
-		pipeline.Spec.Output.Otlp.Authentication.Basic != nil &&
-		pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
-		return false
+//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
+
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	logger := logf.FromContext(ctx)
+
+	logger.Info("Reconciliation triggered")
+
+	var tracePipeline telemetryv1alpha1.TracePipeline
+	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
-	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
-	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
-		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
+	err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
+	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 }
 
 func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
@@ -202,4 +183,18 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	}
 
 	return nil
+}
+
+func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
+	if pipeline.Spec.Output.Otlp != nil &&
+		pipeline.Spec.Output.Otlp.Authentication != nil &&
+		pipeline.Spec.Output.Otlp.Authentication.Basic != nil &&
+		pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
+		return false
+	}
+
+	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
+	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
+	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
+		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
 }
