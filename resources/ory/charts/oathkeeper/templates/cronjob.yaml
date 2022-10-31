@@ -63,9 +63,9 @@ spec:
                   drop:
                   - ALL
                 privileged: false
-                runAsGroup: 10001
+                runAsGroup: 101
                 runAsNonRoot: true
-                runAsUser: 10000
+                runAsUser: 100
               volumeMounts:
                 - name: {{ include "oathkeeper.name" . }}-keys-volume
                   mountPath: /etc/secrets

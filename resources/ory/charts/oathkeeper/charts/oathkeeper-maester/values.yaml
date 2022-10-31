@@ -50,7 +50,7 @@ deployment:
       - ALL
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 10010
+    runAsUser: 1000
     allowPrivilegeEscalation: false
     privileged: false
 

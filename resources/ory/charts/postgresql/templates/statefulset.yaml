@@ -44,8 +44,6 @@ spec:
 {{ toYaml . | indent 8 }}
 {{- end }}
     spec:
-      seccompProfile:
-        type: RuntimeDefault
       {{- if .Values.schedulerName }}
       schedulerName: "{{ .Values.schedulerName }}"
       {{- end }}
@@ -343,7 +341,6 @@ spec:
          {{- if .Values.metrics.securityContext.enabled }}
           securityContext:
             runAsUser: {{ .Values.metrics.securityContext.runAsUser }}
-            runAsNonRoot: {{ .Values.metrics.securityContext.runAsNonRoot }}
         {{- end }}
           env:
             {{- $database := required "In order to enable metrics you need to specify a database (.Values.postgresqlDatabase or .Values.global.postgresql.postgresqlDatabase)" (include "postgresql.database" .) }}

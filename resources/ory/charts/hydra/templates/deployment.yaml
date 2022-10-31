@@ -37,8 +37,6 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      seccompProfile:
-        type: RuntimeDefault
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -65,9 +63,9 @@ spec:
               drop:
               - ALL
             privileged: false
-            runAsGroup: 1337 # Required for Istio CNI sidecar installation
+            runAsGroup: 1337
             runAsNonRoot: true
-            runAsUser: 1337 # Required for Istio CNI sidecar installation
+            runAsUser: 1337
         {{- end }}
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"

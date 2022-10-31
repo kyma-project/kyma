@@ -178,18 +178,18 @@ deployment:
         drop:
         - ALL
       privileged: false
-      runAsGroup: 10001
+      runAsGroup: 1000
       runAsNonRoot: true
-      runAsUser: 10000
+      runAsUser: 1000
     maester:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
         - ALL
       privileged: false
-      runAsGroup: 10011
+      runAsGroup: 101
       runAsNonRoot: true
-      runAsUser: 10010
+      runAsUser: 100
     controller:
       allowPrivilegeEscalation: false
       capabilities:
@@ -276,8 +276,10 @@ deployment:
   #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
   #      e.g.  type: app
 
-  annotations:
-    container.apparmor.security.beta.kubernetes.io: runtime/default
+  annotations: {}
+  #      If you do want to specify annotations, uncomment the following
+  #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+  #      e.g.  sidecar.istio.io/rewriteAppHTTPProbers: "true"
 
 # -- Configure node affinity
 affinity: {}

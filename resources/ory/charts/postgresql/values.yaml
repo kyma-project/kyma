@@ -330,8 +330,7 @@ master:
   labels: {}
   annotations: {}
   podLabels: {}
-  podAnnotations: 
-    container.apparmor.security.beta.kubernetes.io: runtime/default
+  podAnnotations: {}
   priorityClassName: ""
   extraInitContainers: |
     # - name: do-something
@@ -371,8 +370,7 @@ slave:
   labels: {}
   annotations: {}
   podLabels: {}
-  podAnnotations:
-    container.apparmor.security.beta.kubernetes.io: runtime/default 
+  podAnnotations: {}
   priorityClassName: ""
   extraInitContainers: |
     # - name: do-something
@@ -448,7 +446,7 @@ readinessProbe:
 ## Configure metrics exporter
 ##
 metrics:
-  enabled: true
+  enabled: false
   # resources: {}
   service:
     type: ClusterIP
@@ -504,9 +502,8 @@ metrics:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   ##
   securityContext:
-    enabled: true
+    enabled: false
     runAsUser: 1001
-    runAsNonRoot: true
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ## Configure extra options for liveness and readiness probes
   livenessProbe:

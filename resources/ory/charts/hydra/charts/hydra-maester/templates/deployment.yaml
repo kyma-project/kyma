@@ -29,8 +29,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      seccompProfile:
-        type: RuntimeDefault
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra_maester) }}"
@@ -56,9 +54,9 @@ spec:
               drop:
               - ALL
             privileged: false
-            runAsGroup: 10011
+            runAsGroup: 1000
             runAsNonRoot: true
-            runAsUser: 10010
+            runAsUser: 1000
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:
