@@ -70,7 +70,7 @@ volumePermissions:
   ##
   securityContext:
     ## UID 11 is `operator` in Alpine. It belongs to "root" group so it has higher filesystem permissions necessary for init container, but it's not root.
-    runAsUser: 11
+    runAsUser: 11 # Not complaint with restricted
 
 ## Use an alternate scheduler, e.g. "stork".
 ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
@@ -84,7 +84,7 @@ volumePermissions:
 securityContext:
   enabled: true
   fsGroup: 70
-  runAsUser: 70
+  runAsUser: 70 #baseline
 
 ## Pod Service Account
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -330,7 +330,8 @@ master:
   labels: {}
   annotations: {}
   podLabels: {}
-  podAnnotations: {}
+  podAnnotations: 
+    container.apparmor.security.beta.kubernetes.io: runtime/default
   priorityClassName: ""
   extraInitContainers: |
     # - name: do-something
@@ -370,7 +371,8 @@ slave:
   labels: {}
   annotations: {}
   podLabels: {}
-  podAnnotations: {}
+  podAnnotations:
+    container.apparmor.security.beta.kubernetes.io: runtime/default 
   priorityClassName: ""
   extraInitContainers: |
     # - name: do-something
@@ -446,7 +448,7 @@ readinessProbe:
 ## Configure metrics exporter
 ##
 metrics:
-  enabled: false
+  enabled: true
   # resources: {}
   service:
     type: ClusterIP
@@ -502,8 +504,9 @@ metrics:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   ##
   securityContext:
-    enabled: false
+    enabled: true
     runAsUser: 1001
+    runAsNonRoot: true
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ## Configure extra options for liveness and readiness probes
   livenessProbe:

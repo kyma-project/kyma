@@ -40,6 +40,8 @@ spec:
 {{ toYaml . | indent 8 }}
 {{- end }}
     spec:
+      seccompProfile:
+        type: RuntimeDefault
       {{- if .Values.schedulerName }}
       schedulerName: "{{ .Values.schedulerName }}"
       {{- end }}
@@ -137,6 +139,7 @@ spec:
             privileged: false
             runAsNonRoot: true
             runAsUser: {{ .Values.securityContext.runAsUser }}
+            readOnlyRootFilesystem: true
           {{- end }}
           env:
             - name: BITNAMI_DEBUG
