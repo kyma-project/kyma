@@ -19,6 +19,13 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
@@ -85,13 +92,55 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Secret{}).
 		Owns(&appsv1.Deployment{}).
-		Owns(&corev1.Service{})
+		Owns(&corev1.Service{}).
+		Watches(
+			&source.Kind{Type: &corev1.Secret{}},
+			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
+			builder.WithPredicates(predicate.Funcs{UpdateFunc: func(updateEvent event.UpdateEvent) bool { return true }}),
+		)
 
 	if r.config.CreateServiceMonitor {
 		newReconciler.Owns(&monitoringv1.ServiceMonitor{})
 	}
 
 	return newReconciler.Complete(r)
+}
+
+func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
+	secret := object.(*corev1.Secret)
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
+
+	var pipelines *telemetryv1alpha1.TracePipelineList
+	err := r.List(context.Background(), pipelines)
+	if err != nil {
+		ctrl.Log.Error(err, "Secret changed event: Fetching TracePipelineList failed!")
+		return nil
+	}
+
+	var requests []reconcile.Request
+	for _, p := range pipelines.Items {
+		if containsAnyRefToSecret(&p, secret) {
+			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p.Name}}
+			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Adding reconciliation request for pipeline: %s\n", p.Name))
+			requests = append(requests, request)
+		}
+	}
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+	return requests
+}
+
+func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
+	if pipeline.Spec.Output.Otlp != nil &&
+		pipeline.Spec.Output.Otlp.Authentication != nil &&
+		pipeline.Spec.Output.Otlp.Authentication.Basic != nil &&
+		pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
+		return false
+	}
+
+	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
+	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
+	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
+		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
 }
 
 func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
