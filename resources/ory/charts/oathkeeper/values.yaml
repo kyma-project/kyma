@@ -187,9 +187,9 @@ deployment:
         drop:
         - ALL
       privileged: false
-      runAsGroup: 10001
+      runAsGroup: 10011
       runAsNonRoot: true
-      runAsUser: 10000
+      runAsUser: 10010
     controller:
       allowPrivilegeEscalation: false
       capabilities:

@@ -70,7 +70,7 @@ volumePermissions:
   ##
   securityContext:
     ## UID 11 is `operator` in Alpine. It belongs to "root" group so it has higher filesystem permissions necessary for init container, but it's not root.
-    runAsUser: 11 # Not complaint with restricted
+    runAsUser: 11
 
 ## Use an alternate scheduler, e.g. "stork".
 ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
@@ -84,7 +84,7 @@ volumePermissions:
 securityContext:
   enabled: true
   fsGroup: 70
-  runAsUser: 70 #baseline
+  runAsUser: 70
 
 ## Pod Service Account
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/

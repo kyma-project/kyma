@@ -56,9 +56,9 @@ spec:
               drop:
               - ALL
             privileged: false
-            runAsGroup: 10001
+            runAsGroup: 10011
             runAsNonRoot: true
-            runAsUser: 10000
+            runAsUser: 10010
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:
