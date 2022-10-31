@@ -186,10 +186,10 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 }
 
 func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
-	if pipeline.Spec.Output.Otlp != nil &&
-		pipeline.Spec.Output.Otlp.Authentication != nil &&
-		pipeline.Spec.Output.Otlp.Authentication.Basic != nil &&
-		pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
+	if pipeline.Spec.Output.Otlp == nil ||
+		pipeline.Spec.Output.Otlp.Authentication == nil ||
+		pipeline.Spec.Output.Otlp.Authentication.Basic == nil ||
+		!pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
 		return false
 	}
 
