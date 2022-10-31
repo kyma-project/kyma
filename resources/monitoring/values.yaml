@@ -165,7 +165,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.3.0-cf0a130c"
+      version: "7.4.0-f193d3f9"
       directory: "tpi"
       sha: ""
 
