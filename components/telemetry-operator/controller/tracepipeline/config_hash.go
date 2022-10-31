@@ -8,40 +8,30 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-type ConfigHash struct {
-	hash hash.Hash
-}
-
-func NewConfigHash(configMaps []corev1.ConfigMap, secrets []corev1.Secret) *ConfigHash {
-	configHash := ConfigHash{
-		hash: sha256.New(),
-	}
+func CreateConfigHash(configMaps []corev1.ConfigMap, secrets []corev1.Secret) string {
+	h := sha256.New()
 
 	for _, cm := range configMaps {
-		configHash.addStringMap(cm.Data)
+		addStringMap(h, cm.Data)
 	}
 
 	for _, secret := range secrets {
-		configHash.addByteMap(secret.Data)
+		addByteMap(h, secret.Data)
 	}
 
-	return &configHash
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func (c *ConfigHash) addStringMap(m map[string]string) {
+func addStringMap(h hash.Hash, m map[string]string) {
 	for k, v := range m {
-		c.hash.Write([]byte(k))
-		c.hash.Write([]byte(v))
+		h.Write([]byte(k))
+		h.Write([]byte(v))
 	}
 }
 
-func (c *ConfigHash) addByteMap(m map[string][]byte) {
+func addByteMap(h hash.Hash, m map[string][]byte) {
 	for k, v := range m {
-		c.hash.Write([]byte(k))
-		c.hash.Write(v)
+		h.Write([]byte(k))
+		h.Write(v)
 	}
-}
-
-func (c *ConfigHash) Build() string {
-	return fmt.Sprintf("%x", c.hash.Sum(nil))
 }
