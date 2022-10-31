@@ -199,7 +199,8 @@ spec:
       requests: ... #if_custom
     labels: #optional
     annotations: #optional
-​```
+```
+
 ### Option 2
 
 - almost the same as `Option 1` (same pros)
