@@ -24,7 +24,7 @@ test: ## Run the tests of the project
 	$(GOTEST) -run TestApiGateway . -v -race
 
 test-custom-domain:
-	$(GOTEST) -run "^TestCustomDomain$$" . -v -race
+	GODEBUG=netdns=cgo CGO_ENABLED=1 $(GOTEST) -run "^TestCustomDomain$$" . -v -race
 
 test-k3d: ## Prepare k3d and run tests
 	export KYMA_DOMAIN="local.kyma.dev"

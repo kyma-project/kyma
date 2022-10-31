@@ -3,7 +3,8 @@ package api_gateway
 import (
 	"context"
 	"fmt"
-	"log"
+	"net"
+	"time"
 
 	"github.com/cucumber/godog"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/helpers"
@@ -11,26 +12,33 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 type customDomainScenario struct {
-	*Scenario
+	domain         string
+	loadBalancerIP string
+	testID         string
+	namespace      string
+	url            string
+	apiResource    []unstructured.Unstructured
 }
 
 func InitializeScenarioCustomDomain(ctx *godog.ScenarioContext) {
-	mainScenario, err := CreateCustomDomainScenario(noAccessStrategyApiruleFile, "custom-domain")
+	scenario, err := CreateCustomDomainScenario(noAccessStrategyApiruleFile, "custom-domain")
 	if err != nil {
 		t.Fatalf("could not initialize custom domain endpoint err=%s", err)
 	}
-	scenario := customDomainScenario{mainScenario}
-	ctx.Step(`^CustomDomain: There is an secret with DNS cloud service provider credentials$`, scenario.thereIsAnCloudCredentialsSecret)
-	ctx.Step(`^CustomDomain: Create needed resources$`, scenario.createResources)
-	ctx.Step(`^CustomDomain: There is an unsecured endpoint$`, scenario.thereIsAnUnsecuredEndpoint)
-	ctx.Step(`^CustomDomain: Calling the endpoint with any token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithAnyTokenShouldResultInStatusbetween)
-	ctx.Step(`^CustomDomain: Calling the endpoint without a token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutTokenShouldResultInStatusbetween)
+	ctx.Step(`^there is an "([^"]*)" DNS cloud credentials secret in "([^"]*)" namespace$`, scenario.thereIsAnCloudCredentialsSecret)
+	ctx.Step(`^there is an "([^"]*)" service in "([^"]*)" namespace$`, scenario.thereIsAnExposedService)
+	ctx.Step(`^create custom domain resources$`, scenario.createResources)
+	ctx.Step(`^ensure that DNS record is ready$`, scenario.isDNSReady)
+	ctx.Step(`^there is an unsecured endpoint$`, scenario.thereIsAnUnsecuredEndpoint)
+	ctx.Step(`^calling the endpoint with any token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithAnyTokenShouldResultInStatusbetween)
+	ctx.Step(`^calling the endpoint without a token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutTokenShouldResultInStatusbetween)
 }
 
-func CreateCustomDomainScenario(templateFileName string, namePrefix string, deploymentFile ...string) (*Scenario, error) {
+func CreateCustomDomainScenario(templateFileName string, namePrefix string, deploymentFile ...string) (*customDomainScenario, error) {
 	testID := generateRandomString(testIDLength)
 	deploymentFileName := testingAppFile
 	if len(deploymentFile) > 0 {
@@ -62,20 +70,16 @@ func CreateCustomDomainScenario(templateFileName string, namePrefix string, depl
 		Domain           string
 		GatewayName      string
 		GatewayNamespace string
-	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: fmt.Sprintf("%s.goat.build.kyma-project.io", testID), GatewayName: fmt.Sprintf("%s-%s", namePrefix, testID),
+	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: fmt.Sprintf("%s.%s", testID, conf.CustomDomain), GatewayName: fmt.Sprintf("%s-%s", namePrefix, testID),
 		GatewayNamespace: namespace})
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
 	}
 
-	return &Scenario{testID: testID, namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s.%s", testID, testID, "goat.build.kyma-project.io"), apiResource: accessRule}, nil
+	return &customDomainScenario{domain: conf.CustomDomain, testID: testID, namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s.%s", testID, testID, conf.CustomDomain), apiResource: accessRule}, nil
 }
 
 func (c *customDomainScenario) createResources() error {
-	loadBalancerIP, err := getLoadBalancerIP()
-	if err != nil {
-		log.Fatal(err)
-	}
 	customDomainResources, err := manifestprocessor.ParseFromFileWithTemplate("resources.yaml", "manifests/custom-domain", resourceSeparator, struct {
 		Namespace      string
 		NamePrefix     string
@@ -83,7 +87,7 @@ func (c *customDomainScenario) createResources() error {
 		Domain         string
 		Subdomain      string
 		LoadBalancerIP string
-	}{Namespace: namespace, NamePrefix: "custom-domain", TestID: c.testID, Domain: "goat.build.kyma-project.io", Subdomain: fmt.Sprintf("%s.goat.build.kyma-project.io", c.testID), LoadBalancerIP: loadBalancerIP})
+	}{Namespace: namespace, NamePrefix: "custom-domain", TestID: c.testID, Domain: c.domain, Subdomain: fmt.Sprintf("%s.%s", c.testID, c.domain), LoadBalancerIP: c.loadBalancerIP})
 	if err != nil {
 		return fmt.Errorf("failed to process common manifest files, details %s", err.Error())
 	}
@@ -96,9 +100,9 @@ func (c *customDomainScenario) createResources() error {
 	return nil
 }
 
-func (c *customDomainScenario) thereIsAnCloudCredentialsSecret() error {
+func (c *customDomainScenario) thereIsAnCloudCredentialsSecret(secretName string, secretNamespace string) error {
 	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "secrets"}
-	_, err := k8sClient.Resource(res).Namespace("default").Get(context.Background(), "google-credentials", v1.GetOptions{})
+	_, err := k8sClient.Resource(res).Namespace(secretNamespace).Get(context.Background(), secretName, v1.GetOptions{})
 
 	if err != nil {
 		return fmt.Errorf("cloud credenials secret could not be found")
@@ -107,26 +111,48 @@ func (c *customDomainScenario) thereIsAnCloudCredentialsSecret() error {
 	return nil
 }
 
-func getLoadBalancerIP() (string, error) {
-	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "services"}
-	svc, err := k8sClient.Resource(res).Namespace("istio-system").Get(context.Background(), "istio-ingressgateway", v1.GetOptions{})
-
+func (c *customDomainScenario) isDNSReady() error {
+	err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		ips, err := net.LookupIP(fmt.Sprintf("a.%s.%s", c.testID, c.domain))
+		if err != nil {
+			return false, err
+		}
+		if len(ips) != 0 {
+			for _, ip := range ips {
+				if ip.String() == c.loadBalancerIP {
+					fmt.Printf("Found a.%s.%s. IN A %s\n", c.testID, c.domain, ip.String())
+					return true, nil
+				}
+			}
+		}
+		return false, err
+	})
 	if err != nil {
-		return "", fmt.Errorf("istio service not found")
+		return fmt.Errorf("DNS record could not be looked up: %s", err)
+	}
+	return nil
+}
+
+func (c *customDomainScenario) thereIsAnExposedService(svcName string, svcNamespace string) error {
+	res := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "services"}
+	svc, err := k8sClient.Resource(res).Namespace(svcNamespace).Get(context.Background(), svcName, v1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("istio-ingressgateway service was not found")
 	}
 
 	ingress, found, err := unstructured.NestedSlice(svc.Object, "status", "loadBalancer", "ingress")
 	if err != nil || found != true {
-		return "", fmt.Errorf("could not get load balancer IP from istio service: %s", err)
+		return fmt.Errorf("could not get load balancer status from the service: %s", err)
 	}
-	ingressIp, ok := ingress[0].(map[string]interface{})
-	if !ok {
-		return "", fmt.Errorf("could not get load balancer IP from istio service: %s", err)
+	ingressIp, _ := ingress[0].(map[string]interface{})
+
+	loadBalancerIP, found, err := unstructured.NestedString(ingressIp, "ip")
+	if err != nil || found != true {
+		return fmt.Errorf("could not extract load balancer IP from istio service: %s", err)
 	}
+	c.loadBalancerIP = loadBalancerIP
 
-	loadBalancerIP, _, _ := unstructured.NestedString(ingressIp, "ip")
-
-	return loadBalancerIP, nil
+	return nil
 }
 
 func (c *customDomainScenario) thereIsAnUnsecuredEndpoint() error {
