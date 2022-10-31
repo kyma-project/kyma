@@ -75,7 +75,7 @@ func TestCustomDomain(t *testing.T) {
 	SetupCommonResources("custom-domain")
 
 	customDomainOpts := goDogOpts
-	customDomainOpts.Paths = []string{"features/gardener/custom_domain.feature"}
+	customDomainOpts.Paths = []string{"features/e2e/custom_domain.feature"}
 	customDomainOpts.Concurrency = conf.TestConcurency
 	if os.Getenv(exportResultVar) == "true" {
 		customDomainOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"

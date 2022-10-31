@@ -21,11 +21,12 @@ type customDomainScenario struct {
 	testID         string
 	namespace      string
 	url            string
-	apiResource    []unstructured.Unstructured
+	apiResourceOne []unstructured.Unstructured
+	apiResourceTwo []unstructured.Unstructured
 }
 
 func InitializeScenarioCustomDomain(ctx *godog.ScenarioContext) {
-	scenario, err := CreateCustomDomainScenario(noAccessStrategyApiruleFile, "custom-domain")
+	scenario, err := CreateCustomDomainScenario(noAccessStrategyApiruleFile, oauthStrategyApiruleFile, "custom-domain")
 	if err != nil {
 		t.Fatalf("could not initialize custom domain endpoint err=%s", err)
 	}
@@ -36,9 +37,14 @@ func InitializeScenarioCustomDomain(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is an unsecured endpoint$`, scenario.thereIsAnUnsecuredEndpoint)
 	ctx.Step(`^calling the endpoint with any token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithAnyTokenShouldResultInStatusbetween)
 	ctx.Step(`^calling the endpoint without a token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutTokenShouldResultInStatusbetween)
+
+	ctx.Step(`^endpoint is secured with OAuth2$`, scenario.secureWithOAuth2)
+	ctx.Step(`^calling the endpoint with a invalid token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween)
+	ctx.Step(`^calling the endpoint with a valid token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithAValidTokenShouldResultInStatusBeetween)
+	ctx.Step(`^calling the endpoint without a token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutATokenShouldResultInStatusBeetween)
 }
 
-func CreateCustomDomainScenario(templateFileName string, namePrefix string, deploymentFile ...string) (*customDomainScenario, error) {
+func CreateCustomDomainScenario(templateFileNameOne string, templateFileNameTwo string, namePrefix string, deploymentFile ...string) (*customDomainScenario, error) {
 	testID := generateRandomString(testIDLength)
 	deploymentFileName := testingAppFile
 	if len(deploymentFile) > 0 {
@@ -63,7 +69,19 @@ func CreateCustomDomainScenario(templateFileName string, namePrefix string, depl
 	}
 
 	// create api-rule from file
-	accessRule, err := manifestprocessor.ParseFromFileWithTemplate(templateFileName, manifestsDirectory, resourceSeparator, struct {
+	accessRuleOne, err := manifestprocessor.ParseFromFileWithTemplate(templateFileNameOne, manifestsDirectory, resourceSeparator, struct {
+		Namespace        string
+		NamePrefix       string
+		TestID           string
+		Domain           string
+		GatewayName      string
+		GatewayNamespace string
+	}{Namespace: namespace, NamePrefix: namePrefix, TestID: testID, Domain: fmt.Sprintf("%s.%s", testID, conf.CustomDomain), GatewayName: fmt.Sprintf("%s-%s", namePrefix, testID),
+		GatewayNamespace: namespace})
+	if err != nil {
+		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
+	}
+	accessRuleTwo, err := manifestprocessor.ParseFromFileWithTemplate(templateFileNameTwo, manifestsDirectory, resourceSeparator, struct {
 		Namespace        string
 		NamePrefix       string
 		TestID           string
@@ -76,7 +94,7 @@ func CreateCustomDomainScenario(templateFileName string, namePrefix string, depl
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
 	}
 
-	return &customDomainScenario{domain: conf.CustomDomain, testID: testID, namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s.%s", testID, testID, conf.CustomDomain), apiResource: accessRule}, nil
+	return &customDomainScenario{domain: conf.CustomDomain, testID: testID, namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s.%s", testID, testID, conf.CustomDomain), apiResourceOne: accessRuleOne, apiResourceTwo: accessRuleTwo}, nil
 }
 
 func (c *customDomainScenario) createResources() error {
@@ -157,7 +175,7 @@ func (c *customDomainScenario) thereIsAnExposedService(svcName string, svcNamesp
 }
 
 func (c *customDomainScenario) thereIsAnUnsecuredEndpoint() error {
-	return helper.APIRuleWithRetries(batch.CreateResources, batch.UpdateResources, k8sClient, c.apiResource)
+	return helper.APIRuleWithRetries(batch.CreateResources, batch.UpdateResources, k8sClient, c.apiResourceOne)
 }
 
 func (c *customDomainScenario) callingTheEndpointWithAnyTokenShouldResultInStatusbetween(arg1, arg2 int) error {
@@ -166,4 +184,27 @@ func (c *customDomainScenario) callingTheEndpointWithAnyTokenShouldResultInStatu
 
 func (c *customDomainScenario) callingTheEndpointWithoutTokenShouldResultInStatusbetween(arg1, arg2 int) error {
 	return helper.CallEndpointWithRetries(c.url, &helpers.StatusPredicate{LowerStatusBound: arg1, UpperStatusBound: arg2})
+}
+
+func (c *customDomainScenario) secureWithOAuth2() error {
+	return helper.APIRuleWithRetries(batch.UpdateResources, batch.UpdateResources, k8sClient, c.apiResourceTwo)
+}
+
+func (c *customDomainScenario) callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween(lower int, higher int) error {
+	return helper.CallEndpointWithHeadersWithRetries(anyToken, authorizationHeaderName, c.url, &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
+}
+
+func (c *customDomainScenario) callingTheEndpointWithAValidTokenShouldResultInStatusBeetween(lower int, higher int) error {
+	token, err := getOAUTHToken(*oauth2Cfg)
+	if err != nil {
+		return err
+	}
+
+	headerVal := fmt.Sprintf("Bearer %s", token.AccessToken)
+
+	return helper.CallEndpointWithHeadersWithRetries(headerVal, authorizationHeaderName, c.url, &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
+}
+
+func (c *customDomainScenario) callingTheEndpointWithoutATokenShouldResultInStatusBeetween(lower int, higher int) error {
+	return helper.CallEndpointWithRetries(c.url, &helpers.StatusPredicate{LowerStatusBound: lower, UpperStatusBound: higher})
 }

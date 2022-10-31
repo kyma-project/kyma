@@ -61,6 +61,7 @@ const (
 	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
 	resourceSeparator              = "---"
 	defaultHeaderName              = "Authorization"
+	customDomainEnv                = "TEST_CUSTOM_DOMAIN"
 	exportResultVar                = "EXPORT_RESULT"
 	junitFileName                  = "junit-report.xml"
 	cucumberFileName               = "cucumber-report.json"
@@ -88,7 +89,7 @@ var goDogOpts = godog.Options{
 }
 
 type Config struct {
-	CustomDomain     string        `envconfig:"TEST_CUSTOM_DOMAIN,default=goat.build.kyma-project.io"`
+	CustomDomain     string        `envconfig:"TEST_CUSTOM_DOMAIN,default=test.domain.kyma"`
 	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS"`
 	User             string        `envconfig:"TEST_USER_EMAIL,default=admin@kyma.cx"`
 	Pwd              string        `envconfig:"TEST_USER_PASSWORD,default=1234"`

@@ -35,7 +35,7 @@ metadata:
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: goats@sap.com
+    email: test@test.com
     autoRegistration: true
     privateKeySecretRef:
       name: "{{.NamePrefix}}-{{.TestID}}-secret"
