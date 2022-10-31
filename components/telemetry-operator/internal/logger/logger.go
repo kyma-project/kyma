@@ -30,6 +30,8 @@ func New(format, level string) (*Logger, error) {
 		return nil, err
 	}
 
+	// Redirects logs those are being written using standard logging mechanism to klog
+	// to avoid logs from controller-runtime being pushed to the standard logs.
 	klog.CopyStandardLogTo("ERROR")
 
 	return &Logger{Logger: log}, nil
