@@ -188,10 +188,6 @@ containers:
         value: 5m
       serviceAccountRequeueDuration:
         value: 5m
-      roleRequeueDuration:
-        value: 5m
-      roleBindingRequeueDuration:
-        value: 5m
       namespaceExcludedNames:
         value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
