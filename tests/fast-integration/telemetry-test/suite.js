@@ -35,7 +35,6 @@ async function prepareEnvironment() {
   await k8sApplyFile('regex-filter-deployment.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'kyma-system');
-  await k8sApplyFile('tracepipeline-simple.yaml', 'tracing-test');
 }
 
 async function cleanEnvironment() {
@@ -49,7 +48,6 @@ async function cleanEnvironment() {
   await k8sDeleteFile('regex-filter-deployment.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'kyma-system');
-  await k8sDeleteFile('tracepipeline-simple.yaml', 'tracing-test');
 }
 
 describe('Telemetry Operator', function() {
@@ -315,12 +313,28 @@ describe('Telemetry Operator', function() {
 
   context('Configurable Tracing', function() {
     context('TracePipeline', function() {
-      it('Should have created TracePipeline', async function() {
-        await waitForTracePipeline('simple');
+      const pipeline = loadTestData('tracepipeline-simple.yaml');
+      const pipelineName = pipeline[0].metadata.name;
+
+      it(`Should create TracePipeline '${pipelineName}'`, async function() {
+        await k8sApply(pipeline);
+        await waitForTracePipeline(pipelineName);
       });
 
       it('Should have ready trace collector pods', async () => {
         await waitForPodWithLabel('app.kubernetes.io/name', 'telemetry-trace-collector', 'kyma-system');
+      });
+
+      it('Should have created telemetry-trace-collector secret', async () => {
+        // TODO
+      }).skip();
+
+      it(`Should reflect referenced secret change in telemetry-trace-collector secret`, async function() {
+        // TODO
+      }).skip();
+
+      it(`Should delete TracePipeline '${pipelineName}'`, async function() {
+        await k8sDelete(pipeline);
       });
     });
   });
