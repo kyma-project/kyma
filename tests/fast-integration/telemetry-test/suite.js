@@ -314,7 +314,7 @@ describe('Telemetry Operator', function() {
     });
   });
 
-  context('Configurable Tracing', function() {
+  context.only('Configurable Tracing', function() {
     context('TracePipeline', function() {
       const pipeline = loadTestData('tracepipeline-output-otlp-secret-ref.yaml');
       const pipelineName = pipeline[0].metadata.name;
@@ -333,9 +333,9 @@ describe('Telemetry Operator', function() {
         assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL25vLWVuZHBvaW50');
       });
 
-      it(`Should reflect referenced secret change in telemetry-trace-collector secret`, async function() {
+      it(`Should reflect secret ref change in telemetry-trace-collector secret`, async function() {
         await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
-        sleep(5 * 1000);
+        await sleep(2*1000);
         const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
         assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
       });
