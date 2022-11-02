@@ -27,7 +27,7 @@ func Test_isOnSourceChange(t *testing.T) {
 					Source: v1alpha2.Source{
 						GitRepository: &v1alpha2.GitRepositorySource{},
 					},
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 			},
 			expectedResult: true,
@@ -43,7 +43,7 @@ func Test_isOnSourceChange(t *testing.T) {
 							},
 						},
 					},
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 			},
 			expectedResult: true,
@@ -59,7 +59,7 @@ func Test_isOnSourceChange(t *testing.T) {
 							},
 						},
 					},
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 			},
 			expectedResult: true,
@@ -75,14 +75,14 @@ func Test_isOnSourceChange(t *testing.T) {
 							},
 						},
 					},
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 				Status: v1alpha2.FunctionStatus{
 					Repository: v1alpha2.Repository{
 						Reference: "1",
 					},
 					Commit:  "1",
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 			},
 			revision:       "1",
@@ -99,7 +99,7 @@ func Test_isOnSourceChange(t *testing.T) {
 							},
 						},
 					},
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 				Status: v1alpha2.FunctionStatus{
 					Repository: v1alpha2.Repository{
@@ -173,7 +173,7 @@ func Test_isOnSourceChange(t *testing.T) {
 							},
 						},
 					},
-					Runtime: v1alpha2.NodeJs12,
+					Runtime: v1alpha2.NodeJs16,
 				},
 				Status: v1alpha2.FunctionStatus{
 					Repository: v1alpha2.Repository{

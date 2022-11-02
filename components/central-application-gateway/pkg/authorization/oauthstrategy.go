@@ -43,5 +43,5 @@ func (o oauthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientC
 }
 
 func (o oauthStrategy) Invalidate() {
-	o.oauthClient.InvalidateTokenCache(o.clientId, o.url)
+	o.oauthClient.InvalidateTokenCache(o.clientId, o.clientSecret, o.url)
 }

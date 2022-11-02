@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	rtmNodeJS12 = fnRuntime.GetRuntimeConfig(serverlessv1alpha2.NodeJs12)
 	rtmNodeJS14 = fnRuntime.GetRuntimeConfig(serverlessv1alpha2.NodeJs14)
 	rtmNodeJS16 = fnRuntime.GetRuntimeConfig(serverlessv1alpha2.NodeJs16)
 	rtmPython39 = fnRuntime.GetRuntimeConfig(serverlessv1alpha2.Python39)
@@ -78,7 +77,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha2.Function
 	}
-	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha2.NodeJs12)
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha2.NodeJs16)
 
 	tests := []struct {
 		name string
@@ -455,25 +454,6 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 		ExpectedMountsLen    int
 		ExpectedVolumeMounts []corev1.VolumeMount
 	}{
-		{
-			Name:               "Success Node12",
-			Runtime:            serverlessv1alpha2.NodeJs12,
-			ExpectedVolumesLen: 4,
-			ExpectedVolumes: []expectedVolume{
-				{name: "sources", localObjectReference: cmName},
-				{name: "runtime", localObjectReference: rtmNodeJS12.DockerfileConfigMapName},
-				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
-				{name: "registry-config", localObjectReference: packageRegistryConfigSecretName},
-			},
-			ExpectedMountsLen: 5,
-			ExpectedVolumeMounts: []corev1.VolumeMount{
-				{Name: "sources", MountPath: "/workspace/src/package.json", SubPath: FunctionDepsKey, ReadOnly: true},
-				{Name: "sources", MountPath: "/workspace/src/handler.js", SubPath: FunctionSourceKey, ReadOnly: true},
-				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
-				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
-				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
-			},
-		},
 		{
 			Name:               "Success Node14",
 			Runtime:            serverlessv1alpha2.NodeJs14,

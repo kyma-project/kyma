@@ -40,7 +40,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	}
 
 	python39Logger := logf.WithField(scenarioKey, "python39")
-	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
 
@@ -50,11 +49,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		WaitTimeout: cfg.WaitTimeout,
 		Verbose:     cfg.Verbose,
 		Log:         logf,
-	}
-
-	nodejs12Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs12", genericContainer.WithLogger(nodejs12Logger))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating nodejs12 config")
 	}
 
 	python39Cfg, err := runtimes.NewFunctionSimpleConfig("python39", genericContainer.WithLogger(python39Logger))
@@ -106,13 +100,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From python"),
 				teststep.UpdateFunction(python39Logger, python39Cfg.Fn, "Update Python39 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha2.Python39)),
 				teststep.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python39Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From updated python"),
-			),
-			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
-				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs12", serverlessv1alpha2.NodeJs12)),
-				teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
-				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs12"),
-				teststep.UpdateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Update NodeJS12 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs12", serverlessv1alpha2.NodeJs12)),
-				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From updated nodejs12"),
 			),
 			step.NewSerialTestRunner(nodejs14Logger, "NodeJS14 test",
 				teststep.CreateConfigMap(nodejs14Logger, cm, "Create Test ConfigMap", cmData),
