@@ -19,7 +19,6 @@ const {
 } = require('../monitoring');
 const {
   loadTestData,
-  patchSecret,
   waitForLogPipelineStatusRunning,
   waitForTracePipeline,
   waitForPodWithLabel,
@@ -51,7 +50,7 @@ async function cleanEnvironment() {
   await k8sDeleteFile('regex-filter-deployment.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'kyma-system');
-  // await k8sDeleteFile('secret-trace-endpoint.yaml', 'default');
+  await k8sDeleteFile('secret-trace-endpoint.yaml', 'default');
 }
 
 describe('Telemetry Operator', function() {
@@ -315,7 +314,7 @@ describe('Telemetry Operator', function() {
     });
   });
 
-  context.only('Configurable Tracing', function() {
+  context('Configurable Tracing', function() {
     context('TracePipeline', function() {
       const pipeline = loadTestData('tracepipeline-output-otlp-secret-ref.yaml');
       const pipelineName = pipeline[0].metadata.name;
@@ -335,23 +334,13 @@ describe('Telemetry Operator', function() {
       });
 
       it(`Should reflect referenced secret change in telemetry-trace-collector secret`, async function() {
-        // const patch = [
-        //   {
-        //     'op': 'replace',
-        //     'path': 'data',
-        //     'value': {
-        //       'ENDPOINT': 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=',
-        //     },
-        //   },
-        // ];
-        // await patchSecret('some-endpoint-secret', 'default', patch);
         await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
-        sleep(10 * 1000);
+        sleep(5 * 1000);
         const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
         assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
       });
 
-      xit(`Should delete TracePipeline '${pipelineName}'`, async function() {
+      it(`Should delete TracePipeline '${pipelineName}'`, async function() {
         await k8sDelete(pipeline);
       });
     });

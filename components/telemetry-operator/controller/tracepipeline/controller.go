@@ -89,7 +89,7 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	err := r.List(context.Background(), &pipelines)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: No TracePiplines found"))
+			ctrl.Log.V(1).Info("Secret changed event: No TracePipelines found")
 			return nil
 		}
 
@@ -98,7 +98,8 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	}
 
 	var requests []reconcile.Request
-	for _, p := range pipelines.Items {
+	for i := range pipelines.Items {
+		var p = pipelines.Items[i]
 		if containsAnyRefToSecret(&p, secret) {
 			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p.Name}}
 			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Adding reconciliation request for pipeline: %s", p.Name))
