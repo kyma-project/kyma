@@ -330,8 +330,7 @@ master:
   labels: {}
   annotations: {}
   podLabels: {}
-  podAnnotations: 
-    container.apparmor.security.beta.kubernetes.io: runtime/default
+  podAnnotations: {}
   priorityClassName: ""
   extraInitContainers: |
     # - name: do-something
@@ -371,8 +370,7 @@ slave:
   labels: {}
   annotations: {}
   podLabels: {}
-  podAnnotations:
-    container.apparmor.security.beta.kubernetes.io: runtime/default 
+  podAnnotations: {}
   priorityClassName: ""
   extraInitContainers: |
     # - name: do-something

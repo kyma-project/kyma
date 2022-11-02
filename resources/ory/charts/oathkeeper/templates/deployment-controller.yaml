@@ -18,8 +18,6 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  seccompProfile:
-    type: RuntimeDefault
   {{- if not .Values.deployment.autoscaling.enabled }}
     replicas: {{ .Values.replicaCount }}
   {{- end }}
@@ -44,6 +42,9 @@ spec:
           {{- toYaml . | nindent 8 }}
     {{- end }}
     spec:
+      securityPolicy:
+        seccompProfile:
+          type: RuntimeDefault
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

@@ -29,8 +29,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      seccompProfile:
-        type: RuntimeDefault
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra_maester) }}"
@@ -55,6 +53,8 @@ spec:
             capabilities:
               drop:
               - ALL
+            seccompProfile:
+              type: RuntimeDefault
             privileged: false
             runAsGroup: 10011
             runAsNonRoot: true

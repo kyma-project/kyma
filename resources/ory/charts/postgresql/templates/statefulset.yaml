@@ -44,8 +44,6 @@ spec:
 {{ toYaml . | indent 8 }}
 {{- end }}
     spec:
-      seccompProfile:
-        type: RuntimeDefault
       {{- if .Values.schedulerName }}
       schedulerName: "{{ .Values.schedulerName }}"
       {{- end }}
@@ -68,7 +66,13 @@ spec:
       {{- if .Values.securityContext.enabled }}
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       {{- end }}
       {{- if .Values.serviceAccount.enabled }}
       serviceAccountName: {{ default (include "postgresql.fullname" . ) .Values.serviceAccount.name }}
