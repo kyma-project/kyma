@@ -254,12 +254,9 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscriptionOnK8S fetches a subscription using the lookupKey and allows making assertions on it.
-func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription, intervals ...interface{}) gomega.AsyncAssertion {
+func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription) gomega.AsyncAssertion {
 	g := ens.G
 
-	if len(intervals) == 0 {
-		intervals = []interface{}{SmallTimeout, SmallPollingInterval}
-	}
 	return g.Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -269,7 +266,7 @@ func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subs
 			return &eventingv1alpha1.Subscription{}
 		}
 		return subscription
-	}, intervals...)
+	}, SmallTimeout, SmallPollingInterval)
 }
 
 // getK8sEvents returns all kubernetes events for the given namespace.
