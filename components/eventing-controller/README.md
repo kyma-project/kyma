@@ -74,8 +74,8 @@ The Eventing Controller expects the following environment variables:
 | `DEFAULT_DISPATCHER_RETRY_PERIOD` | The retry period for resending an event to a sink, if the sink doesn't return 2XX.             |
 | `DEFAULT_DISPATCHER_MAX_RETRIES`  | The maximum number of retries to send an event to a sink in case of errors.                    |
 | **For NATS JetStream**            |                                                                                                |
-|  `JS_STREAM_NAME`                 | Name of the stream where all events are stored.                                                |
-|  `JS_STREAM_STORAGE_TYPE`         | Storage type of the stream: `memory` or `file`.                                                    |
+|  `JS_STREAM_NAME`                 The name of the stream where all events are stored.                                                |
+|  `JS_STREAM_STORAGE_TYPE`         | The storage type of the stream: `memory` or `file`.                                                    |
 |  `JS_STREAM_RETENTION_POLICY`     | The policy to delete events from the stream: `limits` or `interest`. See [NATS: Stream Limits, Retention, and Policy](https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy). |
 |  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
 |  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
