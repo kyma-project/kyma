@@ -93,6 +93,9 @@ var _ = Describe("Deploying a TracePipeline", func() {
 				if err := validateEnvironment(otelCollectorDeployment); err != nil {
 					return err
 				}
+				if err := validatePodAnnotations(otelCollectorDeployment); err != nil {
+					return err
+				}
 				return nil
 			}, timeout, interval).Should(BeNil())
 
@@ -134,6 +137,18 @@ var _ = Describe("Deploying a TracePipeline", func() {
 		})
 	})
 })
+
+func validatePodAnnotations(deployment appsv1.Deployment) error {
+	if value, found := deployment.Spec.Template.ObjectMeta.Annotations["sidecar.istio.io/inject"]; !found || value != "false" {
+		return fmt.Errorf("istio sidecar injection for otel collector not disabled")
+	}
+
+	if value, found := deployment.Spec.Template.ObjectMeta.Annotations["checksum/config"]; !found || value == "" {
+		return fmt.Errorf("configuration hash not found in pod annotations")
+	}
+
+	return nil
+}
 
 func validateEnvironment(deployment appsv1.Deployment) error {
 	container := deployment.Spec.Template.Spec.Containers[0]
