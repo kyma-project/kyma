@@ -38,7 +38,7 @@ func TestNodejs_SanitizeDependencies(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := runtime.GetRuntime(v1alpha2.NodeJs12)
+			r := runtime.GetRuntime(v1alpha2.NodeJs16)
 			got := r.SanitizeDependencies(tt.deps)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})

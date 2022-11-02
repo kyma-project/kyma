@@ -34,7 +34,7 @@ func GetRuntimeConfig(runtime serverlessv1alpha2.Runtime) Config {
 
 func fillConfigEnvVars(runtime serverlessv1alpha2.Runtime, config *Config) {
 	switch runtime {
-	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14:
+	case serverlessv1alpha2.NodeJs14:
 		config.RuntimeEnvs = append(config.RuntimeEnvs,
 			corev1.EnvVar{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"})
 		return
@@ -50,7 +50,7 @@ func fillConfigEnvVars(runtime serverlessv1alpha2.Runtime, config *Config) {
 
 func fillConfigFileNames(runtime serverlessv1alpha2.Runtime, config *Config) {
 	switch runtime {
-	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
+	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
 		config.DependencyFile = "package.json"
 		config.FunctionFile = "handler.js"
 		return
@@ -63,7 +63,7 @@ func fillConfigFileNames(runtime serverlessv1alpha2.Runtime, config *Config) {
 
 func GetRuntime(r serverlessv1alpha2.Runtime) Runtime {
 	switch r {
-	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14:
+	case serverlessv1alpha2.NodeJs14:
 		return nodejs{}
 	case serverlessv1alpha2.Python39:
 		return python{}
