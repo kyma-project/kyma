@@ -8,7 +8,7 @@ metadata:
   name: lastorder
 spec:
   deps: '{ "name": "orders", "version": "1.0.0", "dependencies": {"axios": "^0.19.2"}}'
-  runtime: nodejs14
+  runtime: nodejs16
   source: |
     let lastOrder = {};
     let lastEvent = {};

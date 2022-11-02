@@ -161,7 +161,7 @@ podManagementPolicy: OrderedReady
 
 rbac:
   create: true
-  pspEnabled: true
+  pspEnabled: false
 
 readinessProbe:
   httpGet:
@@ -184,11 +184,16 @@ podSecurityContext:
   runAsGroup: 10001
   runAsNonRoot: true
   runAsUser: 10001
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   allowPrivilegeEscalation: false
   privileged: false
   readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
 
 service:
   type: ClusterIP
@@ -298,6 +303,13 @@ chunkCleaner:
     requests:
       cpu: 10m
       memory: 10Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
     
 grafana:
   datasource:

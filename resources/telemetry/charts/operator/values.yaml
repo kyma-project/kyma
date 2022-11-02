@@ -22,9 +22,16 @@ podAnnotations: {}
 
 podSecurityContext:
   runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   allowPrivilegeEscalation: false
+  privileged: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
 
 livenessProbe:
   httpGet:
@@ -89,6 +96,12 @@ deniedPlugins:
     - rewrite_tag
     - multiline
   output: []
+
+controllers:
+  logging:
+    enabled: true
+  tracing:
+    enabled: false
 
 syncPeriod: 1h
 maxLogPipelines: 3

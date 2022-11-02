@@ -23,7 +23,7 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	// make sure that the remaining string has at least 4 segments separated by "."
 	// (e.g. application.businessObject.operation.version)
 	parts := strings.Split(eventType, ".")
-	if len(parts) < 4 {
+	if len(parts) < 4 || checkForEmptySegments(parts) {
 		return "", "", "", errors.New("invalid format")
 	}
 
@@ -35,4 +35,13 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	event := fmt.Sprintf("%s.%s", businessObject, operation)
 
 	return applicationName, event, version, nil
+}
+
+func checkForEmptySegments(segments []string) bool {
+	for _, segment := range segments {
+		if segment == "" {
+			return true
+		}
+	}
+	return false
 }

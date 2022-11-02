@@ -9,18 +9,18 @@ func TestConfigureTransport(t *testing.T) {
 	t.Parallel()
 
 	const (
-		maxIdleConns        = 100
-		maxIdleConnsPerHost = 200
+		maxIdleConnections        = 100
+		maxIdleConnectionsPerHost = 200
 	)
 
 	transport := &http.Transport{}
-	cfg := BEBConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	cfg := BEBConfig{MaxIdleConns: maxIdleConnections, MaxIdleConnsPerHost: maxIdleConnectionsPerHost}
 	cfg.ConfigureTransport(transport)
 
-	if transport.MaxIdleConns != maxIdleConns {
-		t.Errorf("HTTP Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConns, transport.MaxIdleConns)
+	if transport.MaxIdleConns != maxIdleConnections {
+		t.Errorf("HTTP Transport MaxIdleConns is misconfigured want: %d but got: %d", maxIdleConnections, transport.MaxIdleConns)
 	}
-	if transport.MaxIdleConnsPerHost != maxIdleConnsPerHost {
-		t.Errorf("HTTP Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d", maxIdleConnsPerHost, transport.MaxIdleConnsPerHost)
+	if transport.MaxIdleConnsPerHost != maxIdleConnectionsPerHost {
+		t.Errorf("HTTP Transport MaxIdleConnsPerHost is misconfigured want: %d but got: %d", maxIdleConnectionsPerHost, transport.MaxIdleConnsPerHost)
 	}
 }

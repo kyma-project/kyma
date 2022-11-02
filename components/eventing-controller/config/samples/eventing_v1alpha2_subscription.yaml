@@ -6,9 +6,9 @@ metadata:
 spec:
   sink: http://test.tunas-testing.svc.cluster.local
   typeMatching: exact
-  source: ""
+  source: "kyma"
   types:
     - sap.kyma.custom.noapp.order.created.v1
     - sap.kyma.custom.noapp.order.created.v2
   config:
-    "maxInFlightMessages": "10"
+    "maxInFlightMessages": "6"

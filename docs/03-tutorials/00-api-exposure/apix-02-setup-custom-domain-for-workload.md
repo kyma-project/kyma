@@ -136,6 +136,8 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 5. Create a Gateway CR. Run:
 
+   >**NOTE:** Skip this step if you're creating mTLS gateway. 
+
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: networking.istio.io/v1alpha3

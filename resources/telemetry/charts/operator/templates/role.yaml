@@ -39,6 +39,54 @@ rules:
   - patch
   - watch
 - apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - telemetry.kyma-project.io
   resources:
   - logparsers
@@ -90,3 +138,25 @@ rules:
   - get
   - patch
   - update
+{{- if .Values.controllers.tracing.enabled }}
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - tracepipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - tracepipelines/status
+  verbs:
+  - get
+  - patch
+  - update
+{{- end }}

@@ -13,3 +13,7 @@ If you're interested in learning more about Security in Kyma, follow these links
 
 - Analyze configuration details for:
   - [Cluster Users chart](../../05-technical-reference/00-configuration-parameters/sec-01-cluster-users.md)
+
+- Secure workload with mTLS
+  - [mTLS Gateway](../../03-tutorials/00-security/sec-03-setup-mtls-gateway.md)
+  - [Expose and secure workload with certificates](../../03-tutorials/00-api-exposure/apix-10-expose-and-secure-workload-with-certificate.md)
