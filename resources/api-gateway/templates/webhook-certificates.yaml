@@ -8,12 +8,17 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "false"
 spec:
-  replicas: 1
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       restartPolicy: Never
       containers:
       - name: init-certificates
@@ -26,6 +31,11 @@ spec:
           value: {{ .Release.Namespace }}
         - name: SECRET_NAME
           value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
       serviceAccountName: {{ include "api-gateway.name" . }}-certificates-account
 ---
 apiVersion: batch/v1
