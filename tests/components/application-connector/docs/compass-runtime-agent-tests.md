@@ -37,7 +37,7 @@ Pipelines build the Compass Runtime Agent test using the **release** target from
 
 To build **and push** the Docker images of the tests, run:
 
-``` sh
+```bash
 ./scripts/local-build.sh {DOCKER_TAG} {DOCKER_PUSH_REPOSITORY}
 ```
 
