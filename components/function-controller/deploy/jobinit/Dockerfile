@@ -35,3 +35,4 @@ RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/c
 COPY --from=builder /app /app
 
 ENTRYPOINT ["/app/jobinit"]
+
