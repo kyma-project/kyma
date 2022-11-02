@@ -237,7 +237,6 @@ spec:
                 description: Runtime enumerates runtimes that are currently supported
                   by Function Controller It is a subset of RuntimeExtended
                 enum:
-                - nodejs12
                 - nodejs14
                 - nodejs16
                 - python39

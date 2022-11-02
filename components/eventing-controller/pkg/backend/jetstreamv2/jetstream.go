@@ -67,11 +67,6 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		return err
 	}
 
-	// TODO: move this to the validation webhook
-	if subscription.Spec.Source == "" {
-		return fmt.Errorf("%v", "source value cannot be empty")
-	}
-
 	if err := js.syncSubscriptionTypes(subscription); err != nil {
 		return err
 	}

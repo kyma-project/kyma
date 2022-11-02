@@ -2,6 +2,7 @@ package logger
 
 import (
 	"github.com/kyma-project/kyma/common/logging/logger"
+	"k8s.io/klog/v2"
 )
 
 type Logger struct {
@@ -28,6 +29,10 @@ func New(format, level string) (*Logger, error) {
 	if err = logger.InitKlog(log, logLevel); err != nil {
 		return nil, err
 	}
+
+	// Redirects logs those are being written using standard logging mechanism to klog
+	// to avoid logs from controller-runtime being pushed to the standard logs.
+	klog.CopyStandardLogTo("ERROR")
 
 	return &Logger{Logger: log}, nil
 }

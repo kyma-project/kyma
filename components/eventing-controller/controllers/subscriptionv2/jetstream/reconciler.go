@@ -136,6 +136,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
+	// TODO: move this to the validation webhook
+	if srcErr := validateSource(desiredSubscription); srcErr != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, srcErr); syncErr != nil {
+			return ctrl.Result{}, syncErr
+		}
+		return ctrl.Result{}, srcErr
+	}
+
 	// update the cleanEventTypes and config values in the subscription status, if changed
 	statusChanged, err := r.syncInitialStatus(desiredSubscription)
 	if err != nil {

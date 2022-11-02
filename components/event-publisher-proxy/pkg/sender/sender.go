@@ -8,6 +8,7 @@ import (
 
 type GenericSender interface {
 	Send(context.Context, *event.Event) (PublishResult, error)
+	URL() string
 }
 
 type PublishResult interface {

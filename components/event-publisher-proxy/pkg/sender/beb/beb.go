@@ -32,6 +32,10 @@ type Sender struct {
 	Target string
 }
 
+func (s *Sender) URL() string {
+	return s.Target
+}
+
 type HTTPPublishResult struct {
 	Status int
 	Body   []byte

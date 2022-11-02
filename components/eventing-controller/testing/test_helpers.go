@@ -400,6 +400,20 @@ func WithEmptyFilter() SubscriptionOpt {
 	}
 }
 
+func WithEmptyStatus() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Status = eventingv1alpha1.SubscriptionStatus{
+			CleanEventTypes: []string{},
+		}
+	}
+}
+
+func WithEmptyConfig() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Config = nil
+	}
+}
+
 func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventType)
 }
