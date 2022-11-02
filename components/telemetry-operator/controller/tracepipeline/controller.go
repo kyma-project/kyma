@@ -19,6 +19,7 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -84,10 +85,15 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
 	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s", secret.Name))
 
-	var pipelines *telemetryv1alpha1.TracePipelineList
-	err := r.List(context.Background(), pipelines)
+	var pipelines telemetryv1alpha1.TracePipelineList
+	err := r.List(context.Background(), &pipelines)
 	if err != nil {
-		ctrl.Log.Error(err, "Secret changed event: Fetching TracePipelineList failed!")
+		if errors.IsNotFound(err) {
+			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: No TracePiplines found"))
+			return nil
+		}
+
+		ctrl.Log.Error(err, "Secret changed event: Fetching TracePipelineList failed!", err.Error())
 		return nil
 	}
 

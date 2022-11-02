@@ -335,22 +335,23 @@ describe('Telemetry Operator', function() {
       });
 
       it(`Should reflect referenced secret change in telemetry-trace-collector secret`, async function() {
-        const patch = [
-          {
-            'op': 'replace',
-            'path': '/data',
-            'value': {
-              'ENPOINT': 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=',
-            },
-          },
-        ];
-        await patchSecret('some-endpoint-secret', 'default', patch);
+        // const patch = [
+        //   {
+        //     'op': 'replace',
+        //     'path': 'data',
+        //     'value': {
+        //       'ENDPOINT': 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=',
+        //     },
+        //   },
+        // ];
+        // await patchSecret('some-endpoint-secret', 'default', patch);
+        await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
         sleep(10 * 1000);
         const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
         assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
       });
 
-      it(`Should delete TracePipeline '${pipelineName}'`, async function() {
+      xit(`Should delete TracePipeline '${pipelineName}'`, async function() {
         await k8sDelete(pipeline);
       });
     });
