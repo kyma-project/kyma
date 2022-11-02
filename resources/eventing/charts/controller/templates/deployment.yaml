@@ -25,33 +25,33 @@ spec:
           imagePullPolicy: "{{ .Values.global.images.eventing_controller.pullPolicy }}"
           name: controller
           env:
-          - name: NATS_URL
-            value: {{ include "controller.natsServer.url" . }}
-          - name: EVENT_TYPE_PREFIX
-            valueFrom:
-              configMapKeyRef:
-                name: {{ .Values.global.configMap.name }}
-                key: {{ .Values.global.configMap.keys.eventTypePrefix }}
-          - name: DOMAIN
-            value: {{ .Values.global.domainName }}
-          - name: WEBHOOK_TOKEN_ENDPOINT
-            value: https://oauth2.{{ .Values.global.domainName }}/oauth2/token
-          - name: PUBLISHER_REQUESTS_CPU
-            value: {{ .Values.publisherProxy.resources.requests.cpu }}
-          - name: PUBLISHER_REQUESTS_MEMORY
-            value: {{ .Values.publisherProxy.resources.requests.memory }}
-          - name: PUBLISHER_LIMITS_CPU
-            value: {{ .Values.publisherProxy.resources.limits.cpu }}
-          - name: PUBLISHER_LIMITS_MEMORY
-            value: {{ .Values.publisherProxy.resources.limits.memory }}
-          - name: PUBLISHER_IMAGE
-            value: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.publisher_proxy) }}"
-          - name: PUBLISHER_IMAGE_PULL_POLICY
-            value: "{{ .Values.publisherProxy.image.pullPolicy }}"
-          - name: PUBLISHER_REPLICAS
-            value: "{{ .Values.publisherProxy.replicas }}"
-          - name: PUBLISHER_REQUEST_TIMEOUT
-            value: "{{ .Values.publisherProxy.requestTimeout }}"
+            - name: NATS_URL
+              value: {{ include "controller.natsServer.url" . }}
+            - name: EVENT_TYPE_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.configMap.name }}
+                  key: {{ .Values.global.configMap.keys.eventTypePrefix }}
+            - name: DOMAIN
+              value: {{ .Values.global.domainName }}
+            - name: WEBHOOK_TOKEN_ENDPOINT
+              value: https://oauth2.{{ .Values.global.domainName }}/oauth2/token
+            - name: PUBLISHER_REQUESTS_CPU
+              value: {{ .Values.publisherProxy.resources.requests.cpu }}
+            - name: PUBLISHER_REQUESTS_MEMORY
+              value: {{ .Values.publisherProxy.resources.requests.memory }}
+            - name: PUBLISHER_LIMITS_CPU
+              value: {{ .Values.publisherProxy.resources.limits.cpu }}
+            - name: PUBLISHER_LIMITS_MEMORY
+              value: {{ .Values.publisherProxy.resources.limits.memory }}
+            - name: PUBLISHER_IMAGE
+              value: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.publisher_proxy) }}"
+            - name: PUBLISHER_IMAGE_PULL_POLICY
+              value: "{{ .Values.publisherProxy.image.pullPolicy }}"
+            - name: PUBLISHER_REPLICAS
+              value: "{{ .Values.publisherProxy.replicas }}"
+            - name: PUBLISHER_REQUEST_TIMEOUT
+              value: "{{ .Values.publisherProxy.requestTimeout }}"
           {{- if .Values.global.priorityClassName }}
           - name: PUBLISHER_PRIORITY_CLASS_NAME
             value: "{{ .Values.global.priorityClassName }}"
@@ -143,5 +143,5 @@ spec:
             secretName: {{ .Values.webhook.secretName }}
       {{- end }}
     {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+    priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
