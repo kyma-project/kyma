@@ -65,8 +65,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	newReconciler := ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.TracePipeline{}).
 		Owns(&corev1.ConfigMap{}).
-		Owns(&corev1.Secret{}).
 		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.Secret{}).
 		Owns(&corev1.Service{}).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
@@ -193,6 +193,14 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 }
 
 func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
+	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
+	if pipeline.Spec.Output.Otlp.Endpoint.IsDefined() &&
+		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom != nil &&
+		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.IsSecretKeyRef() &&
+		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.SecretKeyRef.NamespacedName() == secretName {
+		return true
+	}
+
 	if pipeline.Spec.Output.Otlp == nil ||
 		pipeline.Spec.Output.Otlp.Authentication == nil ||
 		pipeline.Spec.Output.Otlp.Authentication.Basic == nil ||
@@ -201,7 +209,7 @@ func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *c
 	}
 
 	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
-	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
+
 	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
 		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
 }
