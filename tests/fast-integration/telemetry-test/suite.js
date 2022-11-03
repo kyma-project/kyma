@@ -314,7 +314,7 @@ describe('Telemetry Operator', function() {
     });
   });
 
-  context.only('Configurable Tracing', function() {
+  context('Configurable Tracing', function() {
     context('TracePipeline', function() {
       const pipeline = loadTestData('tracepipeline-output-otlp-secret-ref.yaml');
       const pipelineName = pipeline[0].metadata.name;
