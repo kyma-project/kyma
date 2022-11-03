@@ -335,7 +335,7 @@ describe('Telemetry Operator', function() {
 
       it(`Should reflect secret ref change in telemetry-trace-collector secret`, async function() {
         await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
-        await sleep(2*1000);
+        await sleep(5*1000);
         const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
         assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
       });
