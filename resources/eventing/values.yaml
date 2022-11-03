@@ -20,7 +20,7 @@ global:
       directory: external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
-      version: 0.10.0
+      version: 0.10.1
       directory: external
 
   jetstream:
