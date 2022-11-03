@@ -17,10 +17,17 @@ type Logger struct {
 	zapLogger *zap.SugaredLogger
 }
 
+/*
+This function creates logger structure based on given format, atomicLevel and additional cores
+AtomicLevel structure allows to change level dynamically
+*/
 func NewWithAtomicLevel(format Format, atomicLevel zap.AtomicLevel, additionalCores ...zapcore.Core) (*Logger, error) {
 	return new(format, atomicLevel, additionalCores...)
 }
 
+/*
+This function creates logger structure based on given format, level and additional cores
+*/
 func New(format Format, level Level, additionalCores ...zapcore.Core) (*Logger, error) {
 	filterLevel, err := level.ToZapLevel()
 	if err != nil {
