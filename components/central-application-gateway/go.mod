@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gorilla/mux v1.8.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221103100657-e4c1da311a1b
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.0
