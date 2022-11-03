@@ -12,8 +12,8 @@ For eventing in NATS mode, Eventing Controller also acts as a dispatcher. It con
 ## Prerequisites
 
 - Install [ko](https://github.com/ko-build/ko/blob/main/docs/install.md), which is used to build and deploy the controller during local development.
-- Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder), which is the base framework for this controller (currently used version: 3.1).
-- Install [kustomize](https://github.com/kubernetes-sigs/kustomize), which lets you customize raw, template-free `yaml` files during local development.
+- Install [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder), which is the base framework for this controller (currently used version: 3.1).
+- Install [Kustomize](https://github.com/kubernetes-sigs/kustomize), which lets you customize raw, template-free `yaml` files during local development.
 - Install lint on the local environment:
   
   ```bash
