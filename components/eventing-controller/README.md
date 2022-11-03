@@ -60,12 +60,12 @@ The Eventing Controller expects the following environment variables:
 | `PUBLISHER_SERVICE_ACCOUNT`       | The service account of the Event Publisher Proxy.                                              |
 | `PUBLISHER_REPLICAS`              | The number of replicas of the Event Publisher Proxy.                                           |
 | `PUBLISHER_REQUESTS_CPU`          | The CPU requests of the Event Publisher Proxy.                                                 |
-| `PUBLISHER_REQUESTS_MEMORY`       | The memory requests of the Event Publish Proxy.                                                |
+| `PUBLISHER_REQUESTS_MEMORY`       | The memory requests of the Event Publisher Proxy.                                              |
 | `PUBLISHER_LIMITS_CPU`            | The CPU limits of the Event Publisher Proxy.                                                   |
 | `PUBLISHER_LIMITS_MEMORY`         | The memory limits of the Event Publisher Proxy.                                                |
 | **For NATS**                      |                                                                                                |
 | `NATS_URL`                        | The URL for the NATS server.                                                                   |
-| `EVENT_TYPE_PREFIX`               | The event type prefix for the NATS and BEB backend.                                                    |
+| `EVENT_TYPE_PREFIX`               | The event type prefix for the NATS and BEB backend.                                            |
 | `MAX_IDLE_CONNS`                  | The maximum number of idle connections for the HTTP transport of the NATS backend.             |
 | `MAX_CONNS_PER_HOST`              | The maximum connections per host for the HTTP transport of the NATS backend.                   |
 | `MAX_IDLE_CONNS_PER_HOST`         | The maximum idle connections per host for the HTTP transport of the NATS backend.              |
@@ -74,12 +74,12 @@ The Eventing Controller expects the following environment variables:
 | `DEFAULT_DISPATCHER_RETRY_PERIOD` | The retry period for resending an event to a sink, if the sink doesn't return 2XX.             |
 | `DEFAULT_DISPATCHER_MAX_RETRIES`  | The maximum number of retries to send an event to a sink in case of errors.                    |
 | **For NATS JetStream**            |                                                                                                |
-|  `JS_STREAM_NAME`                 The name of the stream where all events are stored.                                                |
-|  `JS_STREAM_STORAGE_TYPE`         | The storage type of the stream: `memory` or `file`.                                                    |
+|  `JS_STREAM_NAME`                 | The name of the stream where all events are stored.                                            |
+|  `JS_STREAM_STORAGE_TYPE`         | The storage type of the stream: `memory` or `file`.                                            |
 |  `JS_STREAM_RETENTION_POLICY`     | The policy to delete events from the stream: `limits` or `interest`. See [NATS: Stream Limits, Retention, and Policy](https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy). |
 |  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
 |  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
-|  `JS_CONSUMER_DELIVER_POLICY`     | The policy to deliver events to consumers from the stream. Supported values are: `all`, `last`, `last_per_subject`, and `new`. See [NATS: DeliverPolicy](https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy). |
+|  `JS_CONSUMER_DELIVER_POLICY`     | The policy to deliver events to consumers from the stream. Supported values are: `all`, `last`, `last_per_subject`, and `new`. See [NATS: DeliverPolicy](https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy).      |
 | **For BEB**                       |                                                                                                |
 | `TOKEN_ENDPOINT`                  | The Authentication Server Endpoint to provide Access Tokens.                                   |
 | `WEBHOOK_ACTIVATION_TIMEOUT`      | The timeout duration used for webhook activation to acquire Access Tokens for Kyma.            |
