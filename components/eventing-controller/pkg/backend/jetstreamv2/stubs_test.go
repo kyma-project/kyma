@@ -16,6 +16,8 @@ type jetStreamContextStub struct {
 
 	update      *nats.ConsumerInfo
 	updateError error
+
+	deleteConsumerErr error
 }
 
 func (j jetStreamContextStub) ObjectStores(_ ...nats.ObjectOpt) <-chan nats.ObjectStoreStatus {
@@ -178,8 +180,7 @@ func (j jetStreamContextStub) UpdateConsumer(_ string, _ *nats.ConsumerConfig,
 }
 
 func (j jetStreamContextStub) DeleteConsumer(_, _ string, _ ...nats.JSOpt) error {
-	// TODO implement me
-	panic("implement me")
+	return j.deleteConsumerErr
 }
 
 func (j jetStreamContextStub) ConsumerInfo(_, _ string, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {
@@ -233,6 +234,8 @@ func (j jetStreamContextStub) DeleteObjectStore(_ string) error {
 
 type subscriberStub struct {
 	isValid bool
+
+	unsubscribeError error
 }
 
 func (s subscriberStub) IsValid() bool {
@@ -245,8 +248,7 @@ func (s subscriberStub) ConsumerInfo() (*nats.ConsumerInfo, error) {
 }
 
 func (s subscriberStub) Unsubscribe() error {
-	// TODO implement me
-	panic("implement me")
+	return s.unsubscribeError
 }
 
 func (s subscriberStub) SetPendingLimits(_ int, _ int) error {
