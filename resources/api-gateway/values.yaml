@@ -13,6 +13,7 @@ deployment:
       memory: 64Mi
   securityContext:
     allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
     capabilities:
       drop:
       - ALL

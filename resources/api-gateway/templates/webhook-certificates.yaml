@@ -12,6 +12,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+        container.apparmor.security.beta.kubernetes.io/init-certificates: runtime/default
     spec:
       securityContext:
         runAsUser: 65534
@@ -33,6 +34,7 @@ spec:
           value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
         securityContext:
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
               - ALL

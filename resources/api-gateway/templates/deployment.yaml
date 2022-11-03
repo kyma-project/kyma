@@ -20,10 +20,11 @@ spec:
         control-plane: controller-manager
         kyma-project.io/component: controller
 {{ include "api-gateway.labels" . | indent 8 }}
-      {{- with .Values.config.annotations }}
       annotations:
+      {{- with .Values.config.annotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+        container.apparmor.security.beta.kubernetes.io/{{ .Chart.Name }}: runtime/default
     spec:
       volumes:
       - name: cert
