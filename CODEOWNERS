@@ -15,7 +15,7 @@
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @wchrapka @mrCherry97 @Lyczeq
 
-/common @Tomasz-Smelcerz-SAP @strekm @akgalwas @piotrmiskiewicz
+/common @Tomasz-Smelcerz-SAP @akgalwas @piotrmiskiewicz
 # Logging library
 /common/logging @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 
