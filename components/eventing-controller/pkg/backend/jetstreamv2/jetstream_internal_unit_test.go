@@ -451,7 +451,6 @@ func Test_UnsubscribeOnNats(t *testing.T) {
 			assert.ErrorIs(t, resultErr, testCase.wantError)
 		})
 	}
-
 }
 
 // HELPER FUNCTIONS
