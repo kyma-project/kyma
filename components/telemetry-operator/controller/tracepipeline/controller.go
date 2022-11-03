@@ -71,7 +71,15 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
-			builder.WithPredicates(predicate.Funcs{UpdateFunc: func(updateEvent event.UpdateEvent) bool { return true }}),
+			builder.WithPredicates(predicate.Funcs{
+				CreateFunc: func(createEvent event.CreateEvent) bool { return false },
+				DeleteFunc: func(deleteEvent event.DeleteEvent) bool { return false },
+				// only handle rotation of existing secrets
+				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
+					return true
+				},
+				GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
+			}),
 		)
 
 	if r.config.CreateServiceMonitor {
@@ -83,30 +91,26 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s", secret.Name))
-
 	var pipelines telemetryv1alpha1.TracePipelineList
 	err := r.List(context.Background(), &pipelines)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			ctrl.Log.V(1).Info("Secret changed event: No TracePipelines found")
-			return nil
+			return []reconcile.Request{}
 		}
-
-		ctrl.Log.Error(err, "Secret changed event: Fetching TracePipelineList failed!", err.Error())
-		return nil
+		ctrl.Log.Error(err, "Secret UpdateEvent: fetching TracePipelineList failed!", err.Error())
+		return []reconcile.Request{}
 	}
 
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: handling Secret: %s", secret.Name))
 	var requests []reconcile.Request
 	for i := range pipelines.Items {
 		var p = pipelines.Items[i]
 		if containsAnyRefToSecret(&p, secret) {
 			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p.Name}}
-			ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Adding reconciliation request for pipeline: %s", p.Name))
 			requests = append(requests, request)
+			ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: added reconcile request for pipeline: %s", p.Name))
 		}
 	}
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.", len(requests)))
 	return requests
 }
 
