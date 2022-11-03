@@ -376,8 +376,8 @@ func Test_SyncConsumersAndSubscriptions_ForBoundConsumerWithoutSubscription(t *t
 	require.ErrorIs(t, err, ErrMissingSubscription)
 }
 
-// Test_UnsubscribeOnNats test the behaviour of the unsubscribeOnNats function.
-func Test_UnsubscribeOnNats(t *testing.T) {
+// Test_DeleteSubscriptionFromJetStream test the behaviour of the deleteSubscriptionFromJetStream function.
+func Test_DeleteSubscriptionFromJetStream(t *testing.T) {
 	// pre-requisites
 	jsBackend := &JetStream{
 		cleaner: &cleaner.JetStreamCleaner{},
