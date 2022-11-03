@@ -427,7 +427,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: my-function
-spec:
+spec: #Contains spec of Function and run stage (deployments, hpa)
   runtime: nodejs16
   source:
     ...
@@ -481,7 +481,7 @@ spec:
 ​​
 
   # optional 
-  build:
+  build: #Contains spec of build stage
     labels: 
     annotations: 
     profile: S / M / L / XL / ... #optional
