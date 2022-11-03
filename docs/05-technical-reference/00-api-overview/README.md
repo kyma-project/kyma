@@ -77,7 +77,7 @@ Users must be able to upgrade to a new release of a Kyma module and then roll ba
 
 ### REST resources (aka API objects)
 
-Consider a hypothetical REST resource named Widget, which was present in API v1 in the above timeline, and which needs to be deprecated. The deprecation is documented and announced in sync with release X+1. The Widget resource still exists in API version v1 (deprecated) but not in v2alpha1. The Widget resource continues to exist and function in releases up to and including X+8. The Widget resource ceases to exist, and the behavior gets removed in release X+9, when API v1 has aged out.  
+Consider a hypothetical REST resource named Widget, which was present in API v1 in the above timeline, and which needs to be deprecated. The deprecation is documented and announced in sync with release X+1. The Widget resource still exists in API version v1 (deprecated) but not in v2alpha1. The Widget resource continues to exist and function in releases up to and including X+5. The Widget resource ceases to exist, and the behavior gets removed in release X+6, when API v1 has aged out.  
 
 ### Fields of REST resources
 
