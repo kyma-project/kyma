@@ -412,11 +412,11 @@ spec:
 ```
 
 
-### Compromise
+### Final version - the compromise
 
- - clearly separate configuration of the build stage in the spec.
+ - clearly separate configuration of the build stage in the spec (treating `build` stage as second class citizen and keeping the main spec dedicated to the more important runtime stage).
  - add convinient way to mount secrets (w/o polluting function API with dependencies to service bindings)
- - volume mounts separated to a different place, for more advanced case (implemented once requested) 
+ - volume mounts as a separate, more advanced case (implemented once requested) 
  - don't group labels and annotations under metadata. 
 
 ```yaml
@@ -481,7 +481,7 @@ spec: #Contains spec of Function and run stage (deployments, hpa)
 ​​
 
   # optional 
-  build: #Contains spec of build stage
+  build: #Contains spec of build stage : build is a "second class citizen" here. Users should make no assumptions that anything from main spec is inherited here (i.e ENVs or secretMounts)
     labels: 
     annotations: 
     profile: S / M / L / XL / ... #optional
