@@ -52,7 +52,8 @@ func (l *Logger) WithContext() *zap.SugaredLogger {
 	return l.zapLogger.With(zap.Namespace("context"))
 }
 
-/**
+/*
+*
 By default the Fatal Error log will be in json format, because it's production default.
 */
 func LogFatalError(format string, args ...interface{}) error {
@@ -64,7 +65,8 @@ func LogFatalError(format string, args ...interface{}) error {
 	return nil
 }
 
-/**
+/*
+*
 This function initialize klog which is used in k8s/go-client
 */
 func InitKlog(log *Logger, level Level) error {
