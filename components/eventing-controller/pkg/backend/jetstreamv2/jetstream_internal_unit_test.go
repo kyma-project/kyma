@@ -390,25 +390,31 @@ func Test_UnsubscribeOnNats(t *testing.T) {
 	jsSubKey := NewSubscriptionSubjectIdentifier(subWithOneType, jsSubject)
 
 	testCases := []struct {
-		name       string
-		jsBackend  *JetStream
-		jsCtx      *jetStreamContextStub
-		subscriber Subscriber
-		wantError  error
+		name                  string
+		jsBackend             *JetStream
+		jsCtx                 *jetStreamContextStub
+		subscriber            Subscriber
+		givenSubscriptionsMap map[SubscriptionSubjectIdentifier]Subscriber
+		wantError             error
+		wantSubscriptionMap   map[SubscriptionSubjectIdentifier]Subscriber
 	}{
 		{
 			name: "Valid subscriber returns error on Unsubscribe",
-			subscriber: &subscriberStub{
-				isValid:          true,
-				unsubscribeError: nats.ErrConnectionNotTLS,
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          true,
+					unsubscribeError: nats.ErrConnectionNotTLS,
+				},
 			},
 			wantError: ErrFailedUnsubscribe,
 		},
 		{
 			name: "Valid unsubscribe with err on consumer delete",
-			subscriber: &subscriberStub{
-				isValid:          true,
-				unsubscribeError: nil,
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          true,
+					unsubscribeError: nil,
+				},
 			},
 			jsCtx: &jetStreamContextStub{
 				deleteConsumerErr: nats.ErrJetStreamNotEnabled,
@@ -417,23 +423,29 @@ func Test_UnsubscribeOnNats(t *testing.T) {
 		},
 		{
 			name: "ErrConsumerNotFound error should be ignored",
-			subscriber: &subscriberStub{
-				isValid:          true,
-				unsubscribeError: nil,
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          true,
+					unsubscribeError: nil,
+				},
 			},
 			jsCtx: &jetStreamContextStub{
 				deleteConsumerErr: nats.ErrConsumerNotFound,
 			},
-			wantError: nil,
+			wantSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
+			wantError:           nil,
 		},
 		{
-			name: "Invalid subscriber doesn't try to unsubcsribe",
-			subscriber: &subscriberStub{
-				isValid:          false,
-				unsubscribeError: nats.ErrConnectionNotTLS,
+			name: "Invalid subscriber doesn't try to unsubscribe",
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          false,
+					unsubscribeError: nats.ErrConnectionNotTLS,
+				},
 			},
-			jsCtx:     &jetStreamContextStub{},
-			wantError: nil,
+			jsCtx:               &jetStreamContextStub{},
+			wantSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
+			wantError:           nil,
 		},
 	}
 
@@ -443,12 +455,16 @@ func Test_UnsubscribeOnNats(t *testing.T) {
 			// given
 			// inject the given subscriber
 			jsBackend.jsCtx = testCase.jsCtx
+			jsBackend.subscriptions = testCase.givenSubscriptionsMap
 
 			// when
-			resultErr := jsBackend.unsubscribeOnNats(testCase.subscriber, jsSubKey)
+			resultErr := jsBackend.deleteSubscriptionFromJetStream(jsBackend.subscriptions[jsSubKey], jsSubKey)
 
 			// then
 			assert.ErrorIs(t, resultErr, testCase.wantError)
+			if testCase.wantError == nil {
+				assert.Equal(t, testCase.wantSubscriptionMap, jsBackend.subscriptions)
+			}
 		})
 	}
 }

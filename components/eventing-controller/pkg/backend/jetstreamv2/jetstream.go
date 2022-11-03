@@ -304,21 +304,6 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub Subscriber,
 
 // deleteSubscriptionFromJetStream deletes subscription from NATS server and from in-memory db.
 func (js *JetStream) deleteSubscriptionFromJetStream(jsSub Subscriber, jsSubKey SubscriptionSubjectIdentifier) error {
-	// unsubscribe call to JetStream is async hence checking the status of the connection is important
-	if err := js.checkJetStreamConnection(); err != nil {
-		return err
-	}
-
-	if err := js.unsubscribeOnNats(jsSub, jsSubKey); err != nil {
-		return err
-	}
-
-	delete(js.subscriptions, jsSubKey)
-	return nil
-}
-
-// unsubscribeOnNats removes the subscription and consumer on NATS server.
-func (js *JetStream) unsubscribeOnNats(jsSub Subscriber, jsSubKey SubscriptionSubjectIdentifier) error {
 	if jsSub.IsValid() {
 		// unsubscribe will also delete the consumer on JS server
 		if err := jsSub.Unsubscribe(); err != nil {
@@ -331,6 +316,7 @@ func (js *JetStream) unsubscribeOnNats(jsSub Subscriber, jsSubKey SubscriptionSu
 		return consDelErr
 	}
 
+	delete(js.subscriptions, jsSubKey)
 	return nil
 }
 
