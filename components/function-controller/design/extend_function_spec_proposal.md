@@ -415,7 +415,7 @@ spec:
 ### Compromise
 
  - clearly separate configuration of the build stage in the spec.
- - add simple, [purpose focused](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/) `serviceBindings` 
+ - add convinient way to mount secrets (w/o polluting function API with dependencies to service bindings)
  - volume mounts separated to a different place, for more advanced case (implemented once requested) 
  - don't group labels and annotations under metadata. 
 
@@ -442,18 +442,21 @@ spec:
     fluentbit.io/parser: my-regex-parser
     istio-injection: enabled
 
-  serviceBindings: 
+  secretMounts: 
   - secretName: my-secret
-    mountPath: "/foo" # optional.. read from SERVICE_BINDING_ROOT ENV 
+    mountPath: "/foo" #required.. no assumptions/validations towards SERVICE_BINDING_ROOT env value
 
-  profile: S / M / L / XL / ... / Custom #optional
-  resources: # optional... required if spec.profile==Custom
-    limits: ... #if_custom
-    requests: ... #if_custom
+  - secretName: my-redis-secret
+    mountPath: "/bar" # this matches SERVICE_BINDING_ROOT env value. Its a soft indication that redis will be consumed as service binding 
+
+  profile: S / M / L / XL / ... #optional
+  resources: # optional... required if spec.profile is empty
+    limits: ... #if profile empty
+    requests: ... #if profile empty
 ​
   env:
-  - name: SERVICE_BINDING_ROOT
-    value: /service_bindings
+  - name: SERVICE_BINDING_ROOT #set explicitely by user if he wants to use a specialised library that expects the ENV (and allows consumption of mounted secrets as service bindings)
+    value: /bar
   - name: MODE
     value: modeA
 
@@ -481,10 +484,10 @@ spec:
   build:
     labels: 
     annotations: 
-    profile: S / M / L / XL / ... / Custom
-    resources: # optional... required if spec.build.profile==Custom
-      limits: ... #if_custom
-      requests: ... #if_custom
+    profile: S / M / L / XL / ... #optional
+    resources: # optional... required if spec.profile is empty
+      limits: ... #if profile empty
+      requests: ... #if profile empty
 
 
 ```
