@@ -30,17 +30,6 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
-      volumes: # TODO: does it work?
-        - secret:
-          name: <''>
-        - configMap:
-          name: <''>
-        - downwardAPI:
-          name: <''>
-        - emptyDir:
-          name: <''>
-        - projected:
-          name: <''>
       serviceAccountName: {{ .Chart.Name }}
       containers:
         - name: {{ .Chart.Name }}
