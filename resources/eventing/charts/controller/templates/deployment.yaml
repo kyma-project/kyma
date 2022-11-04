@@ -132,7 +132,7 @@ spec:
         - name: cert
           secret:
             defaultMode: 420
-            secretName: eventing-webhook-server-cert
+            secretName: {{ .Values.webhook.secretName }}
       {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}

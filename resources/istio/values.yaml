@@ -148,17 +148,17 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.15.0-distroless"
+      version: "1.15.3-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.15.0-distroless"
+      version: "1.15.3-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_install-cni:
       name: "install-cni"
-      version: "1.15.0-distroless"
+      version: "1.15.3-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:

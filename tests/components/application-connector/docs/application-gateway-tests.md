@@ -194,7 +194,7 @@ To run the mock application locally, follow these steps:
    </summary>
 
    ```shell
-   docker run -p 8180:8080 -p 8190:8090 -v "$PWD/k8s/gateway-test/certs:/etc/secret-volume:ro" "$DOCKER_PUSH_REPOSITORY/mock-app:$DOCKER_TAG"
+   docker run -p 8180:8080 -p 8190:8090 -v "$PWD/resources/charts/gateway-test/charts/test/certs/positive:/etc/secret-volume:ro" -v "$PWD/resources/charts/gateway-test/charts/test/certs/negative:/etc/expired-server-cert-volume:ro" "$DOCKER_PUSH_REPOSITORY/mock-app:$DOCKER_TAG"
    ```
 
    </details>

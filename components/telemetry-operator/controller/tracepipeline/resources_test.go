@@ -1,12 +1,13 @@
 package tracepipeline
 
 import (
-	"encoding/base64"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -47,7 +48,12 @@ func TestMakeConfigMap(t *testing.T) {
 	require.NotNil(t, cm)
 	require.Equal(t, cm.Name, config.ResourceName)
 	require.Equal(t, cm.Namespace, config.CollectorNamespace)
-	require.NotEmpty(t, cm.Data[configMapKey])
+	expectedEndpoint := fmt.Sprintf("endpoint: ${%s}", otlpEndpointVariable)
+	collectorConfig := cm.Data[configMapKey]
+
+	var collectorConfigYaml interface{}
+	require.NoError(t, yaml.Unmarshal([]byte(collectorConfig), &collectorConfigYaml), "Otel Collector config must be valid yaml")
+	require.True(t, strings.Contains(collectorConfig, expectedEndpoint), "Otel Collector config must contain OTLP endpoint")
 }
 
 func TestMakeConfigMapWithBasicAuth(t *testing.T) {
@@ -62,30 +68,22 @@ func TestMakeConfigMapWithBasicAuth(t *testing.T) {
 }
 
 func TestMakeSecret(t *testing.T) {
-	secret := makeSecret(config, tracePipeline.Otlp)
+	secretData := map[string][]byte{
+		basicAuthHeaderVariable: []byte("basicAuthHeader"),
+		otlpEndpointVariable:    []byte("otlpEndpoint"),
+	}
+	secret := makeSecret(config, secretData)
 
 	require.NotNil(t, secret)
 	require.Equal(t, secret.Name, config.ResourceName)
 	require.Equal(t, secret.Namespace, config.CollectorNamespace)
 
-	// A TracePipeline without secrets should produce an empty secret
-	require.Empty(t, secret.Data)
-}
-
-func TestMakeSecretWithBasicAuth(t *testing.T) {
-	secret := makeSecret(config, tracePipelineWithBasicAuth.Otlp)
-
-	require.NotNil(t, secret)
-	require.Equal(t, secret.Name, config.ResourceName)
-	require.Equal(t, secret.Namespace, config.CollectorNamespace)
-
-	require.NotEmpty(t, secret.Data)
-	expectedBasicAuthHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte("user:password"))
-	require.Equal(t, expectedBasicAuthHeader, string(secret.Data[basicAuthHeaderVariable]))
+	require.Equal(t, "otlpEndpoint", string(secret.Data[otlpEndpointVariable]), "Secret must contain OTLP endpoint")
+	require.Equal(t, "basicAuthHeader", string(secret.Data[basicAuthHeaderVariable]), "Secret must contain basic auth header")
 }
 
 func TestMakeDeployment(t *testing.T) {
-	deployment := makeDeployment(config)
+	deployment := makeDeployment(config, "123")
 	labels := getLabels(config)
 
 	require.NotNil(t, deployment)
@@ -94,7 +92,10 @@ func TestMakeDeployment(t *testing.T) {
 	require.Equal(t, *deployment.Spec.Replicas, int32(1))
 	require.Equal(t, deployment.Spec.Selector.MatchLabels, labels)
 	require.Equal(t, deployment.Spec.Template.ObjectMeta.Labels, labels)
-	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations, podAnnotations)
+	for k, v := range defaultPodAnnotations {
+		require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[k], v)
+	}
+	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[configHashAnnotationKey], "123")
 	require.NotEmpty(t, deployment.Spec.Template.Spec.Containers[0].EnvFrom)
 }
 
