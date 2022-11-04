@@ -19,6 +19,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        container.apparmor.security.beta.kubernetes.io: runtime/default
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
@@ -29,17 +30,17 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
-        volumes:
-          - secret:
-            name: <''>
-          - configMap:
-            name: <''>
-          - downwardAPI:
-            name: <''>
-          - emptyDir:
-            name: <''>
-          - projected:
-            name: <''>
+      volumes: # TODO: does it work?
+        - secret:
+          name: <''>
+        - configMap:
+          name: <''>
+        - downwardAPI:
+          name: <''>
+        - emptyDir:
+          name: <''>
+        - projected:
+          name: <''>
       serviceAccountName: {{ .Chart.Name }}
       containers:
         - name: {{ .Chart.Name }}
@@ -52,8 +53,8 @@ spec:
                 - ALL
               add:
                 - NET_BIND_SERVICE
-#                - NET_ADMIN
-#                - NET_RAW
+#                - NET_ADMIN # TODO: does it work?
+#                - NET_RAW # TODO: does it work?
             seLinuxOptions:
               type: container_t
             procMount: default
