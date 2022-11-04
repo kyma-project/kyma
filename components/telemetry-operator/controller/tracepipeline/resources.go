@@ -17,6 +17,7 @@ import (
 const (
 	basicAuthHeaderVariable = "BASIC_AUTH_HEADER"
 	otlpEndpointVariable    = "OTLP_ENDPOINT"
+	configHashAnnotationKey = "checksum/config"
 )
 
 var (
@@ -30,8 +31,8 @@ var (
 			corev1.ResourceMemory: resource.MustParse("512Mi"),
 		},
 	}
-	configMapKey   = "relay.conf"
-	podAnnotations = map[string]string{
+	configMapKey          = "relay.conf"
+	defaultPodAnnotations = map[string]string{
 		"sidecar.istio.io/inject": "false",
 	}
 	replicas = int32(1)
@@ -121,9 +122,10 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 	}
 }
 
-func makeDeployment(config Config) *appsv1.Deployment {
+func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 	labels := getLabels(config)
 	optional := true
+	annotations := makePodAnnotations(configHash)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.ResourceName,
@@ -138,7 +140,7 @@ func makeDeployment(config Config) *appsv1.Deployment {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      labels,
-					Annotations: podAnnotations,
+					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -177,6 +179,16 @@ func makeDeployment(config Config) *appsv1.Deployment {
 			},
 		},
 	}
+}
+
+func makePodAnnotations(configHash string) map[string]string {
+	annotations := map[string]string{
+		configHashAnnotationKey: configHash,
+	}
+	for k, v := range defaultPodAnnotations {
+		annotations[k] = v
+	}
+	return annotations
 }
 
 func makeCollectorService(config Config) *corev1.Service {
