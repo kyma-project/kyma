@@ -42,8 +42,6 @@ spec:
                 - ALL
               add:
                 - NET_BIND_SERVICE
-#                - NET_ADMIN # TODO: does it work?
-#                - NET_RAW # TODO: does it work?
             seLinuxOptions:
               type: container_t
             procMount: default
