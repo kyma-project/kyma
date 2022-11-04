@@ -43,6 +43,15 @@ test-k3d: ## Prepare k3d and run tests
 ## Prerequisites:
 setup: ## Setup local installation with the same configuration as pipeline
 	./prepare_local.sh
+
+setup-custom-domain: ## Setup local installation with the same configuration as pipeline
+	export TEST_HYDRA_ADDRESS="https://oauth2.$(TEST_DOMAIN)"
+	export TEST_REQUEST_TIMEOUT="180"
+	export TEST_REQUEST_DELAY="2"
+	export TEST_CLIENT_TIMEOUT=30s
+	export TEST_CONCURENCY="1"
+	export EXPORT_RESULT="true"
+
 ## Help:
 help: ## Show this help.
 	@echo ''
