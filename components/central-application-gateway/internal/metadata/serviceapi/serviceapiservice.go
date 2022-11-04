@@ -175,6 +175,7 @@ func getOAuthWithCertCredentials(secret map[string][]byte, url string) (*authori
 
 	return &authorization.OAuthWithCert{
 		ClientID:          string(secret[ClientIDKey]),
+		ClientSecret:      string(secret[ClientSecretKey]),
 		Certificate:       secret[CertificateKey],
 		PrivateKey:        secret[PrivateKeyKey],
 		URL:               url,

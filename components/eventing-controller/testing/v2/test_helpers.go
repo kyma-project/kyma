@@ -416,6 +416,18 @@ func WithEmptyTypes() SubscriptionOpt {
 	}
 }
 
+func WithEmptyStatus() SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Status = eventingv1alpha2.SubscriptionStatus{}
+	}
+}
+
+func WithEmptyConfig() SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		subscription.Spec.Config = map[string]string{}
+	}
+}
+
 func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventType)
 }

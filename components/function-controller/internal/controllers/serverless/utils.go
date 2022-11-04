@@ -133,7 +133,7 @@ func getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
 
 func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
+	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",

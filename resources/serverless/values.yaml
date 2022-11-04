@@ -80,13 +80,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15876"
+      version: "PR-15990"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15876"
+      version: "PR-15990"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15876"
+      version: "PR-15990"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "v20221011-831da39d"
@@ -98,14 +98,14 @@ global:
       version: "v20221011-831da39d"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20221011-831da39d"
+      version: "PR-15933"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.0-a550386f"
+      version: "1.9.0-4ced14d5"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-981f40fb"
+      version: "2.7.1-4ced14d5"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -114,7 +114,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "v20221013-5a653721"
+      version: "PR-15854"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -188,10 +188,6 @@ containers:
         value: 5m
       serviceAccountRequeueDuration:
         value: 5m
-      roleRequeueDuration:
-        value: 5m
-      roleBindingRequeueDuration:
-        value: 5m
       namespaceExcludedNames:
         value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
@@ -202,8 +198,6 @@ containers:
         value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
-      buildServiceAccountName:
-        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
       # Deprecated as of kyma 2.8

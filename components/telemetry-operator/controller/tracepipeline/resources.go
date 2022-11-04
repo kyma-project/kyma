@@ -1,7 +1,7 @@
 package tracepipeline
 
 import (
-	"encoding/base64"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -16,6 +16,8 @@ import (
 
 const (
 	basicAuthHeaderVariable = "BASIC_AUTH_HEADER"
+	otlpEndpointVariable    = "OTLP_ENDPOINT"
+	configHashAnnotationKey = "checksum/config"
 )
 
 var (
@@ -29,8 +31,8 @@ var (
 			corev1.ResourceMemory: resource.MustParse("512Mi"),
 		},
 	}
-	configMapKey   = "relay.conf"
-	podAnnotations = map[string]string{
+	configMapKey          = "relay.conf"
+	defaultPodAnnotations = map[string]string{
 		"sidecar.istio.io/inject": "false",
 	}
 	replicas = int32(1)
@@ -86,14 +88,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 	}
 }
 
-func makeSecret(config Config, output *v1alpha1.OtlpOutput) *corev1.Secret {
-	secretData := map[string][]byte{}
-
-	basicAuthHeader := getBasicAuthHeader(output)
-	if basicAuthHeader != nil {
-		secretData[basicAuthHeaderVariable] = basicAuthHeader
-	}
-
+func makeSecret(config Config, secretData map[string][]byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.ResourceName,
@@ -102,15 +97,6 @@ func makeSecret(config Config, output *v1alpha1.OtlpOutput) *corev1.Secret {
 		},
 		Data: secretData,
 	}
-}
-
-func getBasicAuthHeader(output *v1alpha1.OtlpOutput) []byte {
-	if output.Authentication != nil && output.Authentication.Basic.IsDefined() {
-		username := output.Authentication.Basic.User.Value
-		password := output.Authentication.Basic.Password.Value
-		return []byte("Basic " + base64.StdEncoding.EncodeToString([]byte(username+":"+password)))
-	}
-	return nil
 }
 
 func getOutputType(output v1alpha1.TracePipelineOutput) string {
@@ -125,20 +111,21 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 	var headers map[string]any
 	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
 		headers = map[string]any{
-			"Authorization": "${" + basicAuthHeaderVariable + "}",
+			"Authorization": fmt.Sprintf("${%s}", basicAuthHeaderVariable),
 		}
 	}
 	return map[string]any{
 		outputType: map[string]any{
-			"endpoint": output.Otlp.Endpoint.Value,
+			"endpoint": fmt.Sprintf("${%s}", otlpEndpointVariable),
 			"headers":  headers,
 		},
 	}
 }
 
-func makeDeployment(config Config) *appsv1.Deployment {
+func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 	labels := getLabels(config)
 	optional := true
+	annotations := makePodAnnotations(configHash)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.ResourceName,
@@ -153,7 +140,7 @@ func makeDeployment(config Config) *appsv1.Deployment {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      labels,
-					Annotations: podAnnotations,
+					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -161,17 +148,6 @@ func makeDeployment(config Config) *appsv1.Deployment {
 							Name:    config.ResourceName,
 							Image:   config.CollectorImage,
 							Command: []string{"/otelcol-contrib", "--config=/conf/" + configMapKey},
-							Env: []corev1.EnvVar{
-								{
-									Name: "MY_POD_IP",
-									ValueFrom: &corev1.EnvVarSource{
-										FieldRef: &corev1.ObjectFieldSelector{
-											APIVersion: "v1",
-											FieldPath:  "status.podIP",
-										},
-									},
-								},
-							},
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									SecretRef: &corev1.SecretEnvSource{
@@ -203,6 +179,16 @@ func makeDeployment(config Config) *appsv1.Deployment {
 			},
 		},
 	}
+}
+
+func makePodAnnotations(configHash string) map[string]string {
+	annotations := map[string]string{
+		configHashAnnotationKey: configHash,
+	}
+	for k, v := range defaultPodAnnotations {
+		annotations[k] = v
+	}
+	return annotations
 }
 
 func makeCollectorService(config Config) *corev1.Service {

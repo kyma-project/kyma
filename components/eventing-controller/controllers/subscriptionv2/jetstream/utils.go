@@ -25,6 +25,13 @@ func setSubReadyStatus(desiredSubscriptionStatus *eventingv1alpha2.SubscriptionS
 	return false
 }
 
+func validateSource(sub *eventingv1alpha2.Subscription) error {
+	if sub.Spec.Source == "" && sub.Spec.TypeMatching != eventingv1alpha2.TypeMatchingExact {
+		return utils.MakeError(errEmptySourceValue, nil)
+	}
+	return nil
+}
+
 //----------------------------------------
 // Condition utils
 //----------------------------------------

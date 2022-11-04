@@ -109,7 +109,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	}
 	ctx := request.Context()
 
-	result, err := h.sendEventAndRecordMetrics(ctx, event, request.URL.Host, request.Header)
+	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
 		h.namedLogger().With().Error(err)
 		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, http.StatusInternalServerError, event, err.Error())
@@ -148,7 +148,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 	event.SetType(eventTypeClean)
 
-	result, err := h.sendEventAndRecordMetrics(ctx, event, request.URL.Host, request.Header)
+	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		h.namedLogger().With().Error(err)
