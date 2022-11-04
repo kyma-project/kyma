@@ -12,7 +12,6 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-        container.apparmor.security.beta.kubernetes.io/init-certificates: runtime/default
     spec:
       securityContext:
         runAsUser: 65534
