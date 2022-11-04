@@ -2,6 +2,7 @@
 package metricstest
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -34,6 +35,14 @@ func EnsureMetricTotalRequests(t *testing.T, collector metrics.PublishingMetrics
 func ensureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollector, metric string, expectedCount int) {
 	if count := testutil.CollectAndCount(collector, metric); count != expectedCount {
 		t.Fatalf("invalid count for metric:%s, want:%d, got:%d", metric, expectedCount, count)
+	}
+}
+
+// EnsureMetricMatchesTextExpositionFormat ensures that metrics collected by the given collector match the given metric output in TextExpositionFormat.
+// This is useful to compare metrics with their given labels.
+func EnsureMetricMatchesTextExpositionFormat(t *testing.T, collector metrics.PublishingMetricsCollector, tef string, metricNames ...string) {
+	if err := testutil.CollectAndCompare(collector, strings.NewReader(tef), metricNames...); err != nil {
+		t.Fatalf("%v", err)
 	}
 }
 

@@ -17,12 +17,31 @@ type Logger struct {
 	zapLogger *zap.SugaredLogger
 }
 
+/*
+This function creates logger structure based on given format, atomicLevel and additional cores
+AtomicLevel structure allows to change level dynamically
+*/
+func NewWithAtomicLevel(format Format, atomicLevel zap.AtomicLevel, additionalCores ...zapcore.Core) (*Logger, error) {
+	return new(format, atomicLevel, additionalCores...)
+}
+
+/*
+This function creates logger structure based on given format, level and additional cores
+*/
 func New(format Format, level Level, additionalCores ...zapcore.Core) (*Logger, error) {
 	filterLevel, err := level.ToZapLevel()
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting zap log level")
 	}
 
+	levelEnabler := zap.LevelEnablerFunc(func(incomingLevel zapcore.Level) bool {
+		return incomingLevel >= filterLevel
+	})
+
+	return new(format, levelEnabler, additionalCores...)
+}
+
+func new(format Format, levelEnabler zapcore.LevelEnabler, additionalCores ...zapcore.Core) (*Logger, error) {
 	encoder, err := format.ToZapEncoder()
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting encoding configuration  for %s format", format)
@@ -31,9 +50,7 @@ func New(format Format, level Level, additionalCores ...zapcore.Core) (*Logger, 
 	defaultCore := zapcore.NewCore(
 		encoder,
 		zapcore.Lock(os.Stderr),
-		zap.LevelEnablerFunc(func(incomingLevel zapcore.Level) bool {
-			return incomingLevel >= filterLevel
-		}),
+		levelEnabler,
 	)
 	cores := append(additionalCores, defaultCore)
 	return &Logger{zap.New(zapcore.NewTee(cores...), zap.AddCaller()).Sugar()}, nil
@@ -52,7 +69,7 @@ func (l *Logger) WithContext() *zap.SugaredLogger {
 	return l.zapLogger.With(zap.Namespace("context"))
 }
 
-/**
+/*
 By default the Fatal Error log will be in json format, because it's production default.
 */
 func LogFatalError(format string, args ...interface{}) error {
@@ -64,7 +81,7 @@ func LogFatalError(format string, args ...interface{}) error {
 	return nil
 }
 
-/**
+/*
 This function initialize klog which is used in k8s/go-client
 */
 func InitKlog(log *Logger, level Level) error {

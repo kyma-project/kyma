@@ -47,7 +47,7 @@ async function getOrProvisionSKR(options, skipProvisioning, provisioningTimeout)
 
 async function provisionSKRInstance(options, timeout) {
   try {
-    const btpOperatorCreds = BTPOperatorCreds.fromEnv();
+    const btpOperatorCreds = BTPOperatorCreds.dummy();
 
     console.log(`\nInstanceID ${options.instanceID}`,
         `Runtime ${options.runtimeName}`, `Application ${options.appName}`, `Suffix ${options.suffix}`);

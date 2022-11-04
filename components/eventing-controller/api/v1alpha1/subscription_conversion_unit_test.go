@@ -23,6 +23,18 @@ func Test_Conversion(t *testing.T) {
 
 	testCases := []TestCase{
 		{
+			name: "Converting NATS Subscription with empty Status",
+			alpha1Sub: newDefaultSubscription(
+				testingv1.WithEmptyFilter(),
+				testingv1.WithEmptyConfig(),
+				testingv1.WithEmptyStatus(),
+			),
+			alpha2Sub: newV2DefaultSubscription(
+				testingv2.WithEmptyStatus(),
+				testingv2.WithEmptyConfig(),
+			),
+		},
+		{
 			name: "Converting NATS Subscription with empty Filters",
 			alpha1Sub: newDefaultSubscription(
 				testingv1.WithEmptyFilter(),
@@ -189,13 +201,6 @@ func v1ToV2Assertions(t *testing.T, wantSub, convertedSub *v1alpha2.Subscription
 	assert.Equal(t, wantSub.Spec.Source, convertedSub.Spec.Source)
 	assert.Equal(t, wantSub.Spec.Types, convertedSub.Spec.Types)
 	assert.Equal(t, wantSub.Spec.Config, convertedSub.Spec.Config)
-
-	// Status
-	assert.Equal(t, wantSub.Status.Ready, convertedSub.Status.Ready)
-	assert.Equal(t, wantSub.Status.Conditions, convertedSub.Status.Conditions)
-	assert.Equal(t, wantSub.Status.Types, convertedSub.Status.Types)
-
-	assert.Equal(t, wantSub.Status.Backend, convertedSub.Status.Backend)
 }
 
 func v2ToV1Assertions(t *testing.T, wantSub, convertedSub *v1alpha1.Subscription) {

@@ -25,7 +25,7 @@ func Test_SyncConsumersAndSubscriptions_ForEmptyTypes(t *testing.T) {
 
 	// when
 	js := JetStream{}
-	err := js.syncConsumersAndSubscriptions(subWithOneType, callback)
+	err := js.syncConsumerAndSubscription(subWithOneType, callback)
 
 	// then
 	assert.NoError(t, err)
@@ -93,7 +93,7 @@ func Test_GetOrCreateConsumer(t *testing.T) {
 }
 
 // Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions tests the
-// binding behaviour in the syncConsumersAndSubscriptions function.
+// binding behaviour in the syncConsumerAndSubscription function.
 func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T) {
 	// pre-requisites
 	subWithOneType := NewSubscriptionWithOneType()
@@ -167,7 +167,7 @@ func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T
 			tc.mocks(subWithOneType, js, jsCtxMock, jsSubKey)
 
 			// when
-			assert.NoError(t, js.syncConsumersAndSubscriptions(subWithOneType, callback))
+			assert.NoError(t, js.syncConsumerAndSubscription(subWithOneType, callback))
 
 			// then
 			jsCtxMock.AssertExpectations(t)
@@ -244,7 +244,7 @@ func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T)
 	}
 }
 
-// Test_SyncConsumersAndSubscriptions_ForErrors test the syncConsumersAndSubscriptions for right error handling.
+// Test_SyncConsumersAndSubscriptions_ForErrors test the syncConsumerAndSubscription for right error handling.
 func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 	// pre-requisites
 	subWithOneType := NewSubscriptionWithOneType()
@@ -347,7 +347,7 @@ func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 			}
 
 			// when
-			err := js.syncConsumersAndSubscriptions(subWithOneType, callback)
+			err := js.syncConsumerAndSubscription(subWithOneType, callback)
 
 			// then
 			assert.ErrorIs(t, err, testCase.wantError)
@@ -370,10 +370,103 @@ func Test_SyncConsumersAndSubscriptions_ForBoundConsumerWithoutSubscription(t *t
 	callback := func(m *nats.Msg) {}
 
 	// when
-	err := js.syncConsumersAndSubscriptions(subWithType, callback)
+	err := js.syncConsumerAndSubscription(subWithType, callback)
 
 	// then
 	require.ErrorIs(t, err, ErrMissingSubscription)
+}
+
+// Test_DeleteSubscriptionFromJetStream test the behaviour of the deleteSubscriptionFromJetStream function.
+func Test_DeleteSubscriptionFromJetStream(t *testing.T) {
+	// pre-requisites
+	jsBackend := &JetStream{
+		cleaner: &cleaner.JetStreamCleaner{},
+	}
+	subWithOneType := NewSubscriptionWithOneType()
+	jsSubject := jsBackend.getJetStreamSubject(subWithOneType.Spec.Source,
+		subWithOneType.Status.Types[0].CleanType,
+		subWithOneType.Spec.TypeMatching,
+	)
+	jsSubKey := NewSubscriptionSubjectIdentifier(subWithOneType, jsSubject)
+
+	testCases := []struct {
+		name                  string
+		jsBackend             *JetStream
+		jsCtx                 *jetStreamContextStub
+		subscriber            Subscriber
+		givenSubscriptionsMap map[SubscriptionSubjectIdentifier]Subscriber
+		wantError             error
+		wantSubscriptionMap   map[SubscriptionSubjectIdentifier]Subscriber
+	}{
+		{
+			name: "Valid subscriber returns error on Unsubscribe",
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          true,
+					unsubscribeError: nats.ErrConnectionNotTLS,
+				},
+			},
+			wantError: ErrFailedUnsubscribe,
+		},
+		{
+			name: "Valid unsubscribe with err on consumer delete",
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          true,
+					unsubscribeError: nil,
+				},
+			},
+			jsCtx: &jetStreamContextStub{
+				deleteConsumerErr: nats.ErrJetStreamNotEnabled,
+			},
+			wantError: nats.ErrJetStreamNotEnabled,
+		},
+		{
+			name: "ErrConsumerNotFound error should be ignored",
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          true,
+					unsubscribeError: nil,
+				},
+			},
+			jsCtx: &jetStreamContextStub{
+				deleteConsumerErr: nats.ErrConsumerNotFound,
+			},
+			wantSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
+			wantError:           nil,
+		},
+		{
+			name: "Invalid subscriber doesn't try to unsubscribe",
+			givenSubscriptionsMap: map[SubscriptionSubjectIdentifier]Subscriber{
+				jsSubKey: &subscriberStub{
+					isValid:          false,
+					unsubscribeError: nats.ErrConnectionNotTLS,
+				},
+			},
+			jsCtx:               &jetStreamContextStub{},
+			wantSubscriptionMap: map[SubscriptionSubjectIdentifier]Subscriber{},
+			wantError:           nil,
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			// inject the given subscriber
+			jsBackend.jsCtx = testCase.jsCtx
+			jsBackend.subscriptions = testCase.givenSubscriptionsMap
+
+			// when
+			resultErr := jsBackend.deleteSubscriptionFromJetStream(jsBackend.subscriptions[jsSubKey], jsSubKey)
+
+			// then
+			assert.ErrorIs(t, resultErr, testCase.wantError)
+			if testCase.wantError == nil {
+				assert.Equal(t, testCase.wantSubscriptionMap, jsBackend.subscriptions)
+			}
+		})
+	}
 }
 
 // HELPER FUNCTIONS

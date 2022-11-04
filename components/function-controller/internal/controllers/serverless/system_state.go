@@ -228,8 +228,7 @@ func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
 							},
 						},
 					},
-					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: cfg.fn.BuildServiceAccountName,
+					RestartPolicy: corev1.RestartPolicyNever,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -322,7 +321,6 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: cfg.fn.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},

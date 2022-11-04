@@ -21,7 +21,8 @@ data:
       "body": [
         {
           "source": "spec.parser",
-          "widget": "CodeViewer"
+          "widget": "CodeViewer",
+          "language": "'plaintext'"
         }
       ]
     }
@@ -30,7 +31,8 @@ data:
       {
         "widget": "CodeEditor",
         "path": "spec.parser",
-        "simple": true
+        "simple": true,
+        "language": "'plaintext'"
       }
     ]
   general: |-
