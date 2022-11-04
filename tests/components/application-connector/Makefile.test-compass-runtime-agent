@@ -19,7 +19,7 @@ test-compass-runtime-agent-debug:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 	kubectl label namespace $(NAMESPACE) istio-injection=enabled --overwrite
 
-	helm template resources/charts/compass-runtime-agent-test \
+	@helm template resources/charts/compass-runtime-agent-test \
 	--set namespace=$(NAMESPACE) \
 	--set compassCredentials.clientID=$(COMPASS_CLIENT_ID) \
 	--set compassCredentials.clientSecret=$(COMPASS_CLIENT_SECRET) \
