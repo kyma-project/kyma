@@ -55,3 +55,17 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 	}
 	return nats.DeliverNew()
 }
+
+func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
+	switch deliverPolicy {
+	case ConsumerDeliverPolicyAll:
+		return nats.DeliverAllPolicy
+	case ConsumerDeliverPolicyLast:
+		return nats.DeliverLastPolicy
+	case ConsumerDeliverPolicyLastPerSubject:
+		return nats.DeliverLastPerSubjectPolicy
+	case ConsumerDeliverPolicyNew:
+		return nats.DeliverNewPolicy
+	}
+	return nats.DeliverNewPolicy
+}

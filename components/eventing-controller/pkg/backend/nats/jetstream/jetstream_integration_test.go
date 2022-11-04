@@ -1318,7 +1318,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			require.Equal(t, err != nil, tc.wantErr)
 
 			if tc.wantErr {
-				// the createConsumer function won't create a new Subscription,
+				// the syncConsumersAndSubscriptions function won't create a new Subscription,
 				// because the subscription was manually deleted from the js.subscriptions map
 				// hence the consumer will be shown in the NATS Backend as still bound
 				err = jsBackend.SyncSubscription(sub)

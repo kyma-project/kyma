@@ -26,6 +26,13 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
+const (
+	ConsumerDeliverPolicyAll            = "all"
+	ConsumerDeliverPolicyLast           = "last"
+	ConsumerDeliverPolicyLastPerSubject = "last_per_subject"
+	ConsumerDeliverPolicyNew            = "new"
+)
+
 type EventTypeInfo struct {
 	OriginalType  string
 	CleanType     string

@@ -249,6 +249,15 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a)
 }
 
+// GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer.
+func (s *Subscription) GetMaxInFlightMessages(defaults *env.DefaultSubscriptionConfig) int {
+	// TODO: move this to validation webhook
+	if s.Spec.Config.MaxInFlightMessages == 0 {
+		return defaults.MaxInFlightMessages
+	}
+	return s.Spec.Config.MaxInFlightMessages
+}
+
 // +kubebuilder:object:root=true
 
 // SubscriptionList contains a list of Subscription.

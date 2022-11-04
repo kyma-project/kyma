@@ -172,8 +172,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		go callback(m)
 	}
 
-	js.bindConsumersForInvalidNATSSubscriptions(subscription, asyncCallback, log)
-	if err := js.createConsumer(subscription, asyncCallback, log); err != nil {
+	if err := js.syncConsumersAndSubscriptions(subscription, asyncCallback, log); err != nil {
 		return err
 	}
 
@@ -423,79 +422,77 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub backendnats.Su
 	return js.deleteSubscriptionFromJetStream(jsSub, key, log)
 }
 
-// bindConsumersForInvalidNATSSubscriptions attempts to bind an existing consumer to a new NATS subscription,
-// when the previous subscription that the consumer was associated with becomes invalid. If binding fails,
-// we will delete the subscription from our internal subscriptions map.
-func (js *JetStream) bindConsumersForInvalidNATSSubscriptions(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) {
-	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJetStreamSubject(subject)
-		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
-		log := log.With("subject", subject)
-
-		if existingNatsSub, ok := js.subscriptions[jsSubKey]; !ok {
-			continue
-		} else if existingNatsSub.IsValid() {
-			log.Debugw("Skipping creation subscription on JetStream because it already exists")
-			continue
-		}
-		log.Debugw("Recreating subscription on JetStream because it was invalid")
-		// bind the existing consumer to a new subscription on JetStream
-		jsSubscription, err := js.jsCtx.Subscribe(
-			jsSubject,
-			asyncCallback,
-			nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
-		)
-		if err != nil {
-			if err != nats.ErrConsumerNotFound {
-				log.Errorw("Failed to bind subscription to an existing consumer", "error", err)
-			}
-			delete(js.subscriptions, jsSubKey)
-		} else {
-			// save recreated JetStream subscription in storage
-			js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
-			log.Debugw("Recreated subscription on JetStream")
-		}
-	}
-}
-
-// createConsumer creates a new consumer on NATS for each CleanEventType,
+// syncConsumersAndSubscriptions creates a new consumer on NATS for each CleanEventType,
 // when there is no NATS subscription associated with the CleanEventType.
-func (js *JetStream) createConsumer(subscription *eventingv1alpha1.Subscription, asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
+func (js *JetStream) syncConsumersAndSubscriptions(subscription *eventingv1alpha1.Subscription,
+	asyncCallback func(m *nats.Msg), log *zap.SugaredLogger) error {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		log := log.With("subject", subject)
 
-		if _, ok := js.subscriptions[jsSubKey]; ok {
-			continue
-		}
-
-		// TODO: optimize this call of ConsumerInfo
-		consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
-		if err != nil && err != nats.ErrConsumerNotFound {
-			log.Errorw("Failed to get consumer info", "error", err)
+		consumerInfo, err := js.getOrCreateConsumer(subscription, subject)
+		if err != nil {
 			return err
 		}
 
-		// skip the subject, in case there is a bound consumer on NATS
-		if consumerInfo != nil && consumerInfo.PushBound {
-			continue
+		natsSubscription, subExists := js.subscriptions[jsSubKey]
+
+		// try to create a NATS Subscription if it doesn't exist
+		if !subExists && !consumerInfo.PushBound {
+			jsSubscription, subscribeErr := js.jsCtx.Subscribe(
+				jsSubject,
+				asyncCallback,
+				js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
+			)
+			if subscribeErr != nil {
+				return fmt.Errorf("failed to subscribe on JetStream: %w", subscribeErr)
+			}
+			// save created JetStream subscription in storage
+			js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
+			js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
+			log.Debugw("Created subscription on JetStream")
 		}
 
-		jsSubscription, err := js.jsCtx.Subscribe(
-			jsSubject,
-			asyncCallback,
-			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
-		)
-		if err != nil {
-			return xerrors.Errorf("failed to subscribe on JetStream: %v", err)
+		// try to bind invalid NATS Subscriptions
+		if subExists && !natsSubscription.IsValid() {
+			// bind the existing consumer to a new subscription on JetStream
+			jsSubscription, subscribeErr := js.jsCtx.Subscribe(
+				jsSubject,
+				asyncCallback,
+				nats.Bind(js.Config.JSStreamName, jsSubKey.ConsumerName()),
+			)
+			if subscribeErr != nil {
+				return fmt.Errorf("failed to bind an invalid subscription to a consumer: %w", err)
+			}
+			// save recreated JetStream subscription in storage
+			js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
 		}
-		// save created JetStream subscription in storage
-		js.subscriptions[jsSubKey] = &backendnats.Subscription{Subscription: jsSubscription}
-		js.metricsCollector.RecordEventTypes(subscription.Name, subscription.Namespace, subject, jsSubKey.ConsumerName())
-		log.Debugw("Created subscription on JetStream")
 	}
 	return nil
+}
+
+// getOrCreateConsumer fetches the ConsumerInfo from NATS Server or creates it in case it doesn't exist.
+func (js *JetStream) getOrCreateConsumer(subscription *eventingv1alpha1.Subscription,
+	subject string) (*nats.ConsumerInfo, error) {
+	jsSubject := js.GetJetStreamSubject(subject)
+	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+
+	consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
+	if err != nil {
+		if errors.Is(err, nats.ErrConsumerNotFound) {
+			consumerInfo, err = js.jsCtx.AddConsumer(
+				js.Config.JSStreamName,
+				js.getConsumerConfig(jsSubKey, jsSubject, subscription.Status.Config),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create a consumer on JetStream: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("failed to get a consumer from JetStream: %w", err)
+		}
+	}
+	return consumerInfo, nil
 }
 
 // checkNATSSubscriptionsCount checks whether NATS Subscription(s) were created for all the Kyma Subscription filters
@@ -524,8 +521,28 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),
+		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
 	}
 	return defaultOpts
+}
+
+// getConsumerConfig return the consumerConfig according to the default configuration.
+func (js *JetStream) getConsumerConfig(consumer SubscriptionSubjectIdentifier, jsSubject string,
+	subConfig *eventingv1alpha1.SubscriptionConfig) *nats.ConsumerConfig {
+	return &nats.ConsumerConfig{
+		Durable:        consumer.consumerName,
+		Description:    consumer.namespacedSubjectName,
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.Config.JSConsumerDeliverPolicy),
+		FlowControl:    true,
+		MaxAckPending:  subConfig.MaxInFlightMessages,
+		AckPolicy:      nats.AckExplicitPolicy,
+		AckWait:        jsConsumerAcKWait,
+		MaxDeliver:     jsConsumerMaxRedeliver,
+		FilterSubject:  jsSubject,
+		ReplayPolicy:   nats.ReplayInstantPolicy,
+		DeliverSubject: nats.NewInbox(),
+		Heartbeat:      idleHeartBeatDuration,
+	}
 }
 
 func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
@@ -595,13 +612,13 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub backendnats.Subscribe
 	if jsSub.IsValid() {
 		// unsubscribe will also delete the consumer on JS server
 		if err := jsSub.Unsubscribe(); err != nil {
-			return xerrors.Errorf("failed to unsubscribe subscription %v from JetStream: %v", jsSub, err)
+			return fmt.Errorf("failed to unsubscribe subscription %v from JetStream: %w", jsSub, err)
 		}
-	} else {
-		// if JS sub is not valid, then we need to delete the consumer on JetStream
-		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
-			return err
-		}
+	}
+
+	// if JS sub is not valid, then we need to delete the consumer on JetStream
+	if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
+		return err
 	}
 
 	delete(js.subscriptions, jsSubKey)
