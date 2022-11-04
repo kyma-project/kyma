@@ -77,11 +77,6 @@ headerRewrite:
   certificateDataHeader: "Certificate-Data"
   workloadLabel: oathkeeper
 
-# Maintenance options
-maintenance:
-  podSecurityPolicy:
-    enabled: true
-
 # Overrides for the Hydra chart
 hydra:
   enabled: true

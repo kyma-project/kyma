@@ -178,18 +178,18 @@ deployment:
         drop:
         - ALL
       privileged: false
-      runAsGroup: 1000
+      runAsGroup: 10001
       runAsNonRoot: true
-      runAsUser: 1000
+      runAsUser: 10000
     maester:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
         - ALL
       privileged: false
-      runAsGroup: 101
+      runAsGroup: 10011
       runAsNonRoot: true
-      runAsUser: 100
+      runAsUser: 10010
     controller:
       allowPrivilegeEscalation: false
       capabilities:
