@@ -57,7 +57,7 @@ Once an API element has been added to an API group at a particular version, it c
 
 **Rule #2: API objects must be able to round-trip between API versions in a given release without information loss, with the exception of whole REST resources that do not exist in some versions.**
 
-For example, an object can be written as v1 and then read back as v2 and converted to v1, and the resulting v1 resource will be identical to the original.  The representation in v2 might be different from v1, but the system knows how to convert between them in both directions.  Additionally, any new field added in v2 must be able to round-trip to v1 and back, which means v1 might have to add an equivalent field or represent it as an annotation.
+For example, an object can be written as v1 and then read back as v2 and converted to v1, and the resulting v1 resource is identical to the original.  The representation in v2 might be different from v1, but the system knows how to convert between them in both directions.  Additionally, any new field added in v2 must be able to round-trip to v1 and back, which means v1 might have to add an equivalent field or represent it as an annotation.
 
 **Rule #3: An API version in a given track may not be deprecated in favor of a less stable API version.**
 
