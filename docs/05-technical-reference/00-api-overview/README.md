@@ -71,7 +71,7 @@ For example, an object can be written as v1 and then read back as v2 and convert
    * **Beta API versions must be supported for 6 months or 3 releases (whichever is longer) after deprecation**
    * **Alpha API versions may be removed in any release without prior deprecation notice**
 
-**Rule #4b: The `preferred` API version and the `storage version` for a given group may not advance until after a release has been made that supports both the new version and the previous version**
+**Rule #4b: The `preferred` API version and the `storage version` for a given group may not advance until after a release has been made that supports both the new version and the previous version.**
 
 Users must be able to upgrade to a new release of a Kyma module and then roll back to a previous release, without converting anything to the new API version or suffering breakages unless they explicitly choose to use features only available in the newer version. This is particularly evident in the stored representation of objects.
 
