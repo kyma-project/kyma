@@ -106,20 +106,20 @@ func Test_CreateSubscription(t *testing.T) {
 
 			// create unique namespace for this test run
 			testNamespace := getTestNamespace()
-			ensureNamespaceCreated(t, ctx, testNamespace)
+			ensureNamespaceCreated(ctx, t, testNamespace)
 
 			// update namespace information in given test assets
 			givenSubscription := tc.givenSubscriptionFunc(testNamespace)
 
 			// create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(givenSubscription.Name, testNamespace)
-			ensureK8sResourceCreated(t, ctx, subscriberSvc)
+			ensureK8sResourceCreated(ctx, t, subscriberSvc)
 
 			// create subscription
-			ensureK8sResourceCreated(t, ctx, givenSubscription)
+			ensureK8sResourceCreated(ctx, t, givenSubscription)
 
 			// check if the subscription is as required
-			getSubscriptionAssert(g, ctx, givenSubscription).Should(tc.wantSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, givenSubscription).Should(tc.wantSubscriptionMatchers)
 
 		})
 	}
@@ -301,7 +301,7 @@ func Test_UpdateSubscription(t *testing.T) {
 
 			// create unique namespace for this test run
 			testNamespace := getTestNamespace()
-			ensureNamespaceCreated(t, ctx, testNamespace)
+			ensureNamespaceCreated(ctx, t, testNamespace)
 
 			// update namespace information in given test assets
 			givenSubscription := tc.givenSubscriptionFunc(testNamespace)
@@ -309,20 +309,20 @@ func Test_UpdateSubscription(t *testing.T) {
 
 			// create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(givenSubscription.Name, testNamespace)
-			ensureK8sResourceCreated(t, ctx, subscriberSvc)
+			ensureK8sResourceCreated(ctx, t, subscriberSvc)
 
 			// create subscription
-			ensureK8sResourceCreated(t, ctx, givenSubscription)
+			ensureK8sResourceCreated(ctx, t, givenSubscription)
 			createdSubscription := givenSubscription.DeepCopy()
 			// check if the created subscription is correct
-			getSubscriptionAssert(g, ctx, createdSubscription).Should(tc.wantSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, createdSubscription).Should(tc.wantSubscriptionMatchers)
 
 			// update subscription
 			givenUpdateSubscription.ResourceVersion = createdSubscription.ResourceVersion
-			ensureK8sResourceUpdated(t, ctx, givenUpdateSubscription)
+			ensureK8sResourceUpdated(ctx, t, givenUpdateSubscription)
 
 			// check if the updated subscription is correct
-			getSubscriptionAssert(g, ctx, givenSubscription).Should(tc.wantUpdateSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, givenSubscription).Should(tc.wantUpdateSubscriptionMatchers)
 		})
 	}
 }
@@ -397,7 +397,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 
 			// create unique namespace for this test run
 			testNamespace := getTestNamespace()
-			ensureNamespaceCreated(t, ctx, testNamespace)
+			ensureNamespaceCreated(ctx, t, testNamespace)
 			subName := fmt.Sprintf("test-sink-%s", testNamespace)
 			sinkPath := "/path1"
 
@@ -407,26 +407,26 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 
 			// create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
-			ensureK8sResourceCreated(t, ctx, subscriberSvc)
+			ensureK8sResourceCreated(ctx, t, subscriberSvc)
 
 			// create subscription
-			ensureK8sResourceCreated(t, ctx, givenSubscription)
+			ensureK8sResourceCreated(ctx, t, givenSubscription)
 			createdSubscription := givenSubscription.DeepCopy()
 			// check if the created subscription is correct
-			getSubscriptionAssert(g, ctx, createdSubscription).Should(wantSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, createdSubscription).Should(wantSubscriptionMatchers)
 
 			// update subscription with valid sink
 			givenUpdateSubscription.ResourceVersion = createdSubscription.ResourceVersion
-			ensureK8sResourceUpdated(t, ctx, givenUpdateSubscription)
+			ensureK8sResourceUpdated(ctx, t, givenUpdateSubscription)
 
 			// check if an APIRule was created for the subscription
-			getAPIRuleForASvcAssert(g, ctx, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
+			getAPIRuleForASvcAssert(ctx, g, subscriberSvc).Should(reconcilertestingv1.HaveNotEmptyAPIRule())
 
 			// check if the created APIRule is as required
 			apiRules, err := getAPIRulesList(ctx, subscriberSvc)
 			assert.NoError(t, err)
 			apiRuleUpdated := filterAPIRulesForASvc(apiRules, subscriberSvc)
-			getAPIRuleAssert(g, ctx, &apiRuleUpdated).Should(gomega.And(
+			getAPIRuleAssert(ctx, g, &apiRuleUpdated).Should(gomega.And(
 				reconcilertestingv1.HaveNotEmptyHost(),
 				reconcilertestingv1.HaveNotEmptyAPIRule(),
 				reconcilertestingv1.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, sinkPath),
@@ -434,10 +434,10 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			))
 
 			// update the status of the APIRule to ready (mocking APIGateway controller)
-			ensureAPIRuleStatusUpdatedWithStatusReady(t, ctx, &apiRuleUpdated)
+			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, &apiRuleUpdated)
 
 			// check if the updated subscription is correct
-			getSubscriptionAssert(g, ctx, givenSubscription).Should(wantUpdateSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, givenSubscription).Should(wantUpdateSubscriptionMatchers)
 
 			// check if the reconciled subscription has API rule in the status
 			assert.Equal(t, givenSubscription.Status.Backend.APIRuleName, apiRuleUpdated.Name)

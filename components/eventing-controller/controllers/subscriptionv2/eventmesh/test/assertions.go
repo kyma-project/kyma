@@ -12,7 +12,7 @@ import (
 )
 
 // getSubscriptionAssert fetches a subscription using the lookupKey and allows making assertions on it.
-func getSubscriptionAssert(g *gomega.GomegaWithT, ctx context.Context, subscription *eventingv1alpha2.Subscription) gomega.AsyncAssertion {
+func getSubscriptionAssert(ctx context.Context, g *gomega.GomegaWithT, subscription *eventingv1alpha2.Subscription) gomega.AsyncAssertion {
 	return g.Eventually(func() *eventingv1alpha2.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -27,7 +27,7 @@ func getSubscriptionAssert(g *gomega.GomegaWithT, ctx context.Context, subscript
 }
 
 // getAPIRuleForASvcAssert fetches an apiRule for a given service and allows making assertions on it.
-func getAPIRuleForASvcAssert(g *gomega.GomegaWithT, ctx context.Context, svc *corev1.Service) gomega.AsyncAssertion {
+func getAPIRuleForASvcAssert(ctx context.Context, g *gomega.GomegaWithT, svc *corev1.Service) gomega.AsyncAssertion {
 	return g.Eventually(func() apigatewayv1beta1.APIRule {
 		apiRules, err := getAPIRulesList(ctx, svc)
 		g.Expect(err).Should(gomega.BeNil())
@@ -36,12 +36,12 @@ func getAPIRuleForASvcAssert(g *gomega.GomegaWithT, ctx context.Context, svc *co
 }
 
 // getAPIRuleAssert fetches an apiRule and allows making assertions on it.
-func getAPIRuleAssert(g *gomega.GomegaWithT, ctx context.Context, apiRule *apigatewayv1beta1.APIRule) gomega.AsyncAssertion {
+func getAPIRuleAssert(ctx context.Context, g *gomega.GomegaWithT, apiRule *apigatewayv1beta1.APIRule) gomega.AsyncAssertion {
 	return g.Eventually(func() apigatewayv1beta1.APIRule {
-		fetchedApiRule, err := getAPIRule(ctx, apiRule)
+		fetchedAPIRule, err := getAPIRule(ctx, apiRule)
 		if err != nil {
 			return apigatewayv1beta1.APIRule{}
 		}
-		return *fetchedApiRule
+		return *fetchedAPIRule
 	}, bigTimeOut, bigPollingInterval)
 }

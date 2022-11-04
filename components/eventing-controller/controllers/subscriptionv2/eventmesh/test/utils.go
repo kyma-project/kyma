@@ -54,16 +54,16 @@ type eventMeshTestEnsemble struct {
 }
 
 const (
-	useExistingCluster          = false
-	attachControlPlaneOutput    = false
-	testEnvStartDelay           = time.Minute
-	testEnvStartAttempts        = 10
-	bigPollingInterval          = 3 * time.Second
-	bigTimeOut                  = 40 * time.Second
-	smallTimeOut                = 5 * time.Second
-	smallPollingInterval        = 1 * time.Second
-	domain                      = "domain.com"
-	namespacePrefixLength       = 5
+	useExistingCluster       = false
+	attachControlPlaneOutput = false
+	testEnvStartDelay        = time.Minute
+	testEnvStartAttempts     = 10
+	bigPollingInterval       = 3 * time.Second
+	bigTimeOut               = 40 * time.Second
+	smallTimeOut             = 5 * time.Second
+	smallPollingInterval     = 1 * time.Second
+	domain                   = "domain.com"
+	namespacePrefixLength    = 5
 )
 
 var (
@@ -220,7 +220,7 @@ func getTestNamespace() string {
 	return fmt.Sprintf("ns-%s", utils.GetRandString(namespacePrefixLength))
 }
 
-func ensureNamespaceCreated(t *testing.T, ctx context.Context, namespace string) {
+func ensureNamespaceCreated(ctx context.Context, t *testing.T, namespace string) {
 	if namespace == "default" {
 		return
 	}
@@ -245,33 +245,29 @@ func fixtureNamespace(name string) *corev1.Namespace {
 	return &namespace
 }
 
-func ensureK8sResourceCreated(t *testing.T, ctx context.Context, obj client.Object) {
+func ensureK8sResourceCreated(ctx context.Context, t *testing.T, obj client.Object) {
 	assert.NoError(t, emTestEnsemble.k8sClient.Create(ctx, obj))
 }
 
-func ensureK8sResourceUpdated(t *testing.T, ctx context.Context, obj client.Object) {
+func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Object) {
 	assert.NoError(t, emTestEnsemble.k8sClient.Update(ctx, obj))
 }
 
 // ensureAPIRuleStatusUpdatedWithStatusReady updates the status fof the APIRule (mocking APIGateway controller).
-func ensureAPIRuleStatusUpdatedWithStatusReady(t *testing.T, ctx context.Context, apiRule *apigatewayv1beta1.APIRule) {
+func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, t *testing.T, apiRule *apigatewayv1beta1.APIRule) {
 	assert.Eventually(t, func() bool {
-		fetchedApiRule, err := getAPIRule(ctx, apiRule)
+		fetchedAPIRule, err := getAPIRule(ctx, apiRule)
 		if err != nil {
 			return false
 		}
 
-		newAPIRule := fetchedApiRule.DeepCopy()
+		newAPIRule := fetchedAPIRule.DeepCopy()
 		// mark the ApiRule status as ready
 		reconcilertesting.MarkReady(newAPIRule)
 
 		// update ApiRule status on k8s
 		err = emTestEnsemble.k8sClient.Status().Update(ctx, newAPIRule)
-		if err != nil {
-			return false
-		}
-
-		return true
+		return err == nil
 	}, bigTimeOut, bigPollingInterval)
 }
 
