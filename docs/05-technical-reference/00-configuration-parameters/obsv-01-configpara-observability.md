@@ -22,6 +22,8 @@ To override the configuration, redefine the default values in your custom `value
 
 - [Loki `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml)
 
+    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
+
 ### Tracing
 
 [Tracing `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/tracing/values.yaml)

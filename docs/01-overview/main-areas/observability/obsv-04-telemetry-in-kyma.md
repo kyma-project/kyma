@@ -14,6 +14,8 @@ To support the logging domain, the Telemetry component provides a log collector,
 
 ## Architecture
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
+
 ### Telemetry component
 
 The telemetry component provides [Fluent Bit](https://fluentbit.io/) as a log collector. Fluent Bit collects all application logs of the cluster workload and ships them to a backend.
@@ -52,6 +54,8 @@ The LogPipeline resource is managed by the Telemetry Operator, a typical Kuberne
 The Telemetry Operator watches all LogPipeline resources and related Secrets. Whenever the configuration changes, it validates the configuration (with a [validating webhook](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)) and generates a new configuration for the Fluent Bit DaemonSet, where several ConfigMaps for the different aspects of the configuration are generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the DaemonSet as well.
 
 ## Setting up a LogPipeline
+
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
 
 ### Step 1: Create a LogPipeline and output
 
@@ -321,6 +325,8 @@ spec:
 ```
 
 ## Parameters
+
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
 
 ### LogPipeline.spec attribute
 

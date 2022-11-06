@@ -2,6 +2,8 @@
 title: Logging Architecture
 ---
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
+
 ## Architecture diagram
 
 ![Logging architecture in Kyma](./assets/obsv-logging-architecture.drawio.svg)

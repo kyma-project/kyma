@@ -21,6 +21,9 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 ## View the logs
 
 1. In the Grafana dashboard, use the left menu to navigate to **Explore** and choose **Loki** from the dropdown list.
+
+    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
+
 2. Click on **Log browser** and select the following values:
    - **1. Select labels to search in**: `container`, `function`
    - **2. Find values for the selected labels**: for **function** choose `lastorder`, for **container** choose `function` 

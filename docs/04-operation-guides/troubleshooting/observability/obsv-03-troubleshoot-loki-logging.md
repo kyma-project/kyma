@@ -2,6 +2,8 @@
 title: Loki doesn't show the logs you want to see
 ---
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
+
 ## Condition
 
 Loki shows fewer logs than you would like to see.
