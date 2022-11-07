@@ -20,14 +20,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// TestMain pre-hook and post-hook to run before and after all tests
+// TestMain pre-hook and post-hook to run before and after all tests.
 func TestMain(m *testing.M) {
 	// Note: The setup will provision a single K8s env and
 	// all the tests need to create and use a separate namespace
 
 	// setup env test
 	if err := setupSuite(); err != nil {
-		fmt.Printf("failed to start test suite")
 		panic(err)
 	}
 
@@ -43,6 +42,7 @@ func TestMain(m *testing.M) {
 }
 
 func Test_CreateSubscription(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		name                     string
 		givenSubscriptionFunc    func(namespace string) *eventingv1alpha2.Subscription
@@ -120,12 +120,12 @@ func Test_CreateSubscription(t *testing.T) {
 
 			// check if the subscription is as required
 			getSubscriptionAssert(ctx, g, givenSubscription).Should(tc.wantSubscriptionMatchers)
-
 		})
 	}
 }
 
 func Test_UpdateSubscription(t *testing.T) {
+	t.Parallel()
 	var testCases = []struct {
 		name                           string
 		givenSubscriptionFunc          func(namespace string) *eventingv1alpha2.Subscription
@@ -328,6 +328,7 @@ func Test_UpdateSubscription(t *testing.T) {
 }
 
 func Test_FixingSinkAndApiRule(t *testing.T) {
+	t.Parallel()
 	// common given test assets
 	givenSubscriptionFunc := func(namespace, name string) *eventingv1alpha2.Subscription {
 		return reconcilertesting.NewSubscription(name, namespace,

@@ -64,14 +64,17 @@ const (
 	smallPollingInterval     = 1 * time.Second
 	domain                   = "domain.com"
 	namespacePrefixLength    = 5
+	syncPeriodSeconds        = 2
 )
 
+//nolint:gochecknoglobals // only used in tests
 var (
 	emTestEnsemble    *eventMeshTestEnsemble
-	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
 	k8sCancelFn       context.CancelFunc
+	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
 )
 
+//nolint:funlen
 func setupSuite() error {
 	emTestEnsemble = &eventMeshTestEnsemble{}
 
@@ -103,9 +106,9 @@ func setupSuite() error {
 			}
 		}()
 
-		cfgLocal, err := emTestEnsemble.testEnv.Start()
+		cfgLocal, startErr := emTestEnsemble.testEnv.Start()
 		cfg = cfgLocal
-		return err
+		return startErr
 	},
 		retry.Delay(testEnvStartDelay),
 		retry.DelayType(retry.FixedDelay),
@@ -145,7 +148,7 @@ func setupSuite() error {
 		return err
 	}
 
-	syncPeriod := time.Second * 2
+	syncPeriod := syncPeriodSeconds * time.Second
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
@@ -181,9 +184,10 @@ func setupSuite() error {
 
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
 	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
-	fmt.Printf("starting emreconciler")
-	err = eventmeshreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
-		recorder, envConf, eventMeshCleaner, eventMeshHandler, credentials, emTestEnsemble.nameMapper, sinkValidator).SetupUnmanaged(k8sManager)
+	testReconciler := eventmeshreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
+		recorder, envConf, eventMeshCleaner, eventMeshHandler, credentials, emTestEnsemble.nameMapper, sinkValidator)
+
+	err = testReconciler.SetupUnmanaged(k8sManager)
 	if err != nil {
 		return err
 	}
@@ -302,9 +306,9 @@ func filterAPIRulesForASvc(apiRules *apigatewayv1beta1.APIRuleList, svc *corev1.
 
 // countEventMeshRequests returns how many requests for a given subscription are sent for each HTTP method
 //
-//nolint:unparam
-func countEventMeshRequests(subscriptionName, eventType string) (countGet, countPost, countDelete int) {
-	countGet, countPost, countDelete = 0, 0, 0
+//nolint:gocognit
+func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) {
+	countGet, countPost, countDelete := 0, 0, 0
 	emTestEnsemble.eventMeshMock.Requests.ReadEach(
 		func(request *http.Request, payload interface{}) {
 			switch method := request.Method; method {
