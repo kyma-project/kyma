@@ -4,7 +4,7 @@ title: Logging
 
 ## Overview
 
-For in-cluster logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
+For in-cluster logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system. You can find how to install your own Loki instance [here](https://github.com/kyma-project/examples/tree/main/loki).
 
 > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed.
 
