@@ -13,6 +13,7 @@ import (
 const (
 	subName      = "sub"
 	subNamespace = "test"
+	sink         = "https://eventing-nats.test.svc.cluster.local:8080"
 )
 
 func Test_Default(t *testing.T) {
@@ -92,6 +93,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: nil,
 		},
@@ -101,6 +103,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -114,6 +117,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: nil,
 		},
@@ -123,6 +127,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: nil,
 		},
@@ -132,6 +137,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -145,6 +151,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{}),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -158,6 +165,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{testingv2.OrderCreatedV1Event, testingv2.OrderCreatedV1Event}),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -171,6 +179,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{testingv2.OrderCreatedV1Event, ""}),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -184,6 +193,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{"order"}),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -197,6 +207,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{v1alpha2.InvalidPrefix}),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -210,6 +221,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{v1alpha2.InvalidPrefix}),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(sink),
 			),
 			wantErr: nil,
 		},
@@ -220,6 +232,7 @@ func Test_validateSubscription(t *testing.T) {
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages("invalid"),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -227,11 +240,110 @@ func Test_validateSubscription(t *testing.T) {
 					subName, v1alpha2.StringIntErrDetail)}),
 		},
 		{
+			name: "missing sink should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SinkPath,
+					subName, v1alpha2.EmptyErrDetail)}),
+		},
+		{
+			name: "sink with invalid scheme should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink(subNamespace),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SinkPath,
+					subName, v1alpha2.MissingSchemeErrDetail)}),
+		},
+		{
+			name: "sink with invalid URL should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink("http://invalid Sink"),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SinkPath,
+					subName, "failed to parse subscription sink URL: "+
+						"parse \"http://invalid Sink\": invalid character \" \" in host name")}),
+		},
+		{
+			name: "sink with invalid suffix should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink("https://svc2.test.local"),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SinkPath,
+					subName, v1alpha2.SuffixMissingErrDetail)}),
+		},
+		{
+			name: "sink with invalid suffix and port should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink("https://svc2.test.local:8080"),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SinkPath,
+					subName, v1alpha2.SuffixMissingErrDetail)}),
+		},
+		{
+			name: "sink with invalid number of subdomains should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink("https://svc.cluster.local:8080"),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.SinkPath,
+					subName, v1alpha2.SubDomainsErrDetail+"svc.cluster.local")}),
+		},
+		{
+			name: "sink with different namespace should return error",
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
+				testingv2.WithTypeMatchingStandard(),
+				testingv2.WithSource(testingv2.EventSourceClean),
+				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
+				testingv2.WithSink("https://eventing-nats.kyma-system.svc.cluster.local"),
+			),
+			wantErr: apierrors.NewInvalid(
+				v1alpha2.GroupKind, subName,
+				field.ErrorList{v1alpha2.MakeInvalidFieldError(v1alpha2.NSPath,
+					subName, v1alpha2.NSMismatchErrDetail+"kyma-system")}),
+		},
+		{
 			name: "multiple errors should be reported if exists",
 			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages("invalid"),
+				testingv2.WithSink(sink),
 			),
 			wantErr: apierrors.NewInvalid(
 				v1alpha2.GroupKind, subName,
@@ -243,10 +355,11 @@ func Test_validateSubscription(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			err := testCase.givenSub.ValidateSubscription()
-			require.Equal(t, err, testCase.wantErr)
+			err := tc.givenSub.ValidateSubscription()
+			require.Equal(t, err, tc.wantErr)
 		})
 	}
 }
