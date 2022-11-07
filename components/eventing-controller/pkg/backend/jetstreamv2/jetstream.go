@@ -82,7 +82,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 		go callback(m)
 	}
 
-	if err := js.syncConsumersAndSubscriptions(subscription, asyncCallback); err != nil {
+	if err := js.syncConsumerAndSubscription(subscription, asyncCallback); err != nil {
 		return err
 	}
 
@@ -90,15 +90,17 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscriptio
 }
 
 func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha2.Subscription) error {
-	log := backendutilsv2.LoggerWithSubscription(js.namedLogger(), subscription)
-
+	// checking the status of the connection is important
+	if err := js.checkJetStreamConnection(); err != nil {
+		return err
+	}
 	// loop over the global list of subscriptions
 	// and delete any related JetStream subscription
 	for key, jsSub := range js.subscriptions {
 		if !isJsSubAssociatedWithKymaSub(key, subscription) {
 			continue
 		}
-		if err := js.deleteSubscriptionFromJetStream(jsSub, key, log); err != nil {
+		if err := js.deleteSubscriptionFromJetStream(jsSub, key); err != nil {
 			return err
 		}
 	}
@@ -297,32 +299,24 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub Subscriber,
 		"Deleting JetStream subscription because it was deleted from subscription types",
 		"jetStreamSubject", info.Config.FilterSubject,
 	)
-	return js.deleteSubscriptionFromJetStream(jsSub, key, log)
+	return js.deleteSubscriptionFromJetStream(jsSub, key)
 }
 
-// deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db.
-func (js *JetStream) deleteSubscriptionFromJetStream(jsSub Subscriber,
-	jsSubKey SubscriptionSubjectIdentifier, log *zap.SugaredLogger) error {
-	// unsubscribe call to JetStream is async hence checking the status of the connection is important
-	if err := js.checkJetStreamConnection(); err != nil {
-		return err
-	}
-
+// deleteSubscriptionFromJetStream deletes subscription from NATS server and from in-memory db.
+func (js *JetStream) deleteSubscriptionFromJetStream(jsSub Subscriber, jsSubKey SubscriptionSubjectIdentifier) error {
 	if jsSub.IsValid() {
 		// unsubscribe will also delete the consumer on JS server
 		if err := jsSub.Unsubscribe(); err != nil {
-			return fmt.Errorf("failed to unsubscribe subscription %v from JetStream: %w", jsSub, err)
+			return utils.MakeSubscriptionError(ErrFailedUnsubscribe, err, jsSub)
 		}
 	}
 
-	// we need to delete the consumer manually, as it was created manually
+	// delete the consumer manually, since it was created by hand, too
 	if consDelErr := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); consDelErr != nil {
 		return consDelErr
 	}
 
 	delete(js.subscriptions, jsSubKey)
-	log.Debugw("Unsubscribed from JetStream", "subscriptionSubject", jsSubKey)
-
 	return nil
 }
 
@@ -377,13 +371,8 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 	}
 }
 
-// deleteConsumerFromJS deletes consumer from JetStream.
+// deleteConsumerFromJS deletes consumer on NATS Server.
 func (js *JetStream) deleteConsumerFromJetStream(name string) error {
-	// checking the status of the connection is important
-	if err := js.checkJetStreamConnection(); err != nil {
-		return err
-	}
-
 	if err := js.jsCtx.DeleteConsumer(js.Config.JSStreamName, name); err != nil &&
 		!errors.Is(err, nats.ErrConsumerNotFound) {
 		// if it is not a Not Found error, then return error
@@ -393,8 +382,9 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 	return nil
 }
 
-// syncConsumersAndSubscriptions makes sure there are consumers and subscriptions created on the NATS Backend.
-func (js *JetStream) syncConsumersAndSubscriptions(subscription *eventingv1alpha2.Subscription,
+// syncConsumerAndSubscription makes sure there is a consumer and subscription created on the NATS Backend.
+// these also must be bound to each other to ensure that NATS JetStream eventing logic works as expected.
+func (js *JetStream) syncConsumerAndSubscription(subscription *eventingv1alpha2.Subscription,
 	asyncCallback func(m *nats.Msg)) error {
 	for _, eventType := range subscription.Status.Types {
 		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, eventType.CleanType, subscription.Spec.TypeMatching)

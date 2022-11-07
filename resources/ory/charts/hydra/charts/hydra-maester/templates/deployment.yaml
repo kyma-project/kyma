@@ -53,10 +53,12 @@ spec:
             capabilities:
               drop:
               - ALL
+            seccompProfile:
+              type: RuntimeDefault
             privileged: false
-            runAsGroup: 1000
+            runAsGroup: 10011
             runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 10010
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:
