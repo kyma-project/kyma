@@ -98,7 +98,8 @@ func Test_CreateSubscription(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, testCase := range testCases {
+		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			g := gomega.NewGomegaWithT(t)
@@ -292,7 +293,8 @@ func Test_UpdateSubscription(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, testCase := range testCases {
+		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -389,7 +391,8 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, testCase := range testCases {
+		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
