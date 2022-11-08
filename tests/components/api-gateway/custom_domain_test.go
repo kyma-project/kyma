@@ -30,7 +30,7 @@ func InitializeScenarioCustomDomain(ctx *godog.ScenarioContext) {
 	if err != nil {
 		t.Fatalf("could not initialize custom domain endpoint err=%s", err)
 	}
-	ctx.Step(`^there is an "([^"]*)" DNS cloud credentials secret in "([^"]*)" namespace$`, scenario.thereIsAnCloudCredentialsSecret)
+	ctx.Step(`^there is a "([^"]*)" DNS cloud credentials secret in "([^"]*)" namespace$`, scenario.thereIsAnCloudCredentialsSecret)
 	ctx.Step(`^there is an "([^"]*)" service in "([^"]*)" namespace$`, scenario.thereIsAnExposedService)
 	ctx.Step(`^create custom domain resources$`, scenario.createResources)
 	ctx.Step(`^ensure that DNS record is ready$`, scenario.isDNSReady)
@@ -39,7 +39,7 @@ func InitializeScenarioCustomDomain(ctx *godog.ScenarioContext) {
 	ctx.Step(`^calling the endpoint without a token should result in status between (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutTokenShouldResultInStatusbetween)
 
 	ctx.Step(`^endpoint is secured with OAuth2$`, scenario.secureWithOAuth2)
-	ctx.Step(`^calling the endpoint with a invalid token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween)
+	ctx.Step(`^calling the endpoint with an invalid token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithAInvalidTokenShouldResultInStatusBeetween)
 	ctx.Step(`^calling the endpoint with a valid token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithAValidTokenShouldResultInStatusBeetween)
 	ctx.Step(`^calling the endpoint without a token should result in status beetween (\d+) and (\d+)$`, scenario.callingTheEndpointWithoutATokenShouldResultInStatusBeetween)
 }
