@@ -5,7 +5,6 @@ global:
   domainName: kyma.example.com
   disableLegacyConnectivity: false
   isLocalEnv: false
-  integrationNamespace: kyma-integration
   systemNamespace: kyma-system
   strictMode: disabled
   log:
