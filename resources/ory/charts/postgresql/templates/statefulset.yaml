@@ -66,10 +66,6 @@ spec:
       {{- if .Values.securityContext.enabled }}
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-          - ALL
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
@@ -348,6 +344,10 @@ spec:
           securityContext:
             runAsUser: {{ .Values.metrics.securityContext.runAsUser }}
             runAsNonRoot: {{ .Values.metrics.securityContext.runAsNonRoot }}
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
         {{- end }}
           env:
             {{- $database := required "In order to enable metrics you need to specify a database (.Values.postgresqlDatabase or .Values.global.postgresql.postgresqlDatabase)" (include "postgresql.database" .) }}

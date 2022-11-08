@@ -1,14 +1,14 @@
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: "{{.NamePrefix}}-{{.TestID}}"
   namespace: "{{.Namespace}}"
 spec:
   gateway: "{{.GatewayNamespace}}/{{.GatewayName}}"
+  host: "httpbin-{{.TestID}}.{{.Domain}}"
   service:
     name: httpbin-{{.TestID}}
     port: 8000
-    host: "httpbin-{{.TestID}}.{{.Domain}}"
   rules:
     - path: /image
       methods: ["GET"]
