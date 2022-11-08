@@ -83,6 +83,20 @@ data:
                         "separator": ", "
                       }
                     ]
+                },
+                {
+                  "widget": "Panel",
+                  "name": "Other Settings",
+                  "children": [
+                    {
+                      "name": "Keep Annotations",
+                      "source": "spec.input.application.keepAnnotations"
+                    },
+                    {
+                      "name": "Drop Labels",
+                      "source": "spec.input.application.dropLabels"
+                    }
+                  ]
                 }
               ]
           },
@@ -276,6 +290,14 @@ data:
               "name": "Exclude Containers",
               "widget": "SimpleList",
               "path": "application.containers.exclude"
+            },
+            {
+              "name": "Keep Annotations",
+              "path": "application.keepAnnotations"
+            },
+            {
+              "name": "Drop Labels",
+              "path": "application.dropLabels"
             }
           ]
       },
