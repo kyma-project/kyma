@@ -302,6 +302,13 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
+	require.Len(t, jsBackend.subscriptions, 1)
+	jsSubject := jsBackend.GetJetStreamSubject(subject)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+	oldJsSub := jsBackend.subscriptions[jsSubKey]
+	require.NotNil(t, oldJsSub)
+	require.True(t, oldJsSub.IsValid())
+
 	// test if subscription is working properly by sending an event
 	// and checking if it is received by the subscriber
 	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
@@ -338,15 +345,19 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJetStreamSubject(newSubject)
-	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-	jsSub := jsBackend.subscriptions[jsSubKey]
-	require.NotNil(t, jsSub)
-	require.True(t, jsSub.IsValid())
+	jsSubject = jsBackend.GetJetStreamSubject(newSubject)
+	jsSubKey = NewSubscriptionSubjectIdentifier(sub, jsSubject)
+	newJsSub := jsBackend.subscriptions[jsSubKey]
+	require.NotNil(t, newJsSub)
+	require.True(t, newJsSub.IsValid())
+	// make sure old filter doesn't have any JetStream consumer
+	oldCon, err := oldJsSub.ConsumerInfo()
+	require.Nil(t, oldCon)
+	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
 
 	// check the metadata, if they are NOT same then it means that NATS subscription
 	// were re-created by SyncSubscription method
-	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	subMsgLimit, subBytesLimit, err := newJsSub.PendingLimits()
 	require.NoError(t, err)
 	require.NotEqual(t, subMsgLimit, msgLimit)
 	require.NotEqual(t, subBytesLimit, bytesLimit)
@@ -504,6 +515,11 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	secondSubject, err := backendnats.GetCleanSubject(sub.Spec.Filter.Filters[1], testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
+	secondJsSubject := jsBackend.GetJetStreamSubject(secondSubject)
+	secondJsSubKey := NewSubscriptionSubjectIdentifier(sub, secondJsSubject)
+	secondJsSub := jsBackend.subscriptions[secondJsSubKey]
+	require.NotNil(t, secondJsSub)
+	require.True(t, secondJsSub.IsValid())
 
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two filters (i.e. two subjects)
@@ -531,15 +547,19 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// Check if total existing NATS subscriptions are correct
 	require.Len(t, jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
-	jsSubject := jsBackend.GetJetStreamSubject(firstSubject)
-	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
-	jsSub := jsBackend.subscriptions[jsSubKey]
-	require.NotNil(t, jsSub)
-	require.True(t, jsSub.IsValid())
+	firstJsSubject := jsBackend.GetJetStreamSubject(firstSubject)
+	firstJsSubKey := NewSubscriptionSubjectIdentifier(sub, firstJsSubject)
+	firstJsSub := jsBackend.subscriptions[firstJsSubKey]
+	require.NotNil(t, firstJsSub)
+	require.True(t, firstJsSub.IsValid())
+	// make sure old filter doesn't have any JetStream consumer
+	secondCon, err := secondJsSub.ConsumerInfo()
+	require.Nil(t, secondCon)
+	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
 
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
-	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	subMsgLimit, subBytesLimit, err := firstJsSub.PendingLimits()
 	require.NoError(t, err)
 	require.Equal(t, subMsgLimit, msgLimit)
 	require.Equal(t, subBytesLimit, bytesLimit)
