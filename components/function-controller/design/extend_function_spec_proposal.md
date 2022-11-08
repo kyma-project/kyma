@@ -19,10 +19,6 @@ Give Serverless users the ability to:
 - Add more flexibility to the Serverless API - enable volume mounted secrets and pod annotations.
 - Organise spec attributes belonging to runtime and build-time configuration (?)
 - Propose sample Function CR visualising different variants
-- Eventually, provide a rollout plan to implement the changes
-
-### Stretch Goals
-- Try to avoid a new API version specification
 
 ## Discussion points
 
@@ -497,3 +493,37 @@ spec: #Contains spec of Function and run stage (deployments, hpa)
 `profile` takes precedence over `resources`. If profile field is not set there should be no defaulting happening for the resources. Controller should fill the pod template resources according to the selected profile preset.
 If profile field is set to "Custom", the user must then ( and only then ) set the values for resources manualy.
 Custom resource values together with non-custom profile should be rejected by the validation webhook.
+
+
+### Labels and annotations
+
+Function CR may have own labels and annotations as defined in it's metadata section. Those labels and annotations are automatically inherited by the resources managed directly by the function CR.
+This direct, first-line inheritance of labels and annotations apply to:
+ - Deployment
+ - Job
+ - HPA
+ - ConfigMap
+
+The same labels and annotation are NOT inherited by the Pods controlled by Deployment and Job (second-line inheritance of labels and annotation doesn't apply).
+In order to control the labels and annotations on the runtime and build-time Pods user must define those in the spec:
+
+```yaml
+apiVersion: serverless.kyma-project.io/v1alpha2
+kind: Function
+metadata:
+  name: my-function
+  namespace: default
+  labels:
+    app.kubernetes.io/name: my-function # <-- this label will be inherited by deployment, job, HPA and config map
+spec: 
+  ...
+  labels:
+    app: my-app # <-- this label will be used in Deployment's PodTemplate and will be applied on the function's runtime pod 
+  annotations:
+    fluentbit.io/parser: my-regex-parser # <-- those annotations will be used in Deployment's PodTemplate and will be applied on the function's runtime pod
+    istio-injection: enabled
+
+  ...  
+  build:
+    labels: # <-- those labels will be used in Job's PodTemplate and will be applied on the function's build-time pod
+    annotations: # <-- those annotations will be used in Job's PodTemplate and will be applied on the function's build-time pod
