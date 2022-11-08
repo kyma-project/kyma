@@ -167,12 +167,7 @@ func (c *customDomainScenario) thereIsAnExposedService(svcName string, svcNamesp
 
 	loadBalancerIP, found, err := unstructured.NestedString(ingressIp, "ip")
 	if err != nil || found != true {
-		loadBalancerHost, found, err := unstructured.NestedString(ingressIp, "hostname")
-		if err != nil || found != true {
-			return fmt.Errorf("could not extract load balancer ip nor hostname from istio service: %s", err)
-		}
-		c.loadBalancerIP = loadBalancerHost
-		return nil
+		return fmt.Errorf("could not extract load balancer IP from istio service: %s", err)
 	}
 	c.loadBalancerIP = loadBalancerIP
 
