@@ -22,7 +22,7 @@ you will then be able to enable available either with support of Busola through 
 
 The only type of Module currently accepted is `ModuleTemplate` in version `v1alpha1`.
 
-When submitting a new module, make sure to add it to the `kustomization.yaml` to also integrate it with our rendering.
+When submitting a new module, make sure to add it to the proper `kustomization.yaml` to also integrate it with our rendering.
 
 ## Disclaimer
 
