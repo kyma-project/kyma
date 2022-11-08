@@ -436,9 +436,9 @@ spec: #Contains spec of Function and run stage (deployments, hpa)
     min: 1
     max: 2
 
-  labels: #?
+  labels:
     app: my-app
-  annotations: #?
+  annotations:
     fluentbit.io/parser: my-regex-parser
     istio-injection: enabled
 
@@ -494,6 +494,6 @@ spec: #Contains spec of Function and run stage (deployments, hpa)
 
 ### Precedence, defaulting and validation
 
-`Profile` takes precedence over `resources`. If profile field is not set to "Custom" there should be no defaulting happening for the resources. Controller should fill the pod template resources accoriding to the selected profile preset.
+`profile` takes precedence over `resources`. If profile field is not set there should be no defaulting happening for the resources. Controller should fill the pod template resources according to the selected profile preset.
 If profile field is set to "Custom", the user must then ( and only then ) set the values for resources manualy.
 Custom resource values together with non-custom profile should be rejected by the validation webhook.
