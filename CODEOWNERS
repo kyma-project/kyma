@@ -112,3 +112,6 @@ VERSION @kyma-project/prow
 
 # All .md files
 *.md @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
+
+# Managed Modules
+/modules @pbochynski @janmedrek @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
