@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	admissionv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -103,6 +104,12 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;delete
 
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
+	if r.natsConfig.EnableNewCRDVersion {
+		if err := r.updateMutatingValidatingWebhookWithCABundle(ctx); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	var secretList v1.SecretList
 	// the default status has all conditions and eventingReady set to true.
 	// if something breaks during reconciliation, the condition and eventingReady is updated to false.
@@ -798,6 +805,49 @@ func (r *Reconciler) deletePublisherProxy(ctx context.Context) error {
 	r.namedLogger().Debug("Event Publisher with invalid backend type found, deleting it")
 	err = r.Delete(ctx, publisher)
 	return err
+}
+
+func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Context) error {
+	var certificateSecret v1.Secret
+	secretKey := client.ObjectKey{
+		Namespace: "kyma-system",
+		Name:      "eventing-webhook-server-cert",
+	}
+	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
+		return err
+	}
+
+	var mutatingwb admissionv1.MutatingWebhookConfiguration
+	mutatingwbKey := client.ObjectKey{
+		Name: "subscription-mutating-webhook-configuration",
+	}
+	if err := r.Client.Get(ctx, mutatingwbKey, &mutatingwb); err != nil {
+		return err
+	}
+	if mutatingwb.Webhooks[0].ClientConfig.CABundle != nil {
+		if bytes.Equal(mutatingwb.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data["tls.crt"]) {
+			return nil
+		}
+	}
+	mutatingwb.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data["tls.crt"]
+	err := r.Client.Update(ctx, &mutatingwb)
+	if err != nil {
+		return errors.Wrap(err, "while updating mutatingwb with caBundle")
+	}
+
+	var validatingwb admissionv1.ValidatingWebhookConfiguration
+	validatingwbKey := client.ObjectKey{
+		Name: "subscription-validating-webhook-configuration",
+	}
+	if err = r.Client.Get(ctx, validatingwbKey, &validatingwb); err != nil {
+		return err
+	}
+	validatingwb.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data["tls.crt"]
+	err = r.Client.Update(ctx, &validatingwb)
+	if err != nil {
+		return errors.Wrap(err, "while updating validatingwb with caBundle")
+	}
+	return nil
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

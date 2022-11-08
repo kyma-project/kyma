@@ -5,9 +5,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"strconv"
 )
 
-var subscriptionlog = logf.Log.WithName("subscription-resource")
+const defaultMaxInFlightMesages = "10"
+
+var logger = logf.Log.WithName("subscription-resource")
 
 func (r *Subscription) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
@@ -21,9 +24,16 @@ var _ webhook.Defaulter = &Subscription{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *Subscription) Default() {
-	subscriptionlog.Info("default", "name", r.Name)
-
-	// TODO(user): fill in your defaulting logic.
+	logger.Info("sub", "typematching", r.Spec.TypeMatching, "maxIn", r.Spec.Config[MaxInFlightMessages])
+	if r.Spec.TypeMatching == "" {
+		r.Spec.TypeMatching = TypeMatchingStandard
+	}
+	if r.Spec.Config == nil {
+		r.Spec.Config = map[string]string{}
+	}
+	if r.Spec.Config[MaxInFlightMessages] == "" {
+		r.Spec.Config[MaxInFlightMessages] = defaultMaxInFlightMesages
+	}
 }
 
 //+kubebuilder:webhook:path=/validate-eventing-kyma-project-io-v1alpha2-subscription,mutating=false,failurePolicy=fail,sideEffects=None,groups=eventing.kyma-project.io,resources=subscriptions,verbs=create;update,versions=v1alpha2,name=vsubscription.kb.io,admissionReviewVersions=v1
@@ -32,24 +42,25 @@ var _ webhook.Validator = &Subscription{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *Subscription) ValidateCreate() error {
-	subscriptionlog.Info("validate create", "name", r.Name)
-
-	// TODO(user): fill in your validation logic upon object creation.
+	logger.Info("validate create", "name", r.Name)
 	return nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *Subscription) ValidateUpdate(old runtime.Object) error {
-	subscriptionlog.Info("validate update", "name", r.Name)
-
-	// TODO(user): fill in your validation logic upon object update.
+	logger.Info("validate update", "name", r.Name)
 	return nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (r *Subscription) ValidateDelete() error {
-	subscriptionlog.Info("validate delete", "name", r.Name)
-
-	// TODO(user): fill in your validation logic upon object deletion.
+	logger.Info("validate delete", "name", r.Name)
 	return nil
+}
+
+func isNotInt(value string) bool {
+	if _, err := strconv.Atoi(value); err != nil {
+		return true
+	}
+	return false
 }

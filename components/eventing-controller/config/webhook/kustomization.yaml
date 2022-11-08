@@ -1,9 +1,0 @@
-resources:
-- manifests.yaml
-- service.yaml
-
-namePrefix: eventing-controller-
-namespace: kyma-system
-
-configurations:
-- kustomizeconfig.yaml

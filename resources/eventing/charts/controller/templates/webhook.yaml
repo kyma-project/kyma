@@ -1,0 +1,56 @@
+{{ if .Values.enableNewCRDVersion }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: subscription-mutating-webhook-configuration
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ include "controller.fullname" . }}-webhook-service
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-eventing-kyma-project-io-v1alpha2-subscription
+    failurePolicy: Fail
+    name: msubscription.kb.io
+    rules:
+      - apiGroups:
+          - eventing.kyma-project.io
+        apiVersions:
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - subscriptions
+    sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: subscription-validating-webhook-configuration
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ include "controller.fullname" . }}-webhook-service
+        namespace: {{ .Release.Namespace }}
+        path: /validate-eventing-kyma-project-io-v1alpha2-subscription
+    failurePolicy: Fail
+    name: vsubscription.kb.io
+    rules:
+      - apiGroups:
+          - eventing.kyma-project.io
+        apiVersions:
+          - v1alpha2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - subscriptions
+    sideEffects: None
+{{- end }}
