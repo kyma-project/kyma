@@ -81,10 +81,7 @@ func Test_CreateSubscription(t *testing.T) {
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
 				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
 					{
 						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
@@ -146,6 +143,15 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
 				)
 			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionActiveCondition(),
+				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
+					{
+						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
+						CleanType:    fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1Event),
+					},
+				}),
+			),
 			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
 				return reconcilertesting.NewSubscription("test", namespace,
 					reconcilertesting.WithDefaultSource(),
@@ -157,23 +163,8 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
 				)
 			},
-			wantSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
-				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
-					{
-						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
-						CleanType:    fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1Event),
-					},
-				}),
-			),
 			wantUpdateSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
 				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
 					{
 						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
@@ -198,6 +189,18 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
 				)
 			},
+			wantSubscriptionMatchers: gomega.And(
+				reconcilertesting.HaveSubscriptionActiveCondition(),
+				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
+					{
+						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
+						CleanType:    fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1Event),
+					}, {
+						OriginalType: fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
+						CleanType:    fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1Event),
+					},
+				}),
+			),
 			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
 				return reconcilertesting.NewSubscription("test", namespace,
 					reconcilertesting.WithDefaultSource(),
@@ -209,26 +212,8 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
 				)
 			},
-			wantSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
-				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
-					{
-						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
-						CleanType:    fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1Event),
-					}, {
-						OriginalType: fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
-						CleanType:    fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1Event),
-					},
-				}),
-			),
 			wantUpdateSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
 				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
 					{
 						OriginalType: fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedV1EventNotClean),
@@ -253,21 +238,8 @@ func Test_UpdateSubscription(t *testing.T) {
 					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
 				)
 			},
-			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
-					reconcilertesting.WithDefaultSource(),
-					reconcilertesting.WithTypes([]string{
-						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
-					}),
-					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
-				)
-			},
 			wantSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
 				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
 					{
 						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
@@ -278,11 +250,18 @@ func Test_UpdateSubscription(t *testing.T) {
 					},
 				}),
 			),
+			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription("test", namespace,
+					reconcilertesting.WithDefaultSource(),
+					reconcilertesting.WithTypes([]string{
+						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
+					}),
+					reconcilertesting.WithWebhookAuthForBEB(),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+				)
+			},
 			wantUpdateSubscriptionMatchers: gomega.And(
-				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscriptionActive,
-					eventingv1alpha2.ConditionReasonSubscriptionActive,
-					corev1.ConditionTrue, "")),
+				reconcilertesting.HaveSubscriptionActiveCondition(),
 				reconcilertesting.HaveCleanEventTypes([]eventingv1alpha2.EventType{
 					{
 						OriginalType: fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
@@ -332,7 +311,7 @@ func Test_UpdateSubscription(t *testing.T) {
 func Test_FixingSinkAndApiRule(t *testing.T) {
 	t.Parallel()
 	// common given test assets
-	givenSubscriptionFunc := func(namespace, name string) *eventingv1alpha2.Subscription {
+	givenSubscriptionWithoutSinkFunc := func(namespace, name string) *eventingv1alpha2.Subscription {
 		return reconcilertesting.NewSubscription(name, namespace,
 			reconcilertesting.WithDefaultSource(),
 			reconcilertesting.WithOrderCreatedV1Event(),
@@ -342,16 +321,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		)
 	}
 
-	givenUpdateSubscriptionFunc := func(namespace, name, sinkFormat, path string) *eventingv1alpha2.Subscription {
-		return reconcilertesting.NewSubscription(name, namespace,
-			reconcilertesting.WithDefaultSource(),
-			reconcilertesting.WithOrderCreatedV1Event(),
-			reconcilertesting.WithWebhookAuthForBEB(),
-			reconcilertesting.WithSink(fmt.Sprintf(sinkFormat, name, namespace, path)),
-		)
-	}
-
-	wantSubscriptionMatchers := gomega.And(
+	wantSubscriptionWithoutSinkMatchers := gomega.And(
 		reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
 			eventingv1alpha2.ConditionAPIRuleStatus,
 			eventingv1alpha2.ConditionReasonAPIRuleStatusNotReady,
@@ -360,7 +330,16 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		)),
 	)
 
-	wantUpdateSubscriptionMatchers := gomega.And(
+	givenUpdateSubscriptionWithSinkFunc := func(namespace, name, sinkFormat, path string) *eventingv1alpha2.Subscription {
+		return reconcilertesting.NewSubscription(name, namespace,
+			reconcilertesting.WithDefaultSource(),
+			reconcilertesting.WithOrderCreatedV1Event(),
+			reconcilertesting.WithWebhookAuthForBEB(),
+			reconcilertesting.WithSink(fmt.Sprintf(sinkFormat, name, namespace, path)),
+		)
+	}
+
+	wantUpdateSubscriptionWithSinkMatchers := gomega.And(
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
 			eventingv1alpha2.ConditionSubscriptionActive,
@@ -382,7 +361,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 		givenSinkFormat string
 	}{
 		{
-			name:            "should succeed to fix invalid sink with Url with port in subscription",
+			name:            "should succeed to fix invalid sink with Url and port in subscription",
 			givenSinkFormat: "https://%s.%s.svc.cluster.local:8080%s",
 		},
 		{
@@ -406,8 +385,8 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			sinkPath := "/path1"
 
 			// update namespace information in given test assets
-			givenSubscription := givenSubscriptionFunc(testNamespace, subName)
-			givenUpdateSubscription := givenUpdateSubscriptionFunc(testNamespace, subName, tc.givenSinkFormat, sinkPath)
+			givenSubscription := givenSubscriptionWithoutSinkFunc(testNamespace, subName)
+			givenUpdateSubscription := givenUpdateSubscriptionWithSinkFunc(testNamespace, subName, tc.givenSinkFormat, sinkPath)
 
 			// create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subName, testNamespace)
@@ -417,7 +396,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			ensureK8sResourceCreated(ctx, t, givenSubscription)
 			createdSubscription := givenSubscription.DeepCopy()
 			// check if the created subscription is correct
-			getSubscriptionAssert(ctx, g, createdSubscription).Should(wantSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, createdSubscription).Should(wantSubscriptionWithoutSinkMatchers)
 
 			// update subscription with valid sink
 			givenUpdateSubscription.ResourceVersion = createdSubscription.ResourceVersion
@@ -441,7 +420,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, t, &apiRuleUpdated)
 
 			// check if the updated subscription is correct
-			getSubscriptionAssert(ctx, g, givenSubscription).Should(wantUpdateSubscriptionMatchers)
+			getSubscriptionAssert(ctx, g, givenSubscription).Should(wantUpdateSubscriptionWithSinkMatchers)
 
 			// check if the reconciled subscription has API rule in the status
 			assert.Equal(t, givenSubscription.Status.Backend.APIRuleName, apiRuleUpdated.Name)
