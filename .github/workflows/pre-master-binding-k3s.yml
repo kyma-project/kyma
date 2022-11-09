@@ -80,7 +80,7 @@ jobs:
 
 
     # Update check run 
-    - uses: actions/github-script@v1
+    - uses: actions/github-script@v6
       id: update-check-run
       if: ${{ always() }}
       env:
