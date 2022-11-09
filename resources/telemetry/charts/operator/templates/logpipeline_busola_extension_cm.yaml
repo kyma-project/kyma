@@ -489,61 +489,6 @@ data:
                   },
                 ]
             },
-            {
-              "name": "Grafana Loki",
-              "path": "grafana-loki",
-              "widget": "FormGroup",
-              "simple": false,
-              "children":
-                [
-                  {
-                    "name": "URL",
-                    "path": "url",
-                    "widget": "FormGroup",
-                    "children":
-                      [
-                        {
-                          "name": "Value",
-                          "path": "value",
-                          "widget": "Text"
-                        },
-                        {
-                          "name": "Secret Reference",
-                          "path": "valueFrom.secretKeyRef",
-                          "widget": "FormGroup",
-                          "children":
-                            [
-                              {
-                                "name": "Namespace",
-                                "path": "namespace",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Name",
-                                "path": "name",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Key",
-                                "path": "key",
-                                "widget": "Text"
-                              },
-                            ]
-                        }
-                      ]
-                  },
-                  {
-                    "name": "Labels",
-                    "path": "labels",
-                    "widget": "KeyValuePair"
-                  },
-                  {
-                    "name": "Remove Keys",
-                    "path": "removeKeys",
-                    "widget": "SimpleList"
-                  }
-                ]
-            },
           ]
       }
     ]
