@@ -203,7 +203,7 @@ updates:
       prefix: "docker"
       include: "scope"
   - package-ecosystem: "github-actions"
-    directory: "/.github/workflows"
+    directory: "/"
     labels:
       - "area/dependency"
     schedule:
