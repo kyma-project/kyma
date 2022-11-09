@@ -5,7 +5,7 @@ const {
 const {getOrProvisionSKR} = require('./provision/provision-skr');
 const {deprovisionAndUnregisterSKR} = require('./provision/deprovision-skr');
 const {getSecret} = require('../utils');
-const {expect} = require("chai");
+const {expect} = require('chai');
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
 const provisioningTimeout = 1000 * 60 * 30; // 30m
