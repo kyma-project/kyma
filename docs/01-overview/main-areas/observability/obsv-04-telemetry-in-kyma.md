@@ -2,6 +2,8 @@
 title: Telemetry
 ---
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+
 ## Kyma's telemetry component
 
 Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The Telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
@@ -13,8 +15,6 @@ To support the logging domain, the Telemetry component provides a log collector,
 - Your application must log to `stdout` or `stderr`.
 
 ## Architecture
-
-> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
 ### Telemetry component
 
@@ -54,8 +54,6 @@ The LogPipeline resource is managed by the Telemetry Operator, a typical Kuberne
 The Telemetry Operator watches all LogPipeline resources and related Secrets. Whenever the configuration changes, it validates the configuration (with a [validating webhook](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)) and generates a new configuration for the Fluent Bit DaemonSet, where several ConfigMaps for the different aspects of the configuration are generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the DaemonSet as well.
 
 ## Setting up a LogPipeline
-
-> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
 ### Step 1: Create a LogPipeline and output
 
@@ -325,8 +323,6 @@ spec:
 ```
 
 ## Parameters
-
-> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
 ### LogPipeline.spec attribute
 

@@ -25,7 +25,6 @@ The collected telemetry data are exposed so that you can view and analyze them w
 You can use the following in-cluster components to observe your applications' telemetry data:
 
 - [Prometheus](https://prometheus.io/docs/introduction), a lightweight backend for metrics.
-- [Loki](https://github.com/grafana/loki), a lightweight Prometheus-like backend for logs.
 - [Jaeger](https://www.jaegertracing.io/docs/), a tracing backend serving as the query mechanism to display information about traces.
 
 - [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to receive and manage alerts coming from Prometheus. Alertmanager can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
