@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -177,22 +176,14 @@ func getUniqueEventTypes(eventTypes []string) []string {
 
 // GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
 func GetCleanEventTypes(sub *eventingv1alpha2.Subscription,
-	cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
-	// TODO: Put this in the validation webhook
-	if sub.Spec.Types == nil || len(sub.Spec.Types) == 0 {
-		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
-	}
+	cleaner cleaner.Cleaner) []eventingv1alpha2.EventType {
 
 	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
 	var cleanEventTypes []eventingv1alpha2.EventType
 	for _, eventType := range uniqueTypes {
 		cleanType := eventType
-		var err error
 		if sub.Spec.TypeMatching != eventingv1alpha2.TypeMatchingExact {
-			cleanType, err = getCleanEventType(eventType, cleaner)
-			if err != nil {
-				return []eventingv1alpha2.EventType{}, err
-			}
+			cleanType, _ = cleaner.CleanEventType(eventType)
 		}
 		newEventType := eventingv1alpha2.EventType{
 			OriginalType: eventType,
@@ -200,7 +191,7 @@ func GetCleanEventTypes(sub *eventingv1alpha2.Subscription,
 		}
 		cleanEventTypes = append(cleanEventTypes, newEventType)
 	}
-	return cleanEventTypes, nil
+	return cleanEventTypes
 }
 
 // GetBackendJetStreamTypes gets the original event type and the consumer name for all the subscriptions
@@ -214,16 +205,6 @@ func GetBackendJetStreamTypes(subscription *eventingv1alpha2.Subscription,
 		jsTypes = append(jsTypes, jt)
 	}
 	return jsTypes
-}
-
-func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error) {
-	if len(eventType) == 0 {
-		return "", nats.ErrBadSubject
-	}
-	if segments := strings.Split(eventType, "."); len(segments) < 2 {
-		return "", nats.ErrBadSubject
-	}
-	return cleaner.CleanEventType(eventType)
 }
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription

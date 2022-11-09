@@ -121,21 +121,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
-			// validation should reject the subscription CR if types is empty
-			By("a Subscription without types", func() {
-				By("should fail to create subscription if types is empty", func() {
-					getSubscription(ctx, subscription).Should(And(
-						reconcilertesting.HaveSubscriptionName(subscriptionName),
-						reconcilertesting.HaveSubscriptionNotReady(),
-						reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-							eventingv1alpha2.ConditionSubscribed,
-							eventingv1alpha2.ConditionReasonSubscriptionCreationFailed,
-							corev1.ConditionFalse, "Types are required")),
-						reconcilertesting.HaveCleanEventTypesEmpty(),
-					))
-				})
-			})
-
 			By("Creation of Subscription with types", func() {
 				subscribeToEventTypes := []string{
 					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
