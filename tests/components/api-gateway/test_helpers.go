@@ -2,6 +2,8 @@ package api_gateway
 
 import (
 	"context"
+	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -21,11 +23,15 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
+	"github.com/kyma-project/kyma/common/ingressgateway"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/client"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/jwt"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/resource"
+	"github.com/spf13/pflag"
 	"github.com/tidwall/pretty"
+	"github.com/vrischmann/envconfig"
 	"gitlab.com/rodrigoodhin/gocure/models"
 	"gitlab.com/rodrigoodhin/gocure/pkg/gocure"
 
@@ -55,6 +61,7 @@ const (
 	jwtAndOauthOnePathApiruleFile  = "jwt-oauth-one-path-strategy.yaml"
 	resourceSeparator              = "---"
 	defaultHeaderName              = "Authorization"
+	customDomainEnv                = "TEST_CUSTOM_DOMAIN"
 	exportResultVar                = "EXPORT_RESULT"
 	junitFileName                  = "junit-report.xml"
 	cucumberFileName               = "cucumber-report.json"
@@ -82,6 +89,7 @@ var goDogOpts = godog.Options{
 }
 
 type Config struct {
+	CustomDomain     string        `envconfig:"TEST_CUSTOM_DOMAIN,default=test.domain.kyma"`
 	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS"`
 	User             string        `envconfig:"TEST_USER_EMAIL,default=admin@kyma.cx"`
 	Pwd              string        `envconfig:"TEST_USER_PASSWORD,default=1234"`
@@ -106,6 +114,149 @@ type TwoStepScenario struct {
 	url            string
 	apiResourceOne []unstructured.Unstructured
 	apiResourceTwo []unstructured.Unstructured
+}
+
+func InitTestSuite() {
+	pflag.Parse()
+	goDogOpts.Paths = pflag.Args()
+	if os.Getenv(exportResultVar) == "true" {
+		goDogOpts.Format = "pretty,junit:junit-report.xml,cucumber:cucumber-report.json"
+	}
+
+	if err := envconfig.Init(&conf); err != nil {
+		log.Fatalf("Unable to setup config: %v", err)
+	}
+
+	if conf.IsMinikubeEnv {
+		var err error
+		log.Printf("Using dedicated ingress client")
+		httpClient, err = ingressgateway.FromEnv().Client()
+		if err != nil {
+			log.Fatalf("Unable to initialize ingress gateway client: %v", err)
+		}
+	} else {
+		log.Printf("Fallback to default http client")
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+			Timeout: conf.ClientTimeout,
+		}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	commonRetryOpts := []retry.Option{
+		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
+		retry.Attempts(conf.ReqTimeout / conf.ReqDelay),
+		retry.DelayType(retry.FixedDelay),
+	}
+
+	helper = helpers.NewHelper(httpClient, commonRetryOpts)
+	mapper, err := client.GetDiscoveryMapper()
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := client.GetDynamicClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	k8sClient = client
+	resourceManager = &resource.Manager{RetryOptions: commonRetryOpts}
+	batch = &resource.Batch{
+		ResourceManager: resourceManager,
+		Mapper:          mapper,
+	}
+}
+
+func SetupCommonResources(namePrefix string) {
+	oauthClientID := generateRandomString(OauthClientIDLength)
+	oauthClientSecret := generateRandomString(OauthClientSecretLength)
+	namespace = fmt.Sprintf("%s-%s", namePrefix, generateRandomString(6))
+	randomSuffix6 := generateRandomString(6)
+	oauthSecretName := fmt.Sprintf("%s-secret-%s", namePrefix, randomSuffix6)
+	oauthClientName := fmt.Sprintf("%s-client-%s", namePrefix, randomSuffix6)
+	log.Printf("Using namespace: %s\n", namespace)
+	log.Printf("Using OAuth2Client with name: %s, secretName: %s\n", oauthClientName, oauthSecretName)
+
+	oauth2Cfg = &clientcredentials.Config{
+		ClientID:     oauthClientID,
+		ClientSecret: oauthClientSecret,
+		TokenURL:     fmt.Sprintf("%s/oauth2/token", conf.HydraAddr),
+		Scopes:       []string{"read"},
+		AuthStyle:    oauth2.AuthStyleInHeader,
+	}
+
+	jwtConf, err := jwt.LoadConfig(oauthClientID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	jwtConfig = &jwtConf
+	// create common resources for all scenarios
+	globalCommonResources, err := manifestprocessor.ParseFromFileWithTemplate(globalCommonResourcesFile, manifestsDirectory, resourceSeparator, struct {
+		Namespace         string
+		OauthClientSecret string
+		OauthClientID     string
+		OauthSecretName   string
+	}{
+		Namespace:         namespace,
+		OauthClientSecret: base64.StdEncoding.EncodeToString([]byte(oauthClientSecret)),
+		OauthClientID:     base64.StdEncoding.EncodeToString([]byte(oauthClientID)),
+		OauthSecretName:   oauthSecretName,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// delete test namespace if the previous test namespace persists
+	nsResourceSchema, ns, name := batch.GetResourceSchemaAndNamespace(globalCommonResources[0])
+	log.Printf("Delete test namespace, if exists: %s\n", name)
+	err = resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
+
+	log.Printf("Creating common tests resources")
+	_, err = batch.CreateResources(k8sClient, globalCommonResources...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
+
+	hydraClientResource, err := manifestprocessor.ParseFromFileWithTemplate(hydraClientFile, manifestsDirectory, resourceSeparator, struct {
+		Namespace       string
+		OauthClientName string
+		OauthSecretName string
+	}{
+		Namespace:       namespace,
+		OauthClientName: oauthClientName,
+		OauthSecretName: oauthSecretName,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Creating hydra client resources")
+
+	_, err = batch.CreateResources(k8sClient, hydraClientResource...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Let's wait a bit to register client in hydra
+	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
+
+	// Get HydraClient Status
+	hydraClientResourceSchema, ns, name := batch.GetResourceSchemaAndNamespace(hydraClientResource[0])
+	clientStatus, err := resourceManager.GetStatus(k8sClient, hydraClientResourceSchema, ns, name)
+	errorStatus, ok := clientStatus["reconciliationError"].(map[string]interface{})
+	if err != nil || !ok {
+		t.Fatalf("Error retrieving Oauth2Client status: %+v | %+v", err, ok)
+	}
+	if len(errorStatus) != 0 {
+		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
+	}
 }
 
 func generateRandomString(length int) string {
@@ -262,7 +413,6 @@ func CreateScenario(templateFileName string, namePrefix string, deploymentFile .
 	if err != nil {
 		return nil, fmt.Errorf("failed to process resource manifest files, details %s", err.Error())
 	}
-
 	return &Scenario{namespace: namespace, url: fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), apiResource: accessRule}, nil
 }
 
