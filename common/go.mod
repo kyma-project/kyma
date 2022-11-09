@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/avast/retry-go v2.2.0+incompatible
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/net v0.0.0-20220728030405-41545e8bf201
 	golang.org/x/tools v0.1.12
 	k8s.io/code-generator v0.18.6
 )
@@ -27,6 +26,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/net v0.0.0-20220728030405-41545e8bf201 // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
@@ -38,7 +38,6 @@ require (
 )
 
 replace (
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	golang.org/x/net => golang.org/x/net v0.0.0-20220728030405-41545e8bf201
 	golang.org/x/text => golang.org/x/text v0.3.7
 	golang.org/x/tools => golang.org/x/tools v0.1.12

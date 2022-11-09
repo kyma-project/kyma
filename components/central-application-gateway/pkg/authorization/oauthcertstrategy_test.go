@@ -1,6 +1,7 @@
 package authorization
 
 import (
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 	"net/http"
 	"testing"
 
@@ -18,12 +19,9 @@ func TestAuthWithCerStrategy(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
 
-		oauthStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", certificate, privateKey, "www.example.com/token", nil)
+		oauthStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", "clientSecret", certificate, privateKey, "www.example.com/token", nil)
 
-		prepareCertificate, err := oauthStrategy.prepareCertificate()
-		require.NoError(t, err)
-
-		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil), true).Return("token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", []byte(testconsts.Certificate), []byte(testconsts.PrivateKey), (*map[string][]string)(nil), (*map[string][]string)(nil), true).Return("token", nil)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -40,9 +38,9 @@ func TestAuthWithCerStrategy(t *testing.T) {
 	t.Run("should invalidate cache", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("InvalidateTokenCache", "clientId", "www.example.com/token").Return("token", nil).Once()
+		oauthClientMock.On("InvalidateTokenCacheMTLS", "clientId", "www.example.com/token", certificate, privateKey).Return("token", nil).Once()
 
-		authWithCertStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", certificate, privateKey, "www.example.com/token", nil)
+		authWithCertStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", "clientSecret", certificate, privateKey, "www.example.com/token", nil)
 
 		// when
 		authWithCertStrategy.Invalidate()
@@ -55,12 +53,8 @@ func TestAuthWithCerStrategy(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
 
-		authWithCertStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", certificate, privateKey, "www.example.com/token", nil)
-
-		prepareCertificate, err := authWithCertStrategy.prepareCertificate()
-		require.NoError(t, err)
-
-		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", prepareCertificate, (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("", apperrors.Internal("failed")).Once()
+		authWithCertStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", "clientSecret", certificate, privateKey, "www.example.com/token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", []byte(testconsts.Certificate), []byte(testconsts.PrivateKey), (*map[string][]string)(nil), (*map[string][]string)(nil), false).Return("", apperrors.Internal("failed")).Once()
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)

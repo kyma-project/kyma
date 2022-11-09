@@ -112,12 +112,12 @@ global:
   images:
     prometheus_operator:
       name: "prometheus-operator"
-      version: "v0.58.0"
+      version: "v0.60.1"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     prometheus_config_reloader:
       name: "prometheus-config-reloader"
-      version: "v0.58.0"
+      version: "v0.60.1"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     configmap_reload:
@@ -132,7 +132,7 @@ global:
       sha: ""
     prometheus:
       name: "prometheus"
-      version: "v2.38.0"
+      version: "v2.39.1"
       directory: "external/quay.io/prometheus"
       sha: ""
     pushgateway:
@@ -165,7 +165,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.3.0-cf0a130c"
+      version: "7.4.0-f193d3f9"
       directory: "tpi"
       sha: ""
 

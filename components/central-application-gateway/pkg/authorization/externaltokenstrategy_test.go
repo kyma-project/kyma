@@ -64,7 +64,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 	t.Run("should call Invalidate method on the provided strategy", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("InvalidateTokenCache", "clientId", "www.example.com/token").Return("token", nil).Once()
+		oauthClientMock.On("InvalidateTokenCache", "clientId", "clientSecret", "www.example.com/token").Return("token", nil).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token", nil)
 

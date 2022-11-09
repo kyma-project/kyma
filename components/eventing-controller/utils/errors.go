@@ -13,3 +13,9 @@ import "fmt"
 func MakeError(actualError, underlyingError error) error {
 	return fmt.Errorf("%w: %v", actualError, underlyingError)
 }
+
+// MakeSubscriptionError creates a new error and includes the underlyingError in the message
+// for subscription-related errors.
+func MakeSubscriptionError(actualError, underlyingError error, subscription any) error {
+	return fmt.Errorf("%w: %v, subscription: %v", actualError, underlyingError, subscription)
+}
