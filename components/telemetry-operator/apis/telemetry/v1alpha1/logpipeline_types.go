@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// LogPipelineSpec defines the desired state of LogPipeline
+// Defines the desired state of LogPipeline
 type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -32,77 +32,90 @@ type LogPipelineSpec struct {
 	Variables []VariableRef `json:"variables,omitempty"`
 }
 
-// Input describes a log input for a LogPipeline
+// Describes a log input for a LogPipeline.
 type Input struct {
-	// Application configures in more detail from which containers application logs are enabled as input
+	// Configures in more detail from which containers application logs are enabled as input.
 	Application ApplicationInput `json:"application,omitempty"`
 }
 
-// ApplicationInput is the default type of Input that handles application logs from runtime containers. It configures in more detail from which containers logs are selected as input
+// Specifies the default type of Input that handles application logs from runtime containers. It configures in more detail from which containers logs are selected as input.
 type ApplicationInput struct {
 	Namespaces InputNamespaces `json:"namespaces,omitempty"`
 	Containers InputContainers `json:"containers,omitempty"`
-	// KeepAnnotations indicates whether to keep all Kubernetes annotations. The default is false.
+	// Defines whether to keep all Kubernetes annotations. The default is false.
 	KeepAnnotations bool `json:"keepAnnotations,omitempty"`
-	// DropLabels indicates whether to drop all Kubernetes labels. The default is false.
+	// Defines whether to drop all Kubernetes labels. The default is false.
 	DropLabels bool `json:"dropLabels,omitempty"`
 }
 
-// InputNamespaces describes whether application logs from specific Namespaces are selected. The options are mutually exclusive. System Namespaces are excluded by default from the collection
+// Describes whether application logs from specific Namespaces are selected. The options are mutually exclusive. System Namespaces are excluded by default from the collection.
 type InputNamespaces struct {
-	// Include describes to include only the container logs of the specified Namespace names
+	// Include only the container logs of the specified Namespace names.
 	Include []string `json:"include,omitempty"`
-	// Exclude describes to exclude only the container logs of the specified Namespace names
+	// Exclude the container logs of the specified Namespace names.
 	Exclude []string `json:"exclude,omitempty"`
-	// System describes to include the container logs of the system Namespaces like kube-system, istio-system, and kyma-system
+	// Describes to include the container logs of the system Namespaces like kube-system, istio-system, and kyma-system.
 	System bool `json:"system,omitempty"`
 }
 
-// InputContainers describes whether application logs from specific containers are selected. The options are mutually exclusive.
+// Describes whether application logs from specific containers are selected. The options are mutually exclusive.
 type InputContainers struct {
-	// Include describes to include only the container logs with the specified container names
+	// Specifies to include only the container logs with the specified container names.
 	Include []string `json:"include,omitempty"`
-	// Exclude describes to exclude only the container logs with the specified container names
+	// Specifies to exclude only the container logs with the specified container names.
 	Exclude []string `json:"exclude,omitempty"`
 }
 
-// Filter describes a filtering option on the logs of the pipeline
+// Describes a filtering option on the logs of the pipeline.
 type Filter struct {
-	// Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode
+	// Custom filter definition in the Fluent Bit syntax. Note: If you use a `custom` filter, you put the LogPipeline in unsupported mode.
 	Custom string `json:"custom,omitempty"`
 }
 
-// LokiOutput configures an output to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead.
+// Configures an output to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead..
 type LokiOutput struct {
 	URL        ValueType         `json:"url,omitempty"`
 	Labels     map[string]string `json:"labels,omitempty"`
 	RemoveKeys []string          `json:"removeKeys,omitempty"`
 }
 
-// HttpOutput configures an HTTP-based output compatible with the Fluent Bit HTTP output plugin
+// Configures an HTTP-based output compatible with the Fluent Bit HTTP output plugin.
 type HTTPOutput struct {
-	Host      ValueType `json:"host,omitempty"`
-	User      ValueType `json:"user,omitempty"`
-	Password  ValueType `json:"password,omitempty"`
-	URI       string    `json:"uri,omitempty"`
-	Port      string    `json:"port,omitempty"`
-	Compress  string    `json:"compress,omitempty"`
-	Format    string    `json:"format,omitempty"`
+	// Defines the host of the HTTP receiver.
+	Host ValueType `json:"host,omitempty"`
+	// Defines the basic auth user.
+	User ValueType `json:"user,omitempty"`
+	// Defines the basic auth password.
+	Password ValueType `json:"password,omitempty"`
+	// Defines the URI of the HTTP receiver. Default is "/".
+	URI string `json:"uri,omitempty"`
+	// Defines the port of the HTTP receiver. Default is 443.
+	Port string `json:"port,omitempty"`
+	// Defines the compression algorithm to use.
+	Compress string `json:"compress,omitempty"`
+	// Defines the log encoding to be used. Default is json.
+	Format string `json:"format,omitempty"`
+	// Defines TLS settings for the HTTP connection.
 	TLSConfig TLSConfig `json:"tls,omitempty"`
-	Dedot     bool      `json:"dedot,omitempty"`
+	// Enables de-dotting of Kubernetes labels and annotations for compatibility with ElasticSearch based backends. Dots (.) will be replaced by underscores (_).
+	Dedot bool `json:"dedot,omitempty"`
 }
 
 type TLSConfig struct {
-	Disabled                  bool `json:"disabled,omitempty"`
+	// Disable TLS.
+	Disabled bool `json:"disabled,omitempty"`
+	// Disable TLS certificate validation.
 	SkipCertificateValidation bool `json:"skipCertificateValidation,omitempty"`
 }
 
-// Output describes a Fluent Bit output configuration section
+// Output describes a Fluent Bit output configuration section.
 type Output struct {
-	// Custom output definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode
-	Custom string      `json:"custom,omitempty"`
-	HTTP   *HTTPOutput `json:"http,omitempty"`
-	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
+	// Custom output definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode.
+	Custom string `json:"custom,omitempty"`
+	// Defines an HTTP based output.
+	HTTP *HTTPOutput `json:"http,omitempty"`
+	// Defines a grafana-loki based output.
+	Loki *LokiOutput `json:"grafana-loki,omitempty"`
 }
 
 func (o *Output) IsCustomDefined() bool {
@@ -172,7 +185,7 @@ type LogPipelineCondition struct {
 	Type               LogPipelineConditionType `json:"type,omitempty"`
 }
 
-// LogPipelineStatus defines the observed state of LogPipeline
+// Shows the observed state of the LogPipeline
 type LogPipelineStatus struct {
 	Conditions      []LogPipelineCondition `json:"conditions,omitempty"`
 	UnsupportedMode bool                   `json:"unsupportedMode,omitempty"`

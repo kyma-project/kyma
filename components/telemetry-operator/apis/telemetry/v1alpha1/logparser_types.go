@@ -20,12 +20,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// LogParserSpec defines the desired state of LogParser
+// Defines the desired state of LogParser.
 type LogParserSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Parser allows defining user defined parsers to be applied to the logs
+	// Configures a user defined log parser to be applied to the logs
 	Parser string `json:"parser,omitempty"`
 }
 
@@ -35,7 +35,7 @@ type LogParserSpec struct {
 //+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
-// LogParser is the Schema for the logparsers API
+// LogParser is the Schema for the logparsers API.
 type LogParser struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -46,7 +46,7 @@ type LogParser struct {
 
 //+kubebuilder:object:root=true
 
-// LogParserList contains a list of LogParser
+// LogParserList contains a list of LogParser.
 type LogParserList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -68,7 +68,7 @@ type LogParserCondition struct {
 	Type               LogParserConditionType `json:"type,omitempty"`
 }
 
-// LogParserStatus defines the observed state of LogParser
+// Shows the observed state of the LogParser.
 type LogParserStatus struct {
 	Conditions []LogParserCondition `json:"conditions,omitempty"`
 }
