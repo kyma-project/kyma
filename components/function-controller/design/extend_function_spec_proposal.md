@@ -3,20 +3,20 @@
 ## Summary
 
 The current Serverless API allows for limited configuration of the generated Function's deployment. 
-Currently users can only use ENVs to pass 3rd party service credentials but it doesn't allow for volume mounted secrets (which becomes the industry standard for [service bindings](https://servicebinding.io/application-developer/)).
-Moreover users have no control over the annotations that are applied on the function runtime pod. This excludes functions pods from features enabled by annotations (i.e custom log parsers via `fluentbit.io/parser: my-regex-parser`).
+Currently, users can only use ENVs to pass 3rd party service credentials but it doesn't allow for volume-mounted Secrets (which become the industry standard for [service bindings](https://servicebinding.io/application-developer/)).
+Moreover, users have no control over the annotations applied on the function runtime pod. This excludes Function's Pods from features enabled by annotations (i.e., custom log parsers via `fluentbit.io/parser: my-regex-parser`).
 
 
 
 ## Motivation
 
 Give Serverless users the ability to:
-- Configure volume mounted secrets for Function's subresources.
-- Configure labels and annotations for the Function runtime pod.
+- Configure volume-mounted Secrets for Function's subresources.
+- Configure labels and annotations for the Function's runtime Pod.
 
 ### Goals
 
-- Add more flexibility to the Serverless API - enable volume mounted secrets and pod annotations.
+- Add more flexibility to the Serverless API - enable volume-mounted Secrets and Pod annotations.
 - Organise spec attributes belonging to runtime and build-time configuration (?)
 - Propose sample Function CR visualising different variants
 
@@ -24,9 +24,9 @@ Give Serverless users the ability to:
 
 ### Runtime, build-time separation
 
-Since Function CR is managing two workloads ( Deployment for runtime and Job for build-time ) we need to separate them in the spec in order to make it clear where do the mounts and annotations belong. 
+Since Function CR is managing two workloads (Deployment for runtime and Job for build-time) we need to separate them in the spec in order to make it clear where the mounts and annotations belong. 
 
-We can either make a clear separation, i.e:
+We can either make a clear separation, i.e.:
 
 ```yaml 
 spec:
@@ -42,7 +42,7 @@ spec:
     # metadata (?)
 ```
 
-Alternatively we could promote runtime fields to the root (as the belong to kind: Function) and extract only the build-time fields 
+Alternatively, we could promote runtime fields to the root (as they belong to kind: Function) and extract only the build-time fields 
 
 ```yaml 
 spec:
@@ -59,19 +59,19 @@ spec:
 
 ### Mounts - own structure or k8s inherited
 
-Under the hood the secret mount becomes a volume mount in the runtime pod.
-We could :
+Under the hood, the Secret mount becomes a volume mount in the runtime Pod.
+We could:
 
-A) expose the k8s volume mount spec in function spec
+A) expose the k8s volume mount spec in the Function spec
 
 Pros: 
- - Generic solution - Allows mounting anything : secrets, config maps, any volumes
- - very easy to achieve (rewriting from function spec to pod teplate spec)
+ - Generic solution - Allows mounting anything: Secrets, ConfigMaps, any volumes
+ - very easy to achieve (rewriting from the Function spec to Pod template spec)
 
 Cons: 
- - Does not represent the service binging use case. User needs to translate service bindngs into volume mounts by themselves
- - Less compact ( elegant ) to configure requested service binding use case
- - Noone requested it yet
+ - Does not represent the service binding use case. User needs to translate service bindings into volume mounts by themselves
+ - Less compact (elegant) to configure requested service binding use case
+ - Noone has requested it yet
 
 ```yaml 
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -102,18 +102,18 @@ spec:
  Pros: 
  - Purpose focused  
  - Compact configuration - easy to adopt
- - Less confusing (as volume mounts cause confusion as serverless functions are considered stateless and should not claim any persistance volumes )
+ - Less confusing (as volume mounts confuse Serverless Functions are considered stateless and should not claim any persistence volumes )
  - Enables using service binding natively with dedicated SDKs (i.e @sap/xsenv) - [related read](https://blogs.sap.com/2022/07/12/the-new-way-to-consume-service-bindings-on-kyma-runtime/)
 
 Cons: 
- - Not allows to mount anything besides secrets
+ - Not allows mounting anything besides Secrets
 
 A) and B) are not exclusive
 
 We could separate those cases. (See last 'compromise' option)
 
 
-### Metadata for function pod
+### Metadata for Function's Pod
 
 Define runtime labels and annotations on the root level or under a `metadata` field
 
@@ -200,11 +200,11 @@ spec:
 ### Option 2
 
 - almost the same as `Option 1` (same pros)
-- dif1: move some fields from `.spec` to the new struct `.spec.runtimeSpec` to clearly distinguish fields desired to be used in the `build` and `running` phases. For example in `Option 1` users may have questions after seeing `.spec.env` and `.spec.build.env` fields for example "is .spec.env dedicated for the running function's pod? Would the field be merged with .spec.build.env for the building job?"
+- dif1: move some fields from `.spec` to the new struct `.spec.runtimeSpec` to clearly distinguish fields desired to be used in the `build` and `running` phases. For example in `Option 1` users may have questions after seeing `.spec.env` and `.spec.build.env` fields for example "is .spec.env dedicated for the running Function's Pod? Would the field be merged with .spec.build.env for the building job?"
 - dif2: rename the `.spec.profile` to the `.spec.resourcesProfile` to make this field more intuitive
 - dif3: this solution is simple but not as simple as `Option 1`
 
->NOTE: the main idea is to close a specific configuration in a field that represents the specific phase of the function's lifecycle. It would be intuitive and easy to understand for a user that the `.spec.build` field contains configuration for the building phase and `.spec.runtimeSpec` for the running phase.
+>NOTE: the main idea is to close a specific configuration in a field that represents the specific phase of the Function's lifecycle. It would be intuitive and easy to understand for a user that the `.spec.build` field contains configuration for the building phase and `.spec.runtimeSpec` for the running phase.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha2
@@ -249,7 +249,7 @@ spec:
 
 ### Option 3
 
-This option expose runtime pod configuration over build pod because runtime pod is final result, the build is transient phase.
+This option exposes runtime pod configuration over the build Pod because the runtime Pod is the final result, and the build is a transient phase.
 Additionaly:
 - It allows to use full k8s volume api the similar way to k8s pods.
 
@@ -411,7 +411,7 @@ spec:
 ### Final version - the compromise
 
  - clearly separate configuration of the build stage in the spec (treating `build` stage as second class citizen and keeping the main spec dedicated to the more important runtime stage).
- - add convinient way to mount secrets (w/o polluting function API with dependencies to service bindings)
+ - add convenient way to mount Secrets (w/o polluting function API with dependencies to service bindings)
  - volume mounts as a separate, more advanced case (implemented once requested) 
  - don't group labels and annotations under metadata. 
 
@@ -490,8 +490,8 @@ spec: #Contains spec of Function and run stage (deployments, hpa)
 
 ### Precedence, defaulting and validation
 
-`profile` takes precedence over `resources`. If profile field is not set there should be no defaulting happening for the resources. Controller should fill the pod template resources according to the selected profile preset.
-If profile field is set to "Custom", the user must then ( and only then ) set the values for resources manualy.
+`profile` takes precedence over `resources`. If the profile field is not set there should be no defaulting happening for the resources. The controller should fill the pod template resources according to the selected profile preset.
+If the profile field is set to "Custom", the user must then (and only then) set the values for resources manually.
 Custom resource values together with non-custom profile should be rejected by the validation webhook.
 
 
