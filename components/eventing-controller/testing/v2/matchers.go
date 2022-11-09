@@ -79,6 +79,15 @@ func HaveSubscriptionActiveCondition() gomegatypes.GomegaMatcher {
 		corev1.ConditionTrue, ""))
 }
 
+func HaveAPIRuleTrueStatusCondition() gomegatypes.GomegaMatcher {
+	return HaveCondition(eventingv1alpha2.MakeCondition(
+		eventingv1alpha2.ConditionAPIRuleStatus,
+		eventingv1alpha2.ConditionReasonAPIRuleStatusReady,
+		corev1.ConditionTrue,
+		"",
+	))
+}
+
 func HaveCleanEventTypes(cleanEventTypes []eventingv1alpha2.EventType) gomegatypes.GomegaMatcher {
 	return WithTransform(
 		func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.EventType {

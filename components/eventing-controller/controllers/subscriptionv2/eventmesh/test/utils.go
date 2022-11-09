@@ -74,7 +74,6 @@ var (
 	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
 )
 
-//nolint:funlen
 func setupSuite() error {
 	emTestEnsemble = &eventMeshTestEnsemble{}
 
@@ -87,6 +86,86 @@ func setupSuite() error {
 	logf.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
 
 	// setup test Env
+	cfg, err := startTestEnv()
+	if err != nil || cfg == nil {
+		return err
+	}
+
+	// start event mesh mock
+	emTestEnsemble.eventMeshMock = startNewEventMeshMock()
+
+	// add schemes
+	err = eventingv1alpha2.AddToScheme(scheme.Scheme)
+	if err != nil {
+		return err
+	}
+
+	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		return err
+	}
+	// +kubebuilder:scaffold:scheme
+
+	// get a free port for eventMesh manager
+	metricsPort, err := reconcilertesting.GetFreePort()
+	if err != nil {
+		return err
+	}
+
+	// start eventMesh manager instance
+	syncPeriod := syncPeriodSeconds * time.Second
+	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+		Scheme:             scheme.Scheme,
+		SyncPeriod:         &syncPeriod,
+		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
+	})
+	if err != nil {
+		return err
+	}
+
+	// setup nameMapper for EventMesh
+	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain, backendbeb.MaxBEBSubscriptionNameLength)
+
+	// setup eventMesh reconciler
+	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
+	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
+	credentials := &backendbeb.OAuth2ClientCredentials{
+		ClientID:     "foo-client-id",
+		ClientSecret: "foo-client-secret",
+	}
+	testReconciler := eventmeshreconciler.NewReconciler(
+		context.Background(),
+		k8sManager.GetClient(),
+		defaultLogger,
+		recorder,
+		getEnvConfig(),
+		cleaner.NewEventMeshCleaner(defaultLogger),
+		backendeventmesh.NewEventMesh(credentials, emTestEnsemble.nameMapper, defaultLogger),
+		credentials,
+		emTestEnsemble.nameMapper,
+		sinkValidator,
+	)
+
+	err = testReconciler.SetupUnmanaged(k8sManager)
+	if err != nil {
+		return err
+	}
+
+	// start k8s client
+	go func() {
+		var ctx context.Context
+		ctx, k8sCancelFn = context.WithCancel(ctrl.SetupSignalHandler())
+		err = k8sManager.Start(ctx)
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	emTestEnsemble.k8sClient = k8sManager.GetClient()
+	return nil
+}
+
+func startTestEnv() (*rest.Config, error) {
 	useExistingCluster := useExistingCluster
 	emTestEnsemble.testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -99,7 +178,7 @@ func setupSuite() error {
 	}
 
 	var cfg *rest.Config
-	err = retry.Do(func() error {
+	err := retry.Do(func() error {
 		defer func() {
 			if r := recover(); r != nil {
 				log.Println("panic recovered:", r)
@@ -120,45 +199,11 @@ func setupSuite() error {
 			}
 		}),
 	)
+	return cfg, err
+}
 
-	if err != nil || cfg == nil {
-		return err
-	}
-
-	err = eventingv1alpha2.AddToScheme(scheme.Scheme)
-	if err != nil {
-		return err
-	}
-
-	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		return err
-	}
-	// +kubebuilder:scaffold:scheme
-
-	// start event mesh mock
-	emTestEnsemble.eventMeshMock = startNewEventMeshMock()
-
-	// client, err := client.New()
-	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
-
-	var metricsPort int
-	metricsPort, err = reconcilertesting.GetFreePort()
-	if err != nil {
-		return err
-	}
-
-	syncPeriod := syncPeriodSeconds * time.Second
-	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:             scheme.Scheme,
-		SyncPeriod:         &syncPeriod,
-		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
-	})
-	if err != nil {
-		return err
-	}
-
-	envConf := env.Config{
+func getEnvConfig() env.Config {
+	return env.Config{
 		BEBAPIURL:                emTestEnsemble.eventMeshMock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
@@ -171,38 +216,6 @@ func setupSuite() error {
 		Qos:                      string(eventMeshtypes.QosAtLeastOnce),
 		EnableNewCRDVersion:      true,
 	}
-
-	credentials := &backendbeb.OAuth2ClientCredentials{
-		ClientID:     "foo-client-id",
-		ClientSecret: "foo-client-secret",
-	}
-
-	// prepare
-	eventMeshCleaner := cleaner.NewEventMeshCleaner(defaultLogger)
-	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain, backendbeb.MaxBEBSubscriptionNameLength)
-	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, emTestEnsemble.nameMapper, defaultLogger)
-
-	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
-	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
-	testReconciler := eventmeshreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
-		recorder, envConf, eventMeshCleaner, eventMeshHandler, credentials, emTestEnsemble.nameMapper, sinkValidator)
-
-	err = testReconciler.SetupUnmanaged(k8sManager)
-	if err != nil {
-		return err
-	}
-
-	go func() {
-		var ctx context.Context
-		ctx, k8sCancelFn = context.WithCancel(ctrl.SetupSignalHandler())
-		err = k8sManager.Start(ctx)
-		if err != nil {
-			panic(err)
-		}
-	}()
-
-	emTestEnsemble.k8sClient = k8sManager.GetClient()
-	return nil
 }
 
 func tearDownSuite() error {

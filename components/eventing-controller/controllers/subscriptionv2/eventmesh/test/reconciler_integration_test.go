@@ -341,18 +341,8 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 
 	wantUpdateSubscriptionWithSinkMatchers := gomega.And(
 		reconcilertesting.HaveSubscriptionReady(),
-		reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-			eventingv1alpha2.ConditionSubscriptionActive,
-			eventingv1alpha2.ConditionReasonSubscriptionActive,
-			corev1.ConditionTrue,
-			"",
-		)),
-		reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-			eventingv1alpha2.ConditionAPIRuleStatus,
-			eventingv1alpha2.ConditionReasonAPIRuleStatusReady,
-			corev1.ConditionTrue,
-			"",
-		)),
+		reconcilertesting.HaveSubscriptionActiveCondition(),
+		reconcilertesting.HaveAPIRuleTrueStatusCondition(),
 	)
 
 	// test cases
