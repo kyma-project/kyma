@@ -4,10 +4,6 @@ title: Logging Architecture
 
 > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
-## Architecture diagram
-
-![Logging architecture in Kyma](./assets/obsv-logging-architecture.drawio.svg)
-
 ## Process flow
 
 1. Container logs are stored under the `var/log` directory and its subdirectories.
