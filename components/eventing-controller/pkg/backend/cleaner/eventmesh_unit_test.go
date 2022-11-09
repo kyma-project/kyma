@@ -44,7 +44,6 @@ func Test_CleanEventType(t *testing.T) {
 			eventType, err := cleaner.CleanEventType(tc.givenEventType)
 			require.NoError(t, err)
 			require.Equal(t, tc.wantEventType, eventType)
-
 		})
 	}
 }

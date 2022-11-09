@@ -175,9 +175,7 @@ func getUniqueEventTypes(eventTypes []string) []string {
 }
 
 // GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
-func GetCleanEventTypes(sub *eventingv1alpha2.Subscription,
-	cleaner cleaner.Cleaner) []eventingv1alpha2.EventType {
-
+func GetCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) []eventingv1alpha2.EventType {
 	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
 	var cleanEventTypes []eventingv1alpha2.EventType
 	for _, eventType := range uniqueTypes {
