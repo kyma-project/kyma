@@ -1,4 +1,4 @@
-# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.58.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+# https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.60.1/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -25,13 +25,28 @@ spec:
       jsonPath: .spec.version
       name: Version
       type: string
-    - description: The desired replicas number of Prometheuses
+    - description: The number of desired replicas
       jsonPath: .spec.replicas
-      name: Replicas
+      name: Desired
       type: integer
+    - description: The number of ready replicas
+      jsonPath: .status.availableReplicas
+      name: Ready
+      type: integer
+    - jsonPath: .status.conditions[?(@.type == 'Reconciled')].status
+      name: Reconciled
+      type: string
+    - jsonPath: .status.conditions[?(@.type == 'Available')].status
+      name: Available
+      type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
+    - description: Whether the resource reconciliation is paused or not
+      jsonPath: .status.paused
+      name: Paused
+      priority: 1
+      type: boolean
     name: v1
     schema:
       openAPIV3Schema:
@@ -109,6 +124,31 @@ spec:
                 - key
                 type: object
                 x-kubernetes-map-type: atomic
+              additionalArgs:
+                description: AdditionalArgs allows setting additional arguments for
+                  the Prometheus container. It is intended for e.g. activating hidden
+                  flags which are not supported by the dedicated configuration options
+                  yet. The arguments are passed as-is to the Prometheus container
+                  which may cause issues if they are invalid or not supported by the
+                  given Prometheus version. In case of an argument conflict (e.g.
+                  an argument which is already set by the operator itself) or when
+                  providing an invalid argument the reconciliation will fail and an
+                  error will be logged.
+                items:
+                  description: Argument as part of the AdditionalArgs list.
+                  properties:
+                    name:
+                      description: Name of the argument, e.g. "scrape.discovery-reload-interval".
+                      minLength: 1
+                      type: string
+                    value:
+                      description: Argument value, e.g. 30s. Can be empty for name-only
+                        arguments (e.g. --storage.tsdb.no-lockfile)
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
               additionalScrapeConfigs:
                 description: 'AdditionalScrapeConfigs allows specifying a key of a
                   Secret containing additional Prometheus scrape configurations. Scrape
@@ -1434,7 +1474,10 @@ spec:
               configMaps:
                 description: ConfigMaps is a list of ConfigMaps in the same namespace
                   as the Prometheus object, which shall be mounted into the Prometheus
-                  Pods. The ConfigMaps are mounted into /etc/prometheus/configmaps/<configmap-name>.
+                  Pods. Each ConfigMap is added to the StatefulSet definition as a
+                  volume named `configmap-<configmap-name>`. The ConfigMaps are mounted
+                  into /etc/prometheus/configmaps/<configmap-name> in the 'prometheus'
+                  container.
                 items:
                   type: string
                 type: array
@@ -2003,13 +2046,13 @@ spec:
                         Cannot be updated.
                       type: string
                     ports:
-                      description: List of ports to expose from the container. Exposing
-                        a port here gives the system additional information about
-                        the network connections a container uses, but is primarily
-                        informational. Not specifying a port here DOES NOT prevent
-                        that port from being exposed. Any port which is listening
-                        on the default "0.0.0.0" address inside a container will be
-                        accessible from the network. Cannot be updated.
+                      description: List of ports to expose from the container. Not
+                        specifying a port here DOES NOT prevent that port from being
+                        exposed. Any port which is listening on the default "0.0.0.0"
+                        address inside a container will be accessible from the network.
+                        Modifying this array with strategic merge patch may corrupt
+                        the data. For more information See https://github.com/kubernetes/kubernetes/issues/108255.
+                        Cannot be updated.
                       items:
                         description: ContainerPort represents a network port in a
                           single container.
@@ -2846,6 +2889,12 @@ spec:
                 x-kubernetes-list-map-keys:
                 - ip
                 x-kubernetes-list-type: map
+              hostNetwork:
+                description: Use the host's network namespace if true. Make sure to
+                  understand the security implications if you want to enable it. When
+                  hostNetwork is enabled, this will set dnsPolicy to ClusterFirstWithHostNet
+                  automatically.
+                type: boolean
               ignoreNamespaceSelectors:
                 description: IgnoreNamespaceSelectors if set to true will ignore NamespaceSelector
                   settings from all PodMonitor, ServiceMonitor and Probe objects.
@@ -3439,13 +3488,13 @@ spec:
                         Cannot be updated.
                       type: string
                     ports:
-                      description: List of ports to expose from the container. Exposing
-                        a port here gives the system additional information about
-                        the network connections a container uses, but is primarily
-                        informational. Not specifying a port here DOES NOT prevent
-                        that port from being exposed. Any port which is listening
-                        on the default "0.0.0.0" address inside a container will be
-                        accessible from the network. Cannot be updated.
+                      description: List of ports to expose from the container. Not
+                        specifying a port here DOES NOT prevent that port from being
+                        exposed. Any port which is listening on the default "0.0.0.0"
+                        address inside a container will be accessible from the network.
+                        Modifying this array with strategic merge patch may corrupt
+                        the data. For more information See https://github.com/kubernetes/kubernetes/issues/108255.
+                        Cannot be updated.
                       items:
                         description: ContainerPort represents a network port in a
                           single container.
@@ -5489,7 +5538,9 @@ spec:
               secrets:
                 description: Secrets is a list of Secrets in the same namespace as
                   the Prometheus object, which shall be mounted into the Prometheus
-                  Pods. The Secrets are mounted into /etc/prometheus/secrets/<secret-name>.
+                  Pods. Each Secret is added to the StatefulSet definition as a volume
+                  named `secret-<secret-name>`. The Secrets are mounted into /etc/prometheus/secrets/<secret-name>
+                  in the 'prometheus' container.
                 items:
                   type: string
                 type: array
@@ -6346,13 +6397,41 @@ spec:
                   notice in any release. \n This is experimental and may change significantly
                   without backward compatibility in any release."
                 properties:
+                  additionalArgs:
+                    description: AdditionalArgs allows setting additional arguments
+                      for the Thanos container. The arguments are passed as-is to
+                      the Thanos container which may cause issues if they are invalid
+                      or not supported the given Thanos version. In case of an argument
+                      conflict (e.g. an argument which is already set by the operator
+                      itself) or when providing an invalid argument the reconciliation
+                      will fail and an error will be logged.
+                    items:
+                      description: Argument as part of the AdditionalArgs list.
+                      properties:
+                        name:
+                          description: Name of the argument, e.g. "scrape.discovery-reload-interval".
+                          minLength: 1
+                          type: string
+                        value:
+                          description: Argument value, e.g. 30s. Can be empty for
+                            name-only arguments (e.g. --storage.tsdb.no-lockfile)
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
                   baseImage:
                     description: 'Thanos base image if other than default. Deprecated:
                       use ''image'' instead'
                     type: string
+                  grpcListenLocal:
+                    description: If true, the Thanos sidecar listens on the loopback
+                      interface for the gRPC endpoints. It has no effect if `listenLocal`
+                      is true.
+                    type: boolean
                   grpcServerTlsConfig:
-                    description: 'GRPCServerTLSConfig configures the gRPC server from
-                      which Thanos Querier reads recorded rule data. Note: Currently
+                    description: 'GRPCServerTLSConfig configures the TLS parameters
+                      for the gRPC server providing the StoreAPI. Note: Currently
                       only the CAFile, CertFile, and KeyFile fields are supported.
                       Maps to the ''--grpc-server-tls-*'' CLI args.'
                     properties:
@@ -6485,6 +6564,11 @@ spec:
                         description: Used to verify the hostname for the targets.
                         type: string
                     type: object
+                  httpListenLocal:
+                    description: If true, the Thanos sidecar listens on the loopback
+                      interface for the HTTP endpoints. It has no effect if `listenLocal`
+                      is true.
+                    type: boolean
                   image:
                     description: Image if specified has precedence over baseImage,
                       tag and sha combinations. Specifying the version is still necessary
@@ -6492,8 +6576,10 @@ spec:
                       is being configured.
                     type: string
                   listenLocal:
-                    description: ListenLocal makes the Thanos sidecar listen on loopback,
-                      so that it does not bind against the Pod IP.
+                    description: 'If true, the Thanos sidecar listens on the loopback
+                      interface for the HTTP and gRPC endpoints. It takes precedence
+                      over `grpcListenLocal` and `httpListenLocal`. Deprecated: use
+                      `grpcListenLocal` and `httpListenLocal` instead.'
                     type: boolean
                   logFormat:
                     description: LogFormat for Thanos sidecar to be configured with.
@@ -6755,6 +6841,19 @@ spec:
                           type: object
                       type: object
                       x-kubernetes-map-type: atomic
+                    matchLabelKeys:
+                      description: MatchLabelKeys is a set of pod label keys to select
+                        the pods over which spreading will be calculated. The keys
+                        are used to lookup values from the incoming pod labels, those
+                        key-value labels are ANDed with labelSelector to select the
+                        group of existing pods over which spreading will be calculated
+                        for the incoming pod. Keys that don't exist in the incoming
+                        pod labels will be ignored. A null or empty list means only
+                        match against labelSelector.
+                      items:
+                        type: string
+                      type: array
+                      x-kubernetes-list-type: atomic
                     maxSkew:
                       description: 'MaxSkew describes the degree to which pods may
                         be unevenly distributed. When `whenUnsatisfiable=DoNotSchedule`,
@@ -6795,11 +6894,31 @@ spec:
                         minimum\" is treated as 0. In this situation, new pod with
                         the same labelSelector cannot be scheduled, because computed
                         skew will be 3(3 - 0) if new Pod is scheduled to any of the
-                        three zones, it will violate MaxSkew. \n This is an alpha
-                        field and requires enabling MinDomainsInPodTopologySpread
-                        feature gate."
+                        three zones, it will violate MaxSkew. \n This is a beta field
+                        and requires the MinDomainsInPodTopologySpread feature gate
+                        to be enabled (enabled by default)."
                       format: int32
                       type: integer
+                    nodeAffinityPolicy:
+                      description: "NodeAffinityPolicy indicates how we will treat
+                        Pod's nodeAffinity/nodeSelector when calculating pod topology
+                        spread skew. Options are: - Honor: only nodes matching nodeAffinity/nodeSelector
+                        are included in the calculations. - Ignore: nodeAffinity/nodeSelector
+                        are ignored. All nodes are included in the calculations. \n
+                        If this value is nil, the behavior is equivalent to the Honor
+                        policy. This is a alpha-level feature enabled by the NodeInclusionPolicyInPodTopologySpread
+                        feature flag."
+                      type: string
+                    nodeTaintsPolicy:
+                      description: "NodeTaintsPolicy indicates how we will treat node
+                        taints when calculating pod topology spread skew. Options
+                        are: - Honor: nodes without taints, along with tainted nodes
+                        for which the incoming pod has a toleration, are included.
+                        - Ignore: node taints are ignored. All nodes are included.
+                        \n If this value is nil, the behavior is equivalent to the
+                        Ignore policy. This is a alpha-level feature enabled by the
+                        NodeInclusionPolicyInPodTopologySpread feature flag."
+                      type: string
                     topologyKey:
                       description: TopologyKey is the key of node labels. Nodes that
                         have a label with this key and identical values are considered
@@ -6807,10 +6926,11 @@ spec:
                         as a "bucket", and try to put balanced number of pods into
                         each bucket. We define a domain as a particular instance of
                         a topology. Also, we define an eligible domain as a domain
-                        whose nodes match the node selector. e.g. If TopologyKey is
-                        "kubernetes.io/hostname", each Node is a domain of that topology.
-                        And, if TopologyKey is "topology.kubernetes.io/zone", each
-                        zone is a domain of that topology. It's a required field.
+                        whose nodes meet the requirements of nodeAffinityPolicy and
+                        nodeTaintsPolicy. e.g. If TopologyKey is "kubernetes.io/hostname",
+                        each Node is a domain of that topology. And, if TopologyKey
+                        is "topology.kubernetes.io/zone", each zone is a domain of
+                        that topology. It's a required field.
                       type: string
                     whenUnsatisfiable:
                       description: 'WhenUnsatisfiable indicates how to deal with a
@@ -6836,6 +6956,20 @@ spec:
                   - whenUnsatisfiable
                   type: object
                 type: array
+              tsdb:
+                description: Defines the runtime reloadable configuration of the timeseries
+                  database (TSDB).
+                properties:
+                  outOfOrderTimeWindow:
+                    description: Configures how old an out-of-order/out-of-bounds
+                      sample can be w.r.t. the TSDB max time. An out-of-order/out-of-bounds
+                      sample is ingested into the TSDB as long as the timestamp of
+                      the sample is >= (TSDB.MaxTime - outOfOrderTimeWindow). Out
+                      of order ingestion is an experimental feature and requires Prometheus
+                      >= v2.39.0.
+                    pattern: ^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$
+                    type: string
+                type: object
               version:
                 description: Version of Prometheus to be deployed.
                 type: string
@@ -8403,11 +8537,58 @@ spec:
               web:
                 description: Defines the web command line flags when starting Prometheus.
                 properties:
+                  httpConfig:
+                    description: Defines HTTP parameters for web server.
+                    properties:
+                      headers:
+                        description: List of headers that can be added to HTTP responses.
+                        properties:
+                          contentSecurityPolicy:
+                            description: Set the Content-Security-Policy header to
+                              HTTP responses. Unset if blank.
+                            type: string
+                          strictTransportSecurity:
+                            description: Set the Strict-Transport-Security header
+                              to HTTP responses. Unset if blank. Please make sure
+                              that you use this with care as this header might force
+                              browsers to load Prometheus and the other applications
+                              hosted on the same domain and subdomains over HTTPS.
+                              https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+                            type: string
+                          xContentTypeOptions:
+                            description: Set the X-Content-Type-Options header to
+                              HTTP responses. Unset if blank. Accepted value is nosniff.
+                              https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+                            enum:
+                            - ""
+                            - NoSniff
+                            type: string
+                          xFrameOptions:
+                            description: Set the X-Frame-Options header to HTTP responses.
+                              Unset if blank. Accepted values are deny and sameorigin.
+                              https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+                            enum:
+                            - ""
+                            - Deny
+                            - SameOrigin
+                            type: string
+                          xXSSProtection:
+                            description: Set the X-XSS-Protection header to all responses.
+                              Unset if blank. https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+                            type: string
+                        type: object
+                      http2:
+                        description: Enable HTTP/2 support. Note that HTTP/2 is only
+                          supported with TLS. When TLSConfig is not configured, HTTP/2
+                          will be disabled. Whenever the value of the field changes,
+                          a rolling update will be triggered.
+                        type: boolean
+                    type: object
                   pageTitle:
                     description: The prometheus web page title
                     type: string
                   tlsConfig:
-                    description: WebTLSConfig defines the TLS parameters for HTTPS.
+                    description: Defines the TLS parameters for HTTPS.
                     properties:
                       cert:
                         description: Contains the TLS certificate for the server.
@@ -8581,6 +8762,14 @@ spec:
                       description: Human-readable message indicating details for the
                         condition's last transition.
                       type: string
+                    observedGeneration:
+                      description: ObservedGeneration represents the .metadata.generation
+                        that the condition was set based upon. For instance, if .metadata.generation
+                        is currently 12, but the .status.conditions[x].observedGeneration
+                        is 9, the condition is out of date with respect to the current
+                        state of the instance.
+                      format: int64
+                      type: integer
                     reason:
                       description: Reason for the condition's last transition.
                       type: string
