@@ -11,7 +11,7 @@ import (
 )
 
 const checkAppExistsPeriod = 10 * time.Second
-const appCreationTimeout = 2 * time.Minute
+const appCreationTimeout = 4 * time.Minute
 
 type ApplicationReader interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
