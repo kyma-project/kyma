@@ -1539,4 +1539,8 @@ func TestJetStreamSubAfterSync_ForExplicitlyBoundSubscriptionDeletion(t *testing
 	oldCon, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, oldJsSubKey.consumerName)
 	require.Nil(t, oldCon)
 	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 025d91723 (Add Int Test for NATS Created Consumer Deletion)
