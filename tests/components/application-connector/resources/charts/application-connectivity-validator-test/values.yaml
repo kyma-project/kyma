@@ -9,6 +9,6 @@ global:
   images:
     validatorTest:
       name: "connectivity-validator-test"
-      version: "v20221011-7ff00703"
+      version: "PR-16067"
 
   namespace: "test"
