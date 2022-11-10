@@ -1549,6 +1549,7 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDo
 	jsBackend := testEnvironment.jsBackend
 	defer testEnvironment.natsServer.Shutdown()
 	defer testEnvironment.jsClient.natsConn.Close()
+	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
 	testEnvironment.jsBackend.Config.JSStreamStorageType = StorageTypeFile
 	testEnvironment.jsBackend.Config.MaxReconnects = 0
@@ -1602,13 +1603,13 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDo
 		require.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
 	}
 
-	//shutdown the JetStream and start so that existing subscription gets invalid.
+	// shutdown the JetStream and start so that existing subscription gets invalid.
 	testEnvironment.natsServer.Shutdown()
 	require.Eventually(t, func() bool {
 		return !testEnvironment.jsBackend.conn.IsConnected()
 	}, 30*time.Second, 2*time.Second)
 
-	// TODO: change subscription CR filters while NATS JetStream is down
+	// change subscription CR filters while NATS JetStream is down
 	// given
 	// Now, change the filter in subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
@@ -1626,9 +1627,9 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDo
 	// the unacknowledged message must still be present in the stream
 
 	require.Eventually(t, func() bool {
-		info, err := testEnvironment.jsClient.StreamInfo(defaultStreamName)
-		require.NoError(t, err)
-		return info != nil && err == nil
+		info, streamErr := testEnvironment.jsClient.StreamInfo(defaultStreamName)
+		require.NoError(t, streamErr)
+		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
 
 	// SyncSubscription binds the existing subscription to JetStream created one

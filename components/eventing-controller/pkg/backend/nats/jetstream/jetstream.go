@@ -5,11 +5,12 @@ import (
 	"crypto/md5" // #nosec
 	"encoding/hex"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
@@ -416,8 +417,9 @@ func (js *JetStream) syncSubscriptionFilter(key SubscriptionSubjectIdentifier, s
 	return nil
 }
 
-// true if cached JetStream consumer filter subject exists in subscription CR
-func (js *JetStream) existsCachedSubscriptionFilter(cachedSubscriptionKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription) bool {
+// true if cached JetStream consumer filter subject exists in subscription CR.
+func (js *JetStream) existsCachedSubscriptionFilter(cachedSubscriptionKey SubscriptionSubjectIdentifier,
+	subscription *eventingv1alpha1.Subscription) bool {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
