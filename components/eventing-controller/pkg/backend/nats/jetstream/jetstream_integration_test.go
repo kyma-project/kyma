@@ -1428,6 +1428,7 @@ func TestJetStreamSubAfterSync_ForExplicitlyBoundSubscriptionDeletion(t *testing
 	jsBackend := testEnvironment.jsBackend
 	defer testEnvironment.natsServer.Shutdown()
 	defer testEnvironment.jsClient.natsConn.Close()
+	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
 	testEnvironment.jsBackend.Config.JSStreamStorageType = StorageTypeFile
 	testEnvironment.jsBackend.Config.MaxReconnects = 0
