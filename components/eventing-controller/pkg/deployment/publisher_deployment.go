@@ -45,9 +45,8 @@ const (
 	LogVolumeName                   = "log-config"
 
 	configMapName               = "eventing"
-	LogConfigMapName            = "eventing-logging"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
-	configMapKeyAppLogLevel     = "appLogLevel"
+	configMapKeyAppLogLevel     = "APP_LOG_LEVEL"
 )
 
 var (

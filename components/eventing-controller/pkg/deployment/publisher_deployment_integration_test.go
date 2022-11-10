@@ -261,16 +261,6 @@ func bebBackendAssertions(t *testing.T, deployment appsv1.Deployment) {
 	assert.Empty(t, deployment.Spec.Template.Spec.Affinity)
 }
 
-func findPublisherVolume(deployment appsv1.Deployment) v1.Volume {
-	var volume v1.Volume
-	for _, v := range deployment.Spec.Template.Spec.Volumes {
-		if strings.EqualFold(v.Name, LogVolumeName) {
-			volume = v
-		}
-	}
-	return volume
-}
-
 // findPublisherContainer gets the publisher proxy container by its name.
 func findPublisherContainer(deployment appsv1.Deployment) v1.Container {
 	var container v1.Container
@@ -280,15 +270,6 @@ func findPublisherContainer(deployment appsv1.Deployment) v1.Container {
 		}
 	}
 	return container
-}
-
-func findVolumeMount(volumeMounts []v1.VolumeMount, name string) *v1.VolumeMount {
-	for _, v := range volumeMounts {
-		if name == v.Name {
-			return &v
-		}
-	}
-	return nil
 }
 
 // findEnvVar returns the env variable which has `name == envVar.Name`,
