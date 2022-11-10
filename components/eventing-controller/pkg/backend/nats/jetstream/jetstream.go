@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
+	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
@@ -451,8 +451,9 @@ func (js *JetStream) syncSubscriptionFilter(key SubscriptionSubjectIdentifier, s
 	return nil
 }
 
-// true if cached JetStream consumer filter subject exists in subscription CR
-func (js *JetStream) existsCachedSubscriptionFilter(cachedSubscriptionKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription) bool {
+// true if cached JetStream consumer filter subject exists in subscription CR.
+func (js *JetStream) existsCachedSubscriptionFilter(cachedSubscriptionKey SubscriptionSubjectIdentifier,
+	subscription *eventingv1alpha1.Subscription) bool {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetStreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
