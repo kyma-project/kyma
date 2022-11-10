@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
+  namespace: {{ .Values.compassRuntimeAgent.resources.systemNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
@@ -22,7 +22,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
+  namespace: {{ .Values.compassRuntimeAgent.resources.systemNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}

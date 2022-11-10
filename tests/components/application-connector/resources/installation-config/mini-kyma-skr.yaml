@@ -9,6 +9,6 @@ prerequisites:
 components:
   - name: "istio-resources"
   - name: "application-connector"
-    namespace: "kyma-integration"
+    namespace: "kyma-system"
   - name: "compass-runtime-agent"
     namespace: "compass-system"

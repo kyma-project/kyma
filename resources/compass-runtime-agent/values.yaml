@@ -21,7 +21,7 @@ compassRuntimeAgent:
     controllerSyncPeriod: 15s
     minimalConfigSyncTime: 15s
   resources:
-    integrationNamespace: "kyma-integration"
+    systemNamespace: "kyma-system"
     dexSecretNamespace: "kyma-system"
     dexSecretName: "admin-user"
     gatewayPort: 8080
