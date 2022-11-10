@@ -3,7 +3,7 @@ module github.com/kyma-project/kyma/components/application-operator
 go 1.19
 
 require (
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	k8s.io/apimachinery v0.25.3
 	k8s.io/client-go v0.25.3
 )

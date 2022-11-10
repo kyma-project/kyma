@@ -2,6 +2,8 @@
 title: Telemetry
 ---
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+
 ## Kyma's telemetry component
 
 Kyma's observability functionality focuses on the pre-integrated collection of telemetry data from the users' workloads, and making that data available for further analysis and storage in backends of any kind and location. The Telemetry component provides the configurable collection and shipment components, and with that, separates them explicitly from the storage and analysis in a specific backend system. You can still choose to install lightweight in-cluster backends with dedicated observability components.
@@ -24,9 +26,8 @@ The telemetry component provides [Fluent Bit](https://fluentbit.io/) as a log co
 2. Fluent Bit runs as a DaemonSet (one instance per node), detects any new log files in the folder, and tails them using a filesystem buffer for reliability.
 3. Fluent Bit queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
 4. The Telemetry component configures Fluent Bit with your custom output configuration.
-5. If Kyma's logging component is installed, the operator configures the shipment to the in-cluster Loki instance automatically.
-6. As specified in your `LogPipeline` configuration, Fluent Bit sends the log data to observability systems outside or inside the Kyma cluster. Here, you can use the integration with HTTP to integrate a system directly or with an additional Fluentd installation.
-7. The user accesses the internal and external observability system to analyze and visualize the logs.
+5. As specified in your `LogPipeline` configuration, Fluent Bit sends the log data to observability systems outside or inside the Kyma cluster. Here, you can use the integration with HTTP to integrate a system directly or with an additional Fluentd installation.
+6. The user accesses the internal and external observability system to analyze and visualize the logs.
 
 ### Pipelines
 
