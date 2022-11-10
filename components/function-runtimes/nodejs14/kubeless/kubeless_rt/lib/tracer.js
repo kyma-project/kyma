@@ -56,21 +56,13 @@ function getTracer(serviceName) {
   const traceCollectorEndpoint = process.env.TRACE_COLLECTOR_ENDPOINT;
 
   if(traceCollectorEndpoint){
-    axios(traceCollectorEndpoint).catch((err) => {
-      if (err.response && err.response.status === 405) {
-        // TODO: resolve dependencies via serverless operator
-        // 405 is the right status code for the GET method if jaeger service exists
-        // because the only allowed method is POST and usage of other methods are not allowe
-        // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
-        const exporter = new OTLPTraceExporter({
-          url: traceCollectorEndpoint
-        });
-    
-        provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-      }
+      const exporter = new OTLPTraceExporter({
+      url: traceCollectorEndpoint
     });
-  }
 
+    provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+  }
+  
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
   provider.register({
     propagator: new B3Propagator({injectEncoding: B3InjectEncoding.MULTI_HEADER}),

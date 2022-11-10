@@ -23,11 +23,27 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        runAsUser: 65535
+        runAsGroup: 65535
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: {{ .Chart.Name }}
       containers:
         - name: {{ .Chart.Name }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            procMount: default
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: {{ .Values.compassRuntimeAgent.healthCheck.port }}
+              hostPort: 0
               name: http-health
           image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.compass_runtime_agent) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}

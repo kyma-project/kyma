@@ -2,6 +2,8 @@
 title: Adjust Loki log limits
 ---
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+
 There's a fixed logs retention time and size. If the default time is exceeded, the oldest logs are removed first.
 
 To adjust the limits to your needs, you simply create a custom YAML file based on the [Loki values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml) and deploy it with `kyma deploy --values-file {VALUES_FILE_PATH}`.
