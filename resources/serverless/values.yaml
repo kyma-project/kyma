@@ -80,22 +80,22 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-16014"
+      version: "v20221110-7847bad7"
     function_webhook:
       name: "function-webhook"
-      version: "PR-16014"
+      version: "v20221110-7847bad7"
     function_build_init:
       name: "function-build-init"
-      version: "PR-16014"
+      version: "v20221110-7847bad7"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-16052"
+      version: "v20221110-f5cb45c7"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-16052"
+      version: "v20221110-f5cb45c7"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-16052"
+      version: "v20221110-f5cb45c7"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-4ced14d5"
@@ -111,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-15854"
+      version: "v20221102-bcd2a2b1"
     git_server:
       name: "gitserver"
       version: "708f6a87"
