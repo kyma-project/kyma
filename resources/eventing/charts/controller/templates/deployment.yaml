@@ -64,6 +64,11 @@ spec:
             value: "{{ .Values.eventingBackend.defaultDispatcherMaxRetries }}"
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
+          - name: APP_LOG_LEVEL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.global.configMap.name }}
+                key: {{ .Values.global.configMap.keys.appLogLevel }}
           - name: JS_STREAM_NAME
             value: {{ .Values.jetstream.streamName | quote }}
           - name: JS_STREAM_STORAGE_TYPE
@@ -119,20 +124,14 @@ spec:
               name: webhook-server
               protocol: TCP
             {{- end }}
+          {{- if .Values.enableNewCRDVersion }}
           volumeMounts:
-            - mountPath: /ect/log-config
-              name: log-config
-            {{- if .Values.enableNewCRDVersion }}
             - mountPath: /tmp/k8s-webhook-server/serving-certs
               name: cert
               readOnly: true
-
           {{- end }}
+      {{- if .Values.enableNewCRDVersion }}
       volumes:
-        - name: log-config
-          configMap:
-            name: {{ .Values.global.log.configMap.name }}
-        {{- if .Values.enableNewCRDVersion }}
         - name: cert
           secret:
             defaultMode: 420

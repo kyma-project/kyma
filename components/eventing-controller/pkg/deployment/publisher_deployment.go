@@ -33,8 +33,6 @@ const (
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"
 	publisherMetricsPortNum  = int32(9090)
-	volumeMountLoggingName   = "log-config"
-	volumeMountLoggingPath   = "/ect/log-config"
 
 	PublisherNamespace              = "kyma-system"
 	PublisherName                   = "eventing-publisher-proxy"
@@ -49,6 +47,7 @@ const (
 	configMapName               = "eventing"
 	LogConfigMapName            = "eventing-logging"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
+	configMapKeyAppLogLevel     = "appLogLevel"
 )
 
 var (
@@ -60,7 +59,6 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 		publisherConfig,
 		WithLabels(v1alpha1.BEBBackendType),
 		WithContainers(publisherConfig),
-		WithVolumes(publisherConfig),
 		WithBEBEnvVars(publisherConfig),
 		WithLogEnvVars(publisherConfig),
 	)
@@ -70,7 +68,6 @@ func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.P
 		publisherConfig,
 		WithLabels(v1alpha1.NatsBackendType),
 		WithContainers(publisherConfig),
-		WithVolumes(publisherConfig),
 		WithNATSEnvVars(natsConfig, publisherConfig),
 		WithLogEnvVars(publisherConfig),
 		WithAffinity(),
@@ -154,22 +151,10 @@ func WithContainers(publisherConfig env.PublisherConfig) DeployOpt {
 				ReadinessProbe:  getReadinessProbe(),
 				ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
 				SecurityContext: getSecurityContext(),
-				VolumeMounts:    getVolumeMounts(),
 				Resources: getResources(publisherConfig.RequestsCPU,
 					publisherConfig.RequestsMemory,
 					publisherConfig.LimitsCPU,
 					publisherConfig.LimitsMemory),
-			},
-		}
-	}
-}
-
-func WithVolumes(publisherConfig env.PublisherConfig) DeployOpt {
-	return func(d *appsv1.Deployment) {
-		d.Spec.Template.Spec.Volumes = []v1.Volume{
-			{
-				Name:         volumeMountLoggingName,
-				VolumeSource: getVolumeSource(),
 			},
 		}
 	}
@@ -255,26 +240,6 @@ func getLivenessProbe() *v1.Probe {
 	}
 }
 
-func getVolumeMounts() []v1.VolumeMount {
-	return []v1.VolumeMount{
-		{
-			Name:      volumeMountLoggingName,
-			MountPath: volumeMountLoggingPath,
-		},
-	}
-
-}
-
-func getVolumeSource() v1.VolumeSource {
-	return v1.VolumeSource{
-		ConfigMap: &v1.ConfigMapVolumeSource{
-			LocalObjectReference: v1.LocalObjectReference{
-				Name: LogConfigMapName,
-			},
-		},
-	}
-}
-
 func getContainerPorts() []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
@@ -291,6 +256,17 @@ func getContainerPorts() []v1.ContainerPort {
 func getLogEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "APP_LOG_FORMAT", Value: publisherConfig.AppLogFormat},
+		{
+			Name: "APP_LOG_LEVEL",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyAppLogLevel,
+				},
+			},
+		},
 	}
 }
 

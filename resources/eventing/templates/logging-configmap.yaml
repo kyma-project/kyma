@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.global.log.configMap.name }}
-  labels: {{ include "eventing.labels" . | nindent 4 }}
-data:
-  {{ .Values.global.log.configMap.keys.appLogLevel }}: {{ .Values.global.log.configMap.values.appLogLevel | quote }}
----

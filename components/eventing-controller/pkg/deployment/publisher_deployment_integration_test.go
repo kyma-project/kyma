@@ -75,18 +75,6 @@ func TestNewDeployment(t *testing.T) {
 			assert.Equal(t, fmt.Sprint(container.Image), publisherConfig.Image)
 			assert.Equal(t, fmt.Sprint(container.ImagePullPolicy), publisherConfig.ImagePullPolicy)
 
-			// check the volume properties were set properly
-			volume := findPublisherVolume(*deployment)
-			assert.NotNil(t, volume)
-
-			assert.Equal(t, fmt.Sprintf(volume.Name), LogVolumeName)
-			assert.Equal(t, fmt.Sprintf(volume.ConfigMap.Name), LogConfigMapName)
-
-			// ensure the right volumeMount was set
-			gotVolumeMount := findVolumeMount(container.VolumeMounts, volumeMountLoggingName)
-			assert.NotNil(t, gotVolumeMount)
-			assert.Equal(t, volumeMountLoggingPath, gotVolumeMount.MountPath)
-
 			tc.wantBackendAssertions(t, *deployment)
 		})
 	}

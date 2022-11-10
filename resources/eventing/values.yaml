@@ -49,15 +49,7 @@ global:
 # it is seperate from the eventing configMap as it needs to be mounted as a volume
   log:
     format: "json"
-    configMap:
-      name: eventing-logging
-      keys:
-        appLogLevel: "APP_LOG_LEVEL"
-      values:
-        appLogLevel: "info"
-
         
-
 # eventTypePrefix is an optional prefix for the eventType
 # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
 # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
@@ -65,8 +57,10 @@ global:
     name: eventing
     keys:
       eventTypePrefix: "eventTypePrefix"
+      appLogLevel: "APP_LOG_LEVEL"
     values:
       eventTypePrefix: "sap.kyma.custom"
+      appLogLevel: "info"
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
