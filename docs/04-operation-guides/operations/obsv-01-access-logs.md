@@ -2,6 +2,8 @@
 title: Access Kyma application logs
 ---
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+
 Get insights into your applications (microservices, Functions...) by viewing the respective logs.
 
 To check out real-time logs immediately, use the Kubernetes functionalities - either with `kubectl`, or in Kyma Dashboard.
