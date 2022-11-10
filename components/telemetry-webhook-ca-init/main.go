@@ -1,19 +1,24 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"flag"
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"telemetry-webhook-ca-init/internal"
+
+	corev1 "k8s.io/api/core/v1"
 	"os"
 )
 
+const caCert = "ca-cert"
+const caKey = "ca-key"
 const secretName = "webhook-ca"
 const secretNamespace = "kyma-system"
 const caName = "telemetry-validating-webhook-ca"
@@ -49,86 +54,112 @@ func main() {
 		panic(err.Error())
 	}
 
-	err = ensureCaSecret(ctx, clientset, secretName, secretNamespace, caName, log)
+	caSecret, err := getOrCreateCaSecret(ctx, clientset, secretName, secretNamespace, caName, log)
 	if err != nil {
+		log.Errorf("failed to ensure ca secret: %s", err.Error())
 		panic(err.Error())
 	}
 
-	//caBundle, err := internal.CreateCABundle(caName)
-	//if err != nil {
-	//	log.WithTracing(ctx).Error(err, "failed to create CA bundle")
-	//	os.Exit(1)
-	//}
-	//
-	//err = os.MkdirAll(certDir, 0777)
-	//if err != nil {
-	//	log.WithTracing(ctx).Error(err, "failed to create certs directory")
-	//	os.Exit(1)
-	//}
-	//
-	//err = writeFile(certDir+"tls.crt", caBundle.ServerCert)
-	//if err != nil {
-	//	log.WithTracing(ctx).Error(err, "failed to write tls.crt")
-	//	os.Exit(1)
-	//}
-	//
-	//err = writeFile(certDir+"tls.key", caBundle.ServerPrivKey)
-	//if err != nil {
-	//	log.WithTracing(ctx).Error(err, "failed to write tls.key")
-	//	os.Exit(1)
-	//}
-
-	// TODO get webhook config and set caBundle
-}
-
-func ensureCaSecret(ctx context.Context, clientset *kubernetes.Clientset, secretName, secretNamespace, serviceName string, log *zap.SugaredLogger) error {
-	log.Info("ensuring ca secret")
-	secret, err := clientset.CoreV1().Secrets(secretName).Get(ctx, secretNamespace, v1.GetOptions{})
-	if err != nil && !apiErrors.IsNotFound(err) {
-		return errors.Wrap(err, "failed to get ca secret")
+	ca, found := caSecret.Data[caCert]
+	if !found {
+		log.Error(err, "invalid secret state: ca-cert not found")
+		os.Exit(1)
 	}
 
+	key, found := caSecret.Data[caKey]
+	if !found {
+		log.Error(err, "invalid secret state: ca-key not found")
+		os.Exit(1)
+	}
+
+	caBundle := &internal.CABundle{
+		CA:    ca,
+		CAKey: key,
+	}
+
+	serverCert, err := internal.GenerateServerCertAndKey(caBundle, "", "")
+	if err != nil {
+		log.Error(err, "failed to generate server cert")
+		os.Exit(1)
+	}
+
+	err = os.MkdirAll(certDir, 0777)
+	if err != nil {
+		log.Error(err, "failed to create cert dir")
+		os.Exit(1)
+	}
+
+	err = writeFile(certDir+"tls.crt", serverCert.Cert)
+	if err != nil {
+		log.Error(err, "failed to write tls.crt")
+		os.Exit(1)
+	}
+
+	err = writeFile(certDir+"tls.key", serverCert.Key)
+	if err != nil {
+		log.Error(err, "failed to write tls.key")
+		os.Exit(1)
+	}
+
+	webhookConfig, err := clientset.AdmissionregistrationV1beta1().
+		ValidatingWebhookConfigurations().
+		Get(ctx, "", metav1.GetOptions{})
+
+	webhookConfig.Webhooks[0].ClientConfig.CABundle = caBundle.CA
+
+	updatedConfig, err := clientset.AdmissionregistrationV1beta1().
+		ValidatingWebhookConfigurations().
+		Update(ctx, webhookConfig, metav1.UpdateOptions{})
+	if err != nil {
+		log.Error(err, "failed to update webhook configuration")
+		os.Exit(1)
+	}
+
+	log.Infof("updated webhook config: %s, with caBundle: %v",
+		updatedConfig.Name,
+		updatedConfig.Webhooks[0].ClientConfig.CABundle)
+}
+
+func getOrCreateCaSecret(ctx context.Context, clientset *kubernetes.Clientset, name, namespace, service string, log *zap.SugaredLogger) (*v1.Secret, error) {
+	log.Info("ensuring ca secret")
+	secret, err := clientset.CoreV1().Secrets(name).Get(ctx, namespace, metav1.GetOptions{})
+	if err == nil {
+		return secret, nil
+	}
 	if apiErrors.IsNotFound(err) {
 		log.Info("creating ca secret")
-		return createSecret(ctx, client, secretName, secretNamespace, serviceName)
+		secret, err = buildSecret(name, namespace, service)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create secret object")
+		}
+		secret, err = clientset.CoreV1().Secrets(namespace).Create(ctx, secret, metav1.CreateOptions{})
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create secret")
+		}
+		return secret, nil
 	}
-
-	log.Info("updating pre-exiting webhook secret")
-	if err := updateSecret(ctx, client, log, secret, serviceName); err != nil {
-		return errors.Wrap(err, "failed to update secret")
-	}
-	return nil
+	return nil, errors.Wrap(err, "failed to get or create ca secret")
 }
 
-func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
-	secret, err := buildSecret(name, namespace, serviceName)
+func buildSecret(name, namespace, service string) (*corev1.Secret, error) {
+	ca, err := internal.GenerateCACert()
 	if err != nil {
-		return errors.Wrap(err, "failed to create secret object")
+		return nil, errors.Wrap(err, "failed to generate ca certificate")
 	}
-	if err := client.Create(ctx, secret); err != nil {
-		return errors.Wrap(err, "failed to create secret")
-	}
-	return nil
-}
 
-func buildSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
-	cert, key, err := generateWebhookCertificates(serviceName, namespace)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate webhook certificates")
-	}
 	return &corev1.Secret{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Data: map[string][]byte{
-			CertFile: cert,
-			KeyFile:  key,
+			caCert: ca.CA,
+			caKey:  ca.CAKey,
 		},
 	}, nil
 }
 
-func writeFile(filepath string, sCert *bytes.Buffer) error {
+func writeFile(filepath string, data []byte) error {
 	f, err := os.Create(filepath)
 	if err != nil {
 		return err
@@ -137,7 +168,7 @@ func writeFile(filepath string, sCert *bytes.Buffer) error {
 		_ = f.Close()
 	}(f)
 
-	_, err = f.Write(sCert.Bytes())
+	_, err = f.Write(data)
 	if err != nil {
 		return err
 	}
