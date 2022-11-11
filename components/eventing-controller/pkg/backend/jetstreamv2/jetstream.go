@@ -276,13 +276,18 @@ func (js *JetStream) syncSubscriptionTypes(subscription *eventingv1alpha2.Subscr
 
 func (js *JetStream) syncSubscriptionType(key SubscriptionSubjectIdentifier,
 	subscription *eventingv1alpha2.Subscription, subscriber Subscriber) error {
-	if !isJsSubAssociatedWithKymaSub(key, subscription) || !subscriber.IsValid() {
+	if !isJsSubAssociatedWithKymaSub(key, subscription) {
+		return nil
+	}
+
+	// cached subscription is invalid and its subject exists in subscription CR filters
+	if !subscriber.IsValid() && js.existsCachedSubscriptionFilter(key, subscription) {
 		return nil
 	}
 
 	// TODO: optimize this call of ConsumerInfo
 	// as jsSub.ConsumerInfo() will send an REST call to nats-server for each subject
-	info, err := subscriber.ConsumerInfo()
+	info, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, key.ConsumerName())
 	log := backendutilsv2.LoggerWithSubscription(js.namedLogger(), subscription)
 	if err != nil {
 		if errors.Is(err, nats.ErrConsumerNotFound) {
@@ -301,6 +306,19 @@ func (js *JetStream) syncSubscriptionType(key SubscriptionSubjectIdentifier,
 		return err
 	}
 	return nil
+}
+
+// true if cached JetStream consumer filter subject exists in subscription CR.
+func (js *JetStream) existsCachedSubscriptionFilter(cachedSubscriptionKey SubscriptionSubjectIdentifier,
+	subscription *eventingv1alpha2.Subscription) bool {
+	for _, subject := range subscription.Status.Types {
+		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
+		if cachedSubscriptionKey.consumerName == jsSubKey.consumerName {
+			return true
+		}
+	}
+	return false
 }
 
 func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(jsSub Subscriber,
