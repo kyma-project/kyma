@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	subtesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -122,47 +121,6 @@ func Test_setSubReadyStatus(t *testing.T) {
 			// then
 			require.Equal(t, tc.wantResult, result)
 			require.Equal(t, tc.givenSub.Status.Ready, tc.givenIsReady)
-		})
-	}
-}
-
-// Test_SyncSubscription_ForSource tests the subscription with and without valid source.
-func Test_validateSource(t *testing.T) {
-	// given
-	testCases := []struct {
-		name      string
-		givenSub  *v1alpha2.Subscription
-		wantError error
-	}{
-		{
-			name: "empty source and TypeMatching Standard should return error",
-			givenSub: subtesting.NewSubscription("test", "test",
-				subtesting.WithTypeMatchingStandard()),
-			wantError: errEmptySourceValue,
-		},
-		{
-			name: "valid source and TypeMatching Standard should not return error",
-			givenSub: subtesting.NewSubscription("test", "test",
-				subtesting.WithSource("source"),
-				subtesting.WithTypeMatchingStandard()),
-			wantError: nil,
-		},
-		{
-			name: "empty source and TypeMatching Exact should not return error",
-			givenSub: subtesting.NewSubscription("test", "test",
-				subtesting.WithTypeMatchingExact()),
-			wantError: nil,
-		},
-	}
-
-	for _, testCase := range testCases {
-		tc := testCase
-		t.Run(tc.name, func(t *testing.T) {
-			// when
-			err := validateSource(tc.givenSub)
-
-			// then
-			assert.ErrorIs(t, err, tc.wantError)
 		})
 	}
 }

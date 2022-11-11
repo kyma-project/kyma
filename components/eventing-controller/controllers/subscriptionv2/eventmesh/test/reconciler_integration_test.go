@@ -49,22 +49,25 @@ func Test_CreateSubscription(t *testing.T) {
 		wantSubscriptionMatchers gomegatypes.GomegaMatcher
 	}{
 		{
-			name: "should fail to create subscription if types is empty",
+			name: "should fail to create subscription if sink does not exist",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
 				return reconcilertesting.NewSubscription("test", namespace,
 					reconcilertesting.WithDefaultSource(),
-					reconcilertesting.WithEmptyTypes(),
+					reconcilertesting.WithTypes([]string{
+						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
+						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
+					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test1")),
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
 				reconcilertesting.HaveSubscriptionNotReady(),
 				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
-					eventingv1alpha2.ConditionSubscribed,
-					eventingv1alpha2.ConditionReasonSubscriptionCreationFailed,
-					corev1.ConditionFalse, "Types are required")),
-				reconcilertesting.HaveCleanEventTypesEmpty(),
+					eventingv1alpha2.ConditionAPIRuleStatus,
+					eventingv1alpha2.ConditionReasonAPIRuleStatusNotReady,
+					corev1.ConditionFalse, "failed to validate subscription sink URL. "+
+						"It is not a valid cluster local svc: Service \"test1\" not found")),
 			),
 		},
 		{

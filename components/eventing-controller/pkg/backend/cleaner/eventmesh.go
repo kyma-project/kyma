@@ -12,7 +12,6 @@ import (
 var _ Cleaner = &EventMeshCleaner{}
 
 const (
-	minEventMeshSegmentsLimit = 2
 	maxEventMeshSegmentsLimit = 3
 )
 
@@ -32,11 +31,6 @@ func (c *EventMeshCleaner) CleanSource(source string) (string, error) {
 }
 
 func (c *EventMeshCleaner) CleanEventType(eventType string) (string, error) {
-	// check for minEventMeshSegmentsLimit
-	if len(strings.Split(eventType, ".")) < minEventMeshSegmentsLimit {
-		return "", fmt.Errorf("event type should have atlease %d segments", minEventMeshSegmentsLimit)
-	}
-
 	mergedEventType := c.getMergedSegments(eventType)
 	return invalidEventMeshTypeSegment.ReplaceAllString(mergedEventType, ""), nil
 }

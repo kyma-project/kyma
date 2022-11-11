@@ -136,22 +136,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	// TODO: move this to the validation webhook
-	if srcErr := validateSource(desiredSubscription); srcErr != nil {
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, false, srcErr); syncErr != nil {
-			return ctrl.Result{}, syncErr
-		}
-		return ctrl.Result{}, srcErr
-	}
-
 	// update the cleanEventTypes and config values in the subscription status, if changed
-	statusChanged, err := r.syncInitialStatus(desiredSubscription)
-	if err != nil {
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); syncErr != nil {
-			return ctrl.Result{}, syncErr
-		}
-		return ctrl.Result{}, err
-	}
+	statusChanged := r.syncInitialStatus(desiredSubscription)
 
 	// Check for valid sink
 	if validateErr := r.sinkValidator.Validate(desiredSubscription); validateErr != nil {
@@ -266,13 +252,9 @@ func (r *Reconciler) addFinalizerToSubscription(sub *eventingv1alpha2.Subscripti
 }
 
 // syncInitialStatus keeps the latest cleaned EventTypes and jetStreamTypes in the subscription.
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscription) (bool, error) {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscription) bool {
 	statusChanged := false
-	cleanedTypes, err := jetstream.GetCleanEventTypes(subscription, r.cleaner)
-	if err != nil {
-		subscription.Status.InitializeEventTypes()
-		return true, utils.MakeError(errFailedToGetCleanEventTypes, err)
-	}
+	cleanedTypes := jetstream.GetCleanEventTypes(subscription, r.cleaner)
 	if !reflect.DeepEqual(subscription.Status.Types, cleanedTypes) {
 		subscription.Status.Types = cleanedTypes
 		statusChanged = true
@@ -285,7 +267,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha2.Subscripti
 		subscription.Status.Backend.Types = jsTypes
 		statusChanged = true
 	}
-	return statusChanged, nil
+	return statusChanged
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
