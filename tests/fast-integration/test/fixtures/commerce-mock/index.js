@@ -344,6 +344,16 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   expect(wasFound).to.be.true;
 }
 
+
+function logSpansGraph(position, currentSpan, traceData) {
+    const span = traceData.processes[curentSpan.process.ID].serviceName;
+    debug(`${buildLevel(position)} ${span}`)
+    
+    for (let i = 0; i < currentSpan.childSpans.length; i++) {
+        logSpansGraph(position + 1, currentSpan.childSPans[i], traceData)
+    }
+}
+
 // findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
 // order while ignoring the spans that are not expected.
 function findSpanSequence(expectedSpans, position, currentSpan, traceData) {
