@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/stretchr/testify/require"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -286,13 +288,14 @@ func setup(objs ...client.Object) Reconciler {
 	fakeClient := fake.NewClientBuilder().WithObjects(objs...).Build()
 	return Reconciler{
 		Client: fakeClient,
+		cfg:    getTestBackendConfig(),
 	}
 }
 
 func getSecretWithTLSSecret(dummyCABundle []byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      certificateSecretName,
+			Name:      getTestBackendConfig().WebhookSecretName,
 			Namespace: certificateSecretNamespace,
 		},
 		Data: map[string][]byte{
@@ -304,7 +307,7 @@ func getSecretWithTLSSecret(dummyCABundle []byte) *corev1.Secret {
 func getMutatingWebhookConfig(webhook []admissionv1.MutatingWebhook) *admissionv1.MutatingWebhookConfiguration {
 	return &admissionv1.MutatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: mutatingWHName,
+			Name: getTestBackendConfig().MutatingWebhookName,
 		},
 		Webhooks: webhook,
 	}
@@ -313,8 +316,16 @@ func getMutatingWebhookConfig(webhook []admissionv1.MutatingWebhook) *admissionv
 func getValidatingWebhookConfig(webhook []admissionv1.ValidatingWebhook) *admissionv1.ValidatingWebhookConfiguration {
 	return &admissionv1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: validatingWHName,
+			Name: getTestBackendConfig().ValidatingWebhookName,
 		},
 		Webhooks: webhook,
+	}
+}
+
+func getTestBackendConfig() env.BackendConfig {
+	return env.BackendConfig{
+		WebhookSecretName:     "webhookSecret",
+		MutatingWebhookName:   "mutatingWH",
+		ValidatingWebhookName: "validatingWH",
 	}
 }

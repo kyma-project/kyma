@@ -55,9 +55,6 @@ const (
 	reconcilerName = "backend-reconciler"
 
 	certificateSecretNamespace = "kyma-system"
-	certificateSecretName      = "eventing-webhook-server-cert"
-	mutatingWHName             = "subscription-mutating-webhook-configuration"
-	validatingWHName           = "subscription-validating-webhook-configuration"
 	tlsCertField               = "tls.crt"
 )
 
@@ -821,7 +818,7 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 	var certificateSecret v1.Secret
 	secretKey := client.ObjectKey{
 		Namespace: certificateSecretNamespace,
-		Name:      certificateSecretName,
+		Name:      r.cfg.WebhookSecretName,
 	}
 	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
 		return utils.MakeError(errObjectNotFound, err)
@@ -836,32 +833,34 @@ func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Con
 	// check that the mutating and validation WH config are valid
 	if len(mutatingWH.Webhooks) == 0 {
 		return utils.MakeError(errInvalidObject,
-			errors.Errorf("mutatingWH %s does not have associated webhooks", mutatingWHName))
+			errors.Errorf("mutatingWH %s does not have associated webhooks", r.cfg.MutatingWebhookName))
 	}
 	if len(validatingWH.Webhooks) == 0 {
 		return utils.MakeError(errInvalidObject,
-			errors.Errorf("validatingWH %s does not have associated webhooks", validatingWHName))
+			errors.Errorf("validatingWH %s does not have associated webhooks", r.cfg.ValidatingWebhookName))
 	}
 
 	// check if the CABundle present is valid
-	if mutatingWH.Webhooks[0].ClientConfig.CABundle != nil && validatingWH.Webhooks[0].ClientConfig.CABundle != nil {
-		if bytes.Equal(mutatingWH.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data[tlsCertField]) &&
-			bytes.Equal(validatingWH.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data[tlsCertField]) {
-			return nil
+	if !(mutatingWH.Webhooks[0].ClientConfig.CABundle != nil &&
+		bytes.Equal(mutatingWH.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data[tlsCertField])) {
+		// update the ClientConfig for mutating WH config
+		mutatingWH.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data[tlsCertField]
+		err = r.Client.Update(ctx, mutatingWH)
+		if err != nil {
+			return errors.Wrap(err, "while updating mutatingWH with caBundle")
 		}
 	}
 
-	// update the ClientConfig for both the mutating and validation WH config
-	mutatingWH.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data[tlsCertField]
-	err = r.Client.Update(ctx, mutatingWH)
-	if err != nil {
-		return errors.Wrap(err, "while updating mutatingWH with caBundle")
+	if !(validatingWH.Webhooks[0].ClientConfig.CABundle != nil &&
+		bytes.Equal(validatingWH.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data[tlsCertField])) {
+		// update the ClientConfig for validating WH config
+		validatingWH.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data[tlsCertField]
+		err = r.Client.Update(ctx, validatingWH)
+		if err != nil {
+			return errors.Wrap(err, "while updating validatingWH with caBundle")
+		}
 	}
-	validatingWH.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data[tlsCertField]
-	err = r.Client.Update(ctx, validatingWH)
-	if err != nil {
-		return errors.Wrap(err, "while updating validatingWH with caBundle")
-	}
+
 	return nil
 }
 
@@ -869,14 +868,14 @@ func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) 
 	*admissionv1.MutatingWebhookConfiguration, *admissionv1.ValidatingWebhookConfiguration, error) {
 	var mutatingWH admissionv1.MutatingWebhookConfiguration
 	mutatingWHKey := client.ObjectKey{
-		Name: mutatingWHName,
+		Name: r.cfg.MutatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, mutatingWHKey, &mutatingWH); err != nil {
 		return nil, nil, utils.MakeError(errObjectNotFound, err)
 	}
 	var validatingWH admissionv1.ValidatingWebhookConfiguration
 	validatingWHKey := client.ObjectKey{
-		Name: validatingWHName,
+		Name: r.cfg.ValidatingWebhookName,
 	}
 	if err := r.Client.Get(ctx, validatingWHKey, &validatingWH); err != nil {
 		return nil, nil, utils.MakeError(errObjectNotFound, err)

@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	subName = "sub"
-	subNs   = "test"
+	subName      = "sub"
+	subNamespace = "test"
 )
 
 func Test_Default(t *testing.T) {
@@ -26,11 +26,11 @@ func Test_Default(t *testing.T) {
 	testCases := []TestCase{
 		{
 			name: "Add TypeMatching Standard and default MaxInFlightMessages value",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 			),
-			wantSub: testingv2.NewSubscription(subName, subNs,
+			wantSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithTypeMatchingStandard(),
@@ -39,25 +39,26 @@ func Test_Default(t *testing.T) {
 		},
 		{
 			name: "Add TypeMatching Standard only",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages("20"),
 			),
-			wantSub: testingv2.NewSubscription(subName, subNs,
+			wantSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
+				testingv2.WithMaxInFlightMessages("20"),
 				testingv2.WithTypeMatchingStandard(),
 			),
 		},
 		{
 			name: "Add default MaxInFlightMessages value only",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithTypeMatchingExact(),
 			),
-			wantSub: testingv2.NewSubscription(subName, subNs,
+			wantSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithTypeMatchingExact(),
@@ -67,10 +68,11 @@ func Test_Default(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			testCase.givenSub.Default()
-			require.Equal(t, testCase.givenSub, testCase.wantSub)
+			tc.givenSub.Default()
+			require.Equal(t, tc.givenSub, tc.wantSub)
 		})
 	}
 }
@@ -86,7 +88,7 @@ func Test_validateSubscription(t *testing.T) {
 	testCases := []TestCase{
 		{
 			name: "A valid subscription should not have errors",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
@@ -95,7 +97,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "empty source and TypeMatching Standard should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
@@ -107,7 +109,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "valid source and TypeMatching Standard should not return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
@@ -117,7 +119,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "empty source and TypeMatching Exact should not return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
@@ -126,7 +128,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "nil types field should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithMaxInFlightMessages(v1alpha2.DefaultMaxInFlightMessages),
@@ -138,7 +140,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "empty types field should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{}),
@@ -151,7 +153,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "duplicate types should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{testingv2.OrderCreatedV1Event, testingv2.OrderCreatedV1Event}),
@@ -164,7 +166,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "empty event type should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{testingv2.OrderCreatedV1Event, ""}),
@@ -177,7 +179,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "lower than min segments should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{"order"}),
@@ -190,7 +192,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid prefix should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{v1alpha2.InvalidPrefix}),
@@ -203,7 +205,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid prefix with exact should not return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingExact(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithTypes([]string{v1alpha2.InvalidPrefix}),
@@ -213,7 +215,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid maxInFlight value should return error",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithSource(testingv2.EventSourceClean),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
@@ -226,7 +228,7 @@ func Test_validateSubscription(t *testing.T) {
 		},
 		{
 			name: "multiple errors should be reported if exists",
-			givenSub: testingv2.NewSubscription(subName, subNs,
+			givenSub: testingv2.NewSubscription(subName, subNamespace,
 				testingv2.WithTypeMatchingStandard(),
 				testingv2.WithEventType(testingv2.OrderCreatedV1Event),
 				testingv2.WithMaxInFlightMessages("invalid"),
