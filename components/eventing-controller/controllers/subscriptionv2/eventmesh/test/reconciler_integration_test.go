@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	sink "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
@@ -19,6 +18,9 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 )
+
+const invalidSinkErrMsg = "failed to validate subscription sink URL. " +
+	"It is not a valid cluster local svc: Service \"invalid\" not found"
 
 // TestMain pre-hook and post-hook to run before and after all tests.
 func TestMain(m *testing.M) {
@@ -58,7 +60,7 @@ func Test_CreateSubscription(t *testing.T) {
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test1")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "invalid")),
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
@@ -66,8 +68,7 @@ func Test_CreateSubscription(t *testing.T) {
 				reconcilertesting.HaveCondition(eventingv1alpha2.MakeCondition(
 					eventingv1alpha2.ConditionAPIRuleStatus,
 					eventingv1alpha2.ConditionReasonAPIRuleStatusNotReady,
-					corev1.ConditionFalse, "failed to validate subscription sink URL. "+
-						"It is not a valid cluster local svc: Service \"test1\" not found")),
+					corev1.ConditionFalse, invalidSinkErrMsg)),
 			),
 		},
 		{
@@ -319,8 +320,8 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			reconcilertesting.WithDefaultSource(),
 			reconcilertesting.WithOrderCreatedV1Event(),
 			reconcilertesting.WithWebhookAuthForBEB(),
-			// The following sink is invalid because it is missing a scheme.
-			reconcilertesting.WithSinkMissingScheme(namespace, name),
+			// The following sink is invalid because it has an invalid svc name
+			reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "invalid")),
 		)
 	}
 
@@ -329,7 +330,7 @@ func Test_FixingSinkAndApiRule(t *testing.T) {
 			eventingv1alpha2.ConditionAPIRuleStatus,
 			eventingv1alpha2.ConditionReasonAPIRuleStatusNotReady,
 			corev1.ConditionFalse,
-			sink.MissingSchemeErrMsg,
+			invalidSinkErrMsg,
 		)),
 	)
 

@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -14,7 +16,9 @@ import (
 const (
 	DefaultMaxInFlightMessages = "10"
 	minEventTypeSegments       = 2
+	subdomainSegments          = 5
 	InvalidPrefix              = "sap.kyma.custom"
+	ClusterLocalURLSuffix      = "svc.cluster.local"
 )
 
 func (s *Subscription) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -119,6 +123,35 @@ func (s *Subscription) validateSubscriptionConfig() *field.Error {
 }
 
 func (s *Subscription) validateSubscriptionSink() *field.Error {
+	if s.Spec.Sink == "" {
+		return MakeInvalidFieldError(SinkPath, s.Name, EmptyErrDetail)
+	}
+
+	if !utils.IsValidScheme(s.Spec.Sink) {
+		return MakeInvalidFieldError(SinkPath, s.Name, MissingSchemeErrDetail)
+	}
+
+	trimmedHost, subDomains, err := utils.GetSinkData(s.Spec.Sink)
+	if err != nil {
+		return MakeInvalidFieldError(SinkPath, s.Name, err.Error())
+	}
+
+	// Validate sink URL is a cluster local URL
+	if !strings.HasSuffix(trimmedHost, ClusterLocalURLSuffix) {
+		return MakeInvalidFieldError(SinkPath, s.Name, SuffixMissingErrDetail)
+	}
+
+	// we expected a sink in the format "service.namespace.svc.cluster.local"
+	if len(subDomains) != subdomainSegments {
+		return MakeInvalidFieldError(SinkPath, s.Name, SubDomainsErrDetail+trimmedHost)
+	}
+
+	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	svcNs := subDomains[1]
+	if s.Namespace != svcNs {
+		return MakeInvalidFieldError(NSPath, s.Name, NSMismatchErrDetail+svcNs)
+	}
+
 	return nil
 }
 

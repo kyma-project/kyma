@@ -572,7 +572,7 @@ func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment 
 		t.Fatalf("initialize logger failed: %v", err)
 	}
 	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
-	defaultSinkValidator := sinkv2.NewValidator(ctx, fakeClient, recorder, defaultLogger)
+	defaultSinkValidator := sinkv2.NewValidator(ctx, fakeClient, recorder)
 
 	r := Reconciler{
 		Backend:       mockedBackend,

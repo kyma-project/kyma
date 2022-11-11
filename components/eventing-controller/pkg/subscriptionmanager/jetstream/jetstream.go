@@ -114,7 +114,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 			sm.logger,
 			recorder,
 			jsCleaner,
-			sinkv2.NewValidator(ctx, client, recorder, sm.logger),
+			sinkv2.NewValidator(ctx, client, recorder),
 		)
 		sm.backendv2 = jetStreamReconciler.Backend
 		if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
