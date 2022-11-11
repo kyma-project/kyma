@@ -597,11 +597,11 @@ func (js *JetStream) deleteSubscriptionFromJetStream(jsSub backendnats.Subscribe
 		if err := jsSub.Unsubscribe(); err != nil {
 			return xerrors.Errorf("failed to unsubscribe subscription %v from JetStream: %v", jsSub, err)
 		}
-	} else {
-		// if JS sub is not valid, then we need to delete the consumer on JetStream
-		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
-			return err
-		}
+	}
+
+	if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil &&
+		!errors.Is(err, nats.ErrConsumerNotFound) {
+		return fmt.Errorf("failed to delete consumer %s from JetStream: %w", jsSubKey.ConsumerName(), err)
 	}
 
 	delete(js.subscriptions, jsSubKey)
