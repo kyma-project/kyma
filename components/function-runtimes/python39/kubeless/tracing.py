@@ -21,11 +21,10 @@ _TRACING_SAMPLE_HEADER = "x-b3-sampled"
 class ServerlessTracerProvider:
     def __init__(self, tracecollector_endpoint: str, service_name: str):
         self.noop_tracer = trace.NoOpTracer()
-        if _is_tracecollector_available(tracecollector_endpoint):
-            self.tracer = _get_tracer(tracecollector_endpoint, service_name)
-        else:
-            logging.info("tracecollector is not available")
+        if not tracecollector_endpoint:
             self.tracer = trace.NoOpTracer()
+        else:
+            self.tracer = _get_tracer(tracecollector_endpoint, service_name)
 
     def get_tracer(self, req):
         val = req.get_header(_TRACING_SAMPLE_HEADER)
@@ -54,20 +53,6 @@ def _get_tracer(tracecollector_endpoint: str, service_name: str) -> trace.Tracer
     trace.get_tracer_provider().add_span_processor(span_processor)
 
     return trace.get_tracer(__name__)
-
-
-def _is_tracecollector_available(tracecollectorEndpoint) -> bool:
-    try:
-        res = requests.get(tracecollectorEndpoint, timeout=2)
-        # 405 is the right status code for the GET method if jaeger service exists 
-        # because the only allowed method is POST and usage of other methods are not allowe
-        # https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
-        if res.status_code == 405:
-            return True
-    except:
-        pass
-
-    return False
 
 
 @contextmanager  # type: ignore

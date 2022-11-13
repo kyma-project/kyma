@@ -183,7 +183,7 @@ func TestJetStream_ServerRestart(t *testing.T) { //nolint:gocognit
 					evtestingv2.WithTypeMatchingStandard(),
 					evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 				)
-				require.NoError(t, jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2))
+				jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2)
 
 				// when
 				err = testEnvironment.jsBackendv2.SyncSubscription(subv2)
@@ -309,7 +309,7 @@ func TestJetStream_ServerAndSinkRestart(t *testing.T) {
 					evtestingv2.WithTypeMatchingStandard(),
 					evtestingv2.WithMaxInFlight(defaultMaxInFlights),
 				)
-				require.NoError(t, jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2))
+				jetstreamv2.AddJSCleanEventTypesToStatus(subv2, testEnvironment.cleanerv2)
 
 				// when
 				err = testEnvironment.jsBackendv2.SyncSubscription(subv2)

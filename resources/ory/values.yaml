@@ -30,14 +30,14 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220819-0c178fc7"
+      version: "20221104-ffd6df73"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.30.1-alpine-3cba814e"
+      version: "v1.33.0-d587c1be"
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
@@ -76,11 +76,6 @@ headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
   workloadLabel: oathkeeper
-
-# Maintenance options
-maintenance:
-  podSecurityPolicy:
-    enabled: true
 
 # Overrides for the Hydra chart
 hydra:

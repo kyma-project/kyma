@@ -14,7 +14,7 @@ data:
       "header": [
          {
           "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})",
-           "placeholder": "custom",
+          "placeholder": "custom",
           "type": "string",
           "name": "Type",
           "isSelected": true,
@@ -83,6 +83,20 @@ data:
                         "separator": ", "
                       }
                     ]
+                },
+                {
+                  "widget": "Panel",
+                  "name": "Other Settings",
+                  "children": [
+                    {
+                      "name": "Keep Annotations",
+                      "source": "spec.input.application.keepAnnotations"
+                    },
+                    {
+                      "name": "Drop Labels",
+                      "source": "spec.input.application.dropLabels"
+                    }
+                  ]
                 }
               ]
           },
@@ -92,8 +106,136 @@ data:
             "children":
               [
                 {
-                  "name": "Type",
-                  "source": "$each(spec.output, function($v, $k) {$v.url.value or $v.url.valueFrom.secretKeyRef.name or $v.host.value or $v.host.valueFrom.secretKeyRef.name ? $k})"
+                  "name": "Custom",
+                  "widget": "CodeViewer",
+                  "language": "'plaintext'",
+                  "source": "spec.output.custom",
+                  "visibility": "$exists(spec.output.custom)",
+                },
+                {
+                  "name": "Grafana-Loki",
+                  "widget": "Panel",
+                  "visibility": "$not($exists(spec.output.custom) or $exists(spec.output.http))",
+                  "children": [
+                    {
+                      "name": "URL",
+                      "source": "spec.output.grafana-loki.url.value"
+                    },
+                    {
+                      "name": "Labels",
+                      "source": "spec.output.grafana-loki.labels"
+                    },
+                    {
+                      "name": "Remove keys",
+                      "source": "spec.output.grafana-loki.removeKeys"
+                    }
+                  ]
+                },
+                {
+                  "name": "HTTP",
+                  "widget": "Panel",
+                  "visibility": "$exists(spec.output.http)",
+                  "children": [
+                    {
+                      "name": "Host",
+                      "widget": "Panel",
+                      "children": [
+                        {
+                          "name": "Value",
+                          "source": "spec.output.http.host.value",
+                          "visibility": "$exists(spec.output.http.host.value)"
+                        },
+                        {
+                          "name": "Value From Secret",
+                          "widget": "ResourceRefs",
+                          "source": "spec.output.http.host.valueFrom.secretKeyRef",
+                          "kind": "Secret",
+                          "visibility": "$exists(spec.output.http.host.valueFrom.secretKeyRef.name)"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "User",
+                      "widget": "Panel",
+                      "children": [
+                        {
+                          "name": "Value",
+                          "source": "spec.output.http.user.value",
+                          "visibility": "$exists(spec.output.http.user.value)"
+                        },
+                        {
+                          "name": "Value From Secret",
+                          "widget": "ResourceRefs",
+                          "source": "spec.output.http.user.valueFrom.secretKeyRef",
+                          "kind": "Secret",
+                          "visibility": "$exists(spec.output.http.user.valueFrom.secretKeyRef.name)"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Password",
+                      "widget": "Panel",
+                      "children": [
+                        {
+                          "name": "Value",
+                          "source": "spec.output.http.password.value",
+                          "visibility": "$exists(spec.output.http.password.value)"
+                        },
+                        {
+                          "name": "Value From Secret",
+                          "widget": "ResourceRefs",
+                          "source": "spec.output.http.password.valueFrom.secretKeyRef",
+                          "kind": "Secret",
+                          "visibility": "$exists(spec.output.http.password.valueFrom.secretKeyRef.name)"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "TLS Settings",
+                      "widget": "Panel",
+                      "children": [
+                        {
+                          "name": "Disabled",
+                          "source": "spec.output.http.tls.disabled",
+                          "placeholder": "false"
+                        },
+                        {
+                          "name": "Skip certificate validation",
+                          "source": "spec.output.http.tls.skipCertificateValidation",
+                          "placeholder": "false"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Other Settings",
+                      "widget": "Panel",
+                      "children": [
+                        {
+                          "name": "Compression",
+                          "source": "spec.output.http.compress"
+                        },
+                        {
+                          "name": "De-dot",
+                          "source": "spec.output.http.dedot",
+                          "placeholder": "false"
+                        },
+                        {
+                          "name": "Format",
+                          "source": "spec.output.http.format",
+                          "placeholder": "json"
+                        },
+                        {
+                          "name": "Port",
+                          "source": "spec.output.http.port",
+                          "placeholder": "443"
+                        },
+                        {
+                          "name": "URI",
+                          "source": "spec.output.http.uri"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
           }
@@ -148,6 +290,14 @@ data:
               "name": "Exclude Containers",
               "widget": "SimpleList",
               "path": "application.containers.exclude"
+            },
+            {
+              "name": "Keep Annotations",
+              "path": "application.keepAnnotations"
+            },
+            {
+              "name": "Drop Labels",
+              "path": "application.dropLabels"
             }
           ]
       },
@@ -180,12 +330,14 @@ data:
             {
               "name": "Custom",
               "path": "custom",
-              "widget": "CodeEditor"
+              "widget": "CodeEditor",
+              "simple": false
             },
             {
               "name": "HTTP",
               "path": "http",
               "widget": "FormGroup",
+              "simple": true,
               "children":
                 [
                   {
@@ -236,7 +388,6 @@ data:
                           "widget": "Text"
                         },
                         {
-                          "name": "Secret Reference",
                           "path": "valueFrom.secretKeyRef",
                           "widget": "FormGroup",
                           "children":
@@ -336,60 +487,6 @@ data:
                     "name": "Dedot",
                     "path": "dedot"
                   },
-                ]
-            },
-            {
-              "name": "Grafana Loki",
-              "path": "grafana-loki",
-              "widget": "FormGroup",
-              "children":
-                [
-                  {
-                    "name": "URL",
-                    "path": "url",
-                    "widget": "FormGroup",
-                    "children":
-                      [
-                        {
-                          "name": "Value",
-                          "path": "value",
-                          "widget": "Text"
-                        },
-                        {
-                          "name": "Secret Reference",
-                          "path": "valueFrom.secretKeyRef",
-                          "widget": "FormGroup",
-                          "children":
-                            [
-                              {
-                                "name": "Namespace",
-                                "path": "namespace",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Name",
-                                "path": "name",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Key",
-                                "path": "key",
-                                "widget": "Text"
-                              },
-                            ]
-                        }
-                      ]
-                  },
-                  {
-                    "name": "Labels",
-                    "path": "labels",
-                    "widget": "KeyValuePair"
-                  },
-                  {
-                    "name": "Remove Keys",
-                    "path": "removeKeys",
-                    "widget": "SimpleList"
-                  }
                 ]
             },
           ]

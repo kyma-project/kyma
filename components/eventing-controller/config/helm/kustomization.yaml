@@ -16,6 +16,8 @@ resources:
   - manifests/eventing/charts/controller/templates/service.yaml
   - manifests/eventing/charts/controller/templates/serviceaccount.yaml
   - manifests/eventing/charts/controller/templates/servicemonitor.yaml
+  - manifests/eventing/charts/controller/templates/webhook.yaml
+  - manifests/eventing/charts/controller/templates/webhook-cert-handler.yaml
 
 patchesStrategicMerge:
 - eventing_controller_patch.yaml
