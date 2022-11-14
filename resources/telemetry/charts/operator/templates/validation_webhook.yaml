@@ -1,7 +1,3 @@
-{{- $cn := printf "%s-webhook" (include "fullname" .) }}
-{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
-{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
-{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -60,15 +56,3 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: {{ .Values.webhook.timeout }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ include "operator.fullname" . }}-webhook-cert
-  labels:
-    {{- include "operator.labels" . | nindent 4 }}
-    {{- toYaml .Values.extraLabels | nindent 4 }}
-type: Opaque
-data:
-  tls.crt: {{ b64enc $cert.Cert }}
-  tls.key: {{ b64enc $cert.Key }}

@@ -8,9 +8,9 @@ global:
     telemetry_operator:
       name: "telemetry-operator"
       version: "PR-15935"
-    telemetry_ca_init:
-      name: "telemetry-webhook-ca-init"
-      version: "PR-15934"
+    # telemetry_ca_init:
+    #   name: "telemetry-webhook-ca-init"
+    #   version: "PR-15934"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.9-cf0a130c"

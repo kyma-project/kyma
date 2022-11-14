@@ -28,12 +28,14 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - command:
-            - /webhook-ca-init
+            - /bin/webhook-ca-init
           args:
             - --cert-dir=/var/run/telemetry-webhook
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_ca_init) }}"
-          imagePullPolicy: IfNotPresent
+          image: "docker.io/lindnerb/webhook-ca-init:latest"
+          imagePullPolicy: Always
           name: webhook-ca-init
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
             - mountPath: /var/run/telemetry-webhook
               name: telemetry-webhook-cert

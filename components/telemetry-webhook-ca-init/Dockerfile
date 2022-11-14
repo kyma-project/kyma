@@ -7,4 +7,7 @@ RUN CGO_ENABLED=0 go build -o /bin/webhook-ca-init
 
 FROM scratch
 COPY --from=build /bin/webhook-ca-init /bin/webhook-ca-init
+
+USER 65532:65532
+
 ENTRYPOINT ["/bin/webhook-ca-init"]
