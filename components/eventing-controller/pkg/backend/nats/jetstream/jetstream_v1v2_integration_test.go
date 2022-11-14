@@ -1,10 +1,14 @@
 package jetstream
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/require"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
@@ -12,9 +16,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/require"
 )
 
 // TestJetStreamInitialize_NoStreamExists tests if a stream is
