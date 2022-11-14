@@ -334,7 +334,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   expect(traceDAG).to.have.length(1);
 
   debug('ACTUAL SPANS:')
-  logsSpansGraph(0, traceDAG[0], traceData)
+  logSpansGraph(0, traceDAG[0], traceData)
   debug('EXPECTED SPANS:')
   for (let i = 0; i < expectedTraceProcessSequence.lenth; i++) {
     debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`)
