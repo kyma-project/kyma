@@ -333,6 +333,13 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
+  debug('ACTUAL SPANS:')
+  logsSpansGraph(0, traceDAG[0], traceData)
+  debug('EXPECTED SPANS:')
+  for (let i = 0; i < expectedTraceProcessSequence.lenth; i++) {
+    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`)
+  }
+
   // searching through the trace-graph for the expected span sequence staring at the root element
   const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
   if (!wasFound) {
