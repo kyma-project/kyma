@@ -23,6 +23,8 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+TEMP_DIR = $(shell mktemp -d)
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -75,6 +77,12 @@ test-local: manifests-local generate-local fmt-local vet-local envtest
 
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
+
+lint-manifests: 
+	$(shell mkdir $(TEMP_DIR)/bases)
+	$(shell ls $(TEMP_DIR))
+	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config="$(TEMP_DIR)/bases"
+	../../hack/manifests-lint.sh $(TEMP_DIR)/bases
 
 lint: ## Run various linters
 	../../hack/verify-lint.sh .
