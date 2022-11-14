@@ -1,5 +1,5 @@
 pjConfigs:
   prowJobs:
     kyma-project:
-      kyma:
-        - pjName: "pre-test-infra-validate-dockerfiles"
+      test-infra:
+        - pjName: "pre-test-infra-validate-scripts"
