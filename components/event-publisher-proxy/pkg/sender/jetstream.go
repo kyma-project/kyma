@@ -62,14 +62,6 @@ func (s *JetStreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	if s.ConnectionStatus() != nats.CONNECTED {
 		return http.StatusBadGateway, errors.New("connection status: no connection to NATS JetStream server")
 	}
-	// ensure the stream exists
-	streamExists, err := s.streamExists(s.connection)
-	if err != nil && err != nats.ErrStreamNotFound {
-		return http.StatusInternalServerError, err
-	}
-	if !streamExists {
-		return http.StatusNotFound, nats.ErrStreamNotFound
-	}
 
 	jsCtx, jsError := s.connection.JetStream()
 	if jsError != nil {
@@ -84,6 +76,10 @@ func (s *JetStreamMessageSender) Send(_ context.Context, event *event.Event) (in
 	_, err = jsCtx.PublishMsg(msg)
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
+		if errors.Is(err, nats.ErrNoStreamResponse) {
+			// returning different error here, to show the same behavior as previously when we actively checked for the streams existence
+			return http.StatusNotFound, nats.ErrStreamNotFound
+		}
 		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
 			return http.StatusInsufficientStorage, err
 		}
