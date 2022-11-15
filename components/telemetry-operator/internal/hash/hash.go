@@ -29,16 +29,16 @@ func Calculate(configMaps []corev1.ConfigMap, secrets []corev1.Secret) string {
 }
 
 func addStringMap(h hash.Hash, m map[string]string) {
-	for k, v := range m {
+	for _, k := range sortKeys(m) {
 		h.Write([]byte(k))
-		h.Write([]byte(v))
+		h.Write([]byte(m[k]))
 	}
 }
 
 func addByteMap(h hash.Hash, m map[string][]byte) {
-	for k, v := range m {
+	for _, k := range sortKeys(m) {
 		h.Write([]byte(k))
-		h.Write(v)
+		h.Write(m[k])
 	}
 }
 
@@ -58,6 +58,15 @@ func sortSecrets(unsorted []corev1.Secret) []corev1.Secret {
 		return less(&sorted[i].ObjectMeta, &sorted[j].ObjectMeta)
 	})
 	return sorted
+}
+
+func sortKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func less(x, y objectMetaGetter) bool {
