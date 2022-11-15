@@ -65,6 +65,9 @@ components:
   cni:
     enabled: true
     config:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       resources:
         limits:
           cpu: 500m
