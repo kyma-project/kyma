@@ -6,4 +6,4 @@ pjConfigs:
   prowJobs:
     kyma-project:
       test-infra:
-        - pjName: "pre-test-infra-validate-scripts"
+        - pjName: "pre-test-infra-validate-scripts-demo"
