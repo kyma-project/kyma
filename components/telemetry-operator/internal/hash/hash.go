@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"hash"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sort"
+
+	corev1 "k8s.io/api/core/v1"
 )
 
 type objectMetaGetter interface {
@@ -43,18 +45,18 @@ func addByteMap(h hash.Hash, m map[string][]byte) {
 func sortConfigMaps(unsorted []corev1.ConfigMap) []corev1.ConfigMap {
 	sorted := make([]corev1.ConfigMap, len(unsorted))
 	copy(sorted, unsorted)
-	//sort.Slice(sorted, func(i, j int) bool {
-	//	return less(&sorted[i].ObjectMeta, &sorted[j].ObjectMeta)
-	//})
+	sort.Slice(sorted, func(i, j int) bool {
+		return less(&sorted[i].ObjectMeta, &sorted[j].ObjectMeta)
+	})
 	return sorted
 }
 
 func sortSecrets(unsorted []corev1.Secret) []corev1.Secret {
 	sorted := make([]corev1.Secret, len(unsorted))
 	copy(sorted, unsorted)
-	//sort.Slice(sorted, func(i, j int) bool {
-	//	return less(&sorted[i].ObjectMeta, &sorted[j].ObjectMeta)
-	//})
+	sort.Slice(sorted, func(i, j int) bool {
+		return less(&sorted[i].ObjectMeta, &sorted[j].ObjectMeta)
+	})
 	return sorted
 }
 
