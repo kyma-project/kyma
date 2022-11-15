@@ -1634,11 +1634,6 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDo
 		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
 
-	// SyncSubscription binds the existing subscription to JetStream created one
-	err = jsBackend.SyncSubscription(sub)
-	// then
-	require.NoError(t, err)
-
 	// when
 	err = jsBackend.SyncSubscription(sub)
 

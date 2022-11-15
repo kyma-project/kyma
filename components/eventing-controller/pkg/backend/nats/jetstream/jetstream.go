@@ -5,16 +5,16 @@ import (
 	"crypto/md5" // #nosec
 	"encoding/hex"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"net/http"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 	"k8s.io/apimachinery/pkg/api/resource"
-
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"

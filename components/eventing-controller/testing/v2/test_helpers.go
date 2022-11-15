@@ -692,6 +692,12 @@ func WithCleanEventTypeOld() SubscriptionOpt {
 	return WithSourceAndType(EventSourceClean, OrderCreatedEventType)
 }
 
+// WithCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and
+// type.
+func WithCleanEventSourceAndType() SubscriptionOpt {
+	return WithSourceAndType(EventSourceClean, OrderCreatedV1Event)
+}
+
 // WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and type
 func WithNotCleanEventSourceAndType() SubscriptionOpt {
 	return WithSourceAndType(EventSourceUnclean, OrderCreatedUncleanEvent)
