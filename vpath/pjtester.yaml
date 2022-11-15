@@ -1,0 +1,9 @@
+pjConfigs:
+  prConfig:
+    kyma-project:
+      test-infra:
+        prNumber: 6390
+  prowJobs:
+    kyma-project:
+      test-infra:
+        - pjName: "pre-test-infra-validate-scripts"
