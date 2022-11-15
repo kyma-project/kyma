@@ -353,11 +353,11 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
 
 
 function logSpansGraph(position, currentSpan, traceData) {
-    const span = traceData.processes[currentSpan.process.ID].serviceName;
+    const span = traceData.processes[currentSpan.processID].serviceName;
     debug(`${buildLevel(position)} ${span}`)
-    
+
     for (let i = 0; i < currentSpan.childSpans.length; i++) {
-        logSpansGraph(position + 1, currentSpan.childSPans[i], traceData)
+        logSpansGraph(position + 1, currentSpan.childSpans[i], traceData)
     }
 }
 
