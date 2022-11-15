@@ -42,6 +42,7 @@
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/installation/resources/crds/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
