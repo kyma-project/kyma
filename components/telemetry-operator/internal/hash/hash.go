@@ -1,4 +1,4 @@
-package tracepipeline
+package hash
 
 import (
 	"crypto/sha256"
@@ -8,7 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func CreateConfigHash(configMaps []corev1.ConfigMap, secrets []corev1.Secret) string {
+func Calculate(configMaps []corev1.ConfigMap, secrets []corev1.Secret) string {
 	h := sha256.New()
 
 	for _, cm := range configMaps {
