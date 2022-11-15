@@ -22,6 +22,9 @@ Then you can enable available Modules either with support of Busola through the 
 
 The only type of Module currently accepted is `ModuleTemplate` in version `v1alpha1`.
 
+The easiest way to create ModuleTemplates from operators is Kyma CLI. We have supplied the command `kyma alpha create module` that is kept up-to-date in all `unstable` builds until Release. For more information, refer to its help documentation.
+
+
 When submitting a new module, make sure to add it to the proper `kustomization.yaml` to also integrate it with our rendering.
 
 ## Disclaimer
