@@ -10,4 +10,3 @@ components:
   - name: "istio-resources"
   - name: "cluster-users"
   - name: "application-connector"
-    namespace: "kyma-system"
