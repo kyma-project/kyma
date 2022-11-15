@@ -40,6 +40,9 @@ spec:
         - name: serverless-webhook
           secret:
             secretName: {{ .Values.container.envs.webhookSecretName.value }}
+      {{- if .Values.pod.extraProperties }}
+      {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
+      {{- end }}
       initContainers:
         - name: remove-old-mutating-secret
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
@@ -47,6 +50,10 @@ spec:
             - "sh"
             - "-c"
             - "kubectl delete mutatingwebhookconfigurations mutating.secrets --ignore-not-found=true"
+           {{- if .Values.initContainer.securityContext }}
+          securityContext:
+            {{- include "tplValue" ( dict "value" .Values.initContainer.securityContext "context" . ) | nindent 12 }}
+          {{- end }}
       containers:
         - name: webhook
           volumeMounts:
@@ -77,10 +84,10 @@ spec:
             limits:
               cpu: {{ .Values.deployment.resources.limits.cpu }}
               memory: {{ .Values.deployment.resources.limits.memory }}
+          {{- if .Values.container.securityContext }}
           securityContext:
-            privileged: {{ .Values.container.privileged }}
-            allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
-            runAsUser: {{ .Values.container.runAsUser }}
+            {{- include "tplValue" ( dict "value" .Values.container.securityContext "context" . ) | nindent 12 }}
+          {{- end }}
           ports:
             - name: {{ .Values.service.ports.httpMetrics.name }}
               containerPort: {{ .Values.service.ports.httpMetrics.targetPort }}

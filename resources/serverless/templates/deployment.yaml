@@ -47,6 +47,8 @@ spec:
         - name: configuration
           configMap:
             name: "{{ .Values.global.configuration.configmapName }}"
+        - name: tmpdir # Needed to allow git repo fetching with read-only rootfs enabled
+          emptyDir: {}
       serviceAccountName: {{ template "fullname" . }}-controller-manager
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
@@ -56,6 +58,8 @@ spec:
           volumeMounts:
             - name: configuration
               mountPath: {{ .Values.global.configuration.targetDir }}
+            - name: tmpdir # Needed to allow git repo fetching with read-only rootfs enabled
+              mountPath: "/tmp"
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
           imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
           command:

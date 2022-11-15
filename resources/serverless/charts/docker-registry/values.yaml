@@ -116,12 +116,49 @@ configData: # example: https://github.com/docker/distribution/blob/master/cmd/re
       interval: 10s
       threshold: 3
 
-securityContext:
-  enabled: true
-  runAsUser: 1000
-  fsGroup: 1000
-  privileged: false
-  allowPrivilegeEscalation: false
+containers:
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+    privileged: false
+    allowPrivilegeEscalation: false
+    # capabilities:
+    #     add: # Only the following capabilities are allowed in the baseline standard. If no capabilities needed, the whole add-section has to be removed.
+    #       - AUDIT_WRITE
+    #       - CHOWN
+    #       - DAC_OVERRIDE
+    #       - FOWNER
+    #       - FSETID
+    #       - KILL
+    #       - MKNOD
+    #       - NET_BIND_SERVICE
+    #       - SETFCAP
+    #       - SETGID
+    #       - SETPCAP
+    #       - SETUID
+    #       - SYS_CHROOT
+    # seLinuxOptions: # Optional. Set this on container level and only if it is really necessary. Setting the user or role option is forbidden. If the setting is not needed, the whole seLinuxOptions-section has to be removed.
+    #   type: container_t # or container_init_t or container_kvm_t
+    procMount: default # Optional. The default is false if the entry is not there.
+    readOnlyRootFilesystem: true # Mandatory
+
+pod:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile: # Optional. This option can also be set on container level but it is recommended to set it on Pod level and leave it undefined on container level.
+      type: RuntimeDefault
+    # sysctls: # Optional. Only the following calls are allowed. If it isn't necessary to modify kernel attributes (which usually should be the case), the whole sysctl-section has to be removed.
+    #   - name: kernel.shm_rmid_forced,
+    #     value: ''
+    #   - name: net.ipv4.ip_local_port_range,
+    #     value: ''
+    #   - name: net.ipv4.ip_unprivileged_port_start,
+    #     value: ''
+    #   - name: net.ipv4.tcp_syncookies,
+    #     value: ''
+    #   - name: net.ipv4.ping_group_range,
+    #     value: ''
 
 priorityClassName: ""
 
