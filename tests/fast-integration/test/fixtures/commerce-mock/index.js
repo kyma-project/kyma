@@ -344,14 +344,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   logSpansGraph(0, traceDAG[0], traceData);
 
   // searching through the trace-graph for the expected span sequence staring at the root element
-  const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData, 0);
-  if (!wasFound) {
-    debug(`Not all expected spans found in the expected order:`);
-    for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
-      debug(`${expectedTraceProcessSequence[i]}`);
-    }
-  }
-  expect(wasFound).to.be.true;
+  expect(findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData, 0)).to.be.true;
 }
 
 function logSpansGraph(position, currentSpan, traceData) {
