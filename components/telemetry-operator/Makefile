@@ -77,7 +77,7 @@ build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 lint-manifests:
-	../../hack/manifests-lint.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
+	../../hack/lint-manifests.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
 
 lint: lint-manifests ## Run various linters
 	../../hack/verify-lint.sh .
