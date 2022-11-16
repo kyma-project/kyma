@@ -344,6 +344,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   logSpansGraph(0, traceDAG[0], traceData);
 
   // searching through the trace-graph for the expected span sequence staring at the root element
+  debug('trying to match expected and actual');
   expect(findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData, 0)).to.be.true;
 }
 
@@ -370,7 +371,7 @@ function findSpanSequence(expectedSpans, position, currentSpan, traceData, numbe
     numberFound++;
     debug(debugMsg);
   } else {
-    debug(`${debugMsg} expected ${expectedSpan}`);
+    debug(`${debugMsg} [expected ${expectedSpan}, continue to search]`);
   }
 
   // check if all traces have been found yet
