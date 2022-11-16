@@ -60,7 +60,7 @@ func (js *JetStream) Initialize(connCloseHandler backendutilsv2.ConnClosedHandle
 	if err := js.initCloudEventClient(js.Config); err != nil {
 		return err
 	}
-	return js.ensureStreamExists()
+	return js.ensureStreamExistsAndIsConfiguredCorrectly()
 }
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscription) error {
@@ -181,22 +181,25 @@ func (js *JetStream) initNATSConn(connCloseHandler backendutilsv2.ConnClosedHand
 
 func (js *JetStream) handleReconnect(_ *nats.Conn) {
 	js.namedLogger().Infow("Called reconnect handler for JetStream")
-	if err := js.ensureStreamExists(); err != nil {
+	if err := js.ensureStreamExistsAndIsConfiguredCorrectly(); err != nil {
 		js.namedLogger().Errorw("Failed to ensure the stream exists", "error", err)
 	}
 }
 
-func (js *JetStream) ensureStreamExists() error {
+func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 	streamConfig, err := getStreamConfig(js.Config)
 	if err != nil {
 		return err
 	}
 	info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName)
 	if errors.Is(err, nats.ErrStreamNotFound) {
-		js.namedLogger().Infow("Stream not found, creating a new Stream",
-			"streamName", js.Config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
-		_, err = js.jsCtx.AddStream(streamConfig)
-		return err
+		info, err = js.jsCtx.AddStream(streamConfig)
+		if err != nil {
+			return err
+		}
+		js.namedLogger().Infow("Stream not found, created a new Stream",
+			"stream-info", info)
+		return nil
 	} else if err != nil {
 		return err
 	}

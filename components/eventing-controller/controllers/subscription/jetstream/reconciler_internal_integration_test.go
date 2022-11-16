@@ -768,6 +768,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		JSStreamMaxBytes:        -1,
 		JSStreamMaxMessages:     -1,
 		JSStreamRetentionPolicy: "interest",
+		JSStreamDiscardPolicy:   "new",
 	}
 
 	// prepare application-lister

@@ -334,10 +334,13 @@ func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 	}
 	info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName)
 	if errors.Is(err, nats.ErrStreamNotFound) {
-		js.namedLogger().Infow("Stream not found, creating a new Stream",
-			"streamName", js.Config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
-		_, err = js.jsCtx.AddStream(streamConfig)
-		return err
+		info, err = js.jsCtx.AddStream(streamConfig)
+		if err != nil {
+			return err
+		}
+		js.namedLogger().Infow("Stream not found, created a new Stream",
+			"stream-info", info)
+		return nil
 	} else if err != nil {
 		return err
 	}
