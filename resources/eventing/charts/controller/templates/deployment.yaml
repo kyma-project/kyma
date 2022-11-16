@@ -80,6 +80,12 @@ spec:
             value: {{ .Values.jetstream.maxMessages | quote }}
           - name: JS_STREAM_MAX_BYTES
             value: {{ .Values.jetstream.maxBytes | quote }}
+          - name: WEBHOOK_SECRET_NAME
+            value: {{ .Values.webhook.secretName | quote }}
+          - name: MUTATING_WEBHOOK_NAME
+            value: {{ .Values.webhook.mutating.name | quote }}
+          - name: VALIDATING_WEBHOOK_NAME
+            value: {{ .Values.webhook.validating.name | quote }}
           - name: ENABLE_NEW_CRD_VERSION
             value: {{ .Values.enableNewCRDVersion | quote }}
           resources:

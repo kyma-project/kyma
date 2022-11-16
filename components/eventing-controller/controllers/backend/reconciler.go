@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	admissionv1 "k8s.io/api/admissionregistration/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -52,6 +53,9 @@ const (
 	BEBPublishEndpointForPublisher  = "/sap/ems/v1/events"
 
 	reconcilerName = "backend-reconciler"
+
+	certificateSecretNamespace = "kyma-system"
+	tlsCertField               = "tls.crt"
 )
 
 var (
@@ -60,6 +64,9 @@ var (
 	allowedAnnotations = map[string]string{
 		"kubectl.kubernetes.io/restartedAt": "",
 	}
+
+	errObjectNotFound = errors.New("object not found")
+	errInvalidObject  = errors.New("invalid object")
 )
 
 type Reconciler struct {
@@ -103,6 +110,12 @@ func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, 
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;delete
 
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
+	if r.natsConfig.EnableNewCRDVersion {
+		if err := r.updateMutatingValidatingWebhookWithCABundle(ctx); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	var secretList v1.SecretList
 	// the default status has all conditions and eventingReady set to true.
 	// if something breaks during reconciliation, the condition and eventingReady is updated to false.
@@ -798,6 +811,76 @@ func (r *Reconciler) deletePublisherProxy(ctx context.Context) error {
 	r.namedLogger().Debug("Event Publisher with invalid backend type found, deleting it")
 	err = r.Delete(ctx, publisher)
 	return err
+}
+
+func (r *Reconciler) updateMutatingValidatingWebhookWithCABundle(ctx context.Context) error {
+	// get the secret containing the certificate
+	var certificateSecret v1.Secret
+	secretKey := client.ObjectKey{
+		Namespace: certificateSecretNamespace,
+		Name:      r.cfg.WebhookSecretName,
+	}
+	if err := r.Client.Get(ctx, secretKey, &certificateSecret); err != nil {
+		return utils.MakeError(errObjectNotFound, err)
+	}
+
+	// get the mutating and validation WH config
+	mutatingWH, validatingWH, err := r.getMutatingAndValidatingWebHookConfig(ctx)
+	if err != nil {
+		return err
+	}
+
+	// check that the mutating and validation WH config are valid
+	if len(mutatingWH.Webhooks) == 0 {
+		return utils.MakeError(errInvalidObject,
+			errors.Errorf("mutatingWH %s does not have associated webhooks", r.cfg.MutatingWebhookName))
+	}
+	if len(validatingWH.Webhooks) == 0 {
+		return utils.MakeError(errInvalidObject,
+			errors.Errorf("validatingWH %s does not have associated webhooks", r.cfg.ValidatingWebhookName))
+	}
+
+	// check if the CABundle present is valid
+	if !(mutatingWH.Webhooks[0].ClientConfig.CABundle != nil &&
+		bytes.Equal(mutatingWH.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data[tlsCertField])) {
+		// update the ClientConfig for mutating WH config
+		mutatingWH.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data[tlsCertField]
+		err = r.Client.Update(ctx, mutatingWH)
+		if err != nil {
+			return errors.Wrap(err, "while updating mutatingWH with caBundle")
+		}
+	}
+
+	if !(validatingWH.Webhooks[0].ClientConfig.CABundle != nil &&
+		bytes.Equal(validatingWH.Webhooks[0].ClientConfig.CABundle, certificateSecret.Data[tlsCertField])) {
+		// update the ClientConfig for validating WH config
+		validatingWH.Webhooks[0].ClientConfig.CABundle = certificateSecret.Data[tlsCertField]
+		err = r.Client.Update(ctx, validatingWH)
+		if err != nil {
+			return errors.Wrap(err, "while updating validatingWH with caBundle")
+		}
+	}
+
+	return nil
+}
+
+func (r *Reconciler) getMutatingAndValidatingWebHookConfig(ctx context.Context) (
+	*admissionv1.MutatingWebhookConfiguration, *admissionv1.ValidatingWebhookConfiguration, error) {
+	var mutatingWH admissionv1.MutatingWebhookConfiguration
+	mutatingWHKey := client.ObjectKey{
+		Name: r.cfg.MutatingWebhookName,
+	}
+	if err := r.Client.Get(ctx, mutatingWHKey, &mutatingWH); err != nil {
+		return nil, nil, utils.MakeError(errObjectNotFound, err)
+	}
+	var validatingWH admissionv1.ValidatingWebhookConfiguration
+	validatingWHKey := client.ObjectKey{
+		Name: r.cfg.ValidatingWebhookName,
+	}
+	if err := r.Client.Get(ctx, validatingWHKey, &validatingWH); err != nil {
+		return nil, nil, utils.MakeError(errObjectNotFound, err)
+	}
+	return &mutatingWH, &validatingWH, nil
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

@@ -128,7 +128,7 @@ func setupSuite() error {
 
 	// setup eventMesh reconciler
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
-	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
+	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder)
 	credentials := &backendbeb.OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",

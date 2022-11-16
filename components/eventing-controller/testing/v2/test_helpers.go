@@ -440,10 +440,6 @@ func WithOrderCreatedV1Event() SubscriptionOpt {
 	return WithEventType(OrderCreatedV1Event)
 }
 
-func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
-	return WithSinkURL(fmt.Sprintf("%s.%s.svc.cluster.local", svcName, svcNamespace))
-}
-
 func WithDefaultSource() SubscriptionOpt {
 	return WithEventSource(ApplicationName)
 }

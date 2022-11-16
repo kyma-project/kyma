@@ -17,4 +17,8 @@ var (
 
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
+
+	//nolint:gochecknoglobals // required for tests
+	// GroupKind is group kind to identify these objects.
+	GroupKind = schema.GroupKind{Group: "eventing.kyma-project.io", Kind: "Subscription"}
 )
