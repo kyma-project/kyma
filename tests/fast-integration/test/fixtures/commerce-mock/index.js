@@ -322,6 +322,12 @@ async function checkInClusterEventTracing(targetNamespace) {
 async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceRes = await getJaegerTrace(traceId);
 
+  // log the expected trace
+  debug('expected spans:');
+  for (i = 0; i < expectedTraceProcessSequence.length; i++) {
+    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
+  }
+
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 
@@ -333,12 +339,9 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
-  debug('ACTUAL SPANS:');
+  // log the actual trace
+  debug('actual spans:');
   logSpansGraph(0, traceDAG[0], traceData);
-  debug('EXPECTED SPANS:');
-  for (let i = 0; i < expectedTraceProcessSequence.lenth; i++) {
-    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
-  }
 
   // searching through the trace-graph for the expected span sequence staring at the root element
   const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
@@ -353,8 +356,9 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
 
 function logSpansGraph(position, currentSpan, traceData) {
   const actualSpan = traceData.processes[currentSpan.processID].serviceName;
-  let newPosition = position +1;
+  debug(`${buildLevel(position)} ${actualSpan}`);
 
+  const newPosition = position +1;
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
     logSpansGraph(newPosition, currentSpan.childSpans[i], traceData);
   }
