@@ -20,8 +20,9 @@ To override the configuration, redefine the default values in your custom `value
 
 [Logging `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/values.yaml) and subcharts:
 
-- [Fluent Bit `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/fluent-bit/values.yaml)
 - [Loki `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml)
+
+    > **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
 ### Tracing
 

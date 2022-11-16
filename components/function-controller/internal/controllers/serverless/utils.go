@@ -6,7 +6,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -117,23 +116,9 @@ func getArg(args []string, arg string) string {
 	return ""
 }
 
-func getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
-	volumeMounts := []corev1.VolumeMount{
-		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-		// If COPY is not used, then the cache will not work
-		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
-		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
-		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-	}
-	// add package registry config volume mount depending on the used runtime
-	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
-	return volumeMounts
-}
-
 func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha2.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha2.NodeJs12, serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
+	case serverlessv1alpha2.NodeJs14, serverlessv1alpha2.NodeJs16:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",

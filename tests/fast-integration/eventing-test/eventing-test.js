@@ -31,8 +31,7 @@ const {
   isDebugEnabled,
   k8sApply,
   deleteK8sPod,
-  eventingSubscription,
-  waitForPodStatusWithLabel,
+  eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -54,6 +53,7 @@ const {
 const {
   bebBackend,
   natsBackend, getEventMeshNamespace,
+  kymaSystem, telemetryOperatorLabel, conditionReady, jaegerLabel, jaegerEndpoint,
 } = require('./common/common');
 const {
   assert,
@@ -72,8 +72,16 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
+  before('Ensure tracing is ready', async function() {
+    await waitForPodWithLabelAndCondition(jaegerLabel.key, jaegerLabel.value, kymaSystem, conditionReady.condition,
+        conditionReady.status);
+    await waitForEndpoint(jaegerEndpoint, kymaSystem);
+  });
+
   before('Expose Grafana', async function() {
     await exposeGrafana();
+    await waitForPodWithLabelAndCondition( telemetryOperatorLabel.key, telemetryOperatorLabel.value, kymaSystem,
+        conditionReady.condition, conditionReady.status, 60_000);
   });
 
   before('Get stream config for JetStream', async function() {

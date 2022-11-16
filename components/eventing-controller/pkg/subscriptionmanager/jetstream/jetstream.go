@@ -3,6 +3,9 @@ package jetstream
 import (
 	"context"
 
+	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
+	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 
 	"golang.org/x/xerrors"
@@ -66,6 +69,7 @@ type SubscriptionManager struct {
 	metricsCollector *backendmetrics.Collector
 	mgr              manager.Manager
 	backend          backendjetstream.Backend
+	backendv2        backendjetstreamv2.Backend
 	logger           *logger.Logger
 }
 
@@ -101,7 +105,8 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	if sm.envCfg.EnableNewCRDVersion {
 		jsCleaner := cleaner.NewJetStreamCleaner(sm.logger)
-		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg, sm.metricsCollector, jsCleaner, sm.logger)
+		jetStreamHandler := backendjetstreamv2.NewJetStream(sm.envCfg,
+			sm.metricsCollector, jsCleaner, defaultSubsConfig, sm.logger)
 		jetStreamReconciler := jetstreamv2.NewReconciler(
 			ctx,
 			client,
@@ -109,11 +114,9 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 			sm.logger,
 			recorder,
 			jsCleaner,
-			defaultSubsConfig,
-			sink.NewValidator(ctx, client, recorder, sm.logger),
+			sinkv2.NewValidator(ctx, client, recorder),
 		)
-		// TODO: fix this
-		// sm.backend = jetStreamReconciler.Backend
+		sm.backendv2 = jetStreamReconciler.Backend
 		if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
 			return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
 		}
@@ -146,6 +149,9 @@ func (sm *SubscriptionManager) Stop(runCleanup bool) error {
 		return nil
 	}
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
+	if sm.envCfg.EnableNewCRDVersion {
+		return cleanupv2(sm.backendv2, dynamicClient, sm.namedLogger())
+	}
 	return cleanup(sm.backend, dynamicClient, sm.namedLogger())
 }
 
@@ -190,6 +196,56 @@ func cleanup(backend backendjetstream.Backend, dynamicClient dynamic.Interface, 
 			if err := jsBackend.DeleteSubscription(&sub); err != nil {
 				isCleanupSuccessful = false
 				log.Errorw("Failed to delete JetStream subscription", "error", err)
+			}
+		}
+	}
+
+	logger.Debugw("Finished cleanup process", "success", isCleanupSuccessful)
+	return nil
+}
+
+// clean removes all JetStream artifacts.
+func cleanupv2(backend backendjetstreamv2.Backend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	var ok bool
+	var jsBackend *backendjetstreamv2.JetStream
+	if jsBackend, ok = backend.(*backendjetstreamv2.JetStream); !ok {
+		err := errors.New("converting backend to JetStream v2 backend failed")
+		return err
+	}
+
+	// fetch all subscriptions.
+	subscriptionsUnstructured, err := dynamicClient.Resource(
+		eventingv1alpha2.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "list subscriptions failed")
+	}
+
+	subs, err := eventingv1alpha2.ConvertUnstructListToSubList(subscriptionsUnstructured)
+	if err != nil {
+		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
+	}
+
+	// clean all status.
+	isCleanupSuccessful := true
+	for _, v := range subs.Items {
+		sub := v
+		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
+		log := logger.With("key", subKey.String())
+
+		desiredSub := sub.DuplicateWithStatusDefaults()
+		if updateErr := backendutilsv2.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); updateErr != nil {
+			isCleanupSuccessful = false
+			log.Errorw("Failed to update JetStream v2 subscription status", "error", err)
+		}
+
+		// clean subscriptions from JetStream.
+		if jsBackend != nil {
+			if delErr := jsBackend.DeleteSubscription(&sub); delErr != nil {
+				isCleanupSuccessful = false
+				log.Errorw("Failed to delete JetStream v2 subscription", "error", delErr)
 			}
 		}
 	}

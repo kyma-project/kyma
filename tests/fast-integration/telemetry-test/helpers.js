@@ -1,12 +1,18 @@
 module.exports = {
   loadTestData,
+  patchSecret,
   waitForLogPipelineStatusRunning,
+  waitForTracePipeline,
+  waitForPodWithLabel,
 };
 
 const k8s = require('@kubernetes/client-node');
 const fs = require('fs');
 const path = require('path');
-const {waitForK8sObject} = require('../utils');
+const {
+  k8sCoreV1Api,
+  waitForK8sObject,
+} = require('../utils');
 
 function loadTestData(fileName) {
   return loadResourceFromFile(`./testdata/${fileName}`);
@@ -44,4 +50,54 @@ function checkLastCondition(logPipeline, conditionType) {
   }
   const lastCondition = conditions[conditions.length - 1];
   return lastCondition.type === conditionType;
+}
+
+function waitForTracePipeline(name) {
+  return waitForK8sObject(
+      '/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines',
+      {},
+      (_type, watchObj, _) => {
+        return (watchObj.metadata.name === name);
+      },
+      18000,
+      `Waiting for trace pipeline ${name} timeout 18000 ms)`,
+  );
+}
+
+function waitForPodWithLabel(
+    labelKey,
+    labelValue,
+    namespace = 'default',
+    timeout = 90000,
+) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/pods`,
+      query,
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.status.phase === 'Running' &&
+            watchObj.object.status.containerStatuses.every((cs) => cs.ready)
+        );
+      },
+      timeout,
+      `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
+  );
+}
+
+async function patchSecret(secretName, namespace, patch) {
+  const options = {'headers': {'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
+
+  await k8sCoreV1Api.patchNamespacedSecret(
+      secretName,
+      namespace,
+      patch,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      options,
+  );
 }

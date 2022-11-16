@@ -82,8 +82,16 @@ jaeger:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
-      allowPrivilegeEscalation: false
-      privileged: false
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    #containerSecurityContext: # available with jaeger-operator 1.38
+    #  allowPrivilegeEscalation: false
+    #  privileged: false
+    #  readOnlyRootFilesystem: true
+    #  capabilities:
+    #    drop:
+    #      - ALL
 
 rbac:
   # Specifies whether RBAC resources should be created
@@ -132,8 +140,16 @@ tolerations: []
 affinity: {}
 
 securityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
+  capabilities:
+    drop:
+      - ALL
 
 priorityClassName:
 
@@ -163,7 +179,7 @@ global:
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.3.0-c54bc74b"
+      version: "7.4.0-f193d3f9"
       directory: "tpi"
 virtualservice:
   enabled: true
@@ -188,11 +204,20 @@ authProxy:
     upstreamTimeout: 1m
   env: {}
   nodeSelector: {}
-  podSecurityContext: {}
   securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
     allowPrivilegeEscalation: false
     privileged: false
-    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   image:
     pullPolicy: IfNotPresent
   resources:

@@ -26,6 +26,8 @@ kubectl logs {POD_NAME} --namespace {NAMESPACE_NAME} --container {CONTAINER_NAME
 
 ## Loki logs in Grafana UI
 
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
+
 To see a visual representation and search for specific logs, follow these steps:
 
 1. In the **Cluster Overview** of Kyma Dashboard, go to **Observability** and open **Grafana**.
@@ -37,6 +39,8 @@ To see a visual representation and search for specific logs, follow these steps:
    ```
 
 ## Loki logs using Loki API
+
+> **NOTE:** Loki is [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) and is planned to be removed. If you want to install a custom Loki stack, take a look at [this tutorial](https://github.com/kyma-project/examples/tree/main/loki).
 
 To access the logs through the [Loki API](https://grafana.com/docs/loki/latest/api/) directly, follow these steps:
 

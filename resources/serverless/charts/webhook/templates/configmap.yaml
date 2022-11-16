@@ -6,6 +6,7 @@ metadata:
   labels:
     {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 data:
+  WEBHOOK_CONFIG_PATH: {{ include "tplValue" ( dict "value" .Values.container.envs.configPath.value "context" . ) | quote }}
   WEBHOOK_SERVICE_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookServiceName.value "context" . ) | quote }}
   WEBHOOK_SECRET_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName.value "context" . ) | quote }}
   WEBHOOK_PORT: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort.value "context" . ) | quote }}
@@ -24,7 +25,6 @@ data:
 {{ include "tplValue" ( dict "value" .Values.values.function.resources.presets "context" . ) | nindent 4 }}
   WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_RUNTIME_PRESETS_MAP: |-
 {{ include "tplValue" ( dict "value" .Values.values.function.resources.runtimePresets "context" . ) | nindent 4 }}
-
 
   WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestCpu "context" . ) | quote }}
   WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestMemory "context" . ) | quote }}

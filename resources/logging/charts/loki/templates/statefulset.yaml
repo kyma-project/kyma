@@ -95,7 +95,10 @@ spec:
         {{- if .Values.chunkCleaner.enabled }}
         - name: chunk-cleaner
           image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.alpine) }}
-          resources: {{- toYaml .Values.chunkCleaner.resources | nindent 12 }}
+          resources:
+            {{- toYaml .Values.chunkCleaner.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.chunkCleaner.securityContext | nindent 12 }}
           command:
             - /bin/sh
             - -c

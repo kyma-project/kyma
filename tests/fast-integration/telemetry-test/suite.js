@@ -3,6 +3,7 @@ const {
   expect,
 } = require('chai');
 const {
+  getSecret,
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
@@ -19,7 +20,10 @@ const {
 const {
   loadTestData,
   waitForLogPipelineStatusRunning,
+  waitForTracePipeline,
+  waitForPodWithLabel,
 } = require('./helpers');
+
 
 async function prepareEnvironment() {
   async function k8sApplyFile(name, namespace) {
@@ -32,6 +36,7 @@ async function prepareEnvironment() {
   await k8sApplyFile('regex-filter-deployment.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'default');
   await k8sApplyFile('logs-workload.yaml', 'kyma-system');
+  await k8sApplyFile('secret-trace-endpoint.yaml', 'default');
 }
 
 async function cleanEnvironment() {
@@ -45,6 +50,7 @@ async function cleanEnvironment() {
   await k8sDeleteFile('regex-filter-deployment.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'default');
   await k8sDeleteFile('logs-workload.yaml', 'kyma-system');
+  await k8sDeleteFile('secret-trace-endpoint.yaml', 'default');
 }
 
 describe('Telemetry Operator', function() {
@@ -304,6 +310,38 @@ describe('Telemetry Operator', function() {
             await k8sDelete(pipeline);
           });
         });
+      });
+    });
+  });
+
+  context('Configurable Tracing', function() {
+    context('TracePipeline', function() {
+      const pipeline = loadTestData('tracepipeline-output-otlp-secret-ref.yaml');
+      const pipelineName = pipeline[0].metadata.name;
+
+      it(`Should create TracePipeline '${pipelineName}'`, async function() {
+        await k8sApply(pipeline);
+        await waitForTracePipeline(pipelineName);
+      });
+
+      it('Should have ready trace collector pods', async () => {
+        await waitForPodWithLabel('app.kubernetes.io/name', 'telemetry-trace-collector', 'kyma-system');
+      });
+
+      it('Should have created telemetry-trace-collector secret', async () => {
+        const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+        assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL25vLWVuZHBvaW50');
+      });
+
+      it(`Should reflect secret ref change in telemetry-trace-collector secret`, async function() {
+        await k8sApply(loadTestData('secret-patched-trace-endpoint.yaml'), 'default');
+        await sleep(5*1000);
+        const secret = await getSecret('telemetry-trace-collector', 'kyma-system');
+        assert.equal(secret.data.OTLP_ENDPOINT, 'aHR0cDovL2Fub3RoZXItZW5kcG9pbnQ=');
+      });
+
+      it(`Should delete TracePipeline '${pipelineName}'`, async function() {
+        await k8sDelete(pipeline);
       });
     });
   });

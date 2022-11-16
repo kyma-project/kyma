@@ -13,7 +13,7 @@ const JetStreamSubjectPrefix = "kyma"
 // NATSConfig represents the environment config for the Event Publisher to NATS.
 type NATSConfig struct {
 	Port                 int           `envconfig:"INGRESS_PORT" default:"8080"`
-	URL                  string        `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
+	URL                  string        `envconfig:"NATS_URL" required:"true"`
 	RetryOnFailedConnect bool          `envconfig:"RETRY_ON_FAILED_CONNECT" default:"true"`
 	MaxReconnects        int           `envconfig:"MAX_RECONNECTS" default:"-1"` // Negative means keep try reconnecting.
 	ReconnectWait        time.Duration `envconfig:"RECONNECT_WAIT" default:"5s"`

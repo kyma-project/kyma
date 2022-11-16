@@ -23,13 +23,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.cleanEventTypes
-      name: Clean Event Types
-      type: string
     name: v1alpha2
     schema:
       openAPIV3Schema:
-        description: Subscription is the Schema for the subscriptions API
+        description: Subscription is the Schema for the subscriptions API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation

@@ -22,11 +22,8 @@ var _ http.Handler = (*testHandler)(nil)
 func TestNewHttpMessageReceiver(t *testing.T) {
 	port := testingutils.GeneratePortOrDie()
 	r := NewHTTPMessageReceiver(port)
-	if r == nil {
-		t.Fatalf("Could not create HTTPMessageReceiver")
-	}
-	if r.port != port {
-		t.Errorf("Port should be: %d is: %d", port, r.port)
+	if r.Port != port {
+		t.Errorf("Port should be: %d is: %d", port, r.Port)
 	}
 }
 
@@ -79,5 +76,5 @@ func TestStartListener(t *testing.T) {
 }
 
 func fixtureReceiver() *HTTPMessageReceiver {
-	return NewHTTPMessageReceiver(0)
+	return &HTTPMessageReceiver{Port: 0, Host: "localhost"}
 }

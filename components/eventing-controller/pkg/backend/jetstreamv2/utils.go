@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -26,6 +25,24 @@ const (
 	ConsumerDeliverPolicyLastPerSubject = "last_per_subject"
 	ConsumerDeliverPolicyNew            = "new"
 )
+
+// getDefaultSubscriptionOptions builds the default nats.SubOpts by using the subscription/consumer configuration.
+func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier,
+	maxInFlightMessages int) DefaultSubOpts {
+	return DefaultSubOpts{
+		nats.Durable(consumer.consumerName),
+		nats.Description(consumer.namespacedSubjectName),
+		nats.ManualAck(),
+		nats.AckExplicit(),
+		nats.IdleHeartbeat(idleHeartBeatDuration),
+		nats.EnableFlowControl(),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(js.Config.JSConsumerDeliverPolicy),
+		nats.MaxAckPending(maxInFlightMessages),
+		nats.MaxDeliver(jsConsumerMaxRedeliver),
+		nats.AckWait(jsConsumerAcKWait),
+		nats.Bind(js.Config.JSStreamName, consumer.ConsumerName()),
+	}
+}
 
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
@@ -64,6 +81,23 @@ func toJetStreamConsumerDeliverPolicyOptOrDefault(deliverPolicy string) nats.Sub
 	return nats.DeliverNew()
 }
 
+// toJetStreamConsumerDeliverPolicy returns a nats.DeliverPolicy based on the given deliver policy string value.
+// It returns "DeliverNew" as the default nats.DeliverPolicy, if the given deliver policy value is not supported.
+// Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
+func toJetStreamConsumerDeliverPolicy(deliverPolicy string) nats.DeliverPolicy {
+	switch deliverPolicy {
+	case ConsumerDeliverPolicyAll:
+		return nats.DeliverAllPolicy
+	case ConsumerDeliverPolicyLast:
+		return nats.DeliverLastPolicy
+	case ConsumerDeliverPolicyLastPerSubject:
+		return nats.DeliverLastPerSubjectPolicy
+	case ConsumerDeliverPolicyNew:
+		return nats.DeliverNewPolicy
+	}
+	return nats.DeliverNewPolicy
+}
+
 func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
 	if err != nil {
@@ -90,6 +124,25 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	return streamConfig, nil
 }
 
+// getConsumerConfig return the consumerConfig according to the default configuration.
+func (js *JetStream) getConsumerConfig(jsSubKey SubscriptionSubjectIdentifier,
+	jsSubject string, maxInFlight int) *nats.ConsumerConfig {
+	return &nats.ConsumerConfig{
+		Durable:        jsSubKey.ConsumerName(),
+		Description:    jsSubKey.namespacedSubjectName,
+		DeliverPolicy:  toJetStreamConsumerDeliverPolicy(js.Config.JSConsumerDeliverPolicy),
+		FlowControl:    true,
+		MaxAckPending:  maxInFlight,
+		AckPolicy:      nats.AckExplicitPolicy,
+		AckWait:        jsConsumerAcKWait,
+		MaxDeliver:     jsConsumerMaxRedeliver,
+		FilterSubject:  jsSubject,
+		ReplayPolicy:   nats.ReplayInstantPolicy,
+		DeliverSubject: nats.NewInbox(),
+		Heartbeat:      idleHeartBeatDuration,
+	}
+}
+
 func createKeyPrefix(sub *eventingv1alpha2.Subscription) string {
 	namespacedName := types.NamespacedName{
 		Namespace: sub.Namespace,
@@ -98,9 +151,9 @@ func createKeyPrefix(sub *eventingv1alpha2.Subscription) string {
 	return namespacedName.String()
 }
 
-func getCleanEventTypesFromStatus(subscriptionStatus eventingv1alpha2.SubscriptionStatus) []string {
+func GetCleanEventTypesFromEventTypes(eventTypes []eventingv1alpha2.EventType) []string {
 	var cleantypes []string
-	for _, eventtypes := range subscriptionStatus.Types {
+	for _, eventtypes := range eventTypes {
 		cleantypes = append(cleantypes, eventtypes.CleanType)
 	}
 	return cleantypes
@@ -121,23 +174,14 @@ func getUniqueEventTypes(eventTypes []string) []string {
 	return unique
 }
 
-// getCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
-func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) ([]eventingv1alpha2.EventType, error) {
-	// TODO: Put this in the validation webhook
-	if sub.Spec.Types == nil {
-		return []eventingv1alpha2.EventType{}, errors.New("event types must be provided")
-	}
-
+// GetCleanEventTypes returns a list of clean eventTypes from the unique types in the subscription.
+func GetCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Cleaner) []eventingv1alpha2.EventType {
 	uniqueTypes := getUniqueEventTypes(sub.Spec.Types)
 	var cleanEventTypes []eventingv1alpha2.EventType
 	for _, eventType := range uniqueTypes {
 		cleanType := eventType
-		var err error
 		if sub.Spec.TypeMatching != eventingv1alpha2.TypeMatchingExact {
-			cleanType, err = getCleanEventType(eventType, cleaner)
-			if err != nil {
-				return []eventingv1alpha2.EventType{}, err
-			}
+			cleanType, _ = cleaner.CleanEventType(eventType)
 		}
 		newEventType := eventingv1alpha2.EventType{
 			OriginalType: eventType,
@@ -145,22 +189,26 @@ func getCleanEventTypes(sub *eventingv1alpha2.Subscription, cleaner cleaner.Clea
 		}
 		cleanEventTypes = append(cleanEventTypes, newEventType)
 	}
-	return cleanEventTypes, nil
+	return cleanEventTypes
 }
 
-func getCleanEventType(eventType string, cleaner cleaner.Cleaner) (string, error) {
-	if len(eventType) == 0 {
-		return "", nats.ErrBadSubject
+// GetBackendJetStreamTypes gets the original event type and the consumer name for all the subscriptions
+// and this slice is set as the backend specific status for JetStream.
+func GetBackendJetStreamTypes(subscription *eventingv1alpha2.Subscription,
+	jsSubjects []string) []eventingv1alpha2.JetStreamTypes {
+	var jsTypes []eventingv1alpha2.JetStreamTypes
+	for i, ot := range subscription.Spec.Types {
+		jt := eventingv1alpha2.JetStreamTypes{OriginalType: ot,
+			ConsumerName: computeConsumerName(subscription, jsSubjects[i])}
+		jsTypes = append(jsTypes, jt)
 	}
-	if segments := strings.Split(eventType, "."); len(segments) < 2 {
-		return "", nats.ErrBadSubject
-	}
-	return cleaner.CleanEventType(eventType)
+	return jsTypes
 }
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription
 // have the same namespaced name, otherwise returns false.
-func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier, subscription *eventingv1alpha2.Subscription) bool {
+func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier,
+	subscription *eventingv1alpha2.Subscription) bool {
 	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
@@ -179,7 +227,8 @@ func (s SubscriptionSubjectIdentifier) ConsumerName() string {
 }
 
 // NewSubscriptionSubjectIdentifier returns a new SubscriptionSubjectIdentifier instance.
-func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha2.Subscription, subject string) SubscriptionSubjectIdentifier {
+func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha2.Subscription,
+	subject string) SubscriptionSubjectIdentifier {
 	cn := computeConsumerName(subscription, subject)          // compute the consumer name once
 	nn := computeNamespacedSubjectName(subscription, subject) // compute the namespaced name with the subject once
 	return SubscriptionSubjectIdentifier{consumerName: cn, namespacedSubjectName: nn}

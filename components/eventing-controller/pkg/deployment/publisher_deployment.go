@@ -45,8 +45,6 @@ const (
 
 	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
-
-	natsURL = "eventing-nats.kyma-system.svc.cluster.local"
 )
 
 var (
@@ -325,7 +323,7 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "nats"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
-		{Name: "NATS_URL", Value: natsURL},
+		{Name: "NATS_URL", Value: natsConfig.URL},
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
 		{

@@ -18,11 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // LogPipelineSpec defines the desired state of LogPipeline
 type LogPipelineSpec struct {
@@ -153,37 +149,6 @@ type FileMount struct {
 type VariableRef struct {
 	Name      string          `json:"name,omitempty"`
 	ValueFrom ValueFromSource `json:"valueFrom,omitempty"`
-}
-
-type ValueType struct {
-	Value     string           `json:"value,omitempty"`
-	ValueFrom *ValueFromSource `json:"valueFrom,omitempty"`
-}
-
-func (v *ValueType) IsDefined() bool {
-	if v.Value != "" {
-		return true
-	}
-
-	return v.ValueFrom != nil && v.ValueFrom.IsSecretKeyRef()
-}
-
-type ValueFromSource struct {
-	SecretKeyRef *SecretKeyRef `json:"secretKeyRef,omitempty"`
-}
-
-func (v *ValueFromSource) IsSecretKeyRef() bool {
-	return v.SecretKeyRef != nil && v.SecretKeyRef.Name != "" && v.SecretKeyRef.Key != ""
-}
-
-type SecretKeyRef struct {
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
-	Key       string `json:"key,omitempty"`
-}
-
-func (skr *SecretKeyRef) NamespacedName() types.NamespacedName {
-	return types.NamespacedName{Name: skr.Name, Namespace: skr.Namespace}
 }
 
 type LogPipelineConditionType string

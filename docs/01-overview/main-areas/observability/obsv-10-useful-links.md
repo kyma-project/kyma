@@ -9,6 +9,8 @@ If you're interested in learning more about the Observability area, check out th
 - Check out the different ways to [access the logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) provided by Kubernetes and Loki.
 - Learn how to adjust Loki's [log limits](../../../04-operation-guides/operations/obsv-02-adjust-loki.md).
 
+- Install a [custom Loki stack](https://github.com/kyma-project/examples/tree/main/loki).
+
 - See how to [access and expose](../../../04-operation-guides/security/sec-06-access-expose-grafana.md) the services Grafana, Jaeger, and Kiali.
 
 - Troubleshoot Observability-related issues:

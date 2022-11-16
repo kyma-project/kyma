@@ -6,10 +6,8 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	corev1 "k8s.io/api/core/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -163,7 +161,7 @@ func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *teleme
 
 func (s *syncer) copySecretData(ctx context.Context, sourceRef telemetryv1alpha1.SecretKeyRef, targetKey string, target map[string][]byte) error {
 	var source corev1.Secret
-	if err := s.Get(ctx, types.NamespacedName{Name: sourceRef.Name, Namespace: sourceRef.Namespace}, &source); err != nil {
+	if err := s.Get(ctx, sourceRef.NamespacedName(), &source); err != nil {
 		return fmt.Errorf("unable to read secret '%s' from namespace '%s': %w", sourceRef.Name, sourceRef.Namespace, err)
 	}
 

@@ -1,5 +1,5 @@
-# image builder base on golang:1.19.1-alpine3.16
-FROM eu.gcr.io/kyma-project/external/golang@sha256:ca4f0513119dfbdc65ae7b76b69688f0723ed00d9ecf9de68abbf6ed01ef11bf as builder
+# image builder base on golang:1.19.2-alpine3.16
+FROM eu.gcr.io/kyma-project/external/golang@sha256:45d14bdb069fd5e1fee50160a3e15752038f0fabf339a5ed7f342b84701ed3d6 as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -32,7 +32,7 @@ FROM eu.gcr.io/kyma-project/external/alpine@sha256:1304f174557314a7ed9eddb4eab12
 ENV LIBGIT2_VERSION=1.1.0-r2
 
 RUN apk update --no-cache && apk upgrade --no-cache
-RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssl
+RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssl=3.0.7-r0
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2=${LIBGIT2_VERSION}
 
 LABEL source = git@github.com:kyma-project/kyma.git

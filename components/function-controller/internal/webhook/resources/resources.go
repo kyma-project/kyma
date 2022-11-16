@@ -20,7 +20,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, logger *zap.SugaredLogger) error {
+func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, log *zap.SugaredLogger) error {
+	logger := log.Named("resource-ctrl")
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
@@ -57,7 +58,7 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 			webhookConfig: webhookConfig,
 			client:        mgr.GetClient(),
 			secretName:    secretName,
-			logger:        logger.Named("webhook-resource-controller"),
+			logger:        log.Named("webhook-resource-controller"),
 		},
 	})
 	if err != nil {

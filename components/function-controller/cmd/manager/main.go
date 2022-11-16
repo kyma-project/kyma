@@ -17,11 +17,12 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -52,7 +53,7 @@ type config struct {
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
-	FileConfigPath            string `envconfig:"default=/appdata/config.yaml"`
+	ConfigPath                string `envconfig:"default=/appdata/config.yaml"`
 }
 
 type healthzConfig struct {
@@ -67,26 +68,42 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	loggerRegistry, err := configureLogger(ctx, config.FileConfigPath)
+	logCfg, err := fileconfig.Load(config.ConfigPath)
 	if err != nil {
-		setupLog.Error(err, "unable to configure logger")
+		setupLog.Error(err, "unable to load configuration file")
 		os.Exit(1)
 	}
 
-	ctrl.SetLogger(zapr.NewLogger(loggerRegistry.CreateDesugared()))
+	atomic := zap.NewAtomicLevel()
+	parsedLevel, err := zapcore.ParseLevel(logCfg.LogLevel)
+	if err != nil {
+		setupLog.Error(err, "unable to parse logger level")
+		os.Exit(1)
+	}
+	atomic.SetLevel(parsedLevel)
 
-	zapLogger := loggerRegistry.CreateUnregistered()
-	zapLogger.Info("Generating Kubernetes client config")
+	log, err := logging.ConfigureLogger(logCfg.LogLevel, logCfg.LogFormat, atomic)
+	if err != nil {
+		setupLog.Error(err, "unable to configure log")
+		os.Exit(1)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	logWithCtx := log.WithContext()
+	go logging.ReconfigureOnConfigChange(ctx, logWithCtx.Named("notifier"), atomic, config.ConfigPath)
+
+	ctrl.SetLogger(zapr.NewLogger(logWithCtx.Desugar()))
+
+	logWithCtx.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
 
-	zapLogger.Info("Registering Prometheus Stats Collector")
+	logWithCtx.Info("Registering Prometheus Stats Collector")
 	prometheusCollector := metrics.NewPrometheusStatsCollector()
 	prometheusCollector.Register()
 
-	zapLogger.Info("Initializing controller manager")
+	logWithCtx.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     config.MetricsAddress,
@@ -104,12 +121,8 @@ func main() {
 	configMapSvc := k8s.NewConfigMapService(resourceClient, config.Kubernetes)
 	secretSvc := k8s.NewSecretService(resourceClient, config.Kubernetes)
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
-	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
-	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
 
-	events := make(chan event.GenericEvent)
-	healthCh := make(chan bool)
-	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, loggerRegistry.CreateNamed("healthz"))
+	healthHandler, healthEventsCh, healthResponseCh := serverless.NewHealthChecker(config.Healthz.LivenessTimeout, logWithCtx.Named("healthz"))
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
 		os.Exit(1)
@@ -120,91 +133,57 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.gitrepo")).SetupWithManager(mgr)
+	err = gitrepo.NewGitRepoUpdateController(mgr.GetClient(), logWithCtx.Named("controllers.gitrepo")).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create gitRepo controller")
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunctionReconciler(resourceClient, loggerRegistry.CreateNamed("controllers.function"), config.Function, &git.GitClientFactory{}, mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunctionReconciler(resourceClient, logWithCtx.Named("controllers.function"), config.Function, &git.GitClientFactory{}, mgr.GetEventRecorderFor(serverlessv1alpha2.FunctionControllerValue), prometheusCollector, healthResponseCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
 	}
 
-	err = fnCtrl.Watch(&source.Channel{Source: events}, &handler.EnqueueRequestForObject{})
+	err = fnCtrl.Watch(&source.Channel{Source: healthEventsCh}, &handler.EnqueueRequestForObject{})
 	if err != nil {
-		setupLog.Error(err, "unable to watch something")
+		setupLog.Error(err, "unable to watch health events channel")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewConfigMap(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.configmap"), config.Kubernetes, configMapSvc).
+	if err := k8s.NewConfigMap(mgr.GetClient(), logWithCtx.Named("controllers.configmap"), config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewNamespace(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.namespace"), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
+	if err := k8s.NewNamespace(mgr.GetClient(), logWithCtx.Named("controllers.namespace"), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewSecret(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.secret"), config.Kubernetes, secretSvc).
+	if err := k8s.NewSecret(mgr.GetClient(), logWithCtx.Named("controllers.secret"), config.Kubernetes, secretSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Secret controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.serviceaccount"), config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), logWithCtx.Named("controllers.serviceaccount"), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRole(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.role"), config.Kubernetes, roleSvc).
-		SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create Role controller")
-		os.Exit(1)
-	}
-
-	if err := k8s.NewRoleBinding(mgr.GetClient(), loggerRegistry.CreateNamed("controllers.rolebinding"), config.Kubernetes, roleBindingSvc).
-		SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create RoleBinding controller")
-		os.Exit(1)
-	}
-
 	// +kubebuilder:scaffold:builder
 
-	zapLogger.Info("Running manager")
+	logWithCtx.Info("Running manager")
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
-}
-
-func configureLogger(ctx context.Context, cfgPath string) (*logging.Registry, error) {
-	cfg, err := fileconfig.Load(cfgPath)
-	if err != nil {
-		return nil, err
-	}
-
-	log, err := logging.ConfigureRegisteredLogger(cfg.LogLevel, cfg.LogFormat)
-	if err != nil {
-		return nil, err
-	}
-
-	notifyLog := log.CreateNamed("notifier")
-	go fileconfig.RunOnConfigChange(ctx, notifyLog, cfgPath, func(cfg fileconfig.Config) {
-		log, err = log.Reconfigure(cfg.LogLevel, cfg.LogFormat)
-		if err != nil {
-			notifyLog.Error(err)
-		}
-	})
-
-	return log, err
 }
 
 func loadConfig(prefix string) (config, error) {

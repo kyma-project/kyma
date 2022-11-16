@@ -65,6 +65,10 @@ global:
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
+  configuration:
+    configmapName: 'serverless-configuration'
+    targetDir: "/appdata"
+    filename: "config.yaml"
   ingress:
     domainName:
   containerRegistry:
@@ -72,36 +76,33 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220819-0c178fc7"
+      version: "20221104-ffd6df73"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15792"
+      version: "PR-16091"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15792"
+      version: "PR-16091"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15792"
-    function_runtime_nodejs12:
-      name: "function-runtime-nodejs12"
-      version: "PR-15671"
+      version: "PR-16091"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-15761"
+      version: "v20221110-f5cb45c7"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "PR-15671"
+      version: "v20221110-f5cb45c7"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-15774"
+      version: "v20221110-f5cb45c7"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.9.0-a550386f"
+      version: "1.9.0-4ced14d5"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-981f40fb"
+      version: "2.7.1-4ced14d5"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -110,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-15776"
+      version: "v20221102-bcd2a2b1"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -172,23 +173,17 @@ containers:
       port: "8090"
     extraProperties: {}
     configuration:
-      targetDir: "/appdata"
-      filename: "config.yaml"
       data:
         logLevel: "info"
         logFormat: "json"
     envs:
-      fileConfigPath:
-        value: "{{ .Values.containers.manager.configuration.targetDir }}/{{ .Values.containers.manager.configuration.filename }}"
+      configPath:
+        value: "{{ .Values.global.configuration.targetDir }}/{{ .Values.global.configuration.filename }}"
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
         value: 5m
       serviceAccountRequeueDuration:
-        value: 5m
-      roleRequeueDuration:
-        value: 5m
-      roleBindingRequeueDuration:
         value: 5m
       namespaceExcludedNames:
         value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
@@ -200,8 +195,6 @@ containers:
         value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
-      buildServiceAccountName:
-        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
       # Deprecated as of kyma 2.8

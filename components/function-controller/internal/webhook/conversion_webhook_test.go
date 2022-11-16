@@ -38,6 +38,10 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 	_ = serverlessv1alpha1.AddToScheme(scheme)
 	_ = serverlessv1alpha2.AddToScheme(scheme)
 
+	one := int32(1)
+	two := int32(2)
+	three := int32(3)
+
 	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(testGitRepo).Build()
 	fakeLogger := zap.NewNop().Sugar()
 	w := NewConvertingWebhook(client, scheme, fakeLogger)
@@ -53,7 +57,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			src: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -61,13 +65,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
 					},
+					Replicas: &one,
 				},
 			},
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
@@ -77,7 +82,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			src: &serverlessv1alpha2.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -89,7 +94,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -101,7 +106,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			src: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -136,7 +141,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantDst: &serverlessv1alpha2.Function{
@@ -168,13 +173,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
 					},
+					Replicas: &one,
 				},
 				Status: serverlessv1alpha2.FunctionStatus{
 					Conditions: []serverlessv1alpha2.Condition{
@@ -220,7 +226,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -242,7 +248,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -277,7 +283,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -287,7 +293,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			src: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -304,7 +310,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: testGitRepo.Spec.URL,
@@ -318,6 +324,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
+					Replicas: &one,
 				},
 			},
 			wantVersion: serverlessv1alpha2.GroupVersion.String(),
@@ -332,7 +339,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: testGitRepo.Spec.URL,
@@ -351,7 +358,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 			wantDst: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -373,7 +380,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -387,7 +394,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantDst: &serverlessv1alpha2.Function{
@@ -398,13 +405,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							Profile: "some-preset-value",
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
 					},
+					Replicas: &one,
 				},
 				Status: serverlessv1alpha2.FunctionStatus{
 					Conditions: []serverlessv1alpha2.Condition{
@@ -430,7 +438,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -458,7 +466,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -472,7 +480,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -487,7 +495,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							Profile: "another-preset-value",
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -515,7 +523,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -529,7 +537,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -545,7 +553,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("123m"),
@@ -569,7 +577,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantDst: &serverlessv1alpha2.Function{
@@ -590,13 +598,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
 					},
+					Replicas: &one,
 				},
 				Status: serverlessv1alpha2.FunctionStatus{
 					Conditions: []serverlessv1alpha2.Condition{
@@ -627,7 +636,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							Profile: "another-preset-value",
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -655,7 +664,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -669,7 +678,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -695,7 +704,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -729,7 +738,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("732Mi"),
 						},
 					},
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -743,7 +752,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -759,7 +768,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -773,7 +782,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantDst: &serverlessv1alpha2.Function{
@@ -784,13 +793,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							Profile: "some-preset-value",
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
 					},
+					Replicas: &one,
 				},
 				Status: serverlessv1alpha2.FunctionStatus{
 					Conditions: []serverlessv1alpha2.Condition{
@@ -816,7 +826,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -844,7 +854,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -858,7 +868,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -873,7 +883,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							Profile: "another-preset-value",
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -901,7 +911,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -915,7 +925,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -931,7 +941,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("123m"),
@@ -955,7 +965,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantDst: &serverlessv1alpha2.Function{
@@ -976,13 +986,14 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
 							Dependencies: "test-deps",
 						},
 					},
+					Replicas: &one,
 				},
 				Status: serverlessv1alpha2.FunctionStatus{
 					Conditions: []serverlessv1alpha2.Condition{
@@ -1013,7 +1024,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							Profile: "another-preset-value",
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -1041,7 +1052,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -1055,7 +1066,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
@@ -1081,7 +1092,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							},
 						},
 					},
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						Inline: &serverlessv1alpha2.InlineSource{
 							Source:       "test-source",
@@ -1115,7 +1126,7 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("732Mi"),
 						},
 					},
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Source:  "test-source",
 					Deps:    "test-deps",
 				},
@@ -1129,10 +1140,41 @@ func TestConvertingWebhook_convertFunction(t *testing.T) {
 						},
 					},
 					Source:  "test-source",
-					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs12,
+					Runtime: serverlessv1alpha1.RuntimeExtendedNodejs16,
 				},
 			},
 			wantVersion: serverlessv1alpha1.GroupVersion.String(),
+		},
+		{
+			name: "v1alpha1 to v1alpha2 inline function -  with min/max replicas",
+			src: &serverlessv1alpha1.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha1.FunctionSpec{
+					MinReplicas: &two,
+					MaxReplicas: &three,
+					Runtime:     serverlessv1alpha1.Nodejs16,
+					Source:      "test-source",
+					Deps:        "test-deps",
+				},
+			},
+			wantDst: &serverlessv1alpha2.Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: serverlessv1alpha2.FunctionSpec{
+					Runtime: serverlessv1alpha2.NodeJs16,
+					Source: serverlessv1alpha2.Source{
+						Inline: &serverlessv1alpha2.InlineSource{
+							Source:       "test-source",
+							Dependencies: "test-deps",
+						},
+					},
+					Replicas: &two,
+					ScaleConfig: &serverlessv1alpha2.ScaleConfig{
+						MinReplicas: &two,
+						MaxReplicas: &three,
+					},
+				},
+			},
+			wantVersion: serverlessv1alpha2.GroupVersion.String(),
 		},
 	}
 	for _, tt := range tests {
@@ -1185,7 +1227,7 @@ func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
 			src: &serverlessv1alpha1.Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: serverlessv1alpha1.FunctionSpec{
-					Runtime: serverlessv1alpha1.Nodejs12,
+					Runtime: serverlessv1alpha1.Nodejs16,
 					Type:    serverlessv1alpha1.SourceTypeGit,
 					Source:  testRepoName,
 					Repository: serverlessv1alpha1.Repository{
@@ -1202,7 +1244,7 @@ func TestConvertingWebhook_convertFunctionWithRemovedAuth(t *testing.T) {
 					},
 				},
 				Spec: serverlessv1alpha2.FunctionSpec{
-					Runtime: serverlessv1alpha2.NodeJs12,
+					Runtime: serverlessv1alpha2.NodeJs16,
 					Source: serverlessv1alpha2.Source{
 						GitRepository: &serverlessv1alpha2.GitRepositorySource{
 							URL: testGitRepoNoAuth.Spec.URL,

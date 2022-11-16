@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
@@ -21,7 +23,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/mocks"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -357,8 +358,6 @@ func Test_syncInitialStatus(t *testing.T) {
 
 	cleanSubjects := []string{controllertesting.OrderCreatedEventType}
 	newSubjects := []string{controllertesting.OrderCreatedEventTypeNotClean}
-	testEnvironment.Backend.On("GetJetStreamSubjects", cleanSubjects).Return(cleanSubjects)
-	testEnvironment.Backend.On("GetJetStreamSubjects", newSubjects).Return(newSubjects)
 
 	wantSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &defaultSubsConfig)
 	newSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}

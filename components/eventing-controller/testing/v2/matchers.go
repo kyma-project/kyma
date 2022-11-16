@@ -3,6 +3,8 @@ package v2
 import (
 	"reflect"
 
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
 	gomegatypes "github.com/onsi/gomega/types"
@@ -68,6 +70,22 @@ func HaveCondition(condition eventingv1alpha2.Condition) gomegatypes.GomegaMatch
 		"Message": Equal(condition.Message),
 		"Status":  Equal(condition.Status),
 	})))
+}
+
+func HaveSubscriptionActiveCondition() gomegatypes.GomegaMatcher {
+	return HaveCondition(eventingv1alpha2.MakeCondition(
+		eventingv1alpha2.ConditionSubscriptionActive,
+		eventingv1alpha2.ConditionReasonSubscriptionActive,
+		corev1.ConditionTrue, ""))
+}
+
+func HaveAPIRuleTrueStatusCondition() gomegatypes.GomegaMatcher {
+	return HaveCondition(eventingv1alpha2.MakeCondition(
+		eventingv1alpha2.ConditionAPIRuleStatus,
+		eventingv1alpha2.ConditionReasonAPIRuleStatusReady,
+		corev1.ConditionTrue,
+		"",
+	))
 }
 
 func HaveCleanEventTypes(cleanEventTypes []eventingv1alpha2.EventType) gomegatypes.GomegaMatcher {

@@ -4,13 +4,13 @@ global:
   images:
     directory_size_exporter:
       name: "directory-size-exporter"
-      version: "5f79928b"
+      version: "v20221020-e314a071"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "v20221014-abc08e19"
+      version: "v20221108-83804843"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.9.9-a2385ca5"
+      version: "1.9.9-cf0a130c"
       directory: "tpi"
     busybox:
       name: "busybox"
