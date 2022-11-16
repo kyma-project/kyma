@@ -1,5 +1,11 @@
+jobs:
+  crdsInConfigMap: 20
 
 global:
+  installCRDs: false
+  disableLegacyConnectivity: false
+  podSecurityPolicy:
+    privileged: false
   priorityClassName: ""
   highPriorityClassName: "kyma-system-priority"
   priorityClassValue: 2000000

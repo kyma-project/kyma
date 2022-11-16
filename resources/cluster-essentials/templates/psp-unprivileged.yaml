@@ -1,0 +1,23 @@
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: 001-kyma-unprivileged
+spec:
+  allowPrivilegeEscalation: false
+  allowedCapabilities:
+  - '*'
+  hostPorts:
+  - max: 65535
+    min: 1024
+  privileged: false
+  fsGroup:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - "*"
