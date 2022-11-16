@@ -31,6 +31,9 @@ spec:
             - /bin/webhook-ca-init
           args:
             - --cert-dir=/var/run/telemetry-webhook
+            - --service-name=telemetry-operator-webhook
+            - --service-namespace=kyma-system
+            - --webhook-name=validation.webhook.telemetry.kyma-project.io
           image: "docker.io/lindnerb/webhook-ca-init:latest"
           imagePullPolicy: Always
           name: webhook-ca-init
