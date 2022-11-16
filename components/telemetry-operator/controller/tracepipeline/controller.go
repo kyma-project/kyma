@@ -19,6 +19,7 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -158,7 +159,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
-	configHash := CreateConfigHash([]corev1.ConfigMap{*configMap}, []corev1.Secret{*secret})
+	configHash := configchecksum.Calculate([]corev1.ConfigMap{*configMap}, []corev1.Secret{*secret})
 	deployment := makeDeployment(r.config, configHash)
 	if err = controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
 		return err
