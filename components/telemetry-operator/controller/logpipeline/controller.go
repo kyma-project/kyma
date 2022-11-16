@@ -149,6 +149,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if err := r.ensureFinalizers(ctx, &pipeline); err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
 	r.syncSecretsCache(&pipeline)
 
 	secretsOK := r.ensureReferencedSecretsExist(ctx, &pipeline)
@@ -170,7 +174,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.manageFinalizers(ctx, &pipeline); err != nil {
+	if err := r.cleanupFinalizers(ctx, &pipeline); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 

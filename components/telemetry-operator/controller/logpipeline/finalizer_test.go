@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestAddFinalizers(t *testing.T) {
+func TestEnsureFinalizers(t *testing.T) {
 	t.Run("without files", func(t *testing.T) {
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -25,7 +25,7 @@ func TestAddFinalizers(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
-		err := sut.manageFinalizers(context.Background(), pipeline)
+		err := sut.ensureFinalizers(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -55,7 +55,7 @@ func TestAddFinalizers(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
-		err := sut.manageFinalizers(context.Background(), pipeline)
+		err := sut.ensureFinalizers(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -66,7 +66,7 @@ func TestAddFinalizers(t *testing.T) {
 	})
 }
 
-func TestRemoveFinalizers(t *testing.T) {
+func TestCleanupFinalizers(t *testing.T) {
 	t.Run("without files", func(t *testing.T) {
 		ts := metav1.Now()
 		pipeline := &telemetryv1alpha1.LogPipeline{
@@ -82,7 +82,7 @@ func TestRemoveFinalizers(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
-		err := sut.manageFinalizers(context.Background(), pipeline)
+		err := sut.cleanupFinalizers(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -106,7 +106,7 @@ func TestRemoveFinalizers(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
-		err := sut.manageFinalizers(context.Background(), pipeline)
+		err := sut.cleanupFinalizers(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
