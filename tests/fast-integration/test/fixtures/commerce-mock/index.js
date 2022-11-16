@@ -333,11 +333,11 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
-  debug('ACTUAL SPANS:')
-  logSpansGraph(0, traceDAG[0], traceData)
-  debug('EXPECTED SPANS:')
+  debug('ACTUAL SPANS:');
+  logSpansGraph(0, traceDAG[0], traceData);
+  debug('EXPECTED SPANS:');
   for (let i = 0; i < expectedTraceProcessSequence.lenth; i++) {
-    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`)
+    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
   }
 
   // searching through the trace-graph for the expected span sequence staring at the root element
@@ -356,7 +356,7 @@ function logSpansGraph(position, currentSpan, traceData) {
   let newPosition = position +1;
 
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData)
+    findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData);
   }
 }
 
