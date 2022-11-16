@@ -49,14 +49,12 @@ func main() {
 		panic(err.Error())
 	}
 
-	//err = writeFile(certDir+"tls.crt", certificate)
 	err = os.WriteFile(path.Join(certDir, "tls.crt"), certificate, os.ModePerm)
 	if err != nil {
 		fmt.Printf("failed to write tls.crt: %s", err.Error())
 		panic(err.Error())
 	}
 
-	//err = writeFile(certDir+"tls.key", key)
 	err = os.WriteFile(path.Join(certDir, "tls.key"), key, os.ModePerm)
 	if err != nil {
 		fmt.Printf("failed to write tls.key: %s", err.Error())
@@ -74,7 +72,9 @@ func main() {
 		panic(err)
 	}
 
-	webhookConfig.Webhooks[0].ClientConfig.CABundle = certificate
+	for i := range webhookConfig.Webhooks {
+		webhookConfig.Webhooks[i].ClientConfig.CABundle = certificate
+	}
 
 	updatedConfig, err := clientset.AdmissionregistrationV1().
 		ValidatingWebhookConfigurations().
