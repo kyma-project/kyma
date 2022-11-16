@@ -14,5 +14,6 @@ DIFF=$(diff -q $TMP_DIR ${OPERATOR_DIR}/config/crd/bases)
 if [ -n "${DIFF}" ]; then
     echo -e "${RED}x manifests linting failed${NC}"
     echo -e "Generated manifests in config/crd/bases are not on par with API types in apis/telemetry/v1alpha1"
+    echo -e "Possible fix to this issue is to run 'make manifests-local'"
     exit 1
 fi
