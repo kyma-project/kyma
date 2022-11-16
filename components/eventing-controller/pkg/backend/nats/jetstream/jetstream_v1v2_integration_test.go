@@ -64,8 +64,9 @@ func TestJetStreamInitialize_StreamExists(t *testing.T) {
 
 			// A stream already exists
 			createdStreamInfo, err := jsClient.AddStream(&nats.StreamConfig{
-				Name:    natsConfig.JSStreamName,
-				Storage: nats.MemoryStorage,
+				Name:      natsConfig.JSStreamName,
+				Storage:   nats.MemoryStorage,
+				Retention: nats.InterestPolicy, // retention policies cannot be changed on an existing stream
 			})
 			require.NotNil(t, createdStreamInfo)
 			require.NoError(t, err)

@@ -1,6 +1,9 @@
 global:
   jetstream:
     storage: file
+    maxBytes: 900M
+    fileStorage:
+      size: 1Gi
 
 controller:
   jetstream:
@@ -8,7 +11,6 @@ controller:
     streamReplicas: 3
     consumerDeliverPolicy: new
     maxMessages: -1
-    maxBytes: -1
   resources:
     limits:
       cpu: 500m
@@ -35,8 +37,6 @@ nats:
     jetstream:
       memStorage:
         enabled: true
-        size: 1Gi
-      fileStorage:
         size: 1Gi
     resources:
       limits:

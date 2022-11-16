@@ -13,11 +13,16 @@ const (
 	RetentionPolicyLimits   = "limits"
 	RetentionPolicyInterest = "interest"
 
+	DiscardPolicyNew = "new"
+	DiscardPolicyOld = "old"
+
 	ConsumerDeliverPolicyAll            = "all"
 	ConsumerDeliverPolicyLast           = "last"
 	ConsumerDeliverPolicyLastPerSubject = "last_per_subject"
 	ConsumerDeliverPolicyNew            = "new"
 )
+
+var ErrInvalidDiscardPolicy = fmt.Errorf("invalid discard policy")
 
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
@@ -37,6 +42,16 @@ func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
 		return nats.InterestPolicy, nil
 	}
 	return nats.LimitsPolicy, fmt.Errorf("invalid stream retention policy %q", s)
+}
+
+func toJetStreamDiscardPolicy(s string) (nats.DiscardPolicy, error) {
+	switch s {
+	case DiscardPolicyOld:
+		return nats.DiscardOld, nil
+	case DiscardPolicyNew:
+		return nats.DiscardNew, nil
+	}
+	return nats.DiscardNew, fmt.Errorf("invalid stream discard policy %q", s)
 }
 
 // toJetStreamConsumerDeliverPolicyOpt returns a nats.DeliverPolicy opt based on the given deliver policy string value.

@@ -26,6 +26,9 @@ global:
   jetstream:
     # Storage type of the stream, memory or file.
     storage: file
+    fileStorage:
+      size: 1Gi
+    maxBytes: 900M
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

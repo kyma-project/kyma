@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -147,7 +148,7 @@ func (js *JetStream) Initialize(connCloseHandler backendnats.ConnClosedHandler) 
 	if err := js.initCloudEventClient(js.Config); err != nil {
 		return err
 	}
-	return js.ensureStreamExists()
+	return js.ensureStreamExistsAndIsConfiguredCorrectly()
 }
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
@@ -291,7 +292,7 @@ func (js *JetStream) validateConfig() error {
 
 func (js *JetStream) handleReconnect(_ *nats.Conn) {
 	js.namedLogger().Infow("Called reconnect handler for JetStream")
-	if err := js.ensureStreamExists(); err != nil {
+	if err := js.ensureStreamExistsAndIsConfiguredCorrectly(); err != nil {
 		js.namedLogger().Errorw("Failed to ensure the stream exists", "error", err)
 	}
 }
@@ -326,25 +327,36 @@ func (js *JetStream) initJSContext() error {
 	return nil
 }
 
-func (js *JetStream) ensureStreamExists() error {
-	if info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName); err == nil {
-		// TODO: in case the stream exists, should we make sure all of its configs matches the stream config in the chart?
-		js.namedLogger().Infow("Reusing existing Stream", "stream-info", info)
-		return nil
-		// if nats server was restarted, the stream needs to be recreated for memory storage type
-		// and hence we get ErrConnectionClosed for the lost stream
-	} else if err != nats.ErrStreamNotFound {
-		js.namedLogger().Debugw("The connection to NATS server is not established!")
-		return err
-	}
+func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 	streamConfig, err := getStreamConfig(js.Config)
 	if err != nil {
 		return err
 	}
-	js.namedLogger().Infow("Stream not found, creating a new Stream",
-		"streamName", js.Config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
-	_, err = js.jsCtx.AddStream(streamConfig)
-	return err
+	info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName)
+	if errors.Is(err, nats.ErrStreamNotFound) {
+		js.namedLogger().Infow("Stream not found, creating a new Stream",
+			"streamName", js.Config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
+		_, err = js.jsCtx.AddStream(streamConfig)
+		return err
+	} else if err != nil {
+		return err
+	}
+
+	if !streamIsConfiguredCorrectly(info.Config, *streamConfig) {
+		newInfo, err := js.jsCtx.UpdateStream(streamConfig)
+		if err != nil {
+			return err
+		}
+		js.namedLogger().Infow("Updated existing Stream:", "stream-info", newInfo)
+		return nil
+	}
+
+	js.namedLogger().Infow("Reusing existing Stream", "stream-info", info)
+	return nil
+}
+
+func streamIsConfiguredCorrectly(got nats.StreamConfig, want nats.StreamConfig) bool {
+	return reflect.DeepEqual(got, want)
 }
 
 func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
@@ -356,6 +368,10 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	discardPolicy, err := toJetStreamDiscardPolicy(natsConfig.JSStreamDiscardPolicy)
+	if err != nil {
+		return nil, err
+	}
 	streamConfig := &nats.StreamConfig{
 		Name:      natsConfig.JSStreamName,
 		Storage:   storage,
@@ -363,6 +379,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		Retention: retentionPolicy,
 		MaxMsgs:   natsConfig.JSStreamMaxMessages,
 		MaxBytes:  natsConfig.JSStreamMaxBytes,
+		Discard:   discardPolicy,
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
