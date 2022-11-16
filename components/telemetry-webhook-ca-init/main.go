@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/cert"
 	"os"
+	"path"
 )
 
 var certDir string
@@ -45,40 +46,42 @@ func main() {
 	err = os.MkdirAll(certDir, 0777)
 	if err != nil {
 		fmt.Printf("failed to create cert dir: %s", err.Error())
-		os.Exit(1)
+		panic(err.Error())
 	}
 
-	err = writeFile(certDir+"tls.crt", certificate)
+	//err = writeFile(certDir+"tls.crt", certificate)
+	err = os.WriteFile(path.Join(certDir, "tls.crt"), certificate, os.ModePerm)
 	if err != nil {
 		fmt.Printf("failed to write tls.crt: %s", err.Error())
-		os.Exit(1)
+		panic(err.Error())
 	}
 
-	err = writeFile(certDir+"tls.key", key)
+	//err = writeFile(certDir+"tls.key", key)
+	err = os.WriteFile(path.Join(certDir, "tls.key"), key, os.ModePerm)
 	if err != nil {
 		fmt.Printf("failed to write tls.key: %s", err.Error())
-		os.Exit(1)
+		panic(err.Error())
 	}
 
-	webhookConfig, err := clientset.AdmissionregistrationV1beta1().
+	webhookConfig, err := clientset.AdmissionregistrationV1().
 		ValidatingWebhookConfigurations().
 		Get(ctx, webhookName, metav1.GetOptions{})
 
 	if apiErrors.IsNotFound(err) {
 		fmt.Printf("webhook %s not found", webhookName)
-		os.Exit(1)
+		panic(err.Error())
 	} else if err != nil {
 		panic(err)
 	}
 
 	webhookConfig.Webhooks[0].ClientConfig.CABundle = certificate
 
-	updatedConfig, err := clientset.AdmissionregistrationV1beta1().
+	updatedConfig, err := clientset.AdmissionregistrationV1().
 		ValidatingWebhookConfigurations().
 		Update(ctx, webhookConfig, metav1.UpdateOptions{})
 	if err != nil {
 		fmt.Printf("failed to update webhook configuration: %s", err.Error())
-		os.Exit(1)
+		panic(err.Error())
 	}
 
 	fmt.Printf("updated webhook config: %s, with caBundle: %v",
