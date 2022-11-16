@@ -324,7 +324,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
 
   // log the expected trace
   debug('expected spans:');
-  for (i = 0; i < expectedTraceProcessSequence.length; i++) {
+  for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
     debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
   }
 
