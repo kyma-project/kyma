@@ -344,7 +344,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   logSpansGraph(0, traceDAG[0], traceData);
 
   // searching through the trace-graph for the expected span sequence staring at the root element
-  const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData, 0);
   if (!wasFound) {
     debug(`Not all expected spans found in the expected order:`);
     for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
@@ -366,28 +366,28 @@ function logSpansGraph(position, currentSpan, traceData) {
 
 // findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
 // order while ignoring the spans that are not expected.
-function findSpanSequence(expectedSpans, position, currentSpan, traceData) {
+function findSpanSequence(expectedSpans, position, currentSpan, traceData, numberFound) {
   // validate if the actual span is the expected span
   const actualSpan = traceData.processes[currentSpan.processID].serviceName;
-  const expectedSpan = expectedSpans[position];
-  let newPosition = position;
+  const expectedSpan = expectedSpans[numberFound];
   const debugMsg = `${buildLevel(position)} ${actualSpan}`;
+
   // if this span contains the currently expected span, the position will be increased
   if (actualSpan === expectedSpan) {
-    newPosition++;
+    numberFound++;
     debug(debugMsg);
   } else {
     debug(`${debugMsg} expected ${expectedSpan}`);
   }
 
   // check if all traces have been found yet
-  if (newPosition === expectedSpans.length) {
+  if (numberFound === expectedSpans.length) {
     return true;
   }
 
   // recursive search through all the child spans
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    if (findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData)) {
+    if (findSpanSequence(expectedSpans, position +1, currentSpan.childSpans[i], traceData, numberFound)) {
       return true;
     }
   }
