@@ -10,6 +10,9 @@ To eliminate potential security risks when using Functions, bear in mind these f
 
 - Kyma does not define any authorization policies that would restrict Functions' access to other resources within the Namespace. If you deploy a Function in a given Namespace, it can freely access all events and APIs of services within this Namespace.
 
+- Starting with version v1.22, Kubernetes is [moving](https://kubernetes.io/docs/tasks/configure-pod-container/migrate-from-psp/) from PodSecurityPolicies to PodSecurity Admission Controller. Kyma Functions require running in Namespaces with `baseline` Pod security level. The `restricted` level is not currently supported due to the requirements of the Function building process.
+
+
 - All administrators and regular users who have access to a specific Namespace in a cluster can also access:
 
   - Source code of all Functions within this Namespace
