@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
-readonly CURRENT_DIR=$1
+readonly OPERATOR_DIR=$1
+readonly CONTROLLER_GEN=$2
 
-echo "Hi1"
-echo "$CURRENT_DIR"
+TMP_DIR=$(mktemp -d)
 
-ls ../telemetry-operator/config/crd/bases
-echo "Hi"
-ls $CURRENT_DIR
+$CONTROLLER_GEN rbac:roleName=manager-role crd webhook paths="${OPERATOR_DIR}/..." output:crd:artifacts:config="${TMP_DIR}"
 
-diff -q $CURRENT_DIR ../telemetry-operator/config/crd/bases
+DIFF=$(diff -q $TMP_DIR ${OPERATOR_DIR}/config/crd/bases)
+if [ -n "${DIFF}" ]; then
+    echo -e "Some error message..."
+    exit 1
+fi

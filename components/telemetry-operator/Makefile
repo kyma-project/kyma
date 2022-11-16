@@ -78,11 +78,8 @@ test-local: manifests-local generate-local fmt-local vet-local envtest
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-lint-manifests: 
-	$(shell mkdir $(TEMP_DIR)/bases)
-	$(shell ls $(TEMP_DIR))
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config="$(TEMP_DIR)/bases"
-	../../hack/manifests-lint.sh $(TEMP_DIR)/bases
+lint-manifests:
+	../../hack/manifests-lint.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
 
 lint: ## Run various linters
 	../../hack/verify-lint.sh .
