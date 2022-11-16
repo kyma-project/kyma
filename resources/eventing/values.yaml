@@ -29,6 +29,7 @@ global:
     fileStorage:
       size: 1Gi
     maxBytes: 900Mi
+    discardPolicy: new
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
