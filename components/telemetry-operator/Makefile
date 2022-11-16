@@ -23,8 +23,6 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-TEMP_DIR = $(shell mktemp -d)
-
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -81,7 +79,7 @@ build: generate fmt vet ## Build manager binary.
 lint-manifests:
 	../../hack/manifests-lint.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
 
-lint: ## Run various linters
+lint: lint-manifests ## Run various linters
 	../../hack/verify-lint.sh .
 
 tls.key:
