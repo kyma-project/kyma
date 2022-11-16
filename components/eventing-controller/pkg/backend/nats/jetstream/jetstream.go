@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
@@ -287,6 +289,9 @@ func (js *JetStream) validateConfig() error {
 	if _, err := toJetStreamRetentionPolicy(js.Config.JSStreamRetentionPolicy); err != nil {
 		return err
 	}
+	if _, err := toJetStreamDiscardPolicy(js.Config.JSStreamDiscardPolicy); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -371,6 +376,15 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Quantities must not be empty. So we default here to "-1"
+	if natsConfig.JSStreamMaxBytes == "" {
+		natsConfig.JSStreamMaxBytes = "-1"
+	}
+	maxBytes, err := resource.ParseQuantity(natsConfig.JSStreamMaxBytes)
+	if err != nil {
+		return nil, err
+	}
 	discardPolicy, err := toJetStreamDiscardPolicy(natsConfig.JSStreamDiscardPolicy)
 	if err != nil {
 		return nil, err
@@ -381,7 +395,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		Replicas:  natsConfig.JSStreamReplicas,
 		Retention: retentionPolicy,
 		MaxMsgs:   natsConfig.JSStreamMaxMessages,
-		MaxBytes:  natsConfig.JSStreamMaxBytes,
+		MaxBytes:  maxBytes.Value(),
 		Discard:   discardPolicy,
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we

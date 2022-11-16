@@ -155,6 +155,9 @@ func (js *JetStream) validateConfig() error {
 	if _, err := toJetStreamRetentionPolicy(js.Config.JSStreamRetentionPolicy); err != nil {
 		return err
 	}
+	if _, err := toJetStreamDiscardPolicy(js.Config.JSStreamDiscardPolicy); err != nil {
+		return err
+	}
 	return nil
 }
 

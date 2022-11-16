@@ -135,9 +135,11 @@ func TestGetStreamConfig(t *testing.T) {
 				JSStreamReplicas:        3,
 				JSStreamMaxMessages:     -1,
 				JSStreamMaxBytes:        "-1",
+				JSStreamDiscardPolicy:   DiscardPolicyNew,
 			},
 			wantStreamConfig: &nats.StreamConfig{
 				Name:      DefaultStreamName,
+				Discard:   nats.DiscardNew,
 				Storage:   nats.MemoryStorage,
 				Replicas:  3,
 				Retention: nats.LimitsPolicy,
@@ -153,12 +155,14 @@ func TestGetStreamConfig(t *testing.T) {
 				JSStreamName:            DefaultStreamName,
 				JSStreamStorageType:     StorageTypeMemory,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
+				JSStreamDiscardPolicy:   DiscardPolicyNew,
 				JSStreamReplicas:        3,
 				JSStreamMaxMessages:     -1,
 				JSStreamMaxBytes:        "10485760",
 			},
 			wantStreamConfig: &nats.StreamConfig{
 				Name:      DefaultStreamName,
+				Discard:   nats.DiscardNew,
 				Storage:   nats.MemoryStorage,
 				Replicas:  3,
 				Retention: nats.LimitsPolicy,
@@ -173,6 +177,7 @@ func TestGetStreamConfig(t *testing.T) {
 			givenNatsConfig: env.NatsConfig{
 				JSStreamName:            DefaultStreamName,
 				JSStreamStorageType:     StorageTypeMemory,
+				JSStreamDiscardPolicy:   DiscardPolicyNew,
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
 				JSStreamReplicas:        3,
 				JSStreamMaxMessages:     -1,
@@ -180,6 +185,7 @@ func TestGetStreamConfig(t *testing.T) {
 			},
 			wantStreamConfig: &nats.StreamConfig{
 				Name:      DefaultStreamName,
+				Discard:   nats.DiscardNew,
 				Storage:   nats.MemoryStorage,
 				Replicas:  3,
 				Retention: nats.LimitsPolicy,
@@ -195,7 +201,11 @@ func TestGetStreamConfig(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			streamConfig, err := getStreamConfig(tc.givenNatsConfig)
-			require.Equal(t, tc.wantError, err != nil)
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
 			require.Equal(t, tc.wantStreamConfig, streamConfig)
 		})
 	}
