@@ -48,6 +48,7 @@ type JetStream struct {
 }
 
 type Subscriber interface {
+	SubscriptionSubject() string
 	ConsumerInfo() (*nats.ConsumerInfo, error)
 	IsValid() bool
 	Unsubscribe() error
@@ -74,4 +75,8 @@ type DefaultSubOpts []nats.SubOpt
 type jetStreamClient struct {
 	nats.JetStreamContext
 	natsConn *nats.Conn
+}
+
+func (js Subscription) SubscriptionSubject() string {
+	return js.Subject
 }

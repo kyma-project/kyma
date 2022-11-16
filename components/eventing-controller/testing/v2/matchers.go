@@ -1,9 +1,9 @@
 package v2
 
 import (
-	"reflect"
-
 	corev1 "k8s.io/api/core/v1"
+	"reflect"
+	"strconv"
 
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
@@ -56,6 +56,19 @@ func HaveSubscriptionReady() gomegatypes.GomegaMatcher {
 		return s.Status.Ready
 	}, BeTrue())
 }
+func HaveTypes(types []string) gomegatypes.GomegaMatcher {
+	return WithTransform(
+		func(s *eventingv1alpha2.Subscription) []string {
+			return s.Spec.Types
+		},
+		Equal(types))
+}
+
+func HaveMaxInFlight(maxInFlight int) gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha2.Subscription) bool {
+		return s.Spec.Config[eventingv1alpha2.MaxInFlightMessages] == strconv.Itoa(maxInFlight)
+	}, BeTrue())
+}
 
 func HaveSubscriptionNotReady() gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha2.Subscription) bool {
@@ -64,12 +77,13 @@ func HaveSubscriptionNotReady() gomegatypes.GomegaMatcher {
 }
 
 func HaveCondition(condition eventingv1alpha2.Condition) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"Type":    Equal(condition.Type),
-		"Reason":  Equal(condition.Reason),
-		"Message": Equal(condition.Message),
-		"Status":  Equal(condition.Status),
-	})))
+	return WithTransform(func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.Condition { return s.Status.Conditions },
+		ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+			"Type":    Equal(condition.Type),
+			"Reason":  Equal(condition.Reason),
+			"Message": Equal(condition.Message),
+			"Status":  Equal(condition.Status),
+		})))
 }
 
 func HaveSubscriptionActiveCondition() gomegatypes.GomegaMatcher {
@@ -94,6 +108,33 @@ func HaveCleanEventTypes(cleanEventTypes []eventingv1alpha2.EventType) gomegatyp
 			return s.Status.Types
 		},
 		Equal(cleanEventTypes))
+}
+
+func DefaultReadyCondition() eventingv1alpha2.Condition {
+	return eventingv1alpha2.MakeCondition(
+		eventingv1alpha2.ConditionSubscriptionActive,
+		eventingv1alpha2.ConditionReasonNATSSubscriptionActive,
+		corev1.ConditionTrue, "")
+}
+
+func HaveStatusTypes(cleanEventTypes []eventingv1alpha2.EventType) gomegatypes.GomegaMatcher {
+	return WithTransform(
+		func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.EventType {
+			return s.Status.Types
+		},
+		Equal(cleanEventTypes))
+}
+
+func HaveNotFoundSubscription() gomegatypes.GomegaMatcher {
+	return WithTransform(func(isDeleted bool) bool { return isDeleted }, BeTrue())
+}
+
+func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
+	return WithTransform(func(l corev1.EventList) []corev1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+		"Reason":  Equal(event.Reason),
+		"Message": Equal(event.Message),
+		"Type":    Equal(event.Type),
+	})))
 }
 
 func HaveCleanEventTypesEmpty() gomegatypes.GomegaMatcher {

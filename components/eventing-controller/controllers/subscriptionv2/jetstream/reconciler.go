@@ -2,18 +2,17 @@ package jetstream
 
 import (
 	"context"
+	"github.com/nats-io/nats.go"
 	"reflect"
 	"time"
 
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"github.com/nats-io/nats.go"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"

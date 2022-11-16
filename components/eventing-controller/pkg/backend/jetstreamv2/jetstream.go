@@ -108,7 +108,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha2.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.Types {
-		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
+		jsSubject := js.GetJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName()); err != nil {
 			return err
@@ -126,13 +126,13 @@ func (js *JetStream) GetJetStreamSubjects(source string, subjects []string,
 	typeMatching eventingv1alpha2.TypeMatching) []string {
 	var result []string
 	for _, subject := range subjects {
-		result = append(result, js.getJetStreamSubject(source, subject, typeMatching))
+		result = append(result, js.GetJetStreamSubject(source, subject, typeMatching))
 	}
 	return result
 }
 
-// getJetStreamSubject appends the prefix and the cleaned source to subject.
-func (js *JetStream) getJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
+// GetJetStreamSubject appends the prefix and the cleaned source to subject.
+func (js *JetStream) GetJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
 	if typeMatching == eventingv1alpha2.TypeMatchingExact {
 		return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
 	}
@@ -387,7 +387,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 func (js *JetStream) syncConsumerAndSubscription(subscription *eventingv1alpha2.Subscription,
 	asyncCallback func(m *nats.Msg)) error {
 	for _, eventType := range subscription.Status.Types {
-		jsSubject := js.getJetStreamSubject(subscription.Spec.Source, eventType.CleanType, subscription.Spec.TypeMatching)
+		jsSubject := js.GetJetStreamSubject(subscription.Spec.Source, eventType.CleanType, subscription.Spec.TypeMatching)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 
 		consumerInfo, err := js.getOrCreateConsumer(subscription, eventType)
@@ -426,7 +426,7 @@ func (js *JetStream) syncConsumerAndSubscription(subscription *eventingv1alpha2.
 // getOrCreateConsumer fetches the ConsumerInfo from NATS Server or creates it in case it doesn't exist.
 func (js *JetStream) getOrCreateConsumer(subscription *eventingv1alpha2.Subscription,
 	subject eventingv1alpha2.EventType) (*nats.ConsumerInfo, error) {
-	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
+	jsSubject := js.GetJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 
 	consumerInfo, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, jsSubKey.ConsumerName())
@@ -449,7 +449,7 @@ func (js *JetStream) getOrCreateConsumer(subscription *eventingv1alpha2.Subscrip
 // createNATSSubscription creates a NATS Subscription and binds it to the already existing consumer.
 func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subscription,
 	subject eventingv1alpha2.EventType, asyncCallback func(m *nats.Msg)) error {
-	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
+	jsSubject := js.GetJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 
 	jsSubscription, err := js.jsCtx.Subscribe(
@@ -475,7 +475,7 @@ func (js *JetStream) createNATSSubscription(subscription *eventingv1alpha2.Subsc
 // bindInvalidSubscriptions tries to bind the invalid NATS Subscription to the existing consumer.
 func (js *JetStream) bindInvalidSubscriptions(subscription *eventingv1alpha2.Subscription,
 	subject eventingv1alpha2.EventType, asyncCallback func(m *nats.Msg)) error {
-	jsSubject := js.getJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
+	jsSubject := js.GetJetStreamSubject(subscription.Spec.Source, subject.CleanType, subscription.Spec.TypeMatching)
 	jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 	// bind the existing consumer to a new subscription on JetStream
 	jsSubscription, err := js.jsCtx.Subscribe(
@@ -510,6 +510,12 @@ func (js *JetStream) syncConsumerMaxInFlight(subscription *eventingv1alpha2.Subs
 		return utils.MakeError(ErrUpdateConsumer, updateErr)
 	}
 	return nil
+}
+
+// GetNATSSubscriptions returns the map which contains details of all NATS subscriptions and consumers.
+// Use this only for testing purposes.
+func (js *JetStream) GetNATSSubscriptions() map[SubscriptionSubjectIdentifier]Subscriber {
+	return js.subscriptions
 }
 
 func (js *JetStream) namedLogger() *zap.SugaredLogger {

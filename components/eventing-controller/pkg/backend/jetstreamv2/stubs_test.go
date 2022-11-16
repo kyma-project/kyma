@@ -243,6 +243,10 @@ type subscriberStub struct {
 	unsubscribeError error
 }
 
+func (s subscriberStub) SubscriptionSubject() string {
+	return ""
+}
+
 func (s subscriberStub) IsValid() bool {
 	return s.isValid
 }
