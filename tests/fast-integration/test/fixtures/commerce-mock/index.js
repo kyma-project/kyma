@@ -356,7 +356,7 @@ function logSpansGraph(position, currentSpan, traceData) {
   let newPosition = position +1;
 
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData);
+    logSpansGraph(newPosition, currentSpan.childSpans[i], traceData);
   }
 }
 
