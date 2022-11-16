@@ -10,10 +10,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-type objectMetaGetter interface {
-	GetObjectMeta() metav1.Object
-}
-
 func Calculate(configMaps []corev1.ConfigMap, secrets []corev1.Secret) string {
 	h := sha256.New()
 
@@ -69,10 +65,9 @@ func sortKeys[V any](m map[string]V) []string {
 	return keys
 }
 
-func less(x, y objectMetaGetter) bool {
-	xNamespace, yNamespace := x.GetObjectMeta().GetNamespace(), y.GetObjectMeta().GetNamespace()
-	if xNamespace != yNamespace {
-		return xNamespace < yNamespace
+func less(x, y *metav1.ObjectMeta) bool {
+	if x.Namespace != y.Namespace {
+		return x.Namespace < y.Namespace
 	}
-	return x.GetObjectMeta().GetName() < y.GetObjectMeta().GetName()
+	return x.Name < y.Name
 }
