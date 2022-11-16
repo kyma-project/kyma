@@ -6,17 +6,16 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	b64 "encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"math/big"
 	"time"
 )
 
-type CA []byte
-type CAKey []byte
 type CABundle struct {
-	CA    CA
-	CAKey CAKey
+	CA    string
+	CAKey string
 }
 
 type ServerCert []byte
@@ -50,40 +49,68 @@ func GenerateCACert() (*CABundle, error) {
 		return nil, fmt.Errorf("failed to create self-signed ca certificate: %v", err)
 	}
 
-	encodedCA := new(bytes.Buffer)
-	err = pem.Encode(encodedCA, &pem.Block{
+	encodedCA := pem.EncodeToMemory(&pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: caSignedBytes,
 	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode signed ca certificate: %v", err)
-	}
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to encode signed ca certificate: %v", err)
+	//}
 
-	encodedCAPrivateKey := new(bytes.Buffer)
-	err = pem.Encode(encodedCAPrivateKey, &pem.Block{
+	//encodedCAPrivateKey := b64.URLEncoding.EncodeToString(x509.MarshalPKCS1PrivateKey(caPrivateKey))
+	//encodedCAPrivateKey := new(bytes.Buffer)
+	encodedCAPrivateKey := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(caPrivateKey),
 	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode ca private key: %v", err)
-	}
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to encode ca private key: %v", err)
+	//}
 
 	return &CABundle{
-		CA:    encodedCA.Bytes(),
-		CAKey: encodedCAPrivateKey.Bytes(),
+		CA:    b64.URLEncoding.EncodeToString(encodedCA),
+		CAKey: b64.URLEncoding.EncodeToString(encodedCAPrivateKey),
 	}, nil
 }
 
 func GenerateServerCertAndKey(ca *CABundle, serviceName, namespace string) (*ServerCertAndKey, error) {
-	caCert, err := x509.ParseCertificate(ca.CA)
+	decodedKey, err := b64.URLEncoding.DecodeString(ca.CA)
+	pemBlock, _ := pem.Decode(decodedKey)
+	if pemBlock == nil {
+		return nil, fmt.Errorf("pem.Decode failed")
+	}
+
+	caCert, err := x509.ParseCertificate(pemBlock.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ca: %v", err)
 	}
 
-	caKey, err := x509.ParsePKCS1PrivateKey(ca.CAKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse ca key: %v", err)
+	//caCert, err := x509.ParsePKIXPublicKey(decodedKey)
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to parse ca: %v", err)
+	//}
+
+	fmt.Print(caCert)
+
+	decodedKey, err = b64.URLEncoding.DecodeString(ca.CAKey)
+	pemBlock, _ = pem.Decode(decodedKey)
+	if pemBlock == nil {
+		return nil, fmt.Errorf("pem.Decode failed")
 	}
+	//der, err := x509.DecryptPEMBlock(pemBlock, []byte("ca private key password"))
+	//if err != nil {
+	//	panic(err)
+	//}
+	caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Print(caPrivateKey)
+	//caKey, err := x509.ParsePKCS1PrivateKey([]byte(ca.CAKey))
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to parse ca key: %v", err)
+	//}
 
 	dnsNames := []string{
 		serviceName,
@@ -110,7 +137,7 @@ func GenerateServerCertAndKey(ca *CABundle, serviceName, namespace string) (*Ser
 		return nil, fmt.Errorf("failed to generate server private key: %v", err)
 	}
 
-	serverCertSignedBytes, err := x509.CreateCertificate(cryptorand.Reader, serverCert, caCert, &serverPrivateKey.PublicKey, caKey)
+	serverCertSignedBytes, err := x509.CreateCertificate(cryptorand.Reader, serverCert, caCert, &serverPrivateKey.PublicKey, caPrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign server certificate: %v", err)
 	}

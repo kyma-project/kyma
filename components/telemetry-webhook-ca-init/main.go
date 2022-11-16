@@ -64,8 +64,8 @@ func main() {
 	}
 
 	caBundle := &internal.CABundle{
-		CA:    ca,
-		CAKey: key,
+		CA:    string(ca),
+		CAKey: string(key),
 	}
 
 	serverCert, err := internal.GenerateServerCertAndKey(caBundle, "", "")
@@ -96,7 +96,7 @@ func main() {
 		ValidatingWebhookConfigurations().
 		Get(ctx, "", metav1.GetOptions{})
 
-	webhookConfig.Webhooks[0].ClientConfig.CABundle = caBundle.CA
+	webhookConfig.Webhooks[0].ClientConfig.CABundle = []byte(caBundle.CA)
 
 	updatedConfig, err := clientset.AdmissionregistrationV1beta1().
 		ValidatingWebhookConfigurations().
@@ -144,10 +144,24 @@ func buildSecret(name, namespace string) (*corev1.Secret, error) {
 			Namespace: namespace,
 		},
 		Data: map[string][]byte{
-			caCert: ca.CA,
-			caKey:  ca.CAKey,
+			caCert: []byte(ca.CA),
+			caKey:  []byte(ca.CAKey),
 		},
 	}, nil
+}
+
+func validateSecretData(secret *v1.Secret) error {
+	_, found := secret.Data[caCert]
+	if !found {
+		return errors.New("secret data does not contain ca-cert")
+	}
+
+	_, found = secret.Data[caKey]
+	if !found {
+		return errors.New("secret data does not contain ca-key")
+	}
+
+	return nil
 }
 
 func writeFile(filepath string, data []byte) error {
