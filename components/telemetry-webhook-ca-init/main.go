@@ -5,29 +5,24 @@ import (
 	"flag"
 	"fmt"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
-	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/cert"
 	"os"
-	"telemetry-webhook-ca-init/internal"
 )
 
-const caCert = "ca-cert"
-const caKey = "ca-key"
-const secretName = "webhook-ca"
-const secretNamespace = "kyma-system"
-
-//const caName = "telemetry-validating-webhook-ca"
-//const retriesOnFailure = 5
-//const certDir = "/var/run/telemetry-webhook/"
-
 var certDir string
+var serviceName string
+var serviceNamespace string
+var webhookName string
 
 func main() {
 	flag.StringVar(&certDir, "cert-dir", "", "Path to server certificate directory")
+	flag.StringVar(&serviceName, "service-name", "", "Common name of service")
+	flag.StringVar(&serviceNamespace, "service-namespace", "", "Namespace of service")
+	flag.StringVar(&webhookName, "webhook-name", "", "Name of webhook config to set CA")
 	flag.Parse()
 
 	if err := validateFlags(); err != nil {
@@ -45,34 +40,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	caSecret, err := getOrCreateCaSecret(ctx, clientset, secretName, secretNamespace)
-	if err != nil {
-		fmt.Printf("failed to ensure ca secret: %s", err.Error())
-		panic(err.Error())
-	}
-
-	ca, found := caSecret.Data[caCert]
-	if !found {
-		fmt.Printf("invalid secret state: ca-cert not found: %s", err.Error())
-		os.Exit(1)
-	}
-
-	key, found := caSecret.Data[caKey]
-	if !found {
-		fmt.Print("invalid secret state: ca-key not found")
-		os.Exit(1)
-	}
-
-	caBundle := &internal.CABundle{
-		CA:    string(ca),
-		CAKey: string(key),
-	}
-
-	serverCert, err := internal.GenerateServerCertAndKey(caBundle, "", "")
-	if err != nil {
-		fmt.Printf("failed to generate server cert: %s", err.Error())
-		os.Exit(1)
-	}
+	certificate, key, err := generateCert(serviceName, serviceNamespace)
 
 	err = os.MkdirAll(certDir, 0777)
 	if err != nil {
@@ -80,13 +48,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = writeFile(certDir+"tls.crt", serverCert.Cert)
+	err = writeFile(certDir+"tls.crt", certificate)
 	if err != nil {
 		fmt.Printf("failed to write tls.crt: %s", err.Error())
 		os.Exit(1)
 	}
 
-	err = writeFile(certDir+"tls.key", serverCert.Key)
+	err = writeFile(certDir+"tls.key", key)
 	if err != nil {
 		fmt.Printf("failed to write tls.key: %s", err.Error())
 		os.Exit(1)
@@ -94,9 +62,16 @@ func main() {
 
 	webhookConfig, err := clientset.AdmissionregistrationV1beta1().
 		ValidatingWebhookConfigurations().
-		Get(ctx, "", metav1.GetOptions{})
+		Get(ctx, webhookName, metav1.GetOptions{})
 
-	webhookConfig.Webhooks[0].ClientConfig.CABundle = []byte(caBundle.CA)
+	if apiErrors.IsNotFound(err) {
+		fmt.Printf("webhook %s not found", webhookName)
+		os.Exit(1)
+	} else if err != nil {
+		panic(err)
+	}
+
+	webhookConfig.Webhooks[0].ClientConfig.CABundle = certificate
 
 	updatedConfig, err := clientset.AdmissionregistrationV1beta1().
 		ValidatingWebhookConfigurations().
@@ -111,57 +86,14 @@ func main() {
 		updatedConfig.Webhooks[0].ClientConfig.CABundle)
 }
 
-func getOrCreateCaSecret(ctx context.Context, clientset *kubernetes.Clientset, name, namespace string) (*v1.Secret, error) {
-	fmt.Print("ensuring ca secret")
-	secret, err := clientset.CoreV1().Secrets(name).Get(ctx, namespace, metav1.GetOptions{})
-	if err == nil {
-		return secret, nil
+func generateCert(serviceName, namespace string) ([]byte, []byte, error) {
+	names := []string{
+		serviceName,
+		fmt.Sprintf("%s.%s", serviceName, namespace),
+		fmt.Sprintf("%s.%s.svc", serviceName, namespace),
+		fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace),
 	}
-	if apiErrors.IsNotFound(err) {
-		fmt.Print("creating ca secret")
-		secret, err = buildSecret(name, namespace)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to create secret object")
-		}
-		secret, err = clientset.CoreV1().Secrets(namespace).Create(ctx, secret, metav1.CreateOptions{})
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to create secret")
-		}
-		return secret, nil
-	}
-	return nil, errors.Wrap(err, "failed to get or create ca secret")
-}
-
-func buildSecret(name, namespace string) (*corev1.Secret, error) {
-	ca, err := internal.GenerateCACert()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate ca certificate")
-	}
-
-	return &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data: map[string][]byte{
-			caCert: []byte(ca.CA),
-			caKey:  []byte(ca.CAKey),
-		},
-	}, nil
-}
-
-func validateSecretData(secret *v1.Secret) error {
-	_, found := secret.Data[caCert]
-	if !found {
-		return errors.New("secret data does not contain ca-cert")
-	}
-
-	_, found = secret.Data[caKey]
-	if !found {
-		return errors.New("secret data does not contain ca-key")
-	}
-
-	return nil
+	return cert.GenerateSelfSignedCertKey(names[0], nil, names)
 }
 
 func writeFile(filepath string, data []byte) error {
@@ -182,7 +114,16 @@ func writeFile(filepath string, data []byte) error {
 
 func validateFlags() error {
 	if certDir == "" {
-		return errors.New("--cert-dir flag is required")
+		return errors.New("--cert-dir is required")
+	}
+	if serviceName == "" {
+		return errors.New("--service-name is required")
+	}
+	if serviceNamespace == "" {
+		return errors.New("--service-namespace is required")
+	}
+	if webhookName == "" {
+		return errors.New("--webhook-name is required")
 	}
 	return nil
 }
