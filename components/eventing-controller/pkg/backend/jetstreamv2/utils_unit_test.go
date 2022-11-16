@@ -5,15 +5,17 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/stretchr/testify/require"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/stretchr/testify/require"
 )
 
 // maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
@@ -132,7 +134,7 @@ func TestGetStreamConfig(t *testing.T) {
 				JSStreamRetentionPolicy: RetentionPolicyLimits,
 				JSStreamReplicas:        3,
 				JSStreamMaxMessages:     -1,
-				JSStreamMaxBytes:        -1,
+				JSStreamMaxBytes:        "-1",
 			},
 			wantStreamConfig: &nats.StreamConfig{
 				Name:      DefaultStreamName,
@@ -141,6 +143,48 @@ func TestGetStreamConfig(t *testing.T) {
 				Retention: nats.LimitsPolicy,
 				MaxMsgs:   -1,
 				MaxBytes:  -1,
+				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+			},
+			wantError: false,
+		},
+		{
+			name: "Should parse MaxBytes correctly without unit",
+			givenNatsConfig: env.NatsConfig{
+				JSStreamName:            DefaultStreamName,
+				JSStreamStorageType:     StorageTypeMemory,
+				JSStreamRetentionPolicy: RetentionPolicyLimits,
+				JSStreamReplicas:        3,
+				JSStreamMaxMessages:     -1,
+				JSStreamMaxBytes:        "10485760",
+			},
+			wantStreamConfig: &nats.StreamConfig{
+				Name:      DefaultStreamName,
+				Storage:   nats.MemoryStorage,
+				Replicas:  3,
+				Retention: nats.LimitsPolicy,
+				MaxMsgs:   -1,
+				MaxBytes:  10485760,
+				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
+			},
+			wantError: false,
+		},
+		{
+			name: "Should parse MaxBytes correctly with unit",
+			givenNatsConfig: env.NatsConfig{
+				JSStreamName:            DefaultStreamName,
+				JSStreamStorageType:     StorageTypeMemory,
+				JSStreamRetentionPolicy: RetentionPolicyLimits,
+				JSStreamReplicas:        3,
+				JSStreamMaxMessages:     -1,
+				JSStreamMaxBytes:        "10Mi",
+			},
+			wantStreamConfig: &nats.StreamConfig{
+				Name:      DefaultStreamName,
+				Storage:   nats.MemoryStorage,
+				Replicas:  3,
+				Retention: nats.LimitsPolicy,
+				MaxMsgs:   -1,
+				MaxBytes:  10485760,
 				Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 			},
 			wantError: false,

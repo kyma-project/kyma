@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nats-io/nats.go"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/types"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/nats-io/nats.go"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -107,13 +109,18 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	maxBytes, err := resource.ParseQuantity(natsConfig.JSStreamMaxBytes)
+	if err != nil {
+		return nil, err
+	}
+
 	streamConfig := &nats.StreamConfig{
 		Name:      natsConfig.JSStreamName,
 		Storage:   storage,
 		Replicas:  natsConfig.JSStreamReplicas,
 		Retention: retentionPolicy,
 		MaxMsgs:   natsConfig.JSStreamMaxMessages,
-		MaxBytes:  natsConfig.JSStreamMaxBytes,
+		MaxBytes:  maxBytes.Value(),
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
@@ -212,9 +219,9 @@ func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier,
 	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
-//----------------------------------------
+// ----------------------------------------
 // SubscriptionSubjectIdentifier utils
-//----------------------------------------
+// ----------------------------------------
 
 // NamespacedName returns the Kubernetes namespaced name.
 func (s SubscriptionSubjectIdentifier) NamespacedName() string {

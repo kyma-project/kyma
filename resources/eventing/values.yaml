@@ -28,7 +28,7 @@ global:
     storage: file
     fileStorage:
       size: 1Gi
-    maxBytes: 900M
+    maxBytes: 900Mi
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

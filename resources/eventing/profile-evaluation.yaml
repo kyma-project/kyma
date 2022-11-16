@@ -1,7 +1,7 @@
 global:
   jetstream:
     storage: file
-    maxBytes: 900M
+    maxBytes: 900Mi
     fileStorage:
       size: 1Gi
 

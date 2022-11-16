@@ -765,7 +765,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		EventTypePrefix:         eventTypePrefix,
 		JSStreamName:            reconcilertesting.JSStreamName,
 		JSStreamStorageType:     "memory",
-		JSStreamMaxBytes:        -1,
+		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
 		JSStreamRetentionPolicy: "interest",
 		JSStreamDiscardPolicy:   "new",
