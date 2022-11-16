@@ -117,6 +117,13 @@ type ResourceConfiguration struct {
 	Function *ResourceRequirements `json:"function,omitempty"`
 }
 
+type SecretMount struct {
+	// +kubebuilder:validation:Required
+	SecretName string `json:"secretName"`
+	// +kubebuilder:validation:Required
+	MountPath string `json:"mountPath"`
+}
+
 const (
 	FunctionResourcesPresetLabel = "serverless.kyma-project.io/function-resources-preset"
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
@@ -148,6 +155,8 @@ type FunctionSpec struct {
 
 	// +optional
 	Template *Template `json:"template,omitempty"`
+
+	SecretMounts []SecretMount `json:"secretMounts,omitempty"`
 }
 
 // TODO: Status related things needs to be developed.

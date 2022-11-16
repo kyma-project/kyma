@@ -378,8 +378,10 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
-	templateSpec := corev1.PodSpec{
-		Volumes: []corev1.Volume{{
+	secretVolumes, secretVolumeMounts := buildDeploymentSecretVolumes(s.instance.Spec.SecretMounts)
+
+	volumes := []corev1.Volume{
+		{
 			Name: volumeName,
 			VolumeSource: corev1.VolumeSource{
 				EmptyDir: &corev1.EmptyDirVolumeSource{
@@ -387,23 +389,33 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 					SizeLimit: &emptyDirVolumeSize,
 				},
 			},
-		}},
+		},
+	}
+	volumes = append(volumes, secretVolumes...)
+
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name: volumeName,
+			/* needed in order to have python functions working:
+			python functions need writable /tmp dir, but we disable writing to root filesystem via
+			security context below. That's why we override this whole /tmp directory with emptyDir volume.
+			We've decided to add this directory to be writable by all functions, as it may come in handy
+			*/
+			MountPath: "/tmp",
+			ReadOnly:  false,
+		},
+	}
+	volumeMounts = append(volumeMounts, secretVolumeMounts...)
+
+	templateSpec := corev1.PodSpec{
+		Volumes: volumes,
 		Containers: []corev1.Container{
 			{
-				Name:      functionContainerName,
-				Image:     imageName,
-				Env:       envs,
-				Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
-				VolumeMounts: []corev1.VolumeMount{{
-					Name: volumeName,
-					/* needed in order to have python functions working:
-					python functions need writable /tmp dir, but we disable writing to root filesystem via
-					security context below. That's why we override this whole /tmp directory with emptyDir volume.
-					We've decided to add this directory to be writable by all functions, as it may come in handy
-					*/
-					MountPath: "/tmp",
-					ReadOnly:  false,
-				}},
+				Name:         functionContainerName,
+				Image:        imageName,
+				Env:          envs,
+				Resources:    *s.instance.Spec.ResourceConfiguration.Function.Resources,
+				VolumeMounts: volumeMounts,
 				/*
 					In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
 					We do this but first ensuring that sidecar is ready by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
@@ -475,6 +487,34 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 			},
 		},
 	}
+}
+
+func buildDeploymentSecretVolumes(secretMounts []serverlessv1alpha2.SecretMount) (volumes []corev1.Volume, volumeMounts []corev1.VolumeMount) {
+	volumes = []corev1.Volume{}
+	volumeMounts = []corev1.VolumeMount{}
+	for _, secretMount := range secretMounts {
+		volumeName := secretMount.SecretName
+
+		volume := corev1.Volume{
+			Name: volumeName,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName:  secretMount.SecretName,
+					DefaultMode: pointer.Int32(0444), //read only for everybody
+					Optional:    pointer.Bool(false),
+				},
+			},
+		}
+		volumes = append(volumes, volume)
+
+		volumeMount := corev1.VolumeMount{
+			Name:      volumeName,
+			ReadOnly:  true,
+			MountPath: secretMount.MountPath,
+		}
+		volumeMounts = append(volumeMounts, volumeMount)
+	}
+	return volumes, volumeMounts
 }
 
 func (s *systemState) getReplicas(defaultVal int32) *int32 {
