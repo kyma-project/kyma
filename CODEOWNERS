@@ -76,7 +76,7 @@
 
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @skhalash @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
+/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
 /tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka
@@ -86,6 +86,10 @@
 /tests/fast-integration/skr-svcat-migration-test @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
 /tests/fast-integration/skr-test @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
 /tests/fast-integration/smctl @szwedm @wozniakjan @tillknuesting @ralikio @PK85 @piotrmiskiewicz @jaroslaw-pieszka
+/tests/fast-integration/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/fast-integration/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/fast-integration/telemetry-test @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
+/tests/fast-integration/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
