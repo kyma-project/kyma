@@ -40,6 +40,7 @@ pod:
     cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
   extraProperties:
     securityContext:
+      runAsNonRoot: true
       runAsUser: 1000 # Optional. Use this setting only when necessary, otherwise delete it. Never set to 0 because this is the ID of root.
       runAsGroup: 1000 # Optional. Use this setting only when necessary, otherwise delete it. Never set to 0 because this is the ID of root.
       seccompProfile: # Optional. This option can also be set on container level but it is recommended to set it on Pod level and leave it undefined on container level.
@@ -79,7 +80,8 @@ container:
     allowPrivilegeEscalation: false
     privileged: false
     runAsUser: 1000
-    # capabilities:
+    capabilities:
+      drop: ["ALL"]
     #     add: # Only the following capabilities are allowed in the baseline standard. If no capabilities needed, the whole add-section has to be removed.
     #       - AUDIT_WRITE
     #       - CHOWN
@@ -113,7 +115,8 @@ initContainer:
     allowPrivilegeEscalation: false
     privileged: false
     runAsUser: 1000
-    # capabilities:
+    capabilities:
+      drop: ["ALL"]
     #     add: # Only the following capabilities are allowed in the baseline standard. If no capabilities needed, the whole add-section has to be removed.
     #       - AUDIT_WRITE
     #       - CHOWN
