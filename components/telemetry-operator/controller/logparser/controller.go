@@ -93,7 +93,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
 
-		if err = r.daemonSetHelper.Restart(ctx, r.config.DaemonSet); err != nil {
+		if err = r.daemonSetHelper.UpdateConfigChecksum(ctx, r.config.DaemonSet); err != nil {
 			log.Error(err, "Failed to restart Fluent Bit DaemonSet")
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
