@@ -153,7 +153,7 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)
 	log.Info("Reconciliation triggered")
 
@@ -170,14 +170,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	defer func() {
+		if err := r.updateStatus(ctx, &pipeline); err != nil {
+			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
+			reconcileErr = fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
+		}
+	}()
+
 	if err := r.ensureFinalizers(ctx, &pipeline); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
 	r.syncSecretsCache(&pipeline)
 
-	err := r.syncer.syncAll(ctx, &pipeline, &allPipelines)
-	if err != nil {
+	if err := r.syncer.syncAll(ctx, &pipeline, &allPipelines); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
@@ -185,15 +191,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err = r.daemonSetHelper.UpdateConfigChecksum(ctx, r.config.DaemonSet); err != nil {
+	if err := r.daemonSetHelper.UpdateConfigChecksum(ctx, r.config.DaemonSet); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
 	}
 
-	//if err = r.updateStatus(ctx, &pipeline); err != nil {
-	//	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
-	//}
-
-	return ctrl.Result{}, nil
+	return reconcileResult, reconcileErr
 }
 
 func (r *Reconciler) syncSecretsCache(pipeline *telemetryv1alpha1.LogPipeline) {
