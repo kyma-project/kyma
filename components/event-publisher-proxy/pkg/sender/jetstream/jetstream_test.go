@@ -28,6 +28,7 @@ func TestJetStreamMessageSender(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
+		givenStreamMaxBytes       int64
 		givenNATSConnectionClosed bool
 		wantErr                   error
 		wantStatusCode            int
@@ -39,8 +40,16 @@ func TestJetStreamMessageSender(t *testing.T) {
 			wantErr:                   sender.ErrBackendTargetNotFound,
 		},
 		{
+			name:                      "send in jetstream mode should not succeed if stream is full",
+			givenStream:               true,
+			givenStreamMaxBytes:       1,
+			givenNATSConnectionClosed: false,
+			wantErr:                   sender.ErrInsufficientStorage,
+		},
+		{
 			name:                      "send in jetstream mode should succeed if NATS connection is open and the stream exists",
 			givenStream:               true,
+			givenStreamMaxBytes:       5000,
 			givenNATSConnectionClosed: false,
 			wantErr:                   nil,
 			wantStatusCode:            http.StatusNoContent,
@@ -65,7 +74,10 @@ func TestJetStreamMessageSender(t *testing.T) {
 			}()
 
 			if tc.givenStream {
-				addStream(t, connection, getStreamConfig())
+				sc := getStreamConfig(tc.givenStreamMaxBytes)
+				cc := getConsumerConfig()
+				addStream(t, connection, sc)
+				addConsumer(t, connection, sc, cc)
 			}
 
 			ce := createCloudEvent(t)
@@ -150,12 +162,23 @@ func createCloudEvent(t *testing.T) *event.Event {
 }
 
 // getStreamConfig inits a testing stream config.
-func getStreamConfig() *nats.StreamConfig {
+func getStreamConfig(maxBytes int64) *nats.StreamConfig {
 	return &nats.StreamConfig{
 		Name:      testingutils.StreamName,
 		Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 		Storage:   nats.MemoryStorage,
 		Retention: nats.InterestPolicy,
+		Discard:   nats.DiscardNew,
+		MaxBytes:  maxBytes,
+	}
+}
+
+func getConsumerConfig() *nats.ConsumerConfig {
+	return &nats.ConsumerConfig{
+		Durable:       "test",
+		DeliverPolicy: nats.DeliverAllPolicy,
+		AckPolicy:     nats.AckExplicitPolicy,
+		FilterSubject: fmt.Sprintf("%v.%v", env.JetStreamSubjectPrefix, testingutils.CloudEventTypeWithPrefix),
 	}
 }
 
@@ -163,7 +186,16 @@ func getStreamConfig() *nats.StreamConfig {
 func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 	js, err := connection.JetStream()
 	assert.NoError(t, err)
-	_, err = js.AddStream(config)
+	info, err := js.AddStream(config)
+	t.Logf("%+v", info)
+	assert.NoError(t, err)
+}
+
+func addConsumer(t *testing.T, connection *nats.Conn, sc *nats.StreamConfig, config *nats.ConsumerConfig) {
+	js, err := connection.JetStream()
+	assert.NoError(t, err)
+	info, err := js.AddConsumer(sc.Name, config)
+	t.Logf("%+v", info)
 	assert.NoError(t, err)
 }
 

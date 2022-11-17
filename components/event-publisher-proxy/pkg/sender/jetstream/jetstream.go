@@ -23,6 +23,7 @@ import (
 )
 
 const (
+	JSStoreFailedCode     = 10077
 	natsBackend           = "nats"
 	jestreamHandlerName   = "jetstream-handler"
 	noSpaceLeftErrMessage = "no space left on device"
@@ -84,8 +85,12 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 		if errors.Is(err, nats.ErrNoStreamResponse) {
 			return nil, fmt.Errorf("%w : %v", sender.ErrBackendTargetNotFound, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
 		}
-		if strings.Contains(err.Error(), natsMaxBytesExceeded) {
-			return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
+
+		var apiErr nats.JetStreamError
+		if ok := errors.As(err, &apiErr); ok {
+			if apiErr.APIError().ErrorCode == JSStoreFailedCode {
+				return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
+			}
 		}
 		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
 			return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
