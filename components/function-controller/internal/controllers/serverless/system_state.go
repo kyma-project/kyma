@@ -2,10 +2,10 @@ package serverless
 
 import (
 	"fmt"
+	"k8s.io/utils/pointer"
 	"path"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -129,127 +129,63 @@ func (s *systemState) fnJobChanged(expectedJob batchv1.Job) bool {
 }
 
 var (
-	one          = int32(1)
-	zero         = int32(0)
-	rootUser     = int64(0)
-	functionUser = int64(1000)
-	optionalTrue = true
+	rootUser          = int64(0)
+	rootUserGroup     = int64(0)
+	functionUser      = int64(10001)
+	functionUserGroup = int64(10001)
 )
 
 func (s *systemState) buildGitJob(gitOptions git.Options, cfg cfg) batchv1.Job {
-	imageName := s.buildImageAddress(cfg.docker.PushAddress)
-
-	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if s.instance.Spec.RuntimeImageOverride != "" {
-		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
-	}
-
-	resourceRequirements := getBuildResourceRequiremenets(s)
-	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
-
-	return batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-build-", s.instance.GetName()),
-			Namespace:    s.instance.GetNamespace(),
-			Labels:       s.functionLabels(),
+	templateSpec := corev1.PodSpec{
+		Volumes: []corev1.Volume{
+			buildJobCredentialsVolume(cfg),
+			buildRegistryConfigVolume(cfg),
+			s.buildJobRuntimeVolume(),
+			{
+				Name:         "workspace",
+				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			},
 		},
-		Spec: batchv1.JobSpec{
-			Parallelism:           &one,
-			Completions:           &one,
-			ActiveDeadlineSeconds: nil,
-			BackoffLimit:          &zero,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      s.functionLabels(),
-					Annotations: istioSidecarInjectFalse,
-				},
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.docker.ActiveRegistryConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
-								},
-							},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmCfg.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
-							Name:         "workspace",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-						},
-						{
-							Name: "registry-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.fn.PackageRegistryConfigSecretName,
-									Optional:   &optionalTrue,
-								},
-							},
-						},
-					},
-					InitContainers: []corev1.Container{
-						{
-							Name:            "repo-fetcher",
-							Image:           cfg.fn.Build.RepoFetcherImage,
-							Env:             buildRepoFetcherEnvVars(&s.instance, gitOptions),
-							ImagePullPolicy: corev1.PullAlways,
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "workspace",
-									MountPath: workspaceMountPath,
-								},
-							},
-						},
-					},
-					Containers: []corev1.Container{
-						{
-							Name:            "executor",
-							Image:           cfg.fn.Build.ExecutorImage,
-							Args:            args,
-							Resources:       resourceRequirements,
-							VolumeMounts:    s.getGitBuildJobVolumeMounts(rtmCfg),
-							ImagePullPolicy: corev1.PullIfNotPresent,
-							Env: []corev1.EnvVar{
-								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
-							},
-						},
-					},
-					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: cfg.fn.BuildServiceAccountName,
-					SecurityContext: &corev1.PodSecurityContext{
-						RunAsUser: &rootUser,
+		InitContainers: []corev1.Container{
+			s.buildGitJobRepoFetcherContainer(gitOptions, cfg),
+		},
+		Containers: []corev1.Container{
+			s.buildJobExecutorContainer(cfg, s.getGitBuildJobVolumeMounts()),
+		},
+		RestartPolicy: corev1.RestartPolicyNever,
+	}
+	enrichPodSpecWithSecurityContext(&templateSpec, rootUser, rootUserGroup)
+
+	return s.buildJobJob(templateSpec)
+}
+
+func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
+	templateSpec := corev1.PodSpec{
+		Volumes: []corev1.Volume{
+			buildJobCredentialsVolume(cfg),
+			buildRegistryConfigVolume(cfg),
+			s.buildJobRuntimeVolume(),
+			{
+				Name: "sources",
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
 					},
 				},
 			},
 		},
+		Containers: []corev1.Container{
+			s.buildJobExecutorContainer(cfg, s.getBuildJobVolumeMounts()),
+		},
+		RestartPolicy: corev1.RestartPolicyNever,
 	}
+	enrichPodSpecWithSecurityContext(&templateSpec, rootUser, rootUserGroup)
+
+	return s.buildJobJob(templateSpec)
 }
 
-func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
-	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
-	imageName := s.buildImageAddress(cfg.docker.PushAddress)
-	args := append(cfg.fn.Build.ExecutorArgs, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if s.instance.Spec.RuntimeImageOverride != "" {
-		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
-	}
-
-	resourceRequirements := getBuildResourceRequiremenets(s)
+func (s *systemState) buildJobJob(templateSpec corev1.PodSpec) batchv1.Job {
 	labels := s.functionLabels()
-
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", s.instance.GetName()),
@@ -257,75 +193,128 @@ func (s *systemState) buildJob(configMapName string, cfg cfg) batchv1.Job {
 			Labels:       labels,
 		},
 		Spec: batchv1.JobSpec{
-			Parallelism:           &one,
-			Completions:           &one,
+			Parallelism:           pointer.Int32(1),
+			Completions:           pointer.Int32(1),
 			ActiveDeadlineSeconds: nil,
-			BackoffLimit:          &zero,
+			BackoffLimit:          pointer.Int32(0),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels:      labels,
 					Annotations: istioSidecarInjectFalse,
 				},
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "sources",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
-								},
-							},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmCfg.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.docker.ActiveRegistryConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
-								},
-							},
-						},
-						{
-							Name: "registry-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: cfg.fn.PackageRegistryConfigSecretName,
-									Optional:   &optionalTrue,
-								},
-							},
-						},
+				Spec: templateSpec,
+			},
+		},
+	}
+}
+
+func (s *systemState) buildGitJobRepoFetcherContainer(gitOptions git.Options, cfg cfg) corev1.Container {
+	return corev1.Container{
+		Name:            "repo-fetcher",
+		Image:           cfg.fn.Build.RepoFetcherImage,
+		Env:             buildRepoFetcherEnvVars(&s.instance, gitOptions),
+		ImagePullPolicy: corev1.PullAlways,
+		VolumeMounts: []corev1.VolumeMount{
+			{
+				Name:      "workspace",
+				MountPath: workspaceMountPath,
+			},
+		},
+		SecurityContext: restrictiveContainerSecurityContext(),
+	}
+}
+
+func (s *systemState) buildJobExecutorContainer(cfg cfg, volumeMounts []corev1.VolumeMount) corev1.Container {
+	imageName := s.buildImageAddress(cfg.docker.PushAddress)
+	args := append(cfg.fn.Build.ExecutorArgs,
+		fmt.Sprintf("%s=%s", destinationArg, imageName),
+		fmt.Sprintf("--context=dir://%s", workspaceMountPath))
+	if s.instance.Spec.RuntimeImageOverride != "" {
+		args = append(args,
+			fmt.Sprintf("--build-arg=base_image=%s", s.instance.Spec.RuntimeImageOverride))
+	}
+
+	resourceRequirements := getBuildResourceRequirements(s)
+
+	return corev1.Container{
+		Name:            "executor",
+		Image:           cfg.fn.Build.ExecutorImage,
+		Args:            args,
+		Resources:       resourceRequirements,
+		VolumeMounts:    volumeMounts,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Env: []corev1.EnvVar{
+			{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
+		},
+		SecurityContext: buildJobContainerSecurityContext(),
+	}
+}
+
+func (s *systemState) getBuildJobVolumeMounts() []corev1.VolumeMount {
+	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
+	volumeMounts := []corev1.VolumeMount{
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmCfg.DependencyFile), SubPath: FunctionDepsKey},
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmCfg.FunctionFile), SubPath: FunctionSourceKey},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmCfg.Runtime)...)
+	return volumeMounts
+}
+
+func (s *systemState) getGitBuildJobVolumeMounts() []corev1.VolumeMount {
+	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
+	volumeMounts := []corev1.VolumeMount{
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(s.instance.Spec.Source.GitRepository.BaseDir, "/")},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmCfg.Runtime)...)
+	return volumeMounts
+}
+
+func buildJobCredentialsVolume(cfg cfg) corev1.Volume {
+	return corev1.Volume{
+		Name: "credentials",
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: cfg.docker.ActiveRegistryConfigSecretName,
+				Items: []corev1.KeyToPath{
+					{
+						Key:  ".dockerconfigjson",
+						Path: ".docker/config.json",
 					},
-					Containers: []corev1.Container{
-						{
-							Name:            "executor",
-							Image:           cfg.fn.Build.ExecutorImage,
-							Args:            args,
-							Resources:       resourceRequirements,
-							VolumeMounts:    getBuildJobVolumeMounts(rtmCfg),
-							ImagePullPolicy: corev1.PullIfNotPresent,
-							Env: []corev1.EnvVar{
-								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
-							},
-						},
-					},
-					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: cfg.fn.BuildServiceAccountName,
-					SecurityContext: &corev1.PodSecurityContext{
-						RunAsUser: &rootUser,
-					},
+				},
+			},
+		},
+	}
+}
+
+func buildRegistryConfigVolume(cfg cfg) corev1.Volume {
+	return corev1.Volume{
+		Name: "registry-config",
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: cfg.fn.PackageRegistryConfigSecretName,
+				Optional:   pointer.Bool(true),
+			},
+		},
+	}
+}
+func (s *systemState) buildJobRuntimeVolume() corev1.Volume {
+	rtmCfg := fnRuntime.GetRuntimeConfig(s.instance.Spec.Runtime)
+	return corev1.Volume{
+		Name: "runtime",
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: rtmCfg.DockerfileConfigMapName,
 				},
 			},
 		},
@@ -341,7 +330,7 @@ func (s *systemState) deploymentSelectorLabels() map[string]string {
 	)
 }
 
-func getBuildResourceRequiremenets(s *systemState) corev1.ResourceRequirements {
+func getBuildResourceRequirements(s *systemState) corev1.ResourceRequirements {
 	var resourceRequirements corev1.ResourceRequirements
 	if s.instance.Spec.ResourceConfiguration != nil &&
 		s.instance.Spec.ResourceConfiguration.Build != nil &&
@@ -389,6 +378,80 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 	)
 	envs = append(envs, deploymentEnvs...)
 
+	templateSpec := corev1.PodSpec{
+		Volumes: []corev1.Volume{{
+			Name: volumeName,
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{
+					Medium:    corev1.StorageMediumDefault,
+					SizeLimit: &emptyDirVolumeSize,
+				},
+			},
+		}},
+		Containers: []corev1.Container{
+			{
+				Name:      functionContainerName,
+				Image:     imageName,
+				Env:       envs,
+				Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
+				VolumeMounts: []corev1.VolumeMount{{
+					Name: volumeName,
+					/* needed in order to have python functions working:
+					python functions need writable /tmp dir, but we disable writing to root filesystem via
+					security context below. That's why we override this whole /tmp directory with emptyDir volume.
+					We've decided to add this directory to be writable by all functions, as it may come in handy
+					*/
+					MountPath: "/tmp",
+					ReadOnly:  false,
+				}},
+				/*
+					In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
+					We do this but first ensuring that sidecar is ready by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
+					Second thing is setting that probe which continuously
+				*/
+				StartupProbe: &corev1.Probe{
+					Handler: corev1.Handler{
+						HTTPGet: &corev1.HTTPGetAction{
+							Path: "/healthz",
+							Port: svcTargetPort,
+						},
+					},
+					InitialDelaySeconds: 0,
+					PeriodSeconds:       5,
+					SuccessThreshold:    1,
+					FailureThreshold:    30, // FailureThreshold * PeriodSeconds = 150s in this case, this should be enough for any function pod to start up
+				},
+				ReadinessProbe: &corev1.Probe{
+					Handler: corev1.Handler{
+						HTTPGet: &corev1.HTTPGetAction{
+							Path: "/healthz",
+							Port: svcTargetPort,
+						},
+					},
+					InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
+					FailureThreshold:    1,
+					PeriodSeconds:       5,
+					TimeoutSeconds:      2,
+				},
+				LivenessProbe: &corev1.Probe{
+					Handler: corev1.Handler{
+						HTTPGet: &corev1.HTTPGetAction{
+							Path: "/healthz",
+							Port: svcTargetPort,
+						},
+					},
+					FailureThreshold: 3,
+					PeriodSeconds:    5,
+					TimeoutSeconds:   4,
+				},
+				ImagePullPolicy: corev1.PullIfNotPresent,
+				SecurityContext: restrictiveContainerSecurityContext(),
+			},
+		},
+		ServiceAccountName: cfg.ImagePullAccountName,
+	}
+	enrichPodSpecWithSecurityContext(&templateSpec, functionUser, functionUserGroup)
+
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
@@ -408,89 +471,7 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 						"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
 					},
 				},
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{{
-						Name: volumeName,
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{
-								Medium:    corev1.StorageMediumDefault,
-								SizeLimit: &emptyDirVolumeSize,
-							},
-						},
-					}},
-					Containers: []corev1.Container{
-						{
-							Name:      functionContainerName,
-							Image:     imageName,
-							Env:       envs,
-							Resources: *s.instance.Spec.ResourceConfiguration.Function.Resources,
-							VolumeMounts: []corev1.VolumeMount{{
-								Name: volumeName,
-								/* needed in order to have python functions working:
-								python functions need writable /tmp dir, but we disable writing to root filesystem via
-								security context below. That's why we override this whole /tmp directory with emptyDir volume.
-								We've decided to add this directory to be writable by all functions, as it may come in handy
-								*/
-								MountPath: "/tmp",
-								ReadOnly:  false,
-							}},
-							/*
-								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
-								We do this but first ensuring that sidecar is ready by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
-								Second thing is setting that probe which continuously
-							*/
-							StartupProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/healthz",
-										Port: svcTargetPort,
-									},
-								},
-								InitialDelaySeconds: 0,
-								PeriodSeconds:       5,
-								SuccessThreshold:    1,
-								FailureThreshold:    30, // FailureThreshold * PeriodSeconds = 150s in this case, this should be enough for any function pod to start up
-							},
-							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/healthz",
-										Port: svcTargetPort,
-									},
-								},
-								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
-								FailureThreshold:    1,
-								PeriodSeconds:       5,
-								TimeoutSeconds:      2,
-							},
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/healthz",
-										Port: svcTargetPort,
-									},
-								},
-								FailureThreshold: 3,
-								PeriodSeconds:    5,
-								TimeoutSeconds:   4,
-							},
-							ImagePullPolicy: corev1.PullIfNotPresent,
-							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Add:  []corev1.Capability{},
-									Drop: []corev1.Capability{"ALL"},
-								},
-								Privileged:               boolPtr(false),
-								RunAsUser:                &functionUser,
-								RunAsGroup:               &functionUser,
-								RunAsNonRoot:             boolPtr(true),
-								ReadOnlyRootFilesystem:   boolPtr(true),
-								AllowPrivilegeEscalation: boolPtr(false),
-							},
-						},
-					},
-					ServiceAccountName: cfg.ImagePullAccountName,
-				},
+				Spec: templateSpec,
 			},
 		},
 	}
@@ -640,23 +621,54 @@ func (s *systemState) gitFnSrcChanged(commit string) bool {
 
 }
 
-func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
-	volumeMounts := []corev1.VolumeMount{
-		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-		// If COPY is not used, then the cache will not work
-		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(s.instance.Spec.Source.GitRepository.BaseDir, "/")},
-		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-	}
-	// add package registry config volume mount depending on the used runtime
-	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
-	return volumeMounts
-}
-
 func (s *systemState) jobFailed(p func(reason string) bool) bool {
 	if len(s.jobs.Items) == 0 {
 		return false
 	}
 
 	return jobFailed(s.jobs.Items[0], p)
+}
+
+// security context is set to fulfill the baseline security profile
+// based on https://raw.githubusercontent.com/kyma-project/community/main/concepts/psp-replacement/baseline-pod-spec.yaml
+func restrictiveContainerSecurityContext() *corev1.SecurityContext {
+	defaultProcMount := corev1.DefaultProcMount
+	return &corev1.SecurityContext{
+		Privileged: pointer.Bool(false),
+		Capabilities: &corev1.Capabilities{
+			Drop: []corev1.Capability{
+				"ALL",
+			},
+		},
+		ProcMount:              &defaultProcMount,
+		ReadOnlyRootFilesystem: pointer.Bool(true),
+	}
+}
+
+// build job requires additional permissions some than the restrictive version
+func buildJobContainerSecurityContext() *corev1.SecurityContext {
+	securityContext := restrictiveContainerSecurityContext()
+	securityContext.Capabilities.Add = []corev1.Capability{
+		"CHOWN",        // for "chown"
+		"FOWNER",       // for "chmod"
+		"SETGID",       // for "fork"
+		"DAC_OVERRIDE", // for "open"
+	}
+	securityContext.ReadOnlyRootFilesystem = pointer.Bool(false)
+	return securityContext
+}
+
+// security context is set to fulfill the baseline security profile
+// based on https://raw.githubusercontent.com/kyma-project/community/main/concepts/psp-replacement/baseline-pod-spec.yaml
+func enrichPodSpecWithSecurityContext(ps *corev1.PodSpec, user int64, userGroup int64) {
+	ps.SecurityContext = &corev1.PodSecurityContext{
+		RunAsUser:  &user,
+		RunAsGroup: &userGroup,
+		SeccompProfile: &corev1.SeccompProfile{
+			Type: corev1.SeccompProfileTypeRuntimeDefault,
+		},
+	}
+	ps.HostNetwork = false
+	ps.HostPID = false
+	ps.HostIPC = false
 }

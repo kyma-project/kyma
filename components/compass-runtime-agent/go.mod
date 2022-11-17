@@ -8,11 +8,11 @@ require (
 	github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c
 	github.com/kyma-incubator/compass/components/connector v0.0.0-20220104122431-99ed924ea212
 	github.com/kyma-incubator/compass/components/director v0.0.0-20220126084901-92232f5eced0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20221102092727-d965167334ef
 	github.com/machinebox/graphql v0.2.3-0.20181106130121-3a9253180225
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/vrischmann/envconfig v1.3.0
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.3
@@ -63,17 +63,17 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
+	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/term v0.1.0 // indirect
+	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -95,4 +95,7 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
+	golang.org/x/crypto => golang.org/x/crypto v0.1.0
+	golang.org/x/net => golang.org/x/net v0.1.0
+	golang.org/x/text => golang.org/x/text v0.3.8
 )

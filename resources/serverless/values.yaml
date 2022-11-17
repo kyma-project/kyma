@@ -76,29 +76,26 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220819-0c178fc7"
+      version: "20221104-ffd6df73"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-15911"
+      version: "PR-16091"
     function_webhook:
       name: "function-webhook"
-      version: "PR-15911"
+      version: "PR-16091"
     function_build_init:
       name: "function-build-init"
-      version: "PR-15911"
-    function_runtime_nodejs12:
-      name: "function-runtime-nodejs12"
-      version: "v20221011-831da39d"
+      version: "PR-16091"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "v20221011-831da39d"
+      version: "v20221110-f5cb45c7"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20221011-831da39d"
+      version: "v20221110-f5cb45c7"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20221011-831da39d"
+      version: "v20221110-f5cb45c7"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-4ced14d5"
@@ -114,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "v20221013-5a653721"
+      version: "v20221102-bcd2a2b1"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -188,10 +185,6 @@ containers:
         value: 5m
       serviceAccountRequeueDuration:
         value: 5m
-      roleRequeueDuration:
-        value: 5m
-      roleBindingRequeueDuration:
-        value: 5m
       namespaceExcludedNames:
         value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
@@ -202,8 +195,6 @@ containers:
         value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
-      buildServiceAccountName:
-        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
       # Deprecated as of kyma 2.8

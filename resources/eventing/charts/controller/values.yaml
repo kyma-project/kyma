@@ -52,6 +52,10 @@ webhook:
   certHandler:
     name: api-gateway-webhook-certificates
     version: v20221027-987e5471
+  mutating:
+    name: subscription-mutating-webhook-configuration
+  validating:
+    name: subscription-validating-webhook-configuration
 
 clusterRoleBindingSuffix: ""
 

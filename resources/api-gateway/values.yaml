@@ -13,13 +13,15 @@ deployment:
       memory: 64Mi
   securityContext:
     allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
     capabilities:
       drop:
       - ALL
-    privileged: false
     runAsGroup: 65534
     runAsNonRoot: true
     runAsUser: 65534
+    seccompProfile:
+      type: RuntimeDefault
 
 config:
   oathkeeper:
@@ -78,10 +80,6 @@ config:
 
 # Configure node affinity
 affinity: {}
-
-# Configure PodSecurityPolicy
-podSecurityPolicy:
-  enabled: true
 
 tests:
   enabled: true

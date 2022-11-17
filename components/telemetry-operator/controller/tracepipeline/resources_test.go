@@ -83,7 +83,7 @@ func TestMakeSecret(t *testing.T) {
 }
 
 func TestMakeDeployment(t *testing.T) {
-	deployment := makeDeployment(config)
+	deployment := makeDeployment(config, "123")
 	labels := getLabels(config)
 
 	require.NotNil(t, deployment)
@@ -92,7 +92,10 @@ func TestMakeDeployment(t *testing.T) {
 	require.Equal(t, *deployment.Spec.Replicas, int32(1))
 	require.Equal(t, deployment.Spec.Selector.MatchLabels, labels)
 	require.Equal(t, deployment.Spec.Template.ObjectMeta.Labels, labels)
-	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations, podAnnotations)
+	for k, v := range defaultPodAnnotations {
+		require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[k], v)
+	}
+	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[configHashAnnotationKey], "123")
 	require.NotEmpty(t, deployment.Spec.Template.Spec.Containers[0].EnvFrom)
 }
 

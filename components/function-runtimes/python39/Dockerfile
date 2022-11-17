@@ -51,12 +51,13 @@ RUN set -ex \
 	\
 	&& apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
 		sqlite-dev=3.39.4-r0 \
+		binutils=2.39-r2 \
 	&& apk add --no-cache --virtual .build-deps  \
 		bluez-dev \
 		bzip2-dev \
 		coreutils \
 		dpkg-dev dpkg \
-		expat-dev \
+		expat-dev=2.5.0-r0 \
 		findutils \
 		gcc \
 		gdbm-dev \
