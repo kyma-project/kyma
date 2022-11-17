@@ -750,7 +750,9 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesL
     });
 
     if (response.data.eventPublishError) {
-      throw convertAxiosError(response.data.statusText);
+      throw convertAxiosError(
+          new Error('sendInClusterEventWithRetry failed with id:'+ eventId+ ' and encoding: '+ encoding),
+          response.data.statusText);
     }
     expect(response.status).to.be.equal(200);
   }, retriesLeft, 1000);
@@ -778,7 +780,9 @@ async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLef
     });
 
     if (response.data.eventPublishError) {
-      throw convertAxiosError(response.data.statusText);
+      throw convertAxiosError(
+          new Error('sendInClusterEventWithRetry failed with eventData:'+ eventData),
+          response.data.statusText);
     }
     expect(response.status).to.be.equal(200);
   }, retriesLeft, 1000);
