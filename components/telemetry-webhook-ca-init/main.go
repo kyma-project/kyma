@@ -27,9 +27,9 @@ func main() {
 	flag.StringVar(&certDir, "cert-dir", "", "Path to server certificate directory")
 	flag.StringVar(&serviceName, "service-name", "", "Common name of service")
 	flag.StringVar(&serviceNamespace, "service-namespace", "", "Namespace of service")
-	flag.StringVar(&webhookName, "webhook-name", "", "Name of webhook config to set CA")
-	flag.StringVar(&logFormat, "log-format", "text", "Log format (json or text)")
-	flag.StringVar(&logLevel, "log-level", "debug", "Log level (debug, info, warn, error, fatal)")
+	flag.StringVar(&webhookName, "validating-webhook", "", "Name of validating webhook config to set CA bundle")
+	flag.StringVar(&logFormat, "log-format", "json", "Log format (json or text)")
+	flag.StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal)")
 	flag.Parse()
 
 	if err := validateFlags(); err != nil {

@@ -28,20 +28,20 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - command:
-            - /bin/webhook-ca-init
+            - /webhook-cert-init
           args:
             - --cert-dir=/var/run/telemetry-webhook
             - --service-name=telemetry-operator-webhook
             - --service-namespace=kyma-system
-            - --webhook-name=validation.webhook.telemetry.kyma-project.io
+            - --validating-webhook=validation.webhook.telemetry.kyma-project.io
           image: "docker.io/lindnerb/webhook-ca-init:latest"
           imagePullPolicy: Always
-          name: webhook-ca-init
+          name: telemetry-webhook-cert-init
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
             - mountPath: /var/run/telemetry-webhook
-              name: telemetry-webhook-cert
+              name: telemetry-webhook-cert-dir
       containers:
         - command:
             - /manager
@@ -87,8 +87,8 @@ spec:
               value: {{ .Values.global.log.level | quote }}
           volumeMounts:
           - mountPath: /var/run/telemetry-webhook
-            name: telemetry-webhook-cert
+            name: telemetry-webhook-cert-dir
             readOnly: true
       volumes:
-      - name: telemetry-webhook-cert
+      - name: telemetry-webhook-cert-dir
         emptyDir: {}

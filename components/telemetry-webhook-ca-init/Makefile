@@ -61,7 +61,7 @@ test-local: fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
 build: generate fmt vet ## Build binary.
-	go build -o bin/webhook-ca-init main.go
+	go build -o bin/webhook-cert-init main.go
 
 lint: ## Run various linters
 	../../hack/verify-lint.sh .
