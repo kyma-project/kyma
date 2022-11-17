@@ -4,9 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -14,47 +13,35 @@ import (
 	"k8s.io/client-go/util/cert"
 	"os"
 	"path"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var certDir string
 var serviceName string
 var serviceNamespace string
 var webhookName string
-var logFormat string
-var logLevel string
 
 func main() {
 	flag.StringVar(&certDir, "cert-dir", "", "Path to server certificate directory")
 	flag.StringVar(&serviceName, "service-name", "", "Common name of service")
 	flag.StringVar(&serviceNamespace, "service-namespace", "", "Namespace of service")
 	flag.StringVar(&webhookName, "validating-webhook", "", "Name of validating webhook config to set CA bundle")
-	flag.StringVar(&logFormat, "log-format", "json", "Log format (json or text)")
-	flag.StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal)")
 	flag.Parse()
 
 	if err := validateFlags(); err != nil {
 		panic(err.Error())
 	}
 
-	log := func() *zap.Logger {
-		log, err := logger.New(logger.JSON, logger.INFO)
-		if err != nil {
-			panic(err.Error())
-		}
-		if err = logger.InitKlog(log, logger.INFO); err != nil {
-			panic(err.Error())
-		}
+	log := zap.New()
+	log = log.WithName("webhook-cert-init")
 
-		return log.WithContext().Desugar()
-	}()
-
-	if err := run(log); err != nil {
-		log.Error(err.Error())
+	if err := run(&log); err != nil {
+		log.Error(err, "failed to initialize webhook certificate")
 		os.Exit(1)
 	}
 }
 
-func run(log *zap.Logger) error {
+func run(log *logr.Logger) error {
 	ctx := context.Background()
 
 	config, err := rest.InClusterConfig()
