@@ -91,6 +91,7 @@ func getNATSConf(natsURL string) env.NatsConfig {
 		JSStreamName:            controllertesting.EventTypePrefix,
 		JSStreamStorageType:     backendjetstream.StorageTypeMemory,
 		JSStreamRetentionPolicy: backendjetstream.RetentionPolicyInterest,
+		JSStreamDiscardPolicy:   backendjetstream.DiscardPolicyNew,
 	}
 }
 

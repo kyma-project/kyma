@@ -13,6 +13,8 @@ import (
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -59,7 +61,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	loggerRegistry, err := logging.ConfigureRegisteredLogger(logCfg.LogLevel, logCfg.LogFormat)
+	atomic := zap.NewAtomicLevel()
+	parsedLevel, err := zapcore.ParseLevel(logCfg.LogLevel)
+	if err != nil {
+		setupLog.Error(err, "unable to parse logger level")
+		os.Exit(1)
+	}
+	atomic.SetLevel(parsedLevel)
+
+	log, err := logging.ConfigureLogger(logCfg.LogLevel, logCfg.LogFormat, atomic)
 	if err != nil {
 		setupLog.Error(err, "unable to configure log")
 		os.Exit(1)
@@ -68,12 +78,11 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go logging.ReconfigureOnConfigChange(ctx, loggerRegistry, cfg.WebhookConfigPath)
+	logWithCtx := log.WithContext()
+	go logging.ReconfigureOnConfigChange(ctx, logWithCtx.Named("notifier"), atomic, cfg.WebhookConfigPath)
 
-	logrZap := zapr.NewLogger(loggerRegistry.CreateDesugared())
+	logrZap := zapr.NewLogger(logWithCtx.Desugar())
 	ctrl.SetLogger(logrZap)
-
-	initLog := loggerRegistry.CreateUnregistered()
 
 	validationConfigv1alpha1 := webhook.ReadValidationConfigV1Alpha1OrDie()
 	validationConfigv1alpha2 := webhook.ReadValidationConfigV1Alpha2OrDie()
@@ -81,7 +90,7 @@ func main() {
 	defaultingConfigv1alpha2 := webhook.ReadDefaultingConfigV1Alpha2OrDie()
 
 	// manager setup
-	initLog.Info("setting up controller-manager")
+	logWithCtx.Info("setting up controller-manager")
 
 	mgr, err := manager.New(ctrl.GetConfigOrDie(), manager.Options{
 		Scheme:             scheme,
@@ -90,11 +99,11 @@ func main() {
 		Logger:             logrZap,
 	})
 	if err != nil {
-		initLog.Error(err, "failed to setup controller-manager")
+		logWithCtx.Error(err, "failed to setup controller-manager")
 		os.Exit(1)
 	}
 
-	initLog.Info("setting up webhook certificates and webhook secret")
+	logWithCtx.Info("setting up webhook certificates and webhook secret")
 	// we need to ensure the certificates and the webhook secret as early as possible
 	// because the webhook server needs to read it from disk to start.
 	if err := resources.SetupCertificates(
@@ -102,12 +111,12 @@ func main() {
 		cfg.WebhookSecretName,
 		cfg.SystemNamespace,
 		cfg.WebhookServiceName,
-		loggerRegistry.CreateNamed("setup-certificates")); err != nil {
-		initLog.Error(err, "failed to setup certificates and webhook secret")
+		logWithCtx.Named("setup-certificates")); err != nil {
+		logWithCtx.Error(err, "failed to setup certificates and webhook secret")
 		os.Exit(1)
 	}
 
-	initLog.Info("setting up webhook server")
+	logWithCtx.Info("setting up webhook server")
 	// webhook server setup
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
@@ -116,7 +125,7 @@ func main() {
 		webhook.NewConvertingWebhook(
 			mgr.GetClient(),
 			scheme,
-			loggerRegistry.CreateNamed("converting-webhook")),
+			logWithCtx.Named("converting-webhook")),
 	)
 	whs.Register(resources.FunctionDefaultingWebhookPath, &ctrlwebhook.Admission{
 		Handler: webhook.NewDefaultingWebhook(defaultingConfigv1alpha1, defaultingConfigv1alpha2, mgr.GetClient()),
@@ -128,7 +137,7 @@ func main() {
 
 	whs.Register(resources.RegistryConfigDefaultingWebhookPath, &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()})
 
-	initLog.Info("setting up webhook resources controller")
+	logWithCtx.Info("setting up webhook resources controller")
 	// apply and monitor configuration
 	if err := resources.SetupResourcesController(
 		context.Background(),
@@ -136,16 +145,16 @@ func main() {
 		cfg.WebhookServiceName,
 		cfg.SystemNamespace,
 		cfg.WebhookSecretName,
-		loggerRegistry); err != nil {
-		initLog.Error(err, "failed to setup webhook resources controller")
+		logWithCtx); err != nil {
+		logWithCtx.Error(err, "failed to setup webhook resources controller")
 		os.Exit(1)
 	}
 
-	initLog.Info("starting the controller-manager")
+	logWithCtx.Info("starting the controller-manager")
 	// start the server manager
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
-		initLog.Error(err, "failed to start controller-manager")
+		logWithCtx.Error(err, "failed to start controller-manager")
 		os.Exit(1)
 	}
 }

@@ -8,6 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/require"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -17,8 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/nats-io/nats.go"
-	"github.com/stretchr/testify/require"
 )
 
 // TestJetStream_SubscriptionDeletion tests the creation and deletion
@@ -44,7 +45,7 @@ func TestJetStream_SubscriptionDeletion(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -92,7 +93,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -101,7 +102,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	subject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	subject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
@@ -180,7 +181,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -189,7 +190,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	subject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	subject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
@@ -266,7 +267,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -275,7 +276,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	subject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	subject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
@@ -299,7 +300,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// Now, change the filter in subscription
 	sub.Spec.Types[0] = fmt.Sprintf("%schanged", evtestingv2.OrderCreatedUncleanEvent)
 	// Sync the subscription status
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -308,7 +309,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	require.NoError(t, err)
 
 	// get new cleaned subject
-	newSubject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	newSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, newSubject)
 
@@ -364,7 +365,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -373,7 +374,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subject
-	firstSubject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	firstSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, firstSubject)
 
@@ -392,10 +393,10 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	sub.Spec.Types = append(sub.Spec.Types, newType)
 
 	// get new cleaned subject
-	secondSubject, err := getCleanEventType(newType, testEnvironment.cleaner)
+	secondSubject, err := testEnvironment.cleaner.CleanEventType(newType)
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -463,7 +464,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	newType := sub.Spec.Types[0]
 	newType = fmt.Sprintf("%snew1", newType)
 	sub.Spec.Types = append(sub.Spec.Types, newType)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -472,11 +473,11 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	require.NoError(t, err)
 
 	// get cleaned subjects
-	firstSubject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	firstSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, firstSubject)
 
-	secondSubject, err := getCleanEventType(sub.Spec.Types[1], testEnvironment.cleaner)
+	secondSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[1])
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
 
@@ -495,7 +496,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// given
 	// Now, remove the second filter from subscription
 	sub.Spec.Types = sub.Spec.Types[:1]
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -559,7 +560,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -574,7 +575,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtestingv2.WithTypeMatchingExact(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub2)
@@ -606,7 +607,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 
 	// Now, change the filter in subscription 1
 	sub.Spec.Types[0] = fmt.Sprintf("%schanged", evtestingv2.OrderCreatedEventTypeNotClean)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -615,7 +616,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	require.NoError(t, err)
 
 	// get new cleaned subject from subscription 1
-	newSubject, err := getCleanEventType(sub.Spec.Types[0], testEnvironment.cleaner)
+	newSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, newSubject)
 
@@ -639,7 +640,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	require.NotEqual(t, subBytesLimit, bytesLimit)
 
 	// get cleaned subject for subscription 2
-	cleanSubjectSub2, err := getCleanEventType(sub2.Spec.Types[0], testEnvironment.cleaner)
+	cleanSubjectSub2, err := testEnvironment.cleaner.CleanEventType(sub2.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, cleanSubjectSub2)
 
@@ -684,7 +685,7 @@ func TestMultipleJSSubscriptionsToSameEvent(t *testing.T) {
 			evtestingv2.WithTypeMatchingStandard(),
 			evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 		)
-		require.NoError(t, AddJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner))
+		AddJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner)
 		// when
 		err := jsBackend.SyncSubscription(subs[i])
 		// then
@@ -735,7 +736,7 @@ func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -775,7 +776,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(defaultMaxInflight),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -831,7 +832,7 @@ func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -885,7 +886,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -978,7 +979,7 @@ func TestJetStream_NATSSubscriptionCount(t *testing.T) {
 			sub := evtestingv2.NewSubscription("sub"+fmt.Sprint(i), "foo",
 				tc.subOpts...,
 			)
-			require.NoError(t, AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+			AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 			// when
 			err := jsBackend.SyncSubscription(sub)
@@ -1017,6 +1018,7 @@ func defaultNatsConfig(url string) env.NatsConfig {
 		JSStreamName:            DefaultStreamName,
 		JSStreamStorageType:     StorageTypeMemory,
 		JSStreamRetentionPolicy: RetentionPolicyInterest,
+		JSStreamDiscardPolicy:   DiscardPolicyNew,
 	}
 }
 

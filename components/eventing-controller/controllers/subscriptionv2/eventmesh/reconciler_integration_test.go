@@ -1377,7 +1377,7 @@ var _ = BeforeSuite(func(done Done) {
 	eventMeshHandler := backendeventmesh.NewEventMesh(credentials, nameMapper, defaultLogger)
 
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
-	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
+	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder)
 	err = eventmeshreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
 		recorder, envConf, eventMeshCleaner, eventMeshHandler, credentials, nameMapper, sinkValidator).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())

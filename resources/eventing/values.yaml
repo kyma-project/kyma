@@ -20,12 +20,16 @@ global:
       directory: external
     prometheus_nats_exporter:
       name: natsio/prometheus-nats-exporter
-      version: 0.10.0
+      version: 0.10.1
       directory: external
 
   jetstream:
     # Storage type of the stream, memory or file.
     storage: file
+    fileStorage:
+      size: 1Gi
+    maxBytes: 900Mi
+    discardPolicy: new
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
