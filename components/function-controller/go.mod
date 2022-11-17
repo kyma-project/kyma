@@ -4,6 +4,8 @@ go 1.19
 
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.42.52
+
+	github.com/kyma-project/kyma/common/logging => github.com/pPrecel/kyma/common/logging v0.0.0-20221103083340-8c749c35c79b
 	github.com/prometheus/common => github.com/prometheus/common v0.26.0
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220213190939-1e6e3497d506
@@ -29,7 +31,7 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/vrischmann/envconfig v1.3.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	gopkg.in/yaml.v2 v2.4.0

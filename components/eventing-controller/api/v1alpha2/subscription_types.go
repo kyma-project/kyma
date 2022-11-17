@@ -89,7 +89,6 @@ func (s Subscription) MarshalJSON() ([]byte, error) {
 
 // GetMaxInFlightMessages tries to convert the string-type maxInFlight to the integer
 func (s *Subscription) GetMaxInFlightMessages(defaults *env.DefaultSubscriptionConfig) int {
-	// TODO: move this to validation webhook
 	val, err := strconv.Atoi(s.Spec.Config[MaxInFlightMessages])
 	if err != nil {
 		return defaults.MaxInFlightMessages

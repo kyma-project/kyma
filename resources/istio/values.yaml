@@ -100,6 +100,8 @@ components:
               targetAverageUtilization: 80
             type: Resource
       securityContext:
+        seccompProfile:
+          type: RuntimeDefault
         runAsUser: 65534
         runAsNonRoot: true
         runAsGroup: 65534
@@ -129,6 +131,8 @@ components:
           cpu: 100m
           memory: 512Mi
       securityContext:
+        seccompProfile:
+          type: RuntimeDefault
         runAsUser: 65534
         runAsNonRoot: true
         runAsGroup: 65534

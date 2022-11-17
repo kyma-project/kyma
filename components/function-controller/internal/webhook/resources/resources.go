@@ -8,7 +8,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"github.com/pkg/errors"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -21,8 +20,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, loggingRegistry *logging.Registry) error {
-	logger := loggingRegistry.CreateUnregistered().Named("resource-ctrl")
+func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string, log *zap.SugaredLogger) error {
+	logger := log.Named("resource-ctrl")
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
@@ -59,7 +58,7 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 			webhookConfig: webhookConfig,
 			client:        mgr.GetClient(),
 			secretName:    secretName,
-			logger:        loggingRegistry.CreateNamed("webhook-resource-controller"),
+			logger:        log.Named("webhook-resource-controller"),
 		},
 	})
 	if err != nil {

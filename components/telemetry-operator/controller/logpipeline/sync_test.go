@@ -6,15 +6,13 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes/mocks"
 
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
@@ -47,7 +45,6 @@ alias foo`,
 		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -81,7 +78,6 @@ alias bar`
 		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -115,7 +111,6 @@ alias foo`,
 		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, changed)
-		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -169,7 +164,6 @@ alias foo`,
 		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -206,7 +200,6 @@ alias foo`,
 		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -242,7 +235,6 @@ alias foo`,
 		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 		require.True(t, changed)
-		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
