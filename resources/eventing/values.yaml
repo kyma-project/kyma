@@ -5,7 +5,7 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-16085
+      version: PR-16111
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -26,6 +26,10 @@ global:
   jetstream:
     # Storage type of the stream, memory or file.
     storage: file
+    fileStorage:
+      size: 1Gi
+    maxBytes: 900Mi
+    discardPolicy: new
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

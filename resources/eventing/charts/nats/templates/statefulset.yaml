@@ -285,7 +285,7 @@ spec:
           {{- toYaml .Values.nats.jetstream.fileStorage.accessModes | nindent 10 }}
         resources:
           requests:
-            storage: {{ .Values.nats.jetstream.fileStorage.size }}
+            storage: {{ .Values.global.jetstream.fileStorage.size }}
         {{- if .Values.nats.jetstream.fileStorage.storageClassName }}
         storageClassName: {{ .Values.nats.jetstream.fileStorage.storageClassName | quote }}
         {{- end }}

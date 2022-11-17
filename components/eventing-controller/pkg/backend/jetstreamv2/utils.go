@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nats-io/nats.go"
+	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/types"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/nats-io/nats.go"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -19,6 +21,9 @@ const (
 
 	RetentionPolicyLimits   = "limits"
 	RetentionPolicyInterest = "interest"
+
+	DiscardPolicyNew = "new"
+	DiscardPolicyOld = "old"
 
 	ConsumerDeliverPolicyAll            = "all"
 	ConsumerDeliverPolicyLast           = "last"
@@ -64,6 +69,16 @@ func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
 	return nats.LimitsPolicy, fmt.Errorf("invalid stream retention policy %q", s)
 }
 
+func toJetStreamDiscardPolicy(s string) (nats.DiscardPolicy, error) {
+	switch s {
+	case DiscardPolicyOld:
+		return nats.DiscardOld, nil
+	case DiscardPolicyNew:
+		return nats.DiscardNew, nil
+	}
+	return nats.DiscardNew, fmt.Errorf("invalid stream discard policy %q", s)
+}
+
 // toJetStreamConsumerDeliverPolicyOpt returns a nats.DeliverPolicy opt based on the given deliver policy string value.
 // It returns "DeliverNew" as the default nats.DeliverPolicy opt, if the given deliver policy value is not supported.
 // Supported deliver policy values are ("all", "last", "last_per_subject" and "new").
@@ -103,17 +118,34 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	retentionPolicy, err := toJetStreamRetentionPolicy(natsConfig.JSStreamRetentionPolicy)
 	if err != nil {
 		return nil, err
 	}
+
+	// Quantities must not be empty. So we default here to "-1"
+	if natsConfig.JSStreamMaxBytes == "" {
+		natsConfig.JSStreamMaxBytes = "-1"
+	}
+	maxBytes, err := resource.ParseQuantity(natsConfig.JSStreamMaxBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	discardPolicy, err := toJetStreamDiscardPolicy(natsConfig.JSStreamDiscardPolicy)
+	if err != nil {
+		return nil, err
+	}
+
 	streamConfig := &nats.StreamConfig{
 		Name:      natsConfig.JSStreamName,
 		Storage:   storage,
 		Replicas:  natsConfig.JSStreamReplicas,
 		Retention: retentionPolicy,
 		MaxMsgs:   natsConfig.JSStreamMaxMessages,
-		MaxBytes:  natsConfig.JSStreamMaxBytes,
+		MaxBytes:  maxBytes.Value(),
+		Discard:   discardPolicy,
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
@@ -212,9 +244,9 @@ func isJsSubAssociatedWithKymaSub(jsSubKey SubscriptionSubjectIdentifier,
 	return createKeyPrefix(subscription) == jsSubKey.NamespacedName()
 }
 
-//----------------------------------------
+// ----------------------------------------
 // SubscriptionSubjectIdentifier utils
-//----------------------------------------
+// ----------------------------------------
 
 // NamespacedName returns the Kubernetes namespaced name.
 func (s SubscriptionSubjectIdentifier) NamespacedName() string {
