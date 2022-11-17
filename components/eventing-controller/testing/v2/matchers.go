@@ -1,9 +1,10 @@
 package v2
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	"reflect"
 	"strconv"
+
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
@@ -25,7 +26,10 @@ func HaveSubscriptionSink(sink string) gomegatypes.GomegaMatcher {
 }
 
 func HaveSubscriptionFinalizer(finalizer string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha2.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
+	return WithTransform(
+		func(s *eventingv1alpha2.Subscription) []string {
+			return s.ObjectMeta.Finalizers
+		}, ContainElement(finalizer))
 }
 
 func HaveSubscriptionLabels(labels map[string]string) gomegatypes.GomegaMatcher {
@@ -77,7 +81,10 @@ func HaveSubscriptionNotReady() gomegatypes.GomegaMatcher {
 }
 
 func HaveCondition(condition eventingv1alpha2.Condition) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.Condition { return s.Status.Conditions },
+	return WithTransform(
+		func(s *eventingv1alpha2.Subscription) []eventingv1alpha2.Condition {
+			return s.Status.Conditions
+		},
 		ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 			"Type":    Equal(condition.Type),
 			"Reason":  Equal(condition.Reason),
@@ -130,11 +137,14 @@ func HaveNotFoundSubscription() gomegatypes.GomegaMatcher {
 }
 
 func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
-	return WithTransform(func(l corev1.EventList) []corev1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"Reason":  Equal(event.Reason),
-		"Message": Equal(event.Message),
-		"Type":    Equal(event.Type),
-	})))
+	return WithTransform(
+		func(l corev1.EventList) []corev1.Event {
+			return l.Items
+		}, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+			"Reason":  Equal(event.Reason),
+			"Message": Equal(event.Message),
+			"Type":    Equal(event.Type),
+		})))
 }
 
 func HaveCleanEventTypesEmpty() gomegatypes.GomegaMatcher {

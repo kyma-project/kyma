@@ -3,13 +3,14 @@ package jetstreamv2
 import (
 	"bytes"
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/nats-io/nats-server/v2/server"
-	"net/http"
-	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 

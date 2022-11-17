@@ -2,6 +2,9 @@ package jetstream
 
 import (
 	"fmt"
+	"log"
+	"testing"
+
 	reconcilertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/onsi/gomega"
@@ -9,8 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	"log"
-	"testing"
 
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
@@ -84,7 +85,8 @@ func TestIdempotency(t *testing.T) {
 			reconcilertestingv2.BeExistingSubscription(),
 			reconcilertestingv2.BeValidSubscription(),
 			reconcilertestingv2.BeNatsSubWithMaxPending(ens.DefaultSubscriptionConfig.MaxInFlightMessages),
-			reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource, testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact),
+			reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+				testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact),
 		)
 	}
 	testNatsSub()
@@ -139,7 +141,8 @@ func TestCreateSubscription(t *testing.T) {
 					testingv2.OrderCreatedEventType: {
 						reconcilertestingv2.BeExistingSubscription(),
 						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource, testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact),
+						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+							testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact),
 					},
 				},
 			},
@@ -195,7 +198,11 @@ func TestCreateSubscription(t *testing.T) {
 					testingv2.OrderCreatedEventType: {
 						reconcilertestingv2.BeExistingSubscription(),
 						reconcilertestingv2.BeValidSubscription(),
-						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventTypePrefixEmpty, testingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingExact),
+						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
+							testingv2.EventTypePrefixEmpty,
+							testingv2.OrderCreatedEventType,
+							eventingv1alpha2.TypeMatchingExact,
+						),
 					},
 				},
 			},
@@ -249,9 +256,11 @@ func TestChangeSubscription(t *testing.T) {
 		wantAfter             reconcilertestingv2.Want
 	}{
 		{
-			// Ensure subscriptions on NATS are not added when adding a Subscription filter and providing an invalid sink to prevent event-loss.
+			// Ensure subscriptions on NATS are not added when adding
+			// a Subscription filter and providing an invalid sink to prevent event-loss.
 			// The reason for this is that the dispatcher will retry only for a finite number and then give up.
-			// Since the sink is invalid, the dispatcher cannot dispatch the event and will stop if the maximum number of retries is reached.
+			// Since the sink is invalid, the dispatcher cannot dispatch the event
+			// and will stop if the maximum number of retries is reached.
 			name: "Disallow the creation of a NATS subscription with an invalid sink",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithTypeMatchingExact(),
@@ -501,10 +510,11 @@ func TestChangeSubscription(t *testing.T) {
 
 			// when
 			t.Log("change and update the subscription")
-			reconcilertestingv2.EventuallyUpdateSubscriptionOnK8s(ens.Ctx, ens.TestEnsemble, sub, func(sub *eventingv1alpha2.Subscription) error {
-				tc.changeSubscription(sub)
-				return ens.K8sClient.Update(ens.Ctx, sub)
-			})
+			reconcilertestingv2.EventuallyUpdateSubscriptionOnK8s(ens.Ctx, ens.TestEnsemble,
+				sub, func(sub *eventingv1alpha2.Subscription) error {
+					tc.changeSubscription(sub)
+					return ens.K8sClient.Update(ens.Ctx, sub)
+				})
 
 			// then
 			t.Log("testing the k8s subscription")
@@ -552,7 +562,8 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
 		reconcilertestingv2.BeExistingSubscription(),
 		reconcilertestingv2.BeValidSubscription(),
-		reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource, testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact),
+		reconcilertestingv2.BeJetStreamSubscriptionWithSubject(testingv2.EventSource,
+			testingv2.OrderCreatedEventTypePrefixEmpty, eventingv1alpha2.TypeMatchingExact),
 	}
 
 	testSubscriptionOnNATS(ens, sub, testingv2.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)

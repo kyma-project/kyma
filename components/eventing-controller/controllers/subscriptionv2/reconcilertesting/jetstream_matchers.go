@@ -2,6 +2,7 @@ package reconcilertesting
 
 import (
 	"fmt"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/onsi/gomega"
@@ -24,7 +25,8 @@ func BeNatsSubWithMaxPending(expectedMaxAckPending int) gomegatypes.GomegaMatche
 	}, gomega.Equal(expectedMaxAckPending))
 }
 
-func BeJetStreamSubscriptionWithSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) gomegatypes.GomegaMatcher {
+func BeJetStreamSubscriptionWithSubject(source, subject string,
+	typeMatching eventingv1alpha2.TypeMatching) gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(subscriber jetstreamv2.Subscriber) (bool, error) {
 		info, err := subscriber.ConsumerInfo()
 		if err != nil {

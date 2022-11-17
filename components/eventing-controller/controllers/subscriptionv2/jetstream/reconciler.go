@@ -2,9 +2,10 @@ package jetstream
 
 import (
 	"context"
-	"github.com/nats-io/nats.go"
 	"reflect"
 	"time"
+
+	"github.com/nats-io/nats.go"
 
 	"github.com/pkg/errors"
 
@@ -70,12 +71,14 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		return err
 	}
 
-	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}},
+		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for subscriptions", "error", err)
 		return err
 	}
 
-	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel},
+		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for custom channel", "error", err)
 		return err
 	}
@@ -89,7 +92,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	return nil
 }
 
-// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete //nolint
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
 // Generate required RBAC to emit kubernetes events in the controller.
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch

@@ -169,12 +169,14 @@ func TestMultipleJSSubscriptionsToSameEvent(t *testing.T) {
 	// Send an event again which should not be delivered to subscriber
 	require.NoError(t,
 		SendCloudEventToJetStream(jsBackend,
-			jsBackend.GetJetStreamSubject(evtestingv2.EventSource, evtestingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingStandard),
+			jsBackend.GetJetStreamSubject(evtestingv2.EventSource,
+				evtestingv2.OrderCreatedEventType, eventingv1alpha2.TypeMatchingStandard),
 			evtestingv2.CloudEventData2,
 			types.ContentModeBinary),
 	)
 	// Check for the event that did not reach the subscriber
-	// Store should never return evtestingv2.CloudEventData2 hence CheckEvent should fail to match evtestingv2.CloudEventData2
+	// Store should never return evtestingv2.CloudEventData2
+	// hence CheckEvent should fail to match evtestingv2.CloudEventData2
 	require.Error(t, subscriber.CheckEvent(evtestingv2.CloudEventData2))
 }
 

@@ -3,6 +3,11 @@ package jetstream
 import (
 	"context"
 	"fmt"
+	"log"
+	"path/filepath"
+	"testing"
+	"time"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	reconcilertestingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
@@ -19,18 +24,15 @@ import (
 	gomegatypes "github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/kubernetes/scheme"
-	"log"
-	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"testing"
-	"time"
 )
 
 const (
 	useExistingCluster       = false
 	attachControlPlaneOutput = false
 	emptyEventSource         = ""
+	syncPeriod               = time.Second * 2
 )
 
 type jetStreamTestEnsemble struct {
@@ -97,7 +99,7 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	metricsPort, err = v2.GetFreePort()
 	require.NoError(ens.T, err)
 
-	syncPeriod := time.Second * 2
+	syncPeriod := syncPeriod
 	k8sManager, err := ctrl.NewManager(ens.Cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
@@ -107,7 +109,7 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 
 	envConf := env.NatsConfig{
 		URL:                     ens.NatsServer.ClientURL(),
-		MaxReconnects:           10,
+		MaxReconnects:           reconcilertestingv2.MaxReconnects,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         v2.EventTypePrefix,
 		JSStreamName:            v2.JSStreamName,
@@ -143,7 +145,11 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	require.NoError(ens.T, err)
 
-	ens.jetStreamBackend = ens.reconciler.Backend.(*jetstreamv2.JetStream)
+	jsBackend, ok := ens.reconciler.Backend.(*jetstreamv2.JetStream)
+	if !ok {
+		panic("cannot convert the Backend interface to Jetstreamv2")
+	}
+	ens.jetStreamBackend = jsBackend
 
 	go func() {
 		err = k8sManager.Start(ctx)
@@ -158,9 +164,14 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha2.Subscription,
 	subject string, expectations ...gomegatypes.GomegaMatcher) {
-
 	description := "Failed to match nats subscriptions"
-	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetStreamSubject(subscription.Spec.Source, subject, subscription.Spec.TypeMatching)).Should(gomega.And(expectations...), description)
+	getSubscriptionFromJetStream(ens,
+		subscription,
+		ens.jetStreamBackend.GetJetStreamSubject(
+			subscription.Spec.Source,
+			subject,
+			subscription.Spec.TypeMatching),
+	).Should(gomega.And(expectations...), description)
 }
 
 // testSubscriptionDeletion deletes the subscription and ensures it is not found anymore on the apiserver.

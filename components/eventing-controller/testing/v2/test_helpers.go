@@ -720,7 +720,7 @@ func WithSourceAndType(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-// WithCleanEventTypeOld is a SubscriptionOpt that initializes subscription with a not clean event type from v1alpha2
+// WithCleanEventTypeOld is a SubscriptionOpt that initializes subscription with a not clean event type from v1alpha2.
 func WithCleanEventTypeOld() SubscriptionOpt {
 	return WithSourceAndType(EventSourceClean, OrderCreatedEventType)
 }
@@ -749,6 +749,15 @@ func WithMaxInFlight(maxInFlight int) SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.Config = map[string]string{
 			eventingv1alpha2.MaxInFlightMessages: fmt.Sprint(maxInFlight),
+		}
+	}
+}
+
+// WithMaxInFlightMessages is a SubscriptionOpt that sets the status with the maxInFlightMessages string value
+func WithMaxInFlightMessages(maxInFlight string) SubscriptionOpt {
+	return func(sub *eventingv1alpha2.Subscription) {
+		sub.Spec.Config = map[string]string{
+			eventingv1alpha2.MaxInFlightMessages: maxInFlight,
 		}
 	}
 }
