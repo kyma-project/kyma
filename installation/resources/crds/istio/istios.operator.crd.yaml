@@ -18,7 +18,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Istio is the Schema for the istio API
+        description: Contains Istio CR specification and current status
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -33,10 +33,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: IstioSpec defines the desired state of Istio
+            description: Defines the desired specification for installing or updating
+              Istio
             properties:
               config:
-                description: Configurion.
+                description: Configuration for the Istio installation.
                 properties:
                   numTrustedProxies:
                     description: Defines the number of trusted proxies deployed in
