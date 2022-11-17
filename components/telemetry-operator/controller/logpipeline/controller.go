@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+	appsv1 "k8s.io/api/apps/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -87,26 +88,27 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&telemetryv1alpha1.LogPipeline{}).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
-			builder.WithPredicates(predicate.Funcs{
-				CreateFunc: func(event event.CreateEvent) bool {
-					return false
-				},
-				DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
-					return false
-				},
-				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-					return true // only handle updates
-				},
-				GenericFunc: func(genericEvent event.GenericEvent) bool {
-					return false
-				},
-			}),
+			handler.EnqueueRequestsFromMapFunc(r.mapSecrets),
+			builder.WithPredicates(onlyUpdate()),
+		).
+		Watches(
+			&source.Kind{Type: &appsv1.DaemonSet{}},
+			handler.EnqueueRequestsFromMapFunc(r.mapDaemonSets),
+			builder.WithPredicates(onlyUpdate()),
 		).
 		Complete(r)
 }
 
-func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
+func onlyUpdate() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc:  func(event event.CreateEvent) bool { return false },
+		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
+		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
+		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
+	}
+}
+
+func (r *Reconciler) mapSecrets(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
 	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
 	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
@@ -118,6 +120,27 @@ func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
 		requests = append(requests, request)
 	}
 	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+	return requests
+}
+
+func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
+	daemonSet := object.(*appsv1.DaemonSet)
+
+	var requests []reconcile.Request
+	if daemonSet.Name != r.config.DaemonSet.Name || daemonSet.Namespace != r.config.DaemonSet.Namespace {
+		return requests
+	}
+
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(context.Background(), &allPipelines); err != nil {
+		ctrl.Log.Error(err, "DamonSet UpdateEvent: fetching LogPipelineList failed!", err.Error())
+		return requests
+	}
+
+	for _, pipeline := range allPipelines.Items {
+		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}})
+	}
+	ctrl.Log.V(1).Info(fmt.Sprintf("DaemonSet changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
 	return requests
 }
 
@@ -166,9 +189,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
 	}
 
-	if err = r.updateStatus(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
-	}
+	//if err = r.updateStatus(ctx, &pipeline); err != nil {
+	//	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
+	//}
 
 	return ctrl.Result{}, nil
 }
