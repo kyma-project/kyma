@@ -72,7 +72,7 @@ type Filter struct {
 	Custom string `json:"custom,omitempty"`
 }
 
-// Configures an output to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead..
+// Configures an output to the Kyma-internal Loki instance. Note: This output is considered legacy and is only provided for backwards compatibility with the in-cluster Loki instance. It might not be compatible with latest Loki versions. For integration with a Loki-based system, use the `custom` output with name `loki` instead.
 type LokiOutput struct {
 	URL        ValueType         `json:"url,omitempty"`
 	Labels     map[string]string `json:"labels,omitempty"`
@@ -111,11 +111,9 @@ type TLSConfig struct {
 // Output describes a Fluent Bit output configuration section.
 type Output struct {
 	// Custom output definition in the Fluent Bit syntax. Note: If you use a `custom` output, you put the LogPipeline in unsupported mode.
-	Custom string `json:"custom,omitempty"`
-	// Defines an HTTP based output.
-	HTTP *HTTPOutput `json:"http,omitempty"`
-	// Defines a grafana-loki based output.
-	Loki *LokiOutput `json:"grafana-loki,omitempty"`
+	Custom string      `json:"custom,omitempty"`
+	HTTP   *HTTPOutput `json:"http,omitempty"`
+	Loki   *LokiOutput `json:"grafana-loki,omitempty"`
 }
 
 func (o *Output) IsCustomDefined() bool {

@@ -133,7 +133,12 @@ spec:
                       in unsupported mode.'
                     type: string
                   grafana-loki:
-                    description: Defines a grafana-loki based output.
+                    description: 'Configures an output to the Kyma-internal Loki instance.
+                      Note: This output is considered legacy and is only provided
+                      for backwards compatibility with the in-cluster Loki instance.
+                      It might not be compatible with latest Loki versions. For integration
+                      with a Loki-based system, use the `custom` output with name
+                      `loki` instead.'
                     properties:
                       labels:
                         additionalProperties:
@@ -162,7 +167,8 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: Defines an HTTP based output.
+                    description: Configures an HTTP-based output compatible with the
+                      Fluent Bit HTTP output plugin.
                     properties:
                       compress:
                         description: Defines the compression algorithm to use.
