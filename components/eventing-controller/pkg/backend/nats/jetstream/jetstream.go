@@ -346,7 +346,8 @@ func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 		js.namedLogger().Infow("Stream not found, created a new Stream",
 			"stream-info", info)
 		return nil
-	} else if err != nil {
+	}
+	if err != nil {
 		return err
 	}
 

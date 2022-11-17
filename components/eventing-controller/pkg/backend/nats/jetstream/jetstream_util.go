@@ -22,7 +22,7 @@ const (
 	ConsumerDeliverPolicyNew            = "new"
 )
 
-var ErrInvalidDiscardPolicy = fmt.Errorf("invalid discard policy")
+var ErrInvalidConfiguration = fmt.Errorf("invalid jetstream configuration")
 
 func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	switch s {
@@ -31,7 +31,7 @@ func toJetStreamStorageType(s string) (nats.StorageType, error) {
 	case StorageTypeFile:
 		return nats.FileStorage, nil
 	}
-	return nats.MemoryStorage, fmt.Errorf("invalid stream storage type %q", s)
+	return nats.MemoryStorage, fmt.Errorf("%w: storage type: %q", ErrInvalidConfiguration, s)
 }
 
 func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
@@ -41,7 +41,7 @@ func toJetStreamRetentionPolicy(s string) (nats.RetentionPolicy, error) {
 	case RetentionPolicyInterest:
 		return nats.InterestPolicy, nil
 	}
-	return nats.LimitsPolicy, fmt.Errorf("invalid stream retention policy %q", s)
+	return nats.LimitsPolicy, fmt.Errorf("%w: stream retention policy: %q", ErrInvalidConfiguration, s)
 }
 
 func toJetStreamDiscardPolicy(s string) (nats.DiscardPolicy, error) {
@@ -51,7 +51,7 @@ func toJetStreamDiscardPolicy(s string) (nats.DiscardPolicy, error) {
 	case DiscardPolicyNew:
 		return nats.DiscardNew, nil
 	}
-	return nats.DiscardNew, fmt.Errorf("invalid stream discard policy %q", s)
+	return nats.DiscardNew, fmt.Errorf("%w: stream discard policy: %q", ErrInvalidConfiguration, s)
 }
 
 // toJetStreamConsumerDeliverPolicyOpt returns a nats.DeliverPolicy opt based on the given deliver policy string value.
