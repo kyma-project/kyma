@@ -2,8 +2,16 @@ package sender
 
 import (
 	"context"
+	"errors"
 
 	"github.com/cloudevents/sdk-go/v2/event"
+)
+
+var (
+	ErrInsufficientStorage   = errors.New("insufficient storage on backend")
+	ErrBackendTargetNotFound = errors.New("publishing target on backend not found")
+	ErrNoConnection          = errors.New("no connection to backend")
+	ErrInternalBackendError  = errors.New("internal error on backend")
 )
 
 type GenericSender interface {
