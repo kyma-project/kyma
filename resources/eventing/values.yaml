@@ -9,10 +9,10 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: v20221031-64dca4da
+      version: v20221117-8bab3b7b
     nats:
       name: nats
-      version: 2.9.3-alpine3.16
+      version: 2.9.6-alpine3.16
       directory: external
     nats_config_reloader:
       name: natsio/nats-server-config-reloader
