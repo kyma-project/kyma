@@ -449,7 +449,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 				`,
 		},
 		{
-			name: "Send valid legacy event but cannot send to backend due target not found (eg stream missing)",
+			name: "Send valid legacy event but cannot send to backend due to target not found (e.g. stream missing)",
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),

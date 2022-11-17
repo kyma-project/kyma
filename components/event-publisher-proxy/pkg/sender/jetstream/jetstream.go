@@ -27,7 +27,6 @@ const (
 	natsBackend           = "nats"
 	jestreamHandlerName   = "jetstream-handler"
 	noSpaceLeftErrMessage = "no space left on device"
-	natsMaxBytesExceeded  = "nats: maximum bytes exceeded"
 )
 
 // compile time check
