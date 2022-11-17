@@ -160,9 +160,9 @@ const (
 )
 
 const (
-	FluentBitDSRestartedReason        = "FluentBitDaemonSetRestarted"
-	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
-	SecretsNotPresent                 = "OneORMoreSecretsAreNotPresent"
+	FluentBitDSNotReadyReason     = "FluentBitDaemonSetNotReady"
+	FluentBitDSReadyReason        = "FluentBitDaemonSetReady"
+	ReferencedSecretMissingReason = "ReferencedSecretMissing"
 )
 
 // LogPipelineCondition contains details for the current condition of this LogPipeline

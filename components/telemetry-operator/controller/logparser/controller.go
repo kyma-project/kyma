@@ -99,7 +99,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		condition := telemetryv1alpha1.NewLogParserCondition(
-			telemetryv1alpha1.FluentBitDSRestartedReason,
+			telemetryv1alpha1.FluentBitDSNotReadyReason,
 			telemetryv1alpha1.LogParserPending,
 		)
 		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
@@ -121,7 +121,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
 
 		condition := telemetryv1alpha1.NewLogParserCondition(
-			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
+			telemetryv1alpha1.FluentBitDSReadyReason,
 			telemetryv1alpha1.LogParserRunning,
 		)
 

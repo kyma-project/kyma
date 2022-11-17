@@ -57,7 +57,7 @@ type Reconciler struct {
 	client.Client
 	config                  Config
 	syncer                  *syncer
-	daemonSetHelper         *kubernetes.DaemonSetHelper
+	daemonSet               *kubernetes.DaemonSetHelper
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
 	secrets                 secretsCache
@@ -72,7 +72,7 @@ func NewReconciler(
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
+	r.daemonSet = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	r.secrets = newSecretsCache()
@@ -191,7 +191,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.daemonSetHelper.UpdateConfigChecksum(ctx, r.config.DaemonSet); err != nil {
+	if err := r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
 	}
 
