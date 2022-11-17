@@ -194,25 +194,7 @@ func TestGetCleanEventTypes(t *testing.T) {
 		name              string
 		givenSubscription *eventingv1alpha2.Subscription
 		wantEventTypes    []eventingv1alpha2.EventType
-		wantError         bool
 	}{
-		{
-			name: "Should throw an error if the eventType is empty",
-			givenSubscription: evtestingv2.NewSubscription("sub", "test",
-				evtestingv2.WithEventSource(evtestingv2.EventSourceUnclean),
-			),
-			wantEventTypes: []eventingv1alpha2.EventType{},
-			wantError:      true,
-		},
-		{
-			name: "Should throw an error if the eventType is empty",
-			givenSubscription: evtestingv2.NewSubscription("sub", "test",
-				evtestingv2.WithEventSource(evtestingv2.EventSourceUnclean),
-				evtestingv2.WithEventType(""),
-			),
-			wantEventTypes: []eventingv1alpha2.EventType{},
-			wantError:      true,
-		},
 		{
 			name: "Should not clean eventTypes if the typeMatching is set to Exact",
 			givenSubscription: evtestingv2.NewSubscription("sub", "test",
@@ -225,7 +207,6 @@ func TestGetCleanEventTypes(t *testing.T) {
 					CleanType:    evtestingv2.OrderCreatedUncleanEvent,
 				},
 			},
-			wantError: false,
 		},
 		{
 			name: "Should clean eventTypes if the typeMatching is set to Standard",
@@ -239,7 +220,6 @@ func TestGetCleanEventTypes(t *testing.T) {
 					CleanType:    evtestingv2.OrderCreatedCleanEvent,
 				},
 			},
-			wantError: false,
 		},
 		{
 			name: "Should clean multiple eventTypes",
@@ -258,33 +238,13 @@ func TestGetCleanEventTypes(t *testing.T) {
 					CleanType:    evtestingv2.OrderCreatedV1Event,
 				},
 			},
-			wantError: false,
-		},
-		{
-			name: "Should throw an error for zero length - BadSubject",
-			givenSubscription: evtestingv2.NewSubscription("sub", "test",
-				evtestingv2.WithEventType(""),
-				evtestingv2.WithTypeMatchingStandard(),
-			),
-			wantEventTypes: []eventingv1alpha2.EventType{},
-			wantError:      true,
-		},
-		{
-			name: "Should throw an error for less than two segments - BadSubject",
-			givenSubscription: evtestingv2.NewSubscription("sub", "test",
-				evtestingv2.WithEventType("order"),
-				evtestingv2.WithTypeMatchingStandard(),
-			),
-			wantEventTypes: []eventingv1alpha2.EventType{},
-			wantError:      true,
 		},
 	}
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			eventTypes, getCleanTypesErr := GetCleanEventTypes(tc.givenSubscription, jscleaner)
-			require.Equal(t, tc.wantError, getCleanTypesErr != nil)
+			eventTypes := GetCleanEventTypes(tc.givenSubscription, jscleaner)
 			require.Equal(t, tc.wantEventTypes, eventTypes)
 		})
 	}
@@ -369,47 +329,6 @@ func TestGetBackendJetStreamTypes(t *testing.T) {
 			t.Parallel()
 			jsTypes := GetBackendJetStreamTypes(tc.givenSubscription, tc.givenJSSubjects)
 			require.Equal(t, tc.wantJSTypes, jsTypes)
-		})
-	}
-}
-
-func TestCleanEventType(t *testing.T) {
-	t.Parallel()
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	require.NoError(t, err)
-	jsCleaner := cleaner.NewJetStreamCleaner(defaultLogger)
-	testCases := []struct {
-		name           string
-		givenEventType string
-		wantEventType  string
-		wantError      bool
-	}{
-		{
-			name:           "Should throw an error if the event type is of length zero",
-			givenEventType: "",
-			wantEventType:  "",
-			wantError:      true,
-		},
-		{
-			name:           "Should throw an error if segments are less then two",
-			givenEventType: "onesegment",
-			wantEventType:  "",
-			wantError:      true,
-		},
-		{
-			name:           "Should return valid cleaned eventType",
-			givenEventType: evtestingv2.OrderCreatedUncleanEvent,
-			wantEventType:  evtestingv2.OrderCreatedCleanEvent,
-			wantError:      false,
-		},
-	}
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-			cleanEventType, getTypesErr := getCleanEventType(tc.givenEventType, jsCleaner)
-			require.Equal(t, tc.wantError, getTypesErr != nil)
-			require.Equal(t, tc.wantEventType, cleanEventType)
 		})
 	}
 }

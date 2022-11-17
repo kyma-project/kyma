@@ -119,15 +119,18 @@ data:
                   "children": [
                     {
                       "name": "URL",
-                      "source": "spec.output.grafana-loki.url.value"
+                      "source": "spec.output.`grafana-loki`.url.value"
                     },
                     {
                       "name": "Labels",
-                      "source": "spec.output.grafana-loki.labels"
+                      "widget": "Labels",
+                      "source": "spec.output.`grafana-loki`.labels"
                     },
                     {
                       "name": "Remove keys",
-                      "source": "spec.output.grafana-loki.removeKeys"
+                      "widget": "JoinedArray",
+                      "separator": ",",
+                      "source": "spec.output.`grafana-loki`.removeKeys",
                     }
                   ]
                 },
@@ -246,6 +249,7 @@ data:
       {
         "path": "spec.input",
         "widget": "FormGroup",
+        "defaultExpanded": true,
         "simple": true,
         "children":
           [
@@ -253,6 +257,8 @@ data:
               "name": "Include Namespaces",
               "widget": "SimpleList",
               "path": "application.namespaces.include",
+              "defaultExpanded": true,
+              "inputInfo": "Include container logs from selected namespaces",
               "children":
                 [
                   {
@@ -324,6 +330,7 @@ data:
         "path": "spec.output",
         "widget": "FormGroup",
         "path": "spec.output",
+        "defaultExpanded": true,
         "simple": true,
         "children":
           [
@@ -331,12 +338,14 @@ data:
               "name": "Custom",
               "path": "custom",
               "widget": "CodeEditor",
-              "simple": false
+              "advanced": true,
+              "inputInfo": "Custom output definition in fluent bit syntax (https://docs.fluentbit.io/manual/pipeline/outputs). Please note using custom option would put logpipeline in unsupported mode"
             },
             {
               "name": "HTTP",
               "path": "http",
               "widget": "FormGroup",
+              "defaultExpanded": true,
               "simple": true,
               "children":
                 [
@@ -354,25 +363,16 @@ data:
                         {
                           "name": "Secret Reference",
                           "path": "valueFrom.secretKeyRef",
-                          "widget": "FormGroup",
-                          "children":
-                            [
-                              {
-                                "name": "Namespace",
-                                "path": "namespace",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Name",
-                                "path": "name",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Key",
-                                "path": "key",
-                                "widget": "Text"
-                              },
-                            ]
+                          "widget": "ResourceRef",
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
                         }
                       ]
                   },
@@ -388,26 +388,18 @@ data:
                           "widget": "Text"
                         },
                         {
+                          "name": "Secret Reference",
                           "path": "valueFrom.secretKeyRef",
-                          "widget": "FormGroup",
-                          "children":
-                            [
-                              {
-                                "name": "Namespace",
-                                "path": "namespace",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Name",
-                                "path": "name",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Key",
-                                "path": "key",
-                                "widget": "Text"
-                              },
-                            ]
+                          "widget": "ResourceRef",
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
                         }
                       ]
                   },
@@ -425,25 +417,16 @@ data:
                         {
                           "name": "Secret Reference",
                           "path": "valueFrom.secretKeyRef",
-                          "widget": "FormGroup",
-                          "children":
-                            [
-                              {
-                                "name": "Namespace",
-                                "path": "namespace",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Name",
-                                "path": "name",
-                                "widget": "Text"
-                              },
-                              {
-                                "name": "Key",
-                                "path": "key",
-                                "widget": "Text"
-                              },
-                            ]
+                          "widget": "ResourceRef",
+                          "resource": {
+                             "kind": "secret",
+                             "version": "v1",
+                          },
+                          "children": [{
+                              "path": "key",
+                              "enum": "$keys($secret.data)",
+                          },
+                          ],
                         }
                       ]
                   },

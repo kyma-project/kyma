@@ -5,10 +5,12 @@ import (
 	"net/url"
 	"strings"
 
-	"golang.org/x/xerrors"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	k8stypes "k8s.io/apimachinery/pkg/types"
+
+	"golang.org/x/xerrors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -48,7 +50,7 @@ func NewValidator(ctx context.Context, client client.Client, recorder record.Eve
 }
 
 func (s defaultSinkValidator) Validate(subscription *v1alpha1.Subscription) error {
-	if !IsValidScheme(subscription.Spec.Sink) {
+	if !utils.IsValidScheme(subscription.Spec.Sink) {
 		events.Warn(s.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
 		return xerrors.Errorf(MissingSchemeErrMsg)
 	}
@@ -102,9 +104,4 @@ func GetClusterLocalService(ctx context.Context, client client.Client, svcNs, sv
 		return nil, err
 	}
 	return svc, nil
-}
-
-// IsValidScheme returns true if the sink scheme is http or https, otherwise returns false.
-func IsValidScheme(sink string) bool {
-	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }

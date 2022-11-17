@@ -143,21 +143,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	r.updateMetrics(&allPipelines)
 
-	var logPipeline telemetryv1alpha1.LogPipeline
-	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
+	var pipeline telemetryv1alpha1.LogPipeline
+	if err := r.Get(ctx, req.NamespacedName, &pipeline); err != nil {
 		log.V(1).Info("Ignoring deleted LogPipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	r.syncSecretsCache(&logPipeline)
+	if err := r.ensureFinalizers(ctx, &pipeline); err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
 
-	secretsOK := r.ensureReferencedSecretsExist(ctx, &logPipeline)
+	r.syncSecretsCache(&pipeline)
+
+	secretsOK := r.ensureReferencedSecretsExist(ctx, &pipeline)
 	if !secretsOK {
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.SecretsNotPresent,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
+		pipelineUnsupported := pipeline.ContainsCustomPlugin()
 		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 		}
@@ -165,17 +169,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
 	}
 
-	changed, err := r.syncer.syncAll(ctx, &logPipeline, &allPipelines)
+	changed, err := r.syncer.syncAll(ctx, &pipeline, &allPipelines)
 	if err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	if err := r.cleanupFinalizers(ctx, &pipeline); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
 	if changed {
 		log.Info("Fluent Bit configuration was updated. Restarting the DaemonSet")
-
-		if err = r.Update(ctx, &logPipeline); err != nil {
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to update LogPipeline: %v", err)
-		}
 
 		if err = r.daemonSetHelper.Restart(ctx, r.config.DaemonSet); err != nil {
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
@@ -185,7 +189,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
+		pipelineUnsupported := pipeline.ContainsCustomPlugin()
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
 		}
@@ -193,7 +197,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
 	}
 
-	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
+	if pipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
 		var ready bool
 		ready, err = r.daemonSetHelper.IsReady(ctx, r.config.DaemonSet)
 		if err != nil {
@@ -209,7 +213,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		pipelineUnsupported := logPipeline.ContainsCustomPlugin()
+		pipelineUnsupported := pipeline.ContainsCustomPlugin()
 
 		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition, pipelineUnsupported); err != nil {
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
