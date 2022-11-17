@@ -329,6 +329,25 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				eventing_epp_errors_total 1
 			`,
 		},
+		{
+			name: "Publish binary CloudEvent but backend is full",
+			fields: fields{
+				Sender: &GenericSenderStub{
+					Err: fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+				},
+				collector:        metrics.NewCollector(latency),
+				eventTypeCleaner: &eventtypetest.CleanerStub{},
+			},
+			args: args{
+				request: CreateValidBinaryRequest(t),
+			},
+			wantStatus: 507,
+			wantTEF: `
+				# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
+				# TYPE eventing_epp_errors_total counter
+				eventing_epp_errors_total 1
+			`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -427,6 +446,50 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 					# HELP eventing_epp_requests_total The total number of event requests
 					# TYPE eventing_epp_requests_total counter
 					eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+				`,
+		},
+		{
+			name: "Send valid legacy event but cannot send to backend due target not found (eg stream missing)",
+			fields: fields{
+				Sender: &GenericSenderStub{
+					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrBackendTargetNotFound),
+					BackendURL: "FOO",
+				},
+				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:         metrics.NewCollector(latency),
+				eventTypeCleaner:  eventtypetest.CleanerStub{},
+			},
+			args: args{
+				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			},
+			wantStatus: http.StatusBadGateway,
+			wantOk:     false,
+			wantTEF: `
+					# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
+					# TYPE eventing_epp_errors_total counter
+					eventing_epp_errors_total 1
+				`,
+		},
+		{
+			name: "Send valid legacy event but cannot send to backend due to full storage",
+			fields: fields{
+				Sender: &GenericSenderStub{
+					Err:        fmt.Errorf("oh no, i cannot send: %w", sender.ErrInsufficientStorage),
+					BackendURL: "FOO",
+				},
+				LegacyTransformer: legacy.NewTransformer("namespace", "im.a.prefix", NewApplicationListerOrDie(context.Background(), "testapp")),
+				collector:         metrics.NewCollector(latency),
+				eventTypeCleaner:  eventtypetest.CleanerStub{},
+			},
+			args: args{
+				request: legacytest.ValidLegacyRequestOrDie(t, "v1", "testapp", "object.created"),
+			},
+			wantStatus: 507,
+			wantOk:     false,
+			wantTEF: `
+					# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
+					# TYPE eventing_epp_errors_total counter
+					eventing_epp_errors_total 1
 				`,
 		},
 		{

@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -28,28 +29,26 @@ func TestJetStreamMessageSender(t *testing.T) {
 		name                      string
 		givenStream               bool
 		givenNATSConnectionClosed bool
-		wantError                 bool
+		wantErr                   error
 		wantStatusCode            int
 	}{
 		{
 			name:                      "send in jetstream mode should not succeed if stream doesn't exist",
 			givenStream:               false,
 			givenNATSConnectionClosed: false,
-			wantError:                 true,
-			wantStatusCode:            http.StatusNotFound,
+			wantErr:                   sender.ErrBackendTargetNotFound,
 		},
 		{
 			name:                      "send in jetstream mode should succeed if NATS connection is open and the stream exists",
 			givenStream:               true,
 			givenNATSConnectionClosed: false,
-			wantError:                 false,
+			wantErr:                   nil,
 			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send in jetstream mode should fail if NATS connection is not open",
 			givenNATSConnectionClosed: true,
-			wantError:                 true,
-			wantStatusCode:            http.StatusBadGateway,
+			wantErr:                   ErrNotConnected,
 		},
 	}
 
@@ -84,8 +83,8 @@ func TestJetStreamMessageSender(t *testing.T) {
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 
 			// assert
-			assert.Equal(t, tc.wantError, err != nil)
-			if !tc.wantError {
+			assert.ErrorIs(t, err, tc.wantErr)
+			if tc.wantErr == nil {
 				assert.Equal(t, tc.wantStatusCode, status.HTTPStatus())
 			}
 		})

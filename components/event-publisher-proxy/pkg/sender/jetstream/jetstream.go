@@ -26,6 +26,7 @@ const (
 	natsBackend           = "nats"
 	jestreamHandlerName   = "jetstream-handler"
 	noSpaceLeftErrMessage = "no space left on device"
+	natsMaxBytesExceeded  = "nats: maximum bytes exceeded"
 )
 
 // compile time check
@@ -81,12 +82,15 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 	if err != nil {
 		s.namedLogger().Errorw("Cannot send event to backend", "error", err)
 		if errors.Is(err, nats.ErrNoStreamResponse) {
-			return nil, fmt.Errorf("%w : %v", ErrCannotSendToStream, err)
+			return nil, fmt.Errorf("%w : %v", sender.ErrBackendTargetNotFound, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
+		}
+		if strings.Contains(err.Error(), natsMaxBytesExceeded) {
+			return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
 		}
 		if strings.Contains(err.Error(), noSpaceLeftErrMessage) {
-			return nil, err
+			return nil, fmt.Errorf("%w: %v", sender.ErrInsufficientStorage, err)
 		}
-		return nil, fmt.Errorf("%w: %v", ErrCannotSendToStream, err)
+		return nil, fmt.Errorf("%w : %v", sender.ErrInternalBackendError, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
 	}
 	return beb.HTTPPublishResult{Status: http.StatusNoContent}, nil
 }
