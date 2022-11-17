@@ -79,7 +79,7 @@ build: generate fmt vet ## Build manager binary.
 lint-manifests:
 	../../hack/lint-manifests.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
 
-lint: lint-manifests ## Run various linters
+lint: lint-manifests
 	../../hack/verify-lint.sh .
 
 tls.key:
