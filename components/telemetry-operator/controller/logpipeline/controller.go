@@ -153,7 +153,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	r.syncSecretsCache(&pipeline)
 
-	_, err := r.syncer.syncAll(ctx, &pipeline, &allPipelines)
+	err := r.syncer.syncAll(ctx, &pipeline, &allPipelines)
 	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
