@@ -173,7 +173,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	defer func() {
 		if err := r.updateStatus(ctx, &pipeline); err != nil {
 			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
-			reconcileErr = fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
+			reconcileErr = fmt.Errorf("failed to update LogPipeline status: %v", err)
 		}
 	}()
 
