@@ -1,4 +1,4 @@
-module telemetry-webhook-ca-init
+module webhook-cert-init
 
 go 1.19
 

@@ -1,5 +1,5 @@
 
-APP_NAME = webhook-ca-init
+APP_NAME = webhook-cert-init
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20220428-6e81d2c4
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
