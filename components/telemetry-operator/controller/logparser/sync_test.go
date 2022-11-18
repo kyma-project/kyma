@@ -37,10 +37,9 @@ func TestSyncParsersConfigMapErrorClientErrorReturnsError(t *testing.T) {
 		Spec: telemetryv1alpha1.LogParserSpec{Parser: `
 Format regex`},
 	}
-	result, err := sut.SyncParsersConfigMap(context.Background(), &lp)
+	err := sut.SyncParsersConfigMap(context.Background(), &lp)
 
 	require.Error(t, err)
-	require.Equal(t, result, false)
 }
 
 func TestSuccessfulParserConfigMap(t *testing.T) {
@@ -56,10 +55,9 @@ Format regex`},
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(lp).Build()
 	sut := newSyncer(mockClient, testConfig)
 
-	changed, err := sut.SyncParsersConfigMap(context.Background(), lp)
+	err = sut.SyncParsersConfigMap(context.Background(), lp)
 
 	require.NoError(t, err)
-	require.Equal(t, true, changed)
 
 	var cm corev1.ConfigMap
 	err = sut.Get(ctx, testConfig.ParsersConfigMap, &cm)

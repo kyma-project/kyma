@@ -2,6 +2,7 @@ package logparser
 
 import (
 	"context"
+	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -32,11 +33,11 @@ func newSyncer(client client.Client, config Config) *syncer {
 }
 
 // SyncParsersConfigMap synchronizes the Fluent Bit parsers ConfigMap for all LogParsers.
-func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
+func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) error {
 	log := logf.FromContext(ctx)
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.ParsersConfigMap)
 	if err != nil {
-		return false, err
+		return fmt.Errorf("unable to get parsers configmap: %w", err)
 	}
 
 	changed := false
@@ -58,7 +59,7 @@ func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv
 
 	err = s.List(ctx, &logParsers)
 	if err != nil {
-		return false, err
+		return fmt.Errorf("unable to list parsers: %w", err)
 	}
 	fluentBitParsersConfig := builder.BuildFluentBitParsersConfig(&logParsers)
 	if fluentBitParsersConfig == "" {
@@ -77,11 +78,12 @@ func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv
 	}
 
 	if !changed {
-		return false, nil
-	}
-	if err = s.Update(ctx, &cm); err != nil {
-		return false, err
+		return nil
 	}
 
-	return changed, nil
+	if err = s.Update(ctx, &cm); err != nil {
+		return fmt.Errorf("unable to parsers files configmap: %w", err)
+	}
+
+	return nil
 }

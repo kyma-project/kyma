@@ -129,12 +129,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		}
 	}()
 
-	var _, err = r.syncer.SyncParsersConfigMap(ctx, &parser)
-	if err != nil {
+	if err := r.syncer.SyncParsersConfigMap(ctx, &parser); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err = r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
+	if err := r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
 		ConfigMapNames:   []types.NamespacedName{r.config.ParsersConfigMap},
 		AnnotationSuffix: "logparser",
 	}); err != nil {
