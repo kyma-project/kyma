@@ -52,7 +52,6 @@ type Config struct {
 	PipelineDefaults  configbuilder.PipelineDefaults
 }
 
-// Reconciler reconciles a LogPipeline object
 type Reconciler struct {
 	client.Client
 	config                  Config
@@ -63,7 +62,6 @@ type Reconciler struct {
 	secrets                 secretsCache
 }
 
-// NewReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
 func NewReconciler(
 	client client.Client,
 	config Config,
@@ -82,7 +80,6 @@ func NewReconciler(
 	return &r
 }
 
-// SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogPipeline{}).
@@ -151,8 +148,6 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="apps",resources=daemonsets,verbs=get;list;watch;patch
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)
 	log.Info("Reconciliation triggered")

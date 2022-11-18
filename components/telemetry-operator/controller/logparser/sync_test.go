@@ -32,30 +32,27 @@ func TestSyncParsersConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
 	sut := newSyncer(mockClient, testConfig)
 
-	lp := telemetryv1alpha1.LogParser{
-		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "fooNs"},
-		Spec: telemetryv1alpha1.LogParserSpec{Parser: `
-Format regex`},
-	}
-	err := sut.SyncParsersConfigMap(context.Background(), &lp)
+	err := sut.SyncParsersConfigMap(context.Background())
 
 	require.Error(t, err)
 }
 
 func TestSuccessfulParserConfigMap(t *testing.T) {
 	var ctx context.Context
+
+	s := scheme.Scheme
+	err := telemetryv1alpha1.AddToScheme(scheme.Scheme)
+	require.NoError(t, err)
+
 	lp := &telemetryv1alpha1.LogParser{
 		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "fooNs"},
 		Spec: telemetryv1alpha1.LogParserSpec{Parser: `
 Format regex`},
 	}
-	s := scheme.Scheme
-	err := telemetryv1alpha1.AddToScheme(s)
-	require.NoError(t, err)
 	mockClient := fake.NewClientBuilder().WithScheme(s).WithObjects(lp).Build()
 	sut := newSyncer(mockClient, testConfig)
 
-	err = sut.SyncParsersConfigMap(context.Background(), lp)
+	err = sut.SyncParsersConfigMap(context.Background())
 
 	require.NoError(t, err)
 

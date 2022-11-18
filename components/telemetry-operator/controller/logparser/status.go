@@ -16,7 +16,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, parser *telemetryv1alpha1
 	}
 
 	if !fluentBitDSReady {
-		if err := setStatus(ctx, r.Client, parser.Name, telemetryv1alpha1.NewLogParserCondition(
+		if err = setStatus(ctx, r.Client, parser.Name, telemetryv1alpha1.NewLogParserCondition(
 			telemetryv1alpha1.FluentBitDSNotReadyReason,
 			telemetryv1alpha1.LogParserPending,
 		)); err != nil {
@@ -27,7 +27,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, parser *telemetryv1alpha1
 	}
 
 	if fluentBitDSReady && parser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
-		if err := setStatus(ctx, r.Client, parser.Name, telemetryv1alpha1.NewLogParserCondition(
+		if err = setStatus(ctx, r.Client, parser.Name, telemetryv1alpha1.NewLogParserCondition(
 			telemetryv1alpha1.FluentBitDSReadyReason,
 			telemetryv1alpha1.LogParserRunning,
 		)); err != nil {

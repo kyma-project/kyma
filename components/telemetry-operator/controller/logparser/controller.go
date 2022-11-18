@@ -44,7 +44,6 @@ type Config struct {
 	DaemonSet        types.NamespacedName
 }
 
-// Reconciler reconciles a LogParser object
 type Reconciler struct {
 	client.Client
 	config    Config
@@ -65,7 +64,6 @@ func NewReconciler(client client.Client, config Config) *Reconciler {
 	return &r
 }
 
-// SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogParser{}).
@@ -111,14 +109,11 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)
 	var parser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, req.NamespacedName, &parser); err != nil {
 		log.Info("Ignoring deleted LogParser")
-		// Ignore not-found errors since we can get them on deleted requests
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -129,11 +124,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		}
 	}()
 
-	if err := r.syncer.SyncParsersConfigMap(ctx, &parser); err != nil {
+	err := ensureFinalizer(ctx, r.Client, &parser)
+	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
+	if err = r.syncer.SyncParsersConfigMap(ctx); err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	err = cleanupFinalizer(ctx, r.Client, &parser)
+	if err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	if err = r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
 		ConfigMapNames:   []types.NamespacedName{r.config.ParsersConfigMap},
 		AnnotationSuffix: "logparser",
 	}); err != nil {

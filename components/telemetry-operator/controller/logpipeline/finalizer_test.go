@@ -14,14 +14,9 @@ import (
 
 func TestEnsureFinalizers(t *testing.T) {
 	t.Run("without files", func(t *testing.T) {
-		pipeline := &telemetryv1alpha1.LogPipeline{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "empty",
-			},
-		}
-
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
+		pipeline := &telemetryv1alpha1.LogPipeline{ObjectMeta: metav1.ObjectMeta{Name: "pipeline"}}
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -29,7 +24,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.True(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, filesFinalizer))
@@ -37,9 +32,7 @@ func TestEnsureFinalizers(t *testing.T) {
 
 	t.Run("with files", func(t *testing.T) {
 		pipeline := &telemetryv1alpha1.LogPipeline{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "empty",
-			},
+			ObjectMeta: metav1.ObjectMeta{Name: "pipeline"},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
 				Files: []telemetryv1alpha1.FileMount{
 					{
@@ -51,7 +44,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -59,7 +52,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.True(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 		require.True(t, controllerutil.ContainsFinalizer(&updatedPipeline, filesFinalizer))
@@ -71,14 +64,14 @@ func TestCleanupFinalizers(t *testing.T) {
 		ts := metav1.Now()
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:              "empty",
+				Name:              "pipeline",
 				Finalizers:        []string{sectionsFinalizer},
 				DeletionTimestamp: &ts,
 			},
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -86,7 +79,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 	})
@@ -95,14 +88,14 @@ func TestCleanupFinalizers(t *testing.T) {
 		ts := metav1.Now()
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:              "empty",
+				Name:              "pipeline",
 				Finalizers:        []string{sectionsFinalizer, filesFinalizer},
 				DeletionTimestamp: &ts,
 			},
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -110,7 +103,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, filesFinalizer))

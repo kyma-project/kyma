@@ -4,19 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	parsersConfigMapKey      = "parsers.conf"
-	parserConfigMapFinalizer = "FLUENT_BIT_PARSERS_CONFIG_MAP"
-)
+const parsersConfigMapKey = "parsers.conf"
 
 type syncer struct {
 	client.Client
@@ -33,8 +27,7 @@ func newSyncer(client client.Client, config Config) *syncer {
 }
 
 // SyncParsersConfigMap synchronizes the Fluent Bit parsers ConfigMap for all LogParsers.
-func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) error {
-	log := logf.FromContext(ctx)
+func (s *syncer) SyncParsersConfigMap(ctx context.Context) error {
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.ParsersConfigMap)
 	if err != nil {
 		return fmt.Errorf("unable to get parsers configmap: %w", err)
@@ -42,20 +35,6 @@ func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv
 
 	changed := false
 	var logParsers telemetryv1alpha1.LogParserList
-
-	if logParser.DeletionTimestamp.IsZero() {
-		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
-			log.Info("Adding finalizer")
-			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			changed = true
-		}
-	} else {
-		if controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
-			log.Info("Removing finalizer")
-			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
-			changed = true
-		}
-	}
 
 	err = s.List(ctx, &logParsers)
 	if err != nil {
