@@ -7,13 +7,16 @@ const {
   debug,
   getEnvOrThrow,
   deleteEventingBackendK8sSecret,
+  deleteK8sConfigMap,
   getShootNameFromK8sServerUrl,
   listPods,
+  retryPromise,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {eventMeshSecretFilePath} = require('./common/common');
+const axios = require('axios');
 const kymaVersion = process.env.KYMA_VERSION || '';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
@@ -26,6 +29,9 @@ const testNamespace = `test-${suffix}`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
+const streamDataConfigMapName = 'eventing-stream-info';
+const eventingNatsSvcName = 'eventing-nats';
+const eventingNatsApiRuleAName = `${eventingNatsSvcName}-apirule`;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
 const streamConfig = { };
@@ -66,6 +72,9 @@ async function cleanupTestingResources() {
     debug('Removing Event Mesh secret');
     await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
   }
+
+  debug('Removing JetStream data configmap');
+  await deleteK8sConfigMap(streamDataConfigMapName);
 
   debug(`Removing ${testNamespace} and ${mockNamespace} namespaces`);
   await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -121,9 +130,24 @@ async function getStreamConfigForJetStream() {
   return envsCount === 2;
 }
 
+async function getJetStreamStreamData(host) {
+  const responseJson = await retryPromise(async () => await axios.get(`https://${host}/jsz?streams=true`), 5, 1000);
+  const streamName = responseJson.data.account_details[0].stream_detail[0].name;
+  const streamCreationTime = responseJson.data.account_details[0].stream_detail[0].created;
+
+  return {
+    streamName: streamName,
+    streamCreationTime: streamCreationTime,
+  };
+}
+
 function skipAtLeastOnceDeliveryTest() {
   return !(streamConfig['retention_policy'] === 'limits' &&
       streamConfig['consumer_deliver_policy'] === 'all');
+}
+
+function skipStreamReCreationTest(streamData) {
+  return streamData.streamCreationTime === undefined;
 }
 
 module.exports = {
@@ -137,6 +161,9 @@ module.exports = {
   testCompassFlow,
   backendK8sSecretName,
   backendK8sSecretNamespace,
+  streamDataConfigMapName,
+  eventingNatsSvcName,
+  eventingNatsApiRuleAName,
   timeoutTime,
   slowTime,
   director,
@@ -148,5 +175,7 @@ module.exports = {
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
+  getJetStreamStreamData,
+  skipStreamReCreationTest,
   subscriptionNames,
 };

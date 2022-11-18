@@ -32,6 +32,7 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
+  createAPIRuleForService, getConfigMap, deleteApiRule,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -48,6 +49,11 @@ const {
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
+  skipStreamReCreationTest,
+  getJetStreamStreamData,
+  streamDataConfigMapName,
+  eventingNatsSvcName,
+  eventingNatsApiRuleAName,
   subscriptionNames,
 } = require('./utils');
 const {
@@ -104,6 +110,7 @@ describe('Eventing tests', function() {
     }
 
     if (backend === natsBackend) {
+      testStreamNotReCreated();
       testJetStreamAtLeastOnceDelivery();
     }
   }
@@ -120,6 +127,45 @@ describe('Eventing tests', function() {
 
     it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function', async function() {
       await sendCloudEventBinaryModeAndCheckResponse(backend, mockNamespace);
+    });
+  }
+
+  function testStreamNotReCreated() {
+    context('stream check with JetStream backend', function() {
+      let wantStreamData = null;
+      let gotStreamData = null;
+      before('check if stream creation timestamp is available', async function() {
+        try {
+          const cm = await getConfigMap(streamDataConfigMapName);
+          wantStreamData = cm.data;
+        } catch (err) {
+          console.log('Skipping the stream recreation check due to missing configmap!');
+          this.skip();
+        }
+        if (skipStreamReCreationTest(wantStreamData)) {
+          console.log('Skipping the stream recreation check due to missing info!');
+          this.skip();
+        }
+      });
+
+      it('Get the current stream creation timestamp', async function() {
+        const vs = await createAPIRuleForService(eventingNatsApiRuleAName,
+            kymaSystem,
+            eventingNatsSvcName,
+            8222);
+        const vsHost = vs.spec.hosts[0];
+        gotStreamData = await getJetStreamStreamData(vsHost);
+      });
+
+      it('Compare the stream creation timestamp', async function() {
+        assert.equal(gotStreamData.streamName, wantStreamData.streamName);
+        assert.equal(gotStreamData.streamCreationTime, wantStreamData.streamCreationTime);
+      });
+
+
+      it('Delete the APIRule created', async function() {
+        await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
+      });
     });
   }
 

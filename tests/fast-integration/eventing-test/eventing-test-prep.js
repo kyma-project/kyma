@@ -15,6 +15,10 @@ const {
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
+  streamDataConfigMapName,
+  eventingNatsSvcName,
+  eventingNatsApiRuleAName,
+  getJetStreamStreamData,
   timeoutTime,
   slowTime,
   gardener,
@@ -22,7 +26,10 @@ const {
   shootName,
   cleanupTestingResources,
 } = require('./utils');
-const {eventMeshSecretFilePath} = require('./common/common');
+const {
+  eventMeshSecretFilePath,
+  kymaSystem,
+} = require('./common/common');
 const {
   ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
@@ -33,6 +40,9 @@ const {
   error,
   debug,
   createEventingBackendK8sSecret,
+  createK8sConfigMap,
+  createAPIRuleForService,
+  deleteApiRule,
 } = require('../utils');
 const {
   addScenarioInCompass,
@@ -91,6 +101,26 @@ describe('Eventing tests preparation', function() {
         backendK8sSecretNamespace,
     );
     setEventMeshSourceNamespace(eventMeshInfo['namespace']);
+  });
+
+  it('Prepare JetStream data configmap', async function() {
+    // Create a configmap that contains stream data for jetstream so that during the test,
+    // we can verify that the stream was not affected/recreated
+    debug('expose the eventing-nats service with an apirule');
+    const vs = await createAPIRuleForService(eventingNatsApiRuleAName,
+        kymaSystem,
+        eventingNatsSvcName,
+        8222);
+    const vsHost = vs.spec.hosts[0];
+
+    debug('Creating configmap with JetStream stream info');
+    const streamInfo = await getJetStreamStreamData(vsHost);
+    await createK8sConfigMap(
+        streamInfo,
+        streamDataConfigMapName,
+    );
+
+    await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
   });
 
   it('Prepare assets without Compass flow', async function() {

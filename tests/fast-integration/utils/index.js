@@ -261,7 +261,7 @@ async function getFunction(name, namespace) {
   return JSON.parse(response.body);
 }
 
-async function getConfigMap(name, namespace) {
+async function getConfigMap(name, namespace='default') {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
@@ -1452,6 +1452,106 @@ function deleteEventingBackendK8sSecret(name, namespace='default') {
 }
 
 /**
+ * Creates apirule for the service specified
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where to create the configmap
+ * @param {string} svcName - service to expose as apirule
+ * @param {int} port - port of the service to expose as apirule
+ */
+async function createAPIRuleForService(name, namespace='default', svcName, port) {
+  const apiRuleJson = {
+    apiVersion: 'gateway.kyma-project.io/v1beta1',
+    kind: 'APIRule',
+    metadata: {
+      name,
+      namespace,
+    },
+    spec: {
+      gateway: 'kyma-gateway.kyma-system.svc.cluster.local',
+      host: svcName,
+      service: {
+        name: svcName,
+        port: port,
+      },
+      rules: [{
+        accessStrategies: [{
+          config: {},
+          handler: 'allow',
+        }],
+        methods: ['GET'],
+        path: '/.*',
+      }],
+    },
+  };
+
+  // apply to k8s
+  await k8sApply([apiRuleJson], namespace, true);
+
+  return waitForVirtualService(namespace, name);
+}
+
+/**
+ * Deletes apirule
+ * @param {string} name - name of the apirule
+ * @param {string} namespace - namespace where the apirule exists
+ * @return {Promise<void>}
+ */
+function deleteApiRule(name, namespace='default') {
+  const apiRuleJson = {
+    apiVersion: 'gateway.kyma-project.io/v1beta1',
+    kind: 'APIRule',
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([apiRuleJson], namespace);
+}
+
+/**
+ * Creates configmap with the data passed as argument
+ * @param {Object} data - host name of the virtual service exposed to obtain the information
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where to create the configmap
+ */
+async function createK8sConfigMap(data, name, namespace='default') {
+  const configMapJson = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name,
+      namespace,
+    },
+    data: data,
+  };
+
+  // apply to k8s
+  await k8sApply([configMapJson], namespace, true);
+
+  return waitForConfigMap(name, namespace);
+}
+
+/**
+ * Deletes configmap
+ * @param {string} name - name of the configmap
+ * @param {string} namespace - namespace where the configmap exists
+ * @return {Promise<void>}
+ */
+function deleteK8sConfigMap(name, namespace='default') {
+  const configMapJson = {
+    apiVersion: 'v1',
+    kind: 'ConfigMap',
+    metadata: {
+      name,
+      namespace,
+    },
+  };
+
+  return k8sDelete([configMapJson], namespace);
+}
+
+/**
  * Switches eventing backend to specified backend-type (beb or nats)
  * @param {string} secretName - name of the beb secret
  * @param {string} namespace - namespace where the secret exists
@@ -1730,6 +1830,10 @@ module.exports = {
   printEventingPublisherProxyLogs,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
+  createK8sConfigMap,
+  deleteK8sConfigMap,
+  createAPIRuleForService,
+  deleteApiRule,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
