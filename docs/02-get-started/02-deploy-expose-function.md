@@ -82,7 +82,9 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
 
 1. In your Function's view, go to the **Configuration** tab.
 2. Click on **Create API Rule +**.
-3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
+3. Provide the **Name** (`hello-world`).
+4. Click on **Choose the service to expose** and select `hello-world (port: 80)`.
+5. Provide the **Subdomain** (`hello-world`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** (`hello-world`) from the dropdown menu.
   </details>
