@@ -3,8 +3,6 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -18,6 +16,12 @@ type DaemonSetHelper struct {
 	restartsTotal prometheus.Counter
 }
 
+type ChecksumParams struct {
+	ConfigMapNames   []string
+	SecretNames      []string
+	AnnotationSuffix string
+}
+
 func NewDaemonSetHelper(client client.Client, restartsTotal prometheus.Counter) *DaemonSetHelper {
 	return &DaemonSetHelper{
 		client:        client,
@@ -26,27 +30,34 @@ func NewDaemonSetHelper(client client.Client, restartsTotal prometheus.Counter) 
 }
 
 // UpdateConfigChecksum deletes all Fluent Bit pods to apply the new configuration
-func (f *DaemonSetHelper) UpdateConfigChecksum(ctx context.Context, daemonSet types.NamespacedName) error {
-	log := logf.FromContext(ctx)
-
+func (f *DaemonSetHelper) UpdateConfigChecksum(ctx context.Context, daemonSet types.NamespacedName, params *ChecksumParams) error {
 	var ds appsv1.DaemonSet
 	if err := f.client.Get(ctx, daemonSet, &ds); err != nil {
-		log.Error(err, "Failed to get DaemonSet", "name", f.daemonSet)
-		return err
+		return fmt.Errorf("failed to get %s/%s DaemonSet: %v", daemonSet.Namespace, daemonSet.Name, err)
 	}
 
 	patchedDS := *ds.DeepCopy()
 	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
 		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 	}
-	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	checksum, err := f.calculateConfigChecksum(params)
+	if err != nil {
+		return fmt.Errorf("failed to calculate config checksum: %v", err)
+	}
+
+	annotation := fmt.Sprintf("checksum/%s", params.AnnotationSuffix)
+	patchedDS.Spec.Template.ObjectMeta.Annotations[annotation] = checksum
 
 	if err := f.client.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
-		log.Error(err, "Failed to patch DaemonSet to trigger rolling update", "name", f.daemonSet)
-		return err
+		return fmt.Errorf("failed to patch %s/%s DaemonSet: %v", daemonSet.Namespace, daemonSet.Name, err)
 	}
 	f.restartsTotal.Inc()
 	return nil
+}
+
+func (f *DaemonSetHelper) calculateConfigChecksum(params *ChecksumParams) (string, error) {
+	return "", nil
 }
 
 func (f *DaemonSetHelper) IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error) {
@@ -54,8 +65,7 @@ func (f *DaemonSetHelper) IsReady(ctx context.Context, daemonSet types.Namespace
 
 	var ds appsv1.DaemonSet
 	if err := f.client.Get(ctx, daemonSet, &ds); err != nil {
-		log.Error(err, "Failed getting DaemonSet", "name", f.daemonSet)
-		return false, err
+		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", daemonSet.Namespace, daemonSet.Name, err)
 	}
 
 	generation := ds.Generation
