@@ -19,6 +19,13 @@ package logparser
 import (
 	"context"
 	"fmt"
+	appsv1 "k8s.io/api/apps/v1"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 
@@ -40,9 +47,9 @@ type Config struct {
 // Reconciler reconciles a LogParser object
 type Reconciler struct {
 	client.Client
-	config          Config
-	syncer          *syncer
-	daemonSetHelper *kubernetes.DaemonSetHelper
+	config    Config
+	syncer    *syncer
+	daemonSet *kubernetes.DaemonSetHelper
 }
 
 func NewReconciler(client client.Client, config Config) *Reconciler {
@@ -50,7 +57,7 @@ func NewReconciler(client client.Client, config Config) *Reconciler {
 
 	r.Client = client
 	r.config = config
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
+	r.daemonSet = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
 
 	controllermetrics.RegisterMetrics()
@@ -62,7 +69,42 @@ func NewReconciler(client client.Client, config Config) *Reconciler {
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogParser{}).
+		Watches(
+			&source.Kind{Type: &appsv1.DaemonSet{}},
+			handler.EnqueueRequestsFromMapFunc(r.mapDaemonSets),
+			builder.WithPredicates(onlyUpdate()),
+		).
 		Complete(r)
+}
+
+func onlyUpdate() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc:  func(event event.CreateEvent) bool { return false },
+		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
+		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
+		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
+	}
+}
+
+func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
+	daemonSet := object.(*appsv1.DaemonSet)
+
+	var requests []reconcile.Request
+	if daemonSet.Name != r.config.DaemonSet.Name || daemonSet.Namespace != r.config.DaemonSet.Namespace {
+		return requests
+	}
+
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(context.Background(), &allPipelines); err != nil {
+		ctrl.Log.Error(err, "DamonSet UpdateEvent: fetching LogPipelineList failed!", err.Error())
+		return requests
+	}
+
+	for _, pipeline := range allPipelines.Items {
+		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}})
+	}
+	ctrl.Log.V(1).Info(fmt.Sprintf("DaemonSet changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+	return requests
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers,verbs=get;list;watch;create;update;patch;delete
@@ -71,100 +113,33 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)
-	var logParser telemetryv1alpha1.LogParser
-	if err := r.Get(ctx, req.NamespacedName, &logParser); err != nil {
+	var parser telemetryv1alpha1.LogParser
+	if err := r.Get(ctx, req.NamespacedName, &parser); err != nil {
 		log.Info("Ignoring deleted LogParser")
 		// Ignore not-found errors since we can get them on deleted requests
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	var changed, err = r.syncer.SyncParsersConfigMap(ctx, &logParser)
+	defer func() {
+		if err := r.updateStatus(ctx, &parser); err != nil {
+			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
+			reconcileErr = fmt.Errorf("failed to update LogPipeline status: %v", err)
+		}
+	}()
+
+	var _, err = r.syncer.SyncParsersConfigMap(ctx, &parser)
 	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if changed {
-		log.V(1).Info("Fluent Bit parser configuration was updated. Restarting the DaemonSet")
-
-		if err = r.Update(ctx, &logParser); err != nil {
-			log.Error(err, "Failed to update LogParser")
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
-		}
-
-		if err = r.daemonSetHelper.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
-			ConfigMapNames:   []types.NamespacedName{r.config.ParsersConfigMap},
-			AnnotationSuffix: "logparser",
-		}); err != nil {
-			log.Error(err, "Failed to restart Fluent Bit DaemonSet")
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
-		}
-
-		condition := telemetryv1alpha1.NewLogParserCondition(
-			telemetryv1alpha1.FluentBitDSNotReadyReason,
-			telemetryv1alpha1.LogParserPending,
-		)
-		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
-		}
+	if err = r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
+		ConfigMapNames:   []types.NamespacedName{r.config.ParsersConfigMap},
+		AnnotationSuffix: "logparser",
+	}); err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 	}
 
-	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
-		var ready bool
-		ready, err = r.daemonSetHelper.IsReady(ctx, r.config.DaemonSet)
-		if err != nil {
-			log.Error(err, "Failed to check Fluent Bit readiness")
-			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
-		}
-		if !ready {
-			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
-			return ctrl.Result{RequeueAfter: controller.RequeueTime}, nil
-		}
-		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
-
-		condition := telemetryv1alpha1.NewLogParserCondition(
-			telemetryv1alpha1.FluentBitDSReadyReason,
-			telemetryv1alpha1.LogParserRunning,
-		)
-
-		if err = r.updateLogParserStatus(ctx, req.NamespacedName, condition); err != nil {
-			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
-		}
-	}
-
-	return ctrl.Result{}, nil
-}
-
-func (r *Reconciler) updateLogParserStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogParserCondition) error {
-	log := logf.FromContext(ctx)
-
-	var logParser telemetryv1alpha1.LogParser
-	if err := r.Get(ctx, name, &logParser); err != nil {
-		log.Error(err, "Failed to get LogParser")
-		return err
-	}
-
-	// Do not update status if the log parser is being deleted
-	if logParser.DeletionTimestamp != nil {
-		return nil
-	}
-
-	// If the log parser had a running condition and then was modified, all conditions are removed.
-	// In this case, condition tracking starts off from the beginning.
-	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) != nil &&
-		condition.Type == telemetryv1alpha1.LogParserPending {
-		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", name.Name, condition.Type))
-		logParser.Status.Conditions = []telemetryv1alpha1.LogParserCondition{}
-	} else {
-		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", name.Name, condition.Type))
-	}
-
-	logParser.Status.SetCondition(*condition)
-
-	if err := r.Status().Update(ctx, &logParser); err != nil {
-		log.Error(err, fmt.Sprintf("Failed to update LogParser status to %s", condition.Type))
-		return err
-	}
-	return nil
+	return reconcileResult, reconcileErr
 }
