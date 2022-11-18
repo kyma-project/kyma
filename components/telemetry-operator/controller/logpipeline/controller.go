@@ -191,7 +191,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet); err != nil {
+	if err := r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
+		ConfigMapNames:   []types.NamespacedName{r.config.SectionsConfigMap, r.config.FilesConfigMap},
+		SecretNames:      []types.NamespacedName{r.config.EnvSecret},
+		AnnotationSuffix: "logpipeline",
+	}); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
 	}
 
