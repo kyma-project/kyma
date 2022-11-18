@@ -103,7 +103,6 @@ replace (
 )
 
 replace (
-	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/kyma-incubator/api-gateway => github.com/kyma-project/api-gateway v0.0.0-20220819093753-296e6704d413
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
