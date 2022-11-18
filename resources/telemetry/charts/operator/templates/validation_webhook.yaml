@@ -1,8 +1,3 @@
-{{- $ca := genCA "telemetry-validating-webhook-ca" 3650 }}
-{{- $cn := printf "%s-webhook" (include "fullname" .) }}
-{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
-{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
-{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -15,7 +10,6 @@ webhooks:
   - v1beta1
   - v1
   clientConfig:
-    caBundle: {{ b64enc $ca.Cert }}
     service:
       name: {{ include "operator.fullname" . }}-webhook
       namespace: {{ .Release.Namespace }}
@@ -41,7 +35,6 @@ webhooks:
   - v1beta1
   - v1
   clientConfig:
-    caBundle: {{ b64enc $ca.Cert }}
     service:
       name: {{ include "operator.fullname" . }}-webhook
       namespace: {{ .Release.Namespace }}
@@ -63,15 +56,3 @@ webhooks:
     scope: '*'
   sideEffects: None
   timeoutSeconds: {{ .Values.webhook.timeout }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ include "operator.fullname" . }}-webhook-cert
-  labels:
-    {{- include "operator.labels" . | nindent 4 }}
-    {{- toYaml .Values.extraLabels | nindent 4 }}
-type: Opaque
-data:
-  tls.crt: {{ b64enc $cert.Cert }}
-  tls.key: {{ b64enc $cert.Key }}

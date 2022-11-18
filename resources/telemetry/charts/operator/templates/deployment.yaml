@@ -26,6 +26,22 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - command:
+            - /webhook-cert-init
+          args:
+            - --cert-dir=/var/run/telemetry-webhook
+            - --service-name=telemetry-operator-webhook
+            - --service-namespace=kyma-system
+            - --validating-webhook=validation.webhook.telemetry.kyma-project.io
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_webhook_cert_init) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: telemetry-webhook-cert-init
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - mountPath: /var/run/telemetry-webhook
+              name: telemetry-webhook-cert-dir
       containers:
         - command:
             - /manager
@@ -71,14 +87,8 @@ spec:
               value: {{ .Values.global.log.level | quote }}
           volumeMounts:
           - mountPath: /var/run/telemetry-webhook
-            name: telemetry-webhook-cert
+            name: telemetry-webhook-cert-dir
             readOnly: true
       volumes:
-      - name: telemetry-webhook-cert
-        secret:
-          secretName: {{ template "fullname" . }}-webhook-cert
-          items:
-          - key: tls.crt
-            path: tls.crt
-          - key: tls.key
-            path: tls.key
+      - name: telemetry-webhook-cert-dir
+        emptyDir: {}
