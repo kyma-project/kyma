@@ -30,4 +30,4 @@ This table lists all the possible parameters of a given resource together with t
 | Field   |      Mandatory      |  Description |
 |---|:---:|---|
 | **metadata.name** | **YES** | Specifies the name of the Istio Manager CR. |
-| **spec.config.numTrustedProxies** | **NO** | Specifies the number of trusted proxies; for more info, read the [Istio documentation](https://istio.io/latest/docs/ops/configuration/traffic-management/network-topologies/). |
+| **spec.config.numTrustedProxies** | **NO** | Specifies the number of trusted proxies; for more information, read the [Istio documentation](https://istio.io/latest/docs/ops/configuration/traffic-management/network-topologies/). |
