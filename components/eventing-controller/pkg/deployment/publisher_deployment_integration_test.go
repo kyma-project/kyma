@@ -145,7 +145,6 @@ func Test_GetLogEnvVars(t *testing.T) {
 			},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "text",
-				"APP_LOG_LEVEL":  "info",
 			},
 		},
 		{
@@ -155,7 +154,6 @@ func Test_GetLogEnvVars(t *testing.T) {
 			},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "json",
-				"APP_LOG_LEVEL":  "warning",
 			},
 		},
 		{
@@ -163,7 +161,6 @@ func Test_GetLogEnvVars(t *testing.T) {
 			givenEnvs: map[string]string{},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "json",
-				"APP_LOG_LEVEL":  "info",
 			},
 		},
 		{
@@ -174,7 +171,6 @@ func Test_GetLogEnvVars(t *testing.T) {
 			},
 			wantEnvs: map[string]string{
 				"APP_LOG_FORMAT": "text",
-				"APP_LOG_LEVEL":  "error",
 			},
 		},
 	}
