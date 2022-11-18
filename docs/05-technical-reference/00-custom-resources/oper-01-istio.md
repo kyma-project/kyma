@@ -3,7 +3,7 @@ title: Istio
 type: Custom Resource
 ---
 
-The `istios.operator.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format the Reconciler use to configure and install Istio. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `istios.operator.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format the Reconciler uses to configure and install Istio. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```shell
 kubectl get crd istios.operator.kyma-project.io -o yaml
