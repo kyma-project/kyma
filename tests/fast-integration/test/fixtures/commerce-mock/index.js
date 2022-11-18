@@ -322,6 +322,12 @@ async function checkInClusterEventTracing(targetNamespace) {
 async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceRes = await getJaegerTrace(traceId);
 
+  // log the expected trace
+  debug('expected spans:');
+  for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
+    debug(`${buildLevel(i)} ${expectedTraceProcessSequence[i]}`);
+  }
+
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 
@@ -333,41 +339,49 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
+  // log the actual trace
+  debug('actual spans:');
+  logSpansGraph(0, traceDAG[0], traceData);
+
   // searching through the trace-graph for the expected span sequence staring at the root element
-  const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
-  if (!wasFound) {
-    debug(`Not all expected spans found in the expected order:`);
-    for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
-      debug(`${expectedTraceProcessSequence[i]}`);
-    }
+  debug('trying to match expected and actual');
+  expect(findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData, 0)).to.be.true;
+}
+
+function logSpansGraph(position, currentSpan, traceData) {
+  const actualSpan = traceData.processes[currentSpan.processID].serviceName;
+  debug(`${buildLevel(position)} ${actualSpan}`);
+
+  const newPosition = position +1;
+  for (let i = 0; i < currentSpan.childSpans.length; i++) {
+    logSpansGraph(newPosition, currentSpan.childSpans[i], traceData);
   }
-  expect(wasFound).to.be.true;
 }
 
 // findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
 // order while ignoring the spans that are not expected.
-function findSpanSequence(expectedSpans, position, currentSpan, traceData) {
+function findSpanSequence(expectedSpans, position, currentSpan, traceData, numberFound) {
   // validate if the actual span is the expected span
   const actualSpan = traceData.processes[currentSpan.processID].serviceName;
-  const expectedSpan = expectedSpans[position];
-  let newPosition = position;
+  const expectedSpan = expectedSpans[numberFound];
   const debugMsg = `${buildLevel(position)} ${actualSpan}`;
+
   // if this span contains the currently expected span, the position will be increased
   if (actualSpan === expectedSpan) {
-    newPosition++;
+    numberFound++;
     debug(debugMsg);
   } else {
-    debug(`${debugMsg} expected ${expectedSpan}`);
+    debug(`${debugMsg} [expected ${expectedSpan}, continue to search]`);
   }
 
   // check if all traces have been found yet
-  if (newPosition === expectedSpans.length) {
+  if (numberFound === expectedSpans.length) {
     return true;
   }
 
   // recursive search through all the child spans
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    if (findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData)) {
+    if (findSpanSequence(expectedSpans, position +1, currentSpan.childSpans[i], traceData, numberFound)) {
       return true;
     }
   }
