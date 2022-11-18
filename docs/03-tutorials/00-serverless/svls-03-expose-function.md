@@ -160,6 +160,8 @@ Follow these steps:
 
     >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
 
+    - **Service** name matching the Function's name.
+
     - **Subdomain** to determine the host on which you want to expose your Function.
 
 5. In the **Rules** section, select the `noop` handler and mark **all** the methods.
