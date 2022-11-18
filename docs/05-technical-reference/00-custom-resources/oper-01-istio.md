@@ -11,7 +11,7 @@ kubectl get crd istios.operator.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample Istio custom resource (CR) that the Reconciler will use to configure and install Istio. This example shows the single supported **numTrustedProxies** configuration setting. There must be only one Istio CR on the cluster.
+This is a sample Istio custom resource (CR) that the Reconciler uses to configure and install Istio. This example shows the single supported **numTrustedProxies** configuration setting. There must be only one Istio CR on the cluster.
 
 ```yaml
 apiVersion: operator.kyma-project.io/v1alpha1
