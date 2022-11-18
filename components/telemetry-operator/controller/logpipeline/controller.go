@@ -19,6 +19,7 @@ package logpipeline
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	appsv1 "k8s.io/api/apps/v1"
 
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -31,7 +32,6 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"github.com/prometheus/client_golang/prometheus"
 
 	corev1 "k8s.io/api/core/v1"
@@ -44,6 +44,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+const checksumAnnotationKey = "checksum/logpipeline-config"
+
 type Config struct {
 	DaemonSet         types.NamespacedName
 	SectionsConfigMap types.NamespacedName
@@ -52,27 +54,36 @@ type Config struct {
 	PipelineDefaults  configbuilder.PipelineDefaults
 }
 
+type DaemonSetProber interface {
+	IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error)
+}
+
+type DaemonSetAnnotator interface {
+	SetAnnotation(ctx context.Context, daemonSet types.NamespacedName, key, value string) (patched bool, err error)
+}
+
 type Reconciler struct {
 	client.Client
 	config                  Config
 	syncer                  *syncer
-	daemonSet               *kubernetes.DaemonSetHelper
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
+	restartsTotal           prometheus.Counter
+	prober                  DaemonSetProber
+	annotator               DaemonSetAnnotator
 	secrets                 secretsCache
 }
 
-func NewReconciler(
-	client client.Client,
-	config Config,
-) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
-	r.daemonSet = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
+	r.restartsTotal = controllermetrics.FluentBitTriggeredRestartsTotal
+	r.prober = prober
+	r.annotator = annotator
 	r.secrets = newSecretsCache()
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
 	controllermetrics.RegisterMetrics()
@@ -186,12 +197,18 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
-		ConfigMapNames:   []types.NamespacedName{r.config.SectionsConfigMap, r.config.FilesConfigMap},
-		SecretNames:      []types.NamespacedName{r.config.EnvSecret},
-		AnnotationSuffix: "logpipeline",
-	}); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to restart Fluent Bit DaemonSet: %v", err)
+	checksum, err := r.calculateChecksum(ctx)
+	if err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	patched, err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum)
+	if err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	if patched {
+		r.restartsTotal.Inc()
 	}
 
 	return reconcileResult, reconcileErr
@@ -237,4 +254,23 @@ func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
 
 func isUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
 	return isNotMarkedForDeletion(pipeline) && pipeline.ContainsCustomPlugin()
+}
+
+func (r *Reconciler) calculateChecksum(ctx context.Context) (string, error) {
+	var sectionsCm corev1.ConfigMap
+	if err := r.Get(ctx, r.config.SectionsConfigMap, &sectionsCm); err != nil {
+		return "", fmt.Errorf("failed to get %s/%s ConfigMap: %v", r.config.SectionsConfigMap.Namespace, r.config.SectionsConfigMap.Name, err)
+	}
+
+	var filesCm corev1.ConfigMap
+	if err := r.Get(ctx, r.config.FilesConfigMap, &filesCm); err != nil {
+		return "", fmt.Errorf("failed to get %s/%s ConfigMap: %v", r.config.FilesConfigMap.Namespace, r.config.FilesConfigMap.Name, err)
+	}
+
+	var envSecret corev1.Secret
+	if err := r.Get(ctx, r.config.EnvSecret, &envSecret); err != nil {
+		return "", fmt.Errorf("failed to get %s/%s ConfigMap: %v", r.config.EnvSecret.Namespace, r.config.EnvSecret.Name, err)
+	}
+
+	return configchecksum.Calculate([]corev1.ConfigMap{sectionsCm, filesCm}, []corev1.Secret{envSecret}), nil
 }

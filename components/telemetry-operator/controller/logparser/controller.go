@@ -19,7 +19,10 @@ package logparser
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -36,28 +39,41 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 )
+
+const checksumAnnotationKey = "checksum/logparser-config"
 
 type Config struct {
 	ParsersConfigMap types.NamespacedName
 	DaemonSet        types.NamespacedName
 }
 
-type Reconciler struct {
-	client.Client
-	config    Config
-	syncer    *syncer
-	daemonSet *kubernetes.DaemonSetHelper
+type DaemonSetProber interface {
+	IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error)
 }
 
-func NewReconciler(client client.Client, config Config) *Reconciler {
+type DaemonSetAnnotator interface {
+	SetAnnotation(ctx context.Context, daemonSet types.NamespacedName, key, value string) (patched bool, err error)
+}
+
+type Reconciler struct {
+	client.Client
+	config        Config
+	syncer        *syncer
+	restartsTotal prometheus.Counter
+	prober        DaemonSetProber
+	annotator     DaemonSetAnnotator
+}
+
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
 	var r Reconciler
 
 	r.Client = client
 	r.config = config
-	r.daemonSet = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
 	r.syncer = newSyncer(client, config)
+	r.restartsTotal = controllermetrics.FluentBitTriggeredRestartsTotal
+	r.prober = prober
+	r.annotator = annotator
 
 	controllermetrics.RegisterMetrics()
 
@@ -138,12 +154,27 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err = r.daemonSet.UpdateConfigChecksum(ctx, r.config.DaemonSet, &kubernetes.ChecksumParams{
-		ConfigMapNames:   []types.NamespacedName{r.config.ParsersConfigMap},
-		AnnotationSuffix: "logparser",
-	}); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+	checksum, err := r.calculateConfigChecksum(ctx)
+	if err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	patched, err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum)
+	if err != nil {
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	}
+
+	if patched {
+		r.restartsTotal.Inc()
 	}
 
 	return reconcileResult, reconcileErr
+}
+
+func (r *Reconciler) calculateConfigChecksum(ctx context.Context) (string, error) {
+	var cm corev1.ConfigMap
+	if err := r.Get(ctx, r.config.ParsersConfigMap, &cm); err != nil {
+		return "", fmt.Errorf("failed to get %s/%s ConfigMap: %v", r.config.ParsersConfigMap.Namespace, r.config.ParsersConfigMap.Name, err)
+	}
+	return configchecksum.Calculate([]corev1.ConfigMap{cm}, nil), nil
 }

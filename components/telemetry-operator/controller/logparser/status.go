@@ -41,29 +41,29 @@ func (r *Reconciler) updateStatus(ctx context.Context, parser *telemetryv1alpha1
 func setStatus(ctx context.Context, client client.Client, parserName string, condition *telemetryv1alpha1.LogParserCondition) error {
 	log := logf.FromContext(ctx)
 
-	var logParser telemetryv1alpha1.LogParser
-	if err := client.Get(ctx, types.NamespacedName{Name: parserName}, &logParser); err != nil {
+	var parser telemetryv1alpha1.LogParser
+	if err := client.Get(ctx, types.NamespacedName{Name: parserName}, &parser); err != nil {
 		return fmt.Errorf("failed to get LogParser: %v", err)
 	}
 
 	// Do not update status if the log parser is being deleted
-	if logParser.DeletionTimestamp != nil {
+	if parser.DeletionTimestamp != nil {
 		return nil
 	}
 
 	// If the log parser had a running condition and then was modified, all conditions are removed.
 	// In this case, condition tracking starts off from the beginning.
-	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) != nil &&
+	if parser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) != nil &&
 		condition.Type == telemetryv1alpha1.LogParserPending {
 		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", parserName, condition.Type))
-		logParser.Status.Conditions = []telemetryv1alpha1.LogParserCondition{}
+		parser.Status.Conditions = []telemetryv1alpha1.LogParserCondition{}
 	} else {
 		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", parserName, condition.Type))
 	}
 
-	logParser.Status.SetCondition(*condition)
+	parser.Status.SetCondition(*condition)
 
-	if err := client.Status().Update(ctx, &logParser); err != nil {
+	if err := client.Status().Update(ctx, &parser); err != nil {
 		log.Error(err, fmt.Sprintf("Failed to update LogParser status to %s", condition.Type))
 		return err
 	}
