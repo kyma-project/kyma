@@ -68,6 +68,7 @@ service:
 webhook:
   timeout: 15
   service:
+    portName: https-webhook
     port: 443
     protocol: TCP
     targetPort: 9443
