@@ -75,7 +75,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
-		err := sut.cleanupFinalizers(context.Background(), pipeline)
+		err := sut.cleanupFinalizersIfNeeded(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -99,7 +99,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
-		err := sut.cleanupFinalizers(context.Background(), pipeline)
+		err := sut.cleanupFinalizersIfNeeded(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline

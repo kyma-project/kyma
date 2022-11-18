@@ -182,7 +182,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.cleanupFinalizers(ctx, &pipeline); err != nil {
+	if err := r.cleanupFinalizersIfNeeded(ctx, &pipeline); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 

@@ -54,7 +54,7 @@ func TestCleanupFinalizer(t *testing.T) {
 		}
 		client := fake.NewClientBuilder().Build()
 
-		err := cleanupFinalizer(ctx, client, parser)
+		err := cleanupFinalizerIfNeeded(ctx, client, parser)
 		require.NoError(t, err)
 	})
 
@@ -72,7 +72,7 @@ func TestCleanupFinalizer(t *testing.T) {
 		}
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(parser).Build()
 
-		err := cleanupFinalizer(ctx, client, parser)
+		err := cleanupFinalizerIfNeeded(ctx, client, parser)
 		require.NoError(t, err)
 
 		var updatedParser telemetryv1alpha1.LogPipeline

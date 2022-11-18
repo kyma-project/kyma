@@ -22,7 +22,7 @@ func ensureFinalizer(ctx context.Context, client client.Client, parser *telemetr
 	return nil
 }
 
-func cleanupFinalizer(ctx context.Context, client client.Client, parser *telemetryv1alpha1.LogParser) error {
+func cleanupFinalizerIfNeeded(ctx context.Context, client client.Client, parser *telemetryv1alpha1.LogParser) error {
 	if parser.DeletionTimestamp.IsZero() {
 		return nil
 	}

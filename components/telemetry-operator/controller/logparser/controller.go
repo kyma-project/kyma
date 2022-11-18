@@ -133,7 +133,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	err = cleanupFinalizer(ctx, r.Client, &parser)
+	err = cleanupFinalizerIfNeeded(ctx, r.Client, &parser)
 	if err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}

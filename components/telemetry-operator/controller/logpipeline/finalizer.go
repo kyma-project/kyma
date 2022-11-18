@@ -34,7 +34,7 @@ func (r *Reconciler) ensureFinalizers(ctx context.Context, pipeline *telemetryv1
 	return r.Update(ctx, pipeline)
 }
 
-func (r *Reconciler) cleanupFinalizers(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+func (r *Reconciler) cleanupFinalizersIfNeeded(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
 	if pipeline.DeletionTimestamp.IsZero() {
 		return nil
 	}
