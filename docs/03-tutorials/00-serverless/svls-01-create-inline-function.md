@@ -4,11 +4,11 @@ title: Create an inline Function
 
 This tutorial shows how you can create a simple "Hello World" Function in Node.js 14. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
 
-> **TIP:** Serverless also allows you to store the Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
+>**TIP:** Serverless also allows you to store the Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
 
-> **TIP:** Read about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
-> **NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
+>**NOTE:** Read about [Istio sidecars in Kyma and why you want them](../../01-overview/main-areas/service-mesh/smsh-03-istio-sidecars-in-kyma.md). Then, check how to [enable automatic Istio sidecar proxy injection](../../04-operation-guides/operations/smsh-01-istio-enable-sidecar-injection.md). For more details, see [Default Istio setup in Kyma](../../01-overview/main-areas/service-mesh/smsh-02-default-istio-setup-in-kyma.md).
 
 ## Steps
 
@@ -56,15 +56,15 @@ Follow these steps:
 
     a. Call the `apply` command from the workspace folder. It will build the container and run it on the Kyma runtime pointed by your current KUBECONFIG file:
 
-    ```bash
-    kyma apply function
-    ```
+      ```bash
+      kyma apply function
+      ```
 
     b. Check if your Function was created successfully:
 
-    ```bash
-    kubectl get functions $NAME -n $NAMESPACE
-    ```
+      ```bash
+      kubectl get functions $NAME -n $NAMESPACE
+      ```
 
     You should get a result similar to this example:
 
@@ -125,7 +125,7 @@ Follow these steps:
     Kyma Dashboard
     </summary>
 
-> **NOTE:** Kyma Dashboard uses Busola, which is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
+>**NOTE:** Kyma Dashboard uses Busola, which is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
 1.  Create a Namespace or select one from the drop-down list in the top navigation panel.
 
@@ -146,11 +146,10 @@ module.exports = {
 };
 ```
 
-> **NOTE:** You can choose Python runtime by clicking on the **Choose preset** button.
-
+>**NOTE:** You can choose Python runtime by clicking on the **Choose preset** button.
     The dialog box closes. Wait for the **Status** field to change into `RUNNING`, confirming that the Function was created successfully.
 
-If you decide to modify it, click **Edit** and confirm changes afterward by selecting the **Update** button.
+   If you decide to modify it, click **Edit** and confirm changes afterward by selecting the **Update** button.
 
     You will see the message at the bottom of the screen confirming the Function was updated.
 
