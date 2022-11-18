@@ -48,7 +48,7 @@ func (f *DaemonSetHelper) UpdateConfigChecksum(ctx context.Context, daemonSet ty
 		return fmt.Errorf("failed to calculate config checksum: %v", err)
 	}
 
-	annotation := fmt.Sprintf("checksum/%s", params.AnnotationSuffix)
+	annotation := fmt.Sprintf("checksum/%s-config", params.AnnotationSuffix)
 	patchedDS.Spec.Template.ObjectMeta.Annotations[annotation] = checksum
 
 	if err := f.client.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
