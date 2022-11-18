@@ -10,6 +10,11 @@ import (
 )
 
 func (r *Reconciler) updateStatus(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
+	// Do not update status if the log parser is being deleted
+	if parser.DeletionTimestamp != nil {
+		return nil
+	}
+
 	fluentBitDSReady, err := r.prober.IsReady(ctx, r.config.DaemonSet)
 	if err != nil {
 		return err
@@ -44,11 +49,6 @@ func setStatus(ctx context.Context, client client.Client, parserName string, con
 	var parser telemetryv1alpha1.LogParser
 	if err := client.Get(ctx, types.NamespacedName{Name: parserName}, &parser); err != nil {
 		return fmt.Errorf("failed to get LogParser: %v", err)
-	}
-
-	// Do not update status if the log parser is being deleted
-	if parser.DeletionTimestamp != nil {
-		return nil
 	}
 
 	// If the log parser had a running condition and then was modified, all conditions are removed.

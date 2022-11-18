@@ -57,7 +57,9 @@ func TestUpdateStatus(t *testing.T) {
 				Name: parserName,
 			},
 			Status: telemetryv1alpha1.LogParserStatus{
-				Conditions: []telemetryv1alpha1.LogParserCondition{{Reason: telemetryv1alpha1.FluentBitDSNotReadyReason, Type: telemetryv1alpha1.LogParserPending}},
+				Conditions: []telemetryv1alpha1.LogParserCondition{
+					{Reason: telemetryv1alpha1.FluentBitDSNotReadyReason, Type: telemetryv1alpha1.LogParserPending},
+				},
 			},
 		}
 		fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(parser).Build()
@@ -84,5 +86,42 @@ func TestUpdateStatus(t *testing.T) {
 		require.Equal(t, updatedParser.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)
 		require.Equal(t, updatedParser.Status.Conditions[1].Type, telemetryv1alpha1.LogParserRunning)
 		require.Equal(t, updatedParser.Status.Conditions[1].Reason, telemetryv1alpha1.FluentBitDSReadyReason)
+	})
+
+	t.Run("should reset conditions and add pending if fluent bit becomes not ready again", func(t *testing.T) {
+		parserName := "dummy"
+		parser := &telemetryv1alpha1.LogParser{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: parserName,
+			},
+			Status: telemetryv1alpha1.LogParserStatus{
+				Conditions: []telemetryv1alpha1.LogParserCondition{
+					{Reason: telemetryv1alpha1.FluentBitDSNotReadyReason, Type: telemetryv1alpha1.LogParserPending},
+					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogParserRunning},
+				},
+			},
+		}
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(parser).Build()
+
+		proberStub := &mocks.DaemonSetProber{}
+		proberStub.On("IsReady", mock.Anything, mock.Anything).Return(false, nil)
+
+		sut := Reconciler{
+			Client: fakeClient,
+			config: Config{
+				DaemonSet:        types.NamespacedName{Name: "fluent-bit"},
+				ParsersConfigMap: types.NamespacedName{Name: "parsers"},
+			},
+			prober: proberStub,
+		}
+
+		err := sut.updateStatus(context.Background(), parser)
+		require.NoError(t, err)
+
+		var updatedParser telemetryv1alpha1.LogParser
+		fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
+		require.Len(t, updatedParser.Status.Conditions, 1)
+		require.Equal(t, updatedParser.Status.Conditions[0].Type, telemetryv1alpha1.LogParserPending)
+		require.Equal(t, updatedParser.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)
 	})
 }
