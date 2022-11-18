@@ -56,12 +56,14 @@ global:
 
   log:
     format: "json"
-    level: "info"
 
   configMap:
     name: eventing
     keys:
       eventTypePrefix: "eventTypePrefix"
+      appLogLevel: "APP_LOG_LEVEL"
+    values:
+      appLogLevel: "info"
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB

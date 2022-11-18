@@ -45,6 +45,7 @@ const (
 
 	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
+	configMapKeyAppLogLevel     = "APP_LOG_LEVEL"
 )
 
 var (
@@ -252,7 +253,17 @@ func getContainerPorts() []v1.ContainerPort {
 func getLogEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "APP_LOG_FORMAT", Value: publisherConfig.AppLogFormat},
-		{Name: "APP_LOG_LEVEL", Value: publisherConfig.AppLogLevel},
+		{
+			Name: "APP_LOG_LEVEL",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyAppLogLevel,
+				},
+			},
+		},
 	}
 }
 

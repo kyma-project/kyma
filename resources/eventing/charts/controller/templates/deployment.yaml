@@ -65,7 +65,10 @@ spec:
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
           - name: APP_LOG_LEVEL
-            value: {{ .Values.global.log.level | quote }}
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.global.configMap.name}}
+                key: {{ .Values.global.configMap.keys.appLogLevel }}
           - name: JS_STREAM_NAME
             value: {{ .Values.jetstream.streamName | quote }}
           - name: JS_STREAM_STORAGE_TYPE
