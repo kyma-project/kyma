@@ -26,8 +26,7 @@ func newSyncer(client client.Client, config Config) *syncer {
 	return &s
 }
 
-// SyncParsersConfigMap synchronizes the Fluent Bit parsers ConfigMap for all LogParsers.
-func (s *syncer) SyncParsersConfigMap(ctx context.Context) error {
+func (s *syncer) sync(ctx context.Context) error {
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.ParsersConfigMap)
 	if err != nil {
 		return fmt.Errorf("unable to get parsers configmap: %w", err)

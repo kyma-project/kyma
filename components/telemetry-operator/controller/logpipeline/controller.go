@@ -55,11 +55,11 @@ type Config struct {
 }
 
 type DaemonSetProber interface {
-	IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error)
+	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
 type DaemonSetAnnotator interface {
-	SetAnnotation(ctx context.Context, daemonSet types.NamespacedName, key, value string) (patched bool, err error)
+	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error)
 }
 
 type Reconciler struct {

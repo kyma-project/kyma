@@ -49,11 +49,11 @@ type Config struct {
 }
 
 type DaemonSetProber interface {
-	IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error)
+	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
 type DaemonSetAnnotator interface {
-	SetAnnotation(ctx context.Context, daemonSet types.NamespacedName, key, value string) (patched bool, err error)
+	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error)
 }
 
 type Reconciler struct {
@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err = r.syncer.SyncParsersConfigMap(ctx); err != nil {
+	if err = r.syncer.sync(ctx); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 

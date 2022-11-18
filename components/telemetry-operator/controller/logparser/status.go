@@ -10,7 +10,7 @@ import (
 )
 
 func (r *Reconciler) updateStatus(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
-	fluentBitDSReady, err := r.daemonSet.IsReady(ctx, r.config.DaemonSet)
+	fluentBitDSReady, err := r.prober.IsReady(ctx, r.config.DaemonSet)
 	if err != nil {
 		return err
 	}

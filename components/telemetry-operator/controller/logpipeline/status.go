@@ -24,7 +24,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, pipeline *telemetryv1alph
 		return nil
 	}
 
-	fluentBitDSReady, err := r.daemonSet.IsReady(ctx, r.config.DaemonSet)
+	fluentBitDSReady, err := r.prober.IsReady(ctx, r.config.DaemonSet)
 	if err != nil {
 		return err
 	}

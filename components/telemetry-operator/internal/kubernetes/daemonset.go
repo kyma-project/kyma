@@ -13,12 +13,12 @@ type DaemonSetProber struct {
 	client.Client
 }
 
-func (dsp *DaemonSetProber) IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error) {
+func (dsp *DaemonSetProber) IsReady(ctx context.Context, name types.NamespacedName) (bool, error) {
 	log := logf.FromContext(ctx)
 
 	var ds appsv1.DaemonSet
-	if err := dsp.Get(ctx, daemonSet, &ds); err != nil {
-		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", daemonSet.Namespace, daemonSet.Name, err)
+	if err := dsp.Get(ctx, name, &ds); err != nil {
+		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
 	generation := ds.Generation
@@ -28,7 +28,7 @@ func (dsp *DaemonSetProber) IsReady(ctx context.Context, daemonSet types.Namespa
 	ready := ds.Status.NumberReady
 
 	log.V(1).Info(fmt.Sprintf("Checking DaemonSet: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
-		updated, desired, ready, generation, observedGeneration), "name", daemonSet.Name)
+		updated, desired, ready, generation, observedGeneration), "name", name.Name)
 
 	return observedGeneration == generation && updated == desired && ready >= desired, nil
 }
@@ -37,10 +37,10 @@ type DaemonSetAnnotator struct {
 	client.Client
 }
 
-func (dsa *DaemonSetAnnotator) SetAnnotation(ctx context.Context, daemonSet types.NamespacedName, key, value string) (patched bool, err error) {
+func (dsa *DaemonSetAnnotator) SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error) {
 	var ds appsv1.DaemonSet
-	if err := dsa.Get(ctx, daemonSet, &ds); err != nil {
-		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", daemonSet.Namespace, daemonSet.Name, err)
+	if err := dsa.Get(ctx, name, &ds); err != nil {
+		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
 	patchedDS := *ds.DeepCopy()
@@ -51,7 +51,7 @@ func (dsa *DaemonSetAnnotator) SetAnnotation(ctx context.Context, daemonSet type
 	patchedDS.Spec.Template.ObjectMeta.Annotations[key] = value
 
 	if err := dsa.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
-		return false, fmt.Errorf("failed to patch %s/%s DaemonSet: %v", daemonSet.Namespace, daemonSet.Name, err)
+		return false, fmt.Errorf("failed to patch %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
 	return true, nil
