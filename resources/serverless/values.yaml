@@ -146,6 +146,7 @@ pod:
     sidecar.istio.io/inject: "false"
   extraProperties:
     terminationGracePeriodSeconds: 10
+    # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
     securityContext:
       runAsNonRoot: true
       runAsUser: 1000 # Optional. Use this setting only when necessary, otherwise delete it. Never set to 0 because this is the ID of root.
@@ -173,6 +174,7 @@ containers:
       requests:
         cpu: 10m
         memory: 32Mi
+    # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
     containerSecurityContext:
       privileged: false
       allowPrivilegeEscalation: false

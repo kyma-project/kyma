@@ -117,6 +117,7 @@ configData: # example: https://github.com/docker/distribution/blob/master/cmd/re
       threshold: 3
 
 containers:
+  # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
   securityContext:
     runAsUser: 1000
     privileged: false
@@ -127,6 +128,7 @@ containers:
     readOnlyRootFilesystem: true # Mandatory
 
 pod:
+  # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
   securityContext:
     runAsUser: 1000
     runAsGroup: 1000

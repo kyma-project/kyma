@@ -39,6 +39,7 @@ pod:
     sidecar.istio.io/inject: "false"
     cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
   extraProperties:
+    # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
     securityContext:
       runAsNonRoot: true
       runAsUser: 1000 # Optional. Use this setting only when necessary, otherwise delete it. Never set to 0 because this is the ID of root.
@@ -65,6 +66,7 @@ service:
       targetPort: 8443
 
 container:
+  # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
@@ -84,6 +86,7 @@ container:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
 
 initContainer:
+  # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
