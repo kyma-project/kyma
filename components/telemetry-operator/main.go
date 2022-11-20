@@ -146,7 +146,7 @@ func main() {
 	ctrLogger, err := logger.New(logFormat, logLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 	if err != nil {
-		setupLog.Error(err, "Failed to initialize logger")
+		setupLog.Error(err, "Failed to initialize logger.")
 		os.Exit(1)
 	}
 	defer func() {
