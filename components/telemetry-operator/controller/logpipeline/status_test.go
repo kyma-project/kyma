@@ -261,7 +261,7 @@ func TestUpdateStatus(t *testing.T) {
 		require.Equal(t, updatedPipeline.Status.Conditions[0].Reason, telemetryv1alpha1.ReferencedSecretMissingReason)
 	})
 
-	t.Run("should set status UnsupportedMode if contains custom plugin", func(t *testing.T) {
+	t.Run("should set status UnsupportedMode true if contains custom plugin", func(t *testing.T) {
 		pipelineName := "pipeline"
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -271,6 +271,7 @@ func TestUpdateStatus(t *testing.T) {
 				Conditions: []telemetryv1alpha1.LogPipelineCondition{
 					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogPipelineRunning},
 				},
+				UnsupportedMode: false,
 			},
 			Spec: telemetryv1alpha1.LogPipelineSpec{
 				Filters: []telemetryv1alpha1.Filter{{Custom: "some-filter"}},
@@ -292,5 +293,36 @@ func TestUpdateStatus(t *testing.T) {
 		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
 
 		require.True(t, updatedPipeline.Status.UnsupportedMode)
+	})
+
+	t.Run("should set status UnsupportedMode false if does not contains custom plugin", func(t *testing.T) {
+		pipelineName := "pipeline"
+		pipeline := &telemetryv1alpha1.LogPipeline{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: pipelineName,
+			},
+			Status: telemetryv1alpha1.LogPipelineStatus{
+				Conditions: []telemetryv1alpha1.LogPipelineCondition{
+					{Reason: telemetryv1alpha1.FluentBitDSReadyReason, Type: telemetryv1alpha1.LogPipelineRunning},
+				},
+				UnsupportedMode: true,
+			},
+		}
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
+		proberStub := &mocks.DaemonSetProber{}
+		proberStub.On("IsReady", mock.Anything, mock.Anything).Return(true, nil)
+		sut := Reconciler{
+			Client: fakeClient,
+			config: Config{DaemonSet: types.NamespacedName{Name: "fluent-bit"}},
+			prober: proberStub,
+		}
+
+		err := sut.updateStatus(context.Background(), pipeline)
+		require.NoError(t, err)
+
+		var updatedPipeline telemetryv1alpha1.LogPipeline
+		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: pipelineName}, &updatedPipeline)
+
+		require.False(t, updatedPipeline.Status.UnsupportedMode)
 	})
 }
