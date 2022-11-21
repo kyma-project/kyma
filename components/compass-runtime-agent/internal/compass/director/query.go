@@ -82,16 +82,9 @@ func bundleApiDefinitions() string {
 	return fmt.Sprintf(`		id
 		name
 		description
-		spec {%s}
 		targetURL
 		group
-		version {%s}`, apiSpecData(), versionData())
-}
-
-func apiSpecData() string {
-	return fmt.Sprintf(`data
-		format
-		type`)
+		version {%s}`, versionData())
 }
 
 func versionData() string {
@@ -106,16 +99,9 @@ func eventAPIData() string {
 			id
 			name
 			description
-			group 
-			spec {%s}
+			group
 			version {%s}
-		`, eventSpecData(), versionData())
-}
-
-func eventSpecData() string {
-	return fmt.Sprintf(`data
-		type
-		format`)
+		`, versionData())
 }
 
 func documentData() string {

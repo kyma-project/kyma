@@ -316,18 +316,14 @@ func fixInternalAPIBundle(suffix string) kymaModel.APIBundle {
 		Description:                    stringPtr(baseBundleDesc + suffix),
 		InstanceAuthRequestInputSchema: stringPtr(baseBundleInputSchema + suffix),
 		APIDefinitions: []kymaModel.APIDefinition{
-			fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
-			fixInternalAPIDefinition("2", nil, fixInternalOpenAPISpec()),
-			fixInternalAPIDefinition("3", nil, fixInternalODataSpec()),
-			fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
+			fixInternalAPIDefinition("1", nil),
+			fixInternalAPIDefinition("2", nil),
+			fixInternalAPIDefinition("3", nil),
+			fixInternalAPIDefinition("4", nil),
 		},
 		EventDefinitions: []kymaModel.EventAPIDefinition{
-			fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
-			fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
-		},
-		Documents: []kymaModel.Document{
-			fixInternalDocument("1", fixInternalDocumentContent()),
-			fixInternalDocument("2", fixInternalDocumentContent()),
+			fixInternalEventAPIDefinition("1"),
+			fixInternalEventAPIDefinition("2"),
 		},
 	}
 }
@@ -339,83 +335,34 @@ func fixInternalAPIBundleEmptySpecs(suffix string) kymaModel.APIBundle {
 		Description:                    stringPtr(baseBundleDesc + suffix),
 		InstanceAuthRequestInputSchema: stringPtr(baseBundleInputSchema + suffix),
 		APIDefinitions: []kymaModel.APIDefinition{
-			fixInternalAPIDefinition("1", nil, nil),
-			fixInternalAPIDefinition("2", nil, nil),
-			fixInternalAPIDefinition("3", nil, nil),
-			fixInternalAPIDefinition("4", nil, nil),
+			fixInternalAPIDefinition("1", nil),
+			fixInternalAPIDefinition("2", nil),
+			fixInternalAPIDefinition("3", nil),
+			fixInternalAPIDefinition("4", nil),
 		},
 		EventDefinitions: []kymaModel.EventAPIDefinition{
-			fixInternalEventAPIDefinition("1", nil),
-			fixInternalEventAPIDefinition("2", nil),
-		},
-		Documents: []kymaModel.Document{
-			fixInternalDocument("1", nil),
-			fixInternalDocument("2", nil),
-			fixInternalDocument("3", nil),
+			fixInternalEventAPIDefinition("1"),
+			fixInternalEventAPIDefinition("2"),
 		},
 	}
 }
 
-func fixInternalAPIDefinition(suffix string, credentials *kymaModel.Credentials, spec *kymaModel.APISpec) kymaModel.APIDefinition {
+func fixInternalAPIDefinition(suffix string, credentials *kymaModel.Credentials) kymaModel.APIDefinition {
 	return kymaModel.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: baseAPIDesc + suffix,
 		TargetUrl:   baseAPIURL + suffix,
-		APISpec:     spec,
 		Credentials: credentials,
 	}
 }
 
-func fixInternalEventAPIDefinition(suffix string, spec *kymaModel.EventAPISpec) kymaModel.EventAPIDefinition {
+func fixInternalEventAPIDefinition(suffix string) kymaModel.EventAPIDefinition {
 	return kymaModel.EventAPIDefinition{
-		ID:           baseAPIId + suffix,
-		Name:         baseAPIName + suffix,
-		Description:  baseAPIDesc + suffix,
-		EventAPISpec: spec,
-	}
-}
-
-func fixInternalDocument(suffix string, data []byte) kymaModel.Document {
-	kind := baseDocKind + suffix
-
-	return kymaModel.Document{
 		ID:          baseAPIId + suffix,
+		Name:        baseAPIName + suffix,
 		Description: baseAPIDesc + suffix,
-		Title:       baseDocTitle + suffix,
-		DisplayName: baseDocDisplayName + suffix,
-		Format:      kymaModel.DocumentFormatMarkdown,
-		Kind:        &kind,
-		Data:        data,
 	}
-}
-
-func fixInternalODataSpec() *kymaModel.APISpec {
-	return &kymaModel.APISpec{
-		Data:   []byte(`OData spec`),
-		Type:   kymaModel.APISpecTypeOdata,
-		Format: kymaModel.SpecFormatXML,
-	}
-}
-
-func fixInternalOpenAPISpec() *kymaModel.APISpec {
-	return &kymaModel.APISpec{
-		Data:   []byte(`Open API spec`),
-		Type:   kymaModel.APISpecTypeOpenAPI,
-		Format: kymaModel.SpecFormatJSON,
-	}
-}
-
-func fixInternalAsyncAPISpec() *kymaModel.EventAPISpec {
-	return &kymaModel.EventAPISpec{
-		Data:   []byte(`Async API spec`),
-		Type:   kymaModel.EventAPISpecTypeAsyncAPI,
-		Format: kymaModel.SpecFormatYAML,
-	}
-}
-
-func fixInternalDocumentContent() []byte {
-	return []byte(`# Md content`)
 }
 
 func fixCompassBundleWithDefaultInstanceAuth(suffix string, defaultInstanceAuth *graphql.Auth) *graphql.BundleExt {
@@ -434,18 +381,14 @@ func fixInternalAPIBundleWithInstanceAuth(suffix string, defaultInstanceAuth *ky
 		Description:                    stringPtr(baseBundleDesc + suffix),
 		InstanceAuthRequestInputSchema: stringPtr(baseBundleInputSchema + suffix),
 		APIDefinitions: []kymaModel.APIDefinition{
-			fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
-			fixInternalAPIDefinition("2", nil, fixInternalOpenAPISpec()),
-			fixInternalAPIDefinition("3", nil, fixInternalODataSpec()),
-			fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
+			fixInternalAPIDefinition("1", nil),
+			fixInternalAPIDefinition("2", nil),
+			fixInternalAPIDefinition("3", nil),
+			fixInternalAPIDefinition("4", nil),
 		},
 		EventDefinitions: []kymaModel.EventAPIDefinition{
-			fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
-			fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
-		},
-		Documents: []kymaModel.Document{
-			fixInternalDocument("1", fixInternalDocumentContent()),
-			fixInternalDocument("2", fixInternalDocumentContent()),
+			fixInternalEventAPIDefinition("1"),
+			fixInternalEventAPIDefinition("2"),
 		},
 		DefaultInstanceAuth: defaultInstanceAuth,
 	}
@@ -463,7 +406,7 @@ func fixCompassBundleExt(suffix string) *graphql.BundleExt {
 func fixCompassBundleExtWithEmptySpecs(suffix string) *graphql.BundleExt {
 	return &graphql.BundleExt{
 		Bundle:           fixCompassBundle(suffix, nil),
-		APIDefinitions:   fixAPIDefinitionPageExtWithEmptyApiSpecs(),
+		APIDefinitions:   fixAPIDefinitionPageExt(),
 		EventDefinitions: fixEventAPIDefinitionPageExtWithEmptySpecs(),
 		Documents:        fixDocumentPageExtWithEmptyDocs(),
 	}
@@ -481,18 +424,18 @@ func fixCompassBundle(suffix string, defaultInstanceAuth *graphql.Auth) graphql.
 	}
 }
 
-func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
-	return graphql.APIDefinitionPageExt{
-		Data: []*graphql.APIDefinitionExt{
-			fixCompassAPIDefinitionExt("1", fixCompassOpenAPISpecExt()),
-			fixCompassAPIDefinitionExt("2", fixCompassOpenAPISpecExt()),
-			fixCompassAPIDefinitionExt("3", fixCompassODataSpecExt()),
-			fixCompassAPIDefinitionExt("4", fixCompassODataSpecExt()),
-		},
-	}
-}
+//func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
+//	return graphql.APIDefinitionPageExt{
+//		Data: []*graphql.APIDefinitionExt{
+//			fixCompassAPIDefinitionExt("1", fixCompassOpenAPISpecExt()),
+//			fixCompassAPIDefinitionExt("2", fixCompassOpenAPISpecExt()),
+//			fixCompassAPIDefinitionExt("3", fixCompassODataSpecExt()),
+//			fixCompassAPIDefinitionExt("4", fixCompassODataSpecExt()),
+//		},
+//	}
+//}
 
-func fixAPIDefinitionPageExtWithEmptyApiSpecs() graphql.APIDefinitionPageExt {
+func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
 	return graphql.APIDefinitionPageExt{
 		Data: []*graphql.APIDefinitionExt{
 			fixCompassAPIDefinitionExt("1", nil),
@@ -515,20 +458,6 @@ func fixCompassAPIDefinitionExt(suffix string, spec *graphql.APISpecExt) *graphq
 	return &graphql.APIDefinitionExt{
 		APIDefinition: *apiDefinition,
 		Spec:          spec,
-	}
-}
-
-func fixCompassOpenAPISpecExt() *graphql.APISpecExt {
-	apiSpec := fixCompassOpenAPISpec()
-	return &graphql.APISpecExt{
-		APISpec: *apiSpec,
-	}
-}
-
-func fixCompassODataSpecExt() *graphql.APISpecExt {
-	apiSpec := fixCompassODataSpec()
-	return &graphql.APISpecExt{
-		APISpec: *apiSpec,
 	}
 }
 
@@ -640,26 +569,6 @@ func fixCompassDocument(suffix string, data *graphql.CLOB) *graphql.Document {
 		Format:      graphql.DocumentFormatMarkdown,
 		Kind:        &kind,
 		Data:        data,
-	}
-}
-
-func fixCompassODataSpec() *graphql.APISpec {
-	data := graphql.CLOB(`OData spec`)
-
-	return &graphql.APISpec{
-		Data:   &data,
-		Type:   graphql.APISpecTypeOdata,
-		Format: graphql.SpecFormatXML,
-	}
-}
-
-func fixCompassOpenAPISpec() *graphql.APISpec {
-	data := graphql.CLOB(`Open API spec`)
-
-	return &graphql.APISpec{
-		Data:   &data,
-		Type:   graphql.APISpecTypeOpenAPI,
-		Format: graphql.SpecFormatJSON,
 	}
 }
 
