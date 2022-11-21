@@ -30,7 +30,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, pipeline *telemetryv1alph
 	}
 
 	if !fluentBitDSReady {
-		if err := setStatus(ctx, r.Client, pipeline.Name, telemetryv1alpha1.NewLogPipelineCondition(
+		if err = setStatus(ctx, r.Client, pipeline.Name, telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.FluentBitDSNotReadyReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)); err != nil {
@@ -41,7 +41,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, pipeline *telemetryv1alph
 	}
 
 	if fluentBitDSReady && pipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
-		if err := setStatus(ctx, r.Client, pipeline.Name, telemetryv1alpha1.NewLogPipelineCondition(
+		if err = setStatus(ctx, r.Client, pipeline.Name, telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.FluentBitDSReadyReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)); err != nil {
