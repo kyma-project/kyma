@@ -9,11 +9,11 @@
 
 /.github @kyma-project/prow
 /.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
-/.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
+/.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger  
 
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @wchrapka @mrCherry97 @Lyczeq
+/.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @mrCherry97 @Lyczeq
 
 /common @Tomasz-Smelcerz-SAP @akgalwas @piotrmiskiewicz
 # Logging library
@@ -34,7 +34,7 @@
 /components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 # All files and subdirectories in /docs
-/docs @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
+/docs @mmitoraj @NHingerl @grego952 @IwonaLanger  
 
 /hack @clebs
 
