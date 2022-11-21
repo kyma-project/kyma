@@ -72,6 +72,8 @@ spec:
             value: {{ .Values.global.jetstream.storage | quote }}
           - name: JS_STREAM_REPLICAS
             value: {{ .Values.jetstream.streamReplicas | quote }}
+          - name: JS_STREAM_DISCARD_POLICY
+            value: {{ .Values.global.jetstream.discardPolicy | quote }}
           - name: JS_STREAM_RETENTION_POLICY
             value: {{ .Values.jetstream.retentionPolicy | quote }}
           - name: JS_CONSUMER_DELIVER_POLICY
@@ -79,7 +81,13 @@ spec:
           - name: JS_STREAM_MAX_MSGS
             value: {{ .Values.jetstream.maxMessages | quote }}
           - name: JS_STREAM_MAX_BYTES
-            value: {{ .Values.jetstream.maxBytes | quote }}
+            value: {{ .Values.global.jetstream.maxBytes | quote }}
+          - name: WEBHOOK_SECRET_NAME
+            value: {{ .Values.webhook.secretName | quote }}
+          - name: MUTATING_WEBHOOK_NAME
+            value: {{ .Values.webhook.mutating.name | quote }}
+          - name: VALIDATING_WEBHOOK_NAME
+            value: {{ .Values.webhook.validating.name | quote }}
           - name: ENABLE_NEW_CRD_VERSION
             value: {{ .Values.enableNewCRDVersion | quote }}
           resources:

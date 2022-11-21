@@ -12,6 +12,11 @@ type JetStreamContext struct {
 	mock.Mock
 }
 
+func (_m *JetStreamContext) StreamNameBySubject(s string, opt ...nats.JSOpt) (string, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
 // AccountInfo provides a mock function with given fields: opts
 func (_m *JetStreamContext) AccountInfo(opts ...nats.JSOpt) (*nats.AccountInfo, error) {
 	_va := make([]interface{}, len(opts))
