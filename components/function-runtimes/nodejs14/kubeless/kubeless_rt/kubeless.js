@@ -37,9 +37,10 @@ const bodParserOptions = {
     type: req => !req.is('multipart/*'),
     limit: `${bodySizeLimit}mb`,
 };
-app.use(bodyParser.raw(bodParserOptions));
-app.use(bodyParser.json({limit: `${bodySizeLimit}mb`}));
+
 app.use(bodyParser.urlencoded({limit: `${bodySizeLimit}mb`, extended: true}));
+app.use(bodyParser.json({limit: `${bodySizeLimit}mb`}));
+app.use(bodyParser.raw(bodParserOptions));
 
 const modName = process.env.MOD_NAME;
 const funcHandler = process.env.FUNC_HANDLER;
