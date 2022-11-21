@@ -2,7 +2,7 @@
 
 ## Overview
 
-This application can be used to initialize webhooks with a certificate and key. Best used as a Init Container in Operator Pods where certificate is shared by emptyDir Volume.
+This application can be used to initialize webhooks with a certificate and key. Best used as an Init Container in the Operator Pods where the certificate is shared by the `emptyDir` Volume.
 
 ## Development
 
