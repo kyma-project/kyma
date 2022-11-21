@@ -519,7 +519,8 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 		Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
 		PushBound: false,
 	}
-	givenConsumersWithDangling := append(givenConsumers, danglingConsumer)
+	givenConsumersWithDangling := givenConsumers
+	givenConsumersWithDangling = append(givenConsumersWithDangling, danglingConsumer)
 
 	testCases := []struct {
 		name               string
@@ -700,7 +701,8 @@ func NewSubscriptionsWithMultipleTypes() []v1alpha2.Subscription {
 	)
 	sub2 := subtesting.NewSubscription("test2", "test2",
 		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV3Event), subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV3Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
 		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV4Event),
 		subtesting.WithTypeMatchingStandard(),
 		subtesting.WithMaxInFlight(DefaultMaxInFlights),

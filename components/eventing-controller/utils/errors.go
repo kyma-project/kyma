@@ -25,6 +25,3 @@ func MakeSubscriptionError(actualError, underlyingError error, subscription any)
 func MakeConsumerError(actualError, underlyingError error, consumer any) error {
 	return fmt.Errorf("%w: %v, consumer: %v", actualError, underlyingError, consumer)
 }
-
-
-

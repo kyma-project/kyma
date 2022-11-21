@@ -3,6 +3,7 @@ package jetstream
 import (
 	"context"
 	"fmt"
+
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 

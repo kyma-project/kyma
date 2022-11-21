@@ -147,10 +147,13 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Sub
 }
 
 func (js *JetStream) hasConsumerType(consumerName string, subscriptions []eventingv1alpha2.Subscription) bool {
-	for _, sub := range subscriptions {
-		jsSubjects := js.GetJetStreamSubjects(sub.Spec.Source, sub.Spec.Types, sub.Spec.TypeMatching)
+	for si := range subscriptions {
+		jsSubjects := js.GetJetStreamSubjects(
+			subscriptions[si].Spec.Source,
+			subscriptions[si].Spec.Types,
+			subscriptions[si].Spec.TypeMatching)
 		for _, jsSubject := range jsSubjects {
-			computedConsumerNameFromSubject := computeConsumerName(&sub, jsSubject)
+			computedConsumerNameFromSubject := computeConsumerName(&subscriptions[si], jsSubject)
 			if consumerName == computedConsumerNameFromSubject {
 				return true
 			}
