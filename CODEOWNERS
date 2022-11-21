@@ -31,6 +31,7 @@
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 # All files and subdirectories in /docs
 /docs @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
