@@ -424,17 +424,6 @@ func fixCompassBundle(suffix string, defaultInstanceAuth *graphql.Auth) graphql.
 	}
 }
 
-//func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
-//	return graphql.APIDefinitionPageExt{
-//		Data: []*graphql.APIDefinitionExt{
-//			fixCompassAPIDefinitionExt("1", fixCompassOpenAPISpecExt()),
-//			fixCompassAPIDefinitionExt("2", fixCompassOpenAPISpecExt()),
-//			fixCompassAPIDefinitionExt("3", fixCompassODataSpecExt()),
-//			fixCompassAPIDefinitionExt("4", fixCompassODataSpecExt()),
-//		},
-//	}
-//}
-
 func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
 	return graphql.APIDefinitionPageExt{
 		Data: []*graphql.APIDefinitionExt{
