@@ -53,3 +53,23 @@ func TestDaemonSetProber(t *testing.T) {
 		})
 	}
 }
+
+func TestSetAnnotation(t *testing.T) {
+	daemonSet := &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "kyma-system"},
+	}
+
+	fakeClient := fake.NewClientBuilder().WithObjects(daemonSet).Build()
+
+	sut := DaemonSetAnnotator{fakeClient}
+
+	patched, err := sut.SetAnnotation(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, "foo", "bar")
+	require.NoError(t, err)
+	require.True(t, patched)
+
+	var updatedDaemonSet appsv1.DaemonSet
+	fakeClient.Get(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, &updatedDaemonSet)
+	require.Len(t, updatedDaemonSet.Annotations, 1)
+	require.Contains(t, updatedDaemonSet.Annotations, "foo")
+	require.Equal(t, updatedDaemonSet.Annotations["foo"], "bar")
+}
