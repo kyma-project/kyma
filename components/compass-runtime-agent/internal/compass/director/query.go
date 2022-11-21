@@ -73,9 +73,8 @@ func bundlesData() string {
 		instanceAuthRequestInputSchema
 		apiDefinitions {%s}
 		eventDefinitions {%s}
-		documents {%s}
 		defaultInstanceAuth {%s}
-		`, pageData(bundleApiDefinitions()), pageData(eventAPIData()), pageData(documentData()), authData())
+		`, pageData(bundleApiDefinitions()), pageData(eventAPIData()), authData())
 }
 
 func bundleApiDefinitions() string {
@@ -102,17 +101,6 @@ func eventAPIData() string {
 			group
 			version {%s}
 		`, versionData())
-}
-
-func documentData() string {
-	return fmt.Sprintf(`
-		id
-		title
-		displayName
-		description
-		format
-		kind
-		data`)
 }
 
 func authData() string {

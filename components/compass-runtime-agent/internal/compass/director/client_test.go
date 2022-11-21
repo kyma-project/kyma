@@ -70,21 +70,6 @@ const (
 		hasNextPage}
 	totalCount
 	}
-		documents {data {
-		
-		id
-		title
-		displayName
-		description
-		format
-		kind
-		data
-	}
-	pageInfo {startCursor
-		endCursor
-		hasNextPage}
-	totalCount
-	}
 		defaultInstanceAuth {
 		credential {
 		... on BasicCredentialData {
