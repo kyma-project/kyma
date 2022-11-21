@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"path"
+	"reflect"
+	"sort"
 	"strings"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -213,7 +215,8 @@ func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment) bo
 		mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
-		equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas)
+		equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas) &&
+		equalSecretMounts(existing.Spec.Template.Spec, expected.Spec.Template.Spec)
 }
 
 func equalServices(existing corev1.Service, expected corev1.Service) bool {
@@ -249,6 +252,80 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 	}
 
 	return *first == *second
+}
+
+func equalSecretMounts(existing, expected corev1.PodSpec) bool {
+	existingSecretVolumes := filterOnlySecretVolumes(existing.Volumes)
+	expectedSecretVolumes := filterOnlySecretVolumes(expected.Volumes)
+	if !equalSecretVolumes(existingSecretVolumes, expectedSecretVolumes) {
+		return false
+	}
+
+	existingSecretVolumeMounts := filterOnlyKnownVolumes(existing.Containers[0].VolumeMounts, existingSecretVolumes)
+	expectedSecretVolumeMounts := filterOnlyKnownVolumes(expected.Containers[0].VolumeMounts, expectedSecretVolumes)
+	return equalVolumeMounts(existingSecretVolumeMounts, expectedSecretVolumeMounts)
+}
+
+type secretVolumeMountSorter []corev1.VolumeMount
+
+func (s secretVolumeMountSorter) Len() int           { return len(s) }
+func (s secretVolumeMountSorter) Less(i, j int) bool { return s[i].Name < s[j].Name }
+func (s secretVolumeMountSorter) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+func equalVolumeMounts(existing []corev1.VolumeMount, expected []corev1.VolumeMount) bool {
+	sort.Stable(secretVolumeMountSorter(existing))
+	sort.Stable(secretVolumeMountSorter(expected))
+	return reflect.DeepEqual(existing, expected)
+}
+
+type secretVolumeSorter []corev1.Volume
+
+func (s secretVolumeSorter) Len() int           { return len(s) }
+func (s secretVolumeSorter) Less(i, j int) bool { return s[i].Name < s[j].Name }
+func (s secretVolumeSorter) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+func equalSecretVolumes(existing []corev1.Volume, expected []corev1.Volume) bool {
+	sort.Stable(secretVolumeSorter(existing))
+	sort.Stable(secretVolumeSorter(expected))
+	return reflect.DeepEqual(existing, expected)
+}
+
+func filterOnlyKnownVolumes(mounts []corev1.VolumeMount, knownVolumes []corev1.Volume) []corev1.VolumeMount {
+	knownVolumeNames := getVolumeNames(knownVolumes)
+	var knownVolumeMounts []corev1.VolumeMount
+	for _, mount := range mounts {
+		if stringInSlice(mount.Name, knownVolumeNames) {
+			knownVolumeMounts = append(knownVolumeMounts, mount)
+		}
+	}
+	return knownVolumeMounts
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+func getVolumeNames(volumes []corev1.Volume) []string {
+	var names []string
+	for _, volume := range volumes {
+		names = append(names, volume.Name)
+	}
+	return names
+}
+
+func filterOnlySecretVolumes(volumes []corev1.Volume) []corev1.Volume {
+	var secretVolumes []corev1.Volume
+	for _, volume := range volumes {
+		if volume.Secret != nil {
+			secretVolumes = append(secretVolumes, volume)
+		}
+	}
+	return secretVolumes
 }
 
 func isScalingEnabled(instance *serverlessv1alpha2.Function) bool {
