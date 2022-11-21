@@ -76,7 +76,7 @@ func Test_GetOrCreateConsumer(t *testing.T) {
 			// given
 			js := JetStream{
 				subscriptions: make(map[SubscriptionSubjectIdentifier]Subscriber),
-				jsCtx:         *testCase.jetStreamContext,
+				jsCtx:         testCase.jetStreamContext,
 				cleaner:       &cleaner.JetStreamCleaner{},
 			}
 			sub := NewSubscriptionWithOneType()
@@ -342,7 +342,7 @@ func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 			js := JetStream{
 				subscriptions:    make(map[SubscriptionSubjectIdentifier]Subscriber),
 				metricsCollector: metrics.NewCollector(),
-				jsCtx:            *testCase.jetStreamContext,
+				jsCtx:            testCase.jetStreamContext,
 				cleaner:          &cleaner.JetStreamCleaner{},
 			}
 
@@ -419,7 +419,7 @@ func Test_DeleteSubscriptionFromJetStream(t *testing.T) {
 			jsCtx: &jetStreamContextStub{
 				deleteConsumerErr: nats.ErrJetStreamNotEnabled,
 			},
-			wantError: nats.ErrJetStreamNotEnabled,
+			wantError: ErrDeleteConsumer,
 		},
 		{
 			name: "ErrConsumerNotFound error should be ignored",
@@ -469,6 +469,200 @@ func Test_DeleteSubscriptionFromJetStream(t *testing.T) {
 	}
 }
 
+// Test_DeleteInvalidConsumers tests the behaviour of the DeleteInvalidConsumers function.
+func Test_DeleteInvalidConsumers(t *testing.T) {
+	// pre-requisites
+	jsBackend := &JetStream{
+		cleaner: &cleaner.JetStreamCleaner{},
+	}
+
+	subs := NewSubscriptionsWithMultipleTypes()
+	sub1 := subs[0]
+	sub2 := subs[1]
+
+	// existing subscription type with existing consumers
+	// namespace: test1, sub: test1, type: v1
+	givenConsumers := []*nats.ConsumerInfo{
+		&nats.ConsumerInfo{
+			Name: computeConsumerName(
+				&sub1,
+				jsBackend.getJetStreamSubject(sub1.Spec.Source,
+					sub1.Status.Types[0].CleanType,
+					sub1.Spec.TypeMatching,
+				)),
+			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+			PushBound: true,
+		},
+		&nats.ConsumerInfo{
+			Name: computeConsumerName(
+				&sub1,
+				jsBackend.getJetStreamSubject(sub2.Spec.Source,
+					sub2.Status.Types[0].CleanType,
+					sub2.Spec.TypeMatching,
+				)),
+			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+			PushBound: true,
+		},
+		&nats.ConsumerInfo{
+			Name: computeConsumerName(
+				&sub2,
+				jsBackend.getJetStreamSubject(sub2.Spec.Source,
+					sub2.Status.Types[1].CleanType,
+					sub2.Spec.TypeMatching,
+				)),
+			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+			PushBound: true,
+		},
+	}
+	danglingConsumer := &nats.ConsumerInfo{
+		Name:      "dangling-invalid-consumer",
+		Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+		PushBound: false,
+	}
+	givenConsumersWithDangling := append(givenConsumers, danglingConsumer)
+
+	testCases := []struct {
+		name               string
+		givenSubscriptions []v1alpha2.Subscription
+		jetStreamContext   *jetStreamContextStub
+		wantConsumers      []*nats.ConsumerInfo
+		wantError          error
+	}{
+		{
+			name:               "no consumer should be deleted",
+			givenSubscriptions: subs,
+			jetStreamContext: &jetStreamContextStub{
+				consumers: givenConsumers,
+			},
+			wantConsumers: givenConsumers,
+			wantError:     nil,
+		},
+		{
+			name:               "a dangling invalid consumer should be deleted",
+			givenSubscriptions: subs,
+			jetStreamContext: &jetStreamContextStub{
+				consumers: givenConsumersWithDangling,
+			},
+			wantConsumers: givenConsumers,
+			wantError:     nil,
+		},
+		{
+			name:               "no consumer should be deleted",
+			givenSubscriptions: subs,
+			jetStreamContext: &jetStreamContextStub{
+				consumers:         givenConsumersWithDangling,
+				deleteConsumerErr: nats.ErrConnectionNotTLS,
+			},
+			wantError: ErrDeleteConsumer,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			jsBackend.jsCtx = tc.jetStreamContext
+
+			// when
+			err := jsBackend.DeleteInvalidConsumers(subs)
+
+			// then
+			if tc.wantError != nil {
+				assert.ErrorIs(t, err, tc.wantError)
+			} else {
+				cons := jsBackend.jsCtx.Consumers("")
+				var actualConsumers []*nats.ConsumerInfo
+				for con := range cons {
+					actualConsumers = append(actualConsumers, con)
+				}
+				assert.Equal(t, len(tc.wantConsumers), len(actualConsumers))
+				assert.Equal(t, tc.wantConsumers, actualConsumers)
+			}
+		})
+	}
+}
+
+// Test_DeleteInvalidConsumersFromJetStream test the behaviour of the deleteSubscriptionFromJetStream function.
+func Test_HasConsumerType(t *testing.T) {
+	// pre-requisites
+	jsBackend := &JetStream{
+		cleaner: &cleaner.JetStreamCleaner{},
+	}
+	subs := NewSubscriptionsWithMultipleTypes()
+	jsSubject1 := jsBackend.getJetStreamSubject(subs[0].Spec.Source,
+		subs[0].Status.Types[0].CleanType,
+		subs[0].Spec.TypeMatching,
+	)
+	jsSubject2 := jsBackend.getJetStreamSubject(subs[1].Spec.Source,
+		subs[1].Status.Types[1].CleanType,
+		subs[1].Spec.TypeMatching,
+	)
+	givenConName1 := computeConsumerName(&subs[0], jsSubject1)
+	givenConName2 := computeConsumerName(&subs[1], jsSubject2)
+	givenNotExistentConName := "non-existing-consumer-name"
+
+	// creating a consumer with existing v2 subject, but different namespace
+	sub3 := subtesting.NewSubscription("test3", "test3",
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
+		subtesting.WithTypeMatchingStandard(),
+		subtesting.WithStatusTypes([]v1alpha2.EventType{
+			{
+				OriginalType: subtesting.OrderCreatedV2Event,
+				CleanType:    subtesting.OrderCreatedV2Event,
+			},
+		}),
+	)
+	jsSubject3 := jsBackend.getJetStreamSubject(sub3.Spec.Source,
+		sub3.Status.Types[0].CleanType,
+		sub3.Spec.TypeMatching,
+	)
+	invalidDanglingConsumer := computeConsumerName(sub3, jsSubject3)
+
+	testCases := []struct {
+		name               string
+		givenConsumerName  string
+		givenSubscriptions []v1alpha2.Subscription
+		wantResult         bool
+		wantError          error
+	}{
+		{
+			name:               "Consumer name found in subscriptions types",
+			givenConsumerName:  givenConName1,
+			givenSubscriptions: subs,
+			wantResult:         true,
+		},
+		{
+			name:               "Consumer name found in the second subscriptions types",
+			givenConsumerName:  givenConName2,
+			givenSubscriptions: subs,
+			wantResult:         true,
+		},
+		{
+			name:               "Consumer is not found in subscriptions types",
+			givenConsumerName:  givenNotExistentConName,
+			givenSubscriptions: subs,
+			wantResult:         false,
+		},
+		{
+			name:               "Consumer with the same subject but different namespace should not be found",
+			givenConsumerName:  invalidDanglingConsumer,
+			givenSubscriptions: subs,
+			wantResult:         false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			// when
+			result := jsBackend.hasConsumerType(tc.givenConsumerName, tc.givenSubscriptions)
+
+			// then
+			if testCase.wantError == nil {
+				assert.Equal(t, testCase.wantResult, result)
+			}
+		})
+	}
+}
+
 // HELPER FUNCTIONS
 
 func NewSubscriptionWithEmptyTypes() *v1alpha2.Subscription {
@@ -489,4 +683,37 @@ func NewSubscriptionWithOneType() *v1alpha2.Subscription {
 			},
 		}),
 	)
+}
+
+func NewSubscriptionsWithMultipleTypes() []v1alpha2.Subscription {
+	sub1 := subtesting.NewSubscription("test1", "test1",
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
+		subtesting.WithTypeMatchingStandard(),
+		subtesting.WithMaxInFlight(DefaultMaxInFlights),
+		subtesting.WithStatusTypes([]v1alpha2.EventType{
+			{
+				OriginalType: subtesting.OrderCreatedV1Event,
+				CleanType:    subtesting.OrderCreatedV1Event,
+			},
+		}),
+	)
+	sub2 := subtesting.NewSubscription("test2", "test2",
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV3Event), subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV4Event),
+		subtesting.WithTypeMatchingStandard(),
+		subtesting.WithMaxInFlight(DefaultMaxInFlights),
+		subtesting.WithStatusTypes([]v1alpha2.EventType{
+			{
+				OriginalType: subtesting.OrderCreatedV2Event,
+				CleanType:    subtesting.OrderCreatedV2Event,
+			},
+			{
+				OriginalType: subtesting.OrderCreatedV3Event,
+				CleanType:    subtesting.OrderCreatedV3Event,
+			},
+		}),
+	)
+	return []v1alpha2.Subscription{*sub1, *sub2}
 }

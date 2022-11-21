@@ -2,7 +2,7 @@ package jetstream
 
 import (
 	"context"
-
+	"fmt"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 
@@ -117,6 +117,17 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 			sinkv2.NewValidator(ctx, client, recorder),
 		)
 		sm.backendv2 = jetStreamReconciler.Backend
+
+		// delete dangling invalid consumers here
+		var subs eventingv1alpha2.SubscriptionList
+		if err := client.List(context.Background(), &subs); err != nil {
+			return fmt.Errorf("failed to get all subscription resources: %w", err)
+		}
+		if err := jetStreamHandler.DeleteInvalidConsumers(subs.Items); err != nil {
+			return err
+		}
+
+		// start the subscription controller
 		if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
 			return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
 		}
@@ -135,6 +146,17 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 			sink.NewValidator(ctx, client, recorder, sm.logger),
 		)
 		sm.backend = jetStreamReconciler.Backend
+
+		// delete dangling invalid consumers here
+		var subs eventingv1alpha1.SubscriptionList
+		if err := client.List(context.Background(), &subs); err != nil {
+			return fmt.Errorf("failed to get all subscription resources: %w", err)
+		}
+		if err := jetStreamHandler.DeleteInvalidConsumers(subs.Items); err != nil {
+			return err
+		}
+
+		// start the subscription controller
 		if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
 			return xerrors.Errorf("unable to setup the NATS subscription controller: %v", err)
 		}

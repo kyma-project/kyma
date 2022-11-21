@@ -17,6 +17,7 @@ type jetStreamContextStub struct {
 	update      *nats.ConsumerInfo
 	updateError error
 
+	consumers         []*nats.ConsumerInfo
 	deleteConsumerErr error
 }
 
@@ -46,8 +47,12 @@ func (j jetStreamContextStub) Streams(_ ...nats.JSOpt) <-chan *nats.StreamInfo {
 }
 
 func (j jetStreamContextStub) Consumers(_ string, _ ...nats.JSOpt) <-chan *nats.ConsumerInfo {
-	// TODO implement me
-	panic("implement me")
+	ch := make(chan *nats.ConsumerInfo, len(j.consumers))
+	defer close(ch)
+	for _, con := range j.consumers {
+		ch <- con
+	}
+	return ch
 }
 
 func (j jetStreamContextStub) ObjectStoreNames(_ ...nats.ObjectOpt) <-chan string {
@@ -184,8 +189,22 @@ func (j jetStreamContextStub) UpdateConsumer(_ string, _ *nats.ConsumerConfig,
 	return j.update, j.updateError
 }
 
-func (j jetStreamContextStub) DeleteConsumer(_, _ string, _ ...nats.JSOpt) error {
-	return j.deleteConsumerErr
+func (j *jetStreamContextStub) DeleteConsumer(_, consumer string, _ ...nats.JSOpt) error {
+	if j.deleteConsumerErr != nil {
+		return j.deleteConsumerErr
+	}
+	if len(j.consumers) > 0 {
+		for i, con := range j.consumers {
+			if con.Name == consumer {
+				j.consumers = remove(j.consumers, i)
+			}
+		}
+	}
+	return nil
+}
+
+func remove(slice []*nats.ConsumerInfo, i int) []*nats.ConsumerInfo {
+	return append(slice[:i], slice[i+1:]...)
 }
 
 func (j jetStreamContextStub) ConsumerInfo(_, _ string, _ ...nats.JSOpt) (*nats.ConsumerInfo, error) {

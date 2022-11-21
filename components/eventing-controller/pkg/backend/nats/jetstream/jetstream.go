@@ -57,6 +57,9 @@ type Backend interface {
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name as prefix if needed
 	GetJetStreamSubjects(subjects []string) []string
+
+	// DeleteInvalidConsumers deletes all JetStream consumers having no subscription types in subscription resources
+	DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Subscription) error
 }
 
 // SubscriptionSubjectIdentifier is used to uniquely identify a Subscription subject.
@@ -189,6 +192,32 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	}
 
 	return nil
+}
+
+func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Subscription) error {
+	consumers := js.jsCtx.Consumers(js.Config.JSStreamName)
+	for con := range consumers {
+		// consumer should have no interest and subscription types to delete it
+		if !con.PushBound && !js.hasConsumerType(con.Name, subscriptions) {
+			if err := js.deleteConsumerFromJetStream(con.Name); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (js *JetStream) hasConsumerType(consumerName string, subscriptions []eventingv1alpha1.Subscription) bool {
+	for _, sub := range subscriptions {
+		jsSubjects := js.GetJetStreamSubjects(sub.Status.CleanEventTypes)
+		for _, jsSubject := range jsSubjects {
+			computedConsumerNameFromSubject := computeConsumerName(&sub, jsSubject)
+			if consumerName == computedConsumerNameFromSubject {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // checkSubscriptionConfig checks that the latest Subscription Config changes are propagated to the consumer.

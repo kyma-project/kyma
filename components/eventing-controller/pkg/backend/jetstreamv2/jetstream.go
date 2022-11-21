@@ -133,6 +133,32 @@ func (js *JetStream) GetJetStreamSubjects(source string, subjects []string,
 	return result
 }
 
+func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Subscription) error {
+	consumers := js.jsCtx.Consumers(js.Config.JSStreamName)
+	for con := range consumers {
+		// consumer should have no interest and no subscription types to delete it
+		if !con.PushBound && !js.hasConsumerType(con.Name, subscriptions) {
+			if err := js.deleteConsumerFromJetStream(con.Name); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (js *JetStream) hasConsumerType(consumerName string, subscriptions []eventingv1alpha2.Subscription) bool {
+	for _, sub := range subscriptions {
+		jsSubjects := js.GetJetStreamSubjects(sub.Spec.Source, sub.Spec.Types, sub.Spec.TypeMatching)
+		for _, jsSubject := range jsSubjects {
+			computedConsumerNameFromSubject := computeConsumerName(&sub, jsSubject)
+			if consumerName == computedConsumerNameFromSubject {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // getJetStreamSubject appends the prefix and the cleaned source to subject.
 func (js *JetStream) getJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
 	if typeMatching == eventingv1alpha2.TypeMatchingExact {
@@ -418,7 +444,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string) error {
 	if err := js.jsCtx.DeleteConsumer(js.Config.JSStreamName, name); err != nil &&
 		!errors.Is(err, nats.ErrConsumerNotFound) {
 		// if it is not a Not Found error, then return error
-		return fmt.Errorf("failed to delete consumer %s from JetStream: %w", name, err)
+		return utils.MakeConsumerError(ErrDeleteConsumer, err, name)
 	}
 
 	return nil
