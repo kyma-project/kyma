@@ -54,10 +54,12 @@ type Config struct {
 	PipelineDefaults  configbuilder.PipelineDefaults
 }
 
+//go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
 type DaemonSetProber interface {
 	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
 }
 
+//go:generate mockery --name DaemonSetAnnotator --filename daemon_set_annotator.go
 type DaemonSetAnnotator interface {
 	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error)
 }

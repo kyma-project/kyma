@@ -136,7 +136,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	}
 
 	defer func() {
-		if err := r.updateStatus(ctx, &parser); err != nil {
+		if err := r.updateStatus(ctx, parser.Name); err != nil {
 			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
 			reconcileErr = fmt.Errorf("failed to update LogPipeline status: %v", err)
 		}

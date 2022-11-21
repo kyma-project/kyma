@@ -20,7 +20,7 @@ func TestUpdateStatus(t *testing.T) {
 	_ = telemetryv1alpha1.AddToScheme(scheme)
 
 	t.Run("should add pending condition if fluent bit is not ready", func(t *testing.T) {
-		parserName := "dummy"
+		parserName := "parser"
 		parser := &telemetryv1alpha1.LogParser{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: parserName,
@@ -40,18 +40,18 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), parser)
+		err := sut.updateStatus(context.Background(), parser.Name)
 		require.NoError(t, err)
 
 		var updatedParser telemetryv1alpha1.LogParser
-		fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
+		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
 		require.Len(t, updatedParser.Status.Conditions, 1)
 		require.Equal(t, updatedParser.Status.Conditions[0].Type, telemetryv1alpha1.LogParserPending)
 		require.Equal(t, updatedParser.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)
 	})
 
 	t.Run("should add running condition if fluent bit becomes ready", func(t *testing.T) {
-		parserName := "dummy"
+		parserName := "parser"
 		parser := &telemetryv1alpha1.LogParser{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: parserName,
@@ -76,11 +76,11 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), parser)
+		err := sut.updateStatus(context.Background(), parser.Name)
 		require.NoError(t, err)
 
 		var updatedParser telemetryv1alpha1.LogParser
-		fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
+		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
 		require.Len(t, updatedParser.Status.Conditions, 2)
 		require.Equal(t, updatedParser.Status.Conditions[0].Type, telemetryv1alpha1.LogParserPending)
 		require.Equal(t, updatedParser.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)
@@ -89,7 +89,7 @@ func TestUpdateStatus(t *testing.T) {
 	})
 
 	t.Run("should reset conditions and add pending if fluent bit becomes not ready again", func(t *testing.T) {
-		parserName := "dummy"
+		parserName := "parser"
 		parser := &telemetryv1alpha1.LogParser{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: parserName,
@@ -115,11 +115,11 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), parser)
+		err := sut.updateStatus(context.Background(), parser.Name)
 		require.NoError(t, err)
 
 		var updatedParser telemetryv1alpha1.LogParser
-		fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
+		_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: parserName}, &updatedParser)
 		require.Len(t, updatedParser.Status.Conditions, 1)
 		require.Equal(t, updatedParser.Status.Conditions[0].Type, telemetryv1alpha1.LogParserPending)
 		require.Equal(t, updatedParser.Status.Conditions[0].Reason, telemetryv1alpha1.FluentBitDSNotReadyReason)

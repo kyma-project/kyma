@@ -9,63 +9,57 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-func (r *Reconciler) updateStatus(ctx context.Context, parser *telemetryv1alpha1.LogParser) error {
-	// Do not update status if the log parser is being deleted
+func (r *Reconciler) updateStatus(ctx context.Context, parserName string) error {
+	log := logf.FromContext(ctx)
+	var parser telemetryv1alpha1.LogParser
+	if err := r.Get(ctx, types.NamespacedName{Name: parserName}, &parser); err != nil {
+		return fmt.Errorf("failed to get LogParser: %v", err)
+	}
+
 	if parser.DeletionTimestamp != nil {
 		return nil
 	}
 
-	fluentBitDSReady, err := r.prober.IsReady(ctx, r.config.DaemonSet)
+	fluentBitReady, err := r.prober.IsReady(ctx, r.config.DaemonSet)
 	if err != nil {
 		return err
 	}
 
-	if !fluentBitDSReady {
-		if err = setStatus(ctx, r.Client, parser.Name, telemetryv1alpha1.NewLogParserCondition(
-			telemetryv1alpha1.FluentBitDSNotReadyReason,
-			telemetryv1alpha1.LogParserPending,
-		)); err != nil {
-			return err
+	if fluentBitReady {
+		if parser.Status.HasCondition(telemetryv1alpha1.LogParserRunning) {
+			return nil
 		}
 
-		return nil
-	}
-
-	if fluentBitDSReady && parser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
-		if err = setStatus(ctx, r.Client, parser.Name, telemetryv1alpha1.NewLogParserCondition(
+		running := telemetryv1alpha1.NewLogParserCondition(
 			telemetryv1alpha1.FluentBitDSReadyReason,
 			telemetryv1alpha1.LogParserRunning,
-		)); err != nil {
-			return err
-		}
+		)
+
+		return setCondition(ctx, r.Client, &parser, running)
 	}
 
-	return nil
+	pending := telemetryv1alpha1.NewLogParserCondition(
+		telemetryv1alpha1.FluentBitDSNotReadyReason,
+		telemetryv1alpha1.LogParserPending,
+	)
+
+	if parser.Status.HasCondition(telemetryv1alpha1.LogParserRunning) {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", parser.Name, pending.Type))
+		parser.Status.Conditions = []telemetryv1alpha1.LogParserCondition{}
+	}
+
+	return setCondition(ctx, r.Client, &parser, pending)
 }
 
-func setStatus(ctx context.Context, client client.Client, parserName string, condition *telemetryv1alpha1.LogParserCondition) error {
+func setCondition(ctx context.Context, client client.Client, parser *telemetryv1alpha1.LogParser, condition *telemetryv1alpha1.LogParserCondition) error {
 	log := logf.FromContext(ctx)
 
-	var parser telemetryv1alpha1.LogParser
-	if err := client.Get(ctx, types.NamespacedName{Name: parserName}, &parser); err != nil {
-		return fmt.Errorf("failed to get LogParser: %v", err)
-	}
-
-	// If the log parser had a running condition and then was modified, all conditions are removed.
-	// In this case, condition tracking starts off from the beginning.
-	if parser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) != nil &&
-		condition.Type == telemetryv1alpha1.LogParserPending {
-		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", parserName, condition.Type))
-		parser.Status.Conditions = []telemetryv1alpha1.LogParserCondition{}
-	} else {
-		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", parserName, condition.Type))
-	}
+	log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", parser.Name, condition.Type))
 
 	parser.Status.SetCondition(*condition)
 
-	if err := client.Status().Update(ctx, &parser); err != nil {
-		log.Error(err, fmt.Sprintf("Failed to update LogParser status to %s", condition.Type))
-		return err
+	if err := client.Status().Update(ctx, parser); err != nil {
+		return fmt.Errorf("failed to update LogParser status to %s: %v", condition.Type, err)
 	}
 	return nil
 }
