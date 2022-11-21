@@ -195,6 +195,10 @@ func (lps *LogPipelineStatus) GetCondition(condType LogPipelineConditionType) *L
 	return nil
 }
 
+func (lps *LogPipelineStatus) HasCondition(condition LogPipelineConditionType) bool {
+	return lps.GetCondition(condition) != nil
+}
+
 func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
 	currentCond := lps.GetCondition(cond.Type)
 	if currentCond != nil && currentCond.Reason == cond.Reason {

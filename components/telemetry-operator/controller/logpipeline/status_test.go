@@ -50,7 +50,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: &mocks.DaemonSetProber{},
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -100,7 +100,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -150,7 +150,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -206,7 +206,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -251,7 +251,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: &mocks.DaemonSetProber{},
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -286,7 +286,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -317,7 +317,7 @@ func TestUpdateStatus(t *testing.T) {
 			prober: proberStub,
 		}
 
-		err := sut.updateStatus(context.Background(), pipeline)
+		err := sut.updateStatus(context.Background(), pipeline.Name)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline

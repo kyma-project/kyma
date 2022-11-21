@@ -3,7 +3,9 @@ package logparser
 import (
 	"context"
 	"fmt"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -13,6 +15,10 @@ func (r *Reconciler) updateStatus(ctx context.Context, parserName string) error 
 	log := logf.FromContext(ctx)
 	var parser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, types.NamespacedName{Name: parserName}, &parser); err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+
 		return fmt.Errorf("failed to get LogParser: %v", err)
 	}
 
