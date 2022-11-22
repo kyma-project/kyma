@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -112,7 +113,13 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
 		h.namedLogger().With().Error(err)
-		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, http.StatusInternalServerError, event, err.Error())
+		httpStatus := http.StatusInternalServerError
+		if errors.Is(err, sender.ErrInsufficientStorage) {
+			httpStatus = http.StatusInsufficientStorage
+		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
+			httpStatus = http.StatusBadGateway
+		}
+		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, event, err.Error())
 		return
 	}
 	h.namedLogger().With().Debug(result)
@@ -150,7 +157,11 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 
 	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
+		httpStatus := http.StatusInternalServerError
+		if errors.Is(err, sender.ErrInsufficientStorage) {
+			httpStatus = http.StatusInsufficientStorage
+		}
+		writer.WriteHeader(httpStatus)
 		h.namedLogger().With().Error(err)
 		return
 	}

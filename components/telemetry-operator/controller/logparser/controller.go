@@ -19,6 +19,7 @@ package logparser
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -122,10 +123,6 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 	ctrl.Log.V(1).Info(fmt.Sprintf("DaemonSet changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
 	return requests
 }
-
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logparsers/finalizers,verbs=update
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)

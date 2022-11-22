@@ -9,11 +9,11 @@
 
 /.github @kyma-project/prow
 /.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @kyma-project/prow
-/.github/ISSUE_TEMPLATE @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
+/.github/ISSUE_TEMPLATE @mmitoraj @NHingerl @grego952 @IwonaLanger  
 
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @wchrapka @mrCherry97 @Lyczeq
+/.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @mrCherry97 @Lyczeq
 
 /common @Tomasz-Smelcerz-SAP @akgalwas @piotrmiskiewicz
 # Logging library
@@ -31,9 +31,10 @@
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
 # All files and subdirectories in /docs
-/docs @mmitoraj @majakurcius @NHingerl @grego952 @IwonaLanger  
+/docs @mmitoraj @NHingerl @grego952 @IwonaLanger  
 
 /hack @clebs
 
@@ -42,6 +43,7 @@
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
+/installation/resources/crds/istio @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /installation/resources/crds/ory @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
