@@ -68,9 +68,6 @@ This tutorial shows only one possible use case. There are many more use cases on
          
          return await event.emitCloudEvent(eventType, eventSource, sanitisedData)
                .then(resp => {
-                  if(resp.status!==204){
-                     throw new Error("Unexpected response from eventing proxy");
-                  }
                   return "Event sent";
                }).catch(err=> {
                   console.error(err)

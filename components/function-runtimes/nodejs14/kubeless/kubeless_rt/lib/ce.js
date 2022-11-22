@@ -24,14 +24,16 @@ function buildEvent(req, res, tracer) {
         emitCloudEvent: (type, source, data, eventtypeversion) => emitCloudEvent(type, source, data, eventtypeversion),
     };
 
-    let stringifiedReqestBody = req.body.toString(charset);
-    if (!req.is('multipart/*') && req.body.length > 0) {
-        if(isCloudEvent(req)) {
-            event = Object.assign(event,buildCloudEventAttributes(req, JSON.parse(stringifiedReqestBody)));    
-        } else if (req.is('application/json')) {
-            event = Object.assign(event,{'data':JSON.parse(stringifiedReqestBody)});
-        } else {
-            event = Object.assign(event,{'data':stringifiedReqestBody});
+    if (req.body){
+        let stringifiedReqestBody = req.body.toString(charset);
+        if (!req.is('multipart/*') && req.body.length > 0) {
+            if(isCloudEvent(req)) {
+                event = Object.assign(event,buildCloudEventAttributes(req, JSON.parse(stringifiedReqestBody)));    
+            } else if (isOfJsonContentType(req)) {
+                event = Object.assign(event,{'data':JSON.parse(stringifiedReqestBody)});
+            } else {
+                event = Object.assign(event,{'data':stringifiedReqestBody});
+            }
         }
     }
     return event;
@@ -85,6 +87,10 @@ function buildResponseCloudEvent(req, id, type, data) {
 
 function isCloudEvent(req) {
     return req.is('application/cloudevents+json') || hasCeHeaders(req);
+}
+
+function isOfJsonContentType(req) {
+    return req.is('application/json');
 }
 
 function hasCeHeaders(req) {
