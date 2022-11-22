@@ -70,7 +70,6 @@ container:
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
-    runAsUser: 1000
     capabilities:
       drop: ["ALL"]
     procMount: default # Optional. The default is false if the entry is not there.
@@ -90,7 +89,6 @@ initContainer:
   securityContext:
     allowPrivilegeEscalation: false
     privileged: false
-    runAsUser: 1000
     capabilities:
       drop: ["ALL"]
     procMount: default # Optional. The default is false if the entry is not there.

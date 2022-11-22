@@ -119,7 +119,6 @@ configData: # example: https://github.com/docker/distribution/blob/master/cmd/re
 containers:
   # the following guidelines should be followed for this https://github.com/kyma-project/community/tree/main/concepts/psp-replacement
   securityContext:
-    runAsUser: 1000
     privileged: false
     allowPrivilegeEscalation: false
     capabilities:
