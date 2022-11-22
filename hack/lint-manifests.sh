@@ -8,6 +8,12 @@ TMP_DIR=$(mktemp -d)
 
 source "${CURRENT_DIR}/utilities.sh" || { echo 'Cannot load CI utilities.'; exit 1; }
 
+cleanup() {
+    rm -rf "${TMP_DIR}" || true
+}
+
+trap cleanup EXIT SIGINT
+
 $CONTROLLER_GEN rbac:roleName=manager-role crd webhook paths="${OPERATOR_DIR}/..." output:crd:artifacts:config="${TMP_DIR}"
 
 DIFF=$(diff -q $TMP_DIR ${OPERATOR_DIR}/config/crd/bases)
