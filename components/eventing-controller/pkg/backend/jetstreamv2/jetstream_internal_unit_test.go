@@ -491,17 +491,17 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 					sub1.Spec.TypeMatching,
 				)),
 			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
-			PushBound: true,
+			PushBound: false,
 		},
 		&nats.ConsumerInfo{
 			Name: computeConsumerName(
-				&sub1,
+				&sub2,
 				jsBackend.getJetStreamSubject(sub2.Spec.Source,
 					sub2.Status.Types[0].CleanType,
 					sub2.Spec.TypeMatching,
 				)),
 			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
-			PushBound: true,
+			PushBound: false,
 		},
 		&nats.ConsumerInfo{
 			Name: computeConsumerName(
@@ -511,7 +511,7 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 					sub2.Spec.TypeMatching,
 				)),
 			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
-			PushBound: true,
+			PushBound: false,
 		},
 	}
 	danglingConsumer := &nats.ConsumerInfo{
@@ -556,6 +556,15 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 			},
 			wantError: ErrDeleteConsumer,
 		},
+		{
+			name:               "all consumers must be deleted if there is no subscription resource",
+			givenSubscriptions: []v1alpha2.Subscription{},
+			jetStreamContext: &jetStreamContextStub{
+				consumers: givenConsumers,
+			},
+			wantConsumers: []*nats.ConsumerInfo{},
+			wantError:     nil,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -563,14 +572,14 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 			jsBackend.jsCtx = tc.jetStreamContext
 
 			// when
-			err := jsBackend.DeleteInvalidConsumers(subs)
+			err := jsBackend.DeleteInvalidConsumers(tc.givenSubscriptions)
 
 			// then
 			if tc.wantError != nil {
 				assert.ErrorIs(t, err, tc.wantError)
 			} else {
 				cons := jsBackend.jsCtx.Consumers("")
-				var actualConsumers []*nats.ConsumerInfo
+				actualConsumers := []*nats.ConsumerInfo{}
 				for con := range cons {
 					actualConsumers = append(actualConsumers, con)
 				}
@@ -637,7 +646,7 @@ func Test_HasConsumerType(t *testing.T) {
 			wantResult:         true,
 		},
 		{
-			name:               "Consumer is not found in subscriptions types",
+			name:               "Consumer should be not found in subscriptions types",
 			givenConsumerName:  givenNotExistentConName,
 			givenSubscriptions: subs,
 			wantResult:         false,
@@ -646,6 +655,12 @@ func Test_HasConsumerType(t *testing.T) {
 			name:               "Consumer with the same subject but different namespace should not be found",
 			givenConsumerName:  invalidDanglingConsumer,
 			givenSubscriptions: subs,
+			wantResult:         false,
+		},
+		{
+			name:               "should return false if there is no subscription resource",
+			givenConsumerName:  givenConName1,
+			givenSubscriptions: []v1alpha2.Subscription{},
 			wantResult:         false,
 		},
 	}
@@ -689,7 +704,6 @@ func NewSubscriptionWithOneType() *v1alpha2.Subscription {
 func NewSubscriptionsWithMultipleTypes() []v1alpha2.Subscription {
 	sub1 := subtesting.NewSubscription("test1", "test1",
 		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
 		subtesting.WithTypeMatchingStandard(),
 		subtesting.WithMaxInFlight(DefaultMaxInFlights),
 		subtesting.WithStatusTypes([]v1alpha2.EventType{
@@ -700,20 +714,18 @@ func NewSubscriptionsWithMultipleTypes() []v1alpha2.Subscription {
 		}),
 	)
 	sub2 := subtesting.NewSubscription("test2", "test2",
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV3Event),
 		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV4Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1EventNotClean),
 		subtesting.WithTypeMatchingStandard(),
 		subtesting.WithMaxInFlight(DefaultMaxInFlights),
 		subtesting.WithStatusTypes([]v1alpha2.EventType{
 			{
-				OriginalType: subtesting.OrderCreatedV2Event,
-				CleanType:    subtesting.OrderCreatedV2Event,
+				OriginalType: subtesting.OrderCreatedV1Event,
+				CleanType:    subtesting.OrderCreatedV1Event,
 			},
 			{
-				OriginalType: subtesting.OrderCreatedV3Event,
-				CleanType:    subtesting.OrderCreatedV3Event,
+				OriginalType: subtesting.OrderCreatedV1Event,
+				CleanType:    subtesting.OrderCreatedV1Event,
 			},
 		}),
 	)

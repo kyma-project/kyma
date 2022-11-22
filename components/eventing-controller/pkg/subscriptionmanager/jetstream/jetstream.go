@@ -135,7 +135,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 		sm.namedLogger().Info("Started v1alpha2 JetStream subscription manager")
 	} else {
 		jsCleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
-		jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
+		jetStreamHandler := backendjetstream.NewJetStream(sm.envCfg, sm.metricsCollector, jsCleaner, sm.logger)
 		jetStreamReconciler := jetstream.NewReconciler(
 			ctx,
 			client,

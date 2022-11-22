@@ -193,11 +193,9 @@ func (j *jetStreamContextStub) DeleteConsumer(_, consumer string, _ ...nats.JSOp
 	if j.deleteConsumerErr != nil {
 		return j.deleteConsumerErr
 	}
-	if len(j.consumers) > 0 {
-		for i, con := range j.consumers {
-			if con.Name == consumer {
-				j.consumers = remove(j.consumers, i)
-			}
+	for i := len(j.consumers) - 1; i >= 0; i-- {
+		if j.consumers[i].Name == consumer {
+			j.consumers = remove(j.consumers, i)
 		}
 	}
 	return nil

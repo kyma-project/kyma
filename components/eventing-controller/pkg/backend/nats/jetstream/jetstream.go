@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/eventtype"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
@@ -110,14 +112,16 @@ type JetStream struct {
 	connClosedHandler backendnats.ConnClosedHandler
 	logger            *logger.Logger
 	metricsCollector  *backendmetrics.Collector
+	cleaner           eventtype.Cleaner
 }
 
-func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, jsCleaner eventtype.Cleaner, logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
 		subscriptions:    make(map[SubscriptionSubjectIdentifier]backendnats.Subscriber),
 		metricsCollector: metricsCollector,
+		cleaner:          jsCleaner,
 	}
 }
 
@@ -208,10 +212,20 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Sub
 }
 
 func (js *JetStream) hasConsumerType(consumerName string, subscriptions []eventingv1alpha1.Subscription) bool {
-	for si := range subscriptions {
-		jsSubjects := js.GetJetStreamSubjects(subscriptions[si].Status.CleanEventTypes)
-		for _, jsSubject := range jsSubjects {
-			computedConsumerNameFromSubject := computeConsumerName(&subscriptions[si], jsSubject)
+	if len(subscriptions) == 0 {
+		return false
+	}
+	for ix := range subscriptions {
+		// subjects := subscriptions[ix].Status.CleanEventTypes
+		cleanedSubjects, err := backendnats.GetCleanSubjects(&subscriptions[ix], js.cleaner)
+		if err != nil {
+			js.namedLogger().Errorw("failed to clean subscription filter subjects", "error", err,
+				"subscription namespace", &subscriptions[ix].Namespace, "subscription name", &subscriptions[ix].Name)
+			return true
+		}
+		for _, subject := range cleanedSubjects {
+			jsSubject := js.GetJetStreamSubject(subject)
+			computedConsumerNameFromSubject := computeConsumerName(&subscriptions[ix], jsSubject)
 			if consumerName == computedConsumerNameFromSubject {
 				return true
 			}
