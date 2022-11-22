@@ -208,9 +208,7 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") ||
-						strings.Contains(line, "telemetry_all_logpipelines") ||
-						strings.Contains(line, "telemetry_unsupported_logpipelines") {
+					if strings.Contains(line, "telemetry_all_logpipelines") || strings.Contains(line, "telemetry_unsupported_logpipelines") {
 						return true
 					}
 				}

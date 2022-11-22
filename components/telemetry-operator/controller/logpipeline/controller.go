@@ -20,29 +20,25 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	appsv1 "k8s.io/api/apps/v1"
-
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
-	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
-	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/prometheus/client_golang/prometheus"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const checksumAnnotationKey = "checksum/logpipeline-config"
@@ -62,7 +58,7 @@ type DaemonSetProber interface {
 
 //go:generate mockery --name DaemonSetAnnotator --filename daemon_set_annotator.go
 type DaemonSetAnnotator interface {
-	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error)
+	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
 type Reconciler struct {
@@ -71,7 +67,6 @@ type Reconciler struct {
 	syncer                  *syncer
 	allLogPipelines         prometheus.Gauge
 	unsupportedLogPipelines prometheus.Gauge
-	restartsTotal           prometheus.Counter
 	prober                  DaemonSetProber
 	annotator               DaemonSetAnnotator
 	secrets                 secretsCache
@@ -84,12 +79,10 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	r.syncer = newSyncer(client, config)
 	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
 	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
-	r.restartsTotal = controllermetrics.FluentBitTriggeredRestartsTotal
 	r.prober = prober
 	r.annotator = annotator
 	r.secrets = newSecretsCache()
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
-	controllermetrics.RegisterMetrics()
 
 	return &r
 }
@@ -198,13 +191,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	patched, err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum)
-	if err != nil {
+	if err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
-	}
-
-	if patched {
-		r.restartsTotal.Inc()
 	}
 
 	return reconcileResult, reconcileErr

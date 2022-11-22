@@ -16,24 +16,17 @@ type DaemonSetAnnotator struct {
 }
 
 // SetAnnotation provides a mock function with given fields: ctx, name, key, value
-func (_m *DaemonSetAnnotator) SetAnnotation(ctx context.Context, name types.NamespacedName, key string, value string) (bool, error) {
+func (_m *DaemonSetAnnotator) SetAnnotation(ctx context.Context, name types.NamespacedName, key string, value string) error {
 	ret := _m.Called(ctx, name, key, value)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(context.Context, types.NamespacedName, string, string) bool); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, types.NamespacedName, string, string) error); ok {
 		r0 = rf(ctx, name, key, value)
 	} else {
-		r0 = ret.Get(0).(bool)
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, types.NamespacedName, string, string) error); ok {
-		r1 = rf(ctx, name, key, value)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 type mockConstructorTestingTNewDaemonSetAnnotator interface {

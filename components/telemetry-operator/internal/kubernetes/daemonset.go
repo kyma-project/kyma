@@ -37,24 +37,24 @@ type DaemonSetAnnotator struct {
 	client.Client
 }
 
-func (dsa *DaemonSetAnnotator) SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error) {
+func (dsa *DaemonSetAnnotator) SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error {
 	var ds appsv1.DaemonSet
-	if err = dsa.Get(ctx, name, &ds); err != nil {
-		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
+	if err := dsa.Get(ctx, name, &ds); err != nil {
+		return fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
 	patchedDS := *ds.DeepCopy()
 	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
 		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 	} else if patchedDS.Spec.Template.ObjectMeta.Annotations[key] == value {
-		return false, nil
+		return nil
 	}
 
 	patchedDS.Spec.Template.ObjectMeta.Annotations[key] = value
 
-	if err = dsa.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
-		return false, fmt.Errorf("failed to patch %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
+	if err := dsa.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
+		return fmt.Errorf("failed to patch %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
-	return true, nil
+	return nil
 }

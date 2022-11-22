@@ -20,26 +20,22 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
-	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
-
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 )
 
 const checksumAnnotationKey = "checksum/logparser-config"
@@ -56,16 +52,15 @@ type DaemonSetProber interface {
 
 //go:generate mockery --name DaemonSetAnnotator --filename daemon_set_annotator.go
 type DaemonSetAnnotator interface {
-	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) (patched bool, err error)
+	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
 type Reconciler struct {
 	client.Client
-	config        Config
-	syncer        *syncer
-	restartsTotal prometheus.Counter
-	prober        DaemonSetProber
-	annotator     DaemonSetAnnotator
+	config    Config
+	syncer    *syncer
+	prober    DaemonSetProber
+	annotator DaemonSetAnnotator
 }
 
 func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
@@ -74,11 +69,8 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	r.Client = client
 	r.config = config
 	r.syncer = newSyncer(client, config)
-	r.restartsTotal = controllermetrics.FluentBitTriggeredRestartsTotal
 	r.prober = prober
 	r.annotator = annotator
-
-	controllermetrics.RegisterMetrics()
 
 	return &r
 }
@@ -158,13 +150,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	patched, err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum)
-	if err != nil {
+	if err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
-	}
-
-	if patched {
-		r.restartsTotal.Inc()
 	}
 
 	return reconcileResult, reconcileErr

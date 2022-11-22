@@ -63,9 +63,8 @@ func TestSetAnnotation(t *testing.T) {
 
 	sut := DaemonSetAnnotator{fakeClient}
 
-	patched, err := sut.SetAnnotation(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, "foo", "bar")
+	err := sut.SetAnnotation(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, "foo", "bar")
 	require.NoError(t, err)
-	require.True(t, patched)
 
 	var updatedDaemonSet appsv1.DaemonSet
 	_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, &updatedDaemonSet)
