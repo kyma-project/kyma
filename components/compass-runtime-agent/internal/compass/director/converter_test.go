@@ -15,10 +15,6 @@ const (
 	baseAPIDesc = "so awesome this api description"
 	baseAPIURL  = "https://api.url.com"
 
-	baseDocTitle       = "my-docu"
-	baseDocDisplayName = "my-docu-display"
-	baseDocKind        = "kind-of-cool"
-
 	baseBundleID          = "bundleID"
 	baseBundleName        = "bundleName"
 	baseBundleDesc        = "bundleDesc"
@@ -271,7 +267,7 @@ func TestApplication_ToApplication(t *testing.T) {
 			},
 		},
 		{
-			description: "convert Compass App with bundles using empty specs",
+			description: "convert Compass App with bundles",
 			compassApp: Application{
 				ID:           appId,
 				Name:         appName,
@@ -279,9 +275,9 @@ func TestApplication_ToApplication(t *testing.T) {
 				ProviderName: &providerName,
 				Bundles: &graphql.BundlePageExt{
 					Data: []*graphql.BundleExt{
-						fixCompassBundleExtWithEmptySpecs("1"),
-						fixCompassBundleExtWithEmptySpecs("2"),
-						fixCompassBundleExtWithEmptySpecs("3"),
+						fixCompassBundleExt("1"),
+						fixCompassBundleExt("2"),
+						fixCompassBundleExt("3"),
 					},
 				},
 			},
@@ -291,9 +287,9 @@ func TestApplication_ToApplication(t *testing.T) {
 				Description:         appDesc,
 				ProviderDisplayName: providerName,
 				ApiBundles: []kymaModel.APIBundle{
-					fixInternalAPIBundleEmptySpecs("1"),
-					fixInternalAPIBundleEmptySpecs("2"),
-					fixInternalAPIBundleEmptySpecs("3"),
+					fixInternalAPIBundle("1"),
+					fixInternalAPIBundle("2"),
+					fixInternalAPIBundle("3"),
 				},
 				SystemAuthsIDs: make([]string, 0),
 			},
@@ -310,25 +306,6 @@ func TestApplication_ToApplication(t *testing.T) {
 }
 
 func fixInternalAPIBundle(suffix string) kymaModel.APIBundle {
-	return kymaModel.APIBundle{
-		ID:                             baseBundleID + suffix,
-		Name:                           baseBundleName + suffix,
-		Description:                    stringPtr(baseBundleDesc + suffix),
-		InstanceAuthRequestInputSchema: stringPtr(baseBundleInputSchema + suffix),
-		APIDefinitions: []kymaModel.APIDefinition{
-			fixInternalAPIDefinition("1", nil),
-			fixInternalAPIDefinition("2", nil),
-			fixInternalAPIDefinition("3", nil),
-			fixInternalAPIDefinition("4", nil),
-		},
-		EventDefinitions: []kymaModel.EventAPIDefinition{
-			fixInternalEventAPIDefinition("1"),
-			fixInternalEventAPIDefinition("2"),
-		},
-	}
-}
-
-func fixInternalAPIBundleEmptySpecs(suffix string) kymaModel.APIBundle {
 	return kymaModel.APIBundle{
 		ID:                             baseBundleID + suffix,
 		Name:                           baseBundleName + suffix,
@@ -370,7 +347,6 @@ func fixCompassBundleWithDefaultInstanceAuth(suffix string, defaultInstanceAuth 
 		Bundle:           fixCompassBundle(suffix, defaultInstanceAuth),
 		APIDefinitions:   fixAPIDefinitionPageExt(),
 		EventDefinitions: fixEventAPIDefinitionPageExt(),
-		Documents:        fixDocumentPageExt(),
 	}
 }
 
@@ -399,16 +375,6 @@ func fixCompassBundleExt(suffix string) *graphql.BundleExt {
 		Bundle:           fixCompassBundle(suffix, nil),
 		APIDefinitions:   fixAPIDefinitionPageExt(),
 		EventDefinitions: fixEventAPIDefinitionPageExt(),
-		Documents:        fixDocumentPageExt(),
-	}
-}
-
-func fixCompassBundleExtWithEmptySpecs(suffix string) *graphql.BundleExt {
-	return &graphql.BundleExt{
-		Bundle:           fixCompassBundle(suffix, nil),
-		APIDefinitions:   fixAPIDefinitionPageExt(),
-		EventDefinitions: fixEventAPIDefinitionPageExtWithEmptySpecs(),
-		Documents:        fixDocumentPageExtWithEmptyDocs(),
 	}
 }
 
@@ -427,98 +393,40 @@ func fixCompassBundle(suffix string, defaultInstanceAuth *graphql.Auth) graphql.
 func fixAPIDefinitionPageExt() graphql.APIDefinitionPageExt {
 	return graphql.APIDefinitionPageExt{
 		Data: []*graphql.APIDefinitionExt{
-			fixCompassAPIDefinitionExt("1", nil),
-			fixCompassAPIDefinitionExt("2", nil),
-			fixCompassAPIDefinitionExt("3", nil),
-			fixCompassAPIDefinitionExt("4", nil),
+			fixCompassAPIDefinitionExt("1"),
+			fixCompassAPIDefinitionExt("2"),
+			fixCompassAPIDefinitionExt("3"),
+			fixCompassAPIDefinitionExt("4"),
 		},
 	}
 }
 
-func fixCompassAPIDefinitionExt(suffix string, spec *graphql.APISpecExt) *graphql.APIDefinitionExt {
-	var apiSpec *graphql.APISpec = nil
-
-	if spec != nil {
-		apiSpec = &spec.APISpec
-	}
-
-	apiDefinition := fixCompassAPIDefinition(suffix, apiSpec)
+func fixCompassAPIDefinitionExt(suffix string) *graphql.APIDefinitionExt {
+	apiDefinition := fixCompassAPIDefinition(suffix)
 
 	return &graphql.APIDefinitionExt{
 		APIDefinition: *apiDefinition,
-		Spec:          spec,
 	}
 }
 
 func fixEventAPIDefinitionPageExt() graphql.EventAPIDefinitionPageExt {
 	return graphql.EventAPIDefinitionPageExt{
 		Data: []*graphql.EventAPIDefinitionExt{
-			fixEventAPIDefinitionExt("1", fixCompassEventAPISpecExt()),
-			fixEventAPIDefinitionExt("2", fixCompassEventAPISpecExt()),
+			fixEventAPIDefinitionExt("1"),
+			fixEventAPIDefinitionExt("2"),
 		},
 	}
 }
 
-func fixEventAPIDefinitionPageExtWithEmptySpecs() graphql.EventAPIDefinitionPageExt {
-	return graphql.EventAPIDefinitionPageExt{
-		Data: []*graphql.EventAPIDefinitionExt{
-			fixEventAPIDefinitionExt("1", nil),
-			fixEventAPIDefinitionExt("2", nil),
-		},
-	}
-}
-
-func fixCompassEventAPISpecExt() *graphql.EventAPISpecExt {
-	eventSpec := fixCompassAsyncAPISpec()
-
-	return &graphql.EventAPISpecExt{
-		EventSpec: *eventSpec,
-	}
-}
-
-func fixEventAPIDefinitionExt(suffix string, extEventSpec *graphql.EventAPISpecExt) *graphql.EventAPIDefinitionExt {
-	var eventSpec *graphql.EventSpec = nil
-
-	if extEventSpec != nil {
-		eventSpec = &extEventSpec.EventSpec
-	}
-
-	eventDefinition := fixCompassEventAPIDefinition(suffix, eventSpec)
+func fixEventAPIDefinitionExt(suffix string) *graphql.EventAPIDefinitionExt {
+	eventDefinition := fixCompassEventAPIDefinition(suffix)
 
 	return &graphql.EventAPIDefinitionExt{
 		EventDefinition: *eventDefinition,
-		Spec:            extEventSpec,
 	}
 }
 
-func fixDocumentPageExt() graphql.DocumentPageExt {
-	return graphql.DocumentPageExt{
-		Data: []*graphql.DocumentExt{
-			fixCompassDocumentExt("1", fixCompassDocContent()),
-			fixCompassDocumentExt("2", fixCompassDocContent()),
-		},
-	}
-}
-
-func fixDocumentPageExtWithEmptyDocs() graphql.DocumentPageExt {
-	return graphql.DocumentPageExt{
-		Data: []*graphql.DocumentExt{
-			fixCompassDocumentExt("1", nil),
-			fixCompassDocumentExt("2", nil),
-			fixCompassDocumentExt("3", nil),
-		},
-	}
-}
-
-func fixCompassDocumentExt(suffix string, content *graphql.CLOB) *graphql.DocumentExt {
-	document := fixCompassDocument(suffix, content)
-
-	return &graphql.DocumentExt{
-		Document: *document,
-	}
-}
-
-func fixCompassAPIDefinition(suffix string, spec *graphql.APISpec) *graphql.APIDefinition {
+func fixCompassAPIDefinition(suffix string) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
 	return &graphql.APIDefinition{
@@ -528,11 +436,10 @@ func fixCompassAPIDefinition(suffix string, spec *graphql.APISpec) *graphql.APID
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		Spec:        spec,
 	}
 }
 
-func fixCompassEventAPIDefinition(suffix string, spec *graphql.EventSpec) *graphql.EventDefinition {
+func fixCompassEventAPIDefinition(suffix string) *graphql.EventDefinition {
 	desc := baseAPIDesc + suffix
 
 	return &graphql.EventDefinition{
@@ -541,40 +448,7 @@ func fixCompassEventAPIDefinition(suffix string, spec *graphql.EventSpec) *graph
 		},
 		Name:        baseAPIName + suffix,
 		Description: &desc,
-		Spec:        spec,
 	}
-}
-
-func fixCompassDocument(suffix string, data *graphql.CLOB) *graphql.Document {
-	kind := baseDocKind + suffix
-
-	return &graphql.Document{
-		BaseEntity: &graphql.BaseEntity{
-			ID: baseAPIId + suffix,
-		},
-		Description: baseAPIDesc + suffix,
-		Title:       baseDocTitle + suffix,
-		DisplayName: baseDocDisplayName + suffix,
-		Format:      graphql.DocumentFormatMarkdown,
-		Kind:        &kind,
-		Data:        data,
-	}
-}
-
-func fixCompassAsyncAPISpec() *graphql.EventSpec {
-	data := graphql.CLOB(`Async API spec`)
-
-	return &graphql.EventSpec{
-		Data:   &data,
-		Type:   graphql.EventSpecTypeAsyncAPI,
-		Format: graphql.SpecFormatYaml,
-	}
-}
-
-func fixCompassDocContent() *graphql.CLOB {
-	data := graphql.CLOB(`# Md content`)
-
-	return &data
 }
 
 func stringPtr(str string) *string {

@@ -17,6 +17,11 @@ const (
 	managedByLabelValue  = "compass-runtime-agent"
 )
 
+const (
+	SpecAPIType    = "API"
+	SpecEventsType = "Events"
+)
+
 //go:generate mockery --name=Converter
 type Converter interface {
 	Do(application model.Application) v1alpha1.Application

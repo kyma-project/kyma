@@ -2,14 +2,6 @@ package model
 
 type Labels map[string]interface{}
 
-type SpecFormat string
-
-type EventAPISpecType string
-
-type APISpecType string
-
-type DocumentFormat string
-
 // Application contains all associated APIs, and EventAPIs
 type Application struct {
 	ID                  string
@@ -31,7 +23,7 @@ type APIBundle struct {
 	DefaultInstanceAuth            *Auth
 }
 
-// APIDefinition contains API data such as URL, credentials and spec
+// APIDefinition contains API data such as URL, and credentials
 type APIDefinition struct {
 	ID          string
 	Name        string
@@ -40,18 +32,11 @@ type APIDefinition struct {
 	Credentials *Credentials
 }
 
-// EventAPIDefinition contains Event API details such
+// EventAPIDefinition contains Event API details
 type EventAPIDefinition struct {
 	ID          string
 	Name        string
 	Description string
-}
-
-// EventAPISpec contains event API spec BLOB and its type
-type EventAPISpec struct {
-	Data   []byte
-	Type   EventAPISpecType
-	Format SpecFormat
 }
 
 // Credentials contains OAuth or BasicAuth configuration along with optional CSRF data.
