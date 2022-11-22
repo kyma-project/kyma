@@ -349,6 +349,21 @@ var _ = Describe("LogPipeline controller", func() {
 
 				return *mf["telemetry_unsupported_logpipelines"].Metric[0].Gauge.Value
 			}, timeout, interval).Should(Equal(0.0))
+
+			// Fluent Bit daemon set should have checksum annotation set
+			Eventually(func() bool {
+				var fluentBitDaemonSet appsv1.DaemonSet
+				err := k8sClient.Get(ctx, types.NamespacedName{
+					Name:      testConfig.DaemonSet.Name,
+					Namespace: testConfig.DaemonSet.Namespace,
+				}, &fluentBitDaemonSet)
+				if err != nil {
+					return false
+				}
+
+				_, found := fluentBitDaemonSet.Annotations["checksum/logpipeline-config"]
+				return found
+			}, timeout, interval).Should(BeTrue())
 		})
 	})
 })

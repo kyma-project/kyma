@@ -28,8 +28,8 @@ func TestDaemonSetProber(t *testing.T) {
 		{summary: "generation mismatch", observedGeneration: 1, desiredGeneration: 2, expected: false},
 	}
 
-	for _, tc := range tests {
-		tc := tc
+	for _, test := range tests {
+		tc := test
 		t.Run(tc.summary, func(t *testing.T) {
 			t.Parallel()
 
@@ -68,7 +68,7 @@ func TestSetAnnotation(t *testing.T) {
 	require.True(t, patched)
 
 	var updatedDaemonSet appsv1.DaemonSet
-	fakeClient.Get(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, &updatedDaemonSet)
+	_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, &updatedDaemonSet)
 	require.Len(t, updatedDaemonSet.Annotations, 1)
 	require.Contains(t, updatedDaemonSet.Annotations, "foo")
 	require.Equal(t, updatedDaemonSet.Annotations["foo"], "bar")
