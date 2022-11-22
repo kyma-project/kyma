@@ -66,6 +66,9 @@ spec:
   env:
     - name: PERSON_NAME
       value: "John"
+  secretMounts:
+    - secretName: SECRET_NAME
+      mountPath: /secret/mount/path
   status:
     conditions:
       - lastTransitionTime: "2020-04-14T08:17:11Z"
@@ -146,6 +149,9 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.scaleConfig**                          |       No       | Defines minimum and maximum number of Function's Pods to run at a time. Can't be used at the same time with **spec.replicas**. |
 | **spec.scaleConfig.minReplicas**              |      Yes       | Defines the minimum number of Function's Pods to run at a time. |
 | **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
+| **spec.secretMounts**                         |       No       | Specifies volumes containing the secrets to mount into the container's filesystem. |
+| **spec.secretMounts.secretName**              |      Yes       | Name of the secret in the pod's namespace to use. |
+| **spec.secretMounts.mountPath**               |      Yes       | Path within the container at which the volume should be mounted. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
