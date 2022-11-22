@@ -339,16 +339,6 @@ spec:
           spec:
             description: FunctionSpec defines the desired state of Function
             properties:
-              customRuntimeConfiguration:
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
               env:
                 description: Env defines an array of key value pairs need to be used
                   as env variable for a function
