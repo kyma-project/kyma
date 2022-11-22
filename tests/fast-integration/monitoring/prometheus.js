@@ -140,12 +140,6 @@ async function assertMetricsExist() {
         {'telemetry_fsbuffer_usage_bytes': [[]]},
         {'fluentbit_input_bytes_total ': [['pod']]}],
     },
-
-    {
-      'telemetry-operator-metrics': [
-        {'telemetry_fluentbit_triggered_restarts_total': [[]]}],
-    },
-
   ];
 
   for (let index = 0; index < metricsList.length; index++) {
