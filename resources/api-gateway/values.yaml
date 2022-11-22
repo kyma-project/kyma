@@ -100,6 +100,9 @@ tests:
     runAsNonRoot: true
     runAsGroup: 65534
 
+webhook:
+  crdName: "apirules.gateway.kyma-project.io"
+
 global:
   domainName: kyma.example.com
   containerRegistry:
@@ -107,7 +110,7 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "1.1.0"
+      version: "PR-99"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "1.1.0"
+      version: "PR-99"
