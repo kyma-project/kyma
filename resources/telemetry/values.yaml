@@ -10,7 +10,7 @@ global:
       version: "PR-15820"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
-      # version: "" TODO
+      version: "PR-16153"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.9-cf0a130c"
