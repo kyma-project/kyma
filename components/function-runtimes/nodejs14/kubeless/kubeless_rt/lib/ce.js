@@ -21,7 +21,7 @@ function buildEvent(req, res, tracer) {
         publishCloudEvent: (data) => publishCloudEvent(data),
         //deprecated
         buildResponseCloudEvent: (id, type, data) => buildResponseCloudEvent(req, id, type, data),
-        emitCloudEvent: (type, source, data, eventtypeversion) => emitCloudEvent(type, source, data, eventtypeversion),
+        emitCloudEvent: (type, source, data, optionalCloudEventAttributes) => emitCloudEvent(type, source, data, optionalCloudEventAttributes),
     };
 
     if (req.body){
