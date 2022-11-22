@@ -69,7 +69,7 @@ func TestSetAnnotation(t *testing.T) {
 
 	var updatedDaemonSet appsv1.DaemonSet
 	_ = fakeClient.Get(context.Background(), types.NamespacedName{Name: "foo", Namespace: "kyma-system"}, &updatedDaemonSet)
-	require.Len(t, updatedDaemonSet.Annotations, 1)
-	require.Contains(t, updatedDaemonSet.Annotations, "foo")
-	require.Equal(t, updatedDaemonSet.Annotations["foo"], "bar")
+	require.Len(t, updatedDaemonSet.Spec.Template.Annotations, 1)
+	require.Contains(t, updatedDaemonSet.Spec.Template.Annotations, "foo")
+	require.Equal(t, updatedDaemonSet.Spec.Template.Annotations["foo"], "bar")
 }
