@@ -157,7 +157,7 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)
-	log.Info("Reconciliation triggered")
+	log.V(1).Info("Reconciliation triggered")
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
