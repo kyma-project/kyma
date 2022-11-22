@@ -118,9 +118,11 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	log := logf.FromContext(ctx)
+	log.V(1).Info("Reconciliation triggered")
+
 	var parser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, req.NamespacedName, &parser); err != nil {
-		log.Info("Ignoring deleted LogParser")
+		log.V(1).Info("Ignoring deleted LogParser")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
