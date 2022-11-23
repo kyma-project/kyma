@@ -3,6 +3,8 @@ package applications
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,9 +15,9 @@ type ApplicationGetter interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
 
-func NewComparator(assertions *assert.Assertions, secretComparer Comparator, applicationGetter ApplicationGetter, expectedNamespace, actualNamespace string) (Comparator, error) {
+func NewComparator(t *testing.T, secretComparer Comparator, applicationGetter ApplicationGetter, expectedNamespace, actualNamespace string) (Comparator, error) {
 	return &comparator{
-		assertions:        assertions,
+		assertions:        t,
 		secretComparer:    secretComparer,
 		applicationGetter: applicationGetter,
 		expectedNamespace: expectedNamespace,
@@ -24,7 +26,7 @@ func NewComparator(assertions *assert.Assertions, secretComparer Comparator, app
 }
 
 type comparator struct {
-	assertions        *assert.Assertions
+	assertions        *testing.T
 	secretComparer    Comparator
 	applicationGetter ApplicationGetter
 	expectedNamespace string
@@ -32,6 +34,7 @@ type comparator struct {
 }
 
 func (c comparator) Compare(expected, actual string) error {
+	c.assertions.Helper()
 
 	if actual == "" || expected == "" {
 		return errors.New("empty actual or expected application name")
@@ -52,29 +55,31 @@ func (c comparator) Compare(expected, actual string) error {
 }
 
 func (c comparator) compareSpec(expected, actual *v1alpha1.Application) {
+	c.assertions.Helper()
+	a := assert.New(c.assertions)
 
-	a := c.assertions
-	a.Equal(expected.Spec.Description, actual.Spec.Description)
-	a.Equal(expected.Spec.SkipInstallation, actual.Spec.SkipInstallation)
+	a.Equal(expected.Spec.Description, actual.Spec.Description, "Description is incorrect")
+	a.Equal(expected.Spec.SkipInstallation, actual.Spec.SkipInstallation, "SkipInstallation is incorrect")
 
 	c.compareServices(expected.Spec.Services, actual.Spec.Services)
 
 	a.NotNil(actual.Labels)
 	a.Equal(actual.Name, actual.Spec.Labels["connected-app"])
 
-	a.Equal(expected.Spec.Tenant, actual.Spec.Tenant)
-	a.Equal(expected.Spec.Group, actual.Spec.Group)
+	a.Equal(expected.Spec.Tenant, actual.Spec.Tenant, "Tenant is incorrect")
+	a.Equal(expected.Spec.Group, actual.Spec.Group, "Group is incorrect")
 
-	a.Equal(expected.Spec.Tags, actual.Spec.Tags)
-	a.Equal(expected.Spec.DisplayName, actual.Spec.DisplayName)
-	a.Equal(expected.Spec.ProviderDisplayName, actual.Spec.ProviderDisplayName)
-	a.Equal(expected.Spec.LongDescription, actual.Spec.LongDescription)
-	a.Equal(expected.Spec.SkipVerify, actual.Spec.SkipVerify)
+	a.Equal(expected.Spec.Tags, actual.Spec.Tags, "Tags is incorrect")
+	a.Equal(expected.Spec.DisplayName, actual.Spec.DisplayName, "DisplayName is incorrect")
+	a.Equal(expected.Spec.ProviderDisplayName, actual.Spec.ProviderDisplayName, "ProviderDisplayName is incorrect")
+	a.Equal(expected.Spec.LongDescription, actual.Spec.LongDescription, "LongDescription is incorrect")
+	a.Equal(expected.Spec.SkipVerify, actual.Spec.SkipVerify, "SkipVerify is incorrect")
 }
 
 func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
+	c.assertions.Helper()
+	a := assert.New(c.assertions)
 
-	a := c.assertions
 	a.Equal(len(expected), len(actual))
 
 	for i := 0; i < len(actual); i++ {
@@ -90,8 +95,9 @@ func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
 }
 
 func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
+	c.assertions.Helper()
+	a := assert.New(c.assertions)
 
-	a := c.assertions
 	a.Equal(len(expected), len(actual))
 
 	for i := 0; i < len(actual); i++ {
@@ -109,8 +115,8 @@ func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
 }
 
 func (c comparator) compareCredentials(expected, actual v1alpha1.Credentials) {
-
-	a := c.assertions
+	c.assertions.Helper()
+	a := assert.New(c.assertions)
 
 	a.Equal(expected.Type, actual.Type)
 
