@@ -121,4 +121,4 @@ tolerations: []
 affinity: {}
 
 dashboardExtension:
-  enabled: false
+  enabled: true

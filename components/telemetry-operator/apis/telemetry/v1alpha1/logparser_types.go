@@ -20,12 +20,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Defines the desired state of LogParser.
+// LogParserSpec defines the desired state of LogParser.
 type LogParserSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Configures a user defined log parser to be applied to the logs
+	// Configures a user defined Fluent Bit parser to be applied to the logs.
 	Parser string `json:"parser,omitempty"`
 }
 
@@ -39,8 +39,9 @@ type LogParserSpec struct {
 type LogParser struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   LogParserSpec   `json:"spec,omitempty"`
+	// Defines the desired state of LogParser.
+	Spec LogParserSpec `json:"spec,omitempty"`
+	// Shows the observed state of the LogParser.
 	Status LogParserStatus `json:"status,omitempty"`
 }
 
@@ -68,7 +69,7 @@ type LogParserCondition struct {
 	Type               LogParserConditionType `json:"type,omitempty"`
 }
 
-// Shows the observed state of the LogParser.
+// LogParserStatus shows the observed state of the LogParser.
 type LogParserStatus struct {
 	Conditions []LogParserCondition `json:"conditions,omitempty"`
 }

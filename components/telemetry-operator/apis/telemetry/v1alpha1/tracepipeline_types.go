@@ -22,33 +22,33 @@ import (
 
 // TracePipelineSpec defines the desired state of TracePipeline
 type TracePipelineSpec struct {
-	// Output configures the trace receiver of a TracePipeline.
+	// Configures the trace receiver of a TracePipeline.
 	Output TracePipelineOutput `json:"output,omitempty"`
 }
 
 type TracePipelineOutput struct {
-	// Otlp defines an output using the OpenTelmetry protocol.
+	// Defines an output using the OpenTelmetry protocol.
 	Otlp *OtlpOutput `json:"otlp,omitempty"`
 }
 
 type OtlpOutput struct {
-	// Protocol defines the OTLP protocol (http or grpc).
+	// Defines the OTLP protocol (http or grpc).
 	Protocol string `json:"protocol,omitempty"`
-	// Endpoint defines the host and port (<host>:<port>) of an OTLP endpoint.
+	// Defines the host and port (<host>:<port>) of an OTLP endpoint.
 	Endpoint ValueType `json:"endpoint,omitempty"`
-	// Authentication defines authentication options for the OTLP output
+	// Defines authentication options for the OTLP output
 	Authentication *AuthenticationOptions `json:"authentication,omitempty"`
 }
 
 type AuthenticationOptions struct {
-	// Basic contains credentials for HTTP basic auth
+	// Contains credentials for HTTP basic auth
 	Basic *BasicAuthOptions `json:"basic,omitempty"`
 }
 
 type BasicAuthOptions struct {
-	// User contains the basic auth username or a secret reference
+	// Contains the basic auth username or a secret reference
 	User ValueType `json:"user,omitempty"`
-	// Password contains the basic auth password or a secret reference
+	// Contains the basic auth password or a secret reference
 	Password ValueType `json:"password,omitempty"`
 }
 

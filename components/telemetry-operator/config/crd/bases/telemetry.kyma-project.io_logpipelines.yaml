@@ -47,8 +47,8 @@ spec:
             properties:
               files:
                 items:
-                  description: FileMount provides file content to be consumed by a
-                    LogPipeline configuration
+                  description: Provides file content to be consumed by a LogPipeline
+                    configuration
                   properties:
                     content:
                       type: string
@@ -125,10 +125,10 @@ spec:
                     type: object
                 type: object
               output:
-                description: Output describes a Fluent Bit output configuration section.
+                description: Describes a Fluent Bit output configuration section.
                 properties:
                   custom:
-                    description: 'Custom output definition in the Fluent Bit syntax.
+                    description: 'Defines a custom output in the Fluent Bit syntax.
                       Note: If you use a `custom` output, you put the LogPipeline
                       in unsupported mode.'
                     type: string
@@ -258,8 +258,8 @@ spec:
                 type: object
               variables:
                 items:
-                  description: VariableRef references a Kubernetes secret that should
-                    be provided as environment variable to Fluent Bit
+                  description: References a Kubernetes secret that should be provided
+                    as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string

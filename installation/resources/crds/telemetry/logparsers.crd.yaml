@@ -43,8 +43,8 @@ spec:
             description: Defines the desired state of LogParser.
             properties:
               parser:
-                description: Configures a user defined log parser to be applied to
-                  the logs
+                description: Configures a user defined Fluent Bit parser to be applied
+                  to the logs.
                 type: string
             type: object
           status:
