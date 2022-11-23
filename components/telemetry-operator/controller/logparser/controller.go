@@ -20,7 +20,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 
@@ -50,7 +57,6 @@ type Config struct {
 	DaemonSet        types.NamespacedName
 }
 
-// Reconciler reconciles a LogParser object
 type Reconciler struct {
 	client.Client
 	config    Config
@@ -73,15 +79,47 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	return &r
 }
 
-// SetupWithManager sets up the controller with the Manager.
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.LogParser{}).
+		Watches(
+			&source.Kind{Type: &appsv1.DaemonSet{}},
+			handler.EnqueueRequestsFromMapFunc(r.mapDaemonSets),
+			builder.WithPredicates(onlyUpdate()),
+		).
 		Complete(r)
 }
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
+func onlyUpdate() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc:  func(event event.CreateEvent) bool { return false },
+		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
+		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
+		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
+	}
+}
+
+func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
+	daemonSet := object.(*appsv1.DaemonSet)
+
+	var requests []reconcile.Request
+	if daemonSet.Name != r.config.DaemonSet.Name || daemonSet.Namespace != r.config.DaemonSet.Namespace {
+		return requests
+	}
+
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(context.Background(), &allPipelines); err != nil {
+		ctrl.Log.Error(err, "DamonSet UpdateEvent: fetching LogPipelineList failed!", err.Error())
+		return requests
+	}
+
+	for _, pipeline := range allPipelines.Items {
+		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}})
+	}
+	ctrl.Log.V(1).Info(fmt.Sprintf("DaemonSet changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+	return requests
+}
+
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	var logParser telemetryv1alpha1.LogParser

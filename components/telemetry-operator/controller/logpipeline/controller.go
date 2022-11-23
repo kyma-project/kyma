@@ -66,7 +66,6 @@ type DaemonSetAnnotator interface {
 	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
 }
 
-// Reconciler reconciles a LogPipeline object
 type Reconciler struct {
 	client.Client
 	config                  Config
@@ -78,7 +77,6 @@ type Reconciler struct {
 	secrets                 secretsCache
 }
 
-// NewReconciler returns a new LogPipelineReconciler using the given Fluent Bit config arguments
 func NewReconciler(
 	client client.Client,
 	config Config,
@@ -105,7 +103,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&telemetryv1alpha1.LogPipeline{}).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
+			handler.EnqueueRequestsFromMapFunc(r.mapSecrets),
 			builder.WithPredicates(onlyUpdate()),
 		).
 		Watches(
@@ -161,23 +159,6 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 	return requests
 }
 
-func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
-	secret := object.(*corev1.Secret)
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
-	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
-	pipelines := r.secrets.get(secretName)
-	var requests []reconcile.Request
-	for _, p := range pipelines {
-		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p}}
-		ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Creating reconciliation request for pipeline: %s\n", p))
-		requests = append(requests, request)
-	}
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
-	return requests
-}
-
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.Info("Reconciliation triggered")
