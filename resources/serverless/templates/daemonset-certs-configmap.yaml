@@ -18,13 +18,13 @@ data:
     apk update
     apk add --no-cache openssl
 
-    CERT_FILE_TEXT=$(kubectl get secret kyma-gateway-certs -n istio-system -o=jsonpath='{.data.cert}' --ignore-not-found)
+    CERT_FILE_TEXT=$(kubectl get secret ${GATEWAY_CERTS} -n istio-system -o=jsonpath='{.data.cert}' --ignore-not-found)
     if [ -z "${CERT_FILE_TEXT}" ]; then
-      echo "No cert key in secret kyma-gateway-certs to inject. Checking tls.crt."
+      echo "No cert key in secret ${GATEWAY_CERTS} to inject. Checking tls.crt."
 
-      CERT_FILE_TEXT=$(kubectl get secret kyma-gateway-certs -n istio-system -o=jsonpath="{.data['tls\.crt']}" --ignore-not-found)
+      CERT_FILE_TEXT=$(kubectl get secret ${GATEWAY_CERTS} -n istio-system -o=jsonpath="{.data['tls\.crt']}" --ignore-not-found)
       if [ -z "${CERT_FILE_TEXT}" ]; then
-        echo "No tls.crt key in secret kyma-gateway-certs to inject. Exit 0."
+        echo "No tls.crt key in secret ${GATEWAY_CERTS} to inject. Exit 0."
         exit 0
       fi
     fi

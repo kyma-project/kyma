@@ -255,6 +255,8 @@ grafanaDashboard:
 
 dockerRegistry:
   enableInternal: true
+  gateway: "kyma-system/kyma-gateway"
+  gatewayCert: "kyma-gateway-certs"
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
