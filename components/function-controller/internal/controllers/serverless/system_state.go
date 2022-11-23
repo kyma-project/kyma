@@ -500,7 +500,7 @@ func buildDeploymentSecretVolumes(secretMounts []serverlessv1alpha2.SecretMount)
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
 					SecretName:  secretMount.SecretName,
-					DefaultMode: pointer.Int32(0444), //read only for everybody
+					DefaultMode: pointer.Int32(0666), //read and write only for everybody
 					Optional:    pointer.Bool(false),
 				},
 			},
