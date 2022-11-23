@@ -18,7 +18,7 @@ This is a proposal to implement garbage collection logic to avoid these issues.
 
 
 ## Proposal
-The Docker registry already has a garbage collection mechanism https://docs.docker.com/registry/garbage-collection/ . However, it's not very flexible. It's only possible to delete blobs that are not referenced by any manifests.
+The Docker registry already has a [garbage collection mechanism](https://docs.docker.com/registry/garbage-collection/). However, it's not very flexible. It's only possible to delete blobs that are not referenced by any manifests.
 
 To utilize this, we need to implement custom logic that will periodically run and:
 - Identify existing functions running on the cluster.
