@@ -7,10 +7,10 @@ global:
       version: "v20221020-e314a071"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-15820"
+      version: "v20221122-6b92a397"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
-      version: "PR-16153"
+      version: "v20221122-200937b4"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.9-cf0a130c"
