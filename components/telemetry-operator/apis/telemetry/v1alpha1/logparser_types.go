@@ -83,6 +83,10 @@ func (lps *LogParserStatus) GetCondition(condType LogParserConditionType) *LogPa
 	return nil
 }
 
+func (lps *LogParserStatus) HasCondition(condition LogParserConditionType) bool {
+	return lps.GetCondition(condition) != nil
+}
+
 func NewLogParserCondition(reason string, condType LogParserConditionType) *LogParserCondition {
 	return &LogParserCondition{
 		LastTransitionTime: metav1.Now(),
