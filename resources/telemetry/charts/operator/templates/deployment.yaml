@@ -30,7 +30,7 @@ spec:
         - command:
             - /webhook-cert-init
           args:
-            - --cert-dir={{ .Values.volumeMount.mountPath }}
+            - --cert-dir={{ .Values.certificateVolumeMount.mountPath }}
             - --service-name={{ include "operator.fullname" . }}-webhook
             - --service-namespace=kyma-system
             - --validating-webhook={{ .Values.webhook.name }}
@@ -40,15 +40,15 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
-            - mountPath: {{ .Values.volumeMount.mountPath }}
-              name: {{ .Values.volumeMount.name }}
+            - mountPath: {{ .Values.certificateVolumeMount.mountPath }}
+              name: {{ .Values.certificateVolumeMount.name }}
       containers:
         - command:
             - /manager
           args:
             - --leader-elect
             - --sync-period={{.Values.syncPeriod}}
-            - --cert-dir=/var/run/telemetry-webhook
+            - --cert-dir={{ .Values.certificateVolumeMount.mountPath }}
             - --telemetry-namespace={{ .Release.Namespace }}
             - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
             - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
@@ -86,9 +86,9 @@ spec:
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
           volumeMounts:
-          - mountPath: {{ .Values.volumeMount.mountPath }}
-            name: {{ .Values.volumeMount.name }}
+          - mountPath: {{ .Values.certificateVolumeMount.mountPath }}
+            name: {{ .Values.certificateVolumeMount.name }}
             readOnly: true
       volumes:
-      - name: {{ .Values.volumeMount.name }}
+      - name: {{ .Values.certificateVolumeMount.name }}
         emptyDir: {}

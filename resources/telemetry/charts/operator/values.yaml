@@ -74,7 +74,7 @@ webhook:
     protocol: TCP
     targetPort: 9443
 
-volumeMount:
+certificateVolumeMount:
   name: telemetry-webhook-cert-dir
   mountPath: /var/run/telemetry-webhook
 
