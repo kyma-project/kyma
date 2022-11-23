@@ -10,7 +10,7 @@ To eliminate potential security risks when using Functions, bear in mind these f
 
 - Kyma does not define any authorization policies that would restrict Functions' access to other resources within the Namespace. If you deploy a Function in a given Namespace, it can freely access all events and APIs of services within this Namespace.
 
-- Since Kubernetes is [moving from PodSecurityPolicies to PodSecurity Admission Controller](https://kubernetes.io/docs/tasks/configure-pod-container/migrate-from-psp/), Kyma Functions require running in Namespaces with `baseline` Pod security level. The `restricted` level is not currently supported due to the requirements of the Function building process.
+- Since Kubernetes is [moving from PodSecurityPolicies to PodSecurity Admission Controller](https://kubernetes.io/docs/tasks/configure-pod-container/migrate-from-psp/), Kyma Functions require running in Namespaces with the `baseline` Pod security level. The `restricted` level is not currently supported due to the requirements of the Function building process.
 
 - Kyma Serverless components can run with PodSecurity Admission Controller support in `restricted` Pod security level when using external registry. When the Internal Docker Registry is enabled, the Internal Registry DaemonSet requires elevated privileges to function correctly which exceeds the limitations of both `restricted` and `baseline` levels.
 
