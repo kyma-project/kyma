@@ -3,7 +3,7 @@
 
 ## Summary
 
-The current implementation for the Internal Registry deployed with Kyma Functions doesn't include any garbage collection logic. In dynamic environments with several Functions with multiple versions,  if the Internal Registry is used with a cluster PVC storage backend, the volume disk space can fill up very quickly resulting in build failures for new Function versions.
+The current implementation for the Internal Registry deployed with Kyma Functions doesn't include any garbage collection logic. In dynamic environments with several Functions with multiple versions, if the Internal Registry is used with a cluster PVC storage backend, the volume disk space can fill up very quickly, resulting in build failures for new Function versions.
 
 Alternatively, if cloud storage like is S3 is used as a storage backend, the old image blobs will will increase S3 cost overtime.
 
