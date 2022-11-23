@@ -6,28 +6,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
-
-const (
-	AssetGroupNameFormat = "%s-%s"
-)
-
-func getSpec(apiSpec *model.APISpec) []byte {
-	if apiSpec == nil {
-		return nil
-	}
-
-	return apiSpec.Data
-}
-
-func getEventSpec(eventApiSpec *model.EventAPISpec) []byte {
-	if eventApiSpec == nil {
-		return nil
-	}
-
-	return eventApiSpec.Data
-}
 
 func newResult(application v1alpha1.Application, applicationID string, operation Operation, appError apperrors.AppError) Result {
 	return Result{
