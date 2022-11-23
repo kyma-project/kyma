@@ -55,6 +55,9 @@ func run(log *logr.Logger) error {
 	}
 
 	certificate, key, err := generateCert(serviceName, serviceNamespace)
+	if err != nil {
+		return fmt.Errorf("failed to generate certificate: %v", err)
+	}
 
 	err = os.MkdirAll(certDir, 0777)
 	if err != nil {
@@ -94,7 +97,7 @@ func run(log *logr.Logger) error {
 	}
 
 	for i := range updatedConfig.Webhooks {
-		log.Info(fmt.Sprintf("updated webhook config: %s, with caBundle bytes total: %v",
+		log.Info(fmt.Sprintf("Updated webhook config: %s, CABundle bytes total: %v",
 			updatedConfig.Name,
 			len(updatedConfig.Webhooks[i].ClientConfig.CABundle)))
 	}

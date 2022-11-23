@@ -8,6 +8,9 @@ global:
     telemetry_operator:
       name: "telemetry-operator"
       version: "PR-16121"
+    telemetry_webhook_cert_init:
+      name: "webhook-cert-init"
+      version: "v20221122-200937b4"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.9-cf0a130c"

@@ -46,7 +46,6 @@ func convertAPIBundles(apiBundles []*graphql.BundleExt) []kymamodel.APIBundle {
 func convertAPIBundle(apiBundle *graphql.BundleExt) kymamodel.APIBundle {
 	apis := convertAPIsExt(apiBundle.APIDefinitions.Data)
 	eventAPIs := convertEventAPIsExt(apiBundle.EventDefinitions.Data)
-	documents := convertDocumentsExt(apiBundle.Documents.Data)
 	defaultInstanceAuth := convertAuth(apiBundle.DefaultInstanceAuth)
 
 	var authRequestInputSchema *string
@@ -61,7 +60,6 @@ func convertAPIBundle(apiBundle *graphql.BundleExt) kymamodel.APIBundle {
 		InstanceAuthRequestInputSchema: authRequestInputSchema,
 		APIDefinitions:                 apis,
 		EventDefinitions:               eventAPIs,
-		Documents:                      documents,
 		DefaultInstanceAuth:            defaultInstanceAuth,
 	}
 }
@@ -84,16 +82,6 @@ func convertEventAPIsExt(compassEventAPIs []*graphql.EventAPIDefinitionExt) []ky
 	}
 
 	return eventAPIs
-}
-
-func convertDocumentsExt(compassDocuments []*graphql.DocumentExt) []kymamodel.Document {
-	documents := make([]kymamodel.Document, len(compassDocuments))
-
-	for i, cDoc := range compassDocuments {
-		documents[i] = convertDocument(&cDoc.Document)
-	}
-
-	return documents
 }
 
 func extractSystemAuthIDs(auths []*graphql.AppSystemAuth) []string {
@@ -119,19 +107,6 @@ func convertAPIExt(compassAPI *graphql.APIDefinitionExt) kymamodel.APIDefinition
 		TargetUrl:   compassAPI.TargetURL,
 	}
 
-	if compassAPI.Spec != nil {
-		var data []byte
-		if compassAPI.Spec.Data != nil {
-			data = []byte(*compassAPI.Spec.Data)
-		}
-
-		api.APISpec = &kymamodel.APISpec{
-			Type:   kymamodel.APISpecType(compassAPI.Spec.Type),
-			Data:   data,
-			Format: kymamodel.SpecFormat(compassAPI.Spec.Format),
-		}
-	}
-
 	return api
 }
 
@@ -147,38 +122,7 @@ func convertEventAPIExt(compassEventAPI *graphql.EventAPIDefinitionExt) kymamode
 		Description: description,
 	}
 
-	if compassEventAPI.Spec != nil {
-
-		var data []byte
-		if compassEventAPI.Spec.Data != nil {
-			data = []byte(*compassEventAPI.Spec.Data)
-		}
-
-		eventAPI.EventAPISpec = &kymamodel.EventAPISpec{
-			Type:   kymamodel.EventAPISpecType(compassEventAPI.Spec.Type),
-			Data:   data,
-			Format: kymamodel.SpecFormat(compassEventAPI.Spec.Format),
-		}
-	}
-
 	return eventAPI
-}
-
-func convertDocument(compassDoc *graphql.Document) kymamodel.Document {
-	var data []byte
-	if compassDoc.Data != nil {
-		data = []byte(*compassDoc.Data)
-	}
-
-	return kymamodel.Document{
-		ID:          compassDoc.ID,
-		Title:       compassDoc.Title,
-		Format:      kymamodel.DocumentFormat(compassDoc.Format),
-		Description: compassDoc.Description,
-		DisplayName: compassDoc.DisplayName,
-		Kind:        compassDoc.Kind,
-		Data:        data,
-	}
 }
 
 func convertAuth(compassAuth *graphql.Auth) *kymamodel.Auth {
