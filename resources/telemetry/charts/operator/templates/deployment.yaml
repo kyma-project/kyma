@@ -26,13 +26,29 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - command:
+            - /webhook-cert-init
+          args:
+            - --cert-dir={{ .Values.certificateVolumeMount.mountPath }}
+            - --service-name={{ include "operator.fullname" . }}-webhook
+            - --service-namespace=kyma-system
+            - --validating-webhook={{ .Values.webhook.name }}
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_webhook_cert_init) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: telemetry-webhook-cert-init
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - mountPath: {{ .Values.certificateVolumeMount.mountPath }}
+              name: {{ .Values.certificateVolumeMount.name }}
       containers:
         - command:
             - /manager
           args:
             - --leader-elect
             - --sync-period={{.Values.syncPeriod}}
-            - --cert-dir=/var/run/telemetry-webhook
+            - --cert-dir={{ .Values.certificateVolumeMount.mountPath }}
             - --telemetry-namespace={{ .Release.Namespace }}
             - --fluent-bit-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
             - --fluent-bit-sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
@@ -70,15 +86,9 @@ spec:
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
           volumeMounts:
-          - mountPath: /var/run/telemetry-webhook
-            name: telemetry-webhook-cert
+          - mountPath: {{ .Values.certificateVolumeMount.mountPath }}
+            name: {{ .Values.certificateVolumeMount.name }}
             readOnly: true
       volumes:
-      - name: telemetry-webhook-cert
-        secret:
-          secretName: {{ template "fullname" . }}-webhook-cert
-          items:
-          - key: tls.crt
-            path: tls.crt
-          - key: tls.key
-            path: tls.key
+      - name: {{ .Values.certificateVolumeMount.name }}
+        emptyDir: {}
