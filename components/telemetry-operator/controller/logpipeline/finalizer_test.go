@@ -21,7 +21,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -29,7 +29,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.True(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, filesFinalizer))
@@ -51,7 +51,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -59,7 +59,7 @@ func TestEnsureFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.True(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 		require.True(t, controllerutil.ContainsFinalizer(&updatedPipeline, filesFinalizer))
@@ -78,7 +78,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -86,7 +86,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 	})
@@ -102,7 +102,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		}
 
 		scheme := runtime.NewScheme()
-		telemetryv1alpha1.AddToScheme(scheme)
+		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
 		sut := Reconciler{Client: client}
 
@@ -110,7 +110,7 @@ func TestCleanupFinalizers(t *testing.T) {
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
-		client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
+		_ = client.Get(ctx, types.NamespacedName{Name: pipeline.Name}, &updatedPipeline)
 
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, sectionsFinalizer))
 		require.False(t, controllerutil.ContainsFinalizer(&updatedPipeline, filesFinalizer))
