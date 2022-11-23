@@ -22,7 +22,7 @@ The Docker registry already has a [garbage collection mechanism](https://docs.do
 
 To utilize this, we need to implement custom logic that will periodically run and:
 - Identify existing Functions running on the cluster.
-- Identify current images used by those functions' runtimes.
+- Identify current images used by those Functions' runtimes.
 - List all tags for the used images.
 - Identify unused tags and use the Registry API to delete them.
 
