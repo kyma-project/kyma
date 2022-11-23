@@ -30,18 +30,18 @@ spec:
         - command:
             - /webhook-cert-init
           args:
-            - --cert-dir=/var/run/telemetry-webhook
-            - --service-name=telemetry-operator-webhook
+            - --cert-dir={{ .Values.volumeMount.mountPath }}
+            - --service-name={{ include "operator.fullname" . }}-webhook
             - --service-namespace=kyma-system
-            - --validating-webhook=validation.webhook.telemetry.kyma-project.io
+            - --validating-webhook={{ .Values.webhook.name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_webhook_cert_init) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: telemetry-webhook-cert-init
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
-            - mountPath: /var/run/telemetry-webhook
-              name: telemetry-webhook-cert-dir
+            - mountPath: {{ .Values.volumeMount.mountPath }}
+              name: {{ .Values.volumeMount.name }}
       containers:
         - command:
             - /manager
@@ -86,9 +86,9 @@ spec:
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
           volumeMounts:
-          - mountPath: /var/run/telemetry-webhook
-            name: telemetry-webhook-cert-dir
+          - mountPath: {{ .Values.volumeMount.mountPath }}
+            name: {{ .Values.volumeMount.name }}
             readOnly: true
       volumes:
-      - name: telemetry-webhook-cert-dir
+      - name: {{ .Values.volumeMount.name }}
         emptyDir: {}

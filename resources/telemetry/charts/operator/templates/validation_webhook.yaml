@@ -4,7 +4,7 @@ metadata:
   labels:
     {{- include "operator.labels" . | nindent 4 }}
     {{- toYaml .Values.extraLabels | nindent 4 }}
-  name: validation.webhook.telemetry.kyma-project.io
+  name: {{ .Values.webhook.name }}
 webhooks:
 - admissionReviewVersions:
   - v1beta1

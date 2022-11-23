@@ -66,12 +66,17 @@ service:
   portName: http-metrics
 
 webhook:
+  name: validation.webhook.telemetry.kyma-project.io
   timeout: 15
   service:
     portName: https-webhook
     port: 443
     protocol: TCP
     targetPort: 9443
+
+volumeMount:
+  name: telemetry-webhook-cert-dir
+  mountPath: /var/run/telemetry-webhook
 
 serviceMonitor:
   endpoints:
