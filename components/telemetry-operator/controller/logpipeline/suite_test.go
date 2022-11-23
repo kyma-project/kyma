@@ -18,6 +18,7 @@ package logpipeline
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"path/filepath"
 	"testing"
 
@@ -101,8 +102,8 @@ var _ = BeforeSuite(func() {
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
 	})
 	Expect(err).ToNot(HaveOccurred())
-
-	reconciler := NewReconciler(mgr.GetClient(), testConfig)
+	client := mgr.GetClient()
+	reconciler := NewReconciler(client, testConfig, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

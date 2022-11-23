@@ -19,6 +19,8 @@ package logparser
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	corev1 "k8s.io/api/core/v1"
 
 	controllermetrics "github.com/kyma-project/kyma/components/telemetry-operator/controller/metrics"
 
@@ -29,8 +31,19 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 )
+
+const checksumAnnotationKey = "checksum/logparser-config"
+
+//go:generate mockery --name DaemonSetProber --filename daemon_set_prober.go
+type DaemonSetProber interface {
+	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
+}
+
+//go:generate mockery --name DaemonSetAnnotator --filename daemon_set_annotator.go
+type DaemonSetAnnotator interface {
+	SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error
+}
 
 type Config struct {
 	ParsersConfigMap types.NamespacedName
@@ -40,17 +53,19 @@ type Config struct {
 // Reconciler reconciles a LogParser object
 type Reconciler struct {
 	client.Client
-	config          Config
-	syncer          *syncer
-	daemonSetHelper *kubernetes.DaemonSetHelper
+	config    Config
+	syncer    *syncer
+	prober    DaemonSetProber
+	annotator DaemonSetAnnotator
 }
 
-func NewReconciler(client client.Client, config Config) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
 	var r Reconciler
 
 	r.Client = client
 	r.config = config
-	r.daemonSetHelper = kubernetes.NewDaemonSetHelper(client, controllermetrics.FluentBitTriggeredRestartsTotal)
+	r.prober = prober
+	r.annotator = annotator
 	r.syncer = newSyncer(client, config)
 
 	controllermetrics.RegisterMetrics()
@@ -89,9 +104,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 		}
 
-		if err = r.daemonSetHelper.Restart(ctx, r.config.DaemonSet); err != nil {
-			log.Error(err, "Failed to restart Fluent Bit DaemonSet")
-			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+		checksum, err := r.calculateConfigChecksum(ctx)
+		if err != nil {
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		}
+
+		if err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+			return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 		}
 
 		condition := telemetryv1alpha1.NewLogParserCondition(
@@ -105,7 +124,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if logParser.Status.GetCondition(telemetryv1alpha1.LogParserRunning) == nil {
 		var ready bool
-		ready, err = r.daemonSetHelper.IsReady(ctx, r.config.DaemonSet)
+		ready, err = r.prober.IsReady(ctx, r.config.DaemonSet)
 		if err != nil {
 			log.Error(err, "Failed to check Fluent Bit readiness")
 			return ctrl.Result{RequeueAfter: controller.RequeueTime}, err
@@ -160,4 +179,12 @@ func (r *Reconciler) updateLogParserStatus(ctx context.Context, name types.Names
 		return err
 	}
 	return nil
+}
+
+func (r *Reconciler) calculateConfigChecksum(ctx context.Context) (string, error) {
+	var cm corev1.ConfigMap
+	if err := r.Get(ctx, r.config.ParsersConfigMap, &cm); err != nil {
+		return "", fmt.Errorf("failed to get %s/%s ConfigMap: %v", r.config.ParsersConfigMap.Namespace, r.config.ParsersConfigMap.Name, err)
+	}
+	return configchecksum.Calculate([]corev1.ConfigMap{cm}, nil), nil
 }

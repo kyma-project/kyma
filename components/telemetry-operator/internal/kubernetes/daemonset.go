@@ -3,59 +3,22 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"time"
-
-	"github.com/prometheus/client_golang/prometheus"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-type DaemonSetHelper struct {
-	client        client.Client
-	daemonSet     types.NamespacedName
-	restartsTotal prometheus.Counter
+type DaemonSetProber struct {
+	client.Client
 }
 
-func NewDaemonSetHelper(client client.Client, restartsTotal prometheus.Counter) *DaemonSetHelper {
-	return &DaemonSetHelper{
-		client:        client,
-		restartsTotal: restartsTotal,
-	}
-}
-
-// Restart deletes all Fluent Bit pods to apply the new configuration
-func (f *DaemonSetHelper) Restart(ctx context.Context, daemonSet types.NamespacedName) error {
+func (dsp *DaemonSetProber) IsReady(ctx context.Context, name types.NamespacedName) (bool, error) {
 	log := logf.FromContext(ctx)
 
 	var ds appsv1.DaemonSet
-	if err := f.client.Get(ctx, daemonSet, &ds); err != nil {
-		log.Error(err, "Failed to get DaemonSet", "name", f.daemonSet)
-		return err
-	}
-
-	patchedDS := *ds.DeepCopy()
-	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
-		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
-	}
-	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
-
-	if err := f.client.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
-		log.Error(err, "Failed to patch DaemonSet to trigger rolling update", "name", f.daemonSet)
-		return err
-	}
-	f.restartsTotal.Inc()
-	return nil
-}
-
-func (f *DaemonSetHelper) IsReady(ctx context.Context, daemonSet types.NamespacedName) (bool, error) {
-	log := logf.FromContext(ctx)
-
-	var ds appsv1.DaemonSet
-	if err := f.client.Get(ctx, daemonSet, &ds); err != nil {
-		log.Error(err, "Failed getting DaemonSet", "name", f.daemonSet)
-		return false, err
+	if err := dsp.Get(ctx, name, &ds); err != nil {
+		return false, fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
 	}
 
 	generation := ds.Generation
@@ -65,7 +28,33 @@ func (f *DaemonSetHelper) IsReady(ctx context.Context, daemonSet types.Namespace
 	ready := ds.Status.NumberReady
 
 	log.V(1).Info(fmt.Sprintf("Checking DaemonSet: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
-		updated, desired, ready, generation, observedGeneration), "name", f.daemonSet)
+		updated, desired, ready, generation, observedGeneration), "name", name.Name)
 
 	return observedGeneration == generation && updated == desired && ready >= desired, nil
+}
+
+type DaemonSetAnnotator struct {
+	client.Client
+}
+
+func (dsa *DaemonSetAnnotator) SetAnnotation(ctx context.Context, name types.NamespacedName, key, value string) error {
+	var ds appsv1.DaemonSet
+	if err := dsa.Get(ctx, name, &ds); err != nil {
+		return fmt.Errorf("failed to get %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
+	}
+
+	patchedDS := *ds.DeepCopy()
+	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
+		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	} else if patchedDS.Spec.Template.ObjectMeta.Annotations[key] == value {
+		return nil
+	}
+
+	patchedDS.Spec.Template.ObjectMeta.Annotations[key] = value
+
+	if err := dsa.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
+		return fmt.Errorf("failed to patch %s/%s DaemonSet: %v", name.Namespace, name.Name, err)
+	}
+
+	return nil
 }
