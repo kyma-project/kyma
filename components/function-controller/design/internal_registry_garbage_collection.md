@@ -47,5 +47,5 @@ This tools runs as a Kubernetes Cronjob and is deployed as part of the Internal 
 ### Unreferenced blob deletion
 The simplest way to perform this is to use the `registry garbage-collection` command.
 
-This is implemented as simple loop in a side-car container in the registry pod. It will run periodically and independently from the Function image garbage collection tool to remove unreferenced blobs. 
+This is implemented as a simple loop in a side-car container in the registry Pod. It will run periodically and independently from the Function image garbage collection tool to remove unreferenced blobs. 
 
