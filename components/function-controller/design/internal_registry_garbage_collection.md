@@ -38,7 +38,7 @@ The garbage collection process is implemented in two phases:
 For this phase, a simple command line tool will perform the following steps:
 
 - Identify existing Functions running on the cluster.
-- Identify current images used by those functions' runtimes.
+- Identify current images used by those Functions' runtimes.
 - List all tags for the used images.
 - Identify unused tags and use the Registry API to delete them
 
