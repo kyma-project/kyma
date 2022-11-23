@@ -944,103 +944,62 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDo
 
 	// then
 	require.NoError(t, err)
-
 	// get cleaned subject
 	subject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[1])
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
-
 	require.Len(t, jsBackend.subscriptions, 2)
-	secondJsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, subject, sub.Spec.TypeMatching)
-	secondJsSubKey := NewSubscriptionSubjectIdentifier(sub, secondJsSubject)
-	secondJsSub := jsBackend.subscriptions[secondJsSubKey]
-	require.NotNil(t, secondJsSub)
-	require.True(t, secondJsSub.IsValid())
+	// store first subscription key
+	secondJsSubKey := NewSubscriptionSubjectIdentifier(sub, jsBackend.getJetStreamSubject(sub.Spec.Source, subject, sub.Spec.TypeMatching))
 
-	// test if subscription is working properly by sending an event
-	// and checking if it is received by the subscriber
-	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
-	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	require.NoError(t, SendEventToJetStream(jsBackend, data))
-	require.NoError(t, subscriber.CheckEvent(expectedDataInStore))
-
-	// set metadata on NATS subscriptions
-	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
-	msgLimit, bytesLimit := 2048, 2048
-	for _, jsSub := range jsBackend.subscriptions {
-		require.True(t, jsSub.IsValid())
-		require.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
-	}
-
-	// test if subscription is working properly by sending an event
-	// and checking if it is received by the subscriber
-	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
-	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
-	require.NoError(t, SendEventToJetStream(jsBackend, data))
-	require.NoError(t, subscriber.CheckEvent(expectedDataInStore))
-
-	// set metadata on NATS subscriptions
-	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
-	msgLimit, bytesLimit = 2048, 2048
-	require.Len(t, jsBackend.subscriptions, 2)
-	for _, jsSub := range jsBackend.subscriptions {
-		require.True(t, jsSub.IsValid())
-		require.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
-	}
-
-	// shutdown the JetStream and start so that existing subscription gets invalid.
-	// shutdown the JetStream and start so that existing subscription gets invalid.
+	// when
+	// shutdown the JetStream
 	testEnvironment.natsServer.Shutdown()
 	require.Eventually(t, func() bool {
 		return !testEnvironment.jsBackend.Conn.IsConnected()
 	}, 30*time.Second, 2*time.Second)
 
-	// given
+	// when
 	// Now, remove the second filter from subscription while NATS JetStream is down
 	sub.Spec.Types = sub.Spec.Types[:1]
 	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
-
 	// SyncSubscription binds the existing subscription to JetStream created one
 	err = jsBackend.SyncSubscription(sub)
 	require.Error(t, err)
 
 	// when
-	// restart the NATS server
+	// restart the NATS server and sync subscription
 	_ = evtesting.RunNatsServerOnPort(
 		evtesting.WithPort(testEnvironment.natsPort),
 		evtesting.WithJetStreamEnabled())
-	// the unacknowledged message must still be present in the stream
-
 	require.Eventually(t, func() bool {
 		info, streamErr := testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 		require.NoError(t, streamErr)
 		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
-
-	// when
 	err = jsBackend.SyncSubscription(sub)
 
 	// then
+	// there should be no error
 	require.NoError(t, err)
-
 	// get new cleaned subject
 	firstSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, firstSubject)
-
-	// check if the NATS subscription are NOT the same after sync
-	// because the subscriptions should have being re-created for new subject
+	// now, there has to be only one subscription
 	require.Len(t, jsBackend.subscriptions, 1)
-	firstJsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, firstSubject, sub.Spec.TypeMatching)
-	firstJsSubKey := NewSubscriptionSubjectIdentifier(sub, firstJsSubject)
+	firstJsSubKey := NewSubscriptionSubjectIdentifier(sub, jsBackend.getJetStreamSubject(sub.Spec.Source, firstSubject,
+		sub.Spec.TypeMatching))
 	firstJsSub := jsBackend.subscriptions[firstJsSubKey]
 	require.NotNil(t, firstJsSub)
 	require.True(t, firstJsSub.IsValid())
-	// make sure new filter does have JetStream consumer
+	// then
+	// make sure first filter does have JetStream consumer
 	firstCon, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, firstJsSubKey.consumerName)
 	require.NotNil(t, firstCon)
 	require.NoError(t, err)
-	// make sure old filter doesn't have any JetStream consumer
+	// then
+	// make sure second filter doesn't have any JetStream consumer
 	secondCon, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, secondJsSubKey.consumerName)
 	require.Nil(t, secondCon)
 	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
