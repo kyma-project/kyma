@@ -21,7 +21,7 @@ This is a proposal to implement garbage collection logic to avoid these issues.
 The Docker registry already has a [garbage collection mechanism](https://docs.docker.com/registry/garbage-collection/). However, it's not very flexible. It's only possible to delete blobs that are not referenced by any manifests.
 
 To utilize this, we need to implement custom logic that will periodically run and:
-- Identify existing functions running on the cluster.
+- Identify existing Functions running on the cluster.
 - Identify current images used by those functions' runtimes.
 - List all tags for the used images.
 - Identify unused tags and use the Registry API to delete them.
