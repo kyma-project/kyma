@@ -268,7 +268,7 @@ func TestKymaService(t *testing.T) {
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, apperrors.Internal("some error"))
 
-		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{}, []model.EventAPIDefinition{})
+		directorApplication := getTestDirectorApplication("id1", "name1")
 
 		directorApplications := []model.Application{
 			directorApplication,
@@ -291,8 +291,8 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
+		api := fixDirectorAPiDefinition("API1", "name", "API description")
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description")
 
 		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api}, nil, nil)
 		apiBundle2 := fixAPIBundle("bundle2", nil, []model.EventAPIDefinition{eventAPI}, nil)
@@ -347,8 +347,8 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
+		api := fixDirectorAPiDefinition("API1", "name", "API description")
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description")
 
 		authBundle1 := fixAuthOauth()
 		authBundle1.RequestParameters = nil
@@ -416,16 +416,16 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec())
-		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
+		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description")
+		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description")
 		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, nil)
 
-		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec())
-		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
+		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description")
+		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description")
 		apiBundle2 := fixAPIBundle("bundle2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
 
-		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil)
-		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
+		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description")
+		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description")
 		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, nil)
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2, apiBundle3)
@@ -480,16 +480,16 @@ func TestKymaService(t *testing.T) {
 		authBundle1 := fixAuthOauth()
 		authBundle3 := fixAuthBasic()
 
-		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec())
-		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
+		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description")
+		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description")
 		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, authBundle1)
 
-		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec())
-		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
+		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description")
+		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description")
 		apiBundle2 := fixAPIBundle("bundle2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
 
-		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil)
-		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
+		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description")
+		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description")
 		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, authBundle3)
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2, apiBundle3)
@@ -693,8 +693,8 @@ func TestKymaService(t *testing.T) {
 			},
 		}
 
-		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
-		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
+		api := fixDirectorAPiDefinition("API1", "name", "API description")
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description")
 
 		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api}, nil, nil)
 		apiBundle2 := fixAPIBundle("bundle2", nil, []model.EventAPIDefinition{eventAPI}, nil)
@@ -752,7 +752,7 @@ func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.A
 	return testApplication
 }
 
-func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
+func getTestDirectorApplication(id, name string) model.Application {
 	return model.Application{
 		ID:   id,
 		Name: name,
@@ -776,22 +776,20 @@ func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Servic
 	}
 }
 
-func fixDirectorAPiDefinition(id, name, description string, spec *model.APISpec) model.APIDefinition {
+func fixDirectorAPiDefinition(id, name, description string) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
 		Name:        name,
 		Description: description,
 		TargetUrl:   "www.example.com",
-		APISpec:     spec,
 	}
 }
 
-func fixDirectorEventAPIDefinition(id, name, description string, spec *model.EventAPISpec) model.EventAPIDefinition {
+func fixDirectorEventAPIDefinition(id, name, description string) model.EventAPIDefinition {
 	return model.EventAPIDefinition{
-		ID:           id,
-		Name:         name,
-		Description:  description,
-		EventAPISpec: spec,
+		ID:          id,
+		Name:        name,
+		Description: description,
 	}
 }
 
@@ -826,22 +824,6 @@ func fixEventAPIEntry(id, name string) v1alpha1.Entry {
 		ID:   id,
 		Name: name,
 		Type: applications.SpecEventsType,
-	}
-}
-
-func fixAPISpec() *model.APISpec {
-	return &model.APISpec{
-		Data:   []byte("spec"),
-		Type:   model.APISpecTypeOpenAPI,
-		Format: model.SpecFormatJSON,
-	}
-}
-
-func fixEventAPISpec() *model.EventAPISpec {
-	return &model.EventAPISpec{
-		Data:   []byte("spec"),
-		Type:   model.EventAPISpecTypeAsyncAPI,
-		Format: model.SpecFormatJSON,
 	}
 }
 
