@@ -17,6 +17,11 @@ const (
 	managedByLabelValue  = "compass-runtime-agent"
 )
 
+const (
+	SpecAPIType    = "API"
+	SpecEventsType = "Events"
+)
+
 //go:generate mockery --name=Converter
 type Converter interface {
 	Do(application model.Application) v1alpha1.Application
@@ -109,19 +114,11 @@ func (c converter) toServiceEntries(applicationName string, apiBundle model.APIB
 }
 
 func (c converter) toAPIEntry(applicationName string, apiBundle model.APIBundle, apiDefinition model.APIDefinition) v1alpha1.Entry {
-	getApiType := func() string {
-		if apiDefinition.APISpec != nil {
-			return string(apiDefinition.APISpec.Type)
-		}
-
-		return ""
-	}
 
 	entry := v1alpha1.Entry{
 		ID:                          apiDefinition.ID,
 		Name:                        apiDefinition.Name,
 		Type:                        SpecAPIType,
-		ApiType:                     getApiType(),
 		TargetUrl:                   apiDefinition.TargetUrl,
 		CentralGatewayUrl:           c.toCentralGatewayURL(applicationName, apiBundle.Name, apiDefinition.Name),
 		SpecificationUrl:            "", // Director returns BLOB here
