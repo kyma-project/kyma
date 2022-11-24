@@ -12,6 +12,7 @@ var (
 	WithRetryOnFailedConnect = nats.RetryOnFailedConnect
 	WithMaxReconnects        = nats.MaxReconnects
 	WithReconnectWait        = nats.ReconnectWait
+	WithName                 = nats.Name
 )
 
 // Connect returns a NATS connection that is ready for use, or an error if connection to the NATS server failed.
