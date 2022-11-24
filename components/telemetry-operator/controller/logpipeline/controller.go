@@ -19,7 +19,6 @@ package logpipeline
 import (
 	"context"
 	"fmt"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -64,25 +63,23 @@ type DaemonSetAnnotator interface {
 type Reconciler struct {
 	client.Client
 	config                  Config
-	syncer                  *syncer
-	allLogPipelines         prometheus.Gauge
-	unsupportedLogPipelines prometheus.Gauge
 	prober                  DaemonSetProber
 	annotator               DaemonSetAnnotator
-	secrets                 secretsCache
+	allLogPipelines         prometheus.Gauge
+	unsupportedLogPipelines prometheus.Gauge
+	syncer                  syncer
 }
 
 func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
-	r.syncer = newSyncer(client, config)
-	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
-	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	r.prober = prober
 	r.annotator = annotator
-	r.secrets = newSecretsCache()
+	r.allLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_all_logpipelines", Help: "Number of log pipelines."})
+	r.unsupportedLogPipelines = prometheus.NewGauge(prometheus.GaugeOpts{Name: "telemetry_unsupported_logpipelines", Help: "Number of log pipelines with custom filters or outputs."})
 	metrics.Registry.MustRegister(r.allLogPipelines, r.unsupportedLogPipelines)
+	r.syncer = syncer{client, config}
 
 	return &r
 }
@@ -114,16 +111,23 @@ func onlyUpdate() predicate.Predicate {
 
 func (r *Reconciler) mapSecrets(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Handling Secret with name: %s\n", secret.Name))
-	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
-	pipelines := r.secrets.get(secretName)
+	var pipelines telemetryv1alpha1.LogPipelineList
 	var requests []reconcile.Request
-	for _, p := range pipelines {
-		request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p}}
-		ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event: Creating reconciliation request for pipeline: %s\n", p))
-		requests = append(requests, request)
+	err := r.List(context.Background(), &pipelines)
+	if err != nil {
+		ctrl.Log.Error(err, "Secret UpdateEvent: fetching LogPipelineList failed!", err.Error())
+		return requests
 	}
-	ctrl.Log.V(1).Info(fmt.Sprintf("Secret changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
+
+	ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: handling Secret: %s", secret.Name))
+	for i := range pipelines.Items {
+		var pipeline = pipelines.Items[i]
+		if hasSecretRef(&pipeline, secret.Name, secret.Namespace) {
+			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}}
+			requests = append(requests, request)
+			ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: added reconcile request for pipeline: %s", pipeline.Name))
+		}
+	}
 	return requests
 }
 
@@ -137,7 +141,7 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(context.Background(), &allPipelines); err != nil {
-		ctrl.Log.Error(err, "DamonSet UpdateEvent: fetching LogPipelineList failed!", err.Error())
+		ctrl.Log.Error(err, "DaemonSet UpdateEvent: fetching LogPipelineList failed!", err.Error())
 		return requests
 	}
 
@@ -152,12 +156,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
 
-	var allPipelines telemetryv1alpha1.LogPipelineList
-	if err := r.List(ctx, &allPipelines); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, fmt.Errorf("failed to get all log pipelines: %v", err)
+	if err := r.updateMetrics(ctx); err != nil {
+		log.Error(err, "failed to get all log pipelines while updating metrics")
 	}
-
-	r.updateMetrics(&allPipelines)
 
 	var pipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &pipeline); err != nil {
@@ -176,9 +177,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	r.syncSecretsCache(&pipeline)
-
-	if err := r.syncer.syncAll(ctx, &pipeline, &allPipelines); err != nil {
+	if err := r.syncer.syncFluentBitConfig(ctx, &pipeline); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
@@ -191,33 +190,23 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
 	return reconcileResult, reconcileErr
 }
 
-func (r *Reconciler) syncSecretsCache(pipeline *telemetryv1alpha1.LogPipeline) {
-	fields := lookupSecretRefFields(pipeline)
-
-	if pipeline.DeletionTimestamp != nil {
-		for _, f := range fields {
-			ctrl.Log.V(1).Info(fmt.Sprintf("Remove secret referenced by %s from cache: %s", pipeline.Name, f.secretKeyRef.Name))
-			r.secrets.delete(f.secretKeyRef.NamespacedName(), pipeline.Name)
-		}
-		return
+func (r *Reconciler) updateMetrics(ctx context.Context) error {
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := r.List(ctx, &allPipelines); err != nil {
+		return err
 	}
 
-	for _, f := range fields {
-		ctrl.Log.V(1).Info(fmt.Sprintf("Add secret referenced by %s to cache: %s", pipeline.Name, f.secretKeyRef.Name))
-		r.secrets.addOrUpdate(f.secretKeyRef.NamespacedName(), pipeline.Name)
-	}
-}
+	r.allLogPipelines.Set(float64(count(&allPipelines, isNotMarkedForDeletion)))
+	r.unsupportedLogPipelines.Set(float64(count(&allPipelines, isUnsupported)))
 
-func (r *Reconciler) updateMetrics(allPipelines *telemetryv1alpha1.LogPipelineList) {
-	r.allLogPipelines.Set(float64(count(allPipelines, isNotMarkedForDeletion)))
-	r.unsupportedLogPipelines.Set(float64(count(allPipelines, isUnsupported)))
+	return nil
 }
 
 type keepFunc func(*telemetryv1alpha1.LogPipeline) bool

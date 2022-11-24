@@ -18,10 +18,8 @@ func TestGetOrCreateConfigMapError(t *testing.T) {
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
 
-	mockGetterOrCreator := NewGetterOrCreator(mockClient)
-
 	configMapName := types.NamespacedName{Name: "some-cm", Namespace: "cm-ns"}
-	_, err := mockGetterOrCreator.ConfigMap(context.Background(), configMapName)
+	_, err := GetOrCreateConfigMap(context.Background(), mockClient, configMapName)
 
 	require.Error(t, err)
 	require.Equal(t, badReqErr, err)
@@ -31,10 +29,8 @@ func TestGetOrCreateConfigMapGetSuccess(t *testing.T) {
 	mockClient := &mocks.Client{}
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	mockGetterOrCreator := NewGetterOrCreator(mockClient)
-
 	configMapName := types.NamespacedName{Name: "some-cm", Namespace: "cm-ns"}
-	cm, err := mockGetterOrCreator.ConfigMap(context.Background(), configMapName)
+	cm, err := GetOrCreateConfigMap(context.Background(), mockClient, configMapName)
 
 	require.NoError(t, err)
 	require.Equal(t, "some-cm", cm.Name)
@@ -47,10 +43,8 @@ func TestGetOrCreateConfigMapCreateSuccess(t *testing.T) {
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
 	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
 
-	mockGetterOrCreator := NewGetterOrCreator(mockClient)
-
 	configMapName := types.NamespacedName{Name: "some-cm", Namespace: "cm-ns"}
-	cm, err := mockGetterOrCreator.ConfigMap(context.Background(), configMapName)
+	cm, err := GetOrCreateConfigMap(context.Background(), mockClient, configMapName)
 
 	require.NoError(t, err)
 	require.Equal(t, "some-cm", cm.Name)
@@ -62,10 +56,8 @@ func TestGetOrCreateSecretError(t *testing.T) {
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
 
-	mockGetterOrCreator := NewGetterOrCreator(mockClient)
-
 	secretName := types.NamespacedName{Name: "some-secret", Namespace: "secret-ns"}
-	_, err := mockGetterOrCreator.Secret(context.Background(), secretName)
+	_, err := GetOrCreateSecret(context.Background(), mockClient, secretName)
 
 	require.Error(t, err)
 	require.Equal(t, badReqErr, err)
@@ -77,10 +69,8 @@ func TestGetOrCreateSecretSuccess(t *testing.T) {
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
 	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
 
-	mockGetterOrCreator := NewGetterOrCreator(mockClient)
-
 	secretName := types.NamespacedName{Name: "some-secret", Namespace: "secret-ns"}
-	secret, err := mockGetterOrCreator.Secret(context.Background(), secretName)
+	secret, err := GetOrCreateSecret(context.Background(), mockClient, secretName)
 
 	require.NoError(t, err)
 	require.Equal(t, "some-secret", secret.Name)

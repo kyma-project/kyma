@@ -58,9 +58,9 @@ type DaemonSetAnnotator interface {
 type Reconciler struct {
 	client.Client
 	config    Config
-	syncer    *syncer
 	prober    DaemonSetProber
 	annotator DaemonSetAnnotator
+	syncer    syncer
 }
 
 func NewReconciler(client client.Client, config Config, prober DaemonSetProber, annotator DaemonSetAnnotator) *Reconciler {
@@ -68,9 +68,9 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 
 	r.Client = client
 	r.config = config
-	r.syncer = newSyncer(client, config)
 	r.prober = prober
 	r.annotator = annotator
+	r.syncer = syncer{client, config}
 
 	return &r
 }
@@ -138,7 +138,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err = r.syncer.sync(ctx); err != nil {
+	if err = r.syncer.syncFluentBitConfig(ctx); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
@@ -152,7 +152,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
-	if err := r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
 		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
 	}
 
