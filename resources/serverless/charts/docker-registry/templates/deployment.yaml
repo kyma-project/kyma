@@ -40,18 +40,19 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
       priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}"
 {{- end }}
-{{- if .Values.securityContext.enabled }}
+{{- if .Values.pod.securityContext }}
       securityContext:
-        fsGroup: {{ .Values.securityContext.fsGroup }}
-        runAsUser: {{ .Values.securityContext.runAsUser }}
+        {{- include "tplValue" ( dict "value" .Values.pod.securityContext "context" . ) | nindent 12 }}
 {{- end }}
+      hostNetwork: false # Optional. The default is false if the entry is not there.
+      hostPID: false # Optional. The default is false if the entry is not there.
+      hostIPC: false # Optional. The default is false if the entry is not there.
       initContainers:
         - name: generate-htpasswd
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
-{{- if .Values.securityContext.enabled }}
+{{- if .Values.containers.securityContext }}
           securityContext:
-            privileged: {{ .Values.securityContext.privileged }}
-            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+            {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 12 }}
 {{- end }}
           volumeMounts:
             - name: registry-credentials
@@ -72,10 +73,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-{{- if .Values.securityContext.enabled }}
+{{- if .Values.containers.securityContext }}
           securityContext:
-            privileged: {{ .Values.securityContext.privileged }}
-            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+            {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 12 }}
 {{- end }}
           command:
           - /bin/registry
