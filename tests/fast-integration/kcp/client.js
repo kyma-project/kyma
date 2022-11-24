@@ -328,7 +328,7 @@ class KCPWrapper {
         console.log(`reconciliation operation status: ${i.status}`);
 
         // kcp reconciliations info -i <scheduling-id> -o json
-        const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+        await this.getReconciliationsInfo(i.schedulingID);
       }
     } catch {
       console.log('skipping reconciliation logging: error in reconcileInformationLog');
