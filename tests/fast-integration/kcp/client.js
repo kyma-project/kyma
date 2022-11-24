@@ -16,7 +16,7 @@ class KCPConfig {
     this.host = getEnvOrThrow('KCP_KEB_API_URL');
     this.issuerURL = getEnvOrThrow('KCP_OIDC_ISSUER_URL');
     this.gardenerNamespace = getEnvOrThrow('KCP_GARDENER_NAMESPACE');
-    this.username =  getEnvOrThrow('KCP_TECH_USER_LOGIN');
+    this.username = getEnvOrThrow('KCP_TECH_USER_LOGIN');
     this.password = getEnvOrThrow('KCP_TECH_USER_PASSWORD');
     this.clientID = getEnvOrThrow('KCP_OIDC_CLIENT_ID');
 
@@ -114,9 +114,8 @@ class KCPWrapper {
   }
 
   async login() {
-
-    var args
-    if(isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+    let args;
+    if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
       args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     } else {
       args = ['login']; 
