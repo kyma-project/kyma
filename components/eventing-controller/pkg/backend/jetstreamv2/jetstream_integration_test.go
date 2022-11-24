@@ -912,24 +912,61 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 
 // TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDown tests the SyncSubscription method
 // when subscription CR filters change while NATS JetStream is down.
-func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDown(t *testing.T) {
+func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForTypeChangeWhileNatsDown(t *testing.T) {
 	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-	defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
+	// prepare JS file storage test environment
+	testEnv := prepareTestEnvironment(t)
+	defer cleanUpTestEnvironment(testEnv)
+	// create a subscriber
+	subscriber := evtesting.NewSubscriber()
+	require.True(t, subscriber.IsRunning())
+	defer subscriber.Shutdown()
+	// create subscription and make sure it is functioning
+	secondSubKey, sub := createSubscriptionAndAssert(t, testEnv, subscriber)
 
+	// when
+	// shutdown the JetStream
+	shutdownJetStream(t, testEnv)
+	// Now, remove the second filter from subscription while NATS JetStream is down
+	deleteSecondFilter(testEnv, sub)
+	err := testEnv.jsBackend.SyncSubscription(sub)
+	require.Error(t, err)
+	// restart the NATS server and sync subscription
+	startJetStream(t, testEnv)
+	err = testEnv.jsBackend.SyncSubscription(sub)
+	require.NoError(t, err)
+
+	// then
+	// get new cleaned subject
+	firstSubKey := assertNewSubscriptionReturnItsKey(t, testEnv, sub)
+
+	// then
+	// make sure first filter does have JetStream consumer
+	firstCon, err := testEnv.jsBackend.jsCtx.ConsumerInfo(testEnv.jsBackend.Config.JSStreamName,
+		firstSubKey.consumerName)
+	require.NotNil(t, firstCon)
+	require.NoError(t, err)
+	// make sure second filter doesn't have any JetStream consumer
+	secondCon, err := testEnv.jsBackend.jsCtx.ConsumerInfo(testEnv.jsBackend.Config.JSStreamName,
+		secondSubKey.consumerName)
+	require.Nil(t, secondCon)
+	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
+}
+
+// HELPER functions
+
+func prepareTestEnvironment(t *testing.T) *TestEnvironment {
+	testEnvironment := setupTestEnvironment(t)
 	testEnvironment.jsBackend.Config.JSStreamStorageType = StorageTypeFile
 	testEnvironment.jsBackend.Config.MaxReconnects = 0
-	initErr := jsBackend.Initialize(nil)
+	initErr := testEnvironment.jsBackend.Initialize(nil)
 	require.NoError(t, initErr)
+	return testEnvironment
+}
 
-	subscriber := evtesting.NewSubscriber()
-	defer subscriber.Shutdown()
-	require.True(t, subscriber.IsRunning())
-
-	// Now, add a new filter to subscription
+func createSubscriptionAndAssert(t *testing.T,
+	testEnv *TestEnvironment,
+	subscriber *evtesting.Subscriber) (SubscriptionSubjectIdentifier, *eventingv1alpha2.Subscription) {
 	sub := evtestingv2.NewSubscription("sub", "foo",
 		evtestingv2.WithCleanEventSourceAndType(),
 		evtestingv2.WithNotCleanEventSourceAndType(),
@@ -937,72 +974,66 @@ func TestJetStreamSubAfterSync_DeleteOldFilterConsumerForFilterChangeWhileNatsDo
 		evtestingv2.WithTypeMatchingStandard(),
 		evtestingv2.WithMaxInFlight(DefaultMaxInFlights),
 	)
-	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	AddJSCleanEventTypesToStatus(sub, testEnv.cleaner)
 
-	// when
-	err := jsBackend.SyncSubscription(sub)
-
-	// then
+	err := testEnv.jsBackend.SyncSubscription(sub)
 	require.NoError(t, err)
+
 	// get cleaned subject
-	subject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[1])
+	subject, err := testEnv.cleaner.CleanEventType(sub.Spec.Types[1])
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
-	require.Len(t, jsBackend.subscriptions, 2)
+	require.Len(t, testEnv.jsBackend.subscriptions, 2)
 	// store first subscription key
-	secondJsSubKey := NewSubscriptionSubjectIdentifier(sub, jsBackend.getJetStreamSubject(sub.Spec.Source, subject, sub.Spec.TypeMatching))
+	subKey := NewSubscriptionSubjectIdentifier(sub,
+		testEnv.jsBackend.getJetStreamSubject(sub.Spec.Source, subject, sub.Spec.TypeMatching))
+	return subKey, sub
+}
 
-	// when
-	// shutdown the JetStream
-	testEnvironment.natsServer.Shutdown()
+func shutdownJetStream(t *testing.T, testEnv *TestEnvironment) {
+	testEnv.natsServer.Shutdown()
 	require.Eventually(t, func() bool {
-		return !testEnvironment.jsBackend.Conn.IsConnected()
+		return !testEnv.jsBackend.Conn.IsConnected()
 	}, 30*time.Second, 2*time.Second)
+}
 
-	// when
-	// Now, remove the second filter from subscription while NATS JetStream is down
+func deleteSecondFilter(testEnv *TestEnvironment, sub *eventingv1alpha2.Subscription) {
 	sub.Spec.Types = sub.Spec.Types[:1]
-	AddJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
-	// SyncSubscription binds the existing subscription to JetStream created one
-	err = jsBackend.SyncSubscription(sub)
-	require.Error(t, err)
+	AddJSCleanEventTypesToStatus(sub, testEnv.cleaner)
+}
 
-	// when
-	// restart the NATS server and sync subscription
+func startJetStream(t *testing.T, testEnv *TestEnvironment) {
 	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
+		evtesting.WithPort(testEnv.natsPort),
 		evtesting.WithJetStreamEnabled())
 	require.Eventually(t, func() bool {
-		info, streamErr := testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
+		info, streamErr := testEnv.jsClient.StreamInfo(testEnv.natsConfig.JSStreamName)
 		require.NoError(t, streamErr)
 		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
-	err = jsBackend.SyncSubscription(sub)
+}
 
-	// then
-	// there should be no error
-	require.NoError(t, err)
-	// get new cleaned subject
-	firstSubject, err := testEnvironment.cleaner.CleanEventType(sub.Spec.Types[0])
+func assertNewSubscriptionReturnItsKey(t *testing.T,
+	testEnv *TestEnvironment,
+	sub *eventingv1alpha2.Subscription) SubscriptionSubjectIdentifier {
+	firstSubject, err := testEnv.cleaner.CleanEventType(sub.Spec.Types[0])
 	require.NoError(t, err)
 	require.NotEmpty(t, firstSubject)
 	// now, there has to be only one subscription
-	require.Len(t, jsBackend.subscriptions, 1)
-	firstJsSubKey := NewSubscriptionSubjectIdentifier(sub, jsBackend.getJetStreamSubject(sub.Spec.Source, firstSubject,
+	require.Len(t, testEnv.jsBackend.subscriptions, 1)
+	firstJsSubKey := NewSubscriptionSubjectIdentifier(sub, testEnv.jsBackend.getJetStreamSubject(sub.Spec.Source,
+		firstSubject,
 		sub.Spec.TypeMatching))
-	firstJsSub := jsBackend.subscriptions[firstJsSubKey]
+	firstJsSub := testEnv.jsBackend.subscriptions[firstJsSubKey]
 	require.NotNil(t, firstJsSub)
 	require.True(t, firstJsSub.IsValid())
-	// then
-	// make sure first filter does have JetStream consumer
-	firstCon, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, firstJsSubKey.consumerName)
-	require.NotNil(t, firstCon)
-	require.NoError(t, err)
-	// then
-	// make sure second filter doesn't have any JetStream consumer
-	secondCon, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.Config.JSStreamName, secondJsSubKey.consumerName)
-	require.Nil(t, secondCon)
-	require.ErrorIs(t, err, nats.ErrConsumerNotFound)
+	return firstJsSubKey
+}
+
+func cleanUpTestEnvironment(testEnv *TestEnvironment) {
+	defer testEnv.natsServer.Shutdown()
+	defer testEnv.jsClient.natsConn.Close()
+	defer func() { _ = testEnv.jsClient.DeleteStream(testEnv.natsConfig.JSStreamName) }()
 }
 
 // TestJetStream_NoNATSSubscription tests if the error is being triggered

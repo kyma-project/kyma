@@ -160,7 +160,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		return err
 	}
 
-	if err := js.syncSubscriptionFilters(subscription, log); err != nil {
+	if err := js.syncSubscriptionEventFilters(subscription, log); err != nil {
 		return err
 	}
 
@@ -408,11 +408,11 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	return streamConfig, nil
 }
 
-// syncSubscriptionFilters syncs the Kyma subscription filters with NATS subscriptions.
-func (js *JetStream) syncSubscriptionFilters(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+// syncSubscriptionEventFilters syncs the Kyma subscription filters with NATS subscriptions.
+func (js *JetStream) syncSubscriptionEventFilters(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
 	for key, jsSub := range js.subscriptions {
 		if js.isJsSubAssociatedWithKymaSub(key, subscription) {
-			err := js.syncSubscriptionFilter(key, subscription, jsSub, log)
+			err := js.syncSubscriptionEventFilter(key, subscription, jsSub, log)
 			if err != nil {
 				return err
 			}
@@ -421,18 +421,20 @@ func (js *JetStream) syncSubscriptionFilters(subscription *eventingv1alpha1.Subs
 	return nil
 }
 
-func (js *JetStream) syncSubscriptionFilter(key SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription, subscriber backendnats.Subscriber, log *zap.SugaredLogger) error {
+// syncSubscriptionEventFilter syncs controller runtime subscriptions to subscription CR event filters and to JetStream
+// subscriptions/consumers.
+func (js *JetStream) syncSubscriptionEventFilter(key SubscriptionSubjectIdentifier, subscription *eventingv1alpha1.Subscription, subscriber backendnats.Subscriber, log *zap.SugaredLogger) error {
 	// don't try to delete invalid subscriber and its consumer if subscriber has type in subscription CR it belongs to.
 	// This means that it will be bound to the existing JetStream consumer in later steps.
-	if !subscriber.IsValid() && js.existsRuntimeSubscriptionInKymaSub(key, subscription) {
+	if !subscriber.IsValid() && js.runtimeSubscriptionExistsInKymaSub(key, subscription) {
 		return nil
 	}
 
 	return js.cleanupUnnecessaryJetStreamSubscribers(subscriber, subscription, log, key)
 }
 
-// existsRuntimeSubscriptionInKymaSub returns true if runtime subscriber subject exists in subscription CR.
-func (js *JetStream) existsRuntimeSubscriptionInKymaSub(cachedSubscriptionKey SubscriptionSubjectIdentifier,
+// runtimeSubscriptionExistsInKymaSub returns true if runtime subscriber subject exists in subscription CR.
+func (js *JetStream) runtimeSubscriptionExistsInKymaSub(cachedSubscriptionKey SubscriptionSubjectIdentifier,
 	subscription *eventingv1alpha1.Subscription) bool {
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubject := js.GetJetStreamSubject(subject)
@@ -464,7 +466,7 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(
 	}
 
 	// delete NATS consumer if it doesn't exist in subscription CR
-	if !js.existsConsumerSubjectInKymaSub(consumer, subscription) {
+	if !js.consumerSubjectExistsInKymaSub(consumer, subscription) {
 		log.Infow(
 			"Deleting JetStream subscription because it was deleted from subscription filters",
 			"subscriptionSubject", key,
@@ -475,8 +477,8 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(
 	return nil
 }
 
-// existsConsumerSubjectInKymaSub checks if the specified consumer is used by the subscription.
-func (js *JetStream) existsConsumerSubjectInKymaSub(consumer *nats.ConsumerInfo,
+// consumerSubjectExistsInKymaSub checks if the specified consumer is used by the subscription.
+func (js *JetStream) consumerSubjectExistsInKymaSub(consumer *nats.ConsumerInfo,
 	subscription *eventingv1alpha1.Subscription) bool {
 	return utils.ContainsString(
 		js.GetJetStreamSubjects(subscription.Status.CleanEventTypes),
