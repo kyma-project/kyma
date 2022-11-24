@@ -477,48 +477,14 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 	}
 
 	subs := NewSubscriptionsWithMultipleTypes()
-	sub1 := subs[0]
-	sub2 := subs[1]
+	givenConsumers := NewConsumers(subs, jsBackend)
 
-	// existing subscription type with existing consumers
-	// namespace: test1, sub: test1, type: v1
-	givenConsumers := []*nats.ConsumerInfo{
-		&nats.ConsumerInfo{
-			Name: computeConsumerName(
-				&sub1,
-				jsBackend.getJetStreamSubject(sub1.Spec.Source,
-					sub1.Status.Types[0].CleanType,
-					sub1.Spec.TypeMatching,
-				)),
-			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
-			PushBound: false,
-		},
-		&nats.ConsumerInfo{
-			Name: computeConsumerName(
-				&sub2,
-				jsBackend.getJetStreamSubject(sub2.Spec.Source,
-					sub2.Status.Types[0].CleanType,
-					sub2.Spec.TypeMatching,
-				)),
-			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
-			PushBound: false,
-		},
-		&nats.ConsumerInfo{
-			Name: computeConsumerName(
-				&sub2,
-				jsBackend.getJetStreamSubject(sub2.Spec.Source,
-					sub2.Status.Types[1].CleanType,
-					sub2.Spec.TypeMatching,
-				)),
-			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
-			PushBound: false,
-		},
-	}
 	danglingConsumer := &nats.ConsumerInfo{
 		Name:      "dangling-invalid-consumer",
 		Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
 		PushBound: false,
 	}
+	// add a dangling consumer which should be deleted
 	givenConsumersWithDangling := givenConsumers
 	givenConsumersWithDangling = append(givenConsumersWithDangling, danglingConsumer)
 
@@ -591,16 +557,19 @@ func Test_DeleteInvalidConsumers(t *testing.T) {
 }
 
 // Test_DeleteInvalidConsumersFromJetStream test the behaviour of the deleteSubscriptionFromJetStream function.
-func Test_HasConsumerType(t *testing.T) {
+func Test_IsConsumerUsedByKymaSub(t *testing.T) {
 	// pre-requisites
 	jsBackend := &JetStream{
 		cleaner: &cleaner.JetStreamCleaner{},
 	}
+
 	subs := NewSubscriptionsWithMultipleTypes()
+
 	jsSubject1 := jsBackend.getJetStreamSubject(subs[0].Spec.Source,
 		subs[0].Status.Types[0].CleanType,
 		subs[0].Spec.TypeMatching,
 	)
+
 	jsSubject2 := jsBackend.getJetStreamSubject(subs[1].Spec.Source,
 		subs[1].Status.Types[1].CleanType,
 		subs[1].Spec.TypeMatching,
@@ -609,14 +578,14 @@ func Test_HasConsumerType(t *testing.T) {
 	givenConName2 := computeConsumerName(&subs[1], jsSubject2)
 	givenNotExistentConName := "non-existing-consumer-name"
 
-	// creating a consumer with existing v2 subject, but different namespace
+	// creating a consumer with existing v1 subject, but different namespace
 	sub3 := subtesting.NewSubscription("test3", "test3",
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV2Event),
+		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
 		subtesting.WithTypeMatchingStandard(),
 		subtesting.WithStatusTypes([]v1alpha2.EventType{
 			{
-				OriginalType: subtesting.OrderCreatedV2Event,
-				CleanType:    subtesting.OrderCreatedV2Event,
+				OriginalType: subtesting.OrderCreatedV1Event,
+				CleanType:    subtesting.OrderCreatedV1Event,
 			},
 		}),
 	)
@@ -624,6 +593,7 @@ func Test_HasConsumerType(t *testing.T) {
 		sub3.Status.Types[0].CleanType,
 		sub3.Spec.TypeMatching,
 	)
+
 	invalidDanglingConsumer := computeConsumerName(sub3, jsSubject3)
 
 	testCases := []struct {
@@ -669,7 +639,7 @@ func Test_HasConsumerType(t *testing.T) {
 		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			// when
-			result := jsBackend.hasConsumerType(tc.givenConsumerName, tc.givenSubscriptions)
+			result := jsBackend.isConsumerUsedByKymaSub(tc.givenConsumerName, tc.givenSubscriptions)
 
 			// then
 			if testCase.wantError == nil {
@@ -730,4 +700,44 @@ func NewSubscriptionsWithMultipleTypes() []v1alpha2.Subscription {
 		}),
 	)
 	return []v1alpha2.Subscription{*sub1, *sub2}
+}
+
+func NewConsumers(subs []v1alpha2.Subscription, jsBackend *JetStream) []*nats.ConsumerInfo {
+	sub1 := subs[0]
+	sub2 := subs[1]
+
+	// existing subscription type with existing consumers
+	// namespace: test1, sub: test1, type: v1
+	return []*nats.ConsumerInfo{
+		&nats.ConsumerInfo{
+			Name: computeConsumerName(
+				&sub1,
+				jsBackend.getJetStreamSubject(sub1.Spec.Source,
+					sub1.Status.Types[0].CleanType,
+					sub1.Spec.TypeMatching,
+				)),
+			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+			PushBound: false,
+		},
+		&nats.ConsumerInfo{
+			Name: computeConsumerName(
+				&sub2,
+				jsBackend.getJetStreamSubject(sub2.Spec.Source,
+					sub2.Status.Types[0].CleanType,
+					sub2.Spec.TypeMatching,
+				)),
+			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+			PushBound: false,
+		},
+		&nats.ConsumerInfo{
+			Name: computeConsumerName(
+				&sub2,
+				jsBackend.getJetStreamSubject(sub2.Spec.Source,
+					sub2.Status.Types[1].CleanType,
+					sub2.Spec.TypeMatching,
+				)),
+			Config:    nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights},
+			PushBound: false,
+		},
+	}
 }

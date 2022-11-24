@@ -202,7 +202,7 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Sub
 	consumers := js.jsCtx.Consumers(js.Config.JSStreamName)
 	for con := range consumers {
 		// consumer should have no interest and subscription types to delete it
-		if !con.PushBound && !js.hasConsumerType(con.Name, subscriptions) {
+		if !con.PushBound && !js.isConsumerUsedByKymaSub(con.Name, subscriptions) {
 			if err := js.deleteConsumerFromJetStream(con.Name); err != nil {
 				return err
 			}
@@ -211,7 +211,7 @@ func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Sub
 	return nil
 }
 
-func (js *JetStream) hasConsumerType(consumerName string, subscriptions []eventingv1alpha1.Subscription) bool {
+func (js *JetStream) isConsumerUsedByKymaSub(consumerName string, subscriptions []eventingv1alpha1.Subscription) bool {
 	if len(subscriptions) == 0 {
 		return false
 	}
