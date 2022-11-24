@@ -4,41 +4,32 @@ const {
   getEnvOrThrow,
   debug,
   wait,
+  isEnvSet,
 } = require('../utils');
 const {inspect} = require('util');
 
 class KCPConfig {
   static fromEnv() {
-    return new KCPConfig(
-        getEnvOrThrow('KCP_KEB_API_URL'),
-        getEnvOrThrow('KCP_OIDC_ISSUER_URL'),
-        getEnvOrThrow('KCP_GARDENER_NAMESPACE'),
-        getEnvOrThrow('KCP_TECH_USER_LOGIN'),
-        getEnvOrThrow('KCP_TECH_USER_PASSWORD'),
-        getEnvOrThrow('KCP_OIDC_CLIENT_ID'),
-        getEnvOrThrow('KCP_OIDC_CLIENT_SECRET'),
-        getEnvOrThrow('KCP_MOTHERSHIP_API_URL'),
-        getEnvOrThrow('KCP_KUBECONFIG_API_URL'),
-    );
+    return new KCPConfig();
   }
-  constructor(host,
-      issuerURL,
-      gardenerNamespace,
-      username,
-      password,
-      clientID,
-      clientSecret,
-      motherShipApiUrl,
-      kubeConfigApiUrl) {
-    this.host = host;
-    this.issuerURL = issuerURL;
-    this.gardenerNamespace = gardenerNamespace;
-    this.username = username;
-    this.password = password;
-    this.clientID = clientID;
-    this.clientSecret = clientSecret;
-    this.motherShipApiUrl = motherShipApiUrl;
-    this.kubeConfigApiUrl = kubeConfigApiUrl;
+  constructor() {
+    this.host = getEnvOrThrow('KCP_KEB_API_URL');
+    this.issuerURL = getEnvOrThrow('KCP_OIDC_ISSUER_URL');
+    this.gardenerNamespace = getEnvOrThrow('KCP_GARDENER_NAMESPACE');
+    this.username =  getEnvOrThrow('KCP_TECH_USER_LOGIN');
+    this.password = getEnvOrThrow('KCP_TECH_USER_PASSWORD');
+    this.clientID = getEnvOrThrow('KCP_OIDC_CLIENT_ID');
+
+    if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+      this.clientSecret = getEnvOrThrow('KCP_OIDC_CLIENT_SECRET');
+    } else {
+      this.oauthClientID = getEnvOrThrow('KCP_OAUTH2_CLIENT_ID');
+      this.oauthSecret = getEnvOrThrow('KCP_OAUTH2_CLIENT_SECRET');
+      this.oauthIssuer = getEnvOrThrow('KCP_OAUTH2_ISSUER_URL');
+    }
+
+    this.motherShipApiUrl = getEnvOrThrow('KCP_MOTHERSHIP_API_URL');
+    this.kubeConfigApiUrl = getEnvOrThrow('KCP_KUBECONFIG_API_URL');
   }
 }
 
@@ -47,7 +38,11 @@ class KCPWrapper {
     this.kcpConfigPath = config.kcpConfigPath;
     this.gardenerNamespace = config.gardenerNamespace;
     this.clientID = config.clientID;
-    this.clientSecret = config.clientSecret;
+    // this.clientSecret = config.clientSecret;
+    this.oauthClientID = config.oauthClientID;
+    this.oauthSecret = config.oauthSecret;
+    this.oauthIssuer = config.oauthIssuer;
+
     this.issuerURL = config.issuerURL;
     this.motherShipApiUrl = config.motherShipApiUrl;
     this.kubeConfigApiUrl = config.kubeConfigApiUrl;
@@ -59,14 +54,19 @@ class KCPWrapper {
     this.kcpConfigPath = 'config.yaml';
     const stream = fs.createWriteStream(`${this.kcpConfigPath}`);
     stream.once('open', (_) => {
-      stream.write(`gardener-namespace: ${this.gardenerNamespace}\n`);
-      stream.write(`oidc-client-id: ${this.clientID}\n`);
-      stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
-      stream.write(`keb-api-url: ${this.host}\n`);
-      stream.write(`oidc-issuer-url: ${this.issuerURL}\n`);
-      stream.write(`mothership-api-url: ${this.motherShipApiUrl}\n`);
-      stream.write(`kubeconfig-api-url: ${this.kubeConfigApiUrl}\n`);
-      stream.write(`username: ${this.username}\n`);
+      stream.write(`gardener-namespace: "${this.gardenerNamespace}"\n`);
+      stream.write(`oidc-client-id: "${this.clientID}"\n`);
+      // stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+
+      stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
+      stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
+      stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+
+      stream.write(`keb-api-url: "${this.host}"\n`);
+      stream.write(`oidc-issuer-url: "${this.issuerURL}"\n`);
+      stream.write(`mothership-api-url: "${this.motherShipApiUrl}"\n`);
+      stream.write(`kubeconfig-api-url: "${this.kubeConfigApiUrl}"\n`);
+      // stream.write(`username: ${this.username}\n`);
       stream.end();
     });
   }
@@ -114,7 +114,14 @@ class KCPWrapper {
   }
 
   async login() {
-    const args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
+
+    var args
+    if(isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+      args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
+    } else {
+      args = ['login']; 
+    }
+
     return await this.exec(args);
   }
 
@@ -323,13 +330,11 @@ class KCPWrapper {
 
         // kcp reconciliations info -i <scheduling-id> -o json
         const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
-        console.log(`reconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
       }
     } catch {
       console.log('skipping reconciliation logging: error in reconcileInformationLog');
     }
   }
-
 
   async exec(args) {
     try {
