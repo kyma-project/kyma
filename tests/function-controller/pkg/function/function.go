@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -92,17 +93,21 @@ func (f *Function) Delete() error {
 }
 
 func (f *Function) Update(spec serverlessv1alpha2.FunctionSpec) error {
-	// correct update must first perform get
-	fn, err := f.Get()
-	if err != nil {
-		return err
-	}
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// correct update must first perform get
+		fn, err := f.Get()
+		if err != nil {
+			return err // RetryOnConflict doesn't work with wrapped errors
+		}
 
-	fnCopy := fn.DeepCopy()
-	fnCopy.Spec = spec
+		fnCopy := fn.DeepCopy()
+		fnCopy.Spec = spec
 
-	_, err = f.resCli.Update(fnCopy)
-	return err
+		_, err = f.resCli.Update(fnCopy)
+		return err // RetryOnConflict doesn't work with wrapped errors
+	}, f.log)
+	return errors.Wrapf(err, "while updating Function %s in namespace %s", f.name, f.namespace)
+
 }
 
 func (f *Function) Get() (*serverlessv1alpha2.Function, error) {
