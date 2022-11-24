@@ -110,7 +110,7 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "PR-99"
+      version: "1.1.0"
     api_gateway_webhook_certificates:
       name: "api-gateway-webhook-certificates"
-      version: "PR-99"
+      version: "1.1.0"
