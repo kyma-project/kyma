@@ -112,6 +112,7 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 		MaxReconnects:           reconcilertestingv2.MaxReconnects,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         v2.EventTypePrefix,
+		JSStreamDiscardPolicy:   jetstreamv2.DiscardPolicyNew,
 		JSStreamName:            v2.JSStreamName,
 		JSStreamStorageType:     "memory",
 		JSStreamMaxBytes:        "-1",
