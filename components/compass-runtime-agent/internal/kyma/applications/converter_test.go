@@ -255,9 +255,6 @@ func TestConverter(t *testing.T) {
 							Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
 							Description: "API 1 description",
 							TargetUrl:   "www.example.com/1",
-							APISpec: &model.APISpec{
-								Type: model.APISpecTypeOpenAPI,
-							},
 						},
 					},
 					EventDefinitions: []model.EventAPIDefinition{
@@ -301,7 +298,6 @@ func TestConverter(t *testing.T) {
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/1",
 								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/bundlename1/veryveryveryveryveryveryveryveryveryveryveryveryveryveryv",
-								ApiType:           string(model.APISpecTypeOpenAPI),
 							},
 							{
 								ID:   "serviceId2",
