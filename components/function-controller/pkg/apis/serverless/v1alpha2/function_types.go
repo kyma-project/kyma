@@ -83,11 +83,6 @@ const (
 	RepositoryAuthSSHKey RepositoryAuthType = "key"
 )
 
-type ConfigMapRef struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-}
-
 type Template struct {
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
@@ -125,9 +120,6 @@ const (
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
 	Runtime Runtime `json:"runtime"`
-
-	//+optional
-	CustomRuntimeConfiguration *ConfigMapRef `json:"customRuntimeConfiguration,omitempty"`
 
 	// +optional
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
