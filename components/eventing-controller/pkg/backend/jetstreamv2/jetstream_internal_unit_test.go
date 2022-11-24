@@ -565,36 +565,23 @@ func Test_IsConsumerUsedByKymaSub(t *testing.T) {
 
 	subs := NewSubscriptionsWithMultipleTypes()
 
-	jsSubject1 := jsBackend.getJetStreamSubject(subs[0].Spec.Source,
+	givenConName1 := computeConsumerName(&subs[0], jsBackend.getJetStreamSubject(subs[0].Spec.Source,
 		subs[0].Status.Types[0].CleanType,
 		subs[0].Spec.TypeMatching,
-	)
-
-	jsSubject2 := jsBackend.getJetStreamSubject(subs[1].Spec.Source,
+	))
+	givenConName2 := computeConsumerName(&subs[1], jsBackend.getJetStreamSubject(subs[1].Spec.Source,
 		subs[1].Status.Types[1].CleanType,
 		subs[1].Spec.TypeMatching,
-	)
-	givenConName1 := computeConsumerName(&subs[0], jsSubject1)
-	givenConName2 := computeConsumerName(&subs[1], jsSubject2)
+	))
 	givenNotExistentConName := "non-existing-consumer-name"
 
 	// creating a consumer with existing v1 subject, but different namespace
-	sub3 := subtesting.NewSubscription("test3", "test3",
-		subtesting.WithSourceAndType(subtesting.EventSourceClean, subtesting.OrderCreatedV1Event),
-		subtesting.WithTypeMatchingStandard(),
-		subtesting.WithStatusTypes([]v1alpha2.EventType{
-			{
-				OriginalType: subtesting.OrderCreatedV1Event,
-				CleanType:    subtesting.OrderCreatedV1Event,
-			},
-		}),
-	)
-	jsSubject3 := jsBackend.getJetStreamSubject(sub3.Spec.Source,
+	sub3 := subs[0]
+	sub3.Namespace = "test3"
+	invalidDanglingConsumer := computeConsumerName(&sub3, jsBackend.getJetStreamSubject(sub3.Spec.Source,
 		sub3.Status.Types[0].CleanType,
 		sub3.Spec.TypeMatching,
-	)
-
-	invalidDanglingConsumer := computeConsumerName(sub3, jsSubject3)
+	))
 
 	testCases := []struct {
 		name               string
@@ -604,13 +591,13 @@ func Test_IsConsumerUsedByKymaSub(t *testing.T) {
 		wantError          error
 	}{
 		{
-			name:               "Consumer name found in subscriptions types",
+			name:               "Consumer name should be found in subscriptions types",
 			givenConsumerName:  givenConName1,
 			givenSubscriptions: subs,
 			wantResult:         true,
 		},
 		{
-			name:               "Consumer name found in the second subscriptions types",
+			name:               "Consumer name should be found in the second subscriptions types",
 			givenConsumerName:  givenConName2,
 			givenSubscriptions: subs,
 			wantResult:         true,

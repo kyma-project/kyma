@@ -115,7 +115,8 @@ type JetStream struct {
 	cleaner           eventtype.Cleaner
 }
 
-func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, jsCleaner eventtype.Cleaner, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, metricsCollector *backendmetrics.Collector, jsCleaner eventtype.Cleaner,
+	logger *logger.Logger) *JetStream {
 	return &JetStream{
 		Config:           config,
 		logger:           logger,
