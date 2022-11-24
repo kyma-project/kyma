@@ -118,7 +118,7 @@ class KCPWrapper {
     if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
       args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     } else {
-      args = ['login']; 
+      args = ['login'];
     }
 
     return await this.exec(args);
