@@ -150,7 +150,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.scaleConfig.minReplicas**              |      Yes       | Defines the minimum number of Function's Pods to run at a time. |
 | **spec.scaleConfig.maxReplicas**              |      Yes       | Defines the maximum number of Function's Pods to run at a time. |
 | **spec.secretMounts**                         |       No       | Specifies volumes containing Secrets to mount into the container's filesystem. |
-| **spec.secretMounts.secretName**              |      Yes       | Name of the secret in the pod's namespace to use. |
+| **spec.secretMounts.secretName**              |      Yes       | Name of the Secret in the Pod's Namespace to use. |
 | **spec.secretMounts.mountPath**               |      Yes       | Path within the container at which the volume should be mounted. |
 | **status.conditions.lastTransitionTime** | Not applicable | Provides a timestamp for the last time the Function's condition status changed from one to another.    |
 | **status.conditions.message**            | Not applicable | Describes a human-readable message on the CR processing progress, success, or failure.   |
