@@ -6,15 +6,13 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes/mocks"
 
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
@@ -44,10 +42,8 @@ alias foo`,
 				},
 			},
 		}
-		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -72,16 +68,14 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		pipeline.Spec.Output.Custom = `
 name  null
 alias bar`
-		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err = sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -107,15 +101,13 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		now := metav1.Now()
 		pipeline.SetDeletionTimestamp(&now)
-		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err = sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
-		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -130,10 +122,9 @@ alias foo`,
 		sut := newSyncer(badReqClient, testConfig)
 
 		lp := telemetryv1alpha1.LogPipeline{}
-		changed, err := sut.syncFilesConfigMap(context.Background(), &lp)
+		err := sut.syncFilesConfigMap(context.Background(), &lp)
 
 		require.Error(t, err)
-		require.Equal(t, changed, false)
 	})
 }
 
@@ -166,10 +157,8 @@ alias foo`,
 				},
 			},
 		}
-		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -199,14 +188,12 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		pipeline.Spec.Files[0].Content = "here comes some more lua code"
-		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err = sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
-		require.True(t, controllerutil.ContainsFinalizer(pipeline, filesFinalizer))
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -234,15 +221,13 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		now := metav1.Now()
 		pipeline.SetDeletionTimestamp(&now)
-		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err = sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
-		require.False(t, controllerutil.ContainsFinalizer(pipeline, sectionsFinalizer))
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -257,10 +242,9 @@ alias foo`,
 		sut := newSyncer(badReqClient, testConfig)
 
 		lp := telemetryv1alpha1.LogPipeline{}
-		changed, err := sut.syncFilesConfigMap(context.Background(), &lp)
+		err := sut.syncFilesConfigMap(context.Background(), &lp)
 
 		require.Error(t, err)
-		require.Equal(t, changed, false)
 	})
 }
 
@@ -302,9 +286,8 @@ func TestSyncReferencedSecrets(t *testing.T) {
 
 		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
 		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
-		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var envSecret corev1.Secret
 		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
@@ -325,16 +308,15 @@ func TestSyncReferencedSecrets(t *testing.T) {
 
 		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
 		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
-		_, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
 
 		passwordSecret.Data["password"] = []byte("qwertz")
 		err = fakeClient.Update(context.Background(), &passwordSecret)
 		require.NoError(t, err)
 
-		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err = sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var envSecret corev1.Secret
 		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
@@ -355,14 +337,13 @@ func TestSyncReferencedSecrets(t *testing.T) {
 
 		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
 		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
-		_, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
 
 		now := metav1.Now()
 		allPipelines.Items[0].SetDeletionTimestamp(&now)
-		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err = sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var envSecret corev1.Secret
 		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)

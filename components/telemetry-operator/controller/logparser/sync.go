@@ -2,20 +2,15 @@ package logparser
 
 import (
 	"context"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"fmt"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	parsersConfigMapKey      = "parsers.conf"
-	parserConfigMapFinalizer = "FLUENT_BIT_PARSERS_CONFIG_MAP"
-)
+const parsersConfigMapKey = "parsers.conf"
 
 type syncer struct {
 	client.Client
@@ -31,34 +26,18 @@ func newSyncer(client client.Client, config Config) *syncer {
 	return &s
 }
 
-// SyncParsersConfigMap synchronizes the Fluent Bit parsers ConfigMap for all LogParsers.
-func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv1alpha1.LogParser) (bool, error) {
-	log := logf.FromContext(ctx)
+func (s *syncer) sync(ctx context.Context) error {
 	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.ParsersConfigMap)
 	if err != nil {
-		return false, err
+		return fmt.Errorf("unable to get parsers configmap: %w", err)
 	}
 
 	changed := false
 	var logParsers telemetryv1alpha1.LogParserList
 
-	if logParser.DeletionTimestamp.IsZero() {
-		if !controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
-			log.Info("Adding finalizer")
-			controllerutil.AddFinalizer(logParser, parserConfigMapFinalizer)
-			changed = true
-		}
-	} else {
-		if controllerutil.ContainsFinalizer(logParser, parserConfigMapFinalizer) {
-			log.Info("Removing finalizer")
-			controllerutil.RemoveFinalizer(logParser, parserConfigMapFinalizer)
-			changed = true
-		}
-	}
-
 	err = s.List(ctx, &logParsers)
 	if err != nil {
-		return false, err
+		return fmt.Errorf("unable to list parsers: %w", err)
 	}
 	fluentBitParsersConfig := builder.BuildFluentBitParsersConfig(&logParsers)
 	if fluentBitParsersConfig == "" {
@@ -77,11 +56,12 @@ func (s *syncer) SyncParsersConfigMap(ctx context.Context, logParser *telemetryv
 	}
 
 	if !changed {
-		return false, nil
-	}
-	if err = s.Update(ctx, &cm); err != nil {
-		return false, err
+		return nil
 	}
 
-	return changed, nil
+	if err = s.Update(ctx, &cm); err != nil {
+		return fmt.Errorf("unable to parsers files configmap: %w", err)
+	}
+
+	return nil
 }

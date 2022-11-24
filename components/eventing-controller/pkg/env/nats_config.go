@@ -40,7 +40,11 @@ type NatsConfig struct {
 	//  configured via JSStreamMaxMessages and JSStreamMaxBytes.
 	JSStreamRetentionPolicy string `envconfig:"JS_STREAM_RETENTION_POLICY" default:"interest"`
 	JSStreamMaxMessages     int64  `envconfig:"JS_STREAM_MAX_MSGS" default:"-1"`
-	JSStreamMaxBytes        int64  `envconfig:"JS_STREAM_MAX_BYTES" default:"-1"`
+	JSStreamMaxBytes        string `envconfig:"JS_STREAM_MAX_BYTES" default:"-1"`
+	// JSStreamDiscardPolicy specifies wich events to discard from the stream in case limits are reached
+	//  new: reject new messages for the stream
+	//  old: discard old messages from the stream to make room for new messages
+	JSStreamDiscardPolicy string `envconfig:"JS_STREAM_DISCARD_POLICY" default:"new"`
 	// Deliver Policy determines for a consumer where in the stream it starts receiving messages
 	// (more info https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy-optstartseq-optstarttime):
 	// - all: The consumer starts receiving from the earliest available message.

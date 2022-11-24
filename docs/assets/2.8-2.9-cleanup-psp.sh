@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io kyma:psp:privileged
+kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io kyma:psp:unprivileged
+kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-operator-psp
+kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io monitoring-prometheus-psp
+kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io psp-monitoring-kube-state-metrics
+kubectl delete -n kyma-system clusterroles.rbac.authorization.k8s.io psp-monitoring-prometheus-node-exporter
+kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io kyma:all:psp:unprivileged
+kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-operator-psp
+kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io monitoring-prometheus-psp
+kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io psp-monitoring-kube-state-metrics
+kubectl delete -n kyma-system clusterrolebindings.rbac.authorization.k8s.io psp-monitoring-prometheus-node-exporter
+kubectl delete -n kyma-system configmaps dockerfile-nodejs12
+kubectl delete -n kyma-system podsecuritypolicies.policy 000-serverless-build
+kubectl delete -n kyma-system podsecuritypolicies.policy 000-serverless-function
+kubectl delete -n kyma-system podsecuritypolicies.policy 001-kyma-unprivileged
+kubectl delete -n kyma-system podsecuritypolicies.policy 002-kyma-privileged
+kubectl delete -n kyma-system podsecuritypolicies.policy api-gateway
+kubectl delete -n kyma-system podsecuritypolicies.policy logging-loki
+kubectl delete -n kyma-system podsecuritypolicies.policy monitoring-alertmanager
+kubectl delete -n kyma-system podsecuritypolicies.policy monitoring-grafana
+kubectl delete -n kyma-system podsecuritypolicies.policy monitoring-kube-state-metrics
+kubectl delete -n kyma-system podsecuritypolicies.policy monitoring-operator
+kubectl delete -n kyma-system podsecuritypolicies.policy monitoring-prometheus
+kubectl delete -n kyma-system podsecuritypolicies.policy monitoring-prometheus-node-exporter
+kubectl delete -n kyma-system podsecuritypolicies.policy ory
+kubectl delete -n kyma-system roles.rbac.authorization.k8s.io monitoring-alertmanager
+kubectl delete -n kyma-system roles.rbac.authorization.k8s.io serverless-build
+kubectl delete -n kyma-system roles.rbac.authorization.k8s.io serverless-function
+kubectl delete -n kyma-system rolebindings.rbac.authorization.k8s.io monitoring-alertmanager
+kubectl delete -n kyma-system rolebindings.rbac.authorization.k8s.io serverless-build
+kubectl delete -n kyma-system rolebindings.rbac.authorization.k8s.io serverless-function
+kubectl delete -n kyma-system serviceaccounts serverless-build

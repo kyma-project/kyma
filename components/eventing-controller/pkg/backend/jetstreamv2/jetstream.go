@@ -4,12 +4,17 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
 	backendutils "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
+	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -18,9 +23,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 var _ Backend = &JetStream{}
@@ -58,7 +60,7 @@ func (js *JetStream) Initialize(connCloseHandler backendutilsv2.ConnClosedHandle
 	if err := js.initCloudEventClient(js.Config); err != nil {
 		return err
 	}
-	return js.ensureStreamExists()
+	return js.ensureStreamExistsAndIsConfiguredCorrectly()
 }
 
 func (js *JetStream) SyncSubscription(subscription *eventingv1alpha2.Subscription) error {
@@ -153,6 +155,9 @@ func (js *JetStream) validateConfig() error {
 	if _, err := toJetStreamRetentionPolicy(js.Config.JSStreamRetentionPolicy); err != nil {
 		return err
 	}
+	if _, err := toJetStreamDiscardPolicy(js.Config.JSStreamDiscardPolicy); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -179,30 +184,45 @@ func (js *JetStream) initNATSConn(connCloseHandler backendutilsv2.ConnClosedHand
 
 func (js *JetStream) handleReconnect(_ *nats.Conn) {
 	js.namedLogger().Infow("Called reconnect handler for JetStream")
-	if err := js.ensureStreamExists(); err != nil {
+	if err := js.ensureStreamExistsAndIsConfiguredCorrectly(); err != nil {
 		js.namedLogger().Errorw("Failed to ensure the stream exists", "error", err)
 	}
 }
 
-func (js *JetStream) ensureStreamExists() error {
-	if info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName); err == nil {
-		// TODO: in case the stream exists, should we make sure all of its configs matches the stream config in the chart?
-		js.namedLogger().Infow("Reusing existing Stream", "stream-info", info)
-		return nil
-		// if nats server was restarted, the stream needs to be recreated for memory storage type
-		// and hence we get ErrConnectionClosed for the lost stream
-	} else if !errors.Is(err, nats.ErrStreamNotFound) {
-		js.namedLogger().Debugw("The connection to NATS server is not established!")
-		return err
-	}
+func (js *JetStream) ensureStreamExistsAndIsConfiguredCorrectly() error {
 	streamConfig, err := getStreamConfig(js.Config)
 	if err != nil {
 		return err
 	}
-	js.namedLogger().Infow("Stream not found, creating a new Stream",
-		"streamName", js.Config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
-	_, err = js.jsCtx.AddStream(streamConfig)
-	return err
+	info, err := js.jsCtx.StreamInfo(js.Config.JSStreamName)
+	if errors.Is(err, nats.ErrStreamNotFound) {
+		info, err = js.jsCtx.AddStream(streamConfig)
+		if err != nil {
+			return err
+		}
+		js.namedLogger().Infow("Stream not found, created a new Stream",
+			"stream-info", info)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	if !streamIsConfiguredCorrectly(info.Config, *streamConfig) {
+		newInfo, err := js.jsCtx.UpdateStream(streamConfig)
+		if err != nil {
+			return err
+		}
+		js.namedLogger().Infow("Updated existing Stream:", "stream-info", newInfo)
+		return nil
+	}
+
+	js.namedLogger().Infow("Reusing existing Stream", "stream-info", info)
+	return nil
+}
+
+func streamIsConfiguredCorrectly(got nats.StreamConfig, want nats.StreamConfig) bool {
+	return reflect.DeepEqual(got, want)
 }
 
 func (js *JetStream) initJSContext() error {

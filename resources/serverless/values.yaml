@@ -76,7 +76,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20221104-ffd6df73"
+      version: "20221115-1e7ca96f"
       directory: "tpi"
     function_controller:
       name: "function-controller"
@@ -89,10 +89,10 @@ global:
       version: "PR-16091"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "v20221110-f5cb45c7"
+      version: "PR-16116"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20221110-f5cb45c7"
+      version: "PR-16116"
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "v20221110-f5cb45c7"
