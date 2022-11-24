@@ -81,7 +81,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	log.V(1).Info("Reconciliation triggered")
 
 	if err := r.updateMetrics(ctx); err != nil {
-		log.Error(err, "failed to get all log pipelines while updating metrics")
+		log.Error(err, "Failed to get all LogPipelines while updating metrics")
 	}
 
 	var pipeline telemetryv1alpha1.LogPipeline
@@ -98,24 +98,24 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	}()
 
 	if err := r.ensureFinalizers(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	if err := r.syncer.syncFluentBitConfig(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	if err := r.cleanupFinalizersIfNeeded(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	checksum, err := r.calculateChecksum(ctx)
 	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	return reconcileResult, reconcileErr

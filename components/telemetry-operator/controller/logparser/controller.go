@@ -86,25 +86,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 
 	err := ensureFinalizer(ctx, r.Client, &parser)
 	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	if err = r.syncer.syncFluentBitConfig(ctx); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	err = cleanupFinalizerIfNeeded(ctx, r.Client, &parser)
 	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	checksum, err := r.calculateConfigChecksum(ctx)
 	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, client.IgnoreNotFound(err)
 	}
 
 	return reconcileResult, reconcileErr
