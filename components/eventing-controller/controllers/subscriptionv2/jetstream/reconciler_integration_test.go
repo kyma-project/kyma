@@ -53,7 +53,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	t.Cleanup(ens.Cancel)
 }
 
-// Check the reconciler idempotency by adding a label to the Kyma and NATS subscriptions.
+// Check the reconciler idempotency by adding a label to the Kyma subscription.
 func TestIdempotency(t *testing.T) {
 	// prepare the test resources and run test reconciler
 	ens := setupTestEnsemble(t)

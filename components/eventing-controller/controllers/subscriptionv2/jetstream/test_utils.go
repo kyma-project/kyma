@@ -114,7 +114,7 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 		EventTypePrefix:         v2.EventTypePrefix,
 		JSStreamDiscardPolicy:   jetstreamv2.DiscardPolicyNew,
 		JSStreamName:            v2.JSStreamName,
-		JSStreamStorageType:     "memory",
+		JSStreamStorageType:     "file",
 		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
 		JSStreamRetentionPolicy: "interest",
