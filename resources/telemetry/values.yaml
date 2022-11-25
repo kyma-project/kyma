@@ -11,6 +11,10 @@ global:
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20221122-200937b4"
+    telemetry_otel_collector:
+      name: "otel-collector"
+      version: "v20221125-767b8d0f"
+      directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
       version: "1.9.9-cf0a130c"
