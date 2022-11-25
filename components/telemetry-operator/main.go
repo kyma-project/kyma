@@ -90,7 +90,7 @@ var (
 	maxLogPipelines            int
 )
 
-const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221125-767b8d0f"
+const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221125-9bbc6dff"
 
 //nolint:gochecknoinits
 func init() {
