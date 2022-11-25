@@ -37,6 +37,9 @@ spec:
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_webhook_cert_init) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: telemetry-webhook-cert-init
+          resources:
+          resources:
+            {{- toYaml .Values.initContainers.webhookInit.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
