@@ -8,7 +8,7 @@ metadata:
   {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
   gateways:
-    - kyma-system/kyma-gateway
+    - {{ .Values.dockerRegistry.gateway }}
   hosts:
     - registry.{{ .Values.global.domainName }} # docker-registry.{DOMAIN}
   http:
