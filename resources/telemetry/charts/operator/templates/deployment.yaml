@@ -37,6 +37,13 @@ spec:
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_webhook_cert_init) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: telemetry-webhook-cert-init
+          resources:
+            requests:
+              cpu: 5m
+              memory: 20Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
