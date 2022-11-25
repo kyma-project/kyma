@@ -1,6 +1,7 @@
 package serverless
 
 import (
+	"k8s.io/utils/pointer"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -361,6 +362,34 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "different secret volumes",
+			args: args{
+				existing: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: podSpecWithSecretVolume(),
+						},
+					},
+				},
+				expected: appsv1.Deployment{
+					Spec: appsv1.DeploymentSpec{
+						Template: corev1.PodTemplateSpec{
+							Spec: func() corev1.PodSpec {
+								volumeName := "another-volume-name"
+								podSpec := podSpecWithSecretVolume()
+								podSpec.Volumes[0].Name = volumeName
+								podSpec.Volumes[0].Secret.SecretName = "another-secret-name"
+								podSpec.Containers[0].VolumeMounts[0].Name = volumeName
+								podSpec.Containers[0].VolumeMounts[0].MountPath = "/another/mount/path"
+								return podSpec
+							}(),
+						},
+					},
+				},
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -448,7 +477,7 @@ func Test_equalResources(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "should return truefor two empty structs",
+			name: "should return true for two empty structs",
 			args: args{
 				existing: corev1.ResourceRequirements{},
 				expected: corev1.ResourceRequirements{}},
@@ -459,6 +488,251 @@ func Test_equalResources(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			got := equalResources(tt.args.expected, tt.args.existing)
+			g.Expect(got).To(gomega.Equal(tt.want))
+		})
+	}
+}
+
+func Test_equalSecretMounts(t *testing.T) {
+	type args struct {
+		existing corev1.PodSpec
+		expected corev1.PodSpec
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "should work in easy equal case",
+			args: args{
+				existing: podSpecWithSecretVolume(),
+				expected: podSpecWithSecretVolume(),
+			},
+			want: true,
+		},
+		{
+			name: "should return true for empty structs",
+			args: args{
+				existing: corev1.PodSpec{
+					Volumes: []corev1.Volume{},
+					Containers: []corev1.Container{
+						{
+							VolumeMounts: []corev1.VolumeMount{},
+						},
+					},
+				},
+				expected: corev1.PodSpec{
+					Volumes: []corev1.Volume{},
+					Containers: []corev1.Container{
+						{
+							VolumeMounts: []corev1.VolumeMount{},
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "should detect difference between secret names",
+			args: args{
+				existing: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Volumes[0].Secret.SecretName = "secret-name-1"
+					return podSpec
+				}(),
+				expected: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Volumes[0].Secret.SecretName = "secret-name-2"
+					return podSpec
+				}(),
+			},
+			want: false,
+		},
+		{
+			name: "should detect difference between mount path",
+			args: args{
+				existing: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Containers[0].VolumeMounts[0].MountPath = "/mount/path/1"
+					return podSpec
+				}(),
+				expected: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Containers[0].VolumeMounts[0].MountPath = "/mount/path/2"
+					return podSpec
+				}(),
+			},
+			want: false,
+		},
+		{
+			name: "should ignore volumes without secret",
+			args: args{
+				existing: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Volumes = append(podSpec.Volumes, notSecretVolume())
+					return podSpec
+				}(),
+				expected: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					anotherNotSecretVolume := notSecretVolume()
+					anotherNotSecretVolume.Name = "another-not-secret-volume"
+					podSpec.Volumes = append(podSpec.Volumes, anotherNotSecretVolume)
+					return podSpec
+				}(),
+			},
+			want: true,
+		},
+		{
+			name: "should detect difference for new secret volume",
+			args: args{
+				existing: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					newVolume := secretVolume()
+					newVolume.Name = "new-volume"
+					podSpec.Volumes = append(podSpec.Volumes, newVolume)
+					return podSpec
+				}(),
+				expected: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Volumes[0].Secret.SecretName = "secret-name-2"
+					return podSpec
+				}(),
+			},
+			want: false,
+		},
+		{
+			name: "should ignore volume mounts not connected with secret volumes",
+			args: args{
+				existing: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					notSecretVolume := notSecretVolume()
+					podSpec.Volumes = append(podSpec.Volumes, notSecretVolume)
+					notSecretVolumeMount := corev1.VolumeMount{
+						Name:      notSecretVolume.Name,
+						MountPath: "/not/secret/volume/mount/path",
+					}
+					podSpec.Containers[0].VolumeMounts = append(podSpec.Containers[0].VolumeMounts, notSecretVolumeMount)
+					return podSpec
+				}(),
+				expected: func() corev1.PodSpec {
+					podSpec := podSpecWithSecretVolume()
+					sizeLimit := k8sresource.MustParse("350Mi")
+					podSpec.Volumes = append(podSpec.Volumes,
+						corev1.Volume{
+							Name: "another-not-secret-volume",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{
+									SizeLimit: &sizeLimit,
+								},
+							},
+						})
+					return podSpec
+				}(),
+			},
+			want: true,
+		},
+		{
+			name: "should ignore different order of volumes",
+			args: func() args {
+				firstVolume := secretVolume()
+				firstVolume.Name = "first"
+				secondVolume := secretVolume()
+				secondVolume.Name = "second"
+
+				existing := podSpecWithSecretVolume()
+				existing.Volumes = []corev1.Volume{
+					firstVolume,
+					secondVolume,
+				}
+
+				expected := podSpecWithSecretVolume()
+				expected.Volumes = []corev1.Volume{
+					secondVolume,
+					firstVolume,
+				}
+
+				return args{
+					existing: existing,
+					expected: expected,
+				}
+			}(),
+			want: true,
+		},
+		{
+			name: "should ignore different order of volumes",
+			args: func() args {
+				firstVolume := secretVolume()
+				firstVolume.Name = "first"
+				secondVolume := secretVolume()
+				secondVolume.Name = "second"
+				volumes := []corev1.Volume{
+					firstVolume,
+					secondVolume,
+				}
+
+				firstMount := secretVolumeMount()
+				firstMount.Name = firstVolume.Name
+				secondMount := secretVolumeMount()
+				secondMount.Name = secondVolume.Name
+
+				existing := podSpecWithSecretVolume()
+				existing.Volumes = volumes
+				existing.Containers[0].VolumeMounts = []corev1.VolumeMount{
+					firstMount,
+					secondMount,
+				}
+
+				expected := podSpecWithSecretVolume()
+				expected.Volumes = volumes
+				expected.Containers[0].VolumeMounts = []corev1.VolumeMount{
+					secondMount,
+					firstMount,
+				}
+
+				return args{
+					existing: existing,
+					expected: expected,
+				}
+			}(),
+			want: true,
+		},
+		{
+			name: "should ignore different volume mounts in not first container",
+			// now we works only with single container
+			args: args{
+				existing: func() corev1.PodSpec {
+					someSecretVolumeMount := secretVolumeMount()
+					someSecretVolumeMount.MountPath = "/some/secret/volume/mount"
+					someSecondContainer := corev1.Container{
+						VolumeMounts: []corev1.VolumeMount{
+							someSecretVolumeMount,
+						},
+					}
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Containers = append(podSpec.Containers, someSecondContainer)
+					return podSpec
+				}(),
+				expected: func() corev1.PodSpec {
+					anotherSecretVolumeMount := secretVolumeMount()
+					anotherSecretVolumeMount.MountPath = "/another/secret/volume/mount"
+					anotherSecondContainer := corev1.Container{
+						VolumeMounts: []corev1.VolumeMount{
+							anotherSecretVolumeMount,
+						},
+					}
+					podSpec := podSpecWithSecretVolume()
+					podSpec.Containers = append(podSpec.Containers, anotherSecondContainer)
+					return podSpec
+				}(),
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			got := equalSecretMounts(tt.args.expected, tt.args.existing)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -689,6 +963,54 @@ func fixDeploymentWithReplicas(replicas int32) appsv1.Deployment {
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{}},
+				},
+			},
+		},
+	}
+}
+
+func secretVolume() corev1.Volume {
+	return corev1.Volume{
+		Name: "volume-name",
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName:  "secret-name",
+				DefaultMode: pointer.Int32(0644),
+				Optional:    pointer.Bool(false),
+			},
+		},
+	}
+}
+
+func notSecretVolume() corev1.Volume {
+	sizeLimit := k8sresource.MustParse("50Mi")
+	return corev1.Volume{
+		Name: "not-secret-volume",
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{
+				SizeLimit: &sizeLimit,
+			},
+		},
+	}
+}
+
+func secretVolumeMount() corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      "volume-name",
+		ReadOnly:  false,
+		MountPath: "/mount/path",
+	}
+}
+
+func podSpecWithSecretVolume() corev1.PodSpec {
+	return corev1.PodSpec{
+		Volumes: []corev1.Volume{
+			secretVolume(),
+		},
+		Containers: []corev1.Container{
+			{
+				VolumeMounts: []corev1.VolumeMount{
+					secretVolumeMount(),
 				},
 			},
 		},
