@@ -20,6 +20,11 @@ type jetStreamContextStub struct {
 	deleteConsumerErr error
 }
 
+func (j jetStreamContextStub) StreamNameBySubject(s string, opt ...nats.JSOpt) (string, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
 func (j jetStreamContextStub) ObjectStores(_ ...nats.ObjectOpt) <-chan nats.ObjectStoreStatus {
 	// TODO implement me
 	panic("implement me")

@@ -30,6 +30,25 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - update
+- apiGroups:
   - apps
   resources:
   - daemonsets
@@ -42,30 +61,6 @@ rules:
   - apps
   resources:
   - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
   verbs:
   - create
   - delete
@@ -138,7 +133,6 @@ rules:
   - get
   - patch
   - update
-{{- if .Values.controllers.tracing.enabled }}
 - apiGroups:
   - telemetry.kyma-project.io
   resources:
@@ -159,4 +153,3 @@ rules:
   - get
   - patch
   - update
-{{- end }}

@@ -83,11 +83,6 @@ const (
 	RepositoryAuthSSHKey RepositoryAuthType = "key"
 )
 
-type ConfigMapRef struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-}
-
 type Template struct {
 	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
@@ -117,6 +112,13 @@ type ResourceConfiguration struct {
 	Function *ResourceRequirements `json:"function,omitempty"`
 }
 
+type SecretMount struct {
+	// +kubebuilder:validation:Required
+	SecretName string `json:"secretName"`
+	// +kubebuilder:validation:Required
+	MountPath string `json:"mountPath"`
+}
+
 const (
 	FunctionResourcesPresetLabel = "serverless.kyma-project.io/function-resources-preset"
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
@@ -125,9 +127,6 @@ const (
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
 	Runtime Runtime `json:"runtime"`
-
-	//+optional
-	CustomRuntimeConfiguration *ConfigMapRef `json:"customRuntimeConfiguration,omitempty"`
 
 	// +optional
 	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
@@ -148,6 +147,8 @@ type FunctionSpec struct {
 
 	// +optional
 	Template *Template `json:"template,omitempty"`
+
+	SecretMounts []SecretMount `json:"secretMounts,omitempty"`
 }
 
 // TODO: Status related things needs to be developed.

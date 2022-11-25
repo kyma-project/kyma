@@ -8,12 +8,13 @@ import (
 	"time"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	cleanerv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	cleanerv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -1004,6 +1005,7 @@ func defaultNatsConfig(url string) env.NatsConfig {
 		JSStreamName:            defaultStreamName,
 		JSStreamStorageType:     StorageTypeMemory,
 		JSStreamRetentionPolicy: RetentionPolicyInterest,
+		JSStreamDiscardPolicy:   DiscardPolicyNew,
 	}
 }
 

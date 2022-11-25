@@ -36,22 +36,20 @@ spec:
             description: TracePipelineSpec defines the desired state of TracePipeline
             properties:
               output:
-                description: Output configures the trace receiver of a TracePipeline.
+                description: Configures the trace receiver of a TracePipeline.
                 properties:
                   otlp:
-                    description: Otlp defines an output using the OpenTelmetry protocol.
+                    description: Defines an output using the OpenTelmetry protocol.
                     properties:
                       authentication:
-                        description: Authentication defines authentication options
-                          for the OTLP output
+                        description: Defines authentication options for the OTLP output
                         properties:
                           basic:
-                            description: Basic contains credentials for HTTP basic
-                              auth
+                            description: Contains credentials for HTTP basic auth
                             properties:
                               password:
-                                description: Password contains the basic auth password
-                                  or a secret reference
+                                description: Contains the basic auth password or a
+                                  secret reference
                                 properties:
                                   value:
                                     type: string
@@ -69,8 +67,8 @@ spec:
                                     type: object
                                 type: object
                               user:
-                                description: User contains the basic auth username
-                                  or a secret reference
+                                description: Contains the basic auth username or a
+                                  secret reference
                                 properties:
                                   value:
                                     type: string
@@ -90,8 +88,8 @@ spec:
                             type: object
                         type: object
                       endpoint:
-                        description: Endpoint defines the host and port (<host>:<port>)
-                          of an OTLP endpoint.
+                        description: Defines the host and port (<host>:<port>) of
+                          an OTLP endpoint.
                         properties:
                           value:
                             type: string
@@ -109,7 +107,7 @@ spec:
                             type: object
                         type: object
                       protocol:
-                        description: Protocol defines the OTLP protocol (http or grpc).
+                        description: Defines the OTLP protocol (http or grpc).
                         type: string
                     type: object
                 type: object

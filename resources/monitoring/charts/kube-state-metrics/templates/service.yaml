@@ -23,7 +23,7 @@ spec:
   {{- end }}
     targetPort: {{ .Values.service.port | default 8080}}
   {{ if .Values.selfMonitor.enabled }}
-  - name: "metrics"
+  - name: "http-metrics"
     protocol: TCP
     port: {{ .Values.selfMonitor.telemetryPort | default 8081 }}
     targetPort: {{ .Values.selfMonitor.telemetryPort | default 8081 }}

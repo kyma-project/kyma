@@ -43,12 +43,12 @@ spec:
           metadata:
             type: object
           spec:
-            description: LogPipelineSpec defines the desired state of LogPipeline
+            description: Defines the desired state of LogPipeline
             properties:
               files:
                 items:
-                  description: FileMount provides file content to be consumed by a
-                    LogPipeline configuration
+                  description: Provides file content to be consumed by a LogPipeline
+                    configuration
                   properties:
                     content:
                       type: string
@@ -58,90 +58,87 @@ spec:
                 type: array
               filters:
                 items:
-                  description: Filter describes a filtering option on the logs of
-                    the pipeline
+                  description: Describes a filtering option on the logs of the pipeline.
                   properties:
                     custom:
                       description: 'Custom filter definition in the Fluent Bit syntax.
                         Note: If you use a `custom` filter, you put the LogPipeline
-                        in unsupported mode'
+                        in unsupported mode.'
                       type: string
                   type: object
                 type: array
               input:
-                description: Input describes a log input for a LogPipeline
+                description: Describes a log input for a LogPipeline.
                 properties:
                   application:
-                    description: Application configures in more detail from which
-                      containers application logs are enabled as input
+                    description: Configures in more detail from which containers application
+                      logs are enabled as input.
                     properties:
                       containers:
-                        description: InputContainers describes whether application
-                          logs from specific containers are selected. The options
-                          are mutually exclusive.
+                        description: Describes whether application logs from specific
+                          containers are selected. The options are mutually exclusive.
                         properties:
                           exclude:
-                            description: Exclude describes to exclude only the container
-                              logs with the specified container names
+                            description: Specifies to exclude only the container logs
+                              with the specified container names.
                             items:
                               type: string
                             type: array
                           include:
-                            description: Include describes to include only the container
-                              logs with the specified container names
+                            description: Specifies to include only the container logs
+                              with the specified container names.
                             items:
                               type: string
                             type: array
                         type: object
                       dropLabels:
-                        description: DropLabels indicates whether to drop all Kubernetes
-                          labels. The default is false.
+                        description: Defines whether to drop all Kubernetes labels.
+                          The default is false.
                         type: boolean
                       keepAnnotations:
-                        description: KeepAnnotations indicates whether to keep all
-                          Kubernetes annotations. The default is false.
+                        description: Defines whether to keep all Kubernetes annotations.
+                          The default is false.
                         type: boolean
                       namespaces:
-                        description: InputNamespaces describes whether application
-                          logs from specific Namespaces are selected. The options
-                          are mutually exclusive. System Namespaces are excluded by
-                          default from the collection
+                        description: Describes whether application logs from specific
+                          Namespaces are selected. The options are mutually exclusive.
+                          System Namespaces are excluded by default from the collection.
                         properties:
                           exclude:
-                            description: Exclude describes to exclude only the container
-                              logs of the specified Namespace names
+                            description: Exclude the container logs of the specified
+                              Namespace names.
                             items:
                               type: string
                             type: array
                           include:
-                            description: Include describes to include only the container
-                              logs of the specified Namespace names
+                            description: Include only the container logs of the specified
+                              Namespace names.
                             items:
                               type: string
                             type: array
                           system:
-                            description: System describes to include the container
-                              logs of the system Namespaces like kube-system, istio-system,
-                              and kyma-system
+                            description: Describes to include the container logs of
+                              the system Namespaces like kube-system, istio-system,
+                              and kyma-system.
                             type: boolean
                         type: object
                     type: object
                 type: object
               output:
-                description: Output describes a Fluent Bit output configuration section
+                description: Describes a Fluent Bit output configuration section.
                 properties:
                   custom:
-                    description: 'Custom output definition in the Fluent Bit syntax.
+                    description: 'Defines a custom output in the Fluent Bit syntax.
                       Note: If you use a `custom` output, you put the LogPipeline
-                      in unsupported mode'
+                      in unsupported mode.'
                     type: string
                   grafana-loki:
-                    description: 'LokiOutput configures an output to the Kyma-internal
-                      Loki instance. Note: This output is considered legacy and is
-                      only provided for backwards compatibility with the in-cluster
-                      Loki instance. It might not be compatible with latest Loki versions.
-                      For integration with a Loki-based system, use the `custom` output
-                      with name `loki` instead.'
+                    description: 'Configures an output to the Kyma-internal Loki instance.
+                      Note: This output is considered legacy and is only provided
+                      for backwards compatibility with the in-cluster Loki instance.
+                      It might not be compatible with latest Loki versions. For integration
+                      with a Loki-based system, use the `custom` output with name
+                      `loki` instead.'
                     properties:
                       labels:
                         additionalProperties:
@@ -170,16 +167,23 @@ spec:
                         type: object
                     type: object
                   http:
-                    description: HttpOutput configures an HTTP-based output compatible
-                      with the Fluent Bit HTTP output plugin
+                    description: Configures an HTTP-based output compatible with the
+                      Fluent Bit HTTP output plugin.
                     properties:
                       compress:
+                        description: Defines the compression algorithm to use.
                         type: string
                       dedot:
+                        description: Enables de-dotting of Kubernetes labels and annotations
+                          for compatibility with ElasticSearch based backends. Dots
+                          (.) will be replaced by underscores (_).
                         type: boolean
                       format:
+                        description: Defines the log encoding to be used. Default
+                          is json.
                         type: string
                       host:
+                        description: Defines the host of the HTTP receiver.
                         properties:
                           value:
                             type: string
@@ -197,6 +201,7 @@ spec:
                             type: object
                         type: object
                       password:
+                        description: Defines the basic auth password.
                         properties:
                           value:
                             type: string
@@ -214,17 +219,25 @@ spec:
                             type: object
                         type: object
                       port:
+                        description: Defines the port of the HTTP receiver. Default
+                          is 443.
                         type: string
                       tls:
+                        description: Defines TLS settings for the HTTP connection.
                         properties:
                           disabled:
+                            description: Disable TLS.
                             type: boolean
                           skipCertificateValidation:
+                            description: Disable TLS certificate validation.
                             type: boolean
                         type: object
                       uri:
+                        description: Defines the URI of the HTTP receiver. Default
+                          is "/".
                         type: string
                       user:
+                        description: Defines the basic auth user.
                         properties:
                           value:
                             type: string
@@ -245,8 +258,8 @@ spec:
                 type: object
               variables:
                 items:
-                  description: VariableRef references a Kubernetes secret that should
-                    be provided as environment variable to Fluent Bit
+                  description: References a Kubernetes secret that should be provided
+                    as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string
@@ -266,7 +279,7 @@ spec:
                 type: array
             type: object
           status:
-            description: LogPipelineStatus defines the observed state of LogPipeline
+            description: Shows the observed state of the LogPipeline
             properties:
               conditions:
                 items:

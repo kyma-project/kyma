@@ -208,9 +208,7 @@ var _ = Describe("LogPipeline controller", func() {
 				scanner := bufio.NewScanner(resp.Body)
 				for scanner.Scan() {
 					line := scanner.Text()
-					if strings.Contains(line, "telemetry_fluentbit_triggered_restarts_total") ||
-						strings.Contains(line, "telemetry_all_logpipelines") ||
-						strings.Contains(line, "telemetry_unsupported_logpipelines") {
+					if strings.Contains(line, "telemetry_all_logpipelines") || strings.Contains(line, "telemetry_unsupported_logpipelines") {
 						return true
 					}
 				}
@@ -307,7 +305,7 @@ var _ = Describe("LogPipeline controller", func() {
 
 			Expect(k8sClient.Delete(ctx, logPipeline)).Should(Succeed())
 
-			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 3)
+			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 2)
 			Eventually(func() int {
 				var fluentBitDaemonSet appsv1.DaemonSet
 				err := k8sClient.Get(ctx, types.NamespacedName{
@@ -319,6 +317,21 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return int(fluentBitDaemonSet.Generation)
 			}, timeout, interval).Should(Equal(2))
+
+			// Fluent Bit daemon set should have checksum annotation set
+			Eventually(func() bool {
+				var fluentBitDaemonSet appsv1.DaemonSet
+				err := k8sClient.Get(ctx, types.NamespacedName{
+					Name:      testConfig.DaemonSet.Name,
+					Namespace: testConfig.DaemonSet.Namespace,
+				}, &fluentBitDaemonSet)
+				if err != nil {
+					return false
+				}
+
+				_, found := fluentBitDaemonSet.Spec.Template.Annotations["checksum/logpipeline-config"]
+				return found
+			}, timeout, interval).Should(BeTrue())
 
 			// All log pipeline gauge should be updated after deletion
 			Eventually(func() float64 {

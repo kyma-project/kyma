@@ -8,6 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/require"
+
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
@@ -17,8 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	evtestingv2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
-	"github.com/nats-io/nats.go"
-	"github.com/stretchr/testify/require"
 )
 
 // TestJetStream_SubscriptionDeletion tests the creation and deletion
@@ -1017,6 +1018,7 @@ func defaultNatsConfig(url string) env.NatsConfig {
 		JSStreamName:            DefaultStreamName,
 		JSStreamStorageType:     StorageTypeMemory,
 		JSStreamRetentionPolicy: RetentionPolicyInterest,
+		JSStreamDiscardPolicy:   DiscardPolicyNew,
 	}
 }
 

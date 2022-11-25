@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -27,29 +28,36 @@ func TestJetStreamMessageSender(t *testing.T) {
 	testCases := []struct {
 		name                      string
 		givenStream               bool
+		givenStreamMaxBytes       int64
 		givenNATSConnectionClosed bool
-		wantError                 bool
+		wantErr                   error
 		wantStatusCode            int
 	}{
 		{
 			name:                      "send in jetstream mode should not succeed if stream doesn't exist",
 			givenStream:               false,
 			givenNATSConnectionClosed: false,
-			wantError:                 true,
-			wantStatusCode:            http.StatusNotFound,
+			wantErr:                   sender.ErrBackendTargetNotFound,
+		},
+		{
+			name:                      "send in jetstream mode should not succeed if stream is full",
+			givenStream:               true,
+			givenStreamMaxBytes:       1,
+			givenNATSConnectionClosed: false,
+			wantErr:                   sender.ErrInsufficientStorage,
 		},
 		{
 			name:                      "send in jetstream mode should succeed if NATS connection is open and the stream exists",
 			givenStream:               true,
+			givenStreamMaxBytes:       5000,
 			givenNATSConnectionClosed: false,
-			wantError:                 false,
+			wantErr:                   nil,
 			wantStatusCode:            http.StatusNoContent,
 		},
 		{
 			name:                      "send in jetstream mode should fail if NATS connection is not open",
 			givenNATSConnectionClosed: true,
-			wantError:                 true,
-			wantStatusCode:            http.StatusBadGateway,
+			wantErr:                   ErrNotConnected,
 		},
 	}
 
@@ -66,7 +74,10 @@ func TestJetStreamMessageSender(t *testing.T) {
 			}()
 
 			if tc.givenStream {
-				addStream(t, connection, getStreamConfig())
+				sc := getStreamConfig(tc.givenStreamMaxBytes)
+				cc := getConsumerConfig()
+				addStream(t, connection, sc)
+				addConsumer(t, connection, sc, cc)
 			}
 
 			ce := createCloudEvent(t)
@@ -84,8 +95,8 @@ func TestJetStreamMessageSender(t *testing.T) {
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 
 			// assert
-			assert.Equal(t, tc.wantError, err != nil)
-			if !tc.wantError {
+			assert.ErrorIs(t, err, tc.wantErr)
+			if tc.wantErr == nil {
 				assert.Equal(t, tc.wantStatusCode, status.HTTPStatus())
 			}
 		})
@@ -151,12 +162,23 @@ func createCloudEvent(t *testing.T) *event.Event {
 }
 
 // getStreamConfig inits a testing stream config.
-func getStreamConfig() *nats.StreamConfig {
+func getStreamConfig(maxBytes int64) *nats.StreamConfig {
 	return &nats.StreamConfig{
 		Name:      testingutils.StreamName,
 		Subjects:  []string{fmt.Sprintf("%s.>", env.JetStreamSubjectPrefix)},
 		Storage:   nats.MemoryStorage,
 		Retention: nats.InterestPolicy,
+		Discard:   nats.DiscardNew,
+		MaxBytes:  maxBytes,
+	}
+}
+
+func getConsumerConfig() *nats.ConsumerConfig {
+	return &nats.ConsumerConfig{
+		Durable:       "test",
+		DeliverPolicy: nats.DeliverAllPolicy,
+		AckPolicy:     nats.AckExplicitPolicy,
+		FilterSubject: fmt.Sprintf("%v.%v", env.JetStreamSubjectPrefix, testingutils.CloudEventTypeWithPrefix),
 	}
 }
 
@@ -164,7 +186,16 @@ func getStreamConfig() *nats.StreamConfig {
 func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 	js, err := connection.JetStream()
 	assert.NoError(t, err)
-	_, err = js.AddStream(config)
+	info, err := js.AddStream(config)
+	t.Logf("%+v", info)
+	assert.NoError(t, err)
+}
+
+func addConsumer(t *testing.T, connection *nats.Conn, sc *nats.StreamConfig, config *nats.ConsumerConfig) {
+	js, err := connection.JetStream()
+	assert.NoError(t, err)
+	info, err := js.AddConsumer(sc.Name, config)
+	t.Logf("%+v", info)
 	assert.NoError(t, err)
 }
 

@@ -19,7 +19,8 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -70,16 +71,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.enqueueRequests),
-			builder.WithPredicates(predicate.Funcs{
-				CreateFunc: func(createEvent event.CreateEvent) bool { return false },
-				DeleteFunc: func(deleteEvent event.DeleteEvent) bool { return false },
-				// only handle rotation of existing secrets
-				UpdateFunc: func(updateEvent event.UpdateEvent) bool {
-					return true
-				},
-				GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
-			}),
+			handler.EnqueueRequestsFromMapFunc(r.mapSecrets),
+			builder.WithPredicates(onlyUpdate()),
 		)
 
 	if r.config.CreateServiceMonitor {
@@ -89,37 +82,58 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return newReconciler.Complete(r)
 }
 
-func (r *Reconciler) enqueueRequests(object client.Object) []reconcile.Request {
+func onlyUpdate() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc:  func(event event.CreateEvent) bool { return false },
+		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
+		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
+		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
+	}
+}
+
+func (r *Reconciler) mapSecrets(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
 	var pipelines telemetryv1alpha1.TracePipelineList
+	var requests []reconcile.Request
 	err := r.List(context.Background(), &pipelines)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return []reconcile.Request{}
-		}
 		ctrl.Log.Error(err, "Secret UpdateEvent: fetching TracePipelineList failed!", err.Error())
-		return []reconcile.Request{}
+		return requests
 	}
 
 	ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: handling Secret: %s", secret.Name))
-	var requests []reconcile.Request
 	for i := range pipelines.Items {
-		var p = pipelines.Items[i]
-		if containsAnyRefToSecret(&p, secret) {
-			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: p.Name}}
+		var pipeline = pipelines.Items[i]
+		if containsAnyRefToSecret(&pipeline, secret) {
+			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}}
 			requests = append(requests, request)
-			ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: added reconcile request for pipeline: %s", p.Name))
+			ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: added reconcile request for pipeline: %s", pipeline.Name))
 		}
 	}
 	return requests
 }
 
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=tracepipelines/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
+func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
+	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
+	if pipeline.Spec.Output.Otlp.Endpoint.IsDefined() &&
+		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom != nil &&
+		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.IsSecretKeyRef() &&
+		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.SecretKeyRef.NamespacedName() == secretName {
+		return true
+	}
+
+	if pipeline.Spec.Output.Otlp == nil ||
+		pipeline.Spec.Output.Otlp.Authentication == nil ||
+		pipeline.Spec.Output.Otlp.Authentication.Basic == nil ||
+		!pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
+		return false
+	}
+
+	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
+
+	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
+		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
+}
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := logf.FromContext(ctx)
@@ -158,7 +172,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
-	configHash := CreateConfigHash([]corev1.ConfigMap{*configMap}, []corev1.Secret{*secret})
+	configHash := configchecksum.Calculate([]corev1.ConfigMap{*configMap}, []corev1.Secret{*secret})
 	deployment := makeDeployment(r.config, configHash)
 	if err = controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
 		return err
@@ -195,26 +209,4 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	}
 
 	return nil
-}
-
-func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
-	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
-	if pipeline.Spec.Output.Otlp.Endpoint.IsDefined() &&
-		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom != nil &&
-		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.IsSecretKeyRef() &&
-		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.SecretKeyRef.NamespacedName() == secretName {
-		return true
-	}
-
-	if pipeline.Spec.Output.Otlp == nil ||
-		pipeline.Spec.Output.Otlp.Authentication == nil ||
-		pipeline.Spec.Output.Otlp.Authentication.Basic == nil ||
-		!pipeline.Spec.Output.Otlp.Authentication.Basic.IsDefined() {
-		return false
-	}
-
-	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
-
-	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
-		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
 }

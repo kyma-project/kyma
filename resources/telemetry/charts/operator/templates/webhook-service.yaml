@@ -9,6 +9,7 @@ metadata:
 spec:
   ports:
     - port: {{ .Values.webhook.service.port }}
+      name: {{ .Values.webhook.service.portName }}
       protocol: {{ .Values.webhook.service.protocol }}
       targetPort: {{ .Values.webhook.service.targetPort }}
   selector:
