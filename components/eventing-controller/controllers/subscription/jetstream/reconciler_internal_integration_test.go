@@ -695,11 +695,14 @@ func testSubscriptionDeletion(ens *utils.JetStreamTestEnsemble, subscription *ev
 
 // ensureNATSSubscriptionIsDeleted ensures that the NATS subscription is not found anymore.
 // This ensures the controller did delete it correctly then the Subscription was deleted.
-func ensureNATSSubscriptionIsDeleted(ens *utils.JetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
-	getSubscriptionFromJetStream(ens, subscription, subject).ShouldNot(natstesting.BeExistingSubscription(), "Failed to delete NATS subscription")
+func ensureNATSSubscriptionIsDeleted(ens *utils.JetStreamTestEnsemble,
+	subscription *eventingv1alpha1.Subscription, subject string) {
+	getSubscriptionFromJetStream(ens, subscription, subject).
+		ShouldNot(natstesting.BeExistingSubscription(), "Failed to delete NATS subscription")
 }
 
-func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *utils.JetStreamTestEnsemble {
+func setupTestEnsemble(ctx context.Context, eventTypePrefix string,
+	g *gomega.GomegaWithT, natsPort int) *utils.JetStreamTestEnsemble {
 	useExistingCluster := useExistingCluster
 	ens := &utils.TestEnsemble{
 		Ctx: ctx,
