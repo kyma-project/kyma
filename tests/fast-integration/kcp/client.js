@@ -4,7 +4,6 @@ const {
   getEnvOrThrow,
   debug,
   wait,
-  isEnvSet,
 } = require('../utils');
 const {inspect} = require('util');
 
@@ -20,7 +19,7 @@ class KCPConfig {
     this.password = getEnvOrThrow('KCP_TECH_USER_PASSWORD');
     this.clientID = getEnvOrThrow('KCP_OIDC_CLIENT_ID');
 
-    if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+    if (process.env.KCP_OIDC_CLIENT_SECRET) {
       this.clientSecret = getEnvOrThrow('KCP_OIDC_CLIENT_SECRET');
     } else {
       this.oauthClientID = getEnvOrThrow('KCP_OAUTH2_CLIENT_ID');
@@ -115,7 +114,7 @@ class KCPWrapper {
 
   async login() {
     let args;
-    if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+    if (process.env.KCP_OIDC_CLIENT_SECRET) {
       args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     } else {
       args = ['login'];
