@@ -38,12 +38,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           name: telemetry-webhook-cert-init
           resources:
-            requests:
-              cpu: 5m
-              memory: 20Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
+          resources:
+            {{- toYaml .Values.initContainers.webhookInit.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
