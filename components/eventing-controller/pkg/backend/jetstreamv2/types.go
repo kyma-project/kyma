@@ -30,6 +30,9 @@ type Backend interface {
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name and source as prefix if needed
 	GetJetStreamSubjects(source string, subjects []string, typeMatching eventingv1alpha2.TypeMatching) []string
+
+	// GetJetStreamContext returns the current JetStreamContext
+	GetJetStreamContext() nats.JetStreamContext
 }
 
 type JetStream struct {

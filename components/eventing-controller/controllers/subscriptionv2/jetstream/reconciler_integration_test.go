@@ -20,7 +20,7 @@ import (
 func TestUnavailableNATSServer(t *testing.T) {
 	// prepare the test resources and run test reconciler
 	ens := setupTestEnsemble(t)
-	defer reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+	defer cleanupResources(ens)
 
 	// prepare the subscription
 	sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble,
@@ -57,7 +57,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 func TestIdempotency(t *testing.T) {
 	// prepare the test resources and run test reconciler
 	ens := setupTestEnsemble(t)
-	defer reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+	defer cleanupResources(ens)
 
 	t.Log("create the subscription")
 	sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble,
@@ -114,7 +114,7 @@ func TestIdempotency(t *testing.T) {
 // TestCreateSubscription tests if subscriptions get created properly by the reconciler.
 func TestCreateSubscription(t *testing.T) {
 	ens := setupTestEnsemble(t)
-	defer reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+	defer cleanupResources(ens)
 
 	var testCases = []struct {
 		name                  string
@@ -246,7 +246,7 @@ func TestCreateSubscription(t *testing.T) {
 // TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
 func TestChangeSubscription(t *testing.T) {
 	ens := setupTestEnsemble(t)
-	defer reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+	defer cleanupResources(ens)
 
 	var testCases = []struct {
 		name                  string
@@ -543,7 +543,7 @@ func TestChangeSubscription(t *testing.T) {
 // TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the EventTypePrefix is empty.
 func TestEmptyEventTypePrefix(t *testing.T) {
 	ens := setupTestEnsemble(t)
-	defer reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+	defer cleanupResources(ens)
 
 	// when
 	sub := reconcilertestingv2.CreateSubscription(ens.TestEnsemble,

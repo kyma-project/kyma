@@ -133,6 +133,11 @@ func (js *JetStream) GetJetStreamSubjects(source string, subjects []string,
 	return result
 }
 
+// GetJetStreamContext returns the current JetStreamContext.
+func (js *JetStream) GetJetStreamContext() nats.JetStreamContext {
+	return js.jsCtx
+}
+
 // GetJetStreamSubject appends the prefix and the cleaned source to subject.
 func (js *JetStream) GetJetStreamSubject(source, subject string, typeMatching eventingv1alpha2.TypeMatching) string {
 	if typeMatching == eventingv1alpha2.TypeMatchingExact {

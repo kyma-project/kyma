@@ -57,6 +57,9 @@ type Backend interface {
 
 	// GetJetStreamSubjects returns a list of subjects appended with stream name as prefix if needed
 	GetJetStreamSubjects(subjects []string) []string
+
+	// GetJetStreamContext returns the current JetStreamContext
+	GetJetStreamContext() nats.JetStreamContext
 }
 
 // SubscriptionSubjectIdentifier is used to uniquely identify a Subscription subject.
@@ -274,6 +277,11 @@ func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 // GetJetStreamSubject appends the prefix to subject.
 func (js *JetStream) GetJetStreamSubject(subject string) string {
 	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
+}
+
+// GetJetStreamContext returns the current JetStreamContext.
+func (js *JetStream) GetJetStreamContext() nats.JetStreamContext {
+	return js.jsCtx
 }
 
 func (js *JetStream) validateConfig() error {

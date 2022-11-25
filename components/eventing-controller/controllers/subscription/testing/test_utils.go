@@ -4,7 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"testing"
 	"time"
+
+	subscriptionjetstream "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
+	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
+	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
+	"github.com/stretchr/testify/require"
 
 	"github.com/avast/retry-go/v3"
 	natsserver "github.com/nats-io/nats-server/v2/server"
@@ -30,6 +36,12 @@ const (
 	SmallPollingInterval   = 1 * time.Second
 	subscriptionNameFormat = "nats-sub-%d"
 )
+
+type JetStreamTestEnsemble struct {
+	Reconciler       *subscriptionjetstream.Reconciler
+	JetStreamBackend *backendjetstream.JetStream
+	*TestEnsemble
+}
 
 type TestEnsemble struct {
 	testID                    int
@@ -185,6 +197,13 @@ func StopTestEnv(ens *TestEnsemble) {
 	if stopErr := ens.TestEnv.Stop(); stopErr != nil {
 		log.Printf("failed to stop testenv: %s", stopErr)
 	}
+}
+
+func CleanupResources(t *testing.T, ens *JetStreamTestEnsemble) {
+	StopTestEnv(ens.TestEnsemble)
+
+	jsCtx := ens.Reconciler.Backend.GetJetStreamContext()
+	require.NoError(t, jsCtx.DeleteStream(v2.JSStreamName))
 }
 
 func StartSubscriberSvc(ens *TestEnsemble) {

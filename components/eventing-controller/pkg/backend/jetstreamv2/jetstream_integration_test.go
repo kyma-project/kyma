@@ -250,7 +250,7 @@ func defaultNatsConfig(url string) env.NatsConfig {
 		MaxReconnects:           DefaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
 		JSStreamName:            DefaultStreamName,
-		JSStreamStorageType:     StorageTypeFile,
+		JSStreamStorageType:     StorageTypeMemory,
 		JSStreamRetentionPolicy: RetentionPolicyInterest,
 		JSStreamDiscardPolicy:   DiscardPolicyNew,
 	}

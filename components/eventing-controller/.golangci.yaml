@@ -9,7 +9,7 @@
 run:
   # Timeout for analysis, e.g. 30s, 5m.
   # Default: 1m
-  timeout: 10m
+  timeout: 3m
 
 
 # This file contains only configs which differ from defaults.

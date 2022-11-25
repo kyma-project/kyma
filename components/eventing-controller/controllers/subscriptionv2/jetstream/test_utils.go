@@ -36,7 +36,7 @@ const (
 )
 
 type jetStreamTestEnsemble struct {
-	reconciler       *Reconciler
+	Reconciler       *Reconciler
 	jetStreamBackend *jetstreamv2.JetStream
 	*reconcilertestingv2.TestEnsemble
 }
@@ -134,7 +134,7 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-jetstream")
 
-	ens.reconciler = NewReconciler(ctx,
+	ens.Reconciler = NewReconciler(ctx,
 		k8sClient,
 		jetStreamHandler,
 		defaultLogger,
@@ -143,10 +143,10 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 		sinkv2.NewValidator(ctx, k8sClient, recorder),
 	)
 
-	err = ens.reconciler.SetupUnmanaged(k8sManager)
+	err = ens.Reconciler.SetupUnmanaged(k8sManager)
 	require.NoError(ens.T, err)
 
-	jsBackend, ok := ens.reconciler.Backend.(*jetstreamv2.JetStream)
+	jsBackend, ok := ens.Reconciler.Backend.(*jetstreamv2.JetStream)
 	if !ok {
 		panic("cannot convert the Backend interface to Jetstreamv2")
 	}
@@ -161,6 +161,14 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	require.NotNil(ens.T, ens.K8sClient)
 
 	return ens
+}
+
+// cleanupResources stop the testEnv and removes the stream from NATS test server.
+func cleanupResources(ens *jetStreamTestEnsemble) {
+	reconcilertestingv2.StopTestEnv(ens.TestEnsemble)
+
+	jsCtx := ens.Reconciler.Backend.GetJetStreamContext()
+	require.NoError(ens.T, jsCtx.DeleteStream(v2.JSStreamName))
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha2.Subscription,
