@@ -145,9 +145,9 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    config.ResourceName,
-							Image:   config.CollectorImage,
-							Command: []string{"/otelcol-contrib", "--config=/conf/" + configMapKey},
+							Name:  config.ResourceName,
+							Image: config.CollectorImage,
+							Args:  []string{"--config=/conf/" + configMapKey},
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									SecretRef: &corev1.SecretEnvSource{

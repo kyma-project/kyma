@@ -68,6 +68,9 @@ spec:
 {{- end }}
 {{- if not .Values.controllers.tracing.enabled }}
             - --enable-tracing=false
+{{- else }}
+            - --enable-tracing=true
+            - --trace-collector-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_otel_collector) }}
 {{- end }}
           name: manager
           ports:
