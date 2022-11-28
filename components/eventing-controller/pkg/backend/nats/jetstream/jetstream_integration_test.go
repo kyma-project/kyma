@@ -1070,7 +1070,7 @@ func setupTestEnvironment(t *testing.T, newCRD bool) *TestEnvironment {
 	if newCRD {
 		jsBackendNew = jetstreamv2.NewJetStream(natsConfig, metricsCollector, cleanerv2, defaultSubsConfig, defaultLogger)
 	} else {
-		jsBackend = NewJetStream(natsConfig, metricsCollector, defaultLogger)
+		jsBackend = NewJetStream(natsConfig, metricsCollector, cleaner, defaultLogger)
 	}
 
 	return &TestEnvironment{

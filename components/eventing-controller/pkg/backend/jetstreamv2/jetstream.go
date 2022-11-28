@@ -133,7 +133,7 @@ func (js *JetStream) GetJetStreamSubjects(source string, subjects []string,
 	return result
 }
 
-// DeleteInvalidConsumers deletes all JetStream consumers having no subscription event types in subscription resources
+// DeleteInvalidConsumers deletes all JetStream consumers having no subscription event types in subscription resources.
 func (js *JetStream) DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Subscription) error {
 	consumers := js.jsCtx.Consumers(js.Config.JSStreamName)
 	for con := range consumers {
