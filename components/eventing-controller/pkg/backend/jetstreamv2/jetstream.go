@@ -295,7 +295,6 @@ func (js *JetStream) cleanupUnnecessaryJetStreamSubscribers(
 	subscription *eventingv1alpha2.Subscription,
 	log *zap.SugaredLogger,
 	key SubscriptionSubjectIdentifier) error {
-
 	consumer, err := js.jsCtx.ConsumerInfo(js.Config.JSStreamName, key.ConsumerName())
 	if err != nil {
 		if errors.Is(err, nats.ErrConsumerNotFound) {
