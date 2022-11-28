@@ -315,6 +315,11 @@ async function k8sApply(resources, namespace, patch = true) {
 }
 
 function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
+  return waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, this.watch)
+}
+
+// Allows to pass watch with different than global K8S context.
+function waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, watch) {
   debug('waiting for', path);
   let res;
   let timer;
@@ -330,7 +335,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
             clearTimeout(timer);
             debug('finished waiting for ', path);
             resolve(watchObj.object);
-          }
+          } 
         },
         () => {
         },
@@ -1191,8 +1196,12 @@ function genRandom(len) {
   return res;
 }
 
+function isEnvSet(key) {
+  return process.env[key]
+}
+
 function getEnvOrDefault(key, defValue = '') {
-  if (!process.env[key]) {
+  if (!isEnvSet(key)) {
     if (defValue !== '') {
       return defValue;
     }
@@ -1203,7 +1212,7 @@ function getEnvOrDefault(key, defValue = '') {
 }
 
 function getEnvOrThrow(key) {
-  if (!process.env[key]) {
+  if (!isEnvSet(key)) {
     throw new Error(`Env ${key} not present`);
   }
 
@@ -1664,6 +1673,7 @@ module.exports = {
   k8sApply,
   k8sDelete,
   waitForK8sObject,
+  waitForK8sObjectWithWatch,
   waitForNamespace,
   waitForClusterAddonsConfiguration,
   waitForVirtualService,
@@ -1706,6 +1716,7 @@ module.exports = {
   fromBase64,
   toBase64,
   genRandom,
+  isEnvSet,
   getEnvOrThrow,
   wait,
   patchApplicationGateway,
