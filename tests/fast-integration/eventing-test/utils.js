@@ -18,6 +18,7 @@ const kymaVersion = process.env.KYMA_VERSION || '';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
+const testV1Alpha2CRD = process.env.ENABLE_NEW_CRD_VERSION === 'true';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;

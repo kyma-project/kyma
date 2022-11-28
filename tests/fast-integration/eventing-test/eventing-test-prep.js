@@ -12,6 +12,7 @@ const {
   kymaVersion,
   isSKR,
   testCompassFlow,
+  testV1Alpha2CRD,
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
@@ -53,6 +54,7 @@ describe('Eventing tests preparation', function() {
     debug(`SKR instance Id: ${skrInstanceId}`);
     debug(`SKR shoot name: ${shootName}`);
     debug(`Test Compass flow enabled: ${testCompassFlow}`);
+    debug(`Test Subscription v1alpha2 CRD enabled: ${testV1Alpha2CRD}`);
   });
 
   it('Prepare SKR Kubeconfig if needed', async function() {
