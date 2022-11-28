@@ -20,7 +20,7 @@ class KCPConfig {
     this.password = getEnvOrThrow('KCP_TECH_USER_PASSWORD');
     this.clientID = getEnvOrThrow('KCP_OIDC_CLIENT_ID');
 
-    if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+    if (process.env.KCP_OIDC_CLIENT_SECRET) {
       this.clientSecret = getEnvOrThrow('KCP_OIDC_CLIENT_SECRET');
     } else {
       this.oauthClientID = getEnvOrThrow('KCP_OAUTH2_CLIENT_ID');
@@ -38,7 +38,7 @@ class KCPWrapper {
     this.kcpConfigPath = config.kcpConfigPath;
     this.gardenerNamespace = config.gardenerNamespace;
     this.clientID = config.clientID;
-    // this.clientSecret = config.clientSecret;
+    this.clientSecret = config.clientSecret;
     this.oauthClientID = config.oauthClientID;
     this.oauthSecret = config.oauthSecret;
     this.oauthIssuer = config.oauthIssuer;
@@ -56,17 +56,19 @@ class KCPWrapper {
     stream.once('open', (_) => {
       stream.write(`gardener-namespace: "${this.gardenerNamespace}"\n`);
       stream.write(`oidc-client-id: "${this.clientID}"\n`);
-      // stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
-
-      stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
-      stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
-      stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+      if (process.env.KCP_OIDC_CLIENT_SECRET) {
+        stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+        stream.write(`username: ${this.username}\n`);
+      } else {
+        stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
+        stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
+        stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+      }
 
       stream.write(`keb-api-url: "${this.host}"\n`);
       stream.write(`oidc-issuer-url: "${this.issuerURL}"\n`);
       stream.write(`mothership-api-url: "${this.motherShipApiUrl}"\n`);
       stream.write(`kubeconfig-api-url: "${this.kubeConfigApiUrl}"\n`);
-      // stream.write(`username: ${this.username}\n`);
       stream.end();
     });
   }
@@ -115,7 +117,7 @@ class KCPWrapper {
 
   async login() {
     let args;
-    if (isEnvSet('KCP_OIDC_CLIENT_SECRET')) {
+    if (process.env.KCP_OIDC_CLIENT_SECRET) {
       args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     } else {
       args = ['login'];

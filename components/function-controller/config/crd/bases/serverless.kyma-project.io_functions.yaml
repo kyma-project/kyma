@@ -536,6 +536,18 @@ spec:
                 - maxReplicas
                 - minReplicas
                 type: object
+              secretMounts:
+                items:
+                  properties:
+                    mountPath:
+                      type: string
+                    secretName:
+                      type: string
+                  required:
+                  - mountPath
+                  - secretName
+                  type: object
+                type: array
               source:
                 properties:
                   gitRepository:

@@ -80,13 +80,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-16091"
+      version: "PR-16108"
     function_webhook:
       name: "function-webhook"
-      version: "PR-16091"
+      version: "PR-16108"
     function_build_init:
       name: "function-build-init"
-      version: "PR-16091"
+      version: "PR-16108"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "PR-16116"
@@ -267,6 +267,8 @@ grafanaDashboard:
 
 dockerRegistry:
   enableInternal: true
+  gateway: "kyma-system/kyma-gateway"
+  gatewayCert: "kyma-gateway-certs"
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
