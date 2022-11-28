@@ -188,6 +188,16 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							},
 							Resources:    collectorResources,
 							VolumeMounts: []corev1.VolumeMount{{Name: "config", MountPath: "/conf"}},
+							LivenessProbe: &corev1.Probe{
+								ProbeHandler: corev1.ProbeHandler{
+									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: 13133}},
+								},
+							},
+							ReadinessProbe: &corev1.Probe{
+								ProbeHandler: corev1.ProbeHandler{
+									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: 13133}},
+								},
+							},
 						},
 					},
 					Volumes: []corev1.Volume{

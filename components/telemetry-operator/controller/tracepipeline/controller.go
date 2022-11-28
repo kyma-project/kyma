@@ -55,7 +55,7 @@ func NewReconciler(client client.Client, config Config, scheme *runtime.Scheme) 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := logf.FromContext(ctx)
 
-	logger.Info("Reconciliation triggered")
+	logger.V(1).Info("Reconciliation triggered")
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
