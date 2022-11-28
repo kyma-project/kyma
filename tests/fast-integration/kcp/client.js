@@ -37,7 +37,7 @@ class KCPWrapper {
     this.kcpConfigPath = config.kcpConfigPath;
     this.gardenerNamespace = config.gardenerNamespace;
     this.clientID = config.clientID;
-    // this.clientSecret = config.clientSecret;
+    this.clientSecret = config.clientSecret;
     this.oauthClientID = config.oauthClientID;
     this.oauthSecret = config.oauthSecret;
     this.oauthIssuer = config.oauthIssuer;
@@ -55,17 +55,19 @@ class KCPWrapper {
     stream.once('open', (_) => {
       stream.write(`gardener-namespace: "${this.gardenerNamespace}"\n`);
       stream.write(`oidc-client-id: "${this.clientID}"\n`);
-      // stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
-
-      stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
-      stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
-      stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+      if (process.env.KCP_OIDC_CLIENT_SECRET) {
+        stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+      } else {
+        stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
+        stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
+        stream.write(`oauth2-issuer-url: "${this.oauthIssuer}"\n`);
+      }
 
       stream.write(`keb-api-url: "${this.host}"\n`);
       stream.write(`oidc-issuer-url: "${this.issuerURL}"\n`);
       stream.write(`mothership-api-url: "${this.motherShipApiUrl}"\n`);
       stream.write(`kubeconfig-api-url: "${this.kubeConfigApiUrl}"\n`);
-      // stream.write(`username: ${this.username}\n`);
+      stream.write(`username: ${this.username}\n`);
       stream.end();
     });
   }
