@@ -174,7 +174,9 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 
 	result, err = r.ResCli.Update(context.Background(), unstructuredObj, metav1.UpdateOptions{})
 	if err != nil {
-		return nil, err // upstream caller RetryOnConflict doesn't work with wrapped errors
+		// upstream caller RetryOnConflict doesn't work with wrapped errors
+		// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
+		return nil, err
 	}
 
 	namespace := "-"

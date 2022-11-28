@@ -92,14 +92,18 @@ func (f *Function) Update(spec serverlessv1alpha1.FunctionSpec) error {
 		// correct update must first perform get
 		fn, err := f.Get()
 		if err != nil {
-			return err // RetryOnConflict doesn't work with wrapped errors
+			// RetryOnConflict doesn't work with wrapped errors
+			// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
+			return err
 		}
 
 		fnCopy := fn.DeepCopy()
 		fnCopy.Spec = spec
 
 		_, err = f.resCli.Update(fnCopy)
-		return err // RetryOnConflict doesn't work with wrapped errors
+		// RetryOnConflict doesn't work with wrapped errors
+		// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
+		return err
 	}, f.log)
 
 	return errors.Wrapf(err, "while updating Function %s in namespace %s", f.name, f.namespace)
