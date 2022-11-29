@@ -25,7 +25,8 @@ push-runtime-k3d:
 IMAGE_HELM_TPL='{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_java11-jvm-alpha) }}'
 .PHONY: generate-configmaps
 generate-configmaps:
-	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${IMAGE_HELM_TPL} CONFIGMAP=resources/java11-jvm-alpha.yaml  python3 resources/generate-cm.py
+	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${IMAGE_HELM_TPL}  python3 ./resources/generate-dockerfile.py  | \
+	CONFIGMAP=resources/java11-jvm-alpha.yaml RUNTIME=java11-jvm-alpha python3 resources/generate-cm.py > ./resources/java11-jvm-alpha.yaml
 
 
 apply-java-runtime:
