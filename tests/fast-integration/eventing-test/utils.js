@@ -136,6 +136,7 @@ module.exports = {
   isSKR,
   skrInstanceId,
   testCompassFlow,
+  testV1Alpha2CRD,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   timeoutTime,
