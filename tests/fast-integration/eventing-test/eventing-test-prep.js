@@ -41,7 +41,7 @@ const {
   debug,
   createEventingBackendK8sSecret,
   createK8sConfigMap,
-  createAPIRuleForService,
+  createApiRuleForService,
   deleteApiRule,
 } = require('../utils');
 const {
@@ -107,7 +107,7 @@ describe('Eventing tests preparation', function() {
     // Create a configmap that contains stream data for jetstream so that during the test,
     // we can verify that the stream was not affected/recreated
     debug('expose the eventing-nats service with an apirule');
-    const vs = await createAPIRuleForService(eventingNatsApiRuleAName,
+    const vs = await createApiRuleForService(eventingNatsApiRuleAName,
         kymaSystem,
         eventingNatsSvcName,
         8222);

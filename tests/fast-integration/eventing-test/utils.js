@@ -146,7 +146,7 @@ function skipAtLeastOnceDeliveryTest() {
       streamConfig['consumer_deliver_policy'] === 'all');
 }
 
-function skipStreamReCreationTest(streamData) {
+function isStreamCreationTimeMissing(streamData) {
   return streamData.streamCreationTime === undefined;
 }
 
@@ -176,6 +176,6 @@ module.exports = {
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
   getJetStreamStreamData,
-  skipStreamReCreationTest,
+  isStreamCreationTimeMissing,
   subscriptionNames,
 };

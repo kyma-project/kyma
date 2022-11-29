@@ -1458,7 +1458,7 @@ function deleteEventingBackendK8sSecret(name, namespace='default') {
  * @param {string} svcName - service to expose as apirule
  * @param {int} port - port of the service to expose as apirule
  */
-async function createAPIRuleForService(name, namespace='default', svcName, port) {
+async function createApiRuleForService(name, namespace='default', svcName, port) {
   const apiRuleJson = {
     apiVersion: 'gateway.kyma-project.io/v1beta1',
     kind: 'APIRule',
@@ -1832,7 +1832,7 @@ module.exports = {
   deleteEventingBackendK8sSecret,
   createK8sConfigMap,
   deleteK8sConfigMap,
-  createAPIRuleForService,
+  createApiRuleForService,
   deleteApiRule,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,

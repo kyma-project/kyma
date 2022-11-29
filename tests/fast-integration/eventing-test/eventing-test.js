@@ -32,7 +32,7 @@ const {
   k8sApply,
   deleteK8sPod,
   eventingSubscription, waitForEndpoint, waitForPodStatusWithLabel, waitForPodWithLabelAndCondition,
-  createAPIRuleForService, getConfigMap, deleteApiRule,
+  createApiRuleForService, getConfigMap, deleteApiRule,
 } = require('../utils');
 const {
   eventingMonitoringTest,
@@ -49,7 +49,7 @@ const {
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
-  skipStreamReCreationTest,
+  isStreamCreationTimeMissing,
   getJetStreamStreamData,
   streamDataConfigMapName,
   eventingNatsSvcName,
@@ -130,6 +130,8 @@ describe('Eventing tests', function() {
     });
   }
 
+  // testStreamNotReCreated - compares the stream creation timestamp before and after upgrade
+  // and if the timestamp is the same, we conclude that the stream is not re created.
   function testStreamNotReCreated() {
     context('stream check with JetStream backend', function() {
       let wantStreamData = null;
@@ -142,14 +144,14 @@ describe('Eventing tests', function() {
           console.log('Skipping the stream recreation check due to missing configmap!');
           this.skip();
         }
-        if (skipStreamReCreationTest(wantStreamData)) {
-          console.log('Skipping the stream recreation check due to missing info!');
+        if (isStreamCreationTimeMissing(wantStreamData)) {
+          console.log('Skipping the stream recreation check as the stream creation timestamp is missing!');
           this.skip();
         }
       });
 
       it('Get the current stream creation timestamp', async function() {
-        const vs = await createAPIRuleForService(eventingNatsApiRuleAName,
+        const vs = await createApiRuleForService(eventingNatsApiRuleAName,
             kymaSystem,
             eventingNatsSvcName,
             8222);
@@ -163,7 +165,7 @@ describe('Eventing tests', function() {
       });
 
 
-      it('Delete the APIRule created', async function() {
+      it('Delete the created APIRule', async function() {
         await deleteApiRule(eventingNatsApiRuleAName, kymaSystem);
       });
     });
