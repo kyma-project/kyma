@@ -12,7 +12,7 @@ clean:
 #------------------------------------------------------JVM---------------------------------------------------------#
 .PHONY: build-runtime
 build-runtime: install-sdk
-	docker build -t ${RUNTIME_IMAGE} -f  Dockerfile-11jvm-runtime .
+	docker build -t ${RUNTIME_IMAGE} -f  Dockerfile-jvm11-runtime .
 
 .PHONY: build-runtime
 push-runtime-k3d:
@@ -41,7 +41,7 @@ FUNCTION_IMAGE=java-jvm11-function
 
 .PHONY: Dockerfile-jvm11-function-local
 Dockerfile-jvm11-function-local:
-	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${RUNTIME_IMAGE_REMOTE}  python3 ./resources/generate-dockerfile.py
+	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${RUNTIME_IMAGE}  python3 ./resources/generate-dockerfile.py > Dockerfile-jvm11-function-local
 
 run-jvm-hello-world: build-runtime Dockerfile-jvm11-function-local
 	docker build --tag ${FUNCTION_IMAGE} \
