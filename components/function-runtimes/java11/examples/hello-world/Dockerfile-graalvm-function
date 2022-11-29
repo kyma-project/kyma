@@ -1,0 +1,22 @@
+FROM graal-vm-runtime:11 as builder
+ARG WORKSPACE=/workspace
+ARG SOURCE_DIR=/workspace/src
+WORKDIR $WORKSPACE
+
+COPY $SOURCE_DIR/pom.xml $WORKSPACE/function.pom.xml
+RUN mvn -f function.pom.xml dependency:go-offline
+
+COPY $SOURCE_DIR/src/main/java/io/project/kyma/serverless/Handler.java $WORKSPACE/src/main/java/io/project/kyma/serverless/handler/Handler.java
+RUN mvn -f runtime.pom.xml package
+RUN native-image --no-fallback --static --verbose -jar $WORKSPACE/target/kyma-java-runtime-0.0.1.jar function
+
+FROM alpine:3.16
+ARG WORKSPACE=/workspace
+
+COPY --from=builder $WORKSPACE/function /app/function
+
+USER 1000
+
+ENV APP_HANDLER_CLASS="io.project.kyma.serverless.handler.Handler"
+
+ENTRYPOINT ["/app/function","--native"]
