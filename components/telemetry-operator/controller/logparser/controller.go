@@ -103,14 +103,14 @@ func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {
 		return requests
 	}
 
-	var allPipelines telemetryv1alpha1.LogPipelineList
-	if err := r.List(context.Background(), &allPipelines); err != nil {
-		ctrl.Log.Error(err, "DamonSet UpdateEvent: fetching LogPipelineList failed!", err.Error())
+	var allParsers telemetryv1alpha1.LogParserList
+	if err := r.List(context.Background(), &allParsers); err != nil {
+		ctrl.Log.Error(err, "DamonSet UpdateEvent: fetching LogParserList failed!", err.Error())
 		return requests
 	}
 
-	for _, pipeline := range allPipelines.Items {
-		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}})
+	for _, parser := range allParsers.Items {
+		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: parser.Name}})
 	}
 	ctrl.Log.V(1).Info(fmt.Sprintf("DaemonSet changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
 	return requests
