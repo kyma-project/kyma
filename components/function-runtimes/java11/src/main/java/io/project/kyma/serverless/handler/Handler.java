@@ -3,14 +3,14 @@ package io.project.kyma.serverless.handler;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import io.project.kyma.serverless.sdk.CloudEventImpl;
+import io.project.kyma.serverless.sdk.CloudEvent;
 import io.project.kyma.serverless.sdk.Function;
 
 
 public class Handler implements Function {
 
     @Override
-    public Response call(CloudEventImpl event, Context context) {
+    public Response call(CloudEvent event, Context context) {
         throw new IllegalStateException("Not implemented stub Handler");
         //TODO: read data from request which will be passed to receiver
 //        String receiverData = "";

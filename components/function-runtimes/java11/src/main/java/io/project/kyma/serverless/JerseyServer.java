@@ -8,6 +8,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.project.kyma.serverless.handler.Handler;
+import io.project.kyma.serverless.sdk.CloudEvent;
 import io.project.kyma.serverless.sdk.CloudEventImpl;
 import io.project.kyma.serverless.sdk.Function;
 
@@ -80,7 +81,7 @@ public class JerseyServer {
             span = tracer.spanBuilder("request").setSpanKind(SpanKind.SERVER).startSpan();
             span.makeCurrent();
 
-            var ceEvent = new CloudEventImpl(httpRequest, openTelemetry, tracer, this.publisherProxyAddr);
+            var ceEvent = new CloudEvent(httpRequest, openTelemetry, tracer, this.publisherProxyAddr);
             return this.fn.call(ceEvent, null);
         } finally {
             if (span != null) {
