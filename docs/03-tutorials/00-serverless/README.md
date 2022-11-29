@@ -17,7 +17,7 @@ Kyma Dashboard is perfect to gain basic experience and start the journey with Ky
 Kyma Dashboard will also help you expose your Function using HTTP, define environment variables, subscribe to CloudEvents, bind ServiceInstances, and even show you the Function logs - all in one place.
 
 Get started with [Function UI](./svls-01-create-inline-function.md)
-
+//TODO change img
 ![function-ui](./assets/svls-function-ui.png)
 
 # Use Kyma CLI for better development experience
