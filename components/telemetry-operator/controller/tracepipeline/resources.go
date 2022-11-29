@@ -23,12 +23,12 @@ const (
 var (
 	collectorResources = corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("10m"),
-			corev1.ResourceMemory: resource.MustParse("64Mi"),
+			corev1.ResourceCPU:    resource.MustParse("150m"),
+			corev1.ResourceMemory: resource.MustParse("256Mi"),
 		},
 		Limits: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("250m"),
-			corev1.ResourceMemory: resource.MustParse("512Mi"),
+			corev1.ResourceCPU:    resource.MustParse("1000m"),
+			corev1.ResourceMemory: resource.MustParse("1Gi"),
 		},
 	}
 	configMapKey          = "relay.conf"
@@ -47,6 +47,7 @@ func getLabels(config Config) map[string]string {
 func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.ConfigMap {
 	exporterConfig := makeExporterConfig(output)
 	outputType := getOutputType(output)
+	processorsConfig := makeProcessorsConfig()
 	conf := confmap.NewFromStringMap(map[string]any{
 		"receivers": map[string]any{
 			"opencensus": map[string]any{},
@@ -57,12 +58,14 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 				},
 			},
 		},
-		"exporters": exporterConfig,
+		"exporters":  exporterConfig,
+		"processors": processorsConfig,
 		"service": map[string]any{
 			"pipelines": map[string]any{
 				"traces": map[string]any{
-					"receivers": []any{"opencensus", "otlp"},
-					"exporters": []any{outputType},
+					"receivers":  []any{"opencensus", "otlp"},
+					"processors": []any{"memory_limiter", "batch"},
+					"exporters":  []any{outputType},
 				},
 			},
 			"telemetry": map[string]any{
@@ -118,6 +121,31 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 		outputType: map[string]any{
 			"endpoint": fmt.Sprintf("${%s}", otlpEndpointVariable),
 			"headers":  headers,
+			"sending_queue": map[string]any{
+				"enabled":    true,
+				"queue_size": 512,
+			},
+			"retry_on_failure": map[string]any{
+				"enabled":          true,
+				"initial_interval": "5s",
+				"max_interval":     "30s",
+				"max_elapsed_time": "300s",
+			},
+		},
+	}
+}
+
+func makeProcessorsConfig() map[string]any {
+	return map[string]any{
+		"batch": map[string]any{
+			"send_batch_size":     512,
+			"timeout":             "10s",
+			"send_batch_max_size": 512,
+		},
+		"memory_limiter": map[string]any{
+			"check_interval":         "1s",
+			"limit_percentage":       75,
+			"spike_limit_percentage": 10,
 		},
 	}
 }
