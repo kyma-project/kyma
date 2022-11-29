@@ -1665,7 +1665,6 @@ module.exports = {
   k8sApply,
   k8sDelete,
   waitForK8sObject,
-  waitForK8sObjectWithWatch,
   waitForNamespace,
   waitForClusterAddonsConfiguration,
   waitForVirtualService,
