@@ -63,9 +63,9 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 		"service": map[string]any{
 			"pipelines": map[string]any{
 				"traces": map[string]any{
-					"receivers": []any{"opencensus", "otlp"},
+					"receivers":  []any{"opencensus", "otlp"},
 					"processors": []any{"memory_limiter", "batch"},
-					"exporters": []any{outputType},
+					"exporters":  []any{outputType},
 				},
 			},
 			"telemetry": map[string]any{
