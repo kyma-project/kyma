@@ -61,8 +61,7 @@ func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
 	for i := range pipelines.Items {
 		var pipeline = pipelines.Items[i]
 		if containsAnyRefToSecret(&pipeline, secret) {
-			request := reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}}
-			requests = append(requests, request)
+			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: pipeline.Name}})
 			ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: added reconcile request for pipeline: %s", pipeline.Name))
 		}
 	}
@@ -72,9 +71,7 @@ func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
 func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *corev1.Secret) bool {
 	secretName := types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}
 	if pipeline.Spec.Output.Otlp.Endpoint.IsDefined() &&
-		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom != nil &&
-		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.IsSecretKeyRef() &&
-		pipeline.Spec.Output.Otlp.Endpoint.ValueFrom.SecretKeyRef.NamespacedName() == secretName {
+		referencesSecret(pipeline.Spec.Output.Otlp.Endpoint, secretName) {
 		return true
 	}
 
