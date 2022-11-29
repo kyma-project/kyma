@@ -18,7 +18,8 @@ const kymaVersion = process.env.KYMA_VERSION || '';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skrInstanceId = process.env.INSTANCE_ID || '';
 const testCompassFlow = process.env.TEST_COMPASS_FLOW || false;
-const testV1Alpha2CRD = process.env.ENABLE_NEW_CRD_VERSION === 'true';
+const testV1Alpha2CRD = process.env.ENABLE_NEW_CRD_VERSION === 'true111';
+const subCRDVersion = testV1Alpha2CRD? 'v1alpha2': 'v1alpha1';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
 const suffix = getSuffix(isSKR, testCompassFlow);
 const appName = `app-${suffix}`;
@@ -137,6 +138,7 @@ module.exports = {
   skrInstanceId,
   testCompassFlow,
   testV1Alpha2CRD,
+  subCRDVersion,
   backendK8sSecretName,
   backendK8sSecretNamespace,
   timeoutTime,

@@ -304,6 +304,7 @@ async function k8sApply(resources, namespace, patch = true) {
             debug(resource.kind, resource.metadata.name, 'created');
           } catch (createError) {
             debug(resource.kind, resource.metadata.name, 'failed to create');
+            debug(JSON.stringify(createError, null, 4));
             throw createError;
           }
         } else {
@@ -419,9 +420,9 @@ function waitForFunction(name, namespace = 'default', timeout = 90_000) {
   );
 }
 
-async function getAllSubscriptions(namespace = 'default') {
+async function getAllSubscriptions(namespace = 'default', crdVersion='v1alpha1') {
   try {
-    const path = `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`;
+    const path = `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`;
     const response = await k8sDynamicApi.requestPromise({
       url: k8sDynamicApi.basePath + path,
       qs: {limit: 500},
@@ -466,9 +467,9 @@ async function getEventingBackend(namespace = 'kyma-system') {
   return '';
 }
 
-function waitForSubscription(name, namespace = 'default', timeout = 180_000) {
+function waitForSubscription(name, namespace = 'default', crdVersion='v1alpha1', timeout = 180_000) {
   return waitForK8sObject(
-      `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
+      `/apis/eventing.kyma-project.io/${crdVersion}/namespaces/${namespace}/subscriptions`,
       {},
       (_type, _apiObj, watchObj) => {
         return (
@@ -1350,11 +1351,6 @@ function eventingSubscription(eventType, sink, name, namespace) {
           },
         ],
       },
-      protocol: 'BEB',
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: 'AT-LEAST-ONCE',
-      },
       sink: sink /* http://lastorder.test.svc.cluster.local*/,
     },
   };
@@ -1610,10 +1606,10 @@ async function printEventingPublisherProxyLogs() {
   }
 }
 
-async function printAllSubscriptions(testNamespace) {
+async function printAllSubscriptions(testNamespace, crdVersion='v1alpha1') {
   try {
     debug(`Printing all subscriptions from namespace: ${testNamespace}`);
-    const subs = await getAllSubscriptions(testNamespace);
+    const subs = await getAllSubscriptions(testNamespace, crdVersion);
     debug(JSON.stringify(subs, null, 4));
   } catch (err) {
     error(err);

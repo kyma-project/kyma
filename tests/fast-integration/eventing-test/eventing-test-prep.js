@@ -13,6 +13,7 @@ const {
   isSKR,
   testCompassFlow,
   testV1Alpha2CRD,
+  subCRDVersion,
   skrInstanceId,
   backendK8sSecretName,
   backendK8sSecretNamespace,
@@ -55,6 +56,7 @@ describe('Eventing tests preparation', function() {
     debug(`SKR shoot name: ${shootName}`);
     debug(`Test Compass flow enabled: ${testCompassFlow}`);
     debug(`Test Subscription v1alpha2 CRD enabled: ${testV1Alpha2CRD}`);
+    debug(`Test Subscription CRD version: ${subCRDVersion}`);
   });
 
   it('Prepare SKR Kubeconfig if needed', async function() {
