@@ -3,16 +3,12 @@ FROM maven:3.6-jdk-11
 #FROM openjdk:17.0 as BUILD
 WORKDIR /build
 
-
 #Compile and install SDK locally
 COPY serverless-java-sdk serverless-java-sdk
 RUN (cd serverless-java-sdk && mvn clean package install)
 
-# To reuse the build cache, here we split maven dependency
-# download and package into two RUN commands to avoid cache invalidation.
 COPY ./pom.xml .
 RUN mvn dependency:go-offline
-
 
 # Create runtime
 COPY ./src ./src

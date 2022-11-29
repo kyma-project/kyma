@@ -19,32 +19,6 @@ push-runtime-k3d:
 	docker image tag ${RUNTIME_IMAGE}  ${RUNTIME_IMAGE_REMOTE}
 	docker push ${RUNTIME_IMAGE_REMOTE}
 
-
-#------------------------------------------------------GraalVM---------------------------------------------------------#
-#TODO: No need to build graalvm
-.PHONY: build-graalvm-base-image
-build-graalvm:
-	docker build -t graal-vm:11 -f Dockerfile-graalvm-11 .
-
-.PHONY: build-graalvm-runtime
-build-runtime-graalvm:
-	docker build -t graal-vm-runtime:11 -f Dockerfile-graalvm-runtime .
-
-
-push-runtime-graalvm:
-	docker tag graal-vm-runtime:11 "${REGISTRY_ADR}"/graal-vm-runtime:11
-	docker push "${REGISTRY_ADR}"/graal-vm-runtime:11
-
-#This step generate files which are used by native-image to include all needed classes which are dynamically loaded at runtime
-#Run this and make some calls to function
-#https://www.graalvm.org/22.3/reference-manual/native-image/guides/build-with-reflection/
-.PHONY: generate-reflection-native
-generate-reflection-native: clean
-	OUTPUT_PATH="./src/main/resouces/META-INF/native-image/io.project.kyma.serverless"
-	mkdir -p "${OUTPUT_PATH}"
-	java -agentlib:native-image-agent=config-output-dir="${OUTPUT_PATH}"  -jar target/kyma-java-runtime-0.0.1.jar --native
-
-
 #------------------------------------------------------K8s-Resources---------------------------------------------------#
 #Generate configmaps which can be used to move to serverless resources
 
