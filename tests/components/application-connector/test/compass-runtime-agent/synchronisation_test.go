@@ -3,11 +3,13 @@ package compass_runtime_agent
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/executor"
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/random"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 const checkAppExistsPeriod = 10 * time.Second
@@ -44,6 +46,8 @@ func (cs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 }
 
 func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
+	t := cs.T()
+	t.Helper()
 
 	exec := func() error {
 		return cs.directorClient.AssignApplicationToFormation(applicationID, cs.formationName)
@@ -52,7 +56,7 @@ func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(a
 	verify := func() bool {
 		_, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
 		if err != nil {
-			cs.T().Log(fmt.Sprintf("Failed to get app: %v", err))
+			t.Logf("Failed to get app: %v", err)
 		}
 
 		return err == nil
@@ -64,4 +68,37 @@ func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(a
 		Tick:                 checkAppExistsPeriod,
 		Timeout:              appCreationTimeout,
 	}.Do()
+}
+
+func (cs *CompassRuntimeAgentSuite) TestDeletingApplication() {
+	expectedAppName := "app1"
+	compassAppName := expectedAppName + random.RandomString(10)
+
+	//Create Application in Director
+	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
+	cs.Require().NoError(err)
+
+	synchronizedCompassAppName := fmt.Sprintf("mp-%s", compassAppName)
+
+	applicationInterface := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
+	err = cs.assignApplicationToFormationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
+	cs.Assert().NoError(err)
+
+	// Compare Application created by Compass Runtime Agent with expected result
+	err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
+	cs.Assert().NoError(err)
+
+	// Clean up
+	err = cs.directorClient.UnassignApplication(applicationID, cs.formationName)
+	cs.Assert().NoError(err)
+
+	err = cs.directorClient.UnregisterApplication(applicationID)
+	cs.Require().NoError(err)
+
+	err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
+
+	time.Sleep(20 * time.Second)
+
+	errStr := fmt.Sprintf("\"%v\" not found", compassAppName)
+	cs.ErrorContains(err, errStr)
 }
