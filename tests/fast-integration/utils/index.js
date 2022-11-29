@@ -315,7 +315,7 @@ async function k8sApply(resources, namespace, patch = true) {
 }
 
 function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
-  return waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, this.watch)
+  return waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, this.watch);
 }
 
 // Allows to pass watch with different than global K8S context.
@@ -335,7 +335,7 @@ function waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, wa
             clearTimeout(timer);
             debug('finished waiting for ', path);
             resolve(watchObj.object);
-          } 
+          }
         },
         () => {
         },
@@ -1197,7 +1197,7 @@ function genRandom(len) {
 }
 
 function isEnvSet(key) {
-  return process.env[key]
+  return process.env[key];
 }
 
 function getEnvOrDefault(key, defValue = '') {
