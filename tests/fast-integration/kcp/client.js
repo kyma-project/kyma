@@ -4,7 +4,6 @@ const {
   getEnvOrThrow,
   debug,
   wait,
-  isEnvSet,
 } = require('../utils');
 const {inspect} = require('util');
 

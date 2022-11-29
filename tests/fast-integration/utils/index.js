@@ -315,7 +315,7 @@ async function k8sApply(resources, namespace, patch = true) {
 }
 
 function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
-  return waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, this.watch);
+  return waitForK8sObjectWithWatch(path, query, checkFn, timeout, timeoutMsg, watch);
 }
 
 // Allows to pass watch with different than global K8S context.
