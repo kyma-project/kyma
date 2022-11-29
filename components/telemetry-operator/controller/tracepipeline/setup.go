@@ -27,7 +27,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(r.mapSecrets),
+			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
 			builder.WithPredicates(onlyUpdate()),
 		)
 
@@ -47,7 +47,7 @@ func onlyUpdate() predicate.Predicate {
 	}
 }
 
-func (r *Reconciler) mapSecrets(object client.Object) []reconcile.Request {
+func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
 	secret := object.(*corev1.Secret)
 	var pipelines telemetryv1alpha1.TracePipelineList
 	var requests []reconcile.Request
@@ -87,6 +87,13 @@ func containsAnyRefToSecret(pipeline *telemetryv1alpha1.TracePipeline, secret *c
 
 	auth := pipeline.Spec.Output.Otlp.Authentication.Basic
 
-	return (auth.User.ValueFrom.IsSecretKeyRef() && auth.User.ValueFrom.SecretKeyRef.NamespacedName() == secretName) ||
-		(auth.Password.ValueFrom.IsSecretKeyRef() && auth.Password.ValueFrom.SecretKeyRef.NamespacedName() == secretName)
+	return referencesSecret(auth.User, secretName) || referencesSecret(auth.Password, secretName)
+}
+
+func referencesSecret(valueType telemetryv1alpha1.ValueType, secretName types.NamespacedName) bool {
+	if valueType.Value == "" && valueType.ValueFrom != nil && valueType.ValueFrom.IsSecretKeyRef() {
+		return valueType.ValueFrom.SecretKeyRef.NamespacedName() == secretName
+	}
+
+	return false
 }
