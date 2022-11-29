@@ -9,7 +9,6 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.project.kyma.serverless.handler.Handler;
 import io.project.kyma.serverless.sdk.CloudEvent;
-import io.project.kyma.serverless.sdk.CloudEventImpl;
 import io.project.kyma.serverless.sdk.Function;
 
 import javax.ws.rs.*;
@@ -24,7 +23,7 @@ import java.util.logging.Logger;
 public class JerseyServer {
 
 
-    private Function fn;
+    private final Function fn;
 
     private static final Logger logger = Logger.getGlobal();
 
@@ -68,14 +67,9 @@ public class JerseyServer {
 
 
     private Response callUserFunction(ContainerRequestContext httpRequest) {
-        if (this.fn == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Container not specialized").build();
-        }
-
         var tracer = openTelemetry.getTracerProvider().get(svcName);
-        GlobalOpenTelemetry.getPropagators().getTextMapPropagator().fields().forEach(a -> System.out.println("Headers from propagator:" + a));
         var extractedContext = injectPropagatorGetter(httpRequest);
-        Scope scope = extractedContext.makeCurrent();
+        extractedContext.makeCurrent();
         Span span = null;
         try {
             span = tracer.spanBuilder("request").setSpanKind(SpanKind.SERVER).startSpan();
