@@ -1196,12 +1196,8 @@ function genRandom(len) {
   return res;
 }
 
-function isEnvSet(key) {
-  return process.env[key];
-}
-
 function getEnvOrDefault(key, defValue = '') {
-  if (!isEnvSet(key)) {
+  if (!process.env[key]) {
     if (defValue !== '') {
       return defValue;
     }
@@ -1212,7 +1208,7 @@ function getEnvOrDefault(key, defValue = '') {
 }
 
 function getEnvOrThrow(key) {
-  if (!isEnvSet(key)) {
+  if (!process.env[key]) {
     throw new Error(`Env ${key} not present`);
   }
 
@@ -1716,7 +1712,6 @@ module.exports = {
   fromBase64,
   toBase64,
   genRandom,
-  isEnvSet,
   getEnvOrThrow,
   wait,
   patchApplicationGateway,
