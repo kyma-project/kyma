@@ -29,6 +29,11 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
 			builder.WithPredicates(onlyUpdate()),
+		).
+		Watches(
+			&source.Kind{Type: &appsv1.Deployment{}},
+			handler.EnqueueRequestsFromMapFunc(r.mapDeployments),
+			builder.WithPredicates(onlyUpdate()),
 		)
 
 	if r.config.CreateServiceMonitor {
@@ -65,6 +70,26 @@ func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
 			ctrl.Log.V(1).Info(fmt.Sprintf("Secret UpdateEvent: added reconcile request for pipeline: %s", pipeline.Name))
 		}
 	}
+	return requests
+}
+
+func (r *Reconciler) mapDeployments(object client.Object) []reconcile.Request {
+	deployment := object.(*appsv1.Deployment)
+	var requests []reconcile.Request
+	if deployment.Name != r.config.ResourceName || deployment.Namespace != r.config.CollectorNamespace {
+		return requests
+	}
+
+	var allPipelines telemetryv1alpha1.TracePipelineList
+	if err := r.List(context.Background(), &allPipelines); err != nil {
+		ctrl.Log.Error(err, "Deployment UpdateEvent: fetching TracePipelineList failed!", err.Error())
+		return requests
+	}
+
+	for _ = range allPipelines.Items {
+		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: r.config.ResourceName, Namespace: r.config.CollectorNamespace}})
+	}
+	ctrl.Log.V(1).Info(fmt.Sprintf("Deployment changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
 	return requests
 }
 

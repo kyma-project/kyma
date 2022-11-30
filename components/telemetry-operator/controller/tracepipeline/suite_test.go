@@ -18,6 +18,7 @@ package tracepipeline
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"path/filepath"
 	"testing"
 
@@ -93,8 +94,8 @@ var _ = BeforeSuite(func() {
 		LeaderElectionID:       "ddd7ef0b.kyma-project.io",
 	})
 	Expect(err).ToNot(HaveOccurred())
-
-	reconciler := NewReconciler(mgr.GetClient(), testConfig, scheme.Scheme)
+	client := mgr.GetClient()
+	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: client}, scheme.Scheme)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

@@ -25,6 +25,7 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -32,27 +33,35 @@ import (
 )
 
 type Config struct {
+	Deployment           types.NamespacedName
 	CreateServiceMonitor bool
 	CollectorNamespace   string
 	ResourceName         string
 	CollectorImage       string
 }
 
+//go:generate mockery --name DeploymentProber --filename deployment_prober.go
+type DeploymentProber interface {
+	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
+}
+
 type Reconciler struct {
 	client.Client
 	config Config
 	Scheme *runtime.Scheme
+	prober DeploymentProber
 }
 
-func NewReconciler(client client.Client, config Config, scheme *runtime.Scheme) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
+	r.prober = prober
 	return &r
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	logger := logf.FromContext(ctx)
 
 	logger.Info("Reconciliation triggered")
@@ -61,8 +70,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	defer func() {
+		if err := r.updateStatus(ctx, tracePipeline.Name); err != nil {
+			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
+			reconcileErr = fmt.Errorf("failed to update TracePipeline status: %v", err)
+		}
+	}()
 	err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
+
 	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
 }
 

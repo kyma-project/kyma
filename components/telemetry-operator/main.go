@@ -19,10 +19,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -317,7 +318,7 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 		ResourceName:         traceCollectorDeploymentName,
 		CollectorImage:       traceCollectorImage,
 	}
-	return tracepipelinereconciler.NewReconciler(client, config, scheme)
+	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, scheme)
 }
 
 func createDryRunConfig() dryrun.Config {
