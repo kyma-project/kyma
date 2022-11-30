@@ -129,6 +129,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-dashboardExtension:
-  enabled: true

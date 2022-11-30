@@ -11,6 +11,7 @@ import (
 
 var (
 	DefaultBackoff = retry.DefaultBackoff
+	DefaultRetry   = retry.DefaultRetry
 	ErrInvalidFunc = goerrors.New("invalid function")
 )
 
