@@ -57,6 +57,7 @@ class KCPWrapper {
       stream.write(`oidc-client-id: "${this.clientID}"\n`);
       if (process.env.KCP_OIDC_CLIENT_SECRET) {
         stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+        stream.write(`username: ${this.username}\n`);
       } else {
         stream.write(`oauth2-client-id: "${this.oauthClientID}"\n`);
         stream.write(`oauth2-client-secret: "${this.oauthSecret}"\n`);
@@ -67,7 +68,6 @@ class KCPWrapper {
       stream.write(`oidc-issuer-url: "${this.issuerURL}"\n`);
       stream.write(`mothership-api-url: "${this.motherShipApiUrl}"\n`);
       stream.write(`kubeconfig-api-url: "${this.kubeConfigApiUrl}"\n`);
-      stream.write(`username: ${this.username}\n`);
       stream.end();
     });
   }
