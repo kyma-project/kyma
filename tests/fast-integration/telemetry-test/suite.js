@@ -22,6 +22,7 @@ const {
   waitForLogPipelineStatusRunning,
   waitForTracePipeline,
   waitForPodWithLabel,
+  waitForTracePipelineStatusRunning,
 } = require('./helpers');
 
 
@@ -322,6 +323,7 @@ describe('Telemetry Operator', function() {
       it(`Should create TracePipeline '${pipelineName}'`, async function() {
         await k8sApply(pipeline);
         await waitForTracePipeline(pipelineName);
+        await waitForTracePipelineStatusRunning(pipelineName);
       });
 
       it('Should have ready trace collector pods', async () => {

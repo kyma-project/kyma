@@ -86,7 +86,7 @@ func (r *Reconciler) mapDeployments(object client.Object) []reconcile.Request {
 		return requests
 	}
 
-	for _ = range allPipelines.Items {
+	for range allPipelines.Items {
 		requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: r.config.ResourceName, Namespace: r.config.CollectorNamespace}})
 	}
 	ctrl.Log.V(1).Info(fmt.Sprintf("Deployment changed event handling done: Created %d new reconciliation requests.\n", len(requests)))
