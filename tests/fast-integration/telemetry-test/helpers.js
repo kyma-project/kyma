@@ -45,7 +45,7 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 }
 
 function waitForTracePipelineStatusRunning(name) {
-    return waitForLogPipelineStatusCondition(name, 'Running', 180000);
+    return waitForTracePipelineStatusCondition(name, 'Running', 180000);
 }
 
 function waitForTracePipelineStatusCondition(name, lastConditionType, timeout) {
