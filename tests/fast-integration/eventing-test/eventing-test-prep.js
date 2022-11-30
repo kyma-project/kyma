@@ -158,9 +158,9 @@ describe('Eventing tests preparation', function() {
   // prepareAssetsWithoutCompassFlow - Sets up test assets without compass flow
   async function prepareAssetsWithoutCompassFlow() {
     debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');
-    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testV1Alpha2CRD).catch((err) => {
       error(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
+      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testV1Alpha2CRD);
     });
   }
 
