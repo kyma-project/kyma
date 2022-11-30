@@ -27,6 +27,7 @@ type NATSConfig struct {
 
 	// JetStream-specific configs
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
+	EnableNewCRDVersion bool `envconfig:"ENABLE_NEWCRD_VERSION" default:"false"`
 }
 
 // ToConfig converts to a default BEB BEBConfig
