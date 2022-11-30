@@ -60,6 +60,9 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 		},
 		"exporters":  exporterConfig,
 		"processors": processorsConfig,
+		"extensions": map[string]any{
+			"health_check": map[string]any{},
+		},
 		"service": map[string]any{
 			"pipelines": map[string]any{
 				"traces": map[string]any{
@@ -73,6 +76,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 					"address": "0.0.0.0:8888",
 				},
 			},
+			"extensions": []string{"health_check"},
 		},
 	})
 
