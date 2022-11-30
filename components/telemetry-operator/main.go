@@ -74,6 +74,7 @@ var (
 	createServiceMonitor         bool
 	traceCollectorDeploymentName string
 	traceCollectorImage          string
+	traceCollectorPriorityClass  string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -143,6 +144,7 @@ func main() {
 	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", otelImage, "Priority class name for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -313,9 +315,12 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
 		CreateServiceMonitor: createServiceMonitor,
-		CollectorNamespace:   telemetryNamespace,
-		ResourceName:         traceCollectorDeploymentName,
-		CollectorImage:       traceCollectorImage,
+		Namespace:            telemetryNamespace,
+		Deployment: tracepipelinereconciler.DeploymentConfig{
+			Name:              traceCollectorDeploymentName,
+			Image:             traceCollectorImage,
+			PriorityClassName: traceCollectorPriorityClass,
+		},
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)
 }

@@ -31,11 +31,17 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+type DeploymentConfig struct {
+	Name              string
+	Image             string
+	PriorityClassName string
+}
+
 type Config struct {
 	CreateServiceMonitor bool
-	CollectorNamespace   string
-	ResourceName         string
-	CollectorImage       string
+	Namespace            string
+
+	Deployment DeploymentConfig
 }
 
 type Reconciler struct {

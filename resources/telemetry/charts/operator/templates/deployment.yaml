@@ -71,6 +71,9 @@ spec:
 {{- else }}
             - --enable-tracing=true
             - --trace-collector-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_otel_collector) }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+            - --trace-collector-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
 {{- end }}
           name: manager
           ports:

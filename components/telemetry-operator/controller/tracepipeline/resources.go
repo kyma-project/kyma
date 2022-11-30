@@ -42,7 +42,7 @@ var (
 
 func getLabels(config Config) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name": config.ResourceName,
+		"app.kubernetes.io/name": config.Deployment.Name,
 	}
 }
 
@@ -87,8 +87,8 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.ResourceName,
-			Namespace: config.CollectorNamespace,
+			Name:      config.Deployment.Name,
+			Namespace: config.Namespace,
 			Labels:    getLabels(config),
 		},
 		Data: map[string]string{
@@ -100,8 +100,8 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 func makeSecret(config Config, secretData map[string][]byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.ResourceName,
-			Namespace: config.CollectorNamespace,
+			Name:      config.Deployment.Name,
+			Namespace: config.Namespace,
 			Labels:    getLabels(config),
 		},
 		Data: secretData,
@@ -162,8 +162,8 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 	annotations := makePodAnnotations(configHash)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.ResourceName,
-			Namespace: config.CollectorNamespace,
+			Name:      config.Deployment.Name,
+			Namespace: config.Namespace,
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -179,14 +179,14 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  config.ResourceName,
-							Image: config.CollectorImage,
+							Name:  config.Deployment.Name,
+							Image: config.Deployment.Image,
 							Args:  []string{"--config=/conf/" + configMapKey},
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									SecretRef: &corev1.SecretEnvSource{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: config.ResourceName,
+											Name: config.Deployment.Name,
 										},
 										Optional: &optional,
 									},
@@ -219,6 +219,7 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							},
 						},
 					},
+					PriorityClassName: config.Deployment.PriorityClassName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser:    pointer.Int64(otelCollectorUser),
 						RunAsNonRoot: pointer.Bool(true),
@@ -232,7 +233,7 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: config.ResourceName,
+										Name: config.Deployment.Name,
 									},
 									Items: []corev1.KeyToPath{{Key: configMapKey, Path: configMapKey}},
 								},
@@ -259,8 +260,8 @@ func makeCollectorService(config Config) *corev1.Service {
 	labels := getLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.ResourceName,
-			Namespace: config.CollectorNamespace,
+			Name:      config.Deployment.Name,
+			Namespace: config.Namespace,
 			Labels:    labels,
 		},
 		Spec: corev1.ServiceSpec{
@@ -294,8 +295,8 @@ func makeMetricsService(config Config) *corev1.Service {
 	labels := getLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.ResourceName + "-metrics",
-			Namespace: config.CollectorNamespace,
+			Name:      config.Deployment.Name + "-metrics",
+			Namespace: config.Namespace,
 			Labels:    labels,
 		},
 		Spec: corev1.ServiceSpec{
@@ -317,8 +318,8 @@ func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 	labels := getLabels(config)
 	return &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.ResourceName,
-			Namespace: config.CollectorNamespace,
+			Name:      config.Deployment.Name,
+			Namespace: config.Namespace,
 			Labels:    labels,
 		},
 		Spec: monitoringv1.ServiceMonitorSpec{
@@ -329,7 +330,7 @@ func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 			},
 			NamespaceSelector: monitoringv1.NamespaceSelector{
 				MatchNames: []string{
-					config.CollectorNamespace,
+					config.Namespace,
 				},
 			},
 			Selector: metav1.LabelSelector{
