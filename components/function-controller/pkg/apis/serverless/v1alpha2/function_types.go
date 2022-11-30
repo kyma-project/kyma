@@ -132,11 +132,11 @@ type ResourceConfiguration struct {
 }
 
 type SecretMount struct {
-	// SecretName specifies name of the Secret in the Pod's Namespace to use.
+	// SecretName specifies name of the Secret in the Function's Namespace to use.
 	// +kubebuilder:validation:Required
 	SecretName string `json:"secretName"`
 
-	// MountPath specifies path within the container at which the volume should be mounted.
+	// MountPath specifies path within the container at which the Secret should be mounted.
 	// +kubebuilder:validation:Required
 	MountPath string `json:"mountPath"`
 }
@@ -158,8 +158,8 @@ type FunctionSpec struct {
 	// Source contains the Function's specification.
 	Source Source `json:"source"`
 
-	// Env specifies environment variables you need to export for the Function.
-	// You can export them either directly in the Function CR's spec or define them in a ConfigMap.
+	// Env specifies an array of key-value pairs to be used as environment variables for the Function.
+	// You can define values as static strings or reference values from ConfigMaps or Secrets.
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// ResourceConfiguration specifies resources requested by Function and build Job.
@@ -167,19 +167,21 @@ type FunctionSpec struct {
 	ResourceConfiguration *ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
 	// ScaleConfig defines minimum and maximum number of Function's Pods to run at a time.
-	// Can't be used at the same time with Replicas.
+	// When it is configured, a HorizontalPodAutoscaler will be deployed and will control the Replicas field
+	// to scale Function based on the CPU utilisation.
 	// +optional
 	ScaleConfig *ScaleConfig `json:"scaleConfig,omitempty"`
 
-	// Replicas defines exact number of Function's Pods to run at a time.
-	// Can't be used at the same time with ScaleConfig.
+	// Replicas defines the exact number of Function's Pods to run at a time.
+	// If ScaleConfig is configured, or if Function is targeted by an external scaler,
+	// then the Replicas field is used by the relevant HorizontalPodAutoscaler to control the number of active replicas.
 	// +optional
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// +optional
 	Template *Template `json:"template,omitempty"`
 
-	// SecretMounts specifies volumes containing Secrets to mount into the container's filesystem.
+	// SecretMounts specifies Secrets to mount into the Function's container filesystem.
 	SecretMounts []SecretMount `json:"secretMounts,omitempty"`
 }
 
