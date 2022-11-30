@@ -45,6 +45,7 @@ const {
   mockNamespace,
   isSKR,
   testCompassFlow,
+  testV1Alpha2CRD,
   subCRDVersion,
   getNatsPods,
   getStreamConfigForJetStream,
@@ -96,8 +97,15 @@ describe('Eventing tests', function() {
       await checkFunctionResponse(testNamespace, mockNamespace);
     });
 
-    it('In-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
+    it('In-cluster v1alpha1 subscription events should be delivered (legacy events, structured and binary cloud events)', async function() {
       await checkInClusterEventDelivery(testNamespace);
+    });
+
+    it('In-cluster v1alpha2 subscription events should be delivered (legacy events, structured and binary cloud events)', async function() {
+      if (!testV1Alpha2CRD) {
+        this.skip();
+      }
+      await checkInClusterEventDelivery(testNamespace, true);
     });
 
     if (isSKR && testCompassFlow) {

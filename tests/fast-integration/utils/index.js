@@ -1356,6 +1356,25 @@ function eventingSubscription(eventType, sink, name, namespace) {
   };
 }
 
+function eventingSubscriptionV1Alpha2(eventType, source, sink, name, namespace, typeMatching='standard') {
+    return {
+        apiVersion: 'eventing.kyma-project.io/v1alpha2',
+        kind: 'Subscription',
+        metadata: {
+            name: `${name}`,
+            namespace: namespace,
+        },
+        spec: {
+            source: source,
+            typeMatching: typeMatching,
+            types: [
+                eventType
+            ],
+            sink: sink /* http://lastorder.test.svc.cluster.local*/,
+        },
+    };
+}
+
 async function patchDeployment(name, ns, patch) {
   const options = {
     headers: {'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH},
@@ -1706,6 +1725,7 @@ module.exports = {
   wait,
   patchApplicationGateway,
   eventingSubscription,
+  eventingSubscriptionV1Alpha2,
   getVirtualService,
   getPersistentVolumeClaim,
   waitForApplicationCr,
