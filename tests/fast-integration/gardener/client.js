@@ -13,7 +13,7 @@ class GardenerConfig {
     return new GardenerConfig({
       kubeconfigPath: getEnvOrThrow('GARDENER_KUBECONFIG'),
       // Exception is not necessary below - shootTemplate is not used in all tests
-      shootTemplate: process.env['GARDENER_SHOOT_TEMPLATE'], 
+      shootTemplate: process.env['GARDENER_SHOOT_TEMPLATE'],
     });
   }
 
