@@ -2,6 +2,7 @@ package tracepipeline
 
 import (
 	"fmt"
+	"k8s.io/utils/pointer"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -18,6 +19,7 @@ const (
 	basicAuthHeaderVariable = "BASIC_AUTH_HEADER"
 	otlpEndpointVariable    = "OTLP_ENDPOINT"
 	configHashAnnotationKey = "checksum/config"
+	otelCollectorUser       = 10001
 )
 
 var (
@@ -190,7 +192,20 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 									},
 								},
 							},
-							Resources:    collectorResources,
+							Resources: collectorResources,
+							SecurityContext: &corev1.SecurityContext{
+								Privileged:               pointer.Bool(false),
+								RunAsUser:                pointer.Int64(otelCollectorUser),
+								RunAsNonRoot:             pointer.Bool(true),
+								ReadOnlyRootFilesystem:   pointer.Bool(true),
+								AllowPrivilegeEscalation: pointer.Bool(false),
+								SeccompProfile: &corev1.SeccompProfile{
+									Type: corev1.SeccompProfileTypeRuntimeDefault,
+								},
+								Capabilities: &corev1.Capabilities{
+									Drop: []corev1.Capability{"ALL"},
+								},
+							},
 							VolumeMounts: []corev1.VolumeMount{{Name: "config", MountPath: "/conf"}},
 							LivenessProbe: &corev1.Probe{
 								ProbeHandler: corev1.ProbeHandler{
@@ -202,6 +217,13 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: 13133}},
 								},
 							},
+						},
+					},
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser:    pointer.Int64(otelCollectorUser),
+						RunAsNonRoot: pointer.Bool(true),
+						SeccompProfile: &corev1.SeccompProfile{
+							Type: corev1.SeccompProfileTypeRuntimeDefault,
 						},
 					},
 					Volumes: []corev1.Volume{

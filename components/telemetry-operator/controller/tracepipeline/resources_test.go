@@ -97,8 +97,22 @@ func TestMakeDeployment(t *testing.T) {
 	}
 	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[configHashAnnotationKey], "123")
 	require.NotEmpty(t, deployment.Spec.Template.Spec.Containers[0].EnvFrom)
-	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].LivenessProbe)
-	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].ReadinessProbe)
+
+	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].LivenessProbe, "liveness probe must be defined")
+	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].ReadinessProbe, "readiness probe must be defined")
+
+	podSecurityContext := deployment.Spec.Template.Spec.SecurityContext
+	require.NotNil(t, podSecurityContext, "pod security context must be defined")
+	require.NotZero(t, podSecurityContext.RunAsUser, "must run as non-root")
+	require.True(t, *podSecurityContext.RunAsNonRoot, "must run as non-root")
+
+	containerSecurityContext := deployment.Spec.Template.Spec.Containers[0].SecurityContext
+	require.NotNil(t, containerSecurityContext, "container security context must be defined")
+	require.NotZero(t, containerSecurityContext.RunAsUser, "must run as non-root")
+	require.True(t, *containerSecurityContext.RunAsNonRoot, "must run as non-root")
+	require.False(t, *containerSecurityContext.Privileged, "must not be privileged")
+	require.False(t, *containerSecurityContext.AllowPrivilegeEscalation, "must not escalate to privileged")
+	require.True(t, *containerSecurityContext.ReadOnlyRootFilesystem, "must use readonly fs")
 }
 
 func TestMakeCollectorService(t *testing.T) {
