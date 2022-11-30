@@ -97,6 +97,8 @@ func TestMakeDeployment(t *testing.T) {
 	}
 	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[configHashAnnotationKey], "123")
 	require.NotEmpty(t, deployment.Spec.Template.Spec.Containers[0].EnvFrom)
+	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].LivenessProbe)
+	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].ReadinessProbe)
 }
 
 func TestMakeCollectorService(t *testing.T) {
