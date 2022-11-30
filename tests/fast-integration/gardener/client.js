@@ -1,5 +1,5 @@
 const k8s = require('@kubernetes/client-node');
-const { fromBase64, getEnvOrThrow, debug } = require('../utils');
+const {fromBase64, getEnvOrThrow, debug} = require('../utils');
 
 const GARDENER_PROJECT = process.env.KCP_GARDENER_NAMESPACE || 'garden-kyma-dev';
 const COMPASS_ID_ANNOTATION_KEY = 'compass.provisioner.kyma-project.io/runtime-id';
@@ -12,7 +12,7 @@ class GardenerConfig {
   static fromEnv() {
     return new GardenerConfig({
       kubeconfigPath: getEnvOrThrow('GARDENER_KUBECONFIG'),
-      shootTemplate: getEnvOrThrow('GARDENER_SHOOT_TEMPLATE')
+      shootTemplate: getEnvOrThrow('GARDENER_SHOOT_TEMPLATE'),
     });
   }
 
@@ -55,58 +55,56 @@ class GardenerClient {
       return new Error(`no shoot template defined in the Gardener client`);
     }
 
-    var data = fromBase64(this.shootTemplate)
+    const data = fromBase64(this.shootTemplate);
 
-    let replaced = data.replace(/<SHOOT>/g, shootName)
+    const replaced = data.replace(/<SHOOT>/g, shootName);
 
     await this.dynamicAPI.create(JSON.parse(replaced))
-      .catch((err) => {
-        var response = JSON.stringify(err)
-        debug(`Got the error with response ${response}`)
-      });
+        .catch((err) => {
+          const response = JSON.stringify(err);
+          debug(`Got the error with response ${response}`);
+        });
 
-    await this.waitForShoot(shootName)
+    await this.waitForShoot(shootName);
 
-    return this.getShoot(shootName)
+    return this.getShoot(shootName);
   }
 
   async deleteShoot(name) {
-
     await this.dynamicAPI.delete({
-      apiVersion: "core.gardener.cloud/v1beta1",
-      kind: "Shoot",
+      apiVersion: 'core.gardener.cloud/v1beta1',
+      kind: 'Shoot',
       metadata: {
         name: name,
-        namespace: GARDENER_PROJECT
-      }
+        namespace: GARDENER_PROJECT,
+      },
     })
-      .catch((err) => {
-        var response = JSON.stringify(err)
-        debug(`Got the error with response ${response}`)
-      });
+        .catch((err) => {
+          const response = JSON.stringify(err);
+          debug(`Got the error with response ${response}`);
+        });
   }
 
   async waitForShoot(shootName) {
     return waitForK8sObject(
-      `/apis/core.gardener.cloud/v1beta1/namespaces/${GARDENER_PROJECT}/shoots`, {}, (_type, _apiObj, watchObj) => {
-        if (watchObj.object.metadata.name != shootName) {
-          return false
-        }
+        `/apis/core.gardener.cloud/v1beta1/namespaces/${GARDENER_PROJECT}/shoots`, {}, (_type, _apiObj, watchObj) => {
+          if (watchObj.object.metadata.name != shootName) {
+            return false;
+          }
 
-        debug(`Waiting for ${watchObj.object.metadata.name} shoot`)
-        let lastOperation = watchObj.object.status.lastOperation
+          debug(`Waiting for ${watchObj.object.metadata.name} shoot`);
+          const lastOperation = watchObj.object.status.lastOperation;
 
-        return lastOperation.type == "Create" && lastOperation.state == "Succeeded";
-
-      }, 1200 * 1000, 'Waiting for shoot to be ready timeout', this.watch);
+          return lastOperation.type == 'Create' && lastOperation.state == 'Succeeded';
+        }, 1200 * 1000, 'Waiting for shoot to be ready timeout', this.watch);
   }
 
   async getShoot(shootName) {
     debug(`Fetching shoot: ${shootName} from gardener namespace: ${GARDENER_PROJECT}`);
 
     const secretResp = await this.coreV1API.readNamespacedSecret(
-      `${shootName}.kubeconfig`,
-      GARDENER_PROJECT,
+        `${shootName}.kubeconfig`,
+        GARDENER_PROJECT,
     );
 
     const shootResp = await this.dynamicAPI.read({
