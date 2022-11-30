@@ -314,12 +314,13 @@ async function k8sApply(resources, namespace, patch = true) {
   }
 }
 
-function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
+// Allows to pass watch with different than global K8S context.
+function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg, watcher = watch) {
   debug('waiting for', path);
   let res;
   let timer;
   return new Promise((resolve, reject) => {
-    watch.watch(
+    watcher.watch(
         path,
         query,
         (type, apiObj, watchObj) => {
