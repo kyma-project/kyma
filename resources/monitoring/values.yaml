@@ -160,7 +160,7 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.15.9-cf0a130c"
+      version: "1.15.9-fe935387"
       directory: "tpi"
       sha: ""
     oauth2_proxy:
