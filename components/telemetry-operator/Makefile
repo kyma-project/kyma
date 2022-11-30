@@ -76,10 +76,10 @@ test-local: manifests-local generate-local fmt-local vet-local envtest
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-lint-manifests: controller-gen-local
+lint-manifests-local: controller-gen-local
 	./hack/lint-manifests.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
 
-lint: lint-manifests
+lint-local: lint-manifests-local
 	../../hack/verify-lint.sh .
 
 tls.key:
