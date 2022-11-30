@@ -323,6 +323,9 @@ describe('Telemetry Operator', function() {
       it(`Should create TracePipeline '${pipelineName}'`, async function() {
         await k8sApply(pipeline);
         await waitForTracePipeline(pipelineName);
+      });
+
+      it('Should be \'Running\'', async function() {
         await waitForTracePipelineStatusRunning(pipelineName);
       });
 
