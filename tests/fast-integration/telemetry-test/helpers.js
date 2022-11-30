@@ -45,21 +45,21 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 }
 
 function waitForTracePipelineStatusRunning(name) {
-    return waitForTracePipelineStatusCondition(name, 'Running', 180000);
+  return waitForTracePipelineStatusCondition(name, 'Running', 180000);
 }
 
 function waitForTracePipelineStatusCondition(name, lastConditionType, timeout) {
-    return waitForK8sObject(
-        '/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines',
-        {},
-        (_type, watchObj, _) => {
-            return (
-                watchObj.metadata.name === name && checkLastCondition(watchObj, lastConditionType)
-            );
-        },
-        timeout,
-        `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
-    );
+  return waitForK8sObject(
+     '/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines',
+     {},
+     (_type, watchObj, _) => {
+       return (
+         watchObj.metadata.name === name && checkLastCondition(watchObj, lastConditionType)
+       );
+     },
+     timeout,
+     `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
+  );
 }
 
 function checkLastCondition(logPipeline, conditionType) {
