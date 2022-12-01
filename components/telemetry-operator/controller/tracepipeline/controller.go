@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,27 +61,26 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	err := r.installOrUpgradeOtelCollector(ctx, &tracePipeline)
-	return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, err
+	return ctrl.Result{}, r.doReconcile(ctx, &tracePipeline)
 }
 
-func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing *telemetryv1alpha1.TracePipeline) error {
+func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
 	var err error
 
 	var secretData map[string][]byte
-	if secretData, err = fetchSecretData(ctx, r, tracing.Spec.Output.Otlp); err != nil {
+	if secretData, err = fetchSecretData(ctx, r, pipeline.Spec.Output.Otlp); err != nil {
 		return err
 	}
 	secret := makeSecret(r.config, secretData)
-	if err = controllerutil.SetControllerReference(tracing, secret, r.Scheme); err != nil {
+	if err = controllerutil.SetControllerReference(pipeline, secret, r.Scheme); err != nil {
 		return err
 	}
 	if err = createOrUpdateSecret(ctx, r.Client, secret); err != nil {
 		return err
 	}
 
-	configMap := makeConfigMap(r.config, tracing.Spec.Output)
-	if err = controllerutil.SetControllerReference(tracing, configMap, r.Scheme); err != nil {
+	configMap := makeConfigMap(r.config, pipeline.Spec.Output)
+	if err = controllerutil.SetControllerReference(pipeline, configMap, r.Scheme); err != nil {
 		return err
 	}
 	if err = createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
@@ -91,7 +89,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 
 	configHash := configchecksum.Calculate([]corev1.ConfigMap{*configMap}, []corev1.Secret{*secret})
 	deployment := makeDeployment(r.config, configHash)
-	if err = controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
+	if err = controllerutil.SetControllerReference(pipeline, deployment, r.Scheme); err != nil {
 		return err
 	}
 	if err = createOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
@@ -99,7 +97,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	}
 
 	service := makeCollectorService(r.config)
-	if err = controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
+	if err = controllerutil.SetControllerReference(pipeline, service, r.Scheme); err != nil {
 		return err
 	}
 	if err = createOrUpdateService(ctx, r.Client, service); err != nil {
@@ -108,7 +106,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 
 	if r.config.CreateServiceMonitor {
 		serviceMonitor := makeServiceMonitor(r.config)
-		if err = controllerutil.SetControllerReference(tracing, serviceMonitor, r.Scheme); err != nil {
+		if err = controllerutil.SetControllerReference(pipeline, serviceMonitor, r.Scheme); err != nil {
 			return err
 		}
 
@@ -117,7 +115,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		}
 
 		metricsService := makeMetricsService(r.config)
-		if err = controllerutil.SetControllerReference(tracing, metricsService, r.Scheme); err != nil {
+		if err = controllerutil.SetControllerReference(pipeline, metricsService, r.Scheme); err != nil {
 			return err
 		}
 		if err = createOrUpdateService(ctx, r.Client, metricsService); err != nil {

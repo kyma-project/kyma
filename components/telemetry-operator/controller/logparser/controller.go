@@ -76,10 +76,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	return r.doReconcile(ctx, &parser)
+	return ctrl.Result{}, r.doReconcile(ctx, &parser)
 }
 
-func (r *Reconciler) doReconcile(ctx context.Context, parser *telemetryv1alpha1.LogParser) (result ctrl.Result, err error) {
+func (r *Reconciler) doReconcile(ctx context.Context, parser *telemetryv1alpha1.LogParser) (err error) {
 	// defer the updating of status to ensure that the status is updated regardless of the outcome of the reconciliation
 	defer func() {
 		if statusErr := r.updateStatus(ctx, parser.Name); statusErr != nil {
@@ -92,27 +92,27 @@ func (r *Reconciler) doReconcile(ctx context.Context, parser *telemetryv1alpha1.
 	}()
 
 	if err = ensureFinalizer(ctx, r.Client, parser); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
 	if err = r.syncer.syncFluentBitConfig(ctx); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
 	if err = cleanupFinalizerIfNeeded(ctx, r.Client, parser); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
 	var checksum string
 	if checksum, err = r.calculateConfigChecksum(ctx); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
 	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
-	return result, err
+	return err
 }
 
 func (r *Reconciler) calculateConfigChecksum(ctx context.Context) (string, error) {
