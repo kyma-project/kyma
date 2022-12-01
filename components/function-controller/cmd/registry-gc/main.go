@@ -2,138 +2,39 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"strings"
+	"net/http"
 
 	"github.com/docker/distribution/reference"
-	"github.com/kyma-project/kyma/components/function-controller/internal/registry"
+	"github.com/docker/distribution/registry/client"
 	"github.com/sirupsen/logrus"
-	appsv1 "k8s.io/api/apps/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-var (
-	functionRuntimeLabels = map[string]string{
-		"serverless.kyma-project.io/managed-by": "function-controller",
-	}
 )
 
 func main() {
-	k8sClient, err := client.New(ctrl.GetConfigOrDie(), client.Options{})
+	named, err := reference.WithName("scratch")
 	if err != nil {
-		panic(fmt.Sprintf("failed to create Kubernetes Client: %v", err))
-	}
-	matchingLabels := client.MatchingLabels(functionRuntimeLabels)
-	listOpts := &client.ListOptions{}
-	matchingLabels.ApplyToList(listOpts)
-
-	deploymentList := appsv1.DeploymentList{}
-
-	if err := k8sClient.List(context.Background(), &deploymentList, listOpts); err != nil {
-		panic(fmt.Sprintf("failed to list deployments: %v", err))
+		panic(err)
 	}
 
-	functionImages := map[string][]string{}
-	for _, deployment := range deploymentList.Items {
-		for _, container := range deployment.Spec.Template.Spec.Containers {
-			if container.Name == "function" {
-				ref, err := reference.ParseNamed(container.Image)
-				if err != nil {
-					panic(fmt.Sprintf("failed to parse container image: %v", err))
-				}
-				taggedRef, ok := ref.(reference.NamedTagged)
-				if !ok {
-					panic("failed to cast image name")
-				}
-				functionImages[reference.Path(taggedRef)] = append(functionImages[reference.Path(taggedRef)], taggedRef.Tag())
-			}
-		}
-	}
-
-	regClient, err := registry.NewRegistryClient()
-	regClient.Logf = func(format string, args ...interface{}) {}
-
+	tr := &RegistryTransport{}
+	repo, err := client.NewRepository(reference.TrimNamed(named), "http://localhost:5000/", tr)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create registry client: %v", err))
+		panic(err)
 	}
+	tags := repo.Tags(context.Background())
+	tag, err := tags.Get(context.Background(), "1")
+	// 1stTag:= tags.Get(context.Background(), "1")
 
-	// repos, err := regClient.Repositories()
-	// if err != nil {
-	// 	panic(fmt.Sprintf("failed to list registry images: %v", err))
-	// }
+	manifests, err := repo.Manifests(context.Background())
+	manifests.Delete(context.Background(), tag.Digest)
+	// m, err := manifests.Get(context.Background(), "", distribution.WithTag("1"), client.ReturnContentDigest(&tag.Digest))
+	logrus.Infof("----------------------------------------------------------------- tags: %#v, err: %v", tag, err)
+}
 
-	// registryImages := map[string][]string{}
+type RegistryTransport struct {
+	http.RoundTripper
+}
 
-	for image, tags := range functionImages {
-		logrus.Infof("-----------------------------functionImages %v: %v", image, tags)
-
-		registryTags, err := regClient.Tags(image)
-		if err != nil {
-			panic(fmt.Sprintf("failed to get image tags from registry: %v", err))
-		}
-		logrus.Infof("-----------------------------registryTags %v: %v", image, registryTags)
-
-		for _, registryTag := range registryTags {
-		xxxx:
-			for _, functionTag := range tags {
-				if functionTag == registryTag {
-					logrus.Infof("-----------------------------image %v:%v is currently used, skipping", image, registryTag)
-
-					break xxxx
-				}
-			}
-			// d, err := regClient.ManifestDigest(image, registryTag)
-			// if err != nil {
-			// 	panic(fmt.Sprintf("failed to get image tag digest from registry: %v", err))
-			// }
-			m, err := regClient.ManifestV2(image, registryTag)
-			if err != nil {
-				panic(fmt.Sprintf("failed to get image tag digest from registry: %v", err))
-			}
-			logrus.Infof("-----------------------------deleting: %v:%v", image, m.Target().Digest)
-			err = regClient.DeleteManifest(image, m.Target().Digest)
-			if err != nil {
-				if strings.Contains(err.Error(), "status=404") {
-					logrus.Infof("manifest for %s:%s is already deleted", image, registryTag)
-					continue
-				}
-				panic(fmt.Sprintf("failed to get image tag digest from registry: %v", err))
-			}
-			logrus.Infof("deleted successfully")
-
-		}
-
-		// for _, tag := range tags {
-		// 	for _, regsiregistryTag := range registryTags {
-
-		// 		if tag == regsiregistryTag {
-		// 			logrus.Infof("-----------------------------image %v:%v is currently used, skipping", image, tag)
-
-		// 			continue
-		// 		}
-		// 		// d, err := regClient.ManifestDigest(image, tag)
-		// 		// if err != nil {
-		// 		// 	panic(fmt.Sprintf("failed to get image tag digest from registry: %v", err))
-		// 		// }
-		// 		// m, err := regClient.ManifestV2(image, tag)
-		// 		// if err != nil {
-		// 		// 	panic(fmt.Sprintf("failed to get image tag digest from registry: %v", err))
-		// 		// }
-		// 		logrus.Infof("-----------------------------deleting: %v:%v", image, tag)
-		// 		// err = regClient.DeleteManifest(image, m.Target().Digest)
-		// 		// if err != nil {
-		// 		// 	if strings.Contains(err.Error(), "status=404") {
-		// 		// 		logrus.Infof("manifest for %s:%s is already deleted", image, tag)
-		// 		// 		continue
-		// 		// 	}
-		// 		// 	panic(fmt.Sprintf("failed to get image tag digest from registry: %v", err))
-		// 		// }
-		// 		// logrus.Infof("deleted successfully")
-		// 	}
-		// }
-	}
-
-	// logrus.Infof("===================================================== repos: %v", repos)
-	// logrus.Infof("===================================================== repos: %v", registryImages)
+func (rt *RegistryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json")
+	return http.DefaultTransport.RoundTrip(req)
 }
