@@ -65,8 +65,9 @@ const (
 )
 
 const (
-	OpenTelemetryDNotReadyReason = "OpenTelemetryDeploymentNotReady"
-	OpenTelemetryDReadyReason    = "OpenTelemetryDeploymentReady"
+	OpenTelemetryDNotReadyReason    = "OpenTelemetryDeploymentNotReady"
+	OpenTelemetryDReadyReason       = "OpenTelemetryDeploymentReady"
+	OTReferencedSecretMissingReason = "ReferencedSecretMissing"
 )
 
 // LogPipelineCondition contains details for the current condition of this LogPipeline
