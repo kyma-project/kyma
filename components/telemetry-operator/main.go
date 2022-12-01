@@ -73,12 +73,13 @@ var (
 	syncPeriod           time.Duration
 	telemetryNamespace   string
 
-	createServiceMonitor         bool
-	traceCollectorDeploymentName string
-	traceCollectorImage          string
-	traceCollectorPriorityClass  string
-	traceCollectorCPULimit       string
-	traceCollectorMemoryLimit    string
+	createServiceMonitor          bool
+	traceCollectorBaseName        string
+	traceCollectorOTLPServiceName string
+	traceCollectorImage           string
+	traceCollectorPriorityClass   string
+	traceCollectorCPULimit        string
+	traceCollectorMemoryLimit     string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -146,7 +147,8 @@ func main() {
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
 	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
-	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorBaseName, "trace-collector-base-name", "telemetry-trace-collector", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
+	flag.StringVar(&traceCollectorOTLPServiceName, "trace-collector-otlp-service-name", "telemetry-otlp-traces", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
 	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", "", "Priority class name for tracing OpenTelemetry Collector")
 	flag.StringVar(&traceCollectorCPULimit, "trace-collector-cpu-limit", "1", "CPU limit for tracing OpenTelemetry Collector")
@@ -329,7 +331,7 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 	config := tracepipelinereconciler.Config{
 		CreateServiceMonitor: createServiceMonitor,
 		Namespace:            telemetryNamespace,
-		BaseName:             traceCollectorDeploymentName,
+		BaseName:             traceCollectorBaseName,
 		Deployment: tracepipelinereconciler.DeploymentConfig{
 			Image:             traceCollectorImage,
 			PriorityClassName: traceCollectorPriorityClass,
@@ -337,7 +339,7 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 			MemoryLimit:       resource.MustParse(traceCollectorMemoryLimit),
 		},
 		Service: tracepipelinereconciler.ServiceConfig{
-			OTLPServiceName: "telemetry-otlp-traces",
+			OTLPServiceName: traceCollectorOTLPServiceName,
 		},
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)
