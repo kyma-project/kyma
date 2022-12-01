@@ -86,7 +86,7 @@ func TestMakeSecret(t *testing.T) {
 
 func TestMakeDeployment(t *testing.T) {
 	deployment := makeDeployment(config, "123")
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, deployment)
 	require.Equal(t, deployment.Name, config.Deployment.Name)
@@ -119,7 +119,7 @@ func TestMakeDeployment(t *testing.T) {
 
 func TestMakeCollectorService(t *testing.T) {
 	service := makeCollectorService(config)
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, service)
 	require.Equal(t, service.Name, config.Deployment.Name)
@@ -130,7 +130,7 @@ func TestMakeCollectorService(t *testing.T) {
 
 func TestMakeServiceMonitor(t *testing.T) {
 	serviceMonitor := makeServiceMonitor(config)
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, serviceMonitor)
 	require.Equal(t, serviceMonitor.Name, config.Deployment.Name)
@@ -141,7 +141,7 @@ func TestMakeServiceMonitor(t *testing.T) {
 
 func TestMakeMetricsService(t *testing.T) {
 	service := makeMetricsService(config)
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, service)
 	require.Equal(t, service.Name, config.Deployment.Name+"-metrics")

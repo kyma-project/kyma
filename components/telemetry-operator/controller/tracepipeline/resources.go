@@ -30,7 +30,7 @@ var (
 	replicas = int32(1)
 )
 
-func getLabels(config Config) map[string]string {
+func makeDefaultLabels(config Config) map[string]string {
 	return map[string]string{
 		"app.kubernetes.io/name": config.Deployment.Name,
 	}
@@ -79,7 +79,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Deployment.Name,
 			Namespace: config.Namespace,
-			Labels:    getLabels(config),
+			Labels:    makeDefaultLabels(config),
 		},
 		Data: map[string]string{
 			configMapKey: confYAML,
@@ -92,7 +92,7 @@ func makeSecret(config Config, secretData map[string][]byte) *corev1.Secret {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Deployment.Name,
 			Namespace: config.Namespace,
-			Labels:    getLabels(config),
+			Labels:    makeDefaultLabels(config),
 		},
 		Data: secretData,
 	}
@@ -147,7 +147,7 @@ func makeProcessorsConfig() map[string]any {
 }
 
 func makeDeployment(config Config, configHash string) *appsv1.Deployment {
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 	optional := true
 	annotations := makePodAnnotations(configHash)
 	resources := makeResourceRequirements(config)
@@ -261,7 +261,7 @@ func makeResourceRequirements(config Config) corev1.ResourceRequirements {
 }
 
 func makeCollectorService(config Config) *corev1.Service {
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Deployment.Name,
@@ -296,7 +296,7 @@ func makeCollectorService(config Config) *corev1.Service {
 }
 
 func makeMetricsService(config Config) *corev1.Service {
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Deployment.Name + "-metrics",
@@ -319,7 +319,7 @@ func makeMetricsService(config Config) *corev1.Service {
 }
 
 func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 	return &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      config.Deployment.Name,
