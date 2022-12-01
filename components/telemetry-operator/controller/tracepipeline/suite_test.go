@@ -55,6 +55,9 @@ var testConfig = Config{
 		CPULimit:    resource.MustParse("1"),
 		MemoryLimit: resource.MustParse("1Gi"),
 	},
+	Service: ServiceConfig{
+		OTLPServiceName: "telemetry-otlp-traces",
+	},
 }
 
 func TestAPIs(t *testing.T) {
