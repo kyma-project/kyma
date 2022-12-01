@@ -49,7 +49,7 @@ describe('SKR own_cluster test', function() {
     options = skr.options;
   });
 
-  // Check if the secret with BTP credentials is created properly
+  // Check if the secret with BTP credentials are created properly
   it('should check if secret exists and contains the expected data', async function() {
     console.log(`Checking the contents of the "sap-btp-manager" secret`);
     const secretToCheck = await getSecret('sap-btp-manager', 'kyma-system');
