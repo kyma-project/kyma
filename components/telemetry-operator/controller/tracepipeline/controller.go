@@ -19,6 +19,7 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
@@ -35,6 +36,8 @@ type DeploymentConfig struct {
 	Name              string
 	Image             string
 	PriorityClassName string
+	CPULimit          resource.Quantity
+	MemoryLimit       resource.Quantity
 }
 
 type Config struct {

@@ -19,7 +19,9 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"os"
 	"strings"
 	"time"
@@ -75,6 +77,8 @@ var (
 	traceCollectorDeploymentName string
 	traceCollectorImage          string
 	traceCollectorPriorityClass  string
+	traceCollectorCPULimit       string
+	traceCollectorMemoryLimit    string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -144,7 +148,9 @@ func main() {
 	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
-	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", otelImage, "Priority class name for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", "", "Priority class name for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorCPULimit, "trace-collector-cpu-limit", "1", "CPU limit for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorMemoryLimit, "trace-collector-memory-limit", "1Gi", "Memory limit for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -271,6 +277,13 @@ func validateFlags() error {
 	if fluentBitStorageType != "filesystem" && fluentBitStorageType != "memory" {
 		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
+	if _, err := resource.ParseQuantity(traceCollectorCPULimit); err != nil {
+		return fmt.Errorf("--trace-collector-cpu-limit has to be a valid quantity: %v", err)
+	}
+	if _, err := resource.ParseQuantity(traceCollectorMemoryLimit); err != nil {
+		return fmt.Errorf("--trace-collector-memory-limit has to be a valid quantity: %v", err)
+	}
+
 	return nil
 }
 
@@ -320,6 +333,8 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 			Name:              traceCollectorDeploymentName,
 			Image:             traceCollectorImage,
 			PriorityClassName: traceCollectorPriorityClass,
+			CPULimit:          resource.MustParse(traceCollectorCPULimit),
+			MemoryLimit:       resource.MustParse(traceCollectorMemoryLimit),
 		},
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)

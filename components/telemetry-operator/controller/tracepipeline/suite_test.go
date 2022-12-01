@@ -47,9 +47,11 @@ var cancel context.CancelFunc
 
 var testConfig = Config{
 	CreateServiceMonitor: false,
-	CollectorNamespace:   "kyma-system",
-	ResourceName:         "telemetry-trace-collector",
-	CollectorImage:       "otel/opentelemetry-collector-contrib:0.60.0",
+	Namespace:            "kyma-system",
+	Deployment: DeploymentConfig{
+		Name:  "telemetry-trace-collector",
+		Image: "otel/opentelemetry-collector-contrib:0.60.0",
+	},
 }
 
 func TestAPIs(t *testing.T) {
