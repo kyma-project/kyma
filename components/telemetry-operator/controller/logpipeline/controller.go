@@ -85,7 +85,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	var pipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &pipeline); err != nil {
-		log.V(1).Info("Ignoring deleted LogPipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 

@@ -72,7 +72,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	var parser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, req.NamespacedName, &parser); err != nil {
-		log.V(1).Info("Ignoring deleted LogParser")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
