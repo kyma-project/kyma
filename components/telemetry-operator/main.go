@@ -329,12 +329,15 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 	config := tracepipelinereconciler.Config{
 		CreateServiceMonitor: createServiceMonitor,
 		Namespace:            telemetryNamespace,
+		BaseName:             traceCollectorDeploymentName,
 		Deployment: tracepipelinereconciler.DeploymentConfig{
-			Name:              traceCollectorDeploymentName,
 			Image:             traceCollectorImage,
 			PriorityClassName: traceCollectorPriorityClass,
 			CPULimit:          resource.MustParse(traceCollectorCPULimit),
 			MemoryLimit:       resource.MustParse(traceCollectorMemoryLimit),
+		},
+		Service: tracepipelinereconciler.ServiceConfig{
+			OTLPServiceName: "telemetry-otlp-traces",
 		},
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)

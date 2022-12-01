@@ -19,7 +19,9 @@ const (
 	basicAuthHeaderVariable = "BASIC_AUTH_HEADER"
 	otlpEndpointVariable    = "OTLP_ENDPOINT"
 	configHashAnnotationKey = "checksum/config"
-	otelCollectorUser       = 10001
+	collectorUser           = 10001
+	collectorContainerName  = "collector"
+	collectorProbePort      = 13133
 )
 
 var (
@@ -32,7 +34,7 @@ var (
 
 func makeDefaultLabels(config Config) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name": config.Deployment.Name,
+		"app.kubernetes.io/name": config.BaseName,
 	}
 }
 
@@ -77,7 +79,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Deployment.Name,
+			Name:      config.BaseName,
 			Namespace: config.Namespace,
 			Labels:    makeDefaultLabels(config),
 		},
@@ -90,7 +92,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 func makeSecret(config Config, secretData map[string][]byte) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Deployment.Name,
+			Name:      config.BaseName,
 			Namespace: config.Namespace,
 			Labels:    makeDefaultLabels(config),
 		},
@@ -153,7 +155,7 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 	resources := makeResourceRequirements(config)
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Deployment.Name,
+			Name:      config.BaseName,
 			Namespace: config.Namespace,
 			Labels:    labels,
 		},
@@ -170,14 +172,14 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  config.Deployment.Name,
+							Name:  collectorContainerName,
 							Image: config.Deployment.Image,
 							Args:  []string{"--config=/conf/" + configMapKey},
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									SecretRef: &corev1.SecretEnvSource{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: config.Deployment.Name,
+											Name: config.BaseName,
 										},
 										Optional: &optional,
 									},
@@ -186,7 +188,7 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							Resources: resources,
 							SecurityContext: &corev1.SecurityContext{
 								Privileged:               pointer.Bool(false),
-								RunAsUser:                pointer.Int64(otelCollectorUser),
+								RunAsUser:                pointer.Int64(collectorUser),
 								RunAsNonRoot:             pointer.Bool(true),
 								ReadOnlyRootFilesystem:   pointer.Bool(true),
 								AllowPrivilegeEscalation: pointer.Bool(false),
@@ -200,19 +202,19 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							VolumeMounts: []corev1.VolumeMount{{Name: "config", MountPath: "/conf"}},
 							LivenessProbe: &corev1.Probe{
 								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: 13133}},
+									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: collectorProbePort}},
 								},
 							},
 							ReadinessProbe: &corev1.Probe{
 								ProbeHandler: corev1.ProbeHandler{
-									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: 13133}},
+									HTTPGet: &corev1.HTTPGetAction{Path: "/", Port: intstr.IntOrString{IntVal: collectorProbePort}},
 								},
 							},
 						},
 					},
 					PriorityClassName: config.Deployment.PriorityClassName,
 					SecurityContext: &corev1.PodSecurityContext{
-						RunAsUser:    pointer.Int64(otelCollectorUser),
+						RunAsUser:    pointer.Int64(collectorUser),
 						RunAsNonRoot: pointer.Bool(true),
 						SeccompProfile: &corev1.SeccompProfile{
 							Type: corev1.SeccompProfileTypeRuntimeDefault,
@@ -224,7 +226,7 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: config.Deployment.Name,
+										Name: config.BaseName,
 									},
 									Items: []corev1.KeyToPath{{Key: configMapKey, Path: configMapKey}},
 								},
@@ -260,11 +262,11 @@ func makeResourceRequirements(config Config) corev1.ResourceRequirements {
 	}
 }
 
-func makeCollectorService(config Config) *corev1.Service {
+func makeOTLPService(config Config) *corev1.Service {
 	labels := makeDefaultLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Deployment.Name,
+			Name:      config.Service.OTLPServiceName,
 			Namespace: config.Namespace,
 			Labels:    labels,
 		},
@@ -282,12 +284,6 @@ func makeCollectorService(config Config) *corev1.Service {
 					Port:       4318,
 					TargetPort: intstr.FromInt(4318),
 				},
-				{
-					Name:       "http-opencensus",
-					Protocol:   corev1.ProtocolTCP,
-					Port:       55678,
-					TargetPort: intstr.FromInt(55678),
-				},
 			},
 			Selector: labels,
 			Type:     corev1.ServiceTypeClusterIP,
@@ -299,7 +295,7 @@ func makeMetricsService(config Config) *corev1.Service {
 	labels := makeDefaultLabels(config)
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Deployment.Name + "-metrics",
+			Name:      config.BaseName + "-metrics",
 			Namespace: config.Namespace,
 			Labels:    labels,
 		},
@@ -318,11 +314,34 @@ func makeMetricsService(config Config) *corev1.Service {
 	}
 }
 
+func makeOpenCensusService(config Config) *corev1.Service {
+	labels := makeDefaultLabels(config)
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      config.BaseName + "-internal",
+			Namespace: config.Namespace,
+			Labels:    labels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "http-opencensus",
+					Protocol:   corev1.ProtocolTCP,
+					Port:       55678,
+					TargetPort: intstr.FromInt(55678),
+				},
+			},
+			Selector: labels,
+			Type:     corev1.ServiceTypeClusterIP,
+		},
+	}
+}
+
 func makeServiceMonitor(config Config) *monitoringv1.ServiceMonitor {
 	labels := makeDefaultLabels(config)
 	return &monitoringv1.ServiceMonitor{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.Deployment.Name,
+			Name:      config.BaseName,
 			Namespace: config.Namespace,
 			Labels:    labels,
 		},

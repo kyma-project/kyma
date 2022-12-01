@@ -32,19 +32,24 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+type Config struct {
+	CreateServiceMonitor bool
+	BaseName             string
+	Namespace            string
+
+	Deployment DeploymentConfig
+	Service    ServiceConfig
+}
+
 type DeploymentConfig struct {
-	Name              string
 	Image             string
 	PriorityClassName string
 	CPULimit          resource.Quantity
 	MemoryLimit       resource.Quantity
 }
 
-type Config struct {
-	CreateServiceMonitor bool
-	Namespace            string
-
-	Deployment DeploymentConfig
+type ServiceConfig struct {
+	OTLPServiceName string
 }
 
 type Reconciler struct {
@@ -107,7 +112,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeCollectorService(r.config)
+	service := makeOTLPService(r.config)
 	if err = controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
 		return err
 	}
