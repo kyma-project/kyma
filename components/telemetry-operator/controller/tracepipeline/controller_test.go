@@ -44,7 +44,7 @@ var _ = Describe("Deploying a TracePipeline", func() {
 		}
 		tracePipeline := &telemetryv1alpha1.TracePipeline{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-tracepipeline",
+				Name: "dummy",
 			},
 			Spec: telemetryv1alpha1.TracePipelineSpec{
 				Output: telemetryv1alpha1.TracePipelineOutput{
@@ -175,7 +175,7 @@ func validateOwnerReferences(ownerRefernces []metav1.OwnerReference) error {
 		return fmt.Errorf("unexpected owner reference type: %s", ownerReference.Kind)
 	}
 
-	if ownerReference.Name != "test-tracepipeline" {
+	if ownerReference.Name != "dummy" {
 		return fmt.Errorf("unexpected owner reference name: %s", ownerReference.Kind)
 	}
 

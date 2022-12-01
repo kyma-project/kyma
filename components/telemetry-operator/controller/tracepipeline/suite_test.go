@@ -18,6 +18,7 @@ package tracepipeline
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"path/filepath"
 	"testing"
 
@@ -50,7 +51,9 @@ var testConfig = Config{
 	BaseName:             "telemetry-trace-collector",
 	Namespace:            "kyma-system",
 	Deployment: DeploymentConfig{
-		Image: "otel/opentelemetry-collector-contrib:0.60.0",
+		Image:       "otel/opentelemetry-collector-contrib:0.60.0",
+		CPULimit:    resource.MustParse("1"),
+		MemoryLimit: resource.MustParse("1Gi"),
 	},
 }
 
