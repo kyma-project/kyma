@@ -12,7 +12,7 @@ const {genRandom} = require('../utils');
 
 const provisioningTimeout = 1000 * 60 * 30; // 30m
 const deprovisioningTimeout = 1000 * 60 * 1; // 1m
-let globalTimeout = 1000 * 60 * 70; // 70m
+const globalTimeout = 1000 * 60 * 70; // 70m
 const slowTime = 5000;
 
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
