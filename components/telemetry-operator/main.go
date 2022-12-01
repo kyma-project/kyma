@@ -73,13 +73,13 @@ var (
 	syncPeriod           time.Duration
 	telemetryNamespace   string
 
-	createServiceMonitor          bool
-	traceCollectorBaseName        string
-	traceCollectorOTLPServiceName string
-	traceCollectorImage           string
-	traceCollectorPriorityClass   string
-	traceCollectorCPULimit        string
-	traceCollectorMemoryLimit     string
+	traceCollectorCreateServiceMonitor bool
+	traceCollectorBaseName             string
+	traceCollectorOTLPServiceName      string
+	traceCollectorImage                string
+	traceCollectorPriorityClass        string
+	traceCollectorCPULimit             string
+	traceCollectorMemoryLimit          string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -146,7 +146,7 @@ func main() {
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
-	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
+	flag.BoolVar(&traceCollectorCreateServiceMonitor, "trace-collector-create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&traceCollectorBaseName, "trace-collector-base-name", "telemetry-trace-collector", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorOTLPServiceName, "trace-collector-otlp-service-name", "telemetry-otlp-traces", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
@@ -329,7 +329,7 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
-		CreateServiceMonitor: createServiceMonitor,
+		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
 		Namespace:            telemetryNamespace,
 		BaseName:             traceCollectorBaseName,
 		Deployment: tracepipelinereconciler.DeploymentConfig{
