@@ -18,6 +18,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+var (
+	createOrUpdate = predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool { return true },
+		DeleteFunc: func(e event.DeleteEvent) bool { return false },
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			// We only need to check generation change here, because it is only updated on spec changes.
+			return e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration()
+		},
+		GenericFunc: func(e event.GenericEvent) bool { return false },
+	}
+)
+
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	newReconciler := ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.TracePipeline{}).
@@ -28,7 +40,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
-			builder.WithPredicates(onlyUpdate()),
+			builder.WithPredicates(createOrUpdate),
 		)
 
 	if r.config.CreateServiceMonitor {
@@ -36,15 +48,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	return newReconciler.Complete(r)
-}
-
-func onlyUpdate() predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc:  func(event event.CreateEvent) bool { return false },
-		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
-		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
-		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
-	}
 }
 
 func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
