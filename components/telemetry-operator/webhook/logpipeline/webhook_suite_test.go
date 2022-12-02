@@ -24,9 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
-
 	"github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/mocks"
 	validationmocks "github.com/kyma-project/kyma/components/telemetry-operator/webhook/logpipeline/validation/mocks"
 
@@ -117,11 +114,6 @@ var _ = BeforeSuite(func() {
 	maxPipelinesValidatorMock = &validationmocks.MaxPipelinesValidator{}
 	outputValidatorMock = &validationmocks.OutputValidator{}
 	fileValidatorMock = &validationmocks.FilesValidator{}
-	restartsTotal := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "telemetry_fluentbit_triggered_restarts_total",
-		Help: "Number of triggered Fluent Bit restarts",
-	})
-	metrics.Registry.MustRegister(restartsTotal)
 
 	logPipelineValidator := NewValidatingWebhookHandler(mgr.GetClient(), inputValidatorMock, variableValidatorMock, pluginValidatorMock, maxPipelinesValidatorMock, outputValidatorMock, fileValidatorMock, dryRunnerMock)
 

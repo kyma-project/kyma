@@ -136,6 +136,16 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							},
 						},
 					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+							MountPath:  "/mount/path/1",
+						},
+						{
+							SecretName: "secret-name-2",
+							MountPath:  "/mount/path/2",
+						},
+					},
 				},
 			},
 			expectedError: gomega.BeNil(),
@@ -656,6 +666,89 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				},
 			},
 			expectedError: gomega.BeNil(),
+		},
+		"Should return error when validate invalid secretName in secretMounts": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs16,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+							MountPath:  "/mount/path/1",
+						},
+						{
+							SecretName: "invalid secret name - not DNS subdomain name as defined in RFC 1123",
+							MountPath:  "/mount/path/2",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.secretMounts"),
+				gomega.ContainSubstring("RFC 1123 subdomain"),
+			),
+		},
+		"Should return error when validate non unique secretName in secretMounts": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs16,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+							MountPath:  "/mount/path/1",
+						},
+						{
+							SecretName: "non-unique-secret-name",
+							MountPath:  "/mount/path/2",
+						},
+						{
+							SecretName: "non-unique-secret-name",
+							MountPath:  "/mount/path/3",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.secretMounts"),
+				gomega.ContainSubstring("secretNames should be unique"),
+			),
+		},
+		"Should return error when validate empty mountPath in secretMounts": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Runtime: NodeJs16,
+					Source: Source{
+						Inline: &InlineSource{
+							Source: "test-source",
+						},
+					},
+					SecretMounts: []SecretMount{
+						{
+							SecretName: "secret-name-1",
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.secretMounts"),
+				gomega.ContainSubstring("mountPath should not be empty"),
+			),
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {

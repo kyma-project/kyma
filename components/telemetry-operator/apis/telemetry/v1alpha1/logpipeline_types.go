@@ -177,9 +177,9 @@ const (
 )
 
 const (
-	FluentBitDSRestartedReason        = "FluentBitDaemonSetRestarted"
-	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
-	SecretsNotPresent                 = "OneORMoreSecretsAreNotPresent"
+	FluentBitDSNotReadyReason     = "FluentBitDaemonSetNotReady"
+	FluentBitDSReadyReason        = "FluentBitDaemonSetReady"
+	ReferencedSecretMissingReason = "ReferencedSecretMissing"
 )
 
 // LogPipelineCondition contains details for the current condition of this LogPipeline
@@ -210,6 +210,10 @@ func (lps *LogPipelineStatus) GetCondition(condType LogPipelineConditionType) *L
 		}
 	}
 	return nil
+}
+
+func (lps *LogPipelineStatus) HasCondition(condition LogPipelineConditionType) bool {
+	return lps.GetCondition(condition) != nil
 }
 
 func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {

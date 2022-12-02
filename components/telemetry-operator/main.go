@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"os"
 	"strings"
 	"time"
@@ -89,6 +90,8 @@ var (
 	maxLogPipelines            int
 )
 
+const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221125-9bbc6dff"
+
 //nolint:gochecknoinits
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -139,7 +142,7 @@ func main() {
 
 	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
 	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
-	flag.StringVar(&traceCollectorImage, "trace-collector-image", "otel/opentelemetry-collector-contrib:0.60.0", "Image for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -277,7 +280,7 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 		PipelineDefaults:  createPipelineDefaults(),
 	}
-	return logpipelinecontroller.NewReconciler(client, config)
+	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
 }
 
 func createLogParserReconciler(client client.Client) *logparsercontroller.Reconciler {
@@ -285,7 +288,7 @@ func createLogParserReconciler(client client.Client) *logparsercontroller.Reconc
 		ParsersConfigMap: types.NamespacedName{Name: fluentBitParsersConfigMap, Namespace: telemetryNamespace},
 		DaemonSet:        types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 	}
-	return logparsercontroller.NewReconciler(client, config)
+	return logparsercontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
 }
 
 func createLogPipelineValidator(client client.Client) *logpipelinewebhook.ValidatingWebhookHandler {

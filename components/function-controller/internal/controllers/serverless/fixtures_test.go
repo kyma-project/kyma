@@ -63,6 +63,16 @@ func newTestGitFunction(namespace, name string, auth *serverlessv1alpha2.Reposit
 					"foo":             "bar",
 				},
 			},
+			SecretMounts: []serverlessv1alpha2.SecretMount{
+				{
+					SecretName: "secret-name-1",
+					MountPath:  "/mount/path/1",
+				},
+				{
+					SecretName: "secret-name-2",
+					MountPath:  "/mount/path/2",
+				},
+			},
 		},
 	}
 }
@@ -116,6 +126,16 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 					testBindingLabel1: "foobar",
 					testBindingLabel2: testBindingLabelValue,
 					"foo":             "bar",
+				},
+			},
+			SecretMounts: []serverlessv1alpha2.SecretMount{
+				{
+					SecretName: "secret-name-1",
+					MountPath:  "/mount/path/1",
+				},
+				{
+					SecretName: "secret-name-2",
+					MountPath:  "/mount/path/2",
 				},
 			},
 		},
