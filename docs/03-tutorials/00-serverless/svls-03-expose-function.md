@@ -162,7 +162,7 @@ Follow these steps:
 
     - **Host** to determine the host on which you want to expose your Function. It is required to change the `*` symbol at the beggining to the subdomain name you want.
 
-5. In the **Rules > Access Strategies > Config**  section, change the handler from `allow` to `noop` and select **all** the methods below.
+5. In the **Rules > Access Strategies > Config**  section, change the handler from `allow` to `noop` and select all the methods below.
 
 6. Select **Create** to confirm your changes.
 
