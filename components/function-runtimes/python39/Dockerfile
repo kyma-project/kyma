@@ -50,7 +50,7 @@ RUN set -ex \
 	&& rm python.tar.xz \
 	\
 	&& apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-		sqlite-dev=3.39.4-r0 \
+		sqlite-dev=3.40.0-r0 \
 		binutils=2.39-r2 \
 	&& apk add --no-cache --virtual .build-deps  \
 		bluez-dev \
