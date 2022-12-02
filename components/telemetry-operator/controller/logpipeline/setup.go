@@ -4,36 +4,16 @@ import (
 	"context"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/setup"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-)
-
-var (
-	createOrUpdate = predicate.Funcs{
-		CreateFunc: func(e event.CreateEvent) bool { return true },
-		DeleteFunc: func(e event.DeleteEvent) bool { return false },
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			// We only need to check generation change here, because it is only updated on spec changes.
-			return e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration()
-		},
-		GenericFunc: func(e event.GenericEvent) bool { return false },
-	}
-
-	onlyUpdate = predicate.Funcs{
-		CreateFunc:  func(e event.CreateEvent) bool { return false },
-		DeleteFunc:  func(e event.DeleteEvent) bool { return false },
-		UpdateFunc:  func(e event.UpdateEvent) bool { return true },
-		GenericFunc: func(e event.GenericEvent) bool { return false },
-	}
 )
 
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
@@ -42,12 +22,12 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
-			builder.WithPredicates(createOrUpdate),
+			builder.WithPredicates(setup.CreateOrUpdate()),
 		).
 		Watches(
 			&source.Kind{Type: &appsv1.DaemonSet{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapDaemonSet),
-			builder.WithPredicates(onlyUpdate),
+			builder.WithPredicates(setup.OnlyUpdate()),
 		).
 		Complete(r)
 }
