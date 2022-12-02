@@ -1,6 +1,4 @@
 FROM maven:3.6-jdk-11
-#as BUILD
-#FROM openjdk:17.0 as BUILD
 WORKDIR /build
 
 #Compile and install SDK locally
