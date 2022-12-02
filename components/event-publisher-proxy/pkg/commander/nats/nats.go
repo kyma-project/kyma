@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+	"k8s.io/client-go/tools/cache"
 
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/xerrors"
@@ -102,7 +103,12 @@ func (c *Commander) Start() error {
 
 	// configure Subscription Lister
 	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig)
-	subLister := subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
+	var subLister cache.GenericLister
+	if c.opts.EnableNewCRDVersion {
+		subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
+	} else {
+		subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVRV1alpha1).Lister()
+	}
 	subscribedProcessor := &subscribed.Processor{
 		SubscriptionLister: &subLister,
 		Prefix:             c.envCfg.ToConfig().EventTypePrefix,
