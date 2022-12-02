@@ -81,21 +81,7 @@ service:
   # nodePort: 30020
   # clusterIP: 172.16.10.1
   annotations: {}
-#   prometheus.io/path: "/api/v1/metrics/prometheus"
-#   prometheus.io/port: "2020"
-#   prometheus.io/scrape: "true"
 
-serviceMonitor:
-  enabled: true
-  serviceMonitorPorts:
-    - port: http-metrics
-      path: /metrics
-      scheme: https
-      tlsConfig:
-        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-        keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true
 
 #   namespace: monitoring
 #   interval: 10s

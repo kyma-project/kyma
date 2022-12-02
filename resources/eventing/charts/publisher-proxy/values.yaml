@@ -14,7 +14,6 @@ metrics:
     port: 9090
     portName: metrics
     nameSuffix: "-metrics"
-    interval: 30s
 
 publisherProxy:
   config:

@@ -28,9 +28,7 @@ spec:
       {{- if or .Values.exporter.enabled .Values.nats.configChecksumAnnotation .Values.podAnnotations }}
       annotations:
       {{- if .Values.exporter.enabled }}
-        prometheus.io/path: /metrics
-        prometheus.io/port: "7777"
-        prometheus.io/scrape: "true"
+        prometheus.io/scrape: "false"
       {{- end }}
       {{- if .Values.nats.configChecksumAnnotation }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}

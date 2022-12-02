@@ -31,6 +31,8 @@ spec:
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.
         serviceAnnotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "15014"
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.
             Any modifications are discarded and the resource is reverted to the original state.

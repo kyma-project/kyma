@@ -42,7 +42,6 @@ metrics:
     port: 8080
     portName: metrics
     nameSuffix: "-metrics"
-    interval: 30s
 
 webhook:
   port: 443

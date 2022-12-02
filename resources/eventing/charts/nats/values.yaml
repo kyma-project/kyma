@@ -245,7 +245,9 @@ statefulSetPodLabels:
   nats_cluster: eventing-nats
 
 # Annotations to add to the NATS Service
-serviceAnnotations: {}
+serviceAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "7777"
 
 cluster:
   enabled: false
@@ -274,11 +276,3 @@ exporter:
   pullPolicy: IfNotPresent
   securityContext: {}
   resources: {}
-  # Prometheus operator ServiceMonitor support. Exporter has to be enabled
-  serviceMonitor:
-    enabled: true
-    labels: {}
-    annotations: {}
-    path: /metrics
-    # interval:
-    # scrapeTimeout:
