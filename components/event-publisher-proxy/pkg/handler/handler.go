@@ -105,7 +105,7 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
 	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
 	if event == nil {
-		h.namedLogger().Debug("Failed to transform legacy event to CloudEvent, event is nil")
+		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
 		return
 	}
 	ctx := request.Context()
