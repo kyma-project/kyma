@@ -41,7 +41,7 @@ describe('SKR own_cluster test', function() {
     options.customParams.shootName = shootName;
 
     skr = await getOrProvisionSKR(options,
-        skipProvisioning, provisioningTimeout);
+        false, provisioningTimeout);
     options = skr.options;
   });
 
