@@ -111,6 +111,8 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
+<!-- This content will not appear in the rendered Markdown -->
+
 | Parameter         |    Required    | Description                                   |
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
