@@ -18,12 +18,9 @@ import (
 
 var (
 	onlyUpdate = predicate.Funcs{
-		CreateFunc: func(e event.CreateEvent) bool { return false },
-		DeleteFunc: func(e event.DeleteEvent) bool { return false },
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			// We only need to check generation change here, because it is only updated on spec changes.
-			return e.ObjectOld.GetGeneration() != e.ObjectNew.GetGeneration()
-		},
+		CreateFunc:  func(e event.CreateEvent) bool { return false },
+		DeleteFunc:  func(e event.DeleteEvent) bool { return false },
+		UpdateFunc:  func(e event.UpdateEvent) bool { return true },
 		GenericFunc: func(e event.GenericEvent) bool { return false },
 	}
 )
