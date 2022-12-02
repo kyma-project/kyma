@@ -251,8 +251,8 @@ func makePodAnnotations(configHash string) map[string]string {
 func makeResourceRequirements(config Config) corev1.ResourceRequirements {
 	return corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("150m"),
-			corev1.ResourceMemory: resource.MustParse("256Mi"),
+			corev1.ResourceCPU:    config.Deployment.CPURequest,
+			corev1.ResourceMemory: config.Deployment.MemoryRequest,
 		},
 		Limits: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    config.Deployment.CPULimit,

@@ -80,6 +80,8 @@ var (
 	traceCollectorPriorityClass        string
 	traceCollectorCPULimit             string
 	traceCollectorMemoryLimit          string
+	traceCollectorCPURequest           string
+	traceCollectorMemoryRequest        string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -153,6 +155,8 @@ func main() {
 	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", "", "Priority class name for tracing OpenTelemetry Collector")
 	flag.StringVar(&traceCollectorCPULimit, "trace-collector-cpu-limit", "1", "CPU limit for tracing OpenTelemetry Collector")
 	flag.StringVar(&traceCollectorMemoryLimit, "trace-collector-memory-limit", "1Gi", "Memory limit for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorCPURequest, "trace-collector-cpu-request", "150m", "CPU request for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorMemoryRequest, "trace-collector-memory-request", "256Mi", "Memory request for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -285,6 +289,12 @@ func validateFlags() error {
 	if _, err := resource.ParseQuantity(traceCollectorMemoryLimit); err != nil {
 		return fmt.Errorf("--trace-collector-memory-limit has to be a valid quantity: %v", err)
 	}
+	if _, err := resource.ParseQuantity(traceCollectorCPURequest); err != nil {
+		return fmt.Errorf("--trace-collector-cpu-request has to be a valid quantity: %v", err)
+	}
+	if _, err := resource.ParseQuantity(traceCollectorMemoryRequest); err != nil {
+		return fmt.Errorf("--trace-collector-memory-request has to be a valid quantity: %v", err)
+	}
 
 	return nil
 }
@@ -337,6 +347,8 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 			PriorityClassName: traceCollectorPriorityClass,
 			CPULimit:          resource.MustParse(traceCollectorCPULimit),
 			MemoryLimit:       resource.MustParse(traceCollectorMemoryLimit),
+			CPURequest:        resource.MustParse(traceCollectorCPURequest),
+			MemoryRequest:     resource.MustParse(traceCollectorMemoryRequest),
 		},
 		Service: tracepipelinereconciler.ServiceConfig{
 			OTLPServiceName: traceCollectorOTLPServiceName,

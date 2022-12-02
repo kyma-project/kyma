@@ -46,6 +46,8 @@ type DeploymentConfig struct {
 	PriorityClassName string
 	CPULimit          resource.Quantity
 	MemoryLimit       resource.Quantity
+	CPURequest        resource.Quantity
+	MemoryRequest     resource.Quantity
 }
 
 type ServiceConfig struct {
