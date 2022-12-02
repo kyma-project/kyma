@@ -103,7 +103,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		}
 	}()
 
-	if err = r.ensureFinalizers(ctx, pipeline); err != nil {
+	if err = ensureFinalizers(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 
@@ -111,7 +111,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return err
 	}
 
-	if err = r.cleanupFinalizersIfNeeded(ctx, pipeline); err != nil {
+	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
 
