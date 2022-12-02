@@ -19,6 +19,7 @@ package tracepipeline
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
@@ -33,9 +34,24 @@ import (
 
 type Config struct {
 	CreateServiceMonitor bool
-	CollectorNamespace   string
-	ResourceName         string
-	CollectorImage       string
+	BaseName             string
+	Namespace            string
+
+	Deployment DeploymentConfig
+	Service    ServiceConfig
+}
+
+type DeploymentConfig struct {
+	Image             string
+	PriorityClassName string
+	CPULimit          resource.Quantity
+	MemoryLimit       resource.Quantity
+	CPURequest        resource.Quantity
+	MemoryRequest     resource.Quantity
+}
+
+type ServiceConfig struct {
+	OTLPServiceName string
 }
 
 type Reconciler struct {
@@ -55,7 +71,7 @@ func NewReconciler(client client.Client, config Config, scheme *runtime.Scheme) 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := logf.FromContext(ctx)
 
-	logger.Info("Reconciliation triggered")
+	logger.V(1).Info("Reconciliation triggered")
 
 	var tracePipeline telemetryv1alpha1.TracePipeline
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
@@ -98,7 +114,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeCollectorService(r.config)
+	service := makeOTLPService(r.config)
 	if err = controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
 		return err
 	}
