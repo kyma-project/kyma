@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -67,47 +66,52 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	return &r
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
 
 	var parser telemetryv1alpha1.LogParser
 	if err := r.Get(ctx, req.NamespacedName, &parser); err != nil {
-		log.V(1).Info("Ignoring deleted LogParser")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	return ctrl.Result{}, r.doReconcile(ctx, &parser)
+}
+
+func (r *Reconciler) doReconcile(ctx context.Context, parser *telemetryv1alpha1.LogParser) (err error) {
+	// defer the updating of status to ensure that the status is updated regardless of the outcome of the reconciliation
 	defer func() {
-		if err := r.updateStatus(ctx, parser.Name); err != nil {
-			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
-			reconcileErr = fmt.Errorf("failed to update LogPipeline status: %v", err)
+		if statusErr := r.updateStatus(ctx, parser.Name); statusErr != nil {
+			if err != nil {
+				err = fmt.Errorf("failed while updating status: %v: %v", statusErr, err)
+			} else {
+				err = fmt.Errorf("failed to update status: %v", statusErr)
+			}
 		}
 	}()
 
-	err := ensureFinalizer(ctx, r.Client, &parser)
-	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	if err = ensureFinalizer(ctx, r.Client, parser); err != nil {
+		return err
 	}
 
 	if err = r.syncer.syncFluentBitConfig(ctx); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return err
 	}
 
-	err = cleanupFinalizerIfNeeded(ctx, r.Client, &parser)
-	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	if err = cleanupFinalizerIfNeeded(ctx, r.Client, parser); err != nil {
+		return err
 	}
 
-	checksum, err := r.calculateConfigChecksum(ctx)
-	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	var checksum string
+	if checksum, err = r.calculateConfigChecksum(ctx); err != nil {
+		return err
 	}
 
 	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return err
 	}
 
-	return reconcileResult, reconcileErr
+	return err
 }
 
 func (r *Reconciler) calculateConfigChecksum(ctx context.Context) (string, error) {
