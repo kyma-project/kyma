@@ -74,6 +74,10 @@ spec:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
             - --trace-collector-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
+            - --traceCollectorCPULimit={{ .Values.traceCollector.resources.limits.cpu }}
+            - --traceCollectorMemoryLimit={{ .Values.traceCollector.resources.limits.memory }}
+            - --traceCollectorCPURequest={{ .Values.traceCollector.resources.requests.cpu }}
+            - --traceCollectorMemoryRequest={{ .Values.traceCollector.resources.requests.memory }}
 {{- end }}
           name: manager
           ports:
