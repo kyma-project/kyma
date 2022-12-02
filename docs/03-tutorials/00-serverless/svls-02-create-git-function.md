@@ -150,9 +150,11 @@ Follow these steps:
 
 3. To connect the repository, go to **Workloads** > **Functions** > **Create Function**.
 
+4. Provide or generate the Function's name. 
+
 4. Go to **Advanced**, change **Source Type** from **Inline** to **Git Repository**.
 
-5. Click on the **Git Repository** section and connect your repository, with `https://github.com/kyma-project/examples.git` as repository **URL**, **Base Dir** as `orders-service/function` and **Reference** as `main`.
+5. Click on the **Git Repository** section and enter `https://github.com/kyma-project/examples.git` as repository **URL**, `orders-service/function` as **Base Dir**,  and `main` as **Reference**.
 
     > **NOTE:** If you want to connect a secured repository instead of a public one, toggle the **Auth** switch. In the **Auth** section choose **Secret** from the list and choose the preffered type.
 6. Click **Create**.
