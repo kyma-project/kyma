@@ -2,7 +2,6 @@ package scenarios
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
@@ -26,8 +25,8 @@ import (
 const scenarioKey = "scenario"
 
 func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
-	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%d", "test-serverless-simple", currentDate.Hour(), currentDate.Minute(), rand.Int())
+	now := time.Now()
+	cfg.Namespace = fmt.Sprintf("%s-%d-%d-%d", "test-serverless-simple", now.Hour(), now.Minute(), now.Second())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {

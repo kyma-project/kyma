@@ -2,7 +2,6 @@ package scenarios
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
@@ -23,8 +22,8 @@ import (
 )
 
 func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
-	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%d", "test-serverless-gitops", currentDate.Hour(), currentDate.Minute(), rand.Int())
+	now := time.Now()
+	cfg.Namespace = fmt.Sprintf("%s-%d-%d-%d", "test-serverless-gitops", now.Hour(), now.Minute(), now.Second())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
