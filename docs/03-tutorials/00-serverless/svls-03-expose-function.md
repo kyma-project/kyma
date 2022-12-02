@@ -150,17 +150,15 @@ Follow these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an APIRule.
 
-2. Go to **Workloads** > **Functions** and select the Function you want to expose.
+2. Go to **Discovery and Network** > **API Rules**, and click on **Create API Rule**.
 
-3. Switch to the **Configuration** tab and select **Create API Rule** in the API Rules section.
-
-4. Under **General settings**, enter the following information:
+3. Enter the following information:
 
     - The APIRule's **Name** matching the Function's name.
 
     >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
 
-    - **Service** name matching the Function's name.
+    - **Service Name** matching the Function's name.
 
     - **Host** to determine the host on which you want to expose your Function. It is required to change the `*` symbol at the beggining to the subdomain name you want.
 
