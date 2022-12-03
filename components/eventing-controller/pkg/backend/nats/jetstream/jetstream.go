@@ -352,6 +352,7 @@ func (js *JetStream) initNATSConn(connCloseHandler backendnats.ConnClosedHandler
 			nats.RetryOnFailedConnect(true),
 			nats.MaxReconnects(js.Config.MaxReconnects),
 			nats.ReconnectWait(js.Config.ReconnectWait),
+			nats.Name("Kyma Controller"),
 		}
 		conn, err := nats.Connect(js.Config.URL, jsOptions...)
 		if err != nil || !conn.IsConnected() {

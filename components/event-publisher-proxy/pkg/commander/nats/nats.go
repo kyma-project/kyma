@@ -76,6 +76,7 @@ func (c *Commander) Start() error {
 		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
 		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
 		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
+		pkgnats.WithName("Kyma Publisher"),
 	)
 	if err != nil {
 		return xerrors.Errorf("failed to connect to backend server for %s : %v", natsCommanderName, err)
