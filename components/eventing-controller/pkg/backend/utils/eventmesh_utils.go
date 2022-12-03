@@ -92,7 +92,7 @@ func getQos(qosStr string) (types.Qos, error) {
 func getEventMeshEvents(typeInfos []EventTypeInfo, typeMatching eventingv1alpha2.TypeMatching,
 	defaultNamespace, source string) types.Events {
 	eventMeshNamespace := defaultNamespace
-	if typeMatching == eventingv1alpha2.TypeMatchingExact {
+	if typeMatching == eventingv1alpha2.TypeMatchingExact && source != "" {
 		eventMeshNamespace = source
 	}
 

@@ -48,13 +48,17 @@ spec:
       hostPID: false # Optional. The default is false if the entry is not there.
       hostIPC: false # Optional. The default is false if the entry is not there.
       initContainers:
-        - name: generate-htpasswd
+        - name: init-registry-config
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
-{{- if .Values.containers.securityContext }}
+{{- if .Values.initContainers.securityContext }}
           securityContext:
-            {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 12 }}
+            {{- include "tplValue" ( dict "value" .Values.initContainers.securityContext "context" . ) | nindent 12 }}
 {{- end }}
           volumeMounts:
+          {{- if eq .Values.storage "filesystem" }}
+            - name: data
+              mountPath: /var/lib/registry/
+          {{- end }}
             - name: registry-credentials
               mountPath: /regcred
               readOnly: true
@@ -69,6 +73,10 @@ spec:
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."
+{{- if eq .Values.storage "filesystem" }}
+              chown -R 1000:1000 "/var/lib/registry/"
+{{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"

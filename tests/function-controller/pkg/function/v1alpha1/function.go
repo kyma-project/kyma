@@ -7,6 +7,7 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -87,17 +88,25 @@ func (f *Function) Delete() error {
 }
 
 func (f *Function) Update(spec serverlessv1alpha1.FunctionSpec) error {
-	// correct update must first perform get
-	fn, err := f.Get()
-	if err != nil {
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		// correct update must first perform get
+		fn, err := f.Get()
+		if err != nil {
+			// RetryOnConflict doesn't work with wrapped errors
+			// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
+			return err
+		}
+
+		fnCopy := fn.DeepCopy()
+		fnCopy.Spec = spec
+
+		_, err = f.resCli.Update(fnCopy)
+		// RetryOnConflict doesn't work with wrapped errors
+		// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
 		return err
-	}
+	}, f.log)
 
-	fnCopy := fn.DeepCopy()
-	fnCopy.Spec = spec
-
-	_, err = f.resCli.Update(fnCopy)
-	return err
+	return errors.Wrapf(err, "while updating Function %s in namespace %s", f.name, f.namespace)
 }
 
 func (f *Function) Get() (*serverlessv1alpha1.Function, error) {

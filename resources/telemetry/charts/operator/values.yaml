@@ -55,6 +55,16 @@ resources:
     cpu: 5m
     memory: 20Mi
 
+initContainers:
+  webhookInit:
+    resources:
+        limits:
+          cpu: 100m
+          memory: 64Mi
+        requests:
+          cpu: 5m
+          memory: 20Mi
+
 terminationGracePeriodSeconds: 10
 
 extraLabels:
@@ -120,5 +130,11 @@ tolerations: []
 
 affinity: {}
 
-dashboardExtension:
-  enabled: true
+traceCollector:
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 150m
+      memory: 256Mi

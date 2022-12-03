@@ -76,17 +76,17 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20221115-1e7ca96f"
+      version: "20221124-ed850f15"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-16091"
+      version: "PR-16183"
     function_webhook:
       name: "function-webhook"
-      version: "PR-16091"
+      version: "PR-16183"
     function_build_init:
       name: "function-build-init"
-      version: "PR-16091"
+      version: "PR-16183"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
       version: "PR-16116"
@@ -95,7 +95,7 @@ global:
       version: "PR-16116"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20221110-f5cb45c7"
+      version: "PR-16240"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-4ced14d5"
@@ -111,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "v20221102-bcd2a2b1"
+      version: "PR-16172"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -267,6 +267,8 @@ grafanaDashboard:
 
 dockerRegistry:
   enableInternal: true
+  gateway: "kyma-system/kyma-gateway"
+  gatewayCert: "kyma-gateway-certs"
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'

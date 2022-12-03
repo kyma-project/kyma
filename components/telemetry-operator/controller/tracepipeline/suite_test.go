@@ -18,6 +18,7 @@ package tracepipeline
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"path/filepath"
 	"testing"
 
@@ -47,9 +48,18 @@ var cancel context.CancelFunc
 
 var testConfig = Config{
 	CreateServiceMonitor: false,
-	CollectorNamespace:   "kyma-system",
-	ResourceName:         "telemetry-trace-collector",
-	CollectorImage:       "otel/opentelemetry-collector-contrib:0.60.0",
+	BaseName:             "telemetry-trace-collector",
+	Namespace:            "kyma-system",
+	Deployment: DeploymentConfig{
+		Image:         "otel/opentelemetry-collector-contrib:0.60.0",
+		CPULimit:      resource.MustParse("1"),
+		MemoryLimit:   resource.MustParse("1Gi"),
+		CPURequest:    resource.MustParse("150m"),
+		MemoryRequest: resource.MustParse("256Mi"),
+	},
+	Service: ServiceConfig{
+		OTLPServiceName: "telemetry-otlp-traces",
+	},
 }
 
 func TestAPIs(t *testing.T) {

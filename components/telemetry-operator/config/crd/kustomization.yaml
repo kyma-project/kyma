@@ -4,7 +4,7 @@
 resources:
   - bases/telemetry.kyma-project.io_logpipelines.yaml
   - bases/telemetry.kyma-project.io_logparsers.yaml
-- bases/telemetry.kyma-project.io_tracepipelines.yaml
+  - bases/telemetry.kyma-project.io_tracepipelines.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

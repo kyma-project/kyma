@@ -19,8 +19,6 @@
 # Logging library
 /common/logging @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 
-/components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/components/application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /components/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
@@ -52,9 +50,6 @@
 
 /resources/api-gateway @strekm @werdes72 @dariusztutaj @cnvergence @barchw @videlov @triffer
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
-/resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @franpog859 @mvshao
 /resources/certificates @dariusztutaj @cnvergence @strekm @werdes72 @barchw
 /resources/cluster-essentials @a-thaler @strekm @dariusztutaj @cnvergence @barchw @werdes72 @PK85 @videlov @triffer
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @tillknuesting
@@ -78,7 +73,7 @@
 
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
+/tests/fast-integration @lindnerby @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP @PK85 @tillknuesting @chrkl
 /tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @tillknuesting @ralikio @jaroslaw-pieszka

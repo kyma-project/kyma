@@ -40,6 +40,7 @@ data:
     RUN mkdir -p /usr/src/app/function
     WORKDIR /usr/src/app/function
 
+    COPY /registry-config/* /usr/src/app/function/
     COPY $SRC_DIR/package.json /usr/src/app/function/package.json
 
     RUN npm install --production
