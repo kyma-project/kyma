@@ -113,7 +113,7 @@ This table lists all the possible parameters of a given resource together with t
 
 <!-- The table bellow is generated automatically don't touch them. When you want to change description, do it in components/function-controller/pkg/apis/serverless/v1alpha2/function_types.go -->
 
-<!-- FUNCTION-CRD-PARAMETERS-TABLE-START -->
+<!-- FUNCTION-CRD-PARAMETERS-TABLE(START) -->
 | Parameter         |    Required    | Description                                   |
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
@@ -160,7 +160,7 @@ This table lists all the possible parameters of a given resource together with t
 | **status.conditions.reason**             | Not applicable | Provides information on the Function CR processing success or failure. See the [**Reasons**](#status-reasons) section for the full list of possible status reasons and their descriptions. All status reasons are in camelCase.   |
 | **status.conditions.status**             | Not applicable | Describes the status of processing the Function CR by the Function Controller. It can be `True` for success, `False` for failure, or `Unknown` if the CR processing is still in progress. If the status of all conditions is `True`, the overall status of the Function CR is ready.     |
 | **status.conditions.type**               | Not applicable | Describes a substage of the Function CR processing. There are three condition types that a Function has to meet to be ready: `ConfigurationReady`, `BuildReady`, and `Running`. When displaying the Function status in the terminal, these types are shown under `CONFIGURED`, `BUILT`, and `RUNNING` columns respectively. All condition types can change asynchronously depending on the type of Function modification, but all three need to be in the `True` status for the Function to be considered successfully processed. |
-<!-- FUNCTION-CRD-PARAMETERS-TABLE-END -->
+<!-- FUNCTION-CRD-PARAMETERS-TABLE(END) -->
 
 ### Status reasons
 
