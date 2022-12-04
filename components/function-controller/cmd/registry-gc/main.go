@@ -3,87 +3,101 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/docker/distribution/reference"
 	"github.com/kyma-project/kyma/components/function-controller/internal/registry"
 	"github.com/sirupsen/logrus"
+	"github.com/vrischmann/envconfig"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
+)
+
+const (
+	UsernameSecretKeyName = "username"
+	PasswordSecretKeyName = "password"
+	URLSecretKeyName      = "registryAddress"
 )
 
 var (
 	functionRuntimeLabels = map[string]string{
 		"serverless.kyma-project.io/managed-by": "function-controller",
 	}
+
+	setupLog = ctrlzap.New().WithName("internal registry gc")
 )
 
+type config struct {
+	Namespace               string `envconfig:"default=kyma-system"`
+	RegistryConfigSecreName string `envconfig:"default=serverless-registry-config-default"`
+}
+
 func main() {
+	setupLog := ctrlzap.New().WithName("internal registry gc")
+	setupLog.Info("reading configuration")
 
-	k8sClient, err := client.New(ctrl.GetConfigOrDie(), client.Options{})
+	cfg := &config{}
+	if err := envconfig.Init(cfg); err != nil {
+		setupLog.Error(err, "while reading env variables")
+		os.Exit(1)
+
+	}
+	restConfig := ctrl.GetConfigOrDie()
+	registryConfig := ReadRegistryConfigSecretOrDie(restConfig, cfg)
+
+	deploymentList, err := getFunctionDeploymentList(restConfig)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create Kubernetes Client: %v", err))
-	}
-	matchingLabels := client.MatchingLabels(functionRuntimeLabels)
-	listOpts := &client.ListOptions{}
-	matchingLabels.ApplyToList(listOpts)
-
-	deploymentList := appsv1.DeploymentList{}
-
-	if err := k8sClient.List(context.Background(), &deploymentList, listOpts); err != nil {
-		panic(fmt.Sprintf("failed to list deployments: %v", err))
+		setupLog.Error(err, "while listing Function Deployments")
+		os.Exit(1)
 	}
 
-	functionImages := map[string][]string{}
+	functionImages := registry.NewTaggedImageList()
 	for _, deployment := range deploymentList.Items {
 		tagged, err := getFunctionImage(deployment)
 		if err != nil {
-			panic(err)
+			setupLog.Error(err, "while parsing deployment images")
+			os.Exit(1)
 		}
-		if tagged != nil {
-			functionImages[reference.Path(tagged)] = append(functionImages[reference.Path(tagged)], tagged.Tag())
-		}
+		imageName := reference.Path(tagged)
+		imageTag := tagged.Tag()
+		functionImages.AddImageWithTag(imageName, imageTag)
 	}
 
-	logrus.Infof("------------------------------------- functionImages: %v", functionImages)
 	registryClient, err := registry.NewRegistryClient(context.Background(),
-		registry.RepositoryClientOptions{
-			URL:      "http://localhost:5000",
-			Username: "d3BZTGRTVnNCQ3BvMkNUeTBWMHc=",
-			Password: "dDVGRFF3bEhFeXR1ckxxcVN0dXBTclNoUWJ1RFk2UXN5YWVabnVLTA==",
-		})
+		registryConfig)
 	if err != nil {
-		panic(err)
+		setupLog.Error(err, "while creating registry client")
+		os.Exit(1)
 	}
-	for function, funcTags := range functionImages {
-		repoCli, err := registryClient.ImageRepository(function)
-		if err != nil {
-			panic(err)
-		}
 
+	for _, functionImage := range functionImages.ListImages() {
+		repoCli, err := registryClient.ImageRepository(functionImage)
+		if err != nil {
+			setupLog.Error(err, "while creating repository client")
+			os.Exit(1)
+		}
 		registryTags, err := repoCli.ListTags()
 		if err != nil {
-			panic(err)
+			setupLog.Error(err, "while getting image tags")
+			os.Exit(1)
 		}
 		for _, tagStr := range registryTags {
-			found := false
-			for _, funcTag := range funcTags {
-				if funcTag == tagStr {
-					found = true
-				}
-				if found {
-					continue
-				}
+			if !functionImages.HasImageWithTag(functionImage, tagStr) {
 				tag, err := repoCli.GetImageTag(tagStr)
 				if err != nil {
-					panic(err)
+					setupLog.Error(err, "while getting tag details")
+					os.Exit(1)
 				}
-				// 	err = repoCli.DeleteImageTag(tag.Digest)
-				// 	if err != nil {
-				// 		panic(err)
-				// 	}
-				// }
-				logrus.Infof(" should delete: %v:%v, with digest: %v err: %v", function, tagStr, tag.Digest, err)
+				err = repoCli.DeleteImageTag(tag.Digest)
+				if err != nil {
+					setupLog.Error(err, "while listing Function Deployments")
+				}
+				logrus.Infof(" should delete: %v:%v, with digest: %v err: %v", functionImage, tagStr, tag.Digest, err)
 			}
 		}
 
@@ -91,19 +105,69 @@ func main() {
 
 }
 
+func getFunctionDeploymentList(config *rest.Config) (*appsv1.DeploymentList, error) {
+	k8sClient, err := client.New(config, client.Options{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Kubernetes Client: %v", err)
+	}
+	matchingLabels := client.MatchingLabels(functionRuntimeLabels)
+	listOpts := &client.ListOptions{}
+	matchingLabels.ApplyToList(listOpts)
+
+	deploymentList := &appsv1.DeploymentList{}
+
+	if err := k8sClient.List(context.Background(), deploymentList, listOpts); err != nil {
+		return nil, fmt.Errorf("failed to list deployments: %v", err)
+	}
+	return deploymentList, nil
+}
+
 func getFunctionImage(d appsv1.Deployment) (reference.NamedTagged, error) {
 	for _, container := range d.Spec.Template.Spec.Containers {
 		if container.Name == "function" {
 			ref, err := reference.ParseNamed(container.Image)
 			if err != nil {
-				return nil, fmt.Errorf("failed to parse container image: %v", err)
+				return nil, fmt.Errorf("failed to parse Function container image: %v", err)
 			}
 			taggedRef, ok := ref.(reference.NamedTagged)
 			if !ok {
-				return nil, fmt.Errorf("failed to cast image name")
+				return nil, fmt.Errorf("failed to cast Function image name")
 			}
 			return taggedRef, nil
 		}
 	}
-	return nil, nil
+	return nil, fmt.Errorf("failed to find Function image")
+}
+
+func ReadRegistryConfigSecretOrDie(resetConfig *rest.Config, envConfig *config) *registry.RegistryClientOptions {
+	k8sClient, err := client.New(resetConfig, client.Options{})
+	if err != nil {
+		setupLog.Error(err, "while creating Kubernetes client")
+		os.Exit(1)
+	}
+
+	s := corev1.Secret{}
+
+	if err := k8sClient.Get(context.Background(),
+		types.NamespacedName{
+			Name:      envConfig.RegistryConfigSecreName,
+			Namespace: envConfig.Namespace,
+		}, &s); err != nil {
+		setupLog.Error(err, "while getting secret")
+		os.Exit(1)
+	}
+
+	keys := []string{UsernameSecretKeyName, PasswordSecretKeyName, URLSecretKeyName}
+	for _, key := range keys {
+		if _, ok := s.Data[key]; !ok {
+			setupLog.Error(fmt.Errorf("can't find required key [%s] in registry config secret", key), "")
+			os.Exit(1)
+		}
+	}
+	return &registry.RegistryClientOptions{
+		Username: string(s.Data[UsernameSecretKeyName]),
+		Password: string(s.Data[PasswordSecretKeyName]),
+		URL:      string(s.Data[URLSecretKeyName]),
+	}
+
 }

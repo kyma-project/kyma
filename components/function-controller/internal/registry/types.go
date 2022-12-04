@@ -13,25 +13,23 @@ type RegistryClient interface {
 	ImageRepository(imageName string) (RepositoryClient, error)
 }
 
+type RepositoryClient interface {
+	ListTags() ([]string, error)
+	GetImageTag(tag string) (*Tag, error)
+	DeleteImageTag(tagDigest digest.Digest) error
+}
+
+var (
+	_ RepositoryClient = &repositoryClient{}
+	_ RegistryClient   = &registryClient{}
+)
+
 type registryClient struct {
 	ctx context.Context
 
 	userName string
 	password string
 	url      *url.URL
-}
-
-type RepositoryClientOptions struct {
-	Username string
-	Password string
-	URL      string
-	Image    string
-}
-
-type RepositoryClient interface {
-	ListTags() ([]string, error)
-	GetImageTag(tag string) (*Tag, error)
-	DeleteImageTag(tagDigest digest.Digest) error
 }
 
 type repositoryClient struct {
@@ -43,13 +41,15 @@ type repositoryClient struct {
 	manifestService distribution.ManifestService
 }
 
-var _ RepositoryClient = &repositoryClient{}
+type RegistryClientOptions struct {
+	Username string
+	Password string
+	URL      string
+	Image    string
+}
 
 type Tag struct {
 	distribution.Descriptor
 }
 
-type FunctionImage struct {
-	name string
-	tags []string
-}
+type ImageList map[string]map[string]struct{}
