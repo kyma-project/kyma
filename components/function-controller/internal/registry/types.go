@@ -8,6 +8,13 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
+type RegistryClient interface {
+	ImageRepository() (RegistryClient, error)
+}
+
+type registryClient struct {
+}
+
 type RepositoryClientOptions struct {
 	UserName string
 	Password string
@@ -34,4 +41,9 @@ var _ RepositoryClient = &repositoryClient{}
 
 type Tag struct {
 	distribution.Descriptor
+}
+
+type FunctionImage struct {
+	name string
+	tags []string
 }
