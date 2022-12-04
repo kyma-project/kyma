@@ -46,15 +46,17 @@ func main() {
 	}
 
 	logrus.Infof("------------------------------------- functionImages: %v", functionImages)
-
+	registryClient, err := registry.NewRegistryClient(context.Background(),
+		registry.RepositoryClientOptions{
+			URL:      "http://localhost:5000",
+			Username: "d3BZTGRTVnNCQ3BvMkNUeTBWMHc=",
+			Password: "dDVGRFF3bEhFeXR1ckxxcVN0dXBTclNoUWJ1RFk2UXN5YWVabnVLTA==",
+		})
+	if err != nil {
+		panic(err)
+	}
 	for function, funcTags := range functionImages {
-		repoCli, err := registry.NewRepositoryClient(context.Background(),
-			registry.RepositoryClientOptions{
-				Image:    function,
-				URL:      "http://localhost:5000",
-				UserName: "d3BZTGRTVnNCQ3BvMkNUeTBWMHc=",
-				Password: "dDVGRFF3bEhFeXR1ckxxcVN0dXBTclNoUWJ1RFk2UXN5YWVabnVLTA==",
-			})
+		repoCli, err := registryClient.ImageRepository(function)
 		if err != nil {
 			panic(err)
 		}

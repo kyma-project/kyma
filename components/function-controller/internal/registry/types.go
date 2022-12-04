@@ -2,6 +2,7 @@ package registry
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/reference"
@@ -9,14 +10,19 @@ import (
 )
 
 type RegistryClient interface {
-	ImageRepository() (RegistryClient, error)
+	ImageRepository(imageName string) (RepositoryClient, error)
 }
 
 type registryClient struct {
+	ctx context.Context
+
+	userName string
+	password string
+	url      *url.URL
 }
 
 type RepositoryClientOptions struct {
-	UserName string
+	Username string
 	Password string
 	URL      string
 	Image    string
