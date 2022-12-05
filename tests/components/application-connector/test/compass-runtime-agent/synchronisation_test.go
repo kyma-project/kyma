@@ -19,7 +19,7 @@ type ApplicationReader interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
 
-func (cs *CompassRuntimeAgentSuite) TestCreatingApplications() {
+func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	expectedAppName := "app1"
 	compassAppName := expectedAppName + random.RandomString(10)
 
@@ -34,15 +34,17 @@ func (cs *CompassRuntimeAgentSuite) TestCreatingApplications() {
 	cs.Assert().NoError(err)
 
 	// Compare Application created by Compass Runtime Agent with expected result
-	err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
-	cs.Assert().NoError(err)
+
+	cs.Run("Is app correct", func() {
+		err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
+		cs.Assert().NoError(err)
+	})
 
 	// Clean up
-	err = cs.directorClient.UnassignApplication(applicationID, cs.formationName)
-	cs.Assert().NoError(err)
-
-	err = cs.directorClient.UnregisterApplication(applicationID)
-	cs.Require().NoError(err)
+	cs.Run("App gets removed", func() {
+		err = cs.removeApplicationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
+		cs.NoError(err)
+	})
 }
 
 func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
@@ -70,35 +72,33 @@ func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(a
 	}.Do()
 }
 
-func (cs *CompassRuntimeAgentSuite) TestDeletingApplication() {
-	expectedAppName := "app1"
-	compassAppName := expectedAppName + random.RandomString(10)
+func (cs *CompassRuntimeAgentSuite) removeApplicationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
+	t := cs.T()
+	t.Helper()
 
-	//Create Application in Director
-	applicationID, err := cs.directorClient.RegisterApplication(compassAppName, "Test Application for testing Compass Runtime Agent")
-	cs.Require().NoError(err)
+	exec := func() error {
+		err := cs.directorClient.UnassignApplication(applicationID, cs.formationName)
+		if err != nil {
+			return err
+		}
 
-	synchronizedCompassAppName := fmt.Sprintf("mp-%s", compassAppName)
+		err = cs.directorClient.UnregisterApplication(applicationID)
+		return err
+	}
 
-	applicationInterface := cs.applicationsClientSet.ApplicationconnectorV1alpha1().Applications()
-	err = cs.assignApplicationToFormationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
-	cs.Assert().NoError(err)
+	verify := func() bool {
+		_, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
+		if err != nil {
+			t.Log(fmt.Sprintf("Failed to get app: %v", err))
+		}
 
-	// Compare Application created by Compass Runtime Agent with expected result
-	err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
-	cs.Assert().NoError(err)
+		return err != nil
+	}
 
-	// Clean up
-	err = cs.directorClient.UnassignApplication(applicationID, cs.formationName)
-	cs.Assert().NoError(err)
-
-	err = cs.directorClient.UnregisterApplication(applicationID)
-	cs.Require().NoError(err)
-
-	err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
-
-	time.Sleep(20 * time.Second)
-
-	errStr := fmt.Sprintf("\"%v\" not found", compassAppName)
-	cs.ErrorContains(err, errStr)
+	return executor.ExecuteAndWaitForCondition{
+		RetryableExecuteFunc: exec,
+		ConditionMetFunc:     verify,
+		Tick:                 checkAppExistsPeriod,
+		Timeout:              appCreationTimeout,
+	}.Do()
 }
