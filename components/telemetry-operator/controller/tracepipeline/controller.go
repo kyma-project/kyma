@@ -23,6 +23,7 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -77,7 +78,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	if err = controllerutil.SetControllerReference(tracing, secret, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateSecret(ctx, r.Client, secret); err != nil {
+	if err = utils.CreateOrUpdateSecret(ctx, r.Client, secret); err != nil {
 		return err
 	}
 
@@ -85,7 +86,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	if err = controllerutil.SetControllerReference(tracing, configMap, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
+	if err = utils.CreateOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
@@ -94,7 +95,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	if err = controllerutil.SetControllerReference(tracing, deployment, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
+	if err = utils.CreateOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
@@ -102,7 +103,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 	if err = controllerutil.SetControllerReference(tracing, service, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateService(ctx, r.Client, service); err != nil {
+	if err = utils.CreateOrUpdateService(ctx, r.Client, service); err != nil {
 		return fmt.Errorf("failed to create otel collector service: %w", err)
 	}
 
@@ -112,7 +113,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 			return err
 		}
 
-		if err = createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
+		if err = utils.CreateOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
 			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
 		}
 
@@ -120,7 +121,7 @@ func (r *Reconciler) installOrUpgradeOtelCollector(ctx context.Context, tracing 
 		if err = controllerutil.SetControllerReference(tracing, metricsService, r.Scheme); err != nil {
 			return err
 		}
-		if err = createOrUpdateService(ctx, r.Client, metricsService); err != nil {
+		if err = utils.CreateOrUpdateService(ctx, r.Client, metricsService); err != nil {
 			return fmt.Errorf("failed to create otel collector metrics service: %w", err)
 		}
 	}
