@@ -19,7 +19,9 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"os"
 	"strings"
 	"time"
@@ -71,9 +73,15 @@ var (
 	syncPeriod           time.Duration
 	telemetryNamespace   string
 
-	createServiceMonitor         bool
-	traceCollectorDeploymentName string
-	traceCollectorImage          string
+	traceCollectorCreateServiceMonitor bool
+	traceCollectorBaseName             string
+	traceCollectorOTLPServiceName      string
+	traceCollectorImage                string
+	traceCollectorPriorityClass        string
+	traceCollectorCPULimit             string
+	traceCollectorMemoryLimit          string
+	traceCollectorCPURequest           string
+	traceCollectorMemoryRequest        string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -140,9 +148,15 @@ func main() {
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
-	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
-	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
+	flag.BoolVar(&traceCollectorCreateServiceMonitor, "trace-collector-create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
+	flag.StringVar(&traceCollectorBaseName, "trace-collector-base-name", "telemetry-trace-collector", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
+	flag.StringVar(&traceCollectorOTLPServiceName, "trace-collector-otlp-service-name", "telemetry-otlp-traces", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", "", "Priority class name for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorCPULimit, "trace-collector-cpu-limit", "1", "CPU limit for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorMemoryLimit, "trace-collector-memory-limit", "1Gi", "Memory limit for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorCPURequest, "trace-collector-cpu-request", "150m", "CPU request for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorMemoryRequest, "trace-collector-memory-request", "256Mi", "Memory request for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -269,6 +283,19 @@ func validateFlags() error {
 	if fluentBitStorageType != "filesystem" && fluentBitStorageType != "memory" {
 		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
+	if _, err := resource.ParseQuantity(traceCollectorCPULimit); err != nil {
+		return fmt.Errorf("--trace-collector-cpu-limit has to be a valid quantity: %v", err)
+	}
+	if _, err := resource.ParseQuantity(traceCollectorMemoryLimit); err != nil {
+		return fmt.Errorf("--trace-collector-memory-limit has to be a valid quantity: %v", err)
+	}
+	if _, err := resource.ParseQuantity(traceCollectorCPURequest); err != nil {
+		return fmt.Errorf("--trace-collector-cpu-request has to be a valid quantity: %v", err)
+	}
+	if _, err := resource.ParseQuantity(traceCollectorMemoryRequest); err != nil {
+		return fmt.Errorf("--trace-collector-memory-request has to be a valid quantity: %v", err)
+	}
+
 	return nil
 }
 
@@ -312,10 +339,20 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
-		CreateServiceMonitor: createServiceMonitor,
-		CollectorNamespace:   telemetryNamespace,
-		ResourceName:         traceCollectorDeploymentName,
-		CollectorImage:       traceCollectorImage,
+		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
+		Namespace:            telemetryNamespace,
+		BaseName:             traceCollectorBaseName,
+		Deployment: tracepipelinereconciler.DeploymentConfig{
+			Image:             traceCollectorImage,
+			PriorityClassName: traceCollectorPriorityClass,
+			CPULimit:          resource.MustParse(traceCollectorCPULimit),
+			MemoryLimit:       resource.MustParse(traceCollectorMemoryLimit),
+			CPURequest:        resource.MustParse(traceCollectorCPURequest),
+			MemoryRequest:     resource.MustParse(traceCollectorMemoryRequest),
+		},
+		Service: tracepipelinereconciler.ServiceConfig{
+			OTLPServiceName: traceCollectorOTLPServiceName,
+		},
 	}
 	return tracepipelinereconciler.NewReconciler(client, config, scheme)
 }

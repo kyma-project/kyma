@@ -45,6 +45,8 @@ const (
 	EventTypePrefixEmpty        = ""
 	OrderCreatedV1Event         = "order.created.v1"
 	OrderCreatedV2Event         = "order.created.v2"
+	OrderCreatedV3Event         = "order.created.v3"
+	OrderCreatedV4Event         = "order.created.v4"
 	OrderCreatedV1EventNotClean = "order.c*r%e&a!te#d.v1"
 	OrderCreatedV2EventNotClean = "o-r_d+e$r.created.v2"
 	JetStreamSubject            = "kyma" + "." + EventSourceClean + "." + OrderCreatedV1Event
@@ -690,6 +692,12 @@ func WithSourceAndType(eventSource, eventType string) SubscriptionOpt {
 // WithCleanEventTypeOld is a SubscriptionOpt that initializes subscription with a not clean event type from v1alpha1
 func WithCleanEventTypeOld() SubscriptionOpt {
 	return WithSourceAndType(EventSourceClean, OrderCreatedEventType)
+}
+
+// WithCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and
+// type.
+func WithCleanEventSourceAndType() SubscriptionOpt {
+	return WithSourceAndType(EventSourceClean, OrderCreatedV1Event)
 }
 
 // WithNotCleanEventSourceAndType is a SubscriptionOpt that initializes subscription with a not clean event source and type

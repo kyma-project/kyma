@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/setup"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -11,9 +12,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -28,7 +27,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
-			builder.WithPredicates(onlyUpdate()),
+			builder.WithPredicates(setup.CreateOrUpdate()),
 		)
 
 	if r.config.CreateServiceMonitor {
@@ -36,15 +35,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	return newReconciler.Complete(r)
-}
-
-func onlyUpdate() predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc:  func(event event.CreateEvent) bool { return false },
-		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
-		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
-		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
-	}
 }
 
 func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {

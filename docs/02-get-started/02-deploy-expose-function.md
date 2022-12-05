@@ -16,7 +16,7 @@ First, let's create the Function and apply it.
 
 1. In Kyma Dashboard, go to the `default` Namespace.
 2. Go to **Workloads** > **Functions**.
-3. Click on **Create Function +**.
+3. Click on **Create Function**.
 4. Name the Function `hello-world` and click **Create**.
   </details>
   <details>
@@ -80,11 +80,12 @@ First, let's create an [APIRule](../05-technical-reference/00-custom-resources/a
   Kyma Dashboard
   </summary>
 
-1. In your Function's view, go to the **Configuration** tab.
-2. Click on **Create API Rule +**.
-3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
+1. Go to **Discovery and Network** > **API Rules**.
+2. Click on **Create API Rule**.
+3. Provide the **Name** (`hello-world`).
+4. From the **Service Name** dropdown, select `hello-world`.
+5. Choose your host from the **Host** dropdown and replace the asterix (*) with the name of your subdomain (`hello-world`).
 
-> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** (`hello-world`) from the dropdown menu.
   </details>
   <details>
   <summary label="kubectl">
