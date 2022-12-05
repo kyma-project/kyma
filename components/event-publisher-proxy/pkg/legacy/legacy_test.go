@@ -102,20 +102,21 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			app := applicationtest.NewApplication(tc.givenApplication, applicationTypeLabel(tc.givenTypeLabel))
 			appLister := fake.NewApplicationListerOrDie(ctx, app)
 			transformer := NewTransformer("test", tc.givenPrefix, appLister)
-			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, request)
-			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
-			assert.Equal(t, wantEventType, gotEventType)
 
-			// check eventType
+			gotEvent, gotOriginalEventType := transformer.TransformLegacyRequestsToTransitionEvent(writer, request)
+			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
+			assert.Equal(t, wantEventType, gotOriginalEventType)
+
+			// Check eventType.
 			gotType := gotEvent.Context.GetType()
 			assert.Equal(t, tc.wantType, gotType)
 
-			// check extensions 'eventtypeversion'
+			// Check extensions 'eventtypeversion'.
 			gotVersion, ok := gotEvent.Extensions()["eventtypeversion"].(string)
 			assert.True(t, ok)
 			assert.Equal(t, tc.wantVersion, gotVersion)
 
-			// check HTTP ContentType set properly
+			// Check HTTP ContentType set properly.
 			gotContentType := gotEvent.Context.GetDataContentType()
 			assert.Equal(t, internal.ContentTypeApplicationJSON, gotContentType)
 		})
@@ -152,7 +153,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	wantDataContentType := internal.ContentTypeApplicationJSON
 
 	legacyTransformer := NewTransformer(wantBEBNamespace, givenEventTypePrefix, nil)
-	gotEvent, err := legacyTransformer.convertPublishRequestToCloudEvent(givenApplicationName, givenPublishReqParams)
+	gotEvent, err := legacyTransformer.convertPublishRequestToTransitionEvent(givenApplicationName, givenPublishReqParams)
 	require.NoError(t, err)
 	assert.Equal(t, wantBEBNamespace, gotEvent.Context.GetSource())
 	assert.Equal(t, wantEventID, gotEvent.Context.GetID())

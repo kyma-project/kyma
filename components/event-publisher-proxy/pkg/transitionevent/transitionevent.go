@@ -21,7 +21,7 @@ type TransitionEvent struct {
 	version   string
 }
 
-func NewTransitionEventFromCloudEvent(cloudEvent ce.Event, prefix, appName, eventName, version string) (*TransitionEvent) {
+func NewTransitionEventFromCloudEvent(cloudEvent ce.Event, prefix, appName, eventName, version string) *TransitionEvent {
 	transitionEvent := TransitionEvent{
 		Event:     cloudEvent,
 		prefix:    prefix,
@@ -76,8 +76,8 @@ func (e *TransitionEvent) Type() string {
 }
 
 func (e *TransitionEvent) updateType() {
-	eventType := concatSegmentsWithDot(e.prefix, e.appName, e.eventName, e.version)
-	e.Event.SetType(eventType)
+	_type := concatSegmentsWithDot(e.prefix, e.appName, e.eventName, e.version)
+	e.Event.SetType(_type)
 }
 
 // concatSegmentsWithDot takes an array of strings and concat them with a dot in between.
@@ -87,7 +87,7 @@ func concatSegmentsWithDot(segments ...string) string {
 	for _, segment := range segments {
 		if s == "" {
 			s = segment
-			break
+			continue
 		}
 		if segment != "" {
 			s = fmt.Sprintf("%s.%s", s, segment)

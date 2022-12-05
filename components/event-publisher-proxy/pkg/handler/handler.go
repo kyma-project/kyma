@@ -111,7 +111,7 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 // publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
 // the configured GenericSender.
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	event, _ := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
+	event, _ := h.LegacyTransformer.TransformLegacyRequestsToTransitionEvent(writer, request)
 	if event == nil {
 		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
 		return

@@ -30,7 +30,7 @@ const (
 )
 
 type RequestToCETransformer interface {
-	TransformLegacyRequestsToCE(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
+	TransformLegacyRequestsToTransitionEvent(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
 	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
 }
 
@@ -86,6 +86,7 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 // to a TransitionEvent from the given request. It's second return type is a string that holds
 // the original Type without any cleanup.
 func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
+	//func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.ResponseWriter, request *http.Request) (*te.TransitionEvent, string) {
 	// Parse request body to PublishRequestV1.
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
@@ -138,63 +139,6 @@ func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.Respo
 	eventType := formatEventType(t.eventTypePrefix, originalAppName, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
 
 	return &transitionEvent.Event, eventType
-}
-
-// TransformLegacyRequestsToCE transforms the legacy event to cloudevent from the given request.
-// It also returns the original event-type without cleanup as the second return type.
-func (t *Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
-	// parse request body to PublishRequestV1
-	if request.Body == nil || request.ContentLength == 0 {
-		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
-		writeJSONResponse(writer, resp)
-		return nil, ""
-	}
-
-	parameters := &apiv1.PublishEventParametersV1{}
-	decoder := json.NewDecoder(request.Body)
-	if err := decoder.Decode(&parameters.PublishrequestV1); err != nil {
-		var resp *apiv1.PublishEventResponses
-		if err.Error() == requestBodyTooLargeErrorMessage {
-			resp = ErrorResponseRequestBodyTooLarge(err.Error())
-		} else {
-			resp = ErrorResponseBadRequest(err.Error())
-		}
-		writeJSONResponse(writer, resp)
-		return nil, ""
-	}
-
-	// validate the PublishRequestV1 for missing / incoherent values
-	checkResp := t.checkParameters(parameters)
-	if checkResp.Error != nil {
-		writeJSONResponse(writer, checkResp)
-		return nil, ""
-	}
-
-	// clean the application name form non-alphanumeric characters
-	appNameOriginal := ParseApplicationNameFromPath(request.URL.Path)
-	appName := appNameOriginal
-	if appObj, err := t.applicationLister.Get(appName); err == nil {
-		// handle existing applications
-		appName = application.GetCleanTypeOrName(appObj)
-	} else {
-		// handle non-existing applications
-		appName = application.GetCleanName(appName)
-	}
-
-	event, err := t.convertPublishRequestToCloudEvent(appName, parameters)
-	if err != nil {
-		response := ErrorResponse(http.StatusInternalServerError, err)
-		writeJSONResponse(writer, response)
-		return nil, ""
-	}
-
-	// Add tracing context to cloud events
-	tracing.AddTracingContextToCEExtensions(request.Header, event)
-
-	// prepare the original event-type without cleanup
-	eventType := formatEventType(t.eventTypePrefix, appNameOriginal, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
-
-	return event, eventType
 }
 
 func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *cev2event.Event, msg string) {
@@ -253,42 +197,6 @@ func (t *Transformer) convertPublishRequestToTransitionEvent(appName string, pub
 	transitionEvent.SetDataContentType(internal.ContentTypeApplicationJSON)
 
 	return transitionEvent, nil
-}
-
-// convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.
-func (t *Transformer) convertPublishRequestToCloudEvent(appName string, publishRequest *apiv1.PublishEventParametersV1) (*cev2event.Event, error) {
-	if !application.IsCleanName(appName) {
-		return nil, errors.New("application name should be cleaned from none-alphanumeric characters")
-	}
-
-	event := cev2event.New(cev2event.CloudEventsVersionV1)
-
-	evTime, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse time from the external publish request")
-	}
-	event.SetTime(evTime)
-
-	if err := event.SetData(internal.ContentTypeApplicationJSON, publishRequest.PublishrequestV1.Data); err != nil {
-		return nil, errors.Wrap(err, "failed to set data to CloudEvent data field")
-	}
-
-	// set the event id from the request if it is available
-	// otherwise generate a new one
-	if len(publishRequest.PublishrequestV1.EventID) > 0 {
-		event.SetID(publishRequest.PublishrequestV1.EventID)
-	} else {
-		event.SetID(uuid.New().String())
-	}
-
-	eventName := combineEventNameSegments(removeNonAlphanumeric(publishRequest.PublishrequestV1.EventType))
-	prefix := removeNonAlphanumeric(t.eventTypePrefix)
-	eventType := formatEventType(prefix, appName, eventName, publishRequest.PublishrequestV1.EventTypeVersion)
-	event.SetType(eventType)
-	event.SetSource(t.namespace)
-	event.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
-	event.SetDataContentType(internal.ContentTypeApplicationJSON)
-	return &event, nil
 }
 
 // combineEventNameSegments returns an eventName with exactly two segments separated by "." if the given event-type
