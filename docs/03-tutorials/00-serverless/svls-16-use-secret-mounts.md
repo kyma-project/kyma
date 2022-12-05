@@ -107,7 +107,7 @@ Follow these steps:
 
     Now you can edit the Secret and see if the Function returns the new value from the Secret.
     
-    For editing Secret you can use:
+    For editing your Secret you can use:
     ```bash
     kubectl -n $NAMESPACE edit secret $SECRET_NAME
     ```
