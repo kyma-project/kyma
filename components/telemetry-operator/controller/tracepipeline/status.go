@@ -31,11 +31,6 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 		return nil
 	}
 
-	openTelemetryReady, err := r.prober.IsReady(ctx, types.NamespacedName{Name: r.config.BaseName, Namespace: r.config.Namespace})
-	if err != nil {
-		return err
-	}
-
 	secretsMissing := checkForMissingSecrets(ctx, r.Client, &pipeline)
 	if secretsMissing {
 		pending := telemetryv1alpha1.NewTracePipelineCondition(
@@ -49,6 +44,11 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 		}
 
 		return setCondition(ctx, r.Client, &pipeline, pending)
+	}
+
+	openTelemetryReady, err := r.prober.IsReady(ctx, types.NamespacedName{Name: r.config.BaseName, Namespace: r.config.Namespace})
+	if err != nil {
+		return err
 	}
 
 	if openTelemetryReady {
@@ -85,7 +85,7 @@ func setCondition(ctx context.Context, client client.Client, pipeline *telemetry
 	pipeline.Status.SetCondition(*condition)
 
 	if err := client.Status().Update(ctx, pipeline); err != nil {
-		return fmt.Errorf("failed to update LogPipeline status to %s: %v", condition.Type, err)
+		return fmt.Errorf("failed to update TracePipeline status to %s: %v", condition.Type, err)
 	}
 	return nil
 }

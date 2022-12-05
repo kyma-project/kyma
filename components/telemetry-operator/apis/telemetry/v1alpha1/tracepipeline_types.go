@@ -126,10 +126,11 @@ func filterCondition(conditions []TracePipelineCondition, condType TracePipeline
 	return newConditions
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:resource:scope=Cluster
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 // TracePipeline is the Schema for the tracepipelines API
 type TracePipeline struct {
 	metav1.TypeMeta   `json:",inline"`
