@@ -21,15 +21,7 @@ type TransitionEvent struct {
 	version   string
 }
 
-func NewFromCloudEvent(cloudEvent ce.Event, prefix, appName, eventName, version string) (*ce.Event, error) {
-	// Check that all event type segments are not empty.
-	for i, s := range []string{prefix, appName, eventName, version} {
-		if s == "" {
-			return nil, fmt.Errorf("segment '%s' is empty string", segmentNames[i])
-		}
-	}
-
-	// Create a new TransitionEvent.
+func NewTransitionEventFromCloudEvent(cloudEvent ce.Event, prefix, appName, eventName, version string) (*TransitionEvent) {
 	transitionEvent := TransitionEvent{
 		Event:     cloudEvent,
 		prefix:    prefix,
@@ -37,9 +29,10 @@ func NewFromCloudEvent(cloudEvent ce.Event, prefix, appName, eventName, version 
 		eventName: eventName,
 		version:   version,
 	}
+
 	transitionEvent.updateType()
 
-	return &transitionEvent.Event, nil
+	return &transitionEvent
 }
 
 func (e *TransitionEvent) Prefix() string {
@@ -83,7 +76,8 @@ func (e *TransitionEvent) Type() string {
 }
 
 func (e *TransitionEvent) updateType() {
-	e.Event.SetType(concatSegmentsWithDot(e.prefix, e.appName, e.eventName, e.version))
+	eventType := concatSegmentsWithDot(e.prefix, e.appName, e.eventName, e.version)
+	e.Event.SetType(eventType)
 }
 
 // concatSegmentsWithDot takes an array of strings and concat them with a dot in between.
