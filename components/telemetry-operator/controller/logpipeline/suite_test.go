@@ -18,9 +18,10 @@ package logpipeline
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"path/filepath"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
