@@ -6,8 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config"
 
-	"github.com/pkg/errors"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 )
 
@@ -29,7 +27,7 @@ func NewFilterValidator(deniedFilterPlugins ...string) FilterValidator {
 func (v *filterValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
 	err := v.validateFilters(logPipeline)
 	if err != nil {
-		return errors.Wrap(err, "error validating filter plugins")
+		return fmt.Errorf("error validating filter plugins: %v", err)
 	}
 	return nil
 }
