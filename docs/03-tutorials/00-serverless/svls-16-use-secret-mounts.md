@@ -34,7 +34,7 @@ Follow these steps:
         --from-literal=$SECRET_DATA_KEY={SECRET_DATA_VALUE}
     ```
    
-3. Create your Function with the `secretMounts`:
+3. Create your Function with `secretMounts`:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
