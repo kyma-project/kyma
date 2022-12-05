@@ -112,7 +112,7 @@ Follow these steps:
     kubectl -n $NAMESPACE edit secret $SECRET_NAME
     ```
    
-    Values used in `data` from Secret should be encoded by `base64`, e.g. like this:
+    To encode values used in `data` from the Secret, use `base64`, for example:
     ```bash
     echo -n '{NEW_SECRET_DATA_VALUE}' | base64
     ```
