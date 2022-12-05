@@ -63,7 +63,7 @@ Follow these steps:
 
    >**NOTE:** Read more about [creating Functions](svls-01-create-inline-function.md).
 
-4. Create ApiRule:
+4. Create an APIRule:
 
     This and next steps allow us to test the Function in action.
 
