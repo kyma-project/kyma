@@ -21,7 +21,7 @@ const (
 )
 
 type Config struct {
-	// Backend used for Eventing. It could be "nats" or "beb".
+	// Backend used for Eventing. It can be "nats" or "beb".
 	Backend string `envconfig:"BACKEND" required:"true"`
 
 	// AppLogFormat defines the log format.
@@ -37,13 +37,13 @@ func main() {
 		golog.Fatalf("Failed to parse options, error: %v", err)
 	}
 
-	// parse the config for main
+	// Parse the config for main.
 	cfg := new(Config)
 	if err := envconfig.Process("", cfg); err != nil {
 		golog.Fatalf("Failed to read configuration, error: %v", err)
 	}
 
-	// init the logger
+	// Init the logger.
 	logger, err := kymalogger.New(cfg.AppLogFormat, cfg.AppLogLevel)
 	if err != nil {
 		golog.Fatalf("Failed to initialize logger, error: %v", err)
@@ -55,11 +55,11 @@ func main() {
 	}()
 	setupLogger := logger.WithContext().With("backend", cfg.Backend)
 
-	// metrics collector
+	// Init the metrics collector.
 	metricsCollector := metrics.NewCollector(latency.NewBucketsProvider())
 	prometheus.MustRegister(metricsCollector)
 
-	// instantiate configured commander
+	// Instantiate configured commander.
 	var c commander.Commander
 	switch cfg.Backend {
 	case backendBEB:
@@ -70,12 +70,12 @@ func main() {
 		setupLogger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
 	}
 
-	// init the commander
+	// Init the commander.
 	if err := c.Init(); err != nil {
 		setupLogger.Fatalw("Commander initialization failed", "error", err)
 	}
 
-	// start the metrics server
+	// Start the metrics server.
 	metricsServer := metrics.NewServer(logger)
 	defer metricsServer.Stop()
 	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
@@ -84,7 +84,7 @@ func main() {
 
 	setupLogger.Infof("Starting publisher to: %v", cfg.Backend)
 
-	// start the commander
+	// Start the commander.
 	if err := c.Start(); err != nil {
 		setupLogger.Fatalw("Failed to to start publisher", "error", err)
 	}
