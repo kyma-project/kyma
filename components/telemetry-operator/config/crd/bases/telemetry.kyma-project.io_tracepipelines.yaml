@@ -1,10 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.0
+    controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
   name: tracepipelines.telemetry.kyma-project.io
 spec:
@@ -16,7 +15,14 @@ spec:
     singular: tracepipeline
   scope: Cluster
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[-1].type
+      name: Status
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: TracePipeline is the Schema for the tracepipelines API
@@ -115,15 +121,24 @@ spec:
             type: object
           status:
             description: TracePipelineStatus defines the observed state of TracePipeline
+            properties:
+              conditions:
+                items:
+                  description: LogPipelineCondition contains details for the current
+                    condition of this LogPipeline
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    reason:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: array
             type: object
         type: object
     served: true
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
