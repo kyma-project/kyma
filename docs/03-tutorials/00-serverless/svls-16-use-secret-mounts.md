@@ -117,6 +117,6 @@ Follow these steps:
     echo -n '{NEW_SECRET_DATA_VALUE}' | base64
     ```
 
-    Calling the Function again (using `curl`) should return `{NEW_SECRET_DATA_VALUE}`. 
+    Calling the Function again (using `curl`) must return `{NEW_SECRET_DATA_VALUE}`. 
     Note that Secret propagation may take some time and the call nay return an old value at first.
 
