@@ -24,7 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
@@ -77,7 +77,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := beb.NewSender(c.envCfg.EmsPublishURL, client)
+	messageSender := eventmesh.NewSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

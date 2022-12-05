@@ -31,7 +31,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
@@ -187,7 +187,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -230,7 +230,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			fields: fields{
 				Sender: &GenericSenderStub{
 					Err: nil,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   []byte(""),
 					},
@@ -407,7 +407,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			name: "Send valid legacy event",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 					},
 					BackendURL: "FOO",
@@ -518,7 +518,7 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			name: "Send invalid legacy event",
 			fields: fields{
 				Sender: &GenericSenderStub{
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 					},
 					BackendURL: "FOO",
@@ -667,7 +667,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				Sender: &GenericSenderStub{
 					Err:           nil,
 					SleepDuration: 0,
-					Result: beb.HTTPPublishResult{
+					Result: eventmesh.HTTPPublishResult{
 						Status: 204,
 						Body:   nil,
 					},
@@ -681,7 +681,7 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				event: &cev2event.Event{},
 			},
 			wants: wants{
-				result: beb.HTTPPublishResult{
+				result: eventmesh.HTTPPublishResult{
 					Status: 204,
 					Body:   nil,
 				},
@@ -766,7 +766,7 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 	stub := &GenericSenderStub{
 		Err:           nil,
 		SleepDuration: 0,
-		Result:        beb.HTTPPublishResult{Status: http.StatusInternalServerError},
+		Result:        eventmesh.HTTPPublishResult{Status: http.StatusInternalServerError},
 	}
 
 	const bucketsFunc = "Buckets"

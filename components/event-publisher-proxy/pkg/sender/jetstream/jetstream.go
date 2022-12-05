@@ -17,7 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/beb"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender/eventmesh"
 
 	"github.com/nats-io/nats.go"
 )
@@ -96,7 +96,7 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 		}
 		return nil, fmt.Errorf("%w : %v", sender.ErrInternalBackendError, fmt.Errorf("%w, %v", ErrCannotSendToStream, err))
 	}
-	return beb.HTTPPublishResult{Status: http.StatusNoContent}, nil
+	return eventmesh.HTTPPublishResult{Status: http.StatusNoContent}, nil
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
