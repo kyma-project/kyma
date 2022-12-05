@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"sigs.k8s.io/yaml"
 	"strings"
+	"time"
 )
 
 type IndentType int
@@ -19,9 +20,10 @@ const indentType = IndentSpace
 
 const InputCRDFilename = `/Users/I567085/src/2022jul/kyma/components/function-controller/config/crd/bases/serverless.kyma-project.io_functions.yaml`
 const APIVersion = "v1alpha2"
-
 const OutputMDFilename = `/Users/I567085/src/2022jul/kyma/docs/05-technical-reference/00-custom-resources/svls-01-function.md`
-const REPatternToReplace = `<!--\s*FUNCTION-CRD-PARAMETERS-TABLE\(START\).*<<!--\s*FUNCTION-CRD-PARAMETERS-TABLE\(START\)[^\n]*`
+
+const ReplacePartIdentifier = `FUNCTION-CRD-PARAMETERS-TABLE`
+const REPatternToReplace = `(?s)<!--\s*` + ReplacePartIdentifier + `\(START\).*<!--\s*` + ReplacePartIdentifier + `\(END\)[^\n]*`
 
 func main() {
 	newDoc := generateDocFromCRD()
@@ -39,7 +41,14 @@ func replaceDocInMD(doc string) {
 		panic(err)
 	}
 
-	outDoc := re.ReplaceAll(inDoc, []byte(doc))
+	newContent := strings.Join([]string{
+		"<!-- " + ReplacePartIdentifier + "(START) -->",
+		"<!-- generated: " + time.Now().String() + " -->",
+		doc,
+		"<!-- " + ReplacePartIdentifier + "(END) -->",
+	}, "\n")
+
+	outDoc := re.ReplaceAll(inDoc, []byte(newContent))
 
 	outFile, err := os.OpenFile(OutputMDFilename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
