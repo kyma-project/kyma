@@ -93,7 +93,7 @@ Follow these steps:
     EOF
     ```
 
-   >**NOTE:** Read more about [exposing functions](svls-03-expose-function.md).
+   >**NOTE:** Read more about [exposing Functions](svls-03-expose-function.md).
 
 5. Call Function:
 
