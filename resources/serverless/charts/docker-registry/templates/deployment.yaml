@@ -32,7 +32,6 @@ spec:
 {{ toYaml $.Values.podAnnotations | indent 8 }}
 {{- end }}
     spec:
-      serviceAccountName: {{ template "docker-registry.name" . }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
@@ -220,16 +219,9 @@ spec:
           - sh
           - -ec
           - |
-             while true; do /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
+              while true; do /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-          env:
-            - name: REGISTRY_CONFIG_SECRET_NAME
-            - value: "serverless-registry-config-default"
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
           volumeMounts:
             - name: data
               mountPath: /var/lib/registry/
@@ -239,6 +231,7 @@ spec:
             {{- toYaml . | nindent 12 }}
 {{- end }}
 {{- end }}
+
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

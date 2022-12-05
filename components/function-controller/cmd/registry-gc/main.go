@@ -7,7 +7,6 @@ import (
 
 	"github.com/docker/distribution/reference"
 	"github.com/kyma-project/kyma/components/function-controller/internal/registry"
-	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -29,7 +28,7 @@ var (
 		"serverless.kyma-project.io/managed-by": "function-controller",
 	}
 
-	setupLog = ctrlzap.New().WithName("internal registry gc")
+	mainLog = ctrlzap.New().WithName("internal registry gc")
 )
 
 type config struct {
@@ -38,12 +37,10 @@ type config struct {
 }
 
 func main() {
-	setupLog := ctrlzap.New().WithName("internal registry gc")
-	setupLog.Info("reading configuration")
-
+	mainLog.Info("reading configuration")
 	cfg := &config{}
 	if err := envconfig.Init(cfg); err != nil {
-		setupLog.Error(err, "while reading env variables")
+		mainLog.Error(err, "while reading env variables")
 		os.Exit(1)
 
 	}
@@ -52,7 +49,7 @@ func main() {
 
 	deploymentList, err := getFunctionDeploymentList(restConfig)
 	if err != nil {
-		setupLog.Error(err, "while listing Function Deployments")
+		mainLog.Error(err, "while listing Function Deployments")
 		os.Exit(1)
 	}
 
@@ -60,7 +57,7 @@ func main() {
 	for _, deployment := range deploymentList.Items {
 		tagged, err := getFunctionImage(deployment)
 		if err != nil {
-			setupLog.Error(err, "while parsing deployment images")
+			mainLog.Error(err, "while parsing deployment images")
 			os.Exit(1)
 		}
 		imageName := reference.Path(tagged)
@@ -71,33 +68,35 @@ func main() {
 	registryClient, err := registry.NewRegistryClient(context.Background(),
 		registryConfig)
 	if err != nil {
-		setupLog.Error(err, "while creating registry client")
+		mainLog.Error(err, "while creating registry client")
 		os.Exit(1)
 	}
 
 	for _, functionImage := range functionImages.ListImages() {
 		repoCli, err := registryClient.ImageRepository(functionImage)
 		if err != nil {
-			setupLog.Error(err, "while creating repository client")
+			mainLog.Error(err, "while creating repository client")
 			os.Exit(1)
 		}
 		registryTags, err := repoCli.ListTags()
 		if err != nil {
-			setupLog.Error(err, "while getting image tags")
+			mainLog.Error(err, "while getting image tags")
 			os.Exit(1)
 		}
 		for _, tagStr := range registryTags {
 			if !functionImages.HasImageWithTag(functionImage, tagStr) {
 				tag, err := repoCli.GetImageTag(tagStr)
 				if err != nil {
-					setupLog.Error(err, "while getting tag details")
+					mainLog.Error(err, "while getting tag details")
 					os.Exit(1)
 				}
+
+				mainLog.Info("deleting image [%v:%v] with digest [%v]..", functionImage, tagStr, tag.Digest)
 				err = repoCli.DeleteImageTag(tag.Digest)
 				if err != nil {
-					setupLog.Error(err, "while listing Function Deployments")
+					mainLog.Error(err, "while deleting image tag")
 				}
-				logrus.Infof(" should delete: %v:%v, with digest: %v err: %v", functionImage, tagStr, tag.Digest, err)
+				mainLog.Info("image [%v:%v] deleted successfully", functionImage, tagStr)
 			}
 		}
 
@@ -142,7 +141,7 @@ func getFunctionImage(d appsv1.Deployment) (reference.NamedTagged, error) {
 func ReadRegistryConfigSecretOrDie(resetConfig *rest.Config, envConfig *config) *registry.RegistryClientOptions {
 	k8sClient, err := client.New(resetConfig, client.Options{})
 	if err != nil {
-		setupLog.Error(err, "while creating Kubernetes client")
+		mainLog.Error(err, "while creating Kubernetes client")
 		os.Exit(1)
 	}
 
@@ -153,14 +152,14 @@ func ReadRegistryConfigSecretOrDie(resetConfig *rest.Config, envConfig *config) 
 			Name:      envConfig.RegistryConfigSecreName,
 			Namespace: envConfig.Namespace,
 		}, &s); err != nil {
-		setupLog.Error(err, "while getting secret")
+		mainLog.Error(err, "while getting secret")
 		os.Exit(1)
 	}
 
 	keys := []string{UsernameSecretKeyName, PasswordSecretKeyName, URLSecretKeyName}
 	for _, key := range keys {
 		if _, ok := s.Data[key]; !ok {
-			setupLog.Error(fmt.Errorf("can't find required key [%s] in registry config secret", key), "")
+			mainLog.Error(fmt.Errorf("can't find required key [%s] in registry config secret", key), "")
 			os.Exit(1)
 		}
 	}

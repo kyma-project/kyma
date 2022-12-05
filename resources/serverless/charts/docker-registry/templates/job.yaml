@@ -1,0 +1,37 @@
+{{- if eq .Values.storage "filesystem" }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ template "docker-registry.name" . }}-image-gc
+spec:
+  schedule: "42 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ template "docker-registry.name" . }}
+          containers:
+          - name: function-image-gc
+            #image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
+            image: melsayed/registry-gc:latest
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- if .Values.containers.securityContext }}
+            securityContext:
+              {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 14 }}
+            {{- end }}
+            command:
+            - sh
+            - -ec
+            - |
+                while true; do /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+            env:
+              - name: REGISTRY_CONFIG_SECRET_NAME
+                value: "serverless-registry-config-default"
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+{{- end }}
+
