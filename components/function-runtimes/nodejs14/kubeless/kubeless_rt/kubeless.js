@@ -33,13 +33,11 @@ if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
 }
 
-const bodParserOptions = {
-    type: req => !req.is('multipart/*'),
-    limit: `${bodySizeLimit}mb`,
-};
-app.use(bodyParser.raw(bodParserOptions));
-app.use(bodyParser.json({limit: `${bodySizeLimit}mb`}));
-app.use(bodyParser.urlencoded({limit: `${bodySizeLimit}mb`, extended: true}));
+app.use(bodyParser.json({ type: ['application/json', 'application/cloudevents+json'], limit: `${bodySizeLimit}mb`, strict: false  }))
+app.use(bodyParser.text({ type: ['text/*'], limit: `${bodySizeLimit}mb`  }))
+app.use(bodyParser.urlencoded({ limit: `${bodySizeLimit}mb`, extended: true }));
+app.use(bodyParser.raw({limit: `${bodySizeLimit}mb`}))
+
 
 const modName = process.env.MOD_NAME;
 const funcHandler = process.env.FUNC_HANDLER;
