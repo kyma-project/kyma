@@ -19,9 +19,8 @@ func TestEnsureFinalizers(t *testing.T) {
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		pipeline := &telemetryv1alpha1.LogPipeline{ObjectMeta: metav1.ObjectMeta{Name: "pipeline"}}
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.ensureFinalizers(context.Background(), pipeline)
+		err := ensureFinalizers(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -47,9 +46,8 @@ func TestEnsureFinalizers(t *testing.T) {
 		scheme := runtime.NewScheme()
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.ensureFinalizers(context.Background(), pipeline)
+		err := ensureFinalizers(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -74,9 +72,8 @@ func TestCleanupFinalizers(t *testing.T) {
 		scheme := runtime.NewScheme()
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.cleanupFinalizersIfNeeded(context.Background(), pipeline)
+		err := cleanupFinalizersIfNeeded(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -98,9 +95,8 @@ func TestCleanupFinalizers(t *testing.T) {
 		scheme := runtime.NewScheme()
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.cleanupFinalizersIfNeeded(context.Background(), pipeline)
+		err := cleanupFinalizersIfNeeded(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline

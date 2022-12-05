@@ -31,7 +31,7 @@ func (r *Reconciler) updateStatusConditions(ctx context.Context, pipelineName st
 		return nil
 	}
 
-	openTelemetryReady, err := r.prober.IsReady(ctx, types.NamespacedName{Name: r.config.ResourceName, Namespace: r.config.CollectorNamespace})
+	openTelemetryReady, err := r.prober.IsReady(ctx, types.NamespacedName{Name: r.config.BaseName, Namespace: r.config.Namespace})
 	if err != nil {
 		return err
 	}

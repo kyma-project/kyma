@@ -1,12 +1,9 @@
 /*
 Copyright 2021.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +16,7 @@ package tracepipeline
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"path/filepath"
 	"testing"
 
@@ -48,9 +46,18 @@ var cancel context.CancelFunc
 
 var testConfig = Config{
 	CreateServiceMonitor: false,
-	CollectorNamespace:   "kyma-system",
-	ResourceName:         "telemetry-trace-collector",
-	CollectorImage:       "otel/opentelemetry-collector-contrib:0.60.0",
+	BaseName:             "telemetry-trace-collector",
+	Namespace:            "kyma-system",
+	Deployment: DeploymentConfig{
+		Image:         "otel/opentelemetry-collector-contrib:0.60.0",
+		CPULimit:      resource.MustParse("1"),
+		MemoryLimit:   resource.MustParse("1Gi"),
+		CPURequest:    resource.MustParse("150m"),
+		MemoryRequest: resource.MustParse("256Mi"),
+	},
+	Service: ServiceConfig{
+		OTLPServiceName: "telemetry-otlp-traces",
+	},
 }
 
 func TestAPIs(t *testing.T) {
@@ -94,8 +101,8 @@ var _ = BeforeSuite(func() {
 		LeaderElectionID:       "ddd7ef0b.kyma-project.io",
 	})
 	Expect(err).ToNot(HaveOccurred())
-	client := mgr.GetClient()
-	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: client}, scheme.Scheme)
+
+	reconciler := NewReconciler(mgr.GetClient(), testConfig, &kubernetes.DeploymentProber{Client: k8sClient}, scheme.Scheme)
 	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 

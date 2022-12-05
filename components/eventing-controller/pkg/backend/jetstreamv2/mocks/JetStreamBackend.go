@@ -72,3 +72,17 @@ func (_m *JetStreamBackend) SyncSubscription(subscription *v1alpha1.Subscription
 
 	return r0
 }
+
+// DeleteInvalidConsumers provides a mock function with given fields: subscriptions
+func (_m *JetStreamBackend) DeleteInvalidConsumers(subscriptions []v1alpha1.Subscription) error {
+	ret := _m.Called(subscriptions)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]v1alpha1.Subscription) error); ok {
+		r0 = rf(subscriptions)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

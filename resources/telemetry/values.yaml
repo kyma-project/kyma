@@ -7,13 +7,13 @@ global:
       version: "v20221020-e314a071"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16221"
+      version: "PR-16211"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20221122-200937b4"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.66.0-9bbc6dff"
+      version: "0.66.0-61707459"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"

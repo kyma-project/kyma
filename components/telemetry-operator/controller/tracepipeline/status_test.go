@@ -40,7 +40,7 @@ func TestUpdateStatus(t *testing.T) {
 
 		sut := Reconciler{
 			Client: fakeClient,
-			config: Config{Deployment: types.NamespacedName{Name: "trace-collector"}},
+			config: Config{BaseName: "trace-collector"},
 			prober: proberStub,
 		}
 		err := sut.updateStatus(context.Background(), pipeline.Name)
@@ -73,7 +73,7 @@ func TestUpdateStatus(t *testing.T) {
 
 		sut := Reconciler{
 			Client: fakeClient,
-			config: Config{Deployment: types.NamespacedName{Name: "trace-collector"}},
+			config: Config{BaseName: "trace-collector"},
 			prober: proberStub,
 		}
 		err := sut.updateStatus(context.Background(), pipeline.Name)
@@ -112,7 +112,7 @@ func TestUpdateStatus(t *testing.T) {
 
 		sut := Reconciler{
 			Client: fakeClient,
-			config: Config{Deployment: types.NamespacedName{Name: "trace-collector"}},
+			config: Config{BaseName: "trace-collector"},
 			prober: proberStub,
 		}
 		err := sut.updateStatus(context.Background(), pipeline.Name)
@@ -159,7 +159,7 @@ func TestUpdateStatus(t *testing.T) {
 
 		sut := Reconciler{
 			Client: fakeClient,
-			config: Config{Deployment: types.NamespacedName{Name: "trace-collector"}},
+			config: Config{BaseName: "trace-collector"},
 			prober: proberStub,
 		}
 
@@ -209,7 +209,7 @@ func TestUpdateStatus(t *testing.T) {
 
 		sut := Reconciler{
 			Client: fakeClient,
-			config: Config{Deployment: types.NamespacedName{Name: "trace-collector"}},
+			config: Config{BaseName: "trace-collector"},
 			prober: proberStub,
 		}
 

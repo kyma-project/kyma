@@ -20,8 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,11 +34,25 @@ import (
 )
 
 type Config struct {
-	Deployment           types.NamespacedName
 	CreateServiceMonitor bool
-	CollectorNamespace   string
-	ResourceName         string
-	CollectorImage       string
+	BaseName             string
+	Namespace            string
+
+	Deployment DeploymentConfig
+	Service    ServiceConfig
+}
+
+type DeploymentConfig struct {
+	Image             string
+	PriorityClassName string
+	CPULimit          resource.Quantity
+	MemoryLimit       resource.Quantity
+	CPURequest        resource.Quantity
+	MemoryRequest     resource.Quantity
+}
+
+type ServiceConfig struct {
+	OTLPServiceName string
 }
 
 //go:generate mockery --name DeploymentProber --filename deployment_prober.go
@@ -70,12 +85,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcile
 	if err := r.Get(ctx, req.NamespacedName, &tracePipeline); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	defer func() {
-		if err := r.updateStatus(ctx, tracePipeline.Name); err != nil {
-			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
-			reconcileErr = fmt.Errorf("failed to update TracePipeline status: %v", err)
-		}
-	}()
 
 	return ctrl.Result{}, r.doReconcile(ctx, &tracePipeline)
 }
@@ -122,7 +131,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeCollectorService(r.config)
+	service := makeOTLPService(r.config)
 	if err = controllerutil.SetControllerReference(pipeline, service, r.Scheme); err != nil {
 		return err
 	}
