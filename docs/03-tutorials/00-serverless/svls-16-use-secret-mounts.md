@@ -2,7 +2,7 @@
 title: Access to Secrets mounted as Volume
 ---
 
-This tutorial shows how to use Secrets mounted as volume, with the Serverless Function.
+This tutorial shows how to use Secrets mounted as volume with the Serverless Function.
 We will create a simple Function in Python 3.9. The Function reads data from Secret and returns it.
 
 ## Prerequisites
