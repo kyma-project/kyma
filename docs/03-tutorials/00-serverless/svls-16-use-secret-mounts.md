@@ -65,7 +65,7 @@ Follow these steps:
 
 4. Create an APIRule:
 
-    This and next steps allow us to test the Function in action.
+    The following steps allow you to test the Function in action.
 
     ```yaml
     cat <<EOF | kubectl apply -f -
