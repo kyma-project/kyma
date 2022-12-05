@@ -61,7 +61,7 @@ Follow these steps:
     EOF
     ```
 
-   >**NOTE:** Read more about [creating functions](svls-01-create-inline-function.md).
+   >**NOTE:** Read more about [creating Functions](svls-01-create-inline-function.md).
 
 4. Create ApiRule:
 
