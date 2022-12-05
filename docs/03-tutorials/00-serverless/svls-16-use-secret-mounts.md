@@ -118,5 +118,5 @@ Follow these steps:
     ```
 
     Calling the Function again (using `curl`) must return `{NEW_SECRET_DATA_VALUE}`. 
-    Note that Secret propagation may take some time and the call nay return an old value at first.
+    Note that the Secret propagation may take some time, and the call may initially return the old value.
 
