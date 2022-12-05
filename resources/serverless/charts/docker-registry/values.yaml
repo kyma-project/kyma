@@ -56,7 +56,11 @@ persistence:
   accessMode: 'ReadWriteOnce'
   enabled: true
   size: 20Gi
+  deleteEnabled: true
   # storageClass: '-'
+
+garbageCollection:
+  enabled: true
 
 # set the type of filesystem to use: filesystem, s3
 storage: filesystem

@@ -8,7 +8,6 @@ metadata:
     app: {{ template "docker-registry.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
@@ -33,6 +32,7 @@ spec:
 {{ toYaml $.Values.podAnnotations | indent 8 }}
 {{- end }}
     spec:
+      serviceAccountName: {{ template "docker-registry.name" . }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
@@ -206,6 +206,38 @@ spec:
 {{- end }}
 {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
+{{- end }}
+
+{{- if ( and ( .Values.garbageCollection.enabled )  ( eq .Values.storage "filesystem" ) )}}
+        - name: garbage-collect
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.containers.securityContext }}
+          securityContext:
+            {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 12 }}
+{{- end }}
+          command:
+          - sh
+          - -ec
+          - |
+             while true; do /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+            - name: REGISTRY_CONFIG_SECRET_NAME
+            - value: "serverless-registry-config-default"
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/registry/
+            - name: "{{ template "docker-registry.fullname" . }}-config"
+              mountPath: "/etc/docker/registry"
+{{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+{{- end }}
 {{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
