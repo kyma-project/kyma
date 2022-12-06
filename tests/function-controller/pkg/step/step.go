@@ -58,6 +58,7 @@ func NewRunner(opts ...RunnerOption) *Runner {
 // Run executes Steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
 // starting from last executed step
 func (r *Runner) Run(step Step, skipCleanup bool) error {
+	r.log.Infof("PIONA: Runner.Run() - START")
 	var err error
 
 	defer func() {
@@ -67,7 +68,9 @@ func (r *Runner) Run(step Step, skipCleanup bool) error {
 			}
 		}
 	}()
+	r.log.Infof("PIONA: Runner.Run() - BEFORE step.Run()")
 	err = step.Run()
+	r.log.Infof("PIONA: Runner.Run() - AFTER step.Run()")
 	if err == nil {
 		return nil
 	}

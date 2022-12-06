@@ -32,12 +32,19 @@ func (f newFunction) Name() string {
 }
 
 func (f newFunction) Run() error {
+	f.log.Infof("PIONA: newFunction[step-%s].Run() - START", f.name)
+	f.log.Infof("PIONA: newFunction[step-%s].Run() - SPEC %v", f.name, f.spec)
+	f.log.Infof("PIONA: newFunction[step-%s].Run() - BEFORE f.fn.Create(f.spec)", f.name)
 	if err := f.fn.Create(f.spec); err != nil {
 		return errors.Wrapf(err, "while creating function: %s", f.name)
 	}
+	f.log.Infof("PIONA: newFunction[step-%s].Run() - AFTER f.fn.Create(f.spec)", f.name)
 
 	f.log.Infof("Function Created, Waiting for ready status")
-	return errors.Wrapf(f.fn.WaitForStatusRunning(), "while waiting for function: %s, to be ready:", f.name)
+	f.log.Infof("PIONA: newFunction[step-%s].Run() - BEFORE f.fn.WaitForStatusRunning()", f.name)
+	err := errors.Wrapf(f.fn.WaitForStatusRunning(), "while waiting for function: %s, to be ready:", f.name)
+	f.log.Infof("PIONA: newFunction[step-%s].Run() - AFTER f.fn.WaitForStatusRunning()", f.name)
+	return err
 }
 
 func (f newFunction) Cleanup() error {

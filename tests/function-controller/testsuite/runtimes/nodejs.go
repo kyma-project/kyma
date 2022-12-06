@@ -12,8 +12,8 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha2.Runtime) serverlessv
 		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
-				Source:       fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
-				Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": {} }`,
+				Source: fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
+				//Dependencies: `{ "name": "hellobasic", "version": "0.0.1", "dependencies": {} }`,
 			},
 		},
 	}

@@ -62,10 +62,10 @@ type scenario struct {
 var availableScenarios = map[string][]scenario{
 	"serverless-integration": {
 		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
-		{displayName: "gitops", testSuite: scenarios.GitopsSteps},
-		{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest},
+		//		{displayName: "gitops", testSuite: scenarios.GitopsSteps},
+		//		{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest},
 	},
-	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
+	//	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
 }
 
 type config struct {
@@ -119,6 +119,7 @@ func main() {
 type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
 func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
+	logf.Infof("PIONA: runScenario(%s) - START", name)
 	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", name))
 	if err != nil {
 		logf.Error(err)
