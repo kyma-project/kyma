@@ -73,7 +73,7 @@ spec:
             - --trace-collector-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_otel_collector) }}
 {{- end }}
 {{- if .Values.global.operatorManagedFluentBit }}
-           - --enable-managed-fluentbit={{.Values.global.operatorManagedFluentBit}}
+            - --enable-managed-fluentbit={{.Values.global.operatorManagedFluentBit}}
 {{- end }}
           name: manager
           ports:

@@ -1,4 +1,4 @@
-{{- if .Values.global.operatorManagedFluentBit }}
+{{- if not .Values.global.operatorManagedFluentBit }}
 {{- if (empty .Values.existingConfigMap) -}}
 apiVersion: v1
 kind: ConfigMap

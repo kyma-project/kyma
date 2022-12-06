@@ -1,4 +1,4 @@
-{{- if .Values.global.operatorManagedFluentBit }}
+{{- if not .Values.global.operatorManagedFluentBit }}
 apiVersion: v1
 kind: Service
 metadata:
