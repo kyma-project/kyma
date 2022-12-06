@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/setup"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -22,18 +21,9 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(
 			&source.Kind{Type: &appsv1.DaemonSet{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapDaemonSets),
-			builder.WithPredicates(onlyUpdate()),
+			builder.WithPredicates(setup.OnlyUpdate()),
 		).
 		Complete(r)
-}
-
-func onlyUpdate() predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc:  func(event event.CreateEvent) bool { return false },
-		DeleteFunc:  func(deleteEvent event.DeleteEvent) bool { return false },
-		UpdateFunc:  func(updateEvent event.UpdateEvent) bool { return true },
-		GenericFunc: func(genericEvent event.GenericEvent) bool { return false },
-	}
 }
 
 func (r *Reconciler) mapDaemonSets(object client.Object) []reconcile.Request {

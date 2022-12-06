@@ -129,3 +129,12 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+traceCollector:
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 150m
+      memory: 256Mi

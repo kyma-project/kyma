@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controller"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	configbuilder "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
@@ -78,60 +77,66 @@ func NewReconciler(client client.Client, config Config, prober DaemonSetProber, 
 	return &r
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
 	log.V(1).Info("Reconciliation triggered")
 
 	if err := r.updateMetrics(ctx); err != nil {
-		log.Error(err, "failed to get all log pipelines while updating metrics")
+		log.Error(err, "Failed to get all LogPipelines while updating metrics")
 	}
 
 	var pipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &pipeline); err != nil {
-		log.V(1).Info("Ignoring deleted LogPipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	return ctrl.Result{}, r.doReconcile(ctx, &pipeline)
+}
+
+func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) (err error) {
+	// defer the updating of status to ensure that the status is updated regardless of the outcome of the reconciliation
 	defer func() {
-		if err := r.updateStatus(ctx, pipeline.Name); err != nil {
-			reconcileResult = ctrl.Result{Requeue: controller.ShouldRetryOn(err)}
-			reconcileErr = fmt.Errorf("failed to update LogPipeline status: %v", err)
+		if statusErr := r.updateStatus(ctx, pipeline.Name); statusErr != nil {
+			if err != nil {
+				err = fmt.Errorf("failed while updating status: %v: %v", statusErr, err)
+			} else {
+				err = fmt.Errorf("failed to update status: %v", statusErr)
+			}
 		}
 	}()
 
-	if err := r.ensureFinalizers(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	if err = ensureFinalizers(ctx, r.Client, pipeline); err != nil {
+		return err
 	}
 
 	if r.config.ManageFluentBit && pipeline.DeletionTimestamp.IsZero() {
 		config := resourceConfig{
-			Name:      r.config.DaemonSet,
-			Component: "telemetry",
+			BaseName:  fmt.Sprintf("telemetry-%s", r.config.DaemonSet.Name),
+			Namespace: r.config.DaemonSet.Namespace,
 		}
-		err := r.installOrUpgradeFluentBit(ctx, config)
-		if err != nil {
-			return ctrl.Result{}, err
+		if err = r.installOrUpgradeFluentBit(ctx, config); err != nil {
+			return err
 		}
 	}
 
-	if err := r.syncer.syncFluentBitConfig(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	if err = r.syncer.syncFluentBitConfig(ctx, pipeline); err != nil {
+		return err
 	}
 
-	if err := r.cleanupFinalizersIfNeeded(ctx, &pipeline); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
+		return err
 	}
 
-	checksum, err := r.calculateChecksum(ctx)
-	if err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+	var checksum string
+	if checksum, err = r.calculateChecksum(ctx); err != nil {
+		return err
 	}
 
 	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
-		return ctrl.Result{Requeue: controller.ShouldRetryOn(err)}, nil
+		return err
 	}
 
-	return reconcileResult, reconcileErr
+	return err
 }
 
 func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, config resourceConfig) error {

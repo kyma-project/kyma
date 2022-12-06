@@ -145,6 +145,7 @@ pod:
   securityContext:
     runAsUser: 1000
     runAsGroup: 1000
+    fsGroup: 1000
     seccompProfile: # Optional. This option can also be set on container level but it is recommended to set it on Pod level and leave it undefined on container level.
       type: RuntimeDefault
 

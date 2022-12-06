@@ -2,6 +2,7 @@ package tracepipeline
 
 import (
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"strings"
 	"testing"
 
@@ -12,8 +13,11 @@ import (
 
 var (
 	config = Config{
-		ResourceName:       "collector",
-		CollectorNamespace: "kyma-system",
+		BaseName:  "collector",
+		Namespace: "kyma-system",
+		Service: ServiceConfig{
+			OTLPServiceName: "otlp-traces",
+		},
 	}
 	tracePipeline = v1alpha1.TracePipelineOutput{
 		Otlp: &v1alpha1.OtlpOutput{
@@ -46,8 +50,8 @@ func TestMakeConfigMap(t *testing.T) {
 	cm := makeConfigMap(config, tracePipeline)
 
 	require.NotNil(t, cm)
-	require.Equal(t, cm.Name, config.ResourceName)
-	require.Equal(t, cm.Namespace, config.CollectorNamespace)
+	require.Equal(t, cm.Name, config.BaseName)
+	require.Equal(t, cm.Namespace, config.Namespace)
 	expectedEndpoint := fmt.Sprintf("endpoint: ${%s}", otlpEndpointVariable)
 	collectorConfig := cm.Data[configMapKey]
 
@@ -75,8 +79,8 @@ func TestMakeSecret(t *testing.T) {
 	secret := makeSecret(config, secretData)
 
 	require.NotNil(t, secret)
-	require.Equal(t, secret.Name, config.ResourceName)
-	require.Equal(t, secret.Namespace, config.CollectorNamespace)
+	require.Equal(t, secret.Name, config.BaseName)
+	require.Equal(t, secret.Namespace, config.Namespace)
 
 	require.Equal(t, "otlpEndpoint", string(secret.Data[otlpEndpointVariable]), "Secret must contain OTLP endpoint")
 	require.Equal(t, "basicAuthHeader", string(secret.Data[basicAuthHeaderVariable]), "Secret must contain basic auth header")
@@ -84,11 +88,11 @@ func TestMakeSecret(t *testing.T) {
 
 func TestMakeDeployment(t *testing.T) {
 	deployment := makeDeployment(config, "123")
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, deployment)
-	require.Equal(t, deployment.Name, config.ResourceName)
-	require.Equal(t, deployment.Namespace, config.CollectorNamespace)
+	require.Equal(t, deployment.Name, config.BaseName)
+	require.Equal(t, deployment.Namespace, config.Namespace)
 	require.Equal(t, *deployment.Spec.Replicas, int32(1))
 	require.Equal(t, deployment.Spec.Selector.MatchLabels, labels)
 	require.Equal(t, deployment.Spec.Template.ObjectMeta.Labels, labels)
@@ -97,37 +101,70 @@ func TestMakeDeployment(t *testing.T) {
 	}
 	require.Equal(t, deployment.Spec.Template.ObjectMeta.Annotations[configHashAnnotationKey], "123")
 	require.NotEmpty(t, deployment.Spec.Template.Spec.Containers[0].EnvFrom)
+
+	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].LivenessProbe, "liveness probe must be defined")
+	require.NotNil(t, deployment.Spec.Template.Spec.Containers[0].ReadinessProbe, "readiness probe must be defined")
+
+	podSecurityContext := deployment.Spec.Template.Spec.SecurityContext
+	require.NotNil(t, podSecurityContext, "pod security context must be defined")
+	require.NotZero(t, podSecurityContext.RunAsUser, "must run as non-root")
+	require.True(t, *podSecurityContext.RunAsNonRoot, "must run as non-root")
+
+	containerSecurityContext := deployment.Spec.Template.Spec.Containers[0].SecurityContext
+	require.NotNil(t, containerSecurityContext, "container security context must be defined")
+	require.NotZero(t, containerSecurityContext.RunAsUser, "must run as non-root")
+	require.True(t, *containerSecurityContext.RunAsNonRoot, "must run as non-root")
+	require.False(t, *containerSecurityContext.Privileged, "must not be privileged")
+	require.False(t, *containerSecurityContext.AllowPrivilegeEscalation, "must not escalate to privileged")
+	require.True(t, *containerSecurityContext.ReadOnlyRootFilesystem, "must use readonly fs")
 }
 
-func TestMakeCollectorService(t *testing.T) {
-	service := makeCollectorService(config)
-	labels := getLabels(config)
+func TestMakeOTLPService(t *testing.T) {
+	service := makeOTLPService(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, service)
-	require.Equal(t, service.Name, config.ResourceName)
-	require.Equal(t, service.Namespace, config.CollectorNamespace)
+	require.Equal(t, service.Name, config.Service.OTLPServiceName)
+	require.Equal(t, service.Namespace, config.Namespace)
 	require.Equal(t, service.Spec.Selector, labels)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
 	require.NotEmpty(t, service.Spec.Ports)
-}
-
-func TestMakeServiceMonitor(t *testing.T) {
-	serviceMonitor := makeServiceMonitor(config)
-	labels := getLabels(config)
-
-	require.NotNil(t, serviceMonitor)
-	require.Equal(t, serviceMonitor.Name, config.ResourceName)
-	require.Equal(t, serviceMonitor.Namespace, config.CollectorNamespace)
-	require.Contains(t, serviceMonitor.Spec.NamespaceSelector.MatchNames, config.CollectorNamespace)
-	require.Equal(t, serviceMonitor.Spec.Selector.MatchLabels, labels)
+	require.Len(t, service.Spec.Ports, 2)
 }
 
 func TestMakeMetricsService(t *testing.T) {
 	service := makeMetricsService(config)
-	labels := getLabels(config)
+	labels := makeDefaultLabels(config)
 
 	require.NotNil(t, service)
-	require.Equal(t, service.Name, config.ResourceName+"-metrics")
-	require.Equal(t, service.Namespace, config.CollectorNamespace)
+	require.Equal(t, service.Name, config.BaseName+"-metrics")
+	require.Equal(t, service.Namespace, config.Namespace)
 	require.Equal(t, service.Spec.Selector, labels)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
 	require.NotEmpty(t, service.Spec.Ports)
+	require.Len(t, service.Spec.Ports, 1)
+}
+
+func TestMakeOpenCensusService(t *testing.T) {
+	service := makeOpenCensusService(config)
+	labels := makeDefaultLabels(config)
+
+	require.NotNil(t, service)
+	require.Equal(t, service.Name, config.BaseName+"-internal")
+	require.Equal(t, service.Namespace, config.Namespace)
+	require.Equal(t, service.Spec.Selector, labels)
+	require.Equal(t, service.Spec.Type, corev1.ServiceTypeClusterIP)
+	require.NotEmpty(t, service.Spec.Ports)
+	require.Len(t, service.Spec.Ports, 1)
+}
+
+func TestMakeServiceMonitor(t *testing.T) {
+	serviceMonitor := makeServiceMonitor(config)
+	labels := makeDefaultLabels(config)
+
+	require.NotNil(t, serviceMonitor)
+	require.Equal(t, serviceMonitor.Name, config.BaseName)
+	require.Equal(t, serviceMonitor.Namespace, config.Namespace)
+	require.Contains(t, serviceMonitor.Spec.NamespaceSelector.MatchNames, config.Namespace)
+	require.Equal(t, serviceMonitor.Spec.Selector.MatchLabels, labels)
 }

@@ -6,13 +6,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type resourceConfig struct {
-	Name      types.NamespacedName
-	Component string
+	BaseName  string
+	Namespace string
 }
 
 func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
@@ -40,8 +39,9 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   name(config),
-			Labels: labels(config),
+			Name:      config.BaseName,
+			Namespace: config.Namespace,
+			Labels:    labels(config),
 		},
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
@@ -50,20 +50,14 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: labels(config),
-					Annotations: map[string]string{
-						"checksum/config":     "5c928f5bb13aabb32f086b320b200c0df16c9ca8a553a856bad3993cd3582143",
-						"checksum/luascripts": "d538085e16b852526ec9e36ce06000a0bb6907347d083db72c15ce0952bda559",
-					},
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: name(config),
+					ServiceAccountName: config.BaseName,
 					PriorityClassName:  "kyma-system-priority",
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsNonRoot:   setFalse(),
 						SeccompProfile: &corev1.SeccompProfile{Type: "RuntimeDefault"},
 					},
-					DNSPolicy:   "ClusterFirst",
-					HostNetwork: false,
 					InitContainers: []corev1.Container{
 						{
 							Name:  "prep-fluent-bit-config",
@@ -105,7 +99,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									SecretRef: &corev1.SecretEnvSource{
-										LocalObjectReference: corev1.LocalObjectReference{Name: "telemetry-fluent-bit-env"},
+										LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-env", config.BaseName)},
 										Optional:             setTrue(),
 									},
 								},
@@ -185,7 +179,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "config",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "telemetry-fluent-bit"},
+									LocalObjectReference: corev1.LocalObjectReference{Name: config.BaseName},
 								},
 							},
 						},
@@ -193,7 +187,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "luascripts",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "telemetry-fluent-bit-luascripts"},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-luascripts", config.BaseName)},
 								},
 							},
 						},
@@ -219,7 +213,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "dynamic-config",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "telemetry-fluent-bit-sections"},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-sections", config.BaseName)},
 									Optional:             setTrue(),
 								},
 							},
@@ -228,7 +222,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "dynamic-parsers-config",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "telemetry-fluent-bit-parsers"},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-parsers", config.BaseName)},
 									Optional:             setTrue(),
 								},
 							},
@@ -237,7 +231,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "dynamic-files",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: "telemetry-fluent-bit-files"},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-files", config.BaseName)},
 									Optional:             setTrue(),
 								},
 							},
@@ -245,7 +239,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 						{
 							Name: "varfluentbit",
 							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{Path: "/var/telemetry-fluent-bit"},
+								HostPath: &corev1.HostPathVolumeSource{Path: fmt.Sprintf("/var/%s", config.BaseName)},
 							},
 						},
 					},
@@ -258,8 +252,8 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 func makeService(config resourceConfig) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name(config),
-			Namespace: config.Name.Namespace,
+			Name:      config.BaseName,
+			Namespace: config.Namespace,
 			Labels:    labels(config),
 		},
 		Spec: corev1.ServiceSpec{
@@ -359,8 +353,8 @@ func makeConfigMap(config resourceConfig) *corev1.ConfigMap {
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name(config),
-			Namespace: config.Name.Namespace,
+			Name:      config.BaseName,
+			Namespace: config.Namespace,
 			Labels:    labels(config),
 		},
 		Data: map[string]string{
@@ -405,8 +399,8 @@ end
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s-luascripts", config.Component, config.Name.Name),
-			Namespace: config.Name.Namespace,
+			Name:      fmt.Sprintf("%s-luascripts", config.BaseName),
+			Namespace: config.Namespace,
 			Labels:    labels(config),
 		},
 		Data: map[string]string{"filter-script.lua": luaFilter},
@@ -415,13 +409,8 @@ end
 
 func labels(config resourceConfig) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name":     config.Name.Name,
-		"app.kubernetes.io/instance": config.Component,
+		"app.kubernetes.io/name": config.BaseName,
 	}
-}
-
-func name(config resourceConfig) string {
-	return fmt.Sprintf("%s-%s", config.Component, config.Name.Name)
 }
 
 func setTrue() *bool {

@@ -2,6 +2,8 @@ package logpipeline
 
 import (
 	"context"
+	"testing"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -9,7 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"testing"
 )
 
 func TestEnsureFinalizers(t *testing.T) {
@@ -18,9 +19,8 @@ func TestEnsureFinalizers(t *testing.T) {
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		pipeline := &telemetryv1alpha1.LogPipeline{ObjectMeta: metav1.ObjectMeta{Name: "pipeline"}}
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.ensureFinalizers(context.Background(), pipeline)
+		err := ensureFinalizers(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -46,9 +46,8 @@ func TestEnsureFinalizers(t *testing.T) {
 		scheme := runtime.NewScheme()
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.ensureFinalizers(context.Background(), pipeline)
+		err := ensureFinalizers(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -73,9 +72,8 @@ func TestCleanupFinalizers(t *testing.T) {
 		scheme := runtime.NewScheme()
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.cleanupFinalizersIfNeeded(context.Background(), pipeline)
+		err := cleanupFinalizersIfNeeded(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
@@ -97,9 +95,8 @@ func TestCleanupFinalizers(t *testing.T) {
 		scheme := runtime.NewScheme()
 		_ = telemetryv1alpha1.AddToScheme(scheme)
 		client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pipeline).Build()
-		sut := Reconciler{Client: client}
 
-		err := sut.cleanupFinalizersIfNeeded(context.Background(), pipeline)
+		err := cleanupFinalizersIfNeeded(context.Background(), client, pipeline)
 		require.NoError(t, err)
 
 		var updatedPipeline telemetryv1alpha1.LogPipeline
