@@ -1,3 +1,4 @@
+{{- if .Values.global.operatorManagedFluentBit }}
 {{- if gt (len .Values.luaScripts) 0 -}}
 apiVersion: v1
 kind: ConfigMap
@@ -10,3 +11,4 @@ data:
   {{ $key }}: {{ $value | quote }}
   {{ end }}
 {{- end -}}
+{{- end }}
