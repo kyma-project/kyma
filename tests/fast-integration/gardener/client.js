@@ -58,9 +58,12 @@ class GardenerClient {
 
     const data = fromBase64(this.shootTemplate);
 
-    const replaced = data.replace(/<SHOOT>/g, shootName);
+    var replaced = data.replace(/<SHOOT>/g, shootName);
+    replaced = replaced.replace(/<NAMESPACE>/g, GARDENER_PROJECT);
 
-    await this.dynamicAPI.create(JSON.parse(replaced))
+    const shootTemplate = k8s.loadYaml(replaced);
+
+    await this.dynamicAPI.create(shootTemplate)
         .catch((err) => {
           const response = JSON.stringify(err);
           debug(`Got the error with response ${response}`);
