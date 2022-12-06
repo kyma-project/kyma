@@ -2,9 +2,10 @@ package jetstreamv2
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats.go"

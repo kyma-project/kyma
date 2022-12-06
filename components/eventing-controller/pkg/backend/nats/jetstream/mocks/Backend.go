@@ -16,6 +16,20 @@ type Backend struct {
 	mock.Mock
 }
 
+// DeleteInvalidConsumers provides a mock function with given fields: subscriptions
+func (_m *Backend) DeleteInvalidConsumers(subscriptions []v1alpha1.Subscription) error {
+	ret := _m.Called(subscriptions)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func([]v1alpha1.Subscription) error); ok {
+		r0 = rf(subscriptions)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteSubscription provides a mock function with given fields: subscription
 func (_m *Backend) DeleteSubscription(subscription *v1alpha1.Subscription) error {
 	ret := _m.Called(subscription)
