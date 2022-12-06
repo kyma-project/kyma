@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/sha1" //nolint:gosec
 	"fmt"
+	"strconv"
 	"strings"
 
 	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
@@ -64,7 +65,7 @@ func hashSubscriptionFullName(domainName, namespace, name string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func getDefaultSubscriptionV1Alpha2(protocolSettings *eventingv1alpha2.ProtocolSettings) (*types.Subscription, error) {
+func getDefaultSubscriptionV1Alpha2(protocolSettings *ProtocolSettings) (*types.Subscription, error) {
 	// @TODO: Rename this method to getDefaultSubscription once old BEB backend is depreciated
 	emsSubscription := &types.Subscription{}
 	emsSubscription.ContentMode = *protocolSettings.ContentMode
@@ -112,7 +113,7 @@ func getEventMeshEvents(typeInfos []EventTypeInfo, typeMatching eventingv1alpha2
 
 func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, typeInfos []EventTypeInfo,
 	apiRule *apigatewayv1beta1.APIRule, defaultWebhookAuth *types.WebhookAuth,
-	defaultProtocolSettings *eventingv1alpha2.ProtocolSettings,
+	defaultProtocolSettings *ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) { //nolint:gocognit
 
 	// get default EventMesh subscription object
@@ -123,25 +124,10 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 	// set Name of EventMesh subscription
 	eventMeshSubscription.Name = nameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace)
 
-	// @TODO: Check how the protocol settings would work in new CRD
-	//// Applying protocol settings if provided in subscription CR
-	// if subscription.Spec.ProtocolSettings != nil {
-	//	if subscription.Spec.ProtocolSettings.ContentMode != nil {
-	//		eventMeshSubscription.ContentMode = *subscription.Spec.ProtocolSettings.ContentMode
-	//	}
-	//	// ExemptHandshake
-	//	if subscription.Spec.ProtocolSettings.ExemptHandshake != nil {
-	//		eventMeshSubscription.ExemptHandshake = *subscription.Spec.ProtocolSettings.ExemptHandshake
-	//	}
-	//	// Qos
-	//	if subscription.Spec.ProtocolSettings.Qos != nil {
-	//		qos, err := getQos(*subscription.Spec.ProtocolSettings.Qos)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		eventMeshSubscription.Qos = qos
-	//	}
-	// }
+	// Applying protocol settings if provided in subscription CR
+	if setErr := setEventMeshProtocolSettings(subscription, eventMeshSubscription); setErr != nil {
+		return nil, setErr
+	}
 
 	// Events
 	// set the event types in EventMesh subscription instance
@@ -156,27 +142,78 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 	}
 	eventMeshSubscription.WebhookURL = urlTobeRegistered
 
-	// Using default webhook auth unless specified in Subscription CR
-	auth := defaultWebhookAuth
-	// @TODO: Check here as well how the protocol settings would work in new CRD
-	//if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
-	//	auth = &types.WebhookAuth{}
-	//	auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientID
-	//	auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
-	//	if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
-	//		auth.GrantType = types.GrantTypeClientCredentials
-	//	} else {
-	//		return nil, fmt.Errorf("invalid GrantType: %v", subscription.Spec.ProtocolSettings.WebhookAuth.GrantType)
-	//	}
-	//	if subscription.Spec.ProtocolSettings.WebhookAuth.Type == string(types.AuthTypeClientCredentials) {
-	//		auth.Type = types.AuthTypeClientCredentials
-	//	} else {
-	//		return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
-	//	}
-	//	auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL
-	//}
-	eventMeshSubscription.WebhookAuth = auth
+	// set webhook auth
+	eventMeshSubscription.WebhookAuth, err = getEventMeshWebhookAuth(subscription, defaultWebhookAuth)
+	if err != nil {
+		return nil, err
+	}
+
 	return eventMeshSubscription, nil
+}
+
+func setEventMeshProtocolSettings(subscription *eventingv1alpha2.Subscription, eventMeshSub *types.Subscription) error {
+	// Applying protocol settings if provided in subscription CR
+	// content mode
+	if contentMode, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode]; ok && contentMode != "" {
+		eventMeshSub.ContentMode = contentMode
+	}
+	// qos
+	if qosStr, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsQos]; ok && qosStr != "" {
+		qos, err := getQos(qosStr)
+		if err != nil {
+			return err
+		}
+		eventMeshSub.Qos = qos
+	}
+	// handshake
+	if exemptHandshake, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsExemptHandshake]; ok {
+		handshake, err := strconv.ParseBool(exemptHandshake)
+		if err != nil {
+			handshake = true
+		}
+		eventMeshSub.ExemptHandshake = handshake
+	}
+	return nil
+}
+
+// getEventMeshWebhookAuth uses default webhook auth unless specified in Subscription CR.
+func getEventMeshWebhookAuth(subscription *eventingv1alpha2.Subscription,
+	defaultWebhookAuth *types.WebhookAuth) (*types.WebhookAuth, error) {
+	auth := &types.WebhookAuth{}
+	// extract auth info from subscription CR if any
+	if authType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthType]; ok {
+		if authType != string(types.AuthTypeClientCredentials) {
+			return nil, fmt.Errorf("invalid Type: %v, required: %v", authType,
+				string(types.AuthTypeClientCredentials))
+		}
+		auth.Type = types.AuthTypeClientCredentials
+	}
+
+	if tokenURL, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthTokenURL]; ok {
+		auth.TokenURL = tokenURL
+	}
+
+	if clientID, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthClientID]; ok {
+		auth.ClientID = clientID
+	}
+
+	if clientSecret, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthClientSecret]; ok {
+		auth.ClientSecret = clientSecret
+	}
+
+	if grantType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthGrantType]; ok {
+		if grantType != string(types.GrantTypeClientCredentials) {
+			return nil, fmt.Errorf("invalid GrantType: %v, required: %v", grantType,
+				string(types.GrantTypeClientCredentials))
+		}
+		auth.GrantType = types.GrantTypeClientCredentials
+	}
+
+	// check if auth was provided in subscription CR
+	if auth.Type != "" {
+		return auth, nil
+	}
+	return defaultWebhookAuth, nil
 }
 
 func GetCleanedEventMeshSubscription(subscription *types.Subscription) *types.Subscription {
