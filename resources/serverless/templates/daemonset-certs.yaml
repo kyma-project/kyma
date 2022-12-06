@@ -38,6 +38,9 @@ spec:
             - name: scripts
               mountPath: /scripts
               readOnly: true
+          env:
+            - name: GATEWAY_CERTS
+              value: {{ .Values.dockerRegistry.gatewayCert }}
           command: ["sh", "/scripts/patch-docker.sh"]
       volumes:
         - name: etckube

@@ -535,7 +535,36 @@ func Test_getEventMeshEvents(t *testing.T) {
 		g.Expect(gotBEBEvents).To(Equal(expectedEventMeshEvents))
 	})
 
-	t.Run("with exact type matching", func(t *testing.T) {
+	t.Run("with exact type matching with empty source", func(t *testing.T) {
+		// given
+		eventTypeInfos := getTypeInfos([]string{
+			eventingtestingv2.OrderCreatedV1Event,
+			eventingtestingv2.OrderCreatedV2Event,
+		})
+
+		defaultNamespace := eventingtestingv2.EventMeshNamespace
+		typeMatching := eventingv1alpha2.TypeMatchingExact
+		source := ""
+
+		expectedEventMeshEvents := types.Events{
+			types.Event{
+				Source: defaultNamespace,
+				Type:   eventingtestingv2.OrderCreatedV1Event,
+			},
+			types.Event{
+				Source: defaultNamespace,
+				Type:   eventingtestingv2.OrderCreatedV2Event,
+			},
+		}
+
+		// when
+		gotBEBEvents := getEventMeshEvents(eventTypeInfos, typeMatching, defaultNamespace, source)
+
+		// then
+		g.Expect(gotBEBEvents).To(Equal(expectedEventMeshEvents))
+	})
+
+	t.Run("with exact type matching with non-empty source", func(t *testing.T) {
 		// given
 		eventTypeInfos := getTypeInfos([]string{
 			eventingtestingv2.OrderCreatedV1Event,

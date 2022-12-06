@@ -37,7 +37,7 @@ This command creates a k3d cluster on your local machine, installs Kyma on it, a
 Create the secret in the default namespace:
 
 ```
-kubectl create secret google-credentials -n default --from-file=serviceaccount.json=serviceaccount.json
+kubectl create secret generic google-credentials -n default --from-file=serviceaccount.json=serviceaccount.json
 ```
 
 ### Set the environment variables with custom domain

@@ -102,19 +102,39 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
-				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
+			}
+			g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+			g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
 
-				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(1))
-				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(1))
+			const expectedVolumeCount = 3
+			g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(expectedVolumeCount))
+			g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(expectedVolumeCount))
 
-				g.Expect(got.Spec.Template.Spec.Volumes[0].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[0].Name))
-				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
+			for i := 0; i < expectedVolumeCount; i++ {
+				g.Expect(got.Spec.Template.Spec.Volumes[i].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[i].Name))
+				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[i].Name)
 				g.Expect(errs).To(gomega.HaveLen(0))
 
-				g.Expect(got.Spec.Template.Spec.Containers[0].StartupProbe.SuccessThreshold).To(gomega.BeEquivalentTo(1), "documentation states that this value has to be set to 1")
+				checkSecretVolume(g, tt.args.instance.Spec.SecretMounts,
+					got.Spec.Template.Spec.Volumes[i], got.Spec.Template.Spec.Containers[0].VolumeMounts[i])
 			}
+
+			g.Expect(got.Spec.Template.Spec.Containers[0].StartupProbe.SuccessThreshold).To(gomega.BeEquivalentTo(1), "documentation states that this value has to be set to 1")
 		})
+	}
+}
+
+func checkSecretVolume(g *gomega.WithT, secretMounts []serverlessv1alpha2.SecretMount, volume corev1.Volume, volumeMount corev1.VolumeMount) {
+	if volume.Secret != nil {
+		var matchingSecretMount *serverlessv1alpha2.SecretMount = nil
+		for _, secretMount := range secretMounts {
+			if secretMount.SecretName == volume.Secret.SecretName {
+				matchingSecretMount = secretMount.DeepCopy()
+				break
+			}
+		}
+		g.Expect(matchingSecretMount).ToNot(gomega.BeNil())
+		g.Expect(volumeMount.MountPath).To(gomega.Equal(matchingSecretMount.MountPath))
 	}
 }
 

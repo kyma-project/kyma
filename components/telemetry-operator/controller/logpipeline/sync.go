@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/config/builder"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -14,31 +15,24 @@ import (
 
 type syncer struct {
 	client.Client
-	config             Config
-	k8sGetterOrCreator *kubernetes.GetterOrCreator
+	config Config
 }
 
-func newSyncer(
-	client client.Client,
-	config Config,
-) *syncer {
-	var s syncer
-	s.Client = client
-	s.config = config
-	s.k8sGetterOrCreator = kubernetes.NewGetterOrCreator(client)
-	return &s
-}
-
-func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.LogPipeline, allPipelines *telemetryv1alpha1.LogPipelineList) error {
-	if err := s.syncSectionsConfigMap(ctx, newPipeline); err != nil {
+func (s *syncer) syncFluentBitConfig(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+	if err := s.syncSectionsConfigMap(ctx, pipeline); err != nil {
 		return fmt.Errorf("failed to sync sections: %v", err)
 	}
 
-	if err := s.syncFilesConfigMap(ctx, newPipeline); err != nil {
+	if err := s.syncFilesConfigMap(ctx, pipeline); err != nil {
 		return fmt.Errorf("failed to sync mounted files: %v", err)
 	}
 
-	if err := s.syncReferencedSecrets(ctx, allPipelines); err != nil {
+	var allPipelines telemetryv1alpha1.LogPipelineList
+	if err := s.List(ctx, &allPipelines); err != nil {
+		return fmt.Errorf("failed to get all log pipelines while syncing Fluent Bit ConfigMaps: %v", err)
+	}
+
+	if err := s.syncReferencedSecrets(ctx, &allPipelines); err != nil {
 		return fmt.Errorf("failed to sync referenced secrets: %v", err)
 	}
 
@@ -46,7 +40,7 @@ func (s *syncer) syncAll(ctx context.Context, newPipeline *telemetryv1alpha1.Log
 }
 
 func (s *syncer) syncSectionsConfigMap(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
-	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.SectionsConfigMap)
+	cm, err := utils.GetOrCreateConfigMap(ctx, s, s.config.SectionsConfigMap)
 	if err != nil {
 		return fmt.Errorf("unable to get section configmap: %w", err)
 	}
@@ -83,7 +77,7 @@ func (s *syncer) syncSectionsConfigMap(ctx context.Context, pipeline *telemetryv
 }
 
 func (s *syncer) syncFilesConfigMap(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
-	cm, err := s.k8sGetterOrCreator.ConfigMap(ctx, s.config.FilesConfigMap)
+	cm, err := utils.GetOrCreateConfigMap(ctx, s, s.config.FilesConfigMap)
 	if err != nil {
 		return fmt.Errorf("unable to get files configmap: %w", err)
 	}
@@ -117,7 +111,7 @@ func (s *syncer) syncFilesConfigMap(ctx context.Context, pipeline *telemetryv1al
 }
 
 func (s *syncer) syncReferencedSecrets(ctx context.Context, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	oldSecret, err := s.k8sGetterOrCreator.Secret(ctx, s.config.EnvSecret)
+	oldSecret, err := utils.GetOrCreateSecret(ctx, s, s.config.EnvSecret)
 	if err != nil {
 		return fmt.Errorf("unable to get env secret: %w", err)
 	}

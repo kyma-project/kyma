@@ -784,9 +784,9 @@ func startReconciler(eventTypePrefix string, ens *utils.JetStreamTestEnsemble) *
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
-
-	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
+
+	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, cleaner, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-nats")

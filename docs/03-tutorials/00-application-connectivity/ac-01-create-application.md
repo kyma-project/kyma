@@ -72,3 +72,4 @@ spec:
     region: "us"
   services: {LIST_OF_REGISTERED_SERVICES}
 ```
+**TIP:** You can use Kyma Dashboard to create and manage your Application. To do so, go to **Integration > Applications** from the **Cluster Details** view.
