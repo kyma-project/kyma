@@ -58,7 +58,7 @@ class GardenerClient {
 
     const data = fromBase64(this.shootTemplate);
 
-    var replaced = data.replace(/<SHOOT>/g, shootName);
+    let replaced = data.replace(/<SHOOT>/g, shootName);
     replaced = replaced.replace(/<NAMESPACE>/g, GARDENER_PROJECT);
 
     const shootTemplate = k8s.loadYaml(replaced);
