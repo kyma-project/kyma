@@ -10,6 +10,7 @@ spec:
       template:
         spec:
           serviceAccountName: {{ template "docker-registry.name" . }}
+          restartPolicy: Never
           containers:
           - name: function-image-gc
             #image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
@@ -20,10 +21,7 @@ spec:
               {{- include "tplValue" ( dict "value" .Values.containers.securityContext "context" . ) | nindent 14 }}
             {{- end }}
             command:
-            - sh
-            - -ec
-            - |
-                while true; do /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
+            - /app/registry-gc
             resources:
               {{- toYaml .Values.resources | nindent 14 }}
             env:

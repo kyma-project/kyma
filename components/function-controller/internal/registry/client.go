@@ -16,15 +16,19 @@ import (
 )
 
 func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
-	url, err := url.Parse(opts.URL)
+	URL, err := url.Parse(opts.URL)
 	if err != nil {
 		return nil, err
+	}
+	// the registry client will panic if it's not set
+	if URL.Scheme == "" {
+		URL.Scheme = "http"
 	}
 	return &registryClient{
 		ctx:      ctx,
 		userName: opts.Username,
 		password: opts.Password,
-		url:      url,
+		url:      URL,
 	}, nil
 }
 
@@ -33,8 +37,11 @@ func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, er
 	if err != nil {
 		return nil, errors.Wrap(err, "while validating image name")
 	}
-
-	repo, err := client.NewRepository(reference.TrimNamed(named), c.url.String(), c.registryAuthTransport())
+	tr, err := c.registryAuthTransport()
+	if err != nil {
+		return nil, errors.Wrap(err, "while building registry auth transport")
+	}
+	repo, err := client.NewRepository(reference.TrimNamed(named), c.url.String(), tr)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing repository client")
 	}
@@ -72,23 +79,25 @@ func (rc *repositoryClient) DeleteImageTag(tagDigest digest.Digest) error {
 	return rc.manifestService.Delete(rc.ctx, tagDigest)
 }
 
-func (rc *registryClient) registryAuthTransport() http.RoundTripper {
+func (rc *registryClient) registryAuthTransport() (http.RoundTripper, error) {
 	// Header required to force the Registry to use V2 digest values
 	// details are here: https://docs.docker.com/registry/spec/api/#deleting-an-image
 	header := http.Header(map[string][]string{"Accept": {"application/vnd.docker.distribution.manifest.v2+json"}})
-
 	authconfig := &dockertypes.AuthConfig{
 		Username: rc.userName,
 		Password: rc.password,
 	}
-	url, err := url.Parse(rc.url.String())
+
+	challengeManager, _, err := dockerregistry.PingV2Registry(rc.url, transport.NewTransport(http.DefaultTransport))
 	if err != nil {
-		panic(err)
+		errors.Wrap(err, "while generating auth challengeManager")
 	}
-	challengeManager, _, err := dockerregistry.PingV2Registry(url, transport.NewTransport(http.DefaultTransport))
-	if err != nil {
-		panic(err)
-	}
+
 	basicAuthHandler := auth.NewBasicHandler(dockerregistry.NewStaticCredentialStore(authconfig))
-	return transport.NewTransport(http.DefaultTransport, transport.NewHeaderRequestModifier(header), auth.NewAuthorizer(challengeManager, basicAuthHandler))
+
+	return transport.NewTransport(
+		http.DefaultTransport,
+		transport.NewHeaderRequestModifier(header),
+		auth.NewAuthorizer(challengeManager, basicAuthHandler),
+	), nil
 }

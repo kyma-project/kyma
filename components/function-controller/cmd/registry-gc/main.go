@@ -91,12 +91,12 @@ func main() {
 					os.Exit(1)
 				}
 
-				mainLog.Info("deleting image [%v:%v] with digest [%v]..", functionImage, tagStr, tag.Digest)
+				mainLog.Info(fmt.Sprintf("deleting image [%v:%v] with digest [%v]..", functionImage, tagStr, tag.Digest))
 				err = repoCli.DeleteImageTag(tag.Digest)
 				if err != nil {
 					mainLog.Error(err, "while deleting image tag")
 				}
-				mainLog.Info("image [%v:%v] deleted successfully", functionImage, tagStr)
+				mainLog.Info(fmt.Sprintf("image [%v:%v] deleted successfully", functionImage, tagStr))
 			}
 		}
 
@@ -168,5 +168,4 @@ func ReadRegistryConfigSecretOrDie(resetConfig *rest.Config, envConfig *config) 
 		Password: string(s.Data[PasswordSecretKeyName]),
 		URL:      string(s.Data[URLSecretKeyName]),
 	}
-
 }

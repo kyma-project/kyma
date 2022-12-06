@@ -218,8 +218,9 @@ spec:
           command:
           - sh
           - -ec
-          - |
-              while true; do /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
+          - | 
+              # garbage-collect will fail if the registry storage is not initialized (images are already pused to it), so we check fist before we run the command
+              while true; do test -d /var/lib/registry/docker/registry/v2/ && /bin/registry garbage-collect /etc/docker/registry/config.yml -m; sleep 1h; done
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:

@@ -62,7 +62,8 @@ persistence:
 garbageCollection:
   enabled: true
 
-# set the type of filesystem to use: filesystem, s3
+# set the type of filesystem to use: filesystem, s3.
+# If filesystem is used, you should also add it to configData, below
 storage: filesystem
 
 # Set this to name of secret for tls certs
@@ -105,6 +106,8 @@ configData: # example: https://github.com/docker/distribution/blob/master/cmd/re
   storage:
     cache:
       blobdescriptor: inmemory
+    filesystem:
+      rootdirectory: /var/lib/registry
   http:
     addr: :5000 # same as .Values.service.port
     headers:
