@@ -132,10 +132,10 @@ func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.Respo
 		return nil, ""
 	}
 
-	// Add tracing context to cloud events
+	// Add tracing context to cloud events.
 	tracing.AddTracingContextToCEExtensions(request.Header, &transitionEvent.Event)
 
-	// prepare the original event-type without cleanup
+	// Prepare the original event-type without cleanup.
 	eventType := formatEventType(t.eventTypePrefix, originalAppName, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
 
 	return &transitionEvent.Event, eventType
@@ -143,7 +143,7 @@ func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.Respo
 
 func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *cev2event.Event, msg string) {
 	response := &apiv1.PublishEventResponses{}
-	// Fail
+	// Fail.
 	if !is2XXStatusCode(statusCode) {
 		response.Error = &apiv1.Error{
 			Status:  statusCode,
@@ -153,7 +153,7 @@ func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseW
 		return
 	}
 
-	// Success
+	// Success.
 	response.Ok = &apiv1.PublishResponse{EventID: event.ID()}
 	writeJSONResponse(writer, response)
 }
@@ -177,8 +177,8 @@ func (t *Transformer) convertPublishRequestToTransitionEvent(appName string, pub
 		return nil, errors.Wrap(err, "failed to set data to CloudEvent data field")
 	}
 
-	// set the event id from the request if it is available
-	// otherwise generate a new one.
+	// Set the event id from the request if it is available
+	// or otherwise generate a new one.
 	if len(publishRequest.PublishrequestV1.EventID) > 0 {
 		cloudEvent.SetID(publishRequest.PublishrequestV1.EventID)
 	} else {

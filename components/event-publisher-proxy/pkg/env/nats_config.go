@@ -26,14 +26,14 @@ type NATSConfig struct {
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:"kyma"`
 
 	// JetStream-specific configs
-	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
-	EnableNewCRDVersion bool `envconfig:"ENABLE_NEWCRD_VERSION" default:"false"`
+	JSStreamName        string `envconfig:"JS_STREAM_NAME" default:"kyma"`
+	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEWCRD_VERSION" default:"false"`
 }
 
 // ToConfig converts to a default BEB BEBConfig
-func (c *NATSConfig) ToConfig() *BEBConfig {
-	cfg := &BEBConfig{
-		BEBNamespace:    c.LegacyNamespace,
+func (c *NATSConfig) ToConfig() *EventMeshConfig {
+	cfg := &EventMeshConfig{
+		Namespace:       c.LegacyNamespace,
 		EventTypePrefix: c.EventTypePrefix,
 	}
 	return cfg

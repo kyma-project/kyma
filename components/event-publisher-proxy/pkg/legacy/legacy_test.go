@@ -24,9 +24,9 @@ const (
 	eventTypeMultiSegmentCombined = "Segment1Segment2Segment3Segment4.Segment5"
 )
 
-// TestTransformLegacyRequestsToCE ensures that TransformLegacyRequestsToCE transforms a http request containing
-// a legacy request to a valid cloud event by creating mock http requests
-func TestTransformLegacyRequestsToCE(t *testing.T) {
+// TestTransformLegacyRequestsToTransitionEvent ensures that TransformLegacyRequestsToCE transforms a http request containing
+// a legacy request to a valid cloud event by creating mock http requests.
+func TestTransformLegacyRequestsToTransitionEvent(t *testing.T) {
 	testCases := []struct {
 		name string
 		// the event type has the structure
