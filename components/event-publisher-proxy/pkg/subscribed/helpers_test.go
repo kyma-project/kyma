@@ -1,6 +1,7 @@
 package subscribed
 
 import (
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"reflect"
 	"testing"
 
@@ -9,72 +10,89 @@ import (
 
 func TestFilterEventTypeVersions(t *testing.T) {
 	testCases := []struct {
-		name            string
-		appName         string
-		eventTypePrefix string
-		bebNs           string
-		eventSource     string
-		eventTypes      []string
-		expectedEvents  []Event
+		name           string
+		appName        string
+		subscription   *eventingv1alpha2.Subscription
+		expectedEvents []Event
 	}{
 		{
-			name:            "should return no events when nil eventTypes are provided",
-			appName:         "fooapp",
-			eventTypePrefix: "foo.prefix",
-			bebNs:           "foo.bebns",
-			eventTypes:      nil,
-			expectedEvents:  make([]Event, 0),
+			name:           "should return no events when there is no subscription",
+			appName:        "fooapp",
+			subscription:   &eventingv1alpha2.Subscription{},
+			expectedEvents: make([]Event, 0),
 		}, {
-			name:            "should return a slice of events when eventTypes are provided",
-			appName:         "foovarkes",
-			eventTypePrefix: "foo.prefix.custom",
-			bebNs:           "/default/foo.kyma/kt1",
-			eventSource:     "/default/foo.kyma/kt1",
-			eventTypes:      []string{"foo.prefix.custom.foovarkes.order.created.v1"},
-			expectedEvents: []Event{
-				NewEvent("order.created", "v1"),
-			},
-		}, {
-			name:            "should return multiple events in a slice when multiple eventTypes are provided",
-			appName:         "foovarkes",
-			eventTypePrefix: "foo.prefix.custom",
-			bebNs:           "/default/foo.kyma/kt1",
-			eventSource:     "/default/foo.kyma/kt1",
-			eventTypes: []string{
-				"foo.prefix.custom.foovarkes.order.created.v1",
-				"foo.prefix.custom.foovarkes.order.created.v1",
-				"foo.prefix.custom.foovarkes.order.created.v1",
+			name:    "should return a slice of events when eventTypes are provided",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source: "foovarkes",
+					Types: []string{
+						"order.created.v1",
+						"order.created.v2",
+					},
+				},
 			},
 			expectedEvents: []Event{
 				NewEvent("order.created", "v1"),
-				NewEvent("order.created", "v1"),
-				NewEvent("order.created", "v1"),
+				NewEvent("order.created", "v2"),
 			},
 		}, {
-			name:            "should return no events when eventTypes sources(bebNamespace) don't match",
-			appName:         "foovarkes",
-			eventTypePrefix: "foo.prefix.custom",
-			bebNs:           "foo-dont-match",
-			eventSource:     "/default/foo.kyma/kt1",
-			eventTypes: []string{
-				"foo.prefix.custom.foovarkes.order.created.v1",
-				"foo.prefix.custom.foovarkes.order.created.v1",
-				"foo.prefix.custom.foovarkes.order.created.v1",
+			name:    "should return no event if app name is different than subscription source",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source: "diff-source",
+					Types: []string{
+						"order.created.v1",
+						"order.created.v2",
+					},
+				},
 			},
 			expectedEvents: []Event{},
 		}, {
-			name:            "should return 2 out 3 events in a slice when eventTypes with different eventTypePrefix are provided",
-			appName:         "foovarkes",
-			eventTypePrefix: "foo.prefix.custom",
-			bebNs:           "/default/foo.kyma/kt1",
-			eventSource:     "/default/foo.kyma/kt1",
-			eventTypes: []string{
-				"foo.prefix.custom.foovarkes.order.created.v1",
-				"foo.prefixdifferent.custom.foovarkes.order.created.v1",
-				"foo.prefix.custom.foovarkes.order.created.v1",
+			name:    "should return event types w/o prefix for exact external event types",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source:       "/default/sap.kyma/tunas-develop",
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
+					Types: []string{
+						"foo.prefix.custom.foovarkes.order.created.v1",
+						"foo.prefix.custom.foovarkes.order.created.v2",
+					},
+				},
 			},
 			expectedEvents: []Event{
 				NewEvent("order.created", "v1"),
+				NewEvent("order.created", "v2"),
+			},
+		}, {
+			name:    "should return no event if app name is not part of external event types",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source:       "/default/sap.kyma/tunas-develop",
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
+					Types: []string{
+						"foo.prefix.custom.difffoovarkes.order.created.v1",
+						"foo.prefix.custom.difffoovarkes.order.created.v2",
+					},
+				},
+			},
+			expectedEvents: []Event{},
+		}, {
+			name:    "should return event even if app name appears two times in the external event type",
+			appName: "foovarkes",
+			subscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Source:       "/default/sap.kyma/tunas-develop",
+					TypeMatching: eventingv1alpha2.TypeMatchingExact,
+					Types: []string{
+						"foo.foovarkes.custom.foovarkes.order.created.v1",
+					},
+				},
+			},
+			expectedEvents: []Event{
 				NewEvent("order.created", "v1"),
 			},
 		},
@@ -85,7 +103,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotEvents := FilterEventTypeVersions(tc.eventTypePrefix, tc.bebNs, tc.appName, tc.eventSource, tc.eventTypes)
+			gotEvents := FilterEventTypeVersions(tc.appName, tc.subscription)
 			if !reflect.DeepEqual(tc.expectedEvents, gotEvents) {
 				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.expectedEvents, gotEvents)
 			}

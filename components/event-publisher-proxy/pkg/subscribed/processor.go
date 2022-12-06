@@ -46,7 +46,7 @@ func (p Processor) extractEventsFromSubscriptions(
 			}
 			if sub.Spec.Types != nil {
 				// TODO: has only v1alpha1 CRD spec which is sub.Spec.Filter
-				eventsForSub := FilterEventTypeVersions(p.Prefix, p.Namespace, appName, sub.Spec.Source, sub.Spec.Types)
+				eventsForSub := FilterEventTypeVersions(appName, sub)
 				eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
 			}
 		} else {

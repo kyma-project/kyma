@@ -3,7 +3,6 @@ package subscribed
 import (
 	"fmt"
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
-	"regexp"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
@@ -92,41 +91,42 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 }
 
 // FilterEventTypeVersions returns a slice of Events:
-// 1. if the eventType matches the format: <eventTypePrefix><appName>.<event-name>.<version>
-// E.g. sap.kyma.custom.varkes.order.created.v0
-// 2. if the eventSource matches BEBNamespace name
-func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, eventSource string, eventTypes []string) []Event {
+// 1. if the eventType matches the format for standard type matching: <event-name>.<version>
+// E.g. order.created.v0
+// 2. if the eventType matches the format for exact type matching: <eventTypePrefix><appName>.<event-name>.<version>
+// E.g. sap.external.custom.exampleapp.order.created.v0
+func FilterEventTypeVersions(appName string, subscription *eventingv1alpha2.Subscription) []Event {
 	events := make([]Event, 0)
-	var eventTypeAppNamePrefix string
-	if len(strings.TrimSpace(eventTypePrefix)) == 0 {
-		eventTypeAppNamePrefix = strings.ToLower(fmt.Sprintf("%s", appName))
-	} else {
-		eventTypeAppNamePrefix = strings.ToLower(fmt.Sprintf("%s.%s", eventTypePrefix, appName))
-	}
-	// regular expression to extract order.created.v1 from sap.kyma.custom.myapp.order.created.v1
-	reStr := fmt.Sprintf("^%s.(.*)$", eventTypeAppNamePrefix)
-	re := regexp.MustCompile(reStr)
-
-	for _, eventType := range eventTypes {
-		// filter by event-source if exists
-		if len(strings.TrimSpace(eventSource)) > 0 && !strings.EqualFold(eventSource, bebNs) {
-			continue
-		}
-		match := re.FindStringSubmatch(eventType)
-		// when there is a match
-		if len(match) > 0 {
-			eventTypeVersion := match[1]
-			lastDotIndex := strings.LastIndex(eventTypeVersion, ".")
-			eventType := eventTypeVersion[:lastDotIndex]
-			eventVersion := eventTypeVersion[lastDotIndex+1:]
-			event := Event{
-				Name:    eventType,
-				Version: eventVersion,
+	for _, eventType := range subscription.Spec.Types {
+		if subscription.Spec.TypeMatching == eventingv1alpha2.TypeMatchingExact {
+			// in case of type matching exact, we have app name as a part of event type
+			appNameWithDots := "." + appName + "."
+			if strings.Contains(eventType, appNameWithDots) {
+				eventTypeVersionArr := strings.Split(eventType, appNameWithDots)
+				eventTypeVersion := eventTypeVersionArr[len(eventTypeVersionArr)-1]
+				event := buildEvent(eventTypeVersion)
+				events = append(events, event)
 			}
-			events = append(events, event)
+		} else {
+			// in case of type matching standard, the source must be app name
+			if appName == subscription.Spec.Source {
+				event := buildEvent(eventType)
+				events = append(events, event)
+			}
 		}
 	}
 	return events
+}
+
+// it receives event and type version, e.g. order.created.v1 and returns {Name: order.created, Version: v1}
+func buildEvent(eventTypeAndVersion string) Event {
+	lastDotIndex := strings.LastIndex(eventTypeAndVersion, ".")
+	eventName := eventTypeAndVersion[:lastDotIndex]
+	eventVersion := eventTypeAndVersion[lastDotIndex+1:]
+	return Event{
+		Name:    eventName,
+		Version: eventVersion,
+	}
 }
 
 // FilterEventTypeVersionsV1alpha1 returns a slice of Events for v1alpha1 version of Subscription resource:
