@@ -2,10 +2,12 @@ package compass_runtime_agent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	k8sErr "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/tests/components/application-connector/test/compass-runtime-agent/testkit/executor"
@@ -89,10 +91,15 @@ func (cs *CompassRuntimeAgentSuite) removeApplicationAndWaitForSync(appReader Ap
 	verify := func() bool {
 		_, err := appReader.Get(context.Background(), compassAppName, v1.GetOptions{})
 		if err != nil {
-			t.Log(fmt.Sprintf("Failed to get app: %v", err))
+			var statusErr *k8sErr.StatusError
+			if errors.As(err, &statusErr) && statusErr.Status().Reason == v1.StatusReasonNotFound {
+				t.Logf("App not found after removing (this is ok): %v", err)
+				return true
+			}
+			t.Logf("Failed to get app after removing (this is bad): %v", err)
 		}
 
-		return err != nil
+		return false
 	}
 
 	return executor.ExecuteAndWaitForCondition{
