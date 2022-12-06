@@ -1297,7 +1297,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		runtimeImageOverride := "any-custom-image"
-		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", "dupa", 1, 2)
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", "initial-custom-image", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
@@ -1334,6 +1334,63 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		function = &serverlessv1alpha2.Function{}
 		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
 		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
+	})
+	t.Run("should reconcile function with SecretMounts", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		someSecretMount := serverlessv1alpha2.SecretMount{
+			SecretName: "some-secret-name",
+			MountPath:  "/some/secret/mount/path",
+		}
+		inFunction := newFixFunction(testNamespace, "function-with-secret-mounts", 1, 2)
+		inFunction.Spec.SecretMounts = []serverlessv1alpha2.SecretMount{
+			someSecretMount,
+		}
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		function := &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.SecretMounts).To(gomega.HaveLen(1))
+		g.Expect(function.Spec.SecretMounts[0]).To(gomega.Equal(someSecretMount))
+
+		t.Log("should detect SecretMount change")
+
+		anotherSecretMount := serverlessv1alpha2.SecretMount{
+			SecretName: "another-secret-name",
+			MountPath:  "/another/secret/mount/path",
+		}
+		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		function.Spec.SecretMounts[0] = anotherSecretMount
+		g.Expect(resourceClient.Update(ctx, function)).To(gomega.Succeed())
+
+		result, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.SecretMounts).To(gomega.HaveLen(1))
+		g.Expect(function.Spec.SecretMounts[0]).To(gomega.Equal(anotherSecretMount))
+
+		t.Log("should detect SecretMount delete")
+
+		function.Spec.SecretMounts = []serverlessv1alpha2.SecretMount{}
+		g.Expect(resourceClient.Update(ctx, function)).To(gomega.Succeed())
+
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function = &serverlessv1alpha2.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.SecretMounts).To(gomega.HaveLen(0))
 	})
 }
 

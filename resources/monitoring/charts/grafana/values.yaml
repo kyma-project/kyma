@@ -363,8 +363,6 @@ admin:
 
 ## Extra environment variables that will be pass onto deployment pods
 env:
-  # https://grafana.com/docs/grafana/latest/installation/configuration/#paths
-  GF_PATHS_PROVISIONING: /etc/grafana/provisioning
   # https://grafana.com/docs/grafana/latest/installation/configuration/#users
   GF_USERS_AUTO_ASSIGN_ORG: "true"
   GF_USERS_AUTO_ASSIGN_ORG_ROLE: Editor

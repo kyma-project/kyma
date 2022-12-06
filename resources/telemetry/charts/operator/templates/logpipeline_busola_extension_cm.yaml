@@ -1,4 +1,3 @@
-{{ if .Values.dashboardExtension.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -339,7 +338,7 @@ data:
               "path": "custom",
               "widget": "CodeEditor",
               "advanced": true,
-              "inputInfo": "Custom output definition in fluent bit syntax (https://docs.fluentbit.io/manual/pipeline/outputs). Please note using custom option would put logpipeline in unsupported mode"
+              "inputInfo": "Note: If you use a custom output, you put the LogPipeline in unsupported mode (https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability/obsv-04-telemetry-in-kyma/#unsupported-mode)"
             },
             {
               "name": "HTTP",
@@ -521,4 +520,3 @@ data:
         "metadata.creationTimestamp": "Created at"
       }
     }
-{{ end }}

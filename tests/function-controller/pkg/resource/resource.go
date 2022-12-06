@@ -171,13 +171,12 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 	}
 
 	var result *unstructured.Unstructured
-	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		var errUpdate error
-		result, errUpdate = r.ResCli.Update(context.Background(), unstructuredObj, metav1.UpdateOptions{})
-		return errUpdate
-	}, r.log)
+
+	result, err = r.ResCli.Update(context.Background(), unstructuredObj, metav1.UpdateOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while updating resource %s '%s'", r.kind, unstructuredObj.GetName())
+		// upstream caller RetryOnConflict doesn't work with wrapped errors
+		// https://github.com/kubernetes/client-go/blob/9927afa2880713c4332723b7f0865adee5e63a7b/util/retry/util.go#L89-L93
+		return nil, err
 	}
 
 	namespace := "-"

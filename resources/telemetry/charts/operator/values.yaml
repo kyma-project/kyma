@@ -55,6 +55,16 @@ resources:
     cpu: 5m
     memory: 20Mi
 
+initContainers:
+  webhookInit:
+    resources:
+        limits:
+          cpu: 100m
+          memory: 64Mi
+        requests:
+          cpu: 5m
+          memory: 20Mi
+
 terminationGracePeriodSeconds: 10
 
 extraLabels:
@@ -66,11 +76,17 @@ service:
   portName: http-metrics
 
 webhook:
+  name: validation.webhook.telemetry.kyma-project.io
   timeout: 15
   service:
+    portName: https-webhook
     port: 443
     protocol: TCP
     targetPort: 9443
+
+certificateVolumeMount:
+  name: telemetry-webhook-cert-dir
+  mountPath: /var/run/telemetry-webhook
 
 serviceMonitor:
   endpoints:
@@ -114,5 +130,11 @@ tolerations: []
 
 affinity: {}
 
-dashboardExtension:
-  enabled: false
+traceCollector:
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 150m
+      memory: 256Mi

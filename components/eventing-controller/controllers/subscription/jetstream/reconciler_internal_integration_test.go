@@ -765,9 +765,10 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		EventTypePrefix:         eventTypePrefix,
 		JSStreamName:            reconcilertesting.JSStreamName,
 		JSStreamStorageType:     "memory",
-		JSStreamMaxBytes:        -1,
+		JSStreamMaxBytes:        "-1",
 		JSStreamMaxMessages:     -1,
 		JSStreamRetentionPolicy: "interest",
+		JSStreamDiscardPolicy:   "new",
 	}
 
 	// prepare application-lister
@@ -779,9 +780,9 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
-
-	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
+
+	jetStreamHandler := backendjetstream.NewJetStream(envConf, metricsCollector, cleaner, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()
 	recorder := k8sManager.GetEventRecorderFor("eventing-controller-nats")

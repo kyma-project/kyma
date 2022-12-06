@@ -41,9 +41,6 @@ const (
 				id
 		name
 		description
-		spec {data
-		format
-		type}
 		targetURL
 		group
 		version {value
@@ -61,30 +58,12 @@ const (
 			id
 			name
 			description
-			group 
-			spec {data
-		type
-		format}
+			group
 			version {value
 		deprecated
 		deprecatedSince
 		forRemoval}
 		
-	}
-	pageInfo {startCursor
-		endCursor
-		hasNextPage}
-	totalCount
-	}
-		documents {data {
-		
-		id
-		title
-		displayName
-		description
-		format
-		kind
-		data
 	}
 	pageInfo {startCursor
 		endCursor

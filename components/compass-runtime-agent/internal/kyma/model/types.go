@@ -2,34 +2,7 @@ package model
 
 type Labels map[string]interface{}
 
-type SpecFormat string
-
-const (
-	SpecFormatYAML SpecFormat = "YAML"
-	SpecFormatJSON SpecFormat = "JSON"
-	SpecFormatXML  SpecFormat = "XML"
-)
-
-type EventAPISpecType string
-
-const (
-	EventAPISpecTypeAsyncAPI EventAPISpecType = "ASYNC_API"
-)
-
-type APISpecType string
-
-const (
-	APISpecTypeOdata   APISpecType = "ODATA"
-	APISpecTypeOpenAPI APISpecType = "OPEN_API"
-)
-
-type DocumentFormat string
-
-const (
-	DocumentFormatMarkdown DocumentFormat = "MARKDOWN"
-)
-
-// Application contains all associated APIs, EventAPIs and Documents
+// Application contains all associated APIs, and EventAPIs
 type Application struct {
 	ID                  string
 	Name                string
@@ -47,52 +20,23 @@ type APIBundle struct {
 	InstanceAuthRequestInputSchema *string
 	APIDefinitions                 []APIDefinition
 	EventDefinitions               []EventAPIDefinition
-	Documents                      []Document
 	DefaultInstanceAuth            *Auth
 }
 
-// APIDefinition contains API data such as URL, credentials and spec
+// APIDefinition contains API data such as URL, and credentials
 type APIDefinition struct {
 	ID          string
 	Name        string
 	Description string
 	TargetUrl   string
-	APISpec     *APISpec
 	Credentials *Credentials
 }
 
-// EventAPIDefinition contains Event API details such
+// EventAPIDefinition contains Event API details
 type EventAPIDefinition struct {
-	ID           string
-	Name         string
-	Description  string
-	EventAPISpec *EventAPISpec
-}
-
-// Document contains data of document stored in the Rafter
-type Document struct {
-	ID            string
-	ApplicationID string
-	Title         string
-	DisplayName   string
-	Description   string
-	Format        DocumentFormat
-	Kind          *string
-	Data          []byte
-}
-
-// APISpec contains API spec BLOB and its type
-type APISpec struct {
-	Data   []byte
-	Type   APISpecType
-	Format SpecFormat
-}
-
-// EventAPISpec contains event API spec BLOB and its type
-type EventAPISpec struct {
-	Data   []byte
-	Type   EventAPISpecType
-	Format SpecFormat
+	ID          string
+	Name        string
+	Description string
 }
 
 // Credentials contains OAuth or BasicAuth configuration along with optional CSRF data.

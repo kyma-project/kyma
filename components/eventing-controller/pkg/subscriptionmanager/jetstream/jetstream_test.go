@@ -91,6 +91,7 @@ func getNATSConf(natsURL string) env.NatsConfig {
 		JSStreamName:            controllertesting.EventTypePrefix,
 		JSStreamStorageType:     backendjetstream.StorageTypeMemory,
 		JSStreamRetentionPolicy: backendjetstream.RetentionPolicyInterest,
+		JSStreamDiscardPolicy:   backendjetstream.DiscardPolicyNew,
 	}
 }
 
@@ -175,8 +176,11 @@ func setUpTestEnvironment(t *testing.T) *TestEnvironment {
 	// init the metrics collector
 	metricsCollector := metrics.NewCollector()
 
+	cleaner := backendnats.CreateEventTypeCleaner(controllertesting.EventTypePrefix,
+		controllertesting.ApplicationNameNotClean, defaultLogger)
+
 	// Create an instance of the JetStream Backend
-	jsBackend := backendjetstream.NewJetStream(envConf, metricsCollector, defaultLogger)
+	jsBackend := backendjetstream.NewJetStream(envConf, metricsCollector, cleaner, defaultLogger)
 
 	// Initialize JetStream Backend
 	err = jsBackend.Initialize(nil)

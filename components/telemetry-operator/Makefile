@@ -76,7 +76,10 @@ test-local: manifests-local generate-local fmt-local vet-local envtest
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-lint: ## Run various linters
+lint-manifests-local: controller-gen-local
+	./hack/lint-manifests.sh $(PROJECT_DIR) $(CONTROLLER_GEN)
+
+lint-local: lint-manifests-local
 	../../hack/verify-lint.sh .
 
 tls.key:
@@ -110,7 +113,7 @@ uninstall-crds-local: manifests-local ## Uninstall CRDs from the K8s cluster spe
 ##@ Build Dependencies
 
 ## Location to install dependencies to
-LOCALBIN ?= $(shell pwd)/bin
+LOCALBIN ?= $(shell pwd)/bin/$(OS)
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 

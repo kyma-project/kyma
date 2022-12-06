@@ -323,6 +323,14 @@ spec:
     name: v1alpha2
     schema:
       openAPIV3Schema:
+        description: A simple code snippet that you can run without provisioning or
+          managing servers. It implements the exact business logic you define. A Function
+          is based on the Function custom resource (CR) and can be written in either
+          Node.js or Python. A Function can perform a business logic of its own. You
+          can also bind it to an instance of a service and configure it to be triggered
+          whenever it receives a particular event type from the service or a call
+          is made to the service's API. Functions are executed only if they are triggered
+          by an event or an API call.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -339,19 +347,10 @@ spec:
           spec:
             description: FunctionSpec defines the desired state of Function
             properties:
-              customRuntimeConfiguration:
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
               env:
-                description: Env defines an array of key value pairs need to be used
-                  as env variable for a function
+                description: Env specifies an array of key-value pairs to be used
+                  as environment variables for the Function. You can define values
+                  as static strings or reference values from ConfigMaps or Secrets.
                 items:
                   description: EnvVar represents an environment variable present in
                     a Container.
@@ -456,17 +455,29 @@ spec:
                   type: object
                 type: array
               replicas:
+                description: Replicas defines the exact number of Function's Pods
+                  to run at a time. If ScaleConfig is configured, or if Function is
+                  targeted by an external scaler, then the Replicas field is used
+                  by the relevant HorizontalPodAutoscaler to control the number of
+                  active replicas.
                 format: int32
                 type: integer
               resourceConfiguration:
+                description: ResourceConfiguration specifies resources requested by
+                  Function and build Job.
                 properties:
                   build:
+                    description: Build specifies resources requested by the build
+                      Job's Pod.
                     properties:
                       profile:
+                        description: Profile defines name of predefined set of values
+                          of resource. Can't be used at the same time with Resources.
                         type: string
                       resources:
-                        description: ResourceRequirements describes the compute resource
-                          requirements.
+                        description: Resources defines amount of resources available
+                          for the Pod to use. Can't be used at the same time with
+                          Profile.
                         properties:
                           limits:
                             additionalProperties:
@@ -494,12 +505,17 @@ spec:
                         type: object
                     type: object
                   function:
+                    description: Function specifies resources requested by the Function's
+                      Pod.
                     properties:
                       profile:
+                        description: Profile defines name of predefined set of values
+                          of resource. Can't be used at the same time with Resources.
                         type: string
                       resources:
-                        description: ResourceRequirements describes the compute resource
-                          requirements.
+                        description: Resources defines amount of resources available
+                          for the Pod to use. Can't be used at the same time with
+                          Profile.
                         properties:
                           limits:
                             additionalProperties:
@@ -528,17 +544,28 @@ spec:
                     type: object
                 type: object
               runtime:
-                description: Runtime specifies the name of the Function's runtime.
+                description: Runtime specifies the runtime of the Function. The available
+                  values are `nodejs14`, `nodejs16`, and `python39`.
                 type: string
               runtimeImageOverride:
+                description: RuntimeImageOverride specifies the runtimes image which
+                  must be used instead of the default one.
                 type: string
               scaleConfig:
+                description: ScaleConfig defines minimum and maximum number of Function's
+                  Pods to run at a time. When it is configured, a HorizontalPodAutoscaler
+                  will be deployed and will control the Replicas field to scale Function
+                  based on the CPU utilisation.
                 properties:
                   maxReplicas:
+                    description: MaxReplicas defines the maximum number of Function's
+                      Pods to run at a time.
                     format: int32
                     minimum: 1
                     type: integer
                   minReplicas:
+                    description: MinReplicas defines the minimum number of Function's
+                      Pods to run at a time.
                     format: int32
                     minimum: 1
                     type: integer
@@ -546,20 +573,48 @@ spec:
                 - maxReplicas
                 - minReplicas
                 type: object
+              secretMounts:
+                description: SecretMounts specifies Secrets to mount into the Function's
+                  container filesystem.
+                items:
+                  properties:
+                    mountPath:
+                      description: MountPath specifies path within the container at
+                        which the Secret should be mounted.
+                      type: string
+                    secretName:
+                      description: SecretName specifies name of the Secret in the
+                        Function's Namespace to use.
+                      type: string
+                  required:
+                  - mountPath
+                  - secretName
+                  type: object
+                type: array
               source:
+                description: Source contains the Function's specification.
                 properties:
                   gitRepository:
+                    description: GitRepository defines Function as git-sourced. Can't
+                      be used at the same time with Inline.
                     properties:
                       auth:
-                        description: Auth is the optional definition of authentication
-                          that should be used for repository operations
+                        description: Auth specifies that you must authenticate to
+                          the Git repository. Required for SSH.
                         properties:
                           secretName:
-                            description: SecretName is the name of Kubernetes Secret
-                              containing credentials used for authentication
+                            description: SecretName specifies the name of the Secret
+                              with credentials used by the Function Controller to
+                              authenticate to the Git repository in order to fetch
+                              the Function's source code and dependencies. This Secret
+                              must be stored in the same Namespace as the Function
+                              CR.
                             type: string
                           type:
-                            description: Type is the type of authentication
+                            description: RepositoryAuthType defines if you must authenticate
+                              to the repository with a password or token (`basic`),
+                              or an SSH key (`key`). For SSH, this parameter must
+                              be set to `key`.
                             enum:
                             - basic
                             - key
@@ -569,20 +624,35 @@ spec:
                         - type
                         type: object
                       baseDir:
+                        description: BaseDir specifies the relative path to the Git
+                          directory that contains the source code from which the Function
+                          is built.
                         type: string
                       reference:
+                        description: Reference specifies either the branch name, tag
+                          or the commit revision from which the Function Controller
+                          automatically fetches the changes in the Function's code
+                          and dependencies.
                         type: string
                       url:
-                        description: URL is the address of GIT repository
+                        description: URL provides the address to the Git repository
+                          with the Function's code and dependencies. Depending on
+                          whether the repository is public or private and what authentication
+                          method is used to access it, the URL must start with the
+                          `http(s)`, `git`, or `ssh` prefix.
                         type: string
                     required:
                     - url
                     type: object
                   inline:
+                    description: Inline defines Function as the inline Function. Can't
+                      be used at the same time with GitRepository.
                     properties:
                       dependencies:
+                        description: Dependencies specifies the Function's dependencies.
                         type: string
                       source:
+                        description: Source provides the Function's full source code.
                         type: string
                     required:
                     - source
@@ -607,6 +677,8 @@ spec:
             description: FunctionStatus defines the observed state of Function
             properties:
               baseDir:
+                description: BaseDir specifies the relative path to the Git directory
+                  that contains the source code from which the Function is built.
                 type: string
               commit:
                 type: string
@@ -632,6 +704,9 @@ spec:
               podSelector:
                 type: string
               reference:
+                description: Reference specifies either the branch name, tag or the
+                  commit revision from which the Function Controller automatically
+                  fetches the changes in the Function's code and dependencies.
                 type: string
               replicas:
                 format: int32

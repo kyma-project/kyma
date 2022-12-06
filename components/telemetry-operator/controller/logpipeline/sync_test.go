@@ -28,7 +28,7 @@ func TestSyncSectionsConfigMap(t *testing.T) {
 		}).Build()
 
 	t.Run("should add section during first sync", func(t *testing.T) {
-		sut := newSyncer(fakeClient, Config{SectionsConfigMap: sectionsCmName})
+		sut := syncer{fakeClient, Config{SectionsConfigMap: sectionsCmName}}
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -42,9 +42,8 @@ alias foo`,
 				},
 			},
 		}
-		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -54,7 +53,7 @@ alias foo`,
 	})
 
 	t.Run("should update section during subsequent sync", func(t *testing.T) {
-		sut := newSyncer(fakeClient, Config{SectionsConfigMap: sectionsCmName})
+		sut := syncer{fakeClient, Config{SectionsConfigMap: sectionsCmName}}
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -69,15 +68,14 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		pipeline.Spec.Output.Custom = `
 name  null
 alias bar`
-		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err = sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -88,7 +86,7 @@ alias bar`
 	})
 
 	t.Run("should remove section if marked for deletion", func(t *testing.T) {
-		sut := newSyncer(fakeClient, Config{SectionsConfigMap: sectionsCmName})
+		sut := syncer{fakeClient, Config{SectionsConfigMap: sectionsCmName}}
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -103,14 +101,13 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err := sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		now := metav1.Now()
 		pipeline.SetDeletionTimestamp(&now)
-		changed, err := sut.syncSectionsConfigMap(context.Background(), pipeline)
+		err = sut.syncSectionsConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var sectionsCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), sectionsCmName, &sectionsCm)
@@ -122,13 +119,13 @@ alias foo`,
 		badReqClient := &mocks.Client{}
 		badReqErr := errors.NewBadRequest("")
 		badReqClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-		sut := newSyncer(badReqClient, testConfig)
+		badReqClient.On("List", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
+		sut := syncer{badReqClient, testConfig}
 
 		lp := telemetryv1alpha1.LogPipeline{}
-		changed, err := sut.syncFilesConfigMap(context.Background(), &lp)
+		err := sut.syncFilesConfigMap(context.Background(), &lp)
 
 		require.Error(t, err)
-		require.Equal(t, changed, false)
 	})
 }
 
@@ -143,7 +140,7 @@ func TestSyncFilesConfigMap(t *testing.T) {
 		}).Build()
 
 	t.Run("should add files during first sync", func(t *testing.T) {
-		sut := newSyncer(fakeClient, Config{FilesConfigMap: filesCmName})
+		sut := syncer{fakeClient, Config{FilesConfigMap: filesCmName}}
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -161,9 +158,8 @@ alias foo`,
 				},
 			},
 		}
-		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -175,7 +171,7 @@ alias foo`,
 	})
 
 	t.Run("should update files during subsequent sync", func(t *testing.T) {
-		sut := newSyncer(fakeClient, Config{FilesConfigMap: filesCmName})
+		sut := syncer{fakeClient, Config{FilesConfigMap: filesCmName}}
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -193,13 +189,12 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		pipeline.Spec.Files[0].Content = "here comes some more lua code"
-		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err = sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -209,7 +204,7 @@ alias foo`,
 	})
 
 	t.Run("should remove files if marked for deletion", func(t *testing.T) {
-		sut := newSyncer(fakeClient, Config{FilesConfigMap: filesCmName})
+		sut := syncer{fakeClient, Config{FilesConfigMap: filesCmName}}
 
 		pipeline := &telemetryv1alpha1.LogPipeline{
 			ObjectMeta: metav1.ObjectMeta{
@@ -227,14 +222,13 @@ alias foo`,
 			},
 		}
 
-		_, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err := sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
 
 		now := metav1.Now()
 		pipeline.SetDeletionTimestamp(&now)
-		changed, err := sut.syncFilesConfigMap(context.Background(), pipeline)
+		err = sut.syncFilesConfigMap(context.Background(), pipeline)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var filesCm corev1.ConfigMap
 		err = fakeClient.Get(context.Background(), filesCmName, &filesCm)
@@ -246,13 +240,13 @@ alias foo`,
 		badReqClient := &mocks.Client{}
 		badReqErr := errors.NewBadRequest("")
 		badReqClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-		sut := newSyncer(badReqClient, testConfig)
+		badReqClient.On("List", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
+		sut := syncer{badReqClient, testConfig}
 
 		lp := telemetryv1alpha1.LogPipeline{}
-		changed, err := sut.syncFilesConfigMap(context.Background(), &lp)
+		err := sut.syncFilesConfigMap(context.Background(), &lp)
 
 		require.Error(t, err)
-		require.Equal(t, changed, false)
 	})
 }
 
@@ -293,10 +287,9 @@ func TestSyncReferencedSecrets(t *testing.T) {
 		fakeClient := fake.NewClientBuilder().WithObjects(&credsSecret).Build()
 
 		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
-		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
-		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		sut := syncer{fakeClient, Config{EnvSecret: envSecretName}}
+		err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var envSecret corev1.Secret
 		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
@@ -316,17 +309,16 @@ func TestSyncReferencedSecrets(t *testing.T) {
 		fakeClient := fake.NewClientBuilder().WithObjects(&passwordSecret).Build()
 
 		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
-		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
-		_, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		sut := syncer{fakeClient, Config{EnvSecret: envSecretName}}
+		err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
 
 		passwordSecret.Data["password"] = []byte("qwertz")
 		err = fakeClient.Update(context.Background(), &passwordSecret)
 		require.NoError(t, err)
 
-		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err = sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var envSecret corev1.Secret
 		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
@@ -346,15 +338,14 @@ func TestSyncReferencedSecrets(t *testing.T) {
 		fakeClient := fake.NewClientBuilder().WithObjects(&passwordSecret).Build()
 
 		envSecretName := types.NamespacedName{Name: "env", Namespace: "kyma-system"}
-		sut := newSyncer(fakeClient, Config{EnvSecret: envSecretName})
-		_, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		sut := syncer{fakeClient, Config{EnvSecret: envSecretName}}
+		err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
 
 		now := metav1.Now()
 		allPipelines.Items[0].SetDeletionTimestamp(&now)
-		changed, err := sut.syncReferencedSecrets(context.Background(), &allPipelines)
+		err = sut.syncReferencedSecrets(context.Background(), &allPipelines)
 		require.NoError(t, err)
-		require.True(t, changed)
 
 		var envSecret corev1.Secret
 		err = fakeClient.Get(context.Background(), envSecretName, &envSecret)
