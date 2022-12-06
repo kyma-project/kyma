@@ -2,8 +2,10 @@ package registry
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/client"
@@ -16,19 +18,23 @@ import (
 )
 
 func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
-	URL, err := url.Parse(opts.URL)
+
+	// url.Parse() doesn't correctly parse URLs with ports and no scheme! So we need to add
+	// the proper scheme before parsing the url
+	strURL := opts.URL
+	if !strings.HasPrefix("http", strURL) {
+		strURL = fmt.Sprintf("http://%s", strURL)
+	}
+	u, err := url.Parse(strURL)
 	if err != nil {
 		return nil, err
 	}
-	// the registry client will panic if it's not set
-	if URL.Scheme == "" {
-		URL.Scheme = "http"
-	}
+
 	return &registryClient{
 		ctx:      ctx,
 		userName: opts.Username,
 		password: opts.Password,
-		url:      URL,
+		url:      u,
 	}, nil
 }
 
