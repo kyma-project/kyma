@@ -10,6 +10,9 @@ require (
 	sigs.k8s.io/controller-runtime v0.13.1
 )
 
+// Fix CVE-2022-32149
+replace golang.org/x/text => golang.org/x/text v0.3.8
+
 require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
