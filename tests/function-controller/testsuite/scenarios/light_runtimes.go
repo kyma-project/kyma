@@ -26,7 +26,7 @@ const scenarioKey = "scenario"
 
 func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	now := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%d-%d-%d", "test-serverless-simple", now.Hour(), now.Minute(), now.Second())
+	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-serverless-simple", now.Hour(), now.Minute(), now.Second())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
