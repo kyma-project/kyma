@@ -24,6 +24,7 @@ type TransitionEvent struct {
 
 type Opt func(*TransitionEvent) error
 
+// NewTransitionEvent will take options to create a TransitionEvent.
 func NewTransitionEvent(options ...Opt) (*TransitionEvent, error) {
 	event := TransitionEvent{
 		Event: ce.Event{},
@@ -31,13 +32,16 @@ func NewTransitionEvent(options ...Opt) (*TransitionEvent, error) {
 
 	// Apply all options.
 	for _, o := range options {
-		o(&event)
+		if err := o(&event); err != nil {
+			return nil, err
+		}
 	}
 
-	// If the type segments are not set yet, try to extract them from the
-	// underlying cloud event.
+	// If the type segments are not set yet try to extract them from the
+	// underlying cloud event. If any segment expect prefix is empty this will
+	// fail with an error.
 	if event.areAllTypeSegmentsEmpty() {
-		err := event.setTypeSegmentViaCloudEvent()
+		err := event.setTypeSegmentsViaCloudEvent()
 		if err != nil {
 			return nil, err
 		}
@@ -48,6 +52,8 @@ func NewTransitionEvent(options ...Opt) (*TransitionEvent, error) {
 	return &event, nil
 }
 
+// Prefix only returns the prefix of the event's type that usually has the
+// structure 'prefix.appName.eventName.version'.
 func (e *TransitionEvent) Prefix() string {
 	return e.prefix
 }
@@ -55,6 +61,10 @@ func (e *TransitionEvent) Prefix() string {
 func (e *TransitionEvent) SetPrefix(p string) {
 	e.prefix = p
 	e.updateType()
+}
+
+func (e *TransitionEvent) IsPrefixEmpty() bool {
+	return e.prefix != ""
 }
 
 func (e *TransitionEvent) AppName() string {
@@ -110,7 +120,9 @@ func concatSegmentsWithDot(segments ...string) string {
 	return s
 }
 
-func (e *TransitionEvent) setTypeSegmentViaCloudEvent() error {
+// setTypeSegmentsViaCloudEvent will set the four type segments by trying to
+// extract them from the underlying cloud event.
+func (e *TransitionEvent) setTypeSegmentsViaCloudEvent() error {
 	prefix, appName, eventName, version, err := extractSegmentsFromEvent(&e.Event)
 	if err != nil {
 		return err
@@ -124,14 +136,19 @@ func (e *TransitionEvent) setTypeSegmentViaCloudEvent() error {
 	return nil
 }
 
+// areAllTypeSegmentsEmpty checks if all type segments are empty and returns a
+// corresponding bool.
 func (e *TransitionEvent) areAllTypeSegmentsEmpty() bool {
 	return e.prefix == "" && e.appName == "" && e.eventName == "" && e.version == ""
 }
 
+// extractSegmentsFromEvent tries extract the event type's segments from a given
+// cloud event. It will return an error if not at least version, event name and
+// app name can be extracted while the prefix stays optional.
 func extractSegmentsFromEvent(event *ce.Event) (string, string, string, string, error) {
 	segments := strings.Split(event.Type(), ".")
 	length := len(segments)
-	if len(segments) < 4 || checkForEmptySegments(segments) {
+	if len(segments) < 4 || isAnySegmentEmpty(segments) {
 		return "", "", "", "", errors.New("invalid format")
 	}
 
@@ -143,7 +160,8 @@ func extractSegmentsFromEvent(event *ce.Event) (string, string, string, string, 
 	return prefix, appName, eventName, version, nil
 }
 
-func checkForEmptySegments(segments []string) bool {
+// isAnySegmentEmpty will return false if any segment is empty.
+func isAnySegmentEmpty(segments []string) bool {
 	for _, segment := range segments {
 		if segment == "" {
 			return true
