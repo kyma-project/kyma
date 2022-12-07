@@ -21,7 +21,7 @@ func WithCloudEvent(cloudEvent *ce.Event) func(*TransitionEvent) error {
 
 // WithCleaner will use the given cleaner to clean up the cloud event's type.
 // Remember to put this option after other options that set the type in the
-// first place or this will not have any effect.
+// first place.
 func WithCleaner(cleaner et.Cleaner) func(*TransitionEvent) error {
 	return func(t *TransitionEvent) error {
 		cleanType, err := cleaner.Clean(t.Event.Type())
@@ -32,7 +32,7 @@ func WithCleaner(cleaner et.Cleaner) func(*TransitionEvent) error {
 	}
 }
 
-// WithPrefix will set the prefix segment of the event's type.
+// WithPrefix will set the prefix segment.
 func WithPrefix(prefix string) func(*TransitionEvent) error {
 	return func(t *TransitionEvent) error {
 		t.prefix = prefix
@@ -40,7 +40,7 @@ func WithPrefix(prefix string) func(*TransitionEvent) error {
 	}
 }
 
-// WithAppName will set the app name segment of the event's type.
+// WithAppName will set the appName segment.
 func WithAppName(appName string) func(*TransitionEvent) error {
 	return func(t *TransitionEvent) error {
 		t.appName = appName
@@ -48,7 +48,7 @@ func WithAppName(appName string) func(*TransitionEvent) error {
 	}
 }
 
-// WithEventName will set the event name segment of the event's type.
+// WithEventName will set the eventName segment.
 func WithEventName(eventName string) func(*TransitionEvent) error {
 	return func(t *TransitionEvent) error {
 		t.eventName = eventName
@@ -56,7 +56,7 @@ func WithEventName(eventName string) func(*TransitionEvent) error {
 	}
 }
 
-// WithVersion will set the version segment of the event's type.
+// WithVersion will set the version segment.
 func WithVersion(version string) func(*TransitionEvent) error {
 	return func(t *TransitionEvent) error {
 		t.version = version
@@ -65,23 +65,23 @@ func WithVersion(version string) func(*TransitionEvent) error {
 }
 
 // WithCloudEventFromRequest will try to extract a cloud event from a request
-// and use it as the TransferEvents event.
+// and use it as the TransferEvent's underlying event.
 func WithCloudEventFromRequest(request *http.Request) func(*TransitionEvent) error {
 	return func(transitionEvent *TransitionEvent) error {
 		message := cehttp.NewMessageFromHttpRequest(request)
 		defer func() { _ = message.Finish(nil) }()
 
-		event, err := binding.ToEvent(context.Background(), message)
+		cloudEvent, err := binding.ToEvent(context.Background(), message)
 		if err != nil {
 			return err
 		}
 
-		err = event.Validate()
+		err = cloudEvent.Validate()
 		if err != nil {
 			return err
 		}
 
-		transitionEvent.Event = *event
+		transitionEvent.Event = *cloudEvent
 		return nil
 	}
 }
