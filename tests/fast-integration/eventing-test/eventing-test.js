@@ -46,6 +46,8 @@ const {
   mockNamespace,
   isSKR,
   testCompassFlow,
+  testSubscriptionV1Alpha2,
+  subCRDVersion,
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
@@ -101,8 +103,17 @@ describe('Eventing tests', function() {
       await checkFunctionResponse(testNamespace, mockNamespace);
     });
 
-    it('In-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
+    it('In-cluster v1alpha1 subscription events should be delivered ' +
+        '(legacy events, structured and binary cloud events)', async function() {
       await checkInClusterEventDelivery(testNamespace);
+    });
+
+    it('In-cluster v1alpha2 subscription events should be delivered ' +
+        '(legacy events, structured and binary cloud events)', async function() {
+      if (!testSubscriptionV1Alpha2) {
+        this.skip();
+      }
+      await checkInClusterEventDelivery(testNamespace, true);
     });
 
     if (isSKR && testCompassFlow) {
@@ -261,7 +272,7 @@ describe('Eventing tests', function() {
   afterEach(async function() {
     // if the test is failed, then printing some debug logs
     if (this.currentTest.state === 'failed' && isDebugEnabled()) {
-      await printAllSubscriptions(testNamespace);
+      await printAllSubscriptions(testNamespace, subCRDVersion);
       await printEventingControllerLogs();
       await printEventingPublisherProxyLogs();
     }
@@ -305,7 +316,7 @@ describe('Eventing tests', function() {
     it('Wait until subscriptions are ready', async function() {
       await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
       if (isDebugEnabled()) {
-        await printAllSubscriptions(testNamespace);
+        await printAllSubscriptions(testNamespace, subCRDVersion);
       }
     });
     // Running Eventing end-to-end tests
