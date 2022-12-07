@@ -1,3 +1,5 @@
+#This is address of registry visible from k3s cluster.
+#On linux you can get this address by executing `hostname -I`
 REGISTRY_ADR=192.168.122.1:5000
 JVM_VERSION=17
 RUNTIME_IMAGE=java-runtime:${JVM_VERSION}
