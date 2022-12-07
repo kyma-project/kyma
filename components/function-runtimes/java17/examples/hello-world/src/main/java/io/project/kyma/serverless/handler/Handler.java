@@ -9,7 +9,7 @@ import io.project.kyma.serverless.sdk.Function;
 
 public class Handler implements Function {
 
-    public static final String RETURN_STRING = "Hello World from java11 runtime with serverless SDK!";
+    public static final String RETURN_STRING = "Hello World from java17 runtime with serverless SDK!";
 
     @Override
     public Response call(CloudEvent event, Context context) {

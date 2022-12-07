@@ -1,4 +1,4 @@
-FROM maven:3.6-jdk-11
+FROM maven:3.8-openjdk-17-slim
 WORKDIR /build
 
 #Compile and install SDK locally

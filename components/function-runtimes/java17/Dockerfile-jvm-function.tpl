@@ -12,7 +12,7 @@ RUN mvn dependency:go-offline -f handler-pom.xml
 
 RUN mvn clean && mvn package -f pom.xml
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 COPY --from=builder /build/target/kyma-java-runtime-0.0.1.jar /app.jar
 
