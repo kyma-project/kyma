@@ -23,8 +23,8 @@ import (
 )
 
 func ConversionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
-	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-serverless-conversion-v1alpha1", currentDate.Hour(), currentDate.Minute(), currentDate.Second())
+	now := time.Now()
+	cfg.Namespace = fmt.Sprintf("%s-%02dh%02dm%02ds", "test-serverless-conversion-v1alpha1", now.Hour(), now.Minute(), now.Second())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
