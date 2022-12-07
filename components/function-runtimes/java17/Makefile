@@ -15,7 +15,7 @@ clean:
 #------------------------------------------------------JVM---------------------------------------------------------#
 .PHONY: build-runtime
 build-runtime: install-sdk
-	docker build -t ${RUNTIME_IMAGE} -f  Dockerfile-jvm${JVM_VERSION}-runtime .
+	docker build -t ${RUNTIME_IMAGE} -f  Dockerfile-jvm-runtime .
 
 .PHONY: build-runtime
 push-runtime-k3d:
