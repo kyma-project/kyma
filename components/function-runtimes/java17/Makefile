@@ -1,5 +1,8 @@
 #This is address of registry visible from k3s cluster.
 #On linux you can get this address by executing `hostname -I`
+
+#TODO: /etc/hosts and coredns patch, fetch it as optional
+#REGISTRY_ADR=k3d-kyma-registry.localhost:5000
 REGISTRY_ADR=192.168.122.1:5000
 JVM_VERSION=17
 RUNTIME_IMAGE=java-runtime:${JVM_VERSION}
@@ -31,9 +34,16 @@ generate-configmaps:
 	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${IMAGE_HELM_TPL}  python3 ./resources/generate-dockerfile.py  | \
 	CONFIGMAP=resources/java${JVM_VERSION}-jvm-alpha.yaml RUNTIME=java${JVM_VERSION}-jvm-alpha python3 resources/generate-cm.py > ./resources/java${JVM_VERSION}-jvm-alpha.yaml
 
+generate-configmaps-local-image:
+	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${RUNTIME_IMAGE_REMOTE}  python3 ./resources/generate-dockerfile.py  | \
+	CONFIGMAP=resources/java${JVM_VERSION}-jvm-alpha.yaml RUNTIME=java${JVM_VERSION}-jvm-alpha python3 resources/generate-cm.py > ./resources/java${JVM_VERSION}-jvm-alpha-local.yaml
+
 
 apply-java-runtime:
 	kubectl replace -f ./resources/java17-jvm-alpha.yaml
+
+apply-java-runtime-local:
+	kubectl replace -f ./resources/java17-jvm-alpha-local.yaml
 
 #-------------------------------------------------Run Example function locally-----------------------------------------#
 #Example function
