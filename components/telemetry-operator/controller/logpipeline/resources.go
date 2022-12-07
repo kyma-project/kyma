@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/pointer"
 )
 
 type resourceConfig struct {
@@ -55,7 +56,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 					ServiceAccountName: config.BaseName,
 					PriorityClassName:  "kyma-system-priority",
 					SecurityContext: &corev1.PodSecurityContext{
-						RunAsNonRoot:   setFalse(),
+						RunAsNonRoot:   pointer.Bool(false),
 						SeccompProfile: &corev1.SeccompProfile{Type: "RuntimeDefault"},
 					},
 					InitContainers: []corev1.Container{
@@ -67,9 +68,9 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 								"cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf",
 							},
 							SecurityContext: &corev1.SecurityContext{
-								AllowPrivilegeEscalation: setFalse(),
-								Privileged:               setFalse(),
-								ReadOnlyRootFilesystem:   setTrue(),
+								AllowPrivilegeEscalation: pointer.Bool(false),
+								Privileged:               pointer.Bool(false),
+								ReadOnlyRootFilesystem:   pointer.Bool(true),
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{"ALL"},
 								},
@@ -86,13 +87,13 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 						{
 							Name: "fluent-bit",
 							SecurityContext: &corev1.SecurityContext{
-								AllowPrivilegeEscalation: setFalse(),
+								AllowPrivilegeEscalation: pointer.Bool(false),
 								Capabilities: &corev1.Capabilities{
 									Add:  []corev1.Capability{"FOWNER"},
 									Drop: []corev1.Capability{"ALL"},
 								},
-								Privileged:             setFalse(),
-								ReadOnlyRootFilesystem: setTrue(),
+								Privileged:             pointer.Bool(false),
+								ReadOnlyRootFilesystem: pointer.Bool(true),
 							},
 							Image:           "eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.9-cf0a130c",
 							ImagePullPolicy: "IfNotPresent",
@@ -100,7 +101,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 								{
 									SecretRef: &corev1.SecretEnvSource{
 										LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-env", config.BaseName)},
-										Optional:             setTrue(),
+										Optional:             pointer.Bool(true),
 									},
 								},
 							},
@@ -162,9 +163,9 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 								},
 							},
 							SecurityContext: &corev1.SecurityContext{
-								AllowPrivilegeEscalation: setFalse(),
-								Privileged:               setFalse(),
-								ReadOnlyRootFilesystem:   setTrue(),
+								AllowPrivilegeEscalation: pointer.Bool(false),
+								Privileged:               pointer.Bool(false),
+								ReadOnlyRootFilesystem:   pointer.Bool(true),
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{"ALL"},
 								},
@@ -214,7 +215,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-sections", config.BaseName)},
-									Optional:             setTrue(),
+									Optional:             pointer.Bool(true),
 								},
 							},
 						},
@@ -223,7 +224,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-parsers", config.BaseName)},
-									Optional:             setTrue(),
+									Optional:             pointer.Bool(true),
 								},
 							},
 						},
@@ -232,7 +233,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-files", config.BaseName)},
-									Optional:             setTrue(),
+									Optional:             pointer.Bool(true),
 								},
 							},
 						},
@@ -411,14 +412,4 @@ func labels(config resourceConfig) map[string]string {
 	return map[string]string{
 		"app.kubernetes.io/name": config.BaseName,
 	}
-}
-
-func setTrue() *bool {
-	b := true
-	return &b
-}
-
-func setFalse() *bool {
-	b := false
-	return &b
 }
