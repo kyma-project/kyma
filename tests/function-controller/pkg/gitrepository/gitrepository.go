@@ -1,8 +1,6 @@
 package gitrepository
 
 import (
-	"time"
-
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
@@ -18,22 +16,18 @@ import (
 )
 
 type GitRepository struct {
-	resCli      *resource.Resource
-	name        string
-	namespace   string
-	waitTimeout time.Duration
-	log         *logrus.Entry
-	verbose     bool
+	resCli    *resource.Resource
+	name      string
+	namespace string
+	log       *logrus.Entry
 }
 
 func New(name string, c shared.Container) *GitRepository {
 	return &GitRepository{
-		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("gitrepositories"), c.Namespace, c.Log, c.Verbose),
-		name:        name,
-		namespace:   c.Namespace,
-		waitTimeout: c.WaitTimeout,
-		log:         c.Log,
-		verbose:     c.Verbose,
+		resCli:    resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("gitrepositories"), c.Namespace, c.Log, c.Verbose),
+		name:      name,
+		namespace: c.Namespace,
+		log:       c.Log,
 	}
 }
 

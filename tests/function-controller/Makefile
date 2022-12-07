@@ -15,12 +15,8 @@ test-local:
 	GO111MODULE=on go test -count=1 -v ./pkg/...
 
 resolve-local:
-	GO111MODULE=on go mod download
-	GO111MODULE=on go mod vendor
+	go mod download
+	go mod vendor
 
-ensure-local:
-	@echo "Go modules present in component - omitting."
-
-dep-status-local:
-	@echo "Go modules present in component - omitting."
-
+compile:
+	CGO_ENABLED=0 go build -o main.test ./cmd/main.go

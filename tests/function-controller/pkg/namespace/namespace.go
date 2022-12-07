@@ -27,11 +27,10 @@ type Namespace struct {
 	coreCli typedcorev1.CoreV1Interface
 	name    string
 	log     *logrus.Entry
-	verbose bool
 }
 
 func New(coreCli typedcorev1.CoreV1Interface, container shared.Container) *Namespace {
-	return &Namespace{coreCli: coreCli, name: container.Namespace, log: container.Log, verbose: container.Verbose}
+	return &Namespace{coreCli: coreCli, name: container.Namespace, log: container.Log}
 }
 
 func (n Namespace) GetName() string {
@@ -89,17 +88,11 @@ func (n *Namespace) Create() (string, error) {
 	}
 
 	n.log.Infof("Create: namespace %s", n.name)
-	if n.verbose {
-		n.log.Infof("%+v", ns)
-	}
 	return n.name, nil
 }
 
 func (n *Namespace) Delete() error {
 	err := retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
-		if n.verbose {
-			n.log.Infof("DELETE: namespace: %s", n.name)
-		}
 		return n.coreCli.Namespaces().Delete(context.Background(), n.name, metav1.DeleteOptions{})
 	}, n.log)
 	if err != nil {

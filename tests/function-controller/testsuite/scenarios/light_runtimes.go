@@ -41,6 +41,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
+	java17JvmAlphaLogger := logf.WithField(scenarioKey, "java17-jvm-alpha")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -114,6 +115,8 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.UpdateFunction(nodejs16Logger, nodejs16Cfg.Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Cfg.InClusterURL, poll.WithLogger(nodejs16Logger), "Hello from updated nodejs16"),
 			),
+			step.NewSerialTestRunner(java17JvmAlphaLogger, "Java17-JVM-alpha"),//teststep.CreateFunction(java17JvmAlphaLogger, nil, "Create Java17-JVM-Alpha function", nil),
+
 		),
 	), nil
 }
