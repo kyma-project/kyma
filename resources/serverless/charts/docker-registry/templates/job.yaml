@@ -13,8 +13,7 @@ spec:
           restartPolicy: Never
           containers:
           - name: function-image-gc
-            #image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
-            image: melsayed/registry-gc:latest
+            image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_registry_gc) }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             {{- if .Values.containers.securityContext }}
             securityContext:

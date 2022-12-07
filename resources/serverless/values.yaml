@@ -104,9 +104,9 @@ global:
       name: "registry"
       version: "2.8.1-68053f3c"
       directory: "tpi"
-    registry-gc:
-      name: "registry"
-      version: "2.7.1-4ced14d5"
+    function_registry_gc:
+      name: "function-registry-gc"
+      version: "PR-16262"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
