@@ -110,7 +110,6 @@ func (f *Function) Update(spec serverlessv1alpha2.FunctionSpec) error {
 		return err
 	}, f.log)
 	return errors.Wrapf(err, "while updating %s", f.toString())
-
 }
 
 func (f *Function) Get() (*serverlessv1alpha2.Function, error) {

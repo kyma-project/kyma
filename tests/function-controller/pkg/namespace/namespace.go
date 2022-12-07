@@ -2,6 +2,7 @@ package namespace
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"time"
 
 	"github.com/pkg/errors"
@@ -13,7 +14,6 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	k8sretry "k8s.io/client-go/util/retry"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
@@ -31,10 +31,6 @@ type Namespace struct {
 
 func New(coreCli typedcorev1.CoreV1Interface, container shared.Container) *Namespace {
 	return &Namespace{coreCli: coreCli, name: container.Namespace, log: container.Log}
-}
-
-func (n Namespace) GetName() string {
-	return n.name
 }
 
 func (n Namespace) LogResource() error {
