@@ -19,3 +19,4 @@ components:
   - name: "cluster-users"
   - name: "serverless"
   - name: "application-connector"
+    namespace: "kyma-integration"
