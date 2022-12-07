@@ -26,6 +26,7 @@ const tracer = setupTracer([serviceName, serviceNamespace].join('.'));
 
 //require express must be called AFTER tracer was setup!!!!!!
 const express = require("express");
+const { type } = require('os');
 const app = express();
 
 
@@ -57,14 +58,10 @@ if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
 }
 
 
-const bodParserOptions = {
-    type: req => !req.is('multipart/*'),
-    limit: `${bodySizeLimit}mb`,
-};
-app.use(bodyParser.raw(bodParserOptions));
-app.use(bodyParser.json({ limit: `${bodySizeLimit}mb` }));
+app.use(bodyParser.json({ type: ['application/json', 'application/cloudevents+json'], limit: `${bodySizeLimit}mb`, strict: false  }))
+app.use(bodyParser.text({ type: ['text/*'], limit: `${bodySizeLimit}mb`  }))
 app.use(bodyParser.urlencoded({ limit: `${bodySizeLimit}mb`, extended: true }));
-
+app.use(bodyParser.raw({limit: `${bodySizeLimit}mb`, type: () => true}))
 
 app.use(helper.handleTimeOut);
 
