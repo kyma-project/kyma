@@ -25,7 +25,7 @@ push-runtime-k3d:
 #------------------------------------------------------K8s-Resources---------------------------------------------------#
 #Generate configmaps which can be used to move to serverless resources
 
-IMAGE_HELM_TPL='{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_java${JVM_VERSION}-jvm-alpha) }}'
+IMAGE_HELM_TPL='{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_java${JVM_VERSION}_jvm_alpha) }}'
 .PHONY: generate-configmaps
 generate-configmaps:
 	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${IMAGE_HELM_TPL}  python3 ./resources/generate-dockerfile.py  | \
