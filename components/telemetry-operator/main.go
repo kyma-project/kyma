@@ -188,7 +188,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() {
-		if err := ctrLogger.WithContext().Sync(); err != nil {
+		if err = ctrLogger.WithContext().Sync(); err != nil {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
