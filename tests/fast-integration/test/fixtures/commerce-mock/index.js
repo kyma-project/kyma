@@ -623,7 +623,7 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, testV1Alpha2CRD=false) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, testSubscriptionV1Alpha2=false) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
@@ -643,7 +643,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await waitForSubscription('order-received', targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
 
-  if (testV1Alpha2CRD) {
+  if (testSubscriptionV1Alpha2) {
     debug('creating v1alpha2 subscription CR');
     const orderCompletedV1Alpha2Sub = eventingSubscriptionV1Alpha2(
         'order.completed.v1alpha2',
@@ -740,10 +740,10 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
   await waitForSubscription('order-created', targetNamespace);
 }
 
-async function checkInClusterEventDelivery(targetNamespace, testV1Alpha2CRD=false) {
-  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', testV1Alpha2CRD);
-  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', testV1Alpha2CRD);
-  await checkInClusterLegacyEvent(targetNamespace, testV1Alpha2CRD);
+async function checkInClusterEventDelivery(targetNamespace, testSubscriptionV1Alpha2=false) {
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured', testSubscriptionV1Alpha2);
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary', testSubscriptionV1Alpha2);
+  await checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2);
 }
 
 // send event using function query parameter send=true
@@ -885,9 +885,9 @@ async function getVirtualServiceHost(targetNamespace, funcName) {
   return vs.spec.hosts[0];
 }
 
-async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testV1Alpha2CRD=false) {
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, testSubscriptionV1Alpha2=false) {
   const eventId = getRandomEventId(encoding);
-  const eventType = testV1Alpha2CRD? 'order.completed.v1alpha2': '';
+  const eventType = testSubscriptionV1Alpha2? 'order.completed.v1alpha2': '';
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
   if (isDebugEnabled()) {
@@ -898,7 +898,7 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding, test
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId, eventType);
 }
 
-async function checkInClusterLegacyEvent(targetNamespace, testV1Alpha2CRD=false) {
+async function checkInClusterLegacyEvent(targetNamespace, testSubscriptionV1Alpha2=false) {
   const eventId = getRandomEventId('legacy');
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
@@ -907,8 +907,8 @@ async function checkInClusterLegacyEvent(targetNamespace, testV1Alpha2CRD=false)
   }
 
   const eventData = {'id': eventId, 'legacyOrder': '987'};
-  const eventType = testV1Alpha2CRD? 'order.completed.v1alpha2': '';
-  if (testV1Alpha2CRD) {
+  const eventType = testSubscriptionV1Alpha2? 'order.completed.v1alpha2': '';
+  if (testSubscriptionV1Alpha2) {
     eventData.save = true;
     eventData.type = eventType;
   }

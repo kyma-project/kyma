@@ -46,7 +46,7 @@ const {
   mockNamespace,
   isSKR,
   testCompassFlow,
-  testV1Alpha2CRD,
+  testSubscriptionV1Alpha2,
   subCRDVersion,
   getNatsPods,
   getStreamConfigForJetStream,
@@ -110,7 +110,7 @@ describe('Eventing tests', function() {
 
     it('In-cluster v1alpha2 subscription events should be delivered ' +
         '(legacy events, structured and binary cloud events)', async function() {
-      if (!testV1Alpha2CRD) {
+      if (!testSubscriptionV1Alpha2) {
         this.skip();
       }
       await checkInClusterEventDelivery(testNamespace, true);

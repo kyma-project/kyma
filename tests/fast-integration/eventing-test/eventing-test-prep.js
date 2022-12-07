@@ -12,7 +12,7 @@ const {
   kymaVersion,
   isSKR,
   testCompassFlow,
-  testV1Alpha2CRD,
+  testSubscriptionV1Alpha2,
   subCRDVersion,
   skrInstanceId,
   backendK8sSecretName,
@@ -65,7 +65,7 @@ describe('Eventing tests preparation', function() {
     debug(`SKR instance Id: ${skrInstanceId}`);
     debug(`SKR shoot name: ${shootName}`);
     debug(`Test Compass flow enabled: ${testCompassFlow}`);
-    debug(`Test Subscription v1alpha2 CRD enabled: ${testV1Alpha2CRD}`);
+    debug(`Test Subscription v1alpha2 CRD enabled: ${testSubscriptionV1Alpha2}`);
     debug(`Test Subscription CRD version: ${subCRDVersion}`);
   });
 
@@ -158,9 +158,9 @@ describe('Eventing tests preparation', function() {
   // prepareAssetsWithoutCompassFlow - Sets up test assets without compass flow
   async function prepareAssetsWithoutCompassFlow() {
     debug('Preparing CommerceMock/In-cluster test fixtures on Kyma');
-    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testV1Alpha2CRD).catch((err) => {
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testSubscriptionV1Alpha2).catch((err) => {
       error(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testV1Alpha2CRD);
+      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, testSubscriptionV1Alpha2);
     });
   }
 
