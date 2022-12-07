@@ -153,7 +153,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	wantDataContentType := internal.ContentTypeApplicationJSON
 
 	legacyTransformer := NewTransformer(wantBEBNamespace, givenEventTypePrefix, nil)
-	gotEvent, err := legacyTransformer.convertPublishRequestToTransitionEvent(givenApplicationName, givenPublishReqParams)
+	gotEvent, err := legacyTransformer.convertPublishRequestToEvent(givenApplicationName, givenPublishReqParams)
 	require.NoError(t, err)
 	assert.Equal(t, wantBEBNamespace, gotEvent.Context.GetSource())
 	assert.Equal(t, wantEventID, gotEvent.Context.GetID())

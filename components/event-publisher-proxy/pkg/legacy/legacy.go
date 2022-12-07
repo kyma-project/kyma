@@ -14,9 +14,9 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
-	te "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/transitionevent"
 )
 
 var (
@@ -125,7 +125,7 @@ func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.Respo
 		appName = application.GetCleanName(appName)
 	}
 
-	transitionEvent, err := t.convertPublishRequestToTransitionEvent(appName, parameters)
+	transitionEvent, err := t.convertPublishRequestToEvent(appName, parameters)
 	if err != nil {
 		response := ErrorResponse(http.StatusInternalServerError, err)
 		writeJSONResponse(writer, response)
@@ -158,9 +158,9 @@ func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseW
 	writeJSONResponse(writer, response)
 }
 
-// convertPublishRequestToCloudEvent converts the given publish request
-// to a TransitionEvent (which itself is a wrapper around a CloudEvent).
-func (t *Transformer) convertPublishRequestToTransitionEvent(appName string, publishRequest *apiv1.PublishEventParametersV1) (*te.TransitionEvent, error) {
+// convertPublishRequestToCloudEvent converts the given publish request to a Event (which itself is a wrapper
+// around a CloudEvent).
+func (t *Transformer) convertPublishRequestToEvent(appName string, publishRequest *apiv1.PublishEventParametersV1) (*builder.Event, error) {
 	if !application.IsCleanName(appName) {
 		return nil, errors.New("application name should be cleaned from none-alphanumeric characters")
 	}
@@ -189,15 +189,15 @@ func (t *Transformer) convertPublishRequestToTransitionEvent(appName string, pub
 	eventName := combineEventNameSegments(removeNonAlphanumeric(publishRequest.PublishrequestV1.EventType))
 	prefix := removeNonAlphanumeric(t.eventTypePrefix)
 	version := publishRequest.PublishrequestV1.EventTypeVersion
-	transitionEvent, err := te.NewTransitionEvent(
-		te.WithCloudEvent(&cloudEvent),
-		te.WithPrefix(prefix),
-		te.WithAppName(appName),
-		te.WithEventName(eventName),
-		te.WithVersion(version),
+	transitionEvent, err := builder.NewEvent(
+		builder.WithCloudEvent(&cloudEvent),
+		builder.WithPrefix(prefix),
+		builder.WithAppName(appName),
+		builder.WithEventName(eventName),
+		builder.WithVersion(version),
 	)
 	if err != nil {
-		// todo
+		return nil, err  
 	}
 
 	// Set values to the TransitionEvent.
