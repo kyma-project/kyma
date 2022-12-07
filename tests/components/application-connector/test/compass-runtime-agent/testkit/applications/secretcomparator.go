@@ -3,6 +3,8 @@ package applications
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -10,12 +12,11 @@ import (
 
 //go:generate mockery --name=Comparator
 type Comparator interface {
-	Compare(expected, actual string) error
+	Compare(test *testing.T, expected, actual string) error
 }
 
-func NewSecretComparator(assertions *require.Assertions, coreClientSet kubernetes.Interface, expectedNamespace, actualNamespace string) (Comparator, error) {
+func NewSecretComparator(coreClientSet kubernetes.Interface, expectedNamespace, actualNamespace string) (Comparator, error) {
 	return &secretComparator{
-		assertions:        assertions,
 		coreClientSet:     coreClientSet,
 		expectedNamespace: expectedNamespace,
 		actualNamespace:   actualNamespace,
@@ -23,13 +24,13 @@ func NewSecretComparator(assertions *require.Assertions, coreClientSet kubernete
 }
 
 type secretComparator struct {
-	assertions        *require.Assertions
 	coreClientSet     kubernetes.Interface
 	expectedNamespace string
 	actualNamespace   string
 }
 
-func (c secretComparator) Compare(expected, actual string) error {
+func (c secretComparator) Compare(t *testing.T, expected, actual string) error {
+	t.Helper()
 
 	if actual == "" && expected == "" {
 		return nil
@@ -51,7 +52,8 @@ func (c secretComparator) Compare(expected, actual string) error {
 	if err != nil {
 		return err
 	}
-	c.assertions.Equal(expectedSecret.Data, actualSecret.Data)
+
+	require.Equal(t, expectedSecret.Data, actualSecret.Data)
 
 	return nil
 }

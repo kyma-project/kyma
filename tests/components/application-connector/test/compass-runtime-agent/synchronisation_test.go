@@ -37,13 +37,13 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 
 	// Compare Application created by Compass Runtime Agent with expected result
 
-	cs.Run("Is app correct", func() {
-		err = cs.appComparator.Compare(expectedAppName, synchronizedCompassAppName)
+	cs.Run("Compass Runtime Agent should create Application", func() {
+		err = cs.appComparator.Compare(cs.T(), expectedAppName, synchronizedCompassAppName)
 		cs.Assert().NoError(err)
 	})
 
 	// Clean up
-	cs.Run("App gets removed", func() {
+	cs.Run("Compass Runtime Agent should remove Application", func() {
 		err = cs.removeApplicationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
 		cs.NoError(err)
 	})
@@ -93,10 +93,10 @@ func (cs *CompassRuntimeAgentSuite) removeApplicationAndWaitForSync(appReader Ap
 		if err != nil {
 			var statusErr *k8sErr.StatusError
 			if errors.As(err, &statusErr) && statusErr.Status().Reason == v1.StatusReasonNotFound {
-				t.Logf("App not found after removing (this is ok): %v", err)
+				t.Logf("Application was successfully removed by Compass Runtime Agent: %v", err)
 				return true
 			}
-			t.Logf("Failed to get app after removing (this is bad): %v", err)
+			t.Logf("Failed to check whether Application was removed by Compass Runtime Agent: %v", err)
 		}
 
 		return false

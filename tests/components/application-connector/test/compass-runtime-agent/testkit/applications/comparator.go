@@ -15,9 +15,8 @@ type ApplicationGetter interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
 }
 
-func NewComparator(t *testing.T, secretComparer Comparator, applicationGetter ApplicationGetter, expectedNamespace, actualNamespace string) (Comparator, error) {
+func NewComparator(secretComparer Comparator, applicationGetter ApplicationGetter, expectedNamespace, actualNamespace string) (Comparator, error) {
 	return &comparator{
-		assertions:        t,
 		secretComparer:    secretComparer,
 		applicationGetter: applicationGetter,
 		expectedNamespace: expectedNamespace,
@@ -26,15 +25,14 @@ func NewComparator(t *testing.T, secretComparer Comparator, applicationGetter Ap
 }
 
 type comparator struct {
-	assertions        *testing.T
 	secretComparer    Comparator
 	applicationGetter ApplicationGetter
 	expectedNamespace string
 	actualNamespace   string
 }
 
-func (c comparator) Compare(expected, actual string) error {
-	c.assertions.Helper()
+func (c comparator) Compare(t *testing.T, expected, actual string) error {
+	t.Helper()
 
 	if actual == "" || expected == "" {
 		return errors.New("empty actual or expected application name")
@@ -50,20 +48,22 @@ func (c comparator) Compare(expected, actual string) error {
 		return err
 	}
 
-	c.compareSpec(expectedApp, actualApp)
+	c.compareSpec(t, expectedApp, actualApp)
 	return nil
 }
 
-func (c comparator) compareSpec(expected, actual *v1alpha1.Application) {
-	c.assertions.Helper()
-	a := assert.New(c.assertions)
+func (c comparator) compareSpec(t *testing.T, expected, actual *v1alpha1.Application) {
+	t.Helper()
+	a := assert.New(t)
+
+	// a.True(false, "Just fail")
 
 	a.Equal(expected.Spec.Description, actual.Spec.Description, "Description is incorrect")
 	a.Equal(expected.Spec.SkipInstallation, actual.Spec.SkipInstallation, "SkipInstallation is incorrect")
 
-	c.compareServices(expected.Spec.Services, actual.Spec.Services)
+	c.compareServices(t, expected.Spec.Services, actual.Spec.Services)
 
-	a.NotNil(actual.Labels)
+	a.NotNil(actual.Spec.Labels)
 	a.Equal(actual.Name, actual.Spec.Labels["connected-app"])
 
 	a.Equal(expected.Spec.Tenant, actual.Spec.Tenant, "Tenant is incorrect")
@@ -76,9 +76,9 @@ func (c comparator) compareSpec(expected, actual *v1alpha1.Application) {
 	a.Equal(expected.Spec.SkipVerify, actual.Spec.SkipVerify, "SkipVerify is incorrect")
 }
 
-func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
-	c.assertions.Helper()
-	a := assert.New(c.assertions)
+func (c comparator) compareServices(t *testing.T, expected, actual []v1alpha1.Service) {
+	t.Helper()
+	a := assert.New(t)
 
 	a.Equal(len(expected), len(actual))
 
@@ -88,15 +88,15 @@ func (c comparator) compareServices(expected, actual []v1alpha1.Service) {
 		a.Equal(expected[i].DisplayName, actual[i].DisplayName)
 		a.Equal(expected[i].Description, actual[i].Description)
 
-		c.compareEntries(expected[i].Entries, actual[i].Entries)
+		c.compareEntries(t, expected[i].Entries, actual[i].Entries)
 
 		a.Equal(expected[i].AuthCreateParameterSchema, actual[i].AuthCreateParameterSchema)
 	}
 }
 
-func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
-	c.assertions.Helper()
-	a := assert.New(c.assertions)
+func (c comparator) compareEntries(t *testing.T, expected, actual []v1alpha1.Entry) {
+	t.Helper()
+	a := assert.New(t)
 
 	a.Equal(len(expected), len(actual))
 
@@ -106,7 +106,7 @@ func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
 		a.Equal(expected[i].SpecificationUrl, actual[i].SpecificationUrl)
 		a.Equal(expected[i].ApiType, actual[i].ApiType)
 
-		c.compareCredentials(expected[i].Credentials, actual[i].Credentials)
+		c.compareCredentials(t, expected[i].Credentials, actual[i].Credentials)
 
 		a.Equal(expected[i].RequestParametersSecretName, actual[i].RequestParametersSecretName)
 		a.Equal(expected[i].Name, actual[i].Name)
@@ -114,13 +114,13 @@ func (c comparator) compareEntries(expected, actual []v1alpha1.Entry) {
 	}
 }
 
-func (c comparator) compareCredentials(expected, actual v1alpha1.Credentials) {
-	c.assertions.Helper()
-	a := assert.New(c.assertions)
+func (c comparator) compareCredentials(t *testing.T, expected, actual v1alpha1.Credentials) {
+	t.Helper()
+	a := assert.New(t)
 
 	a.Equal(expected.Type, actual.Type)
 
-	err := c.secretComparer.Compare(expected.SecretName, actual.SecretName)
+	err := c.secretComparer.Compare(t, expected.SecretName, actual.SecretName)
 	a.NoError(err)
 
 	a.Equal(expected.AuthenticationUrl, actual.AuthenticationUrl)
