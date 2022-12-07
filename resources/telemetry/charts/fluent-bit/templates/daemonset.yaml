@@ -1,5 +1,4 @@
 {{- if not .Values.global.operatorManagedFluentBit }}
-{{- if .Values.networkPolicy.enabled }}
 {{- if eq .Values.kind "DaemonSet" }}
 apiVersion: apps/v1
 kind: DaemonSet
@@ -37,6 +36,5 @@ spec:
         {{- end }}
     spec:
       {{- include "fluent-bit.pod" . | nindent 6 }}
-{{- end }}
 {{- end }}
 {{- end }}
