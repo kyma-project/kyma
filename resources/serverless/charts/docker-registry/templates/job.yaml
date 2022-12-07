@@ -8,6 +8,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
         spec:
           serviceAccountName: {{ template "docker-registry.name" . }}
           restartPolicy: Never
