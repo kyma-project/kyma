@@ -1,7 +1,6 @@
 package jetstreamv2
 
 import (
-	"fmt"
 	"testing"
 
 	jetstreamv2mocks "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
@@ -120,7 +119,7 @@ func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T
 					jsSubKey: invalidSubscriber,
 				}
 				eventType := sub.Status.Types[0]
-				jsSubject := jsBackend.getJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
+				jsSubject := jsBackend.GetJetStreamSubject(sub.Spec.Source, eventType.CleanType, sub.Spec.TypeMatching)
 				// mock the expected calls
 				jsCtx.On("ConsumerInfo", jsBackend.Config.JSStreamName, jsSubKey.ConsumerName()).
 					Return(&nats.ConsumerInfo{Config: nats.ConsumerConfig{MaxAckPending: DefaultMaxInFlights}}, nil)
@@ -159,7 +158,7 @@ func Test_SyncConsumersAndSubscriptions_ForBindInvalidSubscriptions(t *testing.T
 
 			// setup the jetstreamv2mocks
 			eventType := subWithOneType.Status.Types[0]
-			jsSubject := js.getJetStreamSubject(subWithOneType.Spec.Source,
+			jsSubject := js.GetJetStreamSubject(subWithOneType.Spec.Source,
 				eventType.CleanType,
 				subWithOneType.Spec.TypeMatching,
 			)
@@ -224,7 +223,7 @@ func Test_SyncConsumersAndSubscriptions_ForSyncConsumerMaxInFlight(t *testing.T)
 				jsCtx: jsCtxMock,
 			}
 			sub := subtesting.NewSubscription("test", "test",
-				subtesting.WithMaxInFlightMessages(fmt.Sprint(tc.givenSubMaxInFlight)),
+				subtesting.WithMaxInFlight(tc.givenSubMaxInFlight),
 			)
 
 			// setup the jetstreamv2mocks
@@ -250,7 +249,7 @@ func Test_SyncConsumersAndSubscriptions_ForErrors(t *testing.T) {
 	subWithOneType := NewSubscriptionWithOneType()
 	js := &JetStream{cleaner: &cleaner.JetStreamCleaner{}}
 	eventType := subWithOneType.Status.Types[0]
-	jsSubject := js.getJetStreamSubject(subWithOneType.Spec.Source,
+	jsSubject := js.GetJetStreamSubject(subWithOneType.Spec.Source,
 		eventType.CleanType,
 		subWithOneType.Spec.TypeMatching,
 	)
@@ -383,7 +382,7 @@ func Test_DeleteSubscriptionFromJetStream(t *testing.T) {
 		cleaner: &cleaner.JetStreamCleaner{},
 	}
 	subWithOneType := NewSubscriptionWithOneType()
-	jsSubject := jsBackend.getJetStreamSubject(subWithOneType.Spec.Source,
+	jsSubject := jsBackend.GetJetStreamSubject(subWithOneType.Spec.Source,
 		subWithOneType.Status.Types[0].CleanType,
 		subWithOneType.Spec.TypeMatching,
 	)
