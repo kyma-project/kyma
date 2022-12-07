@@ -189,7 +189,16 @@ func (t *Transformer) convertPublishRequestToTransitionEvent(appName string, pub
 	eventName := combineEventNameSegments(removeNonAlphanumeric(publishRequest.PublishrequestV1.EventType))
 	prefix := removeNonAlphanumeric(t.eventTypePrefix)
 	version := publishRequest.PublishrequestV1.EventTypeVersion
-	transitionEvent := te.NewTransitionEventFromCloudEvent(cloudEvent, prefix, appName, eventName, version)
+	transitionEvent, err := te.NewTransitionEvent(
+		te.WithCloudEvent(&cloudEvent),
+		te.WithPrefix(prefix),
+		te.WithAppName(appName),
+		te.WithEventName(eventName),
+		te.WithVersion(version),
+	)
+	if err != nil {
+		// todo
+	}
 
 	// Set values to the TransitionEvent.
 	transitionEvent.SetSource(t.namespace)

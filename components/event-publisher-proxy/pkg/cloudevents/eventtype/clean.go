@@ -3,12 +3,10 @@ package eventtype
 import (
 	"regexp"
 
-	"golang.org/x/xerrors"
-
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
-
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"golang.org/x/xerrors"
 )
 
 var (

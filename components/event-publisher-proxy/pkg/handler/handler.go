@@ -132,7 +132,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	}
 	h.namedLogger().With().Debug(result)
 
-	// Change response as per old error codes
+	// Change response as per old error codes.
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), event, string(result.ResponseBody()))
 }
 
