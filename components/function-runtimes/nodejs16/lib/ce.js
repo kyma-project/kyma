@@ -25,14 +25,13 @@ function buildEvent(req, res, tracer) {
         emitCloudEvent: (type, source, data, optionalCloudEventAttributes) => emitCloudEvent(type, source, data, optionalCloudEventAttributes),
     };
 
-    let stringifiedReqestBody = req.body.toString(charset);
-    if (!req.is('multipart/*') && req.body.length > 0) {
-        if(isCloudEvent(req)) {
-            event = Object.assign(event,buildCloudEventAttributes(req, JSON.parse(stringifiedReqestBody)));    
-        } else if (isOfJsonContentType(req)) {
-            event = Object.assign(event,{'data':JSON.parse(stringifiedReqestBody)});
-        } else {
-            event = Object.assign(event,{'data':stringifiedReqestBody});
+    if(req.body){
+        if (!req.is('multipart/*')) {
+            if(isCloudEvent(req)) {
+                event = Object.assign(event,buildCloudEventAttributes(req));    
+            } else {
+                event = Object.assign(event,{'data':req.body});
+            }
         }
     }
     return event;
@@ -88,16 +87,13 @@ function isCloudEvent(req) {
     return req.is('application/cloudevents+json') || hasCeHeaders(req);
 }
 
-function isOfJsonContentType(req) {
-    return req.is('application/json');
-}
 
 function hasCeHeaders(req) {
     return req.get('ce-type') && req.get('ce-source');
 }
 
-function buildCloudEventAttributes(req, data) {
-    const receivedEvent = HTTP.toEvent({ headers: req.headers, body: data });  
+function buildCloudEventAttributes(req) {
+    const receivedEvent = HTTP.toEvent({ headers: req.headers, body: req.body });  
     return {
         'ce-type': receivedEvent.type,
         'ce-source': receivedEvent.source,

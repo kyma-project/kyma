@@ -26,6 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -54,21 +55,28 @@ type ServiceConfig struct {
 	OTLPServiceName string
 }
 
+//go:generate mockery --name DeploymentProber --filename deployment_prober.go
+type DeploymentProber interface {
+	IsReady(ctx context.Context, name types.NamespacedName) (bool, error)
+}
+
 type Reconciler struct {
 	client.Client
 	config Config
 	Scheme *runtime.Scheme
+	prober DeploymentProber
 }
 
-func NewReconciler(client client.Client, config Config, scheme *runtime.Scheme) *Reconciler {
+func NewReconciler(client client.Client, config Config, prober DeploymentProber, scheme *runtime.Scheme) *Reconciler {
 	var r Reconciler
 	r.Client = client
 	r.config = config
 	r.Scheme = scheme
+	r.prober = prober
 	return &r
 }
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (reconcileResult ctrl.Result, reconcileErr error) {
 	logger := logf.FromContext(ctx)
 
 	logger.V(1).Info("Reconciliation triggered")
@@ -83,6 +91,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
 	var err error
+
+	defer func() {
+		if statusErr := r.updateStatus(ctx, pipeline.Name); statusErr != nil {
+			if err != nil {
+				err = fmt.Errorf("failed while updating status: %v: %v", statusErr, err)
+			} else {
+				err = fmt.Errorf("failed to update status: %v", statusErr)
+			}
+		}
+	}()
 
 	var secretData map[string][]byte
 	if secretData, err = fetchSecretData(ctx, r, pipeline.Spec.Output.Otlp); err != nil {

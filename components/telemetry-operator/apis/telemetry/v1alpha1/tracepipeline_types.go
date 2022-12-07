@@ -56,14 +56,81 @@ func (b *BasicAuthOptions) IsDefined() bool {
 	return b.User.IsDefined() && b.Password.IsDefined()
 }
 
-// TracePipelineStatus defines the observed state of TracePipeline
-type TracePipelineStatus struct {
+type TracePipelineConditionType string
+
+// These are the valid statuses of LogPipeline.
+const (
+	TracePipelinePending TracePipelineConditionType = "Pending"
+	TracePipelineRunning TracePipelineConditionType = "Running"
+)
+
+const (
+	OpenTelemetryDNotReadyReason    = "OpenTelemetryDeploymentNotReady"
+	OpenTelemetryDReadyReason       = "OpenTelemetryDeploymentReady"
+	OTReferencedSecretMissingReason = "ReferencedSecretMissing"
+)
+
+// LogPipelineCondition contains details for the current condition of this LogPipeline
+type TracePipelineCondition struct {
+	LastTransitionTime metav1.Time                `json:"lastTransitionTime,omitempty"`
+	Reason             string                     `json:"reason,omitempty"`
+	Type               TracePipelineConditionType `json:"type,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:resource:scope=Cluster
-//+kubebuilder:subresource:status
+// TracePipelineStatus defines the observed state of TracePipeline
+type TracePipelineStatus struct {
+	Conditions []TracePipelineCondition `json:"conditions,omitempty"`
+}
 
+func NewTracePipelineCondition(reason string, condType TracePipelineConditionType) *TracePipelineCondition {
+	return &TracePipelineCondition{
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Type:               condType,
+	}
+}
+
+func (tps *TracePipelineStatus) GetCondition(condType TracePipelineConditionType) *TracePipelineCondition {
+	for cond := range tps.Conditions {
+		if tps.Conditions[cond].Type == condType {
+			return &tps.Conditions[cond]
+		}
+	}
+	return nil
+}
+
+func (tps *TracePipelineStatus) HasCondition(condition TracePipelineConditionType) bool {
+	return tps.GetCondition(condition) != nil
+}
+
+func (tps *TracePipelineStatus) SetCondition(cond TracePipelineCondition) {
+	currentCond := tps.GetCondition(cond.Type)
+	if currentCond != nil && currentCond.Reason == cond.Reason {
+		return
+	}
+	if currentCond != nil {
+		cond.LastTransitionTime = currentCond.LastTransitionTime
+	}
+	newConditions := filterCondition(tps.Conditions, cond.Type)
+	tps.Conditions = append(newConditions, cond)
+}
+
+func filterCondition(conditions []TracePipelineCondition, condType TracePipelineConditionType) []TracePipelineCondition {
+	var newConditions []TracePipelineCondition
+	for _, cond := range conditions {
+		if cond.Type == condType {
+			continue
+		}
+		newConditions = append(newConditions, cond)
+	}
+	return newConditions
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 // TracePipeline is the Schema for the tracepipelines API
 type TracePipeline struct {
 	metav1.TypeMeta   `json:",inline"`

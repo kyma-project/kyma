@@ -19,7 +19,6 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"os"
@@ -98,7 +97,7 @@ var (
 	maxLogPipelines            int
 )
 
-const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221125-9bbc6dff"
+const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221130-61707459"
 
 //nolint:gochecknoinits
 func init() {
@@ -283,19 +282,6 @@ func validateFlags() error {
 	if fluentBitStorageType != "filesystem" && fluentBitStorageType != "memory" {
 		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
-	if _, err := resource.ParseQuantity(traceCollectorCPULimit); err != nil {
-		return fmt.Errorf("--trace-collector-cpu-limit has to be a valid quantity: %v", err)
-	}
-	if _, err := resource.ParseQuantity(traceCollectorMemoryLimit); err != nil {
-		return fmt.Errorf("--trace-collector-memory-limit has to be a valid quantity: %v", err)
-	}
-	if _, err := resource.ParseQuantity(traceCollectorCPURequest); err != nil {
-		return fmt.Errorf("--trace-collector-cpu-request has to be a valid quantity: %v", err)
-	}
-	if _, err := resource.ParseQuantity(traceCollectorMemoryRequest); err != nil {
-		return fmt.Errorf("--trace-collector-memory-request has to be a valid quantity: %v", err)
-	}
-
 	return nil
 }
 
@@ -354,7 +340,7 @@ func createTracePipelineReconciler(client client.Client) *tracepipelinereconcile
 			OTLPServiceName: traceCollectorOTLPServiceName,
 		},
 	}
-	return tracepipelinereconciler.NewReconciler(client, config, scheme)
+	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, scheme)
 }
 
 func createDryRunConfig() dryrun.Config {

@@ -48,7 +48,7 @@ spec:
       hostPID: false # Optional. The default is false if the entry is not there.
       hostIPC: false # Optional. The default is false if the entry is not there.
       initContainers:
-        - name: init-registry-config
+        - name: generate-htpasswd
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
 {{- if .Values.initContainers.securityContext }}
           securityContext:
