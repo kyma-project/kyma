@@ -33,6 +33,9 @@ type Backend interface {
 
 	// DeleteInvalidConsumers deletes all JetStream consumers having no subscription types in subscription resources
 	DeleteInvalidConsumers(subscriptions []eventingv1alpha2.Subscription) error
+
+	// GetJetStreamContext returns the current JetStreamContext
+	GetJetStreamContext() nats.JetStreamContext
 }
 
 type JetStream struct {
@@ -51,6 +54,7 @@ type JetStream struct {
 }
 
 type Subscriber interface {
+	SubscriptionSubject() string
 	ConsumerInfo() (*nats.ConsumerInfo, error)
 	IsValid() bool
 	Unsubscribe() error
@@ -77,4 +81,8 @@ type DefaultSubOpts []nats.SubOpt
 type jetStreamClient struct {
 	nats.JetStreamContext
 	natsConn *nats.Conn
+}
+
+func (js Subscription) SubscriptionSubject() string {
+	return js.Subject
 }

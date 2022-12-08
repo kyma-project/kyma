@@ -23,8 +23,8 @@ require (
 )
 
 replace (
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
-	golang.org/x/net => golang.org/x/net v0.0.0-20220728030405-41545e8bf201
-	golang.org/x/text => golang.org/x/text v0.3.7
-	golang.org/x/tools => golang.org/x/tools v0.1.12
+	golang.org/x/crypto => golang.org/x/crypto v0.4.0
+	golang.org/x/net => golang.org/x/net v0.4.0
+	golang.org/x/text => golang.org/x/text v0.5.0
+	golang.org/x/tools => golang.org/x/tools v0.4.0
 )

@@ -2,9 +2,13 @@ package test
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net"
 	"strings"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
@@ -95,13 +99,11 @@ func setupSuite() error {
 	emTestEnsemble.eventMeshMock = startNewEventMeshMock()
 
 	// add schemes
-	err = eventingv1alpha2.AddToScheme(scheme.Scheme)
-	if err != nil {
+	if err = eventingv1alpha2.AddToScheme(scheme.Scheme); err != nil {
 		return err
 	}
 
-	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
-	if err != nil {
+	if err = apigatewayv1beta1.AddToScheme(scheme.Scheme); err != nil {
 		return err
 	}
 	// +kubebuilder:scaffold:scheme
@@ -114,12 +116,20 @@ func setupSuite() error {
 
 	// start eventMesh manager instance
 	syncPeriod := syncPeriodSeconds * time.Second
+	webhookInstallOptions := &emTestEnsemble.testEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
+		Host:               webhookInstallOptions.LocalServingHost,
+		Port:               webhookInstallOptions.LocalServingPort,
+		CertDir:            webhookInstallOptions.LocalServingCertDir,
 		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
 	})
 	if err != nil {
+		return err
+	}
+
+	if err = (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager); err != nil {
 		return err
 	}
 
@@ -146,8 +156,7 @@ func setupSuite() error {
 		sinkValidator,
 	)
 
-	err = testReconciler.SetupUnmanaged(k8sManager)
-	if err != nil {
+	if err = testReconciler.SetupUnmanaged(k8sManager); err != nil {
 		return err
 	}
 
@@ -162,6 +171,22 @@ func setupSuite() error {
 	}()
 
 	emTestEnsemble.k8sClient = k8sManager.GetClient()
+
+	// wait for the webhook server to get ready
+	dialer := &net.Dialer{Timeout: time.Second}
+	addrPort := fmt.Sprintf("%s:%d", webhookInstallOptions.LocalServingHost, webhookInstallOptions.LocalServingPort)
+	if err = retry.Do(func() error {
+		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
+		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
+		if connErr != nil {
+			return connErr
+		}
+		conn.Close()
+		return nil
+	}, retry.Attempts(testEnvStartAttempts)); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -175,6 +200,9 @@ func startTestEnv() (*rest.Config, error) {
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
+		WebhookInstallOptions: envtest.WebhookInstallOptions{
+			Paths: []string{filepath.Join("../../../../", "config", "webhook")},
+		},
 	}
 
 	var cfg *rest.Config
@@ -266,6 +294,10 @@ func ensureK8sResourceCreated(ctx context.Context, t *testing.T, obj client.Obje
 	assert.NoError(t, emTestEnsemble.k8sClient.Create(ctx, obj))
 }
 
+func ensureK8sResourceNotCreated(ctx context.Context, t *testing.T, obj client.Object, err error) {
+	assert.Equal(t, emTestEnsemble.k8sClient.Create(ctx, obj), err)
+}
+
 func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Object) {
 	assert.NoError(t, emTestEnsemble.k8sClient.Update(ctx, obj))
 }
@@ -346,4 +378,13 @@ func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) 
 			}
 		})
 	return countGet, countPost, countDelete
+}
+
+func generateInvalidSubscriptionError(subName, errType string, path *field.Path) error {
+	webhookErr := "admission webhook \"vsubscription.kb.io\" denied the request: "
+	givenError := k8serrors.NewInvalid(
+		eventingv1alpha2.GroupKind, subName,
+		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
+	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
+	return givenError
 }
