@@ -16,12 +16,16 @@ const (
 	IndentNbsp
 	IndentParentPath
 )
-const indentType = IndentSpace
+const indentType = IndentParentPath
 
+//TODO: use relative path of from param
 const InputCRDFilename = `/Users/I567085/src/2022jul/kyma/components/function-controller/config/crd/bases/serverless.kyma-project.io_functions.yaml`
 const APIVersion = "v1alpha2"
+
+//TODO: use relative path of from param
 const OutputMDFilename = `/Users/I567085/src/2022jul/kyma/docs/05-technical-reference/00-custom-resources/svls-01-function.md`
 
+//TODO: rename - this script create only SPEC
 const ReplacePartIdentifier = `FUNCTION-CRD-PARAMETERS-TABLE`
 const REPatternToReplace = `(?s)<!--\s*` + ReplacePartIdentifier + `\(START\).*<!--\s*` + ReplacePartIdentifier + `\(END\)[^\n]*`
 
@@ -43,6 +47,7 @@ func replaceDocInMD(doc string) {
 
 	newContent := strings.Join([]string{
 		"<!-- " + ReplacePartIdentifier + "(START) -->",
+		//TODO: for test only - remove row with date (unnecessary changes after regeneration without changes) or detect changes
 		"<!-- generated: " + time.Now().String() + " -->",
 		doc,
 		"<!-- " + ReplacePartIdentifier + "(END) -->",
@@ -64,6 +69,7 @@ func generateDocFromCRD() string {
 		panic(err)
 	}
 
+	//TODO: check why unmarshalling to CustomResource don't work
 	var obj interface{}
 	if err := yaml.Unmarshal(input, &obj); err != nil {
 		panic(err)
@@ -100,7 +106,7 @@ func generateElementDoc(obj interface{}, name string, required bool, indent int,
 		description = d.(string)
 	}
 	result = append(result,
-		fmt.Sprintf("| %s%s | %s | %s |",
+		fmt.Sprintf("| **%s%s** | %s | %s |",
 			getIndent(indent, parentPath), name,
 			yesNo(required), description))
 
@@ -121,6 +127,8 @@ func generateObjectDoc(element map[string]interface{}, name string, indent int, 
 	if rc := getElement(element, "required"); rc != nil {
 		requiredChildren = rc.([]interface{})
 	}
+	//TODO: sort by propName
+	//TODO: skip some elements - keep current descriptions
 	for propName, propVal := range properties.(map[string]interface{}) {
 		propRequired := contains(requiredChildren, name)
 		result = append(result,
