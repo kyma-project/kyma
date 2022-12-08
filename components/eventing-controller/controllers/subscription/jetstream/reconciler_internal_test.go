@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/jetstreamv2/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream/mocks"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/pkg/errors"
@@ -453,7 +453,7 @@ func Test_syncInitialStatus(t *testing.T) {
 type TestEnvironment struct {
 	Context    context.Context
 	Client     client.Client
-	Backend    *mocks.JetStreamBackend
+	Backend    *mocks.Backend
 	Reconciler *Reconciler
 	Logger     *logger.Logger
 	Recorder   *record.FakeRecorder
@@ -461,7 +461,7 @@ type TestEnvironment struct {
 
 // setupTestEnvironment is a TestEnvironment constructor.
 func setupTestEnvironment(t *testing.T, objs ...client.Object) *TestEnvironment {
-	mockedBackend := &mocks.JetStreamBackend{}
+	mockedBackend := &mocks.Backend{}
 	ctx := context.Background()
 	fakeClient := createFakeClientBuilder(t).WithObjects(objs...).Build()
 	recorder := &record.FakeRecorder{}

@@ -5,15 +5,15 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/nats-io/nats.go"
+
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	sinkv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/sink/v2"
 	backendutilsv2 "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/utils/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"github.com/nats-io/nats.go"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/cleaner"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -71,12 +71,14 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		return err
 	}
 
-	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha2.Subscription{}},
+		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for subscriptions", "error", err)
 		return err
 	}
 
-	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
+	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel},
+		&handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("Failed to setup watch for custom channel", "error", err)
 		return err
 	}
@@ -90,6 +92,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	return nil
 }
 
+//nolint:lll
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
 // Generate required RBAC to emit kubernetes events in the controller.
