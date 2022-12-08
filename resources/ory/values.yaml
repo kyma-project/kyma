@@ -61,7 +61,7 @@ global:
       directory: "external/oryd"
     postgres:
       name: "postgres"
-      version: "11.17-alpine3.16"
+      version: "11.18-alpine3.17"
       directory: "external"
     postgres_exporter:
       name: "postgres-exporter"
