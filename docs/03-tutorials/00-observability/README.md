@@ -4,7 +4,7 @@ title: Observability - tutorials
 
 ## Purpose
 
-The following instructions describe the complete monitoring flow for your services in Kyma. You get the gist of monitoring applications, such as Prometheus, Grafana, and Alertmanager. You will learn how and where you can observe and visualize your service metrics to monitor them for any alerting values.
+The following instructions describe the complete monitoring flow for your services in Kyma. You get the gist of monitoring applications, such as Prometheus, Grafana, and Alertmanager. You learn how and where you can observe and visualize your service metrics to monitor them for any alerting values.
 
 Kyma comes with a Prometheus stack, which is designed and sized to monitor Kyma's system components. We recommend to set up an additional Prometheus stack to monitor your custom metrics.
 
@@ -16,7 +16,7 @@ The instructions cover the following tasks:
 
  ![Monitoring tutorials](./assets/monitoring-tutorials.svg)
 
-1. [**Deploy a custom Prometheus stack**](https://github.com/kyma-project/examples/blob/main/prometheus/README.md), in which you deploy the [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus) stack from the upstream Helm chart.
+1. [**Deploy a custom Prometheus stack**](https://github.com/kyma-project/examples/blob/main/prometheus/README.md), in which you deploy the [kube-prometheus-stack](https://github.com/prometheus-operator/kube-prometheus) from the upstream Helm chart.
 
 2. [**Observe application metrics**](https://github.com/kyma-project/examples/blob/main/prometheus/monitoring-custom-metrics/README.md), in which you redirect the `cpu_temperature_celsius` metric to the localhost and the Prometheus UI. You later observe how the metric value changes in the predefined 10 seconds interval in which Prometheus scrapes the metric values from the service's `/metrics` endpoint.
 
