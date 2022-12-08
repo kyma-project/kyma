@@ -81,20 +81,6 @@ func Test_ValidationWebhook(t *testing.T) {
 				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath),
 		},
 		{
-			name: "should fail to create subscription with invalid config",
-			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription(testName, namespace,
-					reconcilertesting.WithStandardTypeMatching(),
-					reconcilertesting.WithSource("source"),
-					reconcilertesting.WithOrderCreatedV1Event(),
-					reconcilertesting.WithValidSink(namespace, "svc"),
-					reconcilertesting.WithMaxInFlightMessages("invalid"),
-				)
-			},
-			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
-				eventingv1alpha2.StringIntErrDetail, eventingv1alpha2.ConfigPath),
-		},
-		{
 			name: "should fail to create subscription with invalid sink",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
 				return reconcilertesting.NewSubscription(testName, namespace,

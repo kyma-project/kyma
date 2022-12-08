@@ -52,6 +52,20 @@ func Test_ValidationWebhook(t *testing.T) {
 			},
 		},
 		{
+			name: "should fail to create subscription with invalid config",
+			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
+				testingv2.WithStandardTypeMatching(),
+				testingv2.WithSource("source"),
+				testingv2.WithOrderCreatedV1Event(),
+				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+				testingv2.WithMaxInFlightMessages("invalid"),
+			},
+			wantError: func(subName string) error {
+				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+					eventingv1alpha2.StringIntErrDetail, eventingv1alpha2.ConfigPath)
+			},
+		},
+		{
 			name: "should fail to create subscription with invalid sink",
 			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
 				testingv2.WithStandardTypeMatching(),
@@ -359,7 +373,7 @@ func TestChangeSubscription(t *testing.T) {
 				testingv2.AddEventType(reconcilertestingv2.NewCleanEventType("1"), subscription)
 
 				// induce an error by making the sink invalid
-				subscription.Spec.Sink = "invalid"
+				subscription.Spec.Sink = testingv2.ValidSinkURL(subscription.Namespace, "invalid")
 			},
 			wantAfter: reconcilertestingv2.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
@@ -380,38 +394,6 @@ func TestChangeSubscription(t *testing.T) {
 					reconcilertestingv2.NewCleanEventType("1"): {
 						gomega.Not(reconcilertestingv2.BeExistingSubscription()),
 					},
-				},
-			},
-		},
-		{
-			name: "CleanEventTypes; add filters to subscription without filters",
-			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
-				testingv2.WithTypeMatchingExact(),
-				testingv2.WithEmptyTypes(),
-				testingv2.WithWebhookForNATS(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
-			},
-			wantBefore: reconcilertestingv2.Want{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
-					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
-				},
-			},
-			changeSubscription: func(subscription *eventingv1alpha2.Subscription) {
-				eventTypes := []string{
-					reconcilertestingv2.NewCleanEventType("0"),
-					reconcilertestingv2.NewCleanEventType("1"),
-				}
-				for _, eventType := range eventTypes {
-					testingv2.AddEventType(eventType, subscription)
-				}
-			},
-			wantAfter: reconcilertestingv2.Want{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
-					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
-					testingv2.HaveTypes([]string{
-						reconcilertestingv2.NewCleanEventType("0"),
-						reconcilertestingv2.NewCleanEventType("1"),
-					}),
 				},
 			},
 		},
@@ -520,34 +502,6 @@ func TestChangeSubscription(t *testing.T) {
 						),
 						reconcilertestingv2.BeNatsSubWithMaxPending(101),
 					},
-				},
-			},
-		},
-		{
-			name: "resolve multiple conditions",
-			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
-				testingv2.WithEmptyTypes(),
-				testingv2.WithWebhookForNATS(),
-				testingv2.WithMultipleConditions(),
-				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
-			},
-			wantBefore: reconcilertestingv2.Want{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
-					testingv2.HaveCleanEventTypesEmpty(),
-					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
-					testingv2.HaveSubscriptionReady(),
-				},
-			},
-			changeSubscription: func(subscription *eventingv1alpha2.Subscription) {
-				testingv2.AddEventType(testingv2.OrderCreatedEventType, subscription)
-			},
-			wantAfter: reconcilertestingv2.Want{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
-					testingv2.HaveCondition(testingv2.DefaultReadyCondition()),
-					testingv2.HaveSubscriptionReady(),
-					testingv2.HaveTypes([]string{testingv2.OrderCreatedEventType}),
-					gomega.Not(testingv2.HaveCondition(testingv2.MultipleDefaultConditions()[0])),
-					gomega.Not(testingv2.HaveCondition(testingv2.MultipleDefaultConditions()[1])),
 				},
 			},
 		},
