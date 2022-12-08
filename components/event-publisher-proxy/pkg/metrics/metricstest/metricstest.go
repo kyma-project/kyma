@@ -14,22 +14,22 @@ import (
 
 // EnsureMetricErrors ensures metric eventing_epp_errors_total exists.
 func EnsureMetricErrors(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.ErrorsKey, count)
+	ensureMetricCount(t, collector, metrics.BackendErrorsKey, count)
 }
 
-// EnsureMetricLatency ensures metric eventing_epp_messaging_server_latency_duration_milliseconds exists.
+// EnsureMetricLatency ensures metric eventing_epp_backend_duration_seconds exists.
 func EnsureMetricLatency(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.LatencyKey, count)
+	ensureMetricCount(t, collector, metrics.BackendLatencyKey, count)
 }
 
-// EnsureMetricEventTypePublished ensures metric epp_event_type_published_total exists.
+// EnsureMetricEventTypePublished ensures metric eventing_epp_event_type_published_total exists.
 func EnsureMetricEventTypePublished(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
 	ensureMetricCount(t, collector, metrics.EventTypePublishedMetricKey, count)
 }
 
-// EnsureMetricTotalRequests ensures metric eventing_epp_requests_total exists.
+// EnsureMetricTotalRequests ensures metric eventing_epp_backend_requests_total exists.
 func EnsureMetricTotalRequests(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
-	ensureMetricCount(t, collector, metrics.EventRequestsKey, count)
+	ensureMetricCount(t, collector, metrics.BackendRequestsKey, count)
 }
 
 func ensureMetricCount(t *testing.T, collector metrics.PublishingMetricsCollector, metric string, expectedCount int) {

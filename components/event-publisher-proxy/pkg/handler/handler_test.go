@@ -201,28 +201,27 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: `
-				# HELP epp_event_type_published_total The total number of events published for a given eventTypeLabel
-				# TYPE epp_event_type_published_total counter
-				epp_event_type_published_total{event_source="/default/sap.kyma/id",event_type="",response_code="204"} 1
-				# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-				# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.005"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.01"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.025"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.05"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.1"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.25"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.5"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="1"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="2.5"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="5"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="10"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="+Inf"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="FOO",response_code="204"} 0
-				eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="FOO",response_code="204"} 1
-				# HELP eventing_epp_requests_total The total number of event requests
-				# TYPE eventing_epp_requests_total counter
-				eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+				# TYPE eventing_epp_event_type_published_total counter
+				eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type=""} 1
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
+                eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
 			`,
 		},
 		{
@@ -244,28 +243,28 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 204,
 			wantTEF: `
-				# HELP epp_event_type_published_total The total number of events published for a given eventTypeLabel
-				# TYPE epp_event_type_published_total counter
-				epp_event_type_published_total{event_source="/default/sap.kyma/id",event_type="",response_code="204"} 1
-				# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-				# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.005"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.01"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.025"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.05"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.1"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.25"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.5"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="1"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="2.5"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="5"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="10"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="+Inf"} 1
-				eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="FOO",response_code="204"} 0
-				eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="FOO",response_code="204"} 1
-				# HELP eventing_epp_requests_total The total number of event requests
-				# TYPE eventing_epp_requests_total counter
-				eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+				# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+				# TYPE eventing_epp_event_type_published_total counter
+				eventing_epp_event_type_published_total{code="204",event_source="/default/sap.kyma/id",event_type=""} 1
+				# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+				# TYPE eventing_epp_backend_duration_milliseconds histogram
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
+				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
+				eventing_epp_backend_duration_milliseconds_sum{destination_service="FOO",code="204"} 0
+				eventing_epp_backend_duration_milliseconds_count{destination_service="FOO",code="204"} 1
+				# HELP eventing_epp_backend_requests_total The total number of backend requests
+				# TYPE eventing_epp_backend_requests_total counter
+				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
 			`,
 		},
 		{
@@ -324,9 +323,9 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 500,
 			wantTEF: `
-				# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
-				# TYPE eventing_epp_errors_total counter
-				eventing_epp_errors_total 1
+				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+				# TYPE eventing_epp_backend_errors_total counter
+				eventing_epp_backend_errors_total 1
 			`,
 		},
 		{
@@ -343,9 +342,9 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 			},
 			wantStatus: 507,
 			wantTEF: `
-				# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
-				# TYPE eventing_epp_errors_total counter
-				eventing_epp_errors_total 1
+				# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+				# TYPE eventing_epp_backend_errors_total counter
+				eventing_epp_backend_errors_total 1
 			`,
 		},
 	}
@@ -422,30 +421,30 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			wantStatus: 200,
 			wantOk:     true,
 			wantTEF: `
-					# HELP epp_event_type_published_total The total number of events published for a given eventTypeLabel
-					# TYPE epp_event_type_published_total counter
-					epp_event_type_published_total{event_source="namespace",event_type="im.a.prefix.testapp.object.created.v1",response_code="204"} 1
+					# HELP eventing_epp_event_type_published_total The total number of events published for a given eventTypeLabel
+					# TYPE eventing_epp_event_type_published_total counter
+					eventing_epp_event_type_published_total{code="204",event_source="namespace",event_type="im.a.prefix.testapp.object.created.v1"} 1
 
-					# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-					# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.005"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.01"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.025"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.05"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.1"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.25"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="0.5"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="1"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="2.5"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="5"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="10"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="FOO",response_code="204",le="+Inf"} 1
-					eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="FOO",response_code="204"} 0
-					eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="FOO",response_code="204"} 1
+					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_backend_duration_milliseconds histogram
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.005"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.01"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.025"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.05"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.25"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="0.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="2.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
+					eventing_epp_backend_duration_milliseconds_sum{destination_service="FOO",code="204"} 0
+					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
 
-					# HELP eventing_epp_requests_total The total number of event requests
-					# TYPE eventing_epp_requests_total counter
-					eventing_epp_requests_total{destination_service="FOO",response_code="204"} 1
+					# HELP eventing_epp_backend_requests_total The total number of backend requests
+					# TYPE eventing_epp_backend_requests_total counter
+					eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
 				`,
 		},
 		{
@@ -465,9 +464,9 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			wantStatus: http.StatusBadGateway,
 			wantOk:     false,
 			wantTEF: `
-					# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
-					# TYPE eventing_epp_errors_total counter
-					eventing_epp_errors_total 1
+					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+					# TYPE eventing_epp_backend_errors_total counter
+					eventing_epp_backend_errors_total 1
 				`,
 		},
 		{
@@ -487,9 +486,9 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			wantStatus: 507,
 			wantOk:     false,
 			wantTEF: `
-					# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
-					# TYPE eventing_epp_errors_total counter
-					eventing_epp_errors_total 1
+					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+					# TYPE eventing_epp_backend_errors_total counter
+					eventing_epp_backend_errors_total 1
 				`,
 		},
 		{
@@ -509,9 +508,9 @@ func TestHandler_publishLegacyEventsAsCE(t *testing.T) {
 			wantStatus: 500,
 			wantOk:     false,
 			wantTEF: `
-					# HELP eventing_epp_errors_total The total number of errors while sending events to the messaging server
-					# TYPE eventing_epp_errors_total counter
-					eventing_epp_errors_total 1
+					# HELP eventing_epp_backend_errors_total The total number of backend errors while sending events to the messaging server
+					# TYPE eventing_epp_backend_errors_total counter
+					eventing_epp_backend_errors_total 1
 				`,
 		},
 		{
@@ -691,22 +690,22 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				metricLatency:   1,
 				metricPublished: 1,
 				metricLatencyTEF: `
-# HELP eventing_epp_messaging_server_latency_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-# TYPE eventing_epp_messaging_server_latency_duration_milliseconds histogram
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.005"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.01"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.025"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.05"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.1"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.25"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="0.5"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="1"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="2.5"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="5"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="10"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_bucket{destination_service="foo",response_code="204",le="+Inf"} 1
-eventing_epp_messaging_server_latency_duration_milliseconds_sum{destination_service="foo",response_code="204"} 0
-eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_service="foo",response_code="204"} 1
+# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+# TYPE eventing_epp_backend_duration_milliseconds histogram
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
+eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
+eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
+eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
 `,
 			},
 		},
@@ -756,7 +755,7 @@ eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_se
 			metricstest.EnsureMetricTotalRequests(t, h.collector, tt.wants.metricTotal)
 			metricstest.EnsureMetricLatency(t, h.collector, tt.wants.metricLatency)
 			metricstest.EnsureMetricEventTypePublished(t, h.collector, tt.wants.metricPublished)
-			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricLatencyTEF, "eventing_epp_messaging_server_latency_duration_milliseconds")
+			metricstest.EnsureMetricMatchesTextExpositionFormat(t, h.collector, tt.wants.metricLatencyTEF, "eventing_epp_backend_duration_milliseconds")
 		})
 	}
 }
