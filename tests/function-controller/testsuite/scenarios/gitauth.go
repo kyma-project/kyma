@@ -3,7 +3,6 @@ package scenarios
 import (
 	"encoding/base64"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/vrischmann/envconfig"
@@ -100,7 +99,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 
 	steps := []step.Step{}
 	for _, testCase := range testCases {
-		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll)
+		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg.KubectProxyEnabled)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while generated test case steps")
 		}
@@ -129,15 +128,12 @@ func setupSharedContainer(restConfig *rest.Config, cfg testsuite.Config, logf *l
 	}, nil
 }
 
-func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller) (step.Step, error) {
+func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller, useProxy bool) (step.Step, error) {
 	genericContainer.Log.Infof("Testing Git Function in namespace: %s", genericContainer.Namespace)
 
 	secret := secret.NewSecret(tr.auth.SecretName, genericContainer)
 
-	inClusterURL, err := url.Parse(fmt.Sprintf("http://%s.%s.svc.cluster.local", tr.name, genericContainer.Namespace))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while parsing in-cluster URL")
-	}
+	testFn := function.NewFunction(tr.name, useProxy, genericContainer)
 
 	return step.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", tr.provider),
 		teststep.CreateSecret(
@@ -147,7 +143,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			tr.secretData),
 		teststep.CreateFunction(
 			genericContainer.Log,
-			function.NewFunction(tr.name, true, genericContainer),
+			testFn,
 			fmt.Sprintf("Create %s Function", tr.provider),
 			gitops.GitopsFunction(
 				tr.url,
@@ -159,7 +155,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 		teststep.NewHTTPCheck(
 			genericContainer.Log,
 			"Git Function simple check through gateway",
-			inClusterURL,
+			testFn.FunctionURL,
 			poll, tr.expectedResponse)), nil
 }
 

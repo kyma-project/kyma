@@ -53,12 +53,12 @@ func ConversionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.
 		Log:         logf,
 	}
 
-	python39Fn := functionv1alpha1.NewFunction("python39", true, genericContainer)
+	python39Fn := functionv1alpha1.NewFunction("python39", cfg.KubectProxyEnabled, genericContainer)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating python39 config")
 	}
 
-	gitCfg, err := gitopsv1alpha1.NewGitopsConfig("gitfunc", cfg.GitServerImage, cfg.GitServerRepoName, true, genericContainer)
+	gitCfg, err := gitopsv1alpha1.NewGitopsConfig("gitfunc", cfg.GitServerImage, cfg.GitServerRepoName, cfg.KubectProxyEnabled, genericContainer)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating Git config")
 	}
