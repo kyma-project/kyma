@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
 
 type GitopsConfig struct {
 	FnName               string
-	Fn                   *function.Function
 	RepoName             string
 	GitServerImage       string
 	GitServerServiceName string
