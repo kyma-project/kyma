@@ -6,7 +6,7 @@ title: Observe application metrics
 
 Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
 
-Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8080`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/main/prometheus/monitoring-custom-metrics) example and one of its services named `sample-metrics`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8080`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
 - From the service with the `app: sample-metrics` label
 - From the `/metrics` endpoint
@@ -37,13 +37,13 @@ Follow this tutorial to:
 2. Deploy the sample service in the `testing-monitoring` Namespace.
 
    ```bash
-   kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
+   kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/main/prometheus/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
    ```
 
 3. Deploy the ServiceMonitor CustomResourceDefinition (CRD) in the `testing-monitoring` Namespace.
 
    ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/service-monitor.yaml --namespace=testing-monitoring
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/prometheus/monitoring-custom-metrics/deployment/service-monitor.yaml --namespace=testing-monitoring
    ```
 
 4. Test your deployment.
