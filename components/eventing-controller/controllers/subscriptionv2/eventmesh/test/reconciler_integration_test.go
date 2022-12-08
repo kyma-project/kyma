@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,8 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: generateInvalidSubscriptionError(testName, eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath),
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath),
 		},
 		{
 			name: "should fail to create subscription with invalid event types",
@@ -75,7 +77,8 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithValidSink(namespace, "svc"),
 				)
 			},
-			wantError: generateInvalidSubscriptionError(testName, eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath),
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath),
 		},
 		{
 			name: "should fail to create subscription with invalid sink",
@@ -87,7 +90,7 @@ func Test_ValidationWebhook(t *testing.T) {
 					reconcilertesting.WithSink("https://svc2.test.local"),
 				)
 			},
-			wantError: generateInvalidSubscriptionError(testName,
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
 				eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath),
 		},
 	}
