@@ -111,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-16282"
+      version: "PR-16284"
     git_server:
       name: "gitserver"
       version: "708f6a87"
