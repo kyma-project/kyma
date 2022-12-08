@@ -33,23 +33,23 @@ func WithCleaner(cleaner et.Cleaner) func(*Event) error {
 // WithPrefix will set the prefix segment.
 func WithPrefix(prefix string) func(*Event) error {
 	return func(t *Event) error {
-		t.prefix = prefix
+		t.prefix = consolidateToMaxNumberOfSegments(3, prefix)
 		return nil
 	}
 }
 
-// WithAppName will set the appName segment.
-func WithAppName(appName string) func(*Event) error {
+// WithApp will set the appName segment.
+func WithApp(app string) func(*Event) error {
 	return func(t *Event) error {
-		t.appName = appName
+		t.app = consolidateToMaxNumberOfSegments(1, app)
 		return nil
 	}
 }
 
 // WithEventName will set the eventName segment.
-func WithEventName(eventName string) func(*Event) error {
+func WithName(name string) func(*Event) error {
 	return func(t *Event) error {
-		t.eventName = eventName
+		t.name = consolidateToMaxNumberOfSegments(2, name)
 		return nil
 	}
 }
@@ -57,7 +57,7 @@ func WithEventName(eventName string) func(*Event) error {
 // WithVersion will set the version segment.
 func WithVersion(version string) func(*Event) error {
 	return func(t *Event) error {
-		t.version = version
+		t.version = consolidateToMaxNumberOfSegments(1, version)
 		return nil
 	}
 }
@@ -65,7 +65,7 @@ func WithVersion(version string) func(*Event) error {
 // WithCloudEventFromRequest will try to extract a cloud event from a request
 // and use it as the TransferEvent's underlying event.
 func WithCloudEventFromRequest(request *http.Request) func(*Event) error {
-	return func(transitionEvent *Event) error {
+	return func(event *Event) error {
 		cloudEvent, err := cesdk.NewEventFromHTTPRequest(request)
 		if err != nil {
 			return err
@@ -76,7 +76,18 @@ func WithCloudEventFromRequest(request *http.Request) func(*Event) error {
 			return err
 		}
 
-		transitionEvent.Event = *cloudEvent
+		event.Event = *cloudEvent
+		return nil
+	}
+}
+
+// WithRemoveNonAlphanumericsFromType will remove all non-alphanumeric characters (but ".") from the type.
+func WithRemoveNonAlphanumericsFromType() func(*Event) error {
+	return func(event *Event) error {
+		event.prefix = removeNonAlphanumeric(event.prefix)
+		event.version = removeNonAlphanumeric(event.version)
+		event.name = removeNonAlphanumeric(event.name)
+		event.app = removeNonAlphanumeric(event.app)
 		return nil
 	}
 }

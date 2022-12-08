@@ -2,7 +2,6 @@ package legacy
 
 import (
 	"context"
-	"fmt"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -103,7 +102,7 @@ func TestTransformLegacyRequestsToTransitionEvent(t *testing.T) {
 			appLister := fake.NewApplicationListerOrDie(ctx, app)
 			transformer := NewTransformer("test", tc.givenPrefix, appLister)
 
-			gotEvent, gotOriginalEventType := transformer.TransformLegacyRequestsToTransitionEvent(writer, request)
+			gotEvent, gotOriginalEventType := transformer.TransformLegacyRequestsToEvent(writer, request)
 			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
 			assert.Equal(t, wantEventType, gotOriginalEventType)
 
@@ -165,72 +164,4 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	gotExtension, err := gotEvent.Context.GetExtension(eventTypeVersionExtensionKey)
 	assert.NoError(t, err)
 	assert.Equal(t, wantLegacyEventVersion, gotExtension)
-}
-
-func TestCombineEventTypeSegments(t *testing.T) {
-	testCases := []struct {
-		name           string
-		givenEventType string
-		wantEventType  string
-	}{
-		{
-			name:           "event-type with two segments",
-			givenEventType: EventName,
-			wantEventType:  EventName,
-		},
-		{
-			name:           "event-type with more than two segments",
-			givenEventType: eventTypeMultiSegment,
-			wantEventType:  eventTypeMultiSegmentCombined,
-		},
-	}
-
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			if gotEventType := combineEventNameSegments(tc.givenEventType); tc.wantEventType != gotEventType {
-				t.Fatalf("invalid event-type want: %s, got: %s", tc.wantEventType, gotEventType)
-			}
-		})
-	}
-}
-
-func TestRemoveNonAlphanumeric(t *testing.T) {
-	testCases := []struct {
-		name           string
-		givenEventType string
-		wantEventType  string
-	}{
-		{
-			name:           "unclean",
-			givenEventType: "1-2+3=4.t&h$i#s.t!h@a%t.t;o/m$f*o{o]lery",
-			wantEventType:  "1234.this.that.tomfoolery",
-		},
-		{
-			name:           "clean",
-			givenEventType: "1234.this.that",
-			wantEventType:  "1234.this.that",
-		},
-		{
-			name:           "single unclean segment",
-			givenEventType: "t_o_m_f_o_o_l_e_r_y",
-			wantEventType:  "tomfoolery",
-		},
-		{
-			name:           "empty",
-			givenEventType: "",
-			wantEventType:  "",
-		},
-	}
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(fmt.Sprintf("%s eventType", tc.name), func(t *testing.T) {
-			t.Parallel()
-
-			gotEventType := removeNonAlphanumeric(tc.givenEventType)
-			assert.Equal(t, tc.wantEventType, gotEventType)
-		})
-	}
 }

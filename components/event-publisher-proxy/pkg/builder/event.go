@@ -2,24 +2,23 @@ package builder
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	ce "github.com/cloudevents/sdk-go/v2/event"
 )
 
-// Event is a wrapper around a CloudEvent that allows to directly manipulate 
+// Event is a wrapper around a CloudEvent that allows to directly manipulate
 // the segments of an event type for the way types are used
 // in kyma eventing.
 type Event struct {
 	ce.Event
 
 	// These are the segments of a CloudEvent's Type:
-	// 'prefix.appName.eventName.version'.
-	prefix    string
-	appName   string
-	eventName string
-	version   string
+	// 'prefix.app.name.version'.
+	prefix  string
+	app     string
+	name    string
+	version string
 }
 
 // Opt is a type for options to build an Event.
@@ -71,23 +70,23 @@ func (e *Event) IsPrefixEmpty() bool {
 
 // AppName only returns the prefix of the EventType.
 func (e *Event) AppName() string {
-	return e.appName
+	return e.app
 }
 
 // SetAppName sets the appName and updates the Type accordingly.
 func (e *Event) SetAppName(s string) {
-	e.appName = s
+	e.app = s
 	e.updateType()
 }
 
 // EventName only returns the prefix of the EventType.
 func (e *Event) EventName() string {
-	return e.eventName
+	return e.name
 }
 
 // SetEventName sets the eventName and updates the Type accordingly.
 func (e *Event) SetEventName(s string) {
-	e.eventName = s
+	e.name = s
 	e.updateType()
 }
 
@@ -108,25 +107,8 @@ func (e *Event) Type() string {
 }
 
 func (e *Event) updateType() {
-	_type := concatSegmentsWithDot(e.prefix, e.appName, e.eventName, e.version)
+	_type := concatSegmentsWithDot(e.prefix, e.app, e.name, e.version)
 	e.Event.SetType(_type)
-}
-
-// concatSegmentsWithDot takes an array of strings and concat them with a dot in
-// between. For example ["a", "b", "c", "d", "e", "f"] would lead to
-// "a.b.c.d.e.f".
-func concatSegmentsWithDot(segments ...string) string {
-	s := ""
-	for _, segment := range segments {
-		if s == "" {
-			s = segment
-			continue
-		}
-		if segment != "" {
-			s = fmt.Sprintf("%s.%s", s, segment)
-		}
-	}
-	return s
 }
 
 // setTypeSegmentsViaCloudEvent will set the four type segments by trying to
@@ -138,8 +120,8 @@ func (e *Event) setTypeSegmentsViaCloudEvent() error {
 	}
 
 	e.prefix = prefix
-	e.appName = appName
-	e.eventName = eventName
+	e.app = appName
+	e.name = eventName
 	e.version = version
 
 	return nil
@@ -148,7 +130,7 @@ func (e *Event) setTypeSegmentsViaCloudEvent() error {
 // areAllTypeSegmentsEmpty checks if all type segments are empty and returns a
 // corresponding bool.
 func (e *Event) areAllTypeSegmentsEmpty() bool {
-	return e.prefix == "" && e.appName == "" && e.eventName == "" && e.version == ""
+	return e.prefix == "" && e.app == "" && e.name == "" && e.version == ""
 }
 
 // extractSegmentsFromEvent tries extract the event type's segments from a given
@@ -169,7 +151,7 @@ func extractSegmentsFromEvent(event *ce.Event) (string, string, string, string, 
 	return prefix, appName, eventName, version, nil
 }
 
-// isAnySegmentEmpty checks if any segment is empty and returns a corresponding 
+// isAnySegmentEmpty checks if any segment is empty and returns a corresponding
 // bool.
 func isAnySegmentEmpty(segments []string) bool {
 	for _, segment := range segments {

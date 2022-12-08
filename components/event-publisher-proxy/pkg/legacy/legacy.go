@@ -2,10 +2,8 @@ package legacy
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -30,7 +28,7 @@ const (
 )
 
 type RequestToCETransformer interface {
-	TransformLegacyRequestsToTransitionEvent(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
+	TransformLegacyRequestsToEvent(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
 	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
 }
 
@@ -82,11 +80,10 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 	return &apiv1.PublishEventResponses{}
 }
 
-// TransformLegacyRequestsToTransitionEvent transforms the http request containing a legacy event
-// to a TransitionEvent from the given request. It's second return type is a string that holds
+// TransformLegacyRequestsToEvent transforms the http request containing a legacy event
+// to a Event from the given request. It's second return type is a string that holds
 // the original Type without any cleanup.
-func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
-	//func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.ResponseWriter, request *http.Request) (*te.TransitionEvent, string) {
+func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
 	// Parse request body to PublishRequestV1.
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
@@ -125,7 +122,7 @@ func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.Respo
 		appName = application.GetCleanName(appName)
 	}
 
-	transitionEvent, err := t.convertPublishRequestToEvent(appName, parameters)
+	event, err := t.convertPublishRequestToEvent(appName, parameters)
 	if err != nil {
 		response := ErrorResponse(http.StatusInternalServerError, err)
 		writeJSONResponse(writer, response)
@@ -133,12 +130,12 @@ func (t *Transformer) TransformLegacyRequestsToTransitionEvent(writer http.Respo
 	}
 
 	// Add tracing context to cloud events.
-	tracing.AddTracingContextToCEExtensions(request.Header, &transitionEvent.Event)
+	tracing.AddTracingContextToCEExtensions(request.Header, &event.Event)
 
 	// Prepare the original event-type without cleanup.
-	eventType := formatEventType(t.eventTypePrefix, originalAppName, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
+	originalEventType := formatEventType(t.eventTypePrefix, originalAppName, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
 
-	return &transitionEvent.Event, eventType
+	return &event.Event, originalEventType
 }
 
 func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *cev2event.Event, msg string) {
@@ -185,42 +182,26 @@ func (t *Transformer) convertPublishRequestToEvent(appName string, publishReques
 		cloudEvent.SetID(uuid.New().String())
 	}
 
-	// Create a new TransitionEvent.
-	eventName := combineEventNameSegments(removeNonAlphanumeric(publishRequest.PublishrequestV1.EventType))
-	prefix := removeNonAlphanumeric(t.eventTypePrefix)
+	// Create a new Event from the CloudEvent.
+	eventName := publishRequest.PublishrequestV1.EventType
+	prefix := t.eventTypePrefix
 	version := publishRequest.PublishrequestV1.EventTypeVersion
-	transitionEvent, err := builder.NewEvent(
+	event, err := builder.NewEvent(
 		builder.WithCloudEvent(&cloudEvent),
 		builder.WithPrefix(prefix),
-		builder.WithAppName(appName),
-		builder.WithEventName(eventName),
+		builder.WithApp(appName),
+		builder.WithName(eventName),
 		builder.WithVersion(version),
+		builder.WithRemoveNonAlphanumericsFromType(),
 	)
 	if err != nil {
-		return nil, err  
+		return nil, err
 	}
 
 	// Set values to the TransitionEvent.
-	transitionEvent.SetSource(t.namespace)
-	transitionEvent.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
-	transitionEvent.SetDataContentType(internal.ContentTypeApplicationJSON)
+	event.SetSource(t.namespace)
+	event.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
+	event.SetDataContentType(internal.ContentTypeApplicationJSON)
 
-	return transitionEvent, nil
-}
-
-// combineEventNameSegments returns an eventName with exactly two segments separated by "." if the given event-type
-// has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created")
-func combineEventNameSegments(eventName string) string {
-	parts := strings.Split(eventName, ".")
-	if len(parts) > 2 {
-		businessObject := strings.Join(parts[0:len(parts)-1], "")
-		operation := parts[len(parts)-1]
-		eventName = fmt.Sprintf("%s.%s", businessObject, operation)
-	}
-	return eventName
-}
-
-// removeNonAlphanumeric returns an eventName without any non-alphanumerical character besides dot (".")
-func removeNonAlphanumeric(eventType string) string {
-	return regexp.MustCompile("[^a-zA-Z0-9.]+").ReplaceAllString(eventType, "")
+	return event, nil
 }
