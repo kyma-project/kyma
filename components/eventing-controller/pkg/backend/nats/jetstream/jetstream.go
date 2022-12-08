@@ -62,6 +62,9 @@ type Backend interface {
 
 	// DeleteInvalidConsumers deletes all JetStream consumers having no subscription types in subscription resources
 	DeleteInvalidConsumers(subscriptions []eventingv1alpha1.Subscription) error
+
+	// GetJetStreamContext returns the current JetStreamContext
+	GetJetStreamContext() nats.JetStreamContext
 }
 
 // SubscriptionSubjectIdentifier is used to uniquely identify a Subscription subject.
@@ -318,6 +321,11 @@ func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 // GetJetStreamSubject appends the prefix to subject.
 func (js *JetStream) GetJetStreamSubject(subject string) string {
 	return fmt.Sprintf("%s.%s", env.JetStreamSubjectPrefix, subject)
+}
+
+// GetJetStreamContext returns the current JetStreamContext.
+func (js *JetStream) GetJetStreamContext() nats.JetStreamContext {
+	return js.jsCtx
 }
 
 func (js *JetStream) validateConfig() error {

@@ -132,12 +132,20 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
-	service := makeOTLPService(r.config)
-	if err = controllerutil.SetControllerReference(pipeline, service, r.Scheme); err != nil {
+	otlpService := makeOTLPService(r.config)
+	if err = controllerutil.SetControllerReference(pipeline, otlpService, r.Scheme); err != nil {
 		return err
 	}
-	if err = utils.CreateOrUpdateService(ctx, r.Client, service); err != nil {
-		return fmt.Errorf("failed to create otel collector service: %w", err)
+	if err = utils.CreateOrUpdateService(ctx, r.Client, otlpService); err != nil {
+		return fmt.Errorf("failed to create otel collector otlp service: %w", err)
+	}
+
+	openCensusService := makeOpenCensusService(r.config)
+	if err = controllerutil.SetControllerReference(pipeline, openCensusService, r.Scheme); err != nil {
+		return err
+	}
+	if err = utils.CreateOrUpdateService(ctx, r.Client, openCensusService); err != nil {
+		return fmt.Errorf("failed to create otel collector open census service: %w", err)
 	}
 
 	if r.config.CreateServiceMonitor {
