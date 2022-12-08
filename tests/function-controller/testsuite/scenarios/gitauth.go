@@ -147,7 +147,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			tr.secretData),
 		teststep.CreateFunction(
 			genericContainer.Log,
-			function.NewFunction(tr.name, genericContainer),
+			function.NewFunction(tr.name, true, genericContainer),
 			fmt.Sprintf("Create %s Function", tr.provider),
 			gitops.GitopsFunction(
 				tr.url,

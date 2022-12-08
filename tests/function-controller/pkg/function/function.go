@@ -33,7 +33,7 @@ type Function struct {
 	verbose     bool
 }
 
-func NewFunction(name string, c shared.Container) *Function {
+func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 	function := &serverlessv1alpha2.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       serverlessv1alpha2.FunctionKind,
@@ -46,7 +46,7 @@ func NewFunction(name string, c shared.Container) *Function {
 	}
 
 	//TODO: implement kubectl proxy
-	fnURL, err := calculateFunctionURL(name, c.Namespace, false)
+	fnURL, err := calculateFunctionURL(name, c.Namespace, proxyEnabled)
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +102,7 @@ func (f *Function) Delete() error {
 func calculateFunctionURL(name, namespace string, useProxy bool) (*url.URL, error) {
 	var functionURL = ""
 	if useProxy {
-		functionURL = fmt.Sprintf("127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", namespace, name)
+		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", namespace, name)
 	} else {
 		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", name, namespace)
 	}

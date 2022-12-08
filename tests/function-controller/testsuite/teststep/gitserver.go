@@ -27,7 +27,7 @@ func NewGitServer(cfg gitops.GitopsConfig, stepName string, deployments appsCli.
 	return newGitServer{
 		name:      stepName,
 		gs:        gitserver.New(cfg.Toolbox, cfg.GitServerServiceName, cfg.GitServerImage, cfg.GitServerServicePort, deployments, services, istioEnabled),
-		gitClient: git.New(cfg.GetGitServerInClusterURL()),
+		gitClient: git.New(cfg.GetGitServerURL(true)),
 		log:       cfg.Toolbox.Log.WithField(step.LogStepKey, stepName),
 	}
 }
@@ -36,7 +36,7 @@ func NewGitServerV1Alpha1(cfg gitopsv1alpha1.GitopsConfig, stepName string, depl
 	return newGitServer{
 		name:      stepName,
 		gs:        gitserver.New(cfg.Toolbox, cfg.GitServerServiceName, cfg.GitServerImage, cfg.GitServerServicePort, deployments, services, istioEnabled),
-		gitClient: git.New(cfg.GetGitServerInClusterURL()),
+		gitClient: git.New(cfg.GetGitServerURL(true)),
 		log:       cfg.Toolbox.Log.WithField(step.LogStepKey, stepName),
 	}
 }

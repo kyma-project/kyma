@@ -16,7 +16,6 @@ type GitopsConfig struct {
 	GitServerServiceName string
 	GitServerServicePort int
 	GitServerRepoName    string
-	InClusterURL         *url.URL
 	Toolbox              shared.Container
 }
 
@@ -27,23 +26,37 @@ const (
 )
 
 func NewGitopsConfig(fnName, gitServerImage, gitServerRepoName string, toolbox shared.Container) (GitopsConfig, error) {
-	inClusterURL, err := url.Parse(fmt.Sprintf("http://%s.%s.svc.cluster.local", fnName, toolbox.Namespace))
-	if err != nil {
-		return GitopsConfig{}, err
-	}
-
 	return GitopsConfig{
 		FnName:               fnName,
-		Fn:                   function.NewFunction(fnName, toolbox),
 		GitServerImage:       gitServerImage,
 		GitServerServicePort: gitServerServicePort,
 		GitServerServiceName: gitServerServiceName,
 		GitServerRepoName:    gitServerRepoName,
-		InClusterURL:         inClusterURL,
 		Toolbox:              toolbox,
 	}, nil
 }
 
+func (c *GitopsConfig) GetGitServerURL(useProxy bool) string {
+	var functionURL = ""
+	if useProxy {
+		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/%s.git", c.Toolbox.Namespace, c.GitServerServiceName, c.GitServerRepoName)
+	} else {
+		functionURL = c.GetGitServerInClusterURL()
+	}
+	parsedURL, err := url.Parse(functionURL)
+	if err != nil {
+		panic(err)
+	}
+
+	return parsedURL.String()
+}
+
 func (c *GitopsConfig) GetGitServerInClusterURL() string {
-	return fmt.Sprintf(gitServerEndpointFormat, c.GitServerServiceName, c.Toolbox.Namespace, c.GitServerServicePort, c.GitServerRepoName)
+	functionURL := fmt.Sprintf(gitServerEndpointFormat, c.GitServerServiceName, c.Toolbox.Namespace, c.GitServerServicePort, c.GitServerRepoName)
+	parsedURL, err := url.Parse(functionURL)
+	if err != nil {
+		panic(err)
+	}
+
+	return parsedURL.String()
 }

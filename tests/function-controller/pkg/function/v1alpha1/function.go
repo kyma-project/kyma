@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
@@ -27,12 +28,13 @@ import (
 type Function struct {
 	resCli      *resource.Resource
 	function    *serverlessv1alpha1.Function
+	FunctionURL *url.URL
 	waitTimeout time.Duration
 	log         *logrus.Entry
 	verbose     bool
 }
 
-func NewFunction(name string, c shared.Container) *Function {
+func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -44,12 +46,18 @@ func NewFunction(name string, c shared.Container) *Function {
 		},
 	}
 
+	fnURL, err := calculateFunctionURL(name, c.Namespace, proxyEnabled)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Function{
 		resCli:      resource.New(c.DynamicCli, serverlessv1alpha1.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
 		verbose:     c.Verbose,
 		function:    function,
+		FunctionURL: fnURL,
 	}
 }
 
@@ -191,4 +199,18 @@ func (f Function) LogReadiness(ready bool) {
 	if f.verbose {
 		f.log.Infof("%+v", f.function)
 	}
+}
+
+func calculateFunctionURL(name, namespace string, useProxy bool) (*url.URL, error) {
+	var functionURL = ""
+	if useProxy {
+		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", namespace, name)
+	} else {
+		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", namespace, name)
+	}
+	parsedURL, err := url.Parse(functionURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while parsing function access URL")
+	}
+	return parsedURL, nil
 }

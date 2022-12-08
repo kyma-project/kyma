@@ -1,3 +1,4 @@
+// To run tests locally run `kubectl proxy --proxy 8001` in background and set env KUBECTL_PROXY_ENABLED=true
 package main
 
 import (
@@ -61,8 +62,8 @@ type scenario struct {
 
 var availableScenarios = map[string][]scenario{
 	"serverless-integration": {
-		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
-		{displayName: "gitops", testSuite: scenarios.GitopsSteps},
+		//{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
+		//{displayName: "gitops", testSuite: scenarios.GitopsSteps},
 		{displayName: "conversion-v1alpha1", testSuite: scenarios.ConversionTest},
 	},
 	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
