@@ -105,6 +105,7 @@ func generateElementDoc(obj interface{}, name string, required bool, indent int,
 	if d := element["description"]; d != nil {
 		description = d.(string)
 	}
+	//TODO: remove first word from description (or unify descriptions in other way)
 	result = append(result,
 		fmt.Sprintf("| **%s%s** | %s | %s |",
 			getIndent(indent, parentPath), name,
