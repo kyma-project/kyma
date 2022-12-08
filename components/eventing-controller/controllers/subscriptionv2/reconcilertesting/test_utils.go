@@ -2,10 +2,14 @@ package reconcilertesting
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net"
 	"testing"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -82,7 +86,7 @@ func EventuallyUpdateSubscriptionOnK8s(ctx context.Context, ens *TestEnsemble,
 	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "error while updating the subscription")
 }
 
-func GetSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
+func NewSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
 	subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
 	ens.testID++
 	subscription := v2.NewSubscription(subscriptionName, ens.SubscriberSvc.Namespace, subscriptionOpts...)
@@ -90,7 +94,7 @@ func GetSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) 
 }
 
 func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
-	subscription := GetSubscription(ens, subscriptionOpts...)
+	subscription := NewSubscription(ens, subscriptionOpts...)
 	EnsureNamespaceCreatedForSub(ens, subscription)
 	ensureSubscriptionCreated(ens, subscription)
 	return subscription
@@ -309,4 +313,23 @@ func GenerateInvalidSubscriptionError(subName, errType string, path *field.Path)
 		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
 	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
 	return givenError
+}
+
+func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts *envtest.WebhookInstallOptions) error {
+	if err := (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager); err != nil {
+		return err
+	}
+	// wait for the webhook server to get ready
+	dialer := &net.Dialer{Timeout: time.Second}
+	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
+	err := retry.Do(func() error {
+		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
+		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
+		if connErr != nil {
+			return connErr
+		}
+		conn.Close()
+		return nil
+	}, retry.Attempts(MaxReconnects))
+	return err
 }

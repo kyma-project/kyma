@@ -86,7 +86,7 @@ func Test_ValidationWebhook(t *testing.T) {
 			ens := ens
 
 			t.Log("creating the k8s subscription")
-			sub := reconcilertestingv2.GetSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			sub := reconcilertestingv2.NewSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 
 			reconcilertestingv2.EnsureNamespaceCreatedForSub(ens.TestEnsemble, sub)
 

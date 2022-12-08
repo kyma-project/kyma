@@ -2,10 +2,8 @@ package jetstream
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net"
 	"path/filepath"
 	"testing"
 	"time"
@@ -116,9 +114,6 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	})
 	require.NoError(ens.T, err)
 
-	err = (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager)
-	require.NoError(ens.T, err)
-
 	envConf := env.NatsConfig{
 		URL:                     ens.NatsServer.ClientURL(),
 		MaxReconnects:           reconcilertestingv2.MaxReconnects,
@@ -172,18 +167,8 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	ens.K8sClient = k8sManager.GetClient()
 	require.NotNil(ens.T, ens.K8sClient)
 
-	// wait for the webhook server to get ready
-	dialer := &net.Dialer{Timeout: time.Second}
-	addrPort := fmt.Sprintf("%s:%d", webhookInstallOptions.LocalServingHost, webhookInstallOptions.LocalServingPort)
-	ens.G.Eventually(func() error {
-		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
-		conn, err := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
-		if err != nil {
-			return err
-		}
-		conn.Close()
-		return nil
-	}).Should(gomega.Succeed())
+	err = reconcilertestingv2.StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
+	require.NoError(ens.T, err)
 
 	return ens
 }
