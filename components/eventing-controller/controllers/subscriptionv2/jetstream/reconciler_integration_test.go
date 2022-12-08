@@ -16,6 +16,73 @@ import (
 	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 )
 
+func Test_ValidationWebhook(t *testing.T) {
+	ens := setupTestEnsemble(t)
+	defer cleanupResources(ens)
+
+	var testCases = []struct {
+		name                  string
+		givenSubscriptionOpts []testingv2.SubscriptionOpt
+		wantError             func(subName string) error
+	}{
+		{
+			name: "should fail to create subscription with invalid event source",
+			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
+				testingv2.WithStandardTypeMatching(),
+				testingv2.WithSource(""),
+				testingv2.WithOrderCreatedV1Event(),
+				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+			},
+			wantError: func(subName string) error {
+				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+					eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath)
+			},
+		},
+		{
+			name: "should fail to create subscription with invalid event types",
+			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
+				testingv2.WithStandardTypeMatching(),
+				testingv2.WithSource("source"),
+				testingv2.WithTypes([]string{}),
+				testingv2.WithSinkURLFromSvc(ens.SubscriberSvc),
+			},
+			wantError: func(subName string) error {
+				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+					eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath)
+			},
+		},
+		{
+			name: "should fail to create subscription with invalid sink",
+			givenSubscriptionOpts: []testingv2.SubscriptionOpt{
+				testingv2.WithStandardTypeMatching(),
+				testingv2.WithSource("source"),
+				testingv2.WithOrderCreatedV1Event(),
+				testingv2.WithSink("https://svc2.test.local"),
+			},
+			wantError: func(subName string) error {
+				return reconcilertestingv2.GenerateInvalidSubscriptionError(subName,
+					eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath)
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			ens := ens
+
+			t.Log("creating the k8s subscription")
+			sub := reconcilertestingv2.GetSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+
+			reconcilertestingv2.EnsureNamespaceCreatedForSub(ens.TestEnsemble, sub)
+
+			// attempt to create subscription
+			reconcilertestingv2.EnsureK8sResourceNotCreated(ens.TestEnsemble, t, sub, tc.wantError(sub.Name))
+		})
+	}
+	t.Cleanup(ens.Cancel)
+}
+
 // TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
 func TestUnavailableNATSServer(t *testing.T) {
 	// prepare the test resources and run test reconciler

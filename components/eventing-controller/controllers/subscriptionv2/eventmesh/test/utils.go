@@ -8,8 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/validation/field"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
@@ -378,13 +376,4 @@ func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) 
 			}
 		})
 	return countGet, countPost, countDelete
-}
-
-func generateInvalidSubscriptionError(subName, errType string, path *field.Path) error {
-	webhookErr := "admission webhook \"vsubscription.kb.io\" denied the request: "
-	givenError := k8serrors.NewInvalid(
-		eventingv1alpha2.GroupKind, subName,
-		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
-	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
-	return givenError
 }

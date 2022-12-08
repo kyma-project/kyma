@@ -2,8 +2,10 @@ package jetstream
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net"
 	"path/filepath"
 	"testing"
 	"time"
@@ -65,6 +67,9 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 			},
 			AttachControlPlaneOutput: attachControlPlaneOutput,
 			UseExistingCluster:       &useExistingCluster,
+			WebhookInstallOptions: envtest.WebhookInstallOptions{
+				Paths: []string{filepath.Join("../../../", "config", "webhook")},
+			},
 		},
 	}
 
@@ -100,11 +105,18 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	require.NoError(ens.T, err)
 
 	syncPeriod := syncPeriod
+	webhookInstallOptions := &ens.TestEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(ens.Cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
+		Host:               webhookInstallOptions.LocalServingHost,
+		Port:               webhookInstallOptions.LocalServingPort,
+		CertDir:            webhookInstallOptions.LocalServingCertDir,
 		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
 	})
+	require.NoError(ens.T, err)
+
+	err = (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager)
 	require.NoError(ens.T, err)
 
 	envConf := env.NatsConfig{
@@ -159,6 +171,19 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 
 	ens.K8sClient = k8sManager.GetClient()
 	require.NotNil(ens.T, ens.K8sClient)
+
+	// wait for the webhook server to get ready
+	dialer := &net.Dialer{Timeout: time.Second}
+	addrPort := fmt.Sprintf("%s:%d", webhookInstallOptions.LocalServingHost, webhookInstallOptions.LocalServingPort)
+	ens.G.Eventually(func() error {
+		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
+		conn, err := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			return err
+		}
+		conn.Close()
+		return nil
+	}).Should(gomega.Succeed())
 
 	return ens
 }
