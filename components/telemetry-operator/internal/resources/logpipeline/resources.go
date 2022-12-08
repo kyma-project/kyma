@@ -11,7 +11,7 @@ import (
 	"k8s.io/utils/pointer"
 )
 
-func makeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
+func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 	resourcesFluentBit := corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("10m"),
@@ -246,7 +246,7 @@ func makeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 	}
 }
 
-func makeService(name types.NamespacedName) *corev1.Service {
+func MakeService(name types.NamespacedName) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
@@ -273,7 +273,7 @@ func makeService(name types.NamespacedName) *corev1.Service {
 	}
 }
 
-func makeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
+func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 	parserConfig := `
 [PARSER]
     Name docker_no_time
@@ -362,7 +362,7 @@ func makeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 	}
 }
 
-func makeLuaConfigMap(name types.NamespacedName) *corev1.ConfigMap {
+func MakeLuaConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 	luaFilter := `
 function kubernetes_map_keys(tag, timestamp, record)
   if record.kubernetes == nil then
