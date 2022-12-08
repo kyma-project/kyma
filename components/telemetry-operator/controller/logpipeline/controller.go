@@ -110,11 +110,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	if r.config.ManageFluentBit && pipeline.DeletionTimestamp.IsZero() {
-		config := resourceConfig{
-			BaseName:  fmt.Sprintf("telemetry-%s", r.config.DaemonSet.Name),
-			Namespace: r.config.DaemonSet.Namespace,
-		}
-		if err = r.installOrUpgradeFluentBit(ctx, config); err != nil {
+		if err = r.installOrUpgradeFluentBit(ctx, r.config.DaemonSet); err != nil {
 			return err
 		}
 	}
@@ -139,20 +135,20 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	return err
 }
 
-func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, config resourceConfig) error {
-	daemonSet := makeDaemonSet(config)
+func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, name types.NamespacedName) error {
+	daemonSet := makeDaemonSet(name)
 	if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
 		return fmt.Errorf("failed to create fluent bit daemonset: %w", err)
 	}
-	service := makeService(config)
+	service := makeService(name)
 	if err := utils.CreateOrUpdateService(ctx, r, service); err != nil {
 		return fmt.Errorf("failed to create fluent bit service: %w", err)
 	}
-	configMap := makeConfigMap(config)
+	configMap := makeConfigMap(name)
 	if err := utils.CreateOrUpdateConfigMap(ctx, r, configMap); err != nil {
 		return fmt.Errorf("failed to create fluent bit configmap: %w", err)
 	}
-	luaConfigMap := makeLuaConfigMap(config)
+	luaConfigMap := makeLuaConfigMap(name)
 	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaConfigMap); err != nil {
 		return fmt.Errorf("failed to create fluent bit lua configmap: %w", err)
 	}

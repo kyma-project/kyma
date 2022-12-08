@@ -6,16 +6,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 )
 
-type resourceConfig struct {
-	BaseName  string
-	Namespace string
-}
-
-func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
+func makeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 	resourcesFluentBit := corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    resource.MustParse("10m"),
@@ -40,20 +36,20 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 	return &appsv1.DaemonSet{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.BaseName,
-			Namespace: config.Namespace,
-			Labels:    labels(config),
+			Name:      name.Name,
+			Namespace: name.Namespace,
+			Labels:    labels(name),
 		},
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: labels(config),
+				MatchLabels: labels(name),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels(config),
+					Labels: labels(name),
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: config.BaseName,
+					ServiceAccountName: name.Name,
 					PriorityClassName:  "kyma-system-priority",
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsNonRoot:   pointer.Bool(false),
@@ -100,7 +96,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							EnvFrom: []corev1.EnvFromSource{
 								{
 									SecretRef: &corev1.SecretEnvSource{
-										LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-env", config.BaseName)},
+										LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-env", name.Name)},
 										Optional:             pointer.Bool(true),
 									},
 								},
@@ -180,7 +176,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "config",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: config.BaseName},
+									LocalObjectReference: corev1.LocalObjectReference{Name: name.Name},
 								},
 							},
 						},
@@ -188,7 +184,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "luascripts",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-luascripts", config.BaseName)},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-luascripts", name.Name)},
 								},
 							},
 						},
@@ -214,7 +210,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "dynamic-config",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-sections", config.BaseName)},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-sections", name.Name)},
 									Optional:             pointer.Bool(true),
 								},
 							},
@@ -223,7 +219,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "dynamic-parsers-config",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-parsers", config.BaseName)},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-parsers", name.Name)},
 									Optional:             pointer.Bool(true),
 								},
 							},
@@ -232,7 +228,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 							Name: "dynamic-files",
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-files", config.BaseName)},
+									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-files", name.Name)},
 									Optional:             pointer.Bool(true),
 								},
 							},
@@ -240,7 +236,7 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 						{
 							Name: "varfluentbit",
 							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{Path: fmt.Sprintf("/var/%s", config.BaseName)},
+								HostPath: &corev1.HostPathVolumeSource{Path: fmt.Sprintf("/var/%s", name.Name)},
 							},
 						},
 					},
@@ -250,12 +246,12 @@ func makeDaemonSet(config resourceConfig) *appsv1.DaemonSet {
 	}
 }
 
-func makeService(config resourceConfig) *corev1.Service {
+func makeService(name types.NamespacedName) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.BaseName,
-			Namespace: config.Namespace,
-			Labels:    labels(config),
+			Name:      name.Name,
+			Namespace: name.Namespace,
+			Labels:    labels(name),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -272,12 +268,12 @@ func makeService(config resourceConfig) *corev1.Service {
 					TargetPort: intstr.IntOrString{StrVal: "http-metrics"},
 				},
 			},
-			Selector: labels(config),
+			Selector: labels(name),
 		},
 	}
 }
 
-func makeConfigMap(config resourceConfig) *corev1.ConfigMap {
+func makeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 	parserConfig := `
 [PARSER]
     Name docker_no_time
@@ -354,9 +350,9 @@ func makeConfigMap(config resourceConfig) *corev1.ConfigMap {
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      config.BaseName,
-			Namespace: config.Namespace,
-			Labels:    labels(config),
+			Name:      name.Name,
+			Namespace: name.Namespace,
+			Labels:    labels(name),
 		},
 		Data: map[string]string{
 			"custom_parsers.conf": parserConfig,
@@ -366,7 +362,7 @@ func makeConfigMap(config resourceConfig) *corev1.ConfigMap {
 	}
 }
 
-func makeLuaConfigMap(config resourceConfig) *corev1.ConfigMap {
+func makeLuaConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 	luaFilter := `
 function kubernetes_map_keys(tag, timestamp, record)
   if record.kubernetes == nil then
@@ -400,16 +396,16 @@ end
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-luascripts", config.BaseName),
-			Namespace: config.Namespace,
-			Labels:    labels(config),
+			Name:      fmt.Sprintf("%s-luascripts", name.Name),
+			Namespace: name.Namespace,
+			Labels:    labels(name),
 		},
 		Data: map[string]string{"filter-script.lua": luaFilter},
 	}
 }
 
-func labels(config resourceConfig) map[string]string {
+func labels(name types.NamespacedName) map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name": config.BaseName,
+		"app.kubernetes.io/name": name.Name,
 	}
 }
