@@ -15,12 +15,12 @@ install-sdk:
 clean:
 	mvn clean package
 
-#------------------------------------------------------JVM---------------------------------------------------------#
+#------------------------------------------------------JVM-------------------------------------------------------------#
 .PHONY: build-runtime
 build-runtime: install-sdk
 	docker build -t ${RUNTIME_IMAGE} -f  Dockerfile-jvm-runtime .
 
-.PHONY: build-runtime
+.PHONY: push-runtime-k3d
 push-runtime-k3d:
 	docker image tag ${RUNTIME_IMAGE}  ${RUNTIME_IMAGE_REMOTE}
 	docker push ${RUNTIME_IMAGE_REMOTE}
@@ -63,7 +63,7 @@ run-jvm-hello-world: build-runtime Dockerfile-jvm-function-local
 		 -f Dockerfile-jvm-function-local .
 
 	docker run -ti -p 8080:8080 --rm --env PUBLISHER_PROXY_ADDRESS=http://localhost:10000/publish \
-		--env TRACE_COLLECTOR_ENDPOINT=http://localhost:4318/v1/traces\
+		--env TRACE_COLLECTOR_ENDPOINT=http://localhost:4318/v1/traces \
 		--env SERVICE_NAMESPACE=default \
 		--env HOSTNAME=emitter-local-84dd76fc94-2pnpd \
 		--name java-jvm-function ${FUNCTION_IMAGE}
