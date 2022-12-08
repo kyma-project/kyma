@@ -3,12 +3,12 @@ package function
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
-
 	"github.com/sirupsen/logrus"
+	"net/url"
+	"time"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -27,6 +27,7 @@ import (
 type Function struct {
 	resCli      *resource.Resource
 	function    *serverlessv1alpha2.Function
+	FunctionURL *url.URL
 	waitTimeout time.Duration
 	log         *logrus.Entry
 	verbose     bool
@@ -44,12 +45,19 @@ func NewFunction(name string, c shared.Container) *Function {
 		},
 	}
 
+	//TODO: implement kubectl proxy
+	fnURL, err := calculateFunctionURL(name, c.Namespace, false)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Function{
 		resCli:      resource.New(c.DynamicCli, serverlessv1alpha2.GroupVersion.WithResource("functions"), c.Namespace, c.Log, c.Verbose),
 		waitTimeout: c.WaitTimeout,
 		log:         c.Log,
 		verbose:     c.Verbose,
 		function:    function,
+		FunctionURL: fnURL,
 	}
 }
 
@@ -89,6 +97,20 @@ func (f *Function) Delete() error {
 	}
 
 	return nil
+}
+
+func calculateFunctionURL(name, namespace string, useProxy bool) (*url.URL, error) {
+	var functionURL = ""
+	if useProxy {
+		functionURL = fmt.Sprintf("127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", namespace, name)
+	} else {
+		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", namespace, name)
+	}
+	parsedURL, err := url.Parse(functionURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while parsing function access URL")
+	}
+	return parsedURL, nil
 }
 
 func (f *Function) Update(spec serverlessv1alpha2.FunctionSpec) error {
@@ -159,13 +181,13 @@ func (f *Function) isFunctionReady() func(event watch.Event) (bool, error) {
 func (f Function) isConditionReady(fn serverlessv1alpha2.Function) bool {
 	conditions := fn.Status.Conditions
 	if len(conditions) == 0 {
-		f.LogReadiness(false)
+		f.logReadiness(false)
 		return false
 	}
 
 	ready := conditions[0].Type == serverlessv1alpha2.ConditionRunning && conditions[0].Status == corev1.ConditionTrue
 
-	f.LogReadiness(ready)
+	f.logReadiness(ready)
 
 	return ready
 }
@@ -180,7 +202,7 @@ func (f Function) toString() string {
 	return fmt.Sprintf("Function %s in namespace %s", f.function.Name, f.function.Namespace)
 }
 
-func (f Function) LogReadiness(ready bool) {
+func (f Function) logReadiness(ready bool) {
 	if ready {
 		f.log.Infof("%s is ready", f.toString())
 	} else {
