@@ -7,18 +7,19 @@ import (
 	ce "github.com/cloudevents/sdk-go/v2/event"
 )
 
-// Event is a wrapper around a CloudEvent that allows to directly manipulate
-// the segments of an event type for the way types are used
+// Event is a wrapper around a CloudEvent that allows to directly manipulate the segments of type of an event.
 // in kyma eventing.
 type Event struct {
 	ce.Event
 
-	// These are the segments of a CloudEvent's Type:
-	// 'prefix.app.name.version'.
-	prefix  string
-	app     string
-	name    string
-	version string
+	// These are the segments of a CloudEvent's Type: "prefix.app.name.version".
+	prefix       string
+	app          string
+	name         string
+	version      string
+
+	// This is the original type of the event before any changes were done to it. 
+	originalType string
 }
 
 // Opt is a type for options to build an Event.
@@ -37,9 +38,8 @@ func NewEvent(options ...Opt) (*Event, error) {
 		}
 	}
 
-	// If the type segments are not set yet try to extract them from the
-	// underlying CloudEvent. If any segment --expect prefix-- is empty,
-	// this will fail with an error.
+	// If the type segments are not set yet try to extract them from the underlying CloudEvent. If any segment
+	// --expect the prefix-- is empty, this will fail with an error.
 	if event.areAllTypeSegmentsEmpty() {
 		err := event.setTypeSegmentsViaCloudEvent()
 		if err != nil {
@@ -52,12 +52,12 @@ func NewEvent(options ...Opt) (*Event, error) {
 	return &event, nil
 }
 
-// Prefix only returns the prefix of the EventType.
+// Prefix only returns the prefix segment of the Type.
 func (e *Event) Prefix() string {
 	return e.prefix
 }
 
-// SetPrefix sets the prefix and updates the Type accordingly.
+// SetPrefix sets the prefix segment of the Type and updates the Type accordingly.
 func (e *Event) SetPrefix(p string) {
 	e.prefix = p
 	e.updateType()
@@ -68,24 +68,24 @@ func (e *Event) IsPrefixEmpty() bool {
 	return e.prefix != ""
 }
 
-// AppName only returns the prefix of the EventType.
-func (e *Event) AppName() string {
+// Name only returns the app segment of the Type.
+func (e *Event) Name() string {
 	return e.app
 }
 
-// SetAppName sets the appName and updates the Type accordingly.
-func (e *Event) SetAppName(s string) {
+// SetApp sets the app segment of the Type and updates the Type accordingly.
+func (e *Event) SetApp(s string) {
 	e.app = s
 	e.updateType()
 }
 
-// EventName only returns the prefix of the EventType.
+// EventName only returns the name segment of the Type.
 func (e *Event) EventName() string {
 	return e.name
 }
 
-// SetEventName sets the eventName and updates the Type accordingly.
-func (e *Event) SetEventName(s string) {
+// SetName sets the name and updates the Type accordingly.
+func (e *Event) SetName(s string) {
 	e.name = s
 	e.updateType()
 }

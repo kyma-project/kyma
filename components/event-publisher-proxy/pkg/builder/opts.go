@@ -9,7 +9,7 @@ import (
 	et "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 )
 
-// WithCloudEvent will set the TransitionEvent's event as the given one.
+// WithCloudEvent will set the TransitionEvent's event as the given one. 
 func WithCloudEvent(cloudEvent *ce.Event) func(*Event) error {
 	return func(t *Event) error {
 		t.Event = *cloudEvent
@@ -17,9 +17,16 @@ func WithCloudEvent(cloudEvent *ce.Event) func(*Event) error {
 	}
 }
 
+func WithOriginalType(originalType string) func(*Event) error {
+	return func(e *Event) error {
+		e.originalType = originalType
+		return nil
+	}
+}
+
 // WithCleaner will use the given cleaner to clean up the cloud event's type.
 // Remember to put this option after other options that set the type in the
-// first place.
+// first place. If 
 func WithCleaner(cleaner et.Cleaner) func(*Event) error {
 	return func(t *Event) error {
 		cleanType, err := cleaner.Clean(t.Event.Type())

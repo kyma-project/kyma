@@ -183,15 +183,12 @@ func (t *Transformer) convertPublishRequestToEvent(appName string, publishReques
 	}
 
 	// Create a new Event from the CloudEvent.
-	eventName := publishRequest.PublishrequestV1.EventType
-	prefix := t.eventTypePrefix
-	version := publishRequest.PublishrequestV1.EventTypeVersion
 	event, err := builder.NewEvent(
 		builder.WithCloudEvent(&cloudEvent),
-		builder.WithPrefix(prefix),
+		builder.WithPrefix(t.eventTypePrefix),
 		builder.WithApp(appName),
-		builder.WithName(eventName),
-		builder.WithVersion(version),
+		builder.WithName(publishRequest.PublishrequestV1.EventType),
+		builder.WithVersion(publishRequest.PublishrequestV1.EventTypeVersion),
 		builder.WithRemoveNonAlphanumericsFromType(),
 	)
 	if err != nil {
