@@ -56,8 +56,6 @@ func (c comparator) compareSpec(t *testing.T, expected, actual *v1alpha1.Applica
 	t.Helper()
 	a := assert.New(t)
 
-	// a.True(false, "Just fail")
-
 	a.Equal(expected.Spec.Description, actual.Spec.Description, "Description is incorrect")
 	a.Equal(expected.Spec.SkipInstallation, actual.Spec.SkipInstallation, "SkipInstallation is incorrect")
 
