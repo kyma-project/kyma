@@ -2,6 +2,8 @@ package dryrun
 
 import (
 	"context"
+	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"os"
 	"path/filepath"
 
@@ -59,8 +61,14 @@ func (f *fileWriterImpl) preparePipelineDryRun(ctx context.Context, workDir stri
 func (f *fileWriterImpl) writeConfig(ctx context.Context, basePath string) error {
 	var cm v1.ConfigMap
 	var err error
-	if err = f.client.Get(ctx, f.config.FluentBitConfigMapName, &cm); err != nil {
-		return err
+	err = f.client.Get(ctx, f.config.FluentBitConfigMapName, &cm)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			newCm := resources.MakeConfigMap(f.config.FluentBitConfigMapName)
+			cm = *newCm
+		} else {
+			return err
+		}
 	}
 
 	for key, data := range cm.Data {

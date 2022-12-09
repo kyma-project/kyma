@@ -24,6 +24,7 @@ import (
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/configchecksum"
+	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -110,7 +111,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = controllerutil.SetControllerReference(pipeline, secret, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateSecret(ctx, r.Client, secret); err != nil {
+	if err = utils.CreateOrUpdateSecret(ctx, r.Client, secret); err != nil {
 		return err
 	}
 
@@ -118,7 +119,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = controllerutil.SetControllerReference(pipeline, configMap, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
+	if err = utils.CreateOrUpdateConfigMap(ctx, r.Client, configMap); err != nil {
 		return fmt.Errorf("failed to create otel collector configmap: %w", err)
 	}
 
@@ -127,7 +128,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = controllerutil.SetControllerReference(pipeline, deployment, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
+	if err = utils.CreateOrUpdateDeployment(ctx, r.Client, deployment); err != nil {
 		return fmt.Errorf("failed to create otel collector deployment: %w", err)
 	}
 
@@ -135,16 +136,16 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = controllerutil.SetControllerReference(pipeline, otlpService, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateService(ctx, r.Client, otlpService); err != nil {
-		return fmt.Errorf("failed to create otel collector service: %w", err)
+	if err = utils.CreateOrUpdateService(ctx, r.Client, otlpService); err != nil {
+		return fmt.Errorf("failed to create otel collector otlp service: %w", err)
 	}
 
 	openCensusService := makeOpenCensusService(r.config)
 	if err = controllerutil.SetControllerReference(pipeline, openCensusService, r.Scheme); err != nil {
 		return err
 	}
-	if err = createOrUpdateService(ctx, r.Client, openCensusService); err != nil {
-		return fmt.Errorf("failed to create otel collector service: %w", err)
+	if err = utils.CreateOrUpdateService(ctx, r.Client, openCensusService); err != nil {
+		return fmt.Errorf("failed to create otel collector open census service: %w", err)
 	}
 
 	if r.config.CreateServiceMonitor {
@@ -153,7 +154,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 			return err
 		}
 
-		if err = createOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
+		if err = utils.CreateOrUpdateServiceMonitor(ctx, r.Client, serviceMonitor); err != nil {
 			return fmt.Errorf("failed to create otel collector prometheus service monitor: %w", err)
 		}
 
@@ -161,7 +162,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 		if err = controllerutil.SetControllerReference(pipeline, metricsService, r.Scheme); err != nil {
 			return err
 		}
-		if err = createOrUpdateService(ctx, r.Client, metricsService); err != nil {
+		if err = utils.CreateOrUpdateService(ctx, r.Client, metricsService); err != nil {
 			return fmt.Errorf("failed to create otel collector metrics service: %w", err)
 		}
 	}
