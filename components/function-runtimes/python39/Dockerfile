@@ -7,8 +7,8 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-# image base on alpine:3.16.2
-FROM alpine@sha256:bc41182d7ef5ffc53a40b044e725193bc10142a1243f395ee852a8d9730fc2ad
+# image base on alpine:3.17.0
+FROM alpine@sha256:c0d488a800e4127c334ad20d61d7bc21b4097540327217dfab52262adc02380c
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -28,7 +28,7 @@ RUN set -eux; \
 # other runtime dependencies for Python are installed later
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.9.13
+ENV PYTHON_VERSION 3.9.16
 
 # hadolint ignore=DL3003,SC2155
 RUN set -ex \
@@ -50,7 +50,6 @@ RUN set -ex \
 	&& rm python.tar.xz \
 	\
 	&& apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-		sqlite-dev=3.39.4-r0 \
 		binutils=2.39-r2 \
 	&& apk add --no-cache --virtual .build-deps  \
 		bluez-dev \
