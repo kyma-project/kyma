@@ -1,5 +1,7 @@
 package registry
 
+type ImageList map[string]map[string]struct{}
+
 func NewTaggedImageList() ImageList {
 	return ImageList{}
 }

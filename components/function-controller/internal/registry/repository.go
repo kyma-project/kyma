@@ -2,13 +2,10 @@ package registry
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"net/url"
-	"strings"
 
+	"github.com/docker/distribution"
 	"github.com/docker/distribution/reference"
-	"github.com/docker/distribution/registry/client"
 	"github.com/docker/distribution/registry/client/auth"
 	"github.com/docker/distribution/registry/client/transport"
 	dockertypes "github.com/docker/docker/api/types"
@@ -17,52 +14,26 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
-	// url.Parse() doesn't correctly parse URLs with ports and no scheme! So we need to add
-	// the proper scheme before parsing the url
-	strURL := opts.URL
-	if !strings.HasPrefix("http", strURL) {
-		strURL = fmt.Sprintf("http://%s", strURL)
-	}
-	u, err := url.Parse(strURL)
-	if err != nil {
-		return nil, err
-	}
-
-	return &registryClient{
-		ctx:      ctx,
-		userName: opts.Username,
-		password: opts.Password,
-		url:      u,
-	}, nil
+type RepositoryClient interface {
+	ListTags() ([]string, error)
+	GetImageTag(tag string) (*Tag, error)
+	DeleteImageTag(tagDigest digest.Digest) error
 }
 
-func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, error) {
-	named, err := reference.WithName(imageName)
-	if err != nil {
-		return nil, errors.Wrap(err, "while validating image name")
-	}
-	tr, err := c.registryAuthTransport()
-	if err != nil {
-		return nil, errors.Wrap(err, "while building registry auth transport")
-	}
-	repo, err := client.NewRepository(reference.TrimNamed(named), c.url.String(), tr)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing repository client")
-	}
+type repositoryClient struct {
+	ctx context.Context
 
-	manifestService, err := repo.Manifests(context.Background())
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating repository manifest service")
-	}
+	namedImage reference.Named
 
-	return &repositoryClient{
-		ctx:             c.ctx,
-		namedImage:      named,
-		tagSservice:     repo.Tags(c.ctx),
-		manifestService: manifestService,
-	}, nil
+	tagSservice     distribution.TagService
+	manifestService distribution.ManifestService
 }
+
+type Tag struct {
+	distribution.Descriptor
+}
+
+var _ RepositoryClient = &repositoryClient{}
 
 func (rc *repositoryClient) ListTags() ([]string, error) {
 	return rc.tagSservice.All(rc.ctx)
