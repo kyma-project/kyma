@@ -89,13 +89,13 @@ global:
       version: "v20221114-432a0472"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "v20221110-f5cb45c7"
+      version: "v20221209-28eb3cee"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
-      version: "v20221110-f5cb45c7"
+      version: "v20221209-28eb3cee"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "v20221110-f5cb45c7"
+      version: "v20221209-28eb3cee"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.9.0-4ced14d5"
