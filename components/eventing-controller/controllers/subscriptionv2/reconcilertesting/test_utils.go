@@ -2,10 +2,16 @@ package reconcilertesting
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net"
 	"testing"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/stretchr/testify/require"
@@ -80,11 +86,17 @@ func EventuallyUpdateSubscriptionOnK8s(ctx context.Context, ens *TestEnsemble,
 	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "error while updating the subscription")
 }
 
-func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
+func NewSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
 	subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
 	ens.testID++
 	subscription := v2.NewSubscription(subscriptionName, ens.SubscriberSvc.Namespace, subscriptionOpts...)
-	subscription = createSubscriptionInK8s(ens, subscription)
+	return subscription
+}
+
+func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...v2.SubscriptionOpt) *eventingv1alpha2.Subscription {
+	subscription := NewSubscription(ens, subscriptionOpts...)
+	EnsureNamespaceCreatedForSub(ens, subscription)
+	ensureSubscriptionCreated(ens, subscription)
 	return subscription
 }
 
@@ -213,12 +225,9 @@ func createSubscriberSvcInK8s(ens *TestEnsemble) {
 	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "Failed to create the subscriber service")
 }
 
-// createSubscriptionInK8s creates a Subscription on the K8s client of the testEnsemble. All the reconciliation
-// happening will be reflected in the subscription.
-func createSubscriptionInK8s(ens *TestEnsemble,
-	subscription *eventingv1alpha2.Subscription) *eventingv1alpha2.Subscription {
-	g := ens.G
-
+// EnsureNamespaceCreatedForSub creates the namespace for subscription if it does not exist.
+func EnsureNamespaceCreatedForSub(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) {
+	// create subscription on cluster
 	if subscription.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
@@ -229,12 +238,20 @@ func createSubscriptionInK8s(ens *TestEnsemble,
 			}
 		}
 	}
+}
 
+// ensureSubscriptionCreated creates a Subscription on the K8s client of the testEnsemble. All the reconciliation
+// happening will be reflected in the subscription.
+func ensureSubscriptionCreated(ens *TestEnsemble, subscription *eventingv1alpha2.Subscription) {
 	// create subscription on cluster
-	g.Eventually(func() error {
+	ens.G.Eventually(func() error {
 		return ens.K8sClient.Create(ens.Ctx, subscription)
 	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred(), "Failed to create subscription")
-	return subscription
+}
+
+// EnsureK8sResourceNotCreated ensures that the obj creation in K8s fails.
+func EnsureK8sResourceNotCreated(ens *TestEnsemble, t *testing.T, obj client.Object, err error) {
+	require.Equal(t, ens.K8sClient.Create(ens.Ctx, obj), err)
 }
 
 func fixtureNamespace(name string) *v1.Namespace {
@@ -287,4 +304,32 @@ func NewUncleanEventType(ending string) string {
 
 func NewCleanEventType(ending string) string {
 	return fmt.Sprintf("%s%s", v2.OrderCreatedEventType, ending)
+}
+
+func GenerateInvalidSubscriptionError(subName, errType string, path *field.Path) error {
+	webhookErr := "admission webhook \"vsubscription.kb.io\" denied the request: "
+	givenError := k8serrors.NewInvalid(
+		eventingv1alpha2.GroupKind, subName,
+		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
+	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
+	return givenError
+}
+
+func StartAndWaitForWebhookServer(k8sManager manager.Manager, webhookInstallOpts *envtest.WebhookInstallOptions) error {
+	if err := (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager); err != nil {
+		return err
+	}
+	// wait for the webhook server to get ready
+	dialer := &net.Dialer{Timeout: time.Second}
+	addrPort := fmt.Sprintf("%s:%d", webhookInstallOpts.LocalServingHost, webhookInstallOpts.LocalServingPort)
+	err := retry.Do(func() error {
+		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
+		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
+		if connErr != nil {
+			return connErr
+		}
+		conn.Close()
+		return nil
+	}, retry.Attempts(MaxReconnects))
+	return err
 }

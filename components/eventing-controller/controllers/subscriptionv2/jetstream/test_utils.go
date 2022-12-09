@@ -65,6 +65,9 @@ func setupTestEnsemble(t *testing.T) *jetStreamTestEnsemble {
 			},
 			AttachControlPlaneOutput: attachControlPlaneOutput,
 			UseExistingCluster:       &useExistingCluster,
+			WebhookInstallOptions: envtest.WebhookInstallOptions{
+				Paths: []string{filepath.Join("../../../", "config", "webhook")},
+			},
 		},
 	}
 
@@ -100,9 +103,13 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 	require.NoError(ens.T, err)
 
 	syncPeriod := syncPeriod
+	webhookInstallOptions := &ens.TestEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(ens.Cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
+		Host:               webhookInstallOptions.LocalServingHost,
+		Port:               webhookInstallOptions.LocalServingPort,
+		CertDir:            webhookInstallOptions.LocalServingCertDir,
 		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
 	})
 	require.NoError(ens.T, err)
@@ -159,6 +166,9 @@ func startReconciler(ens *jetStreamTestEnsemble) *jetStreamTestEnsemble {
 
 	ens.K8sClient = k8sManager.GetClient()
 	require.NotNil(ens.T, ens.K8sClient)
+
+	err = reconcilertestingv2.StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions)
+	require.NoError(ens.T, err)
 
 	return ens
 }

@@ -9,7 +9,6 @@ import (
 )
 
 type FunctionSimpleTestConfig struct {
-	FnName       string
 	Fn           *function.Function
 	InClusterURL *url.URL
 }
@@ -21,7 +20,6 @@ func NewFunctionSimpleConfig(fnName string, toolBox shared.Container) (FunctionS
 	}
 
 	return FunctionSimpleTestConfig{
-		FnName:       fnName,
 		Fn:           function.NewFunction(fnName, toolBox),
 		InClusterURL: inClusterURL,
 	}, nil

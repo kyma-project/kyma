@@ -19,11 +19,12 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -51,26 +52,26 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 	//+kubebuilder:scaffold:imports
 )
 
 var (
-	certDir              string
-	deniedFilterPlugins  string
-	deniedOutputPlugins  string
-	enableLeaderElection bool
-	enableLogging        bool
-	enableTracing        bool
-	logFormat            string
-	logLevel             string
-	metricsAddr          string
-	probeAddr            string
-	scheme               = runtime.NewScheme()
-	setupLog             = ctrl.Log.WithName("setup")
-	syncPeriod           time.Duration
-	telemetryNamespace   string
+	certDir                string
+	deniedFilterPlugins    string
+	deniedOutputPlugins    string
+	enableLeaderElection   bool
+	enableLogging          bool
+	enableTracing          bool
+	enableManagedFluentBit bool
+	logFormat              string
+	logLevel               string
+	metricsAddr            string
+	probeAddr              string
+	scheme                 = runtime.NewScheme()
+	setupLog               = ctrl.Log.WithName("setup")
+	syncPeriod             time.Duration
+	telemetryNamespace     string
 
 	traceCollectorCreateServiceMonitor bool
 	traceCollectorBaseName             string
@@ -128,7 +129,7 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;patch
+//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 
 //+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
 
@@ -142,6 +143,7 @@ func main() {
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "Enable configurable logging.")
 	flag.BoolVar(&enableTracing, "enable-tracing", true, "Enable configurable tracing.")
+	flag.BoolVar(&enableManagedFluentBit, "enable-managed-fluentbit", false, "Enable operator managed Fluent Bit resources.")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
@@ -186,7 +188,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() {
-		if err := ctrLogger.WithContext().Sync(); err != nil {
+		if err = ctrLogger.WithContext().Sync(); err != nil {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
@@ -236,11 +238,11 @@ func main() {
 
 	//+kubebuilder:scaffold:builder
 
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+	if err := mgr.AddHealthzCheck("healthz", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "Failed to set up health check")
 		os.Exit(1)
 	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+	if err := mgr.AddReadyzCheck("readyz", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "Failed to set up ready check")
 		os.Exit(1)
 	}
@@ -292,6 +294,7 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		EnvSecret:         types.NamespacedName{Name: fluentBitEnvSecret, Namespace: telemetryNamespace},
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 		PipelineDefaults:  createPipelineDefaults(),
+		ManageFluentBit:   enableManagedFluentBit,
 	}
 	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
 }
