@@ -83,6 +83,13 @@ spec:
           ports:
           - containerPort: 9443
             protocol: TCP
+            name: webook
+          - containerPort: 8081
+            protocol: TCP
+            name: health
+          - containerPort: 8080
+            protocol: TCP
+            name: metrics
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_operator) }}"
