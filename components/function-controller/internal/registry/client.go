@@ -18,7 +18,6 @@ import (
 )
 
 func NewRegistryClient(ctx context.Context, opts *RegistryClientOptions) (RegistryClient, error) {
-
 	// url.Parse() doesn't correctly parse URLs with ports and no scheme! So we need to add
 	// the proper scheme before parsing the url
 	strURL := opts.URL
