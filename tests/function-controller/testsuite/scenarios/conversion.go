@@ -74,7 +74,7 @@ func ConversionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		step.NewParallelRunner(logf, "",
 			step.NewSerialTestRunner(gitFuncLogger, "Convert Git function",
-				teststep.NewGitServerV1Alpha1(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.IstioEnabled),
+				teststep.NewGitServerV1Alpha1(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.KubectlProxyEnabled, cfg.IstioEnabled),
 				teststep.NewCreateGitRepository(gitFuncLogger, gitrepository.New("git-repo", genericContainer), "Create Git Repository", gitopsv1alpha1.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
 				teststep.CreateFunctionV1Alpha1(gitFuncLogger, gitCfg.Fn, "Create Git Function", gitopsv1alpha1.GitopsFunction("git-repo", "/", "master", serverlessv1alpha1.Nodejs14)),
 				teststep.NewHTTPCheck(gitFuncLogger, "gitops function check ", gitCfg.InClusterURL, poll.WithLogger(gitFuncLogger), "GITOPS 1")),
