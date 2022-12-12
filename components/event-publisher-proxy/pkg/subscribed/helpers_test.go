@@ -1,9 +1,10 @@
 package subscribed
 
 import (
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"reflect"
 	"testing"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
@@ -50,7 +51,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			},
 			expectedEvents: []Event{},
 		}, {
-			name:    "should return event types w/o prefix for exact external event types",
+			name:    "should return event types if event type has prefix and app name as prefix",
 			appName: "foovarkes",
 			subscription: &eventingv1alpha2.Subscription{
 				Spec: eventingv1alpha2.SubscriptionSpec{
@@ -81,7 +82,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			},
 			expectedEvents: []Event{},
 		}, {
-			name:    "should return event type only with 'sap.kyma.custom' prefix",
+			name:    "should return event type only with 'sap.kyma.custom' prefix and appname",
 			appName: "foovarkes",
 			subscription: &eventingv1alpha2.Subscription{
 				Spec: eventingv1alpha2.SubscriptionSpec{
@@ -90,6 +91,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 					Types: []string{
 						"foo.prefix.custom.foovarkes.order.created.v1",
 						"sap.kyma.custom.foovarkes.order.created.v2",
+						"sap.kyma.custom.diffvarkes.order.created.v2",
 					},
 				},
 			},

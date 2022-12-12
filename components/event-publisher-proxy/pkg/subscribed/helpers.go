@@ -2,8 +2,9 @@ package subscribed
 
 import (
 	"fmt"
-	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 	"strings"
+
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -92,9 +93,11 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 
 // FilterEventTypeVersions returns a slice of Events:
 // 1. if the eventType matches the format for standard type matching: <event-name>.<version>
+// and source is equal to appName.
 // E.g. order.created.v0
-// 2. if the eventType matches the format for exact type matching: <eventTypePrefix><appName>.<event-name>.<version>
-// E.g. sap.external.custom.exampleapp.order.created.v0
+// 2. if the eventType matches the format for exact type matching: <eventTypePrefix>.<appName>.<event-name>.<version>
+// and eventTypePrefix and appName together is a prefix.
+// E.g. sap.kyma.custom.exampleapp.order.created.v0
 func FilterEventTypeVersions(eventTypePrefix, appName string, subscription *eventingv1alpha2.Subscription) []Event {
 	events := make([]Event, 0)
 	prefixAndAppName := fmt.Sprintf("%s.%s.", eventTypePrefix, appName)

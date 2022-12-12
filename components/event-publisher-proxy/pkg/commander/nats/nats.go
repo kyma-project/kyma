@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kelseyhightower/envconfig"

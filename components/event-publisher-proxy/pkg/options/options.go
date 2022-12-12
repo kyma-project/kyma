@@ -3,6 +3,7 @@ package options
 import (
 	"flag"
 	"fmt"
+
 	"github.com/kelseyhightower/envconfig"
 )
 
