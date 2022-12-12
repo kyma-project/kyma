@@ -117,7 +117,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: &corev1.HTTPGetAction{
 										Path: "/",
-										Port: intstr.IntOrString{StrVal: "http"},
+										Port: intstr.IntOrString{IntVal: 8080},
 									},
 								},
 							},
@@ -125,7 +125,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: &corev1.HTTPGetAction{
 										Path: "/api/v1/health",
-										Port: intstr.IntOrString{StrVal: "http"},
+										Port: intstr.IntOrString{IntVal: 8080},
 									},
 								},
 							},
