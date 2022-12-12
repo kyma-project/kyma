@@ -8,7 +8,7 @@ Observability tools should clearly show the big picture, no matter if you're mon
 
 The diagram shows how distributed tracing helps to track the request path:
 
-![Distributed tracing](./assets/distributed-tracing.svg)
+![Distributed tracing](./assets/distributed-tracing.drawio.svg)
 
 ## Prerequisites
 
@@ -143,6 +143,7 @@ For details, see the [TracePipeline specification file](https://github.com/kyma-
 ## Limitations
 
 The collector setup is designed using the following assumptions:
+- 
 
 Out of that the following limitations are resulting:
 

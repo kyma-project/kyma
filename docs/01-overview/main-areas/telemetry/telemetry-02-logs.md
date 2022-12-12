@@ -411,7 +411,7 @@ For LogPipeline and LogParser examples, see the [samples](https://github.com/kym
 
 After a log record has been read, it is preprocessed by centrally configured plugins, like the `kubernetes` filter. Thus, when a record is ready to be processed by the sections defined in the LogPipeline definition, it has several attributes available for processing and shipment.
 
-![Flow](./assets/telemetry-logging-flow.drawio.svg)
+![Flow](./assets/logging-flow.drawio.svg)
 
 Learn more about these attributes in the following sections.
 
