@@ -9,8 +9,6 @@ replace (
 	github.com/prometheus/common => github.com/prometheus/common v0.26.0
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220213190939-1e6e3497d506
-	golang.org/x/net => golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
-	golang.org/x/text => golang.org/x/text v0.3.8-0.20220124021120-d1c84af989ab
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api => k8s.io/api v0.22.7
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.7
@@ -68,11 +66,11 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
+	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/term v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
