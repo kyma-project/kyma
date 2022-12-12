@@ -2,8 +2,9 @@ package namespace
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

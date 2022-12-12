@@ -31,7 +31,7 @@ func NewGitopsConfig(fnName, gitServerImage, gitServerRepoName string, useProxy 
 	if useProxy {
 		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", toolbox.Namespace, fnName)
 	} else {
-		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", toolbox.Namespace, fnName)
+		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", fnName, toolbox.Namespace)
 	}
 	parsedURL, err := url.Parse(functionURL)
 	if err != nil {

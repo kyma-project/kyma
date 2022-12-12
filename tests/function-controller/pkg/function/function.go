@@ -3,11 +3,12 @@ package function
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/sirupsen/logrus"
-	"net/url"
-	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
@@ -45,7 +46,6 @@ func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 		},
 	}
 
-	//TODO: implement kubectl proxy
 	fnURL, err := calculateFunctionURL(name, c.Namespace, proxyEnabled)
 	if err != nil {
 		panic(err)

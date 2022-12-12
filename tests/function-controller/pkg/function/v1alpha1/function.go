@@ -206,7 +206,7 @@ func calculateFunctionURL(name, namespace string, useProxy bool) (*url.URL, erro
 	if useProxy {
 		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", namespace, name)
 	} else {
-		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", namespace, name)
+		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", name, namespace)
 	}
 	parsedURL, err := url.Parse(functionURL)
 	if err != nil {
