@@ -12,7 +12,7 @@ const (
 
 type Config struct {
 	Namespace                       string           `envconfig:"default=test-function"`
-	KubectProxyEnabled              bool             `envconfig:"default=false"`
+	KubectlProxyEnabled             bool             `envconfig:"default=false"`
 	Verbose                         bool             `envconfig:"default=false"`
 	WaitTimeout                     time.Duration    `envconfig:"default=15m"`
 	MaxPollingTime                  time.Duration    `envconfig:"default=5m"`

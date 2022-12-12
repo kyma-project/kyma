@@ -99,7 +99,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 
 	steps := []step.Step{}
 	for _, testCase := range testCases {
-		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg.KubectProxyEnabled)
+		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg.KubectlProxyEnabled)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while generated test case steps")
 		}
