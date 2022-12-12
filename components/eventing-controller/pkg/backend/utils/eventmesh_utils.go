@@ -153,10 +153,6 @@ func ConvertKymaSubToEventMeshSub(subscription *eventingv1alpha2.Subscription, t
 
 func setEventMeshProtocolSettings(subscription *eventingv1alpha2.Subscription, eventMeshSub *types.Subscription) error {
 	// Applying protocol settings if provided in subscription CR
-	// content mode
-	if contentMode, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode]; ok && contentMode != "" {
-		eventMeshSub.ContentMode = contentMode
-	}
 	// qos
 	if qosStr, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsQos]; ok && qosStr != "" {
 		qos, err := getQos(qosStr)
@@ -164,6 +160,10 @@ func setEventMeshProtocolSettings(subscription *eventingv1alpha2.Subscription, e
 			return err
 		}
 		eventMeshSub.Qos = qos
+	}
+	// content mode
+	if contentMode, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode]; ok && contentMode != "" {
+		eventMeshSub.ContentMode = contentMode
 	}
 	// handshake
 	if exemptHandshake, ok := subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsExemptHandshake]; ok {
@@ -189,6 +189,14 @@ func getEventMeshWebhookAuth(subscription *eventingv1alpha2.Subscription,
 		auth.Type = types.AuthTypeClientCredentials
 	}
 
+	if grantType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthGrantType]; ok {
+		if grantType != string(types.GrantTypeClientCredentials) {
+			return nil, fmt.Errorf("invalid GrantType: %v, required: %v", grantType,
+				string(types.GrantTypeClientCredentials))
+		}
+		auth.GrantType = types.GrantTypeClientCredentials
+	}
+
 	if tokenURL, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthTokenURL]; ok {
 		auth.TokenURL = tokenURL
 	}
@@ -199,14 +207,6 @@ func getEventMeshWebhookAuth(subscription *eventingv1alpha2.Subscription,
 
 	if clientSecret, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthClientSecret]; ok {
 		auth.ClientSecret = clientSecret
-	}
-
-	if grantType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthGrantType]; ok {
-		if grantType != string(types.GrantTypeClientCredentials) {
-			return nil, fmt.Errorf("invalid GrantType: %v, required: %v", grantType,
-				string(types.GrantTypeClientCredentials))
-		}
-		auth.GrantType = types.GrantTypeClientCredentials
 	}
 
 	// check if auth was provided in subscription CR

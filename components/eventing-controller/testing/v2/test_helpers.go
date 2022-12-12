@@ -347,6 +347,22 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 	}
 }
 
+func WithInvalidProtocolSettingsQos() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		s.Spec.Config = map[string]string{
+			eventingv1alpha2.ProtocolSettingsQos: "AT_INVALID_ONCE",
+		}
+	}
+}
+
+func WithInvalidWebhookAuthType() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		s.Spec.Config = map[string]string{
+			eventingv1alpha2.WebhookAuthType: "abcd",
+		}
+	}
+}
+
 func WithProtocolBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		if s.Spec.Config == nil {
