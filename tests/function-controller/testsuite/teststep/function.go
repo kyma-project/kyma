@@ -51,11 +51,10 @@ func (f newFunction) OnError() error {
 var _ step.Step = newFunction{}
 
 type updateFunc struct {
-	name     string
-	funcData *function.FunctionData
-	fn       *function.Function
-	spec     serverlessv1alpha2.FunctionSpec
-	log      *logrus.Entry
+	name string
+	fn   *function.Function
+	spec serverlessv1alpha2.FunctionSpec
+	log  *logrus.Entry
 }
 
 func UpdateFunction(log *logrus.Entry, fn *function.Function, name string, spec serverlessv1alpha2.FunctionSpec) step.Step {

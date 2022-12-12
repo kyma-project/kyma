@@ -2,13 +2,11 @@ package test
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net"
 	"strings"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/validation/field"
+	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
@@ -129,10 +127,6 @@ func setupSuite() error {
 		return err
 	}
 
-	if err = (&eventingv1alpha2.Subscription{}).SetupWebhookWithManager(k8sManager); err != nil {
-		return err
-	}
-
 	// setup nameMapper for EventMesh
 	emTestEnsemble.nameMapper = backendutils.NewBEBSubscriptionNameMapper(domain, backendbeb.MaxBEBSubscriptionNameLength)
 
@@ -172,18 +166,7 @@ func setupSuite() error {
 
 	emTestEnsemble.k8sClient = k8sManager.GetClient()
 
-	// wait for the webhook server to get ready
-	dialer := &net.Dialer{Timeout: time.Second}
-	addrPort := fmt.Sprintf("%s:%d", webhookInstallOptions.LocalServingHost, webhookInstallOptions.LocalServingPort)
-	if err = retry.Do(func() error {
-		//nolint:gosec //the test certificate used will report as bad certificate and hence not perform the test
-		conn, connErr := tls.DialWithDialer(dialer, "tcp", addrPort, &tls.Config{InsecureSkipVerify: true})
-		if connErr != nil {
-			return connErr
-		}
-		conn.Close()
-		return nil
-	}, retry.Attempts(testEnvStartAttempts)); err != nil {
+	if err = testingv2.StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions); err != nil {
 		return err
 	}
 
@@ -378,13 +361,4 @@ func countEventMeshRequests(subscriptionName, eventType string) (int, int, int) 
 			}
 		})
 	return countGet, countPost, countDelete
-}
-
-func generateInvalidSubscriptionError(subName, errType string, path *field.Path) error {
-	webhookErr := "admission webhook \"vsubscription.kb.io\" denied the request: "
-	givenError := k8serrors.NewInvalid(
-		eventingv1alpha2.GroupKind, subName,
-		field.ErrorList{eventingv1alpha2.MakeInvalidFieldError(path, subName, errType)})
-	givenError.ErrStatus.Message = webhookErr + givenError.ErrStatus.Message
-	return givenError
 }
