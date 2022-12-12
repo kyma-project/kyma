@@ -1,5 +1,5 @@
 ---
-title: Observability - tutorials
+title: Observability
 ---
 
 ## Purpose
