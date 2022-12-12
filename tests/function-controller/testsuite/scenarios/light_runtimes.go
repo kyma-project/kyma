@@ -43,6 +43,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 	nodejs16Logger := logf.WithField(scenarioKey, "nodejs16")
+	java17AlphaJvmLogger := logf.WithField(scenarioKey, "java17jvm-alpha")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -57,6 +58,8 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	nodeJS14Fn := function.NewFunction("nodejs14", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs14Logger))
 
 	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+
+	java17AlphaJvmFn := function.NewFunction("java17jvm-alpha", cfg.KubectProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
@@ -107,6 +110,11 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 pre update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from nodejs16"),
 				teststep.UpdateFunction(nodejs16Logger, nodejs16Fn, "Update NodeJS16 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello from updated nodejs16", serverlessv1alpha2.NodeJs16)),
 				teststep.NewHTTPCheck(nodejs16Logger, "NodeJS16 post update simple check through service", nodejs16Fn.FunctionURL, poll, "Hello from updated nodejs16"),
+			),
+			step.NewSerialTestRunner(java17AlphaJvmLogger, "Java 17 Jvm Alppha test",
+				//TODO: Use runtime name from package after merging this PR: https://github.com/kyma-project/kyma/pull/15910
+				teststep.CreateFunction(java17AlphaJvmLogger, java17AlphaJvmFn, "Create Java 17 JVM Alpha", runtimes.BasicJavaFunction("Hello from java17 jvm", "java17-jvm-alpha")),
+				teststep.NewHTTPCheck(java17AlphaJvmLogger, "Java17 Jvm pre update simple check through service", java17AlphaJvmFn.FunctionURL, poll, "Hello from java17 jvm"),
 			),
 		),
 	), nil
