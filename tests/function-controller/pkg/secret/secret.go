@@ -1,8 +1,6 @@
 package secret
 
 import (
-	"time"
-
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/sirupsen/logrus"
@@ -18,22 +16,18 @@ import (
 )
 
 type Secret struct {
-	resCli      *resource.Resource
-	name        string
-	namespace   string
-	waitTimeout time.Duration
-	log         *logrus.Entry
-	verbose     bool
+	resCli    *resource.Resource
+	name      string
+	namespace string
+	log       *logrus.Entry
 }
 
 func NewSecret(name string, c shared.Container) *Secret {
 	return &Secret{
-		resCli:      resource.New(c.DynamicCli, corev1.SchemeGroupVersion.WithResource("secrets"), c.Namespace, c.Log, c.Verbose),
-		name:        name,
-		namespace:   c.Namespace,
-		waitTimeout: c.WaitTimeout,
-		log:         c.Log,
-		verbose:     c.Verbose,
+		resCli:    resource.New(c.DynamicCli, corev1.SchemeGroupVersion.WithResource("secrets"), c.Namespace, c.Log, c.Verbose),
+		name:      name,
+		namespace: c.Namespace,
+		log:       c.Log,
 	}
 }
 
