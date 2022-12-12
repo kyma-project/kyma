@@ -51,7 +51,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			},
 			expectedEvents: []Event{},
 		}, {
-			name:    "should return event types if event type has prefix and app name as prefix",
+			name:    "should return event types if event type consists of eventType and appName for typeMaching exact",
 			appName: "foovarkes",
 			subscription: &eventingv1alpha2.Subscription{
 				Spec: eventingv1alpha2.SubscriptionSpec{

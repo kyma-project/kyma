@@ -92,12 +92,8 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 }
 
 // FilterEventTypeVersions returns a slice of Events:
-// 1. if the eventType matches the format for standard type matching: <event-name>.<version>
-// and source is equal to appName.
-// E.g. order.created.v0
-// 2. if the eventType matches the format for exact type matching: <eventTypePrefix>.<appName>.<event-name>.<version>
-// and eventTypePrefix and appName together is a prefix.
-// E.g. sap.kyma.custom.exampleapp.order.created.v0
+// if the event source matches the appName for typeMatching standard
+// if the <eventTypePrefix>.<appName> is present in the eventType for typeMatching exact
 func FilterEventTypeVersions(eventTypePrefix, appName string, subscription *eventingv1alpha2.Subscription) []Event {
 	events := make([]Event, 0)
 	prefixAndAppName := fmt.Sprintf("%s.%s.", eventTypePrefix, appName)
