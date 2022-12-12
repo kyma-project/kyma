@@ -36,7 +36,6 @@ func (p Processor) extractEventsFromSubscriptions(
 
 	appName := legacy.ParseApplicationNameFromPath(request.URL.Path)
 	for _, sObj := range subsList {
-		// TODO: following function call returns v1alpha1, there needs to be v1alpha2 versions too
 		if enableNewCRDVersion {
 			sub, err := ConvertRuntimeObjToSubscription(sObj)
 
@@ -45,8 +44,7 @@ func (p Processor) extractEventsFromSubscriptions(
 				continue
 			}
 			if sub.Spec.Types != nil {
-				// TODO: has only v1alpha1 CRD spec which is sub.Spec.Filter
-				eventsForSub := FilterEventTypeVersions(appName, sub)
+				eventsForSub := FilterEventTypeVersions(p.Prefix, appName, sub)
 				eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
 			}
 		} else {
@@ -57,7 +55,6 @@ func (p Processor) extractEventsFromSubscriptions(
 				continue
 			}
 			if sub.Spec.Filter != nil {
-				// TODO: has only v1alpha1 CRD spec which is sub.Spec.Filter
 				eventsForSub := FilterEventTypeVersionsV1alpha1(p.Prefix, p.Namespace, appName, sub.Spec.Filter)
 				eventsMap = AddUniqueEventsToResult(eventsForSub, eventsMap)
 			}

@@ -95,15 +95,15 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 // E.g. order.created.v0
 // 2. if the eventType matches the format for exact type matching: <eventTypePrefix><appName>.<event-name>.<version>
 // E.g. sap.external.custom.exampleapp.order.created.v0
-func FilterEventTypeVersions(appName string, subscription *eventingv1alpha2.Subscription) []Event {
+func FilterEventTypeVersions(eventTypePrefix, appName string, subscription *eventingv1alpha2.Subscription) []Event {
 	events := make([]Event, 0)
+	prefixAndAppName := fmt.Sprintf("%s.%s.", eventTypePrefix, appName)
+
 	for _, eventType := range subscription.Spec.Types {
 		if subscription.Spec.TypeMatching == eventingv1alpha2.TypeMatchingExact {
 			// in case of type matching exact, we have app name as a part of event type
-			appNameWithDots := "." + appName + "."
-			if strings.Contains(eventType, appNameWithDots) {
-				eventTypeVersionArr := strings.Split(eventType, appNameWithDots)
-				eventTypeVersion := eventTypeVersionArr[len(eventTypeVersionArr)-1]
+			if strings.HasPrefix(eventType, prefixAndAppName) {
+				eventTypeVersion := strings.ReplaceAll(eventType, prefixAndAppName, "")
 				event := buildEvent(eventTypeVersion)
 				events = append(events, event)
 			}
