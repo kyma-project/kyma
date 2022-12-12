@@ -2,10 +2,11 @@ package runtimes
 
 import (
 	"fmt"
+
 	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-const basicJavaRequirements = `
+const basicJavaRequirementsTpl = `
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -37,9 +38,22 @@ const basicJavaRequirements = `
             <version>0.0.1</version>
             <scope>compile</scope>
         </dependency>
+		%s
     </dependencies>
 </project>
 `
+
+const additionalLib = `
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-csv -->
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-csv</artifactId>
+    <version>2.14.1</version>
+</dependency>
+`
+
+var basicDeps = fmt.Sprintf(basicJavaRequirementsTpl, "")
+var updatedDeps = fmt.Sprintf(basicJavaRequirementsTpl, additionalLib)
 
 const functionCodeTpl = `
 package io.project.kyma.serverless.handler;
@@ -67,7 +81,7 @@ func BasicJavaFunction(returnMsg string, rtm serverlessv1alpha2.Runtime) serverl
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
 				Source:       fmt.Sprintf(functionCodeTpl, returnMsg),
-				Dependencies: basicJavaRequirements,
+				Dependencies: basicDeps,
 			},
 		},
 	}
@@ -80,9 +94,8 @@ func BasicJavaFunctionWithCustomDependency(returnMsg string, rtm serverlessv1alp
 		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
-				Source: fmt.Sprintf(functionCodeTpl, returnMsg),
-				//TODO: add basic java dependency
-				Dependencies: basicJavaRequirements,
+				Source:       fmt.Sprintf(functionCodeTpl, returnMsg),
+				Dependencies: updatedDeps,
 			},
 		},
 	}

@@ -59,7 +59,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 
 	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
-	java17AlphaJvmFn := function.NewFunction("java17jvm-alpha", cfg.KubectProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
+	java17AlphaJvmFn := function.NewFunction("java17jvm-alpha", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
