@@ -74,3 +74,18 @@ func BasicJavaFunction(returnMsg string, rtm serverlessv1alpha2.Runtime) serverl
 
 	return spec
 }
+
+func BasicJavaFunctionWithCustomDependency(returnMsg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+	var spec = serverlessv1alpha2.FunctionSpec{
+		Runtime: rtm,
+		Source: serverlessv1alpha2.Source{
+			Inline: &serverlessv1alpha2.InlineSource{
+				Source: fmt.Sprintf(functionCodeTpl, returnMsg),
+				//TODO: add basic java dependency
+				Dependencies: basicJavaRequirements,
+			},
+		},
+	}
+
+	return spec
+}
