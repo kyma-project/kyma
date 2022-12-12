@@ -146,6 +146,21 @@ func (src *Subscription) setV2ProtocolFields(dst *v1alpha2.Subscription) {
 	}
 }
 
+func (src *Subscription) initializeProtocolSettingsIfNil() {
+	if src.Spec.ProtocolSettings == nil {
+		src.Spec.ProtocolSettings = &ProtocolSettings{}
+	}
+}
+
+func (src *Subscription) initializeWebhookAuthIfNil() {
+	if src.Spec.ProtocolSettings == nil {
+		src.Spec.ProtocolSettings = &ProtocolSettings{}
+	}
+	if src.Spec.ProtocolSettings.WebhookAuth == nil {
+		src.Spec.ProtocolSettings.WebhookAuth = &WebhookAuth{}
+	}
+}
+
 // setV1ProtocolFields converts the protocol-related fields from v1alpha1 to v1alpha2 Subscription version.
 func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 	if protocol, ok := dst.Spec.Config[v1alpha2.Protocol]; ok {
@@ -153,10 +168,11 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 	}
 
 	if currentMode, ok := dst.Spec.Config[v1alpha2.ProtocolSettingsContentMode]; ok {
-		src.Spec.ProtocolSettings = &ProtocolSettings{}
+		src.initializeProtocolSettingsIfNil()
 		src.Spec.ProtocolSettings.ContentMode = &currentMode
 	}
 	if qos, ok := dst.Spec.Config[v1alpha2.ProtocolSettingsQos]; ok {
+		src.initializeProtocolSettingsIfNil()
 		src.Spec.ProtocolSettings.Qos = &qos
 	}
 	if exemptHandshake, ok := dst.Spec.Config[v1alpha2.ProtocolSettingsExemptHandshake]; ok {
@@ -164,29 +180,35 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 		if err != nil {
 			handshake = true
 		}
+		src.initializeProtocolSettingsIfNil()
 		src.Spec.ProtocolSettings.ExemptHandshake = &handshake
 	}
-	if src.Spec.ProtocolSettings != nil {
-		if authType, ok := dst.Spec.Config[v1alpha2.WebhookAuthType]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth = &WebhookAuth{}
-			src.Spec.ProtocolSettings.WebhookAuth.Type = authType
-		}
-		if grantType, ok := dst.Spec.Config[v1alpha2.WebhookAuthGrantType]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.GrantType = grantType
-		}
-		if clientID, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientID]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.ClientID = clientID
-		}
-		if secret, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientSecret]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.ClientSecret = secret
-		}
-		if token, ok := dst.Spec.Config[v1alpha2.WebhookAuthTokenURL]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.TokenURL = token
-		}
-		if scope, ok := dst.Spec.Config[v1alpha2.WebhookAuthScope]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
-		}
+
+	if authType, ok := dst.Spec.Config[v1alpha2.WebhookAuthType]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.Type = authType
 	}
+	if grantType, ok := dst.Spec.Config[v1alpha2.WebhookAuthGrantType]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.GrantType = grantType
+	}
+	if clientID, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientID]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.ClientID = clientID
+	}
+	if secret, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientSecret]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.ClientSecret = secret
+	}
+	if token, ok := dst.Spec.Config[v1alpha2.WebhookAuthTokenURL]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.TokenURL = token
+	}
+	if scope, ok := dst.Spec.Config[v1alpha2.WebhookAuthScope]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
+	}
+
 }
 
 // setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way.
