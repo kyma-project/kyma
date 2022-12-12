@@ -8,7 +8,7 @@ Observability tools should clearly show the big picture, no matter if you're mon
 
 The diagram shows how distributed tracing helps to track the request path:
 
-![Distributed tracing](./assets/distributed-tracing.drawio.svg)
+![Distributed tracing](./assets/tracing-intro.drawio.svg)
 
 ## Prerequisites
 
@@ -20,7 +20,9 @@ Furthermore, an application should enrich a trace with additional span data and 
 
 ## Architecture
 
-The telemetry module provides a in-cluster central deployment of an [Otel Collector](https://opentelemetry.io/docs/collector/). The collector is exposing endpoints for the OTLP protocol for GRPC and HTTP based communication via a dedicates service `telematry-otlp-traces`. Here, all Kyma components and users applications should send   
+The telemetry module provides an in-cluster central deployment of an [Otel Collector](https://opentelemetry.io/docs/collector/). The collector is exposing endpoints for the OTLP protocol for GRPC and HTTP based communication via a dedicates Service `telemetry-otlp-traces`. Here, all Kyma components and users applications should send trace data to.
+
+![Architecture](./assets/tracing-arch.drawio.svg)
 
 ### Otel Collector
 

@@ -6,7 +6,7 @@ Fundamentally, ["Observability"](https://opentelemetry.io/docs/concepts/observab
 
 In order to implement Day-2 operations for a distributed application running in a container runtime, the single components of an application needs to expose these signals by employing modern instrumentation. Furthermore the signals needs to get collected and enriched with the infrastructural metadata in order to ship them to a target system.
 
-![Stages of Observability](./assets/stages.drawio.svg)
+![Stages of Observability](./assets/general-stages.drawio.svg)
 
 There a plenty of observability backends available either as service or as a self-manageable solution focussing on different aspects and scenarios. Here, one solution will never fit all sizes and the need to integrate with a specific solution will always be present. That's why the aspect of instrumenting and shipping your telemetry instance in an easy way in a vendor-neutral way is relevant for Kyma in order to enable observability for your application with low effort by integration into existing backends. That aspects must happen alongside with your application and here managed tooling in combination with guidance can provide the biggest effect for users on initial investment and maintenance effort. Also, Kyma will not focus on providing a managed in-cluster backend solution as solution for an enterprise-grade setup will demand a central outer-cluster solution.
 
@@ -36,7 +36,7 @@ Supported integration scenarios are neutral to the vendor of the target system, 
 
 ## Components
 
-![Components](./assets/components.drawio.svg)
+![Components](./assets/general-components.drawio.svg)
 
 ### Telemetry Operator
 
