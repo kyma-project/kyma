@@ -79,6 +79,9 @@ spec:
             - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
             - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
 {{- end }}
+{{- if .Values.global.operatorManagedFluentBit }}
+            - --enable-managed-fluentbit={{.Values.global.operatorManagedFluentBit}}
+{{- end }}
           name: manager
           ports:
           - containerPort: 9443
