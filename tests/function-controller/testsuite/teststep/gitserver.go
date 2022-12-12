@@ -23,20 +23,20 @@ type newGitServer struct {
 
 var _ step.Step = newGitServer{}
 
-func NewGitServer(cfg gitops.GitopsConfig, stepName string, deployments appsCli.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) step.Step {
+func NewGitServer(cfg gitops.GitopsConfig, stepName string, deployments appsCli.DeploymentInterface, services coreclient.ServiceInterface, proxyEnabled, istioEnabled bool) step.Step {
 	return newGitServer{
 		name:      stepName,
 		gs:        gitserver.New(cfg.Toolbox, cfg.GitServerServiceName, cfg.GitServerImage, cfg.GitServerServicePort, deployments, services, istioEnabled),
-		gitClient: git.New(cfg.GetGitServerURL(true)),
+		gitClient: git.New(cfg.GetGitServerURL(proxyEnabled)),
 		log:       cfg.Toolbox.Log.WithField(step.LogStepKey, stepName),
 	}
 }
 
-func NewGitServerV1Alpha1(cfg gitopsv1alpha1.GitopsConfig, stepName string, deployments appsCli.DeploymentInterface, services coreclient.ServiceInterface, istioEnabled bool) step.Step {
+func NewGitServerV1Alpha1(cfg gitopsv1alpha1.GitopsConfig, stepName string, deployments appsCli.DeploymentInterface, services coreclient.ServiceInterface, proxyEnabled, istioEnabled bool) step.Step {
 	return newGitServer{
 		name:      stepName,
 		gs:        gitserver.New(cfg.Toolbox, cfg.GitServerServiceName, cfg.GitServerImage, cfg.GitServerServicePort, deployments, services, istioEnabled),
-		gitClient: git.New(cfg.GetGitServerURL(true)),
+		gitClient: git.New(cfg.GetGitServerURL(proxyEnabled)),
 		log:       cfg.Toolbox.Log.WithField(step.LogStepKey, stepName),
 	}
 }
