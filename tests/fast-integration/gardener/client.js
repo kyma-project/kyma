@@ -65,7 +65,7 @@ class GardenerClient {
 
     await this.dynamicAPI.create(shootTemplate)
         .catch((err) => {
-          const response = JSON.stringify(err);
+          const response = JSON.stringify(err.body.message);
           debug(`Got the error with response ${response}`);
         });
 
@@ -84,7 +84,7 @@ class GardenerClient {
       },
     })
         .catch((err) => {
-          const response = JSON.stringify(err);
+          const response = JSON.stringify(err.body.message);
           debug(`Got the error with response ${response}`);
         });
   }
