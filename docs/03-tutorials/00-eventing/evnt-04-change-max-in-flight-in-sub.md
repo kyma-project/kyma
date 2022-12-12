@@ -91,16 +91,9 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
      config:
        maxInFlightMessages: 5
      sink: 'http://lastorder.default.svc.cluster.local'
-     filter:
-       filters:
-         - eventSource:
-             property: source
-             type: exact
-             value: ''
-           eventType:
-             property: type
-             type: exact
-             value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
    ```
 
 4. Click **Create**.
@@ -124,16 +117,9 @@ cat <<EOF | kubectl apply -f -
      config:
        maxInFlightMessages: 5
      sink: 'http://lastorder.default.svc.cluster.local'
-     filter:
-       filters:
-         - eventSource:
-             property: source
-             type: exact
-             value: ''
-           eventType:
-             property: type
-             type: exact
-             value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
 EOF
 ```
 
@@ -167,7 +153,7 @@ Next, publish 15 events at once and see how Kyma Eventing triggers the workload.
      for i in {1..15}
      do
        cloudevents send http://localhost:3000/publish \
-         --type sap.kyma.custom.myapp.order.received.v1 \
+         --type order.received.v1 \
          --id e4bcc616-c3a9-4840-9321-763aa23851f${i} \
          --source myapp \
          --datacontenttype application/json \
@@ -187,7 +173,7 @@ Next, publish 15 events at once and see how Kyma Eventing triggers the workload.
      do
        curl -v -X POST \
          -H "ce-specversion: 1.0" \
-         -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
+         -H "ce-type: order.received.v1" \
          -H "ce-source: myapp" \
          -H "ce-eventtypeversion: v1" \
          -H "ce-id: e4bcc616-c3a9-4840-9321-763aa23851f${i}" \

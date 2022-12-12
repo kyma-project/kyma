@@ -36,7 +36,7 @@ You can find the broken consumer in two ways: by using Grafana dashboard or dire
 3. Find the consumer with pending messages and encode it as an `md5` hash:
 
 ```bash
-echo -n "tunas-testing/test-noapp3/kyma.sap.kyma.custom.noapp.order.created.v1" | md5
+echo -n "tunas-testing/test-noapp3/kyma.noapp.order.created.v1" | md5
 ```
 
 this shell command results in `6642d54a92f357ba28280b9cb609e79d`.
@@ -53,7 +53,7 @@ Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-
 Configuration:
 
                 Name: 6642d54a92f357ba28280b9cb609e79d
-         Description: tunas-testing/test-noapp3/kyma.sap.kyma.custom.noapp.order.created.v1
+         Description: tunas-testing/test-noapp3/kyma.noapp.order.created.v1
           ...
 
 Cluster Information:

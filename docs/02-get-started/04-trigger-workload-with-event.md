@@ -94,11 +94,9 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 1. In your Function's view, go to **Configuration** and click **Create Subscription+**.
 2. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
-   - **Application name**: `myapp`
-   - **Event name**: `order.received`
-   - **Event version**: `v1`
-
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
+   - **Type**: `order.received.v1`
 
 3. Click **Create**.
 4. Wait a few seconds for the Subscription to have status `READY`.
@@ -118,16 +116,9 @@ cat <<EOF | kubectl apply -f -
      name: lastorder-sub
      namespace: default
    spec:
-     filter:
-       filters:
-       - eventSource:
-           property: source
-           type: exact
-           value: ""
-         eventType:
-           property: type
-           type: exact
-           value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
      sink: http://lastorder.default.svc.cluster.local
 EOF
 ```
@@ -161,8 +152,8 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
    ```bash
    curl -v -X POST \
         -H "ce-specversion: 1.0" \
-        -H "ce-type: sap.kyma.custom.myapp.order.received.v1" \
-        -H "ce-source: /default/io.kyma-project/custom" \
+        -H "ce-type: order.received.v1" \
+        -H "ce-source: myapp" \
         -H "ce-eventtypeversion: v1" \
         -H "ce-id: 759815c3-b142-48f2-bf18-c6502dc0998f" \
         -H "content-type: application/json" \
@@ -177,7 +168,7 @@ We created the `lastorder` Function and subscribed to the `order.received.v1` ev
 
    ```bash
    cloudevents send http://localhost:3000/publish \
-      --type sap.kyma.custom.myapp.order.received.v1 \
+      --type order.received.v1 \
       --id 759815c3-b142-48f2-bf18-c6502dc0998f \
       --source myapp \
       --datacontenttype application/json \

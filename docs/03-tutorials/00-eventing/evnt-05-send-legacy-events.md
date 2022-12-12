@@ -27,14 +27,12 @@ To subscribe to events, we need a [Subscription](../../05-technical-reference/00
 2. Go to **Configuration** > **Create Subscription+**.
 3. Provide the following parameters:
    - **Subscription name**: `lastorder-sub`
-   - **Application name**: `myapp`
-   - **Event name**: `order.received`
-   - **Event version**: `v1`
+   - **Type matching:**: `standard`
+   - **Source**: `myapp`
+   - **Type**: `order.received.v1`
 
-   - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`.
-
-4. Click **Create**.
-5. Wait a few seconds for the Subscription to have status `READY`.
+5. Click **Create**.
+6. Wait a few seconds for the Subscription to have status `READY`.
 
   </details>
   <details>
@@ -52,16 +50,9 @@ cat <<EOF | kubectl apply -f -
      namespace: default
    spec:
      sink: http://lastorder.default.svc.cluster.local
-     filter:
-       filters:
-       - eventSource:
-           property: source
-           type: exact
-           value: ""
-         eventType:
-           property: type
-           type: exact
-           value: sap.kyma.custom.myapp.order.received.v1
+     source: myapp
+     types:
+       - order.received.v1
 EOF
 ```
 
