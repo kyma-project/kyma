@@ -153,9 +153,7 @@ func (src *Subscription) initializeProtocolSettingsIfNil() {
 }
 
 func (src *Subscription) initializeWebhookAuthIfNil() {
-	if src.Spec.ProtocolSettings == nil {
-		src.Spec.ProtocolSettings = &ProtocolSettings{}
-	}
+	src.initializeProtocolSettingsIfNil()
 	if src.Spec.ProtocolSettings.WebhookAuth == nil {
 		src.Spec.ProtocolSettings.WebhookAuth = &WebhookAuth{}
 	}
@@ -208,7 +206,6 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 		src.initializeWebhookAuthIfNil()
 		src.Spec.ProtocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
 	}
-
 }
 
 // setV2SpecTypes sets event types in the Subscription Spec in the v1alpha2 way.
