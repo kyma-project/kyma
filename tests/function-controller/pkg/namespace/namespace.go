@@ -2,6 +2,7 @@ package namespace
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"time"
 
 	"github.com/pkg/errors"
@@ -13,7 +14,6 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	k8sretry "k8s.io/client-go/util/retry"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
@@ -27,15 +27,10 @@ type Namespace struct {
 	coreCli typedcorev1.CoreV1Interface
 	name    string
 	log     *logrus.Entry
-	verbose bool
 }
 
 func New(coreCli typedcorev1.CoreV1Interface, container shared.Container) *Namespace {
-	return &Namespace{coreCli: coreCli, name: container.Namespace, log: container.Log, verbose: container.Verbose}
-}
-
-func (n Namespace) GetName() string {
-	return n.name
+	return &Namespace{coreCli: coreCli, name: container.Namespace, log: container.Log}
 }
 
 func (n Namespace) LogResource() error {
@@ -89,17 +84,11 @@ func (n *Namespace) Create() (string, error) {
 	}
 
 	n.log.Infof("Create: namespace %s", n.name)
-	if n.verbose {
-		n.log.Infof("%+v", ns)
-	}
 	return n.name, nil
 }
 
 func (n *Namespace) Delete() error {
 	err := retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
-		if n.verbose {
-			n.log.Infof("DELETE: namespace: %s", n.name)
-		}
 		return n.coreCli.Namespaces().Delete(context.Background(), n.name, metav1.DeleteOptions{})
 	}, n.log)
 	if err != nil {
