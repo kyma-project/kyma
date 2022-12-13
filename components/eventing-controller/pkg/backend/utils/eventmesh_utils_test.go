@@ -342,7 +342,7 @@ func Test_getEventMeshWebhookAuth(t *testing.T) {
 			givenSubscription: &eventingv1alpha2.Subscription{
 				Spec: eventingv1alpha2.SubscriptionSpec{
 					Config: map[string]string{
-						eventingv1alpha2.WebhookAuthType: "oauth2",
+						eventingv1alpha2.WebhookAuthType:      "oauth2",
 						eventingv1alpha2.WebhookAuthGrantType: "invalid",
 					},
 				},
