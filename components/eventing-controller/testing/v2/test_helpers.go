@@ -435,6 +435,15 @@ func WithEmptyConfig() SubscriptionOpt {
 	}
 }
 
+func WithConfigValue(key, value string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		if subscription.Spec.Config == nil {
+			subscription.Spec.Config = map[string]string{}
+		}
+		subscription.Spec.Config[key] = value
+	}
+}
+
 func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithEventType(OrderCreatedEventType)
 }
