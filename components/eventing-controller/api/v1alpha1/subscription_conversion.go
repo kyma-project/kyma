@@ -136,13 +136,30 @@ func (src *Subscription) setV2ProtocolFields(dst *v1alpha2.Subscription) {
 		}
 		// webhookAuth fields
 		if src.Spec.ProtocolSettings.WebhookAuth != nil {
-			dst.Spec.Config[v1alpha2.WebhookAuthType] = src.Spec.ProtocolSettings.WebhookAuth.Type
+			if src.Spec.ProtocolSettings.WebhookAuth.Type != "" {
+				dst.Spec.Config[v1alpha2.WebhookAuthType] = src.Spec.ProtocolSettings.WebhookAuth.Type
+			}
 			dst.Spec.Config[v1alpha2.WebhookAuthGrantType] = src.Spec.ProtocolSettings.WebhookAuth.GrantType
 			dst.Spec.Config[v1alpha2.WebhookAuthClientID] = src.Spec.ProtocolSettings.WebhookAuth.ClientID
 			dst.Spec.Config[v1alpha2.WebhookAuthClientSecret] = src.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 			dst.Spec.Config[v1alpha2.WebhookAuthTokenURL] = src.Spec.ProtocolSettings.WebhookAuth.TokenURL
-			dst.Spec.Config[v1alpha2.WebhookAuthScope] = strings.Join(src.Spec.ProtocolSettings.WebhookAuth.Scope, ",")
+			if src.Spec.ProtocolSettings.WebhookAuth.Scope != nil {
+				dst.Spec.Config[v1alpha2.WebhookAuthScope] = strings.Join(src.Spec.ProtocolSettings.WebhookAuth.Scope, ",")
+			}
 		}
+	}
+}
+
+func (src *Subscription) initializeProtocolSettingsIfNil() {
+	if src.Spec.ProtocolSettings == nil {
+		src.Spec.ProtocolSettings = &ProtocolSettings{}
+	}
+}
+
+func (src *Subscription) initializeWebhookAuthIfNil() {
+	src.initializeProtocolSettingsIfNil()
+	if src.Spec.ProtocolSettings.WebhookAuth == nil {
+		src.Spec.ProtocolSettings.WebhookAuth = &WebhookAuth{}
 	}
 }
 
@@ -153,10 +170,11 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 	}
 
 	if currentMode, ok := dst.Spec.Config[v1alpha2.ProtocolSettingsContentMode]; ok {
-		src.Spec.ProtocolSettings = &ProtocolSettings{}
+		src.initializeProtocolSettingsIfNil()
 		src.Spec.ProtocolSettings.ContentMode = &currentMode
 	}
 	if qos, ok := dst.Spec.Config[v1alpha2.ProtocolSettingsQos]; ok {
+		src.initializeProtocolSettingsIfNil()
 		src.Spec.ProtocolSettings.Qos = &qos
 	}
 	if exemptHandshake, ok := dst.Spec.Config[v1alpha2.ProtocolSettingsExemptHandshake]; ok {
@@ -164,28 +182,33 @@ func (src *Subscription) setV1ProtocolFields(dst *v1alpha2.Subscription) {
 		if err != nil {
 			handshake = true
 		}
+		src.initializeProtocolSettingsIfNil()
 		src.Spec.ProtocolSettings.ExemptHandshake = &handshake
 	}
-	if src.Spec.ProtocolSettings != nil {
-		if authType, ok := dst.Spec.Config[v1alpha2.WebhookAuthType]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth = &WebhookAuth{}
-			src.Spec.ProtocolSettings.WebhookAuth.Type = authType
-		}
-		if grantType, ok := dst.Spec.Config[v1alpha2.WebhookAuthGrantType]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.GrantType = grantType
-		}
-		if clientID, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientID]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.ClientID = clientID
-		}
-		if secret, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientSecret]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.ClientSecret = secret
-		}
-		if token, ok := dst.Spec.Config[v1alpha2.WebhookAuthTokenURL]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.TokenURL = token
-		}
-		if scope, ok := dst.Spec.Config[v1alpha2.WebhookAuthScope]; ok {
-			src.Spec.ProtocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
-		}
+
+	if authType, ok := dst.Spec.Config[v1alpha2.WebhookAuthType]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.Type = authType
+	}
+	if grantType, ok := dst.Spec.Config[v1alpha2.WebhookAuthGrantType]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.GrantType = grantType
+	}
+	if clientID, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientID]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.ClientID = clientID
+	}
+	if secret, ok := dst.Spec.Config[v1alpha2.WebhookAuthClientSecret]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.ClientSecret = secret
+	}
+	if token, ok := dst.Spec.Config[v1alpha2.WebhookAuthTokenURL]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.TokenURL = token
+	}
+	if scope, ok := dst.Spec.Config[v1alpha2.WebhookAuthScope]; ok {
+		src.initializeWebhookAuthIfNil()
+		src.Spec.ProtocolSettings.WebhookAuth.Scope = strings.Split(scope, ",")
 	}
 }
 
@@ -222,9 +245,10 @@ func (src *Subscription) natsSpecConfigToV1(dst *v1alpha2.Subscription) error {
 // natsSpecConfigToV2 converts the hardcoded v1alpha1 Spec config to v1alpha2 generic config version.
 func (src *Subscription) natsSpecConfigToV2(dst *v1alpha2.Subscription) {
 	if src.Spec.Config != nil {
-		dst.Spec.Config = map[string]string{
-			v1alpha2.MaxInFlightMessages: fmt.Sprint(src.Spec.Config.MaxInFlightMessages),
+		if dst.Spec.Config == nil {
+			dst.Spec.Config = map[string]string{}
 		}
+		dst.Spec.Config[v1alpha2.MaxInFlightMessages] = fmt.Sprint(src.Spec.Config.MaxInFlightMessages)
 	}
 }
 
