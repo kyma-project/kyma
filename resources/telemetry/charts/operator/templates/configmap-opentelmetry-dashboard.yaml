@@ -362,7 +362,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Queue Length",
+              "legendFormat": "Queue Capacity",
               "refId": "A"
             },
             {
