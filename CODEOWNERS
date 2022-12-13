@@ -27,7 +27,7 @@
 /components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh @muralov
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
-/components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/components/telemetry-operator @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /components/directory-size-exporter @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /components/webhook-cert-init @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @hisarbalik
 
@@ -96,7 +96,7 @@
 /tests/components/reconciler @khlifi411 @jeremyharisch @ruanxin @tobiscr @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # performance tests
-/tests/perf @a-thaler @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
+/tests/perf @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh @hisarbalik
 /tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey @anoipm
 
 # The tools/event-subscriber directory
