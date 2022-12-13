@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: garfana-opentelemetry-dashboard
+  name: telemetry-otel-collector-grafana-dashboard
   labels:
     grafana_dashboard: "1"
 data:
@@ -33,8 +33,7 @@ data:
       "editable": true,
       "gnetId": 12553,
       "graphTooltip": 0,
-      "id": 224,
-      "iteration": 1670937119873,
+      "iteration": 1670938798900,
       "links": [],
       "panels": [
         {
@@ -363,7 +362,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Queue Length",
+              "legendFormat": "Queue Capacity",
               "refId": "A"
             },
             {
@@ -804,12 +803,13 @@ data:
                 "type": "prometheus",
                 "uid": "webstore-metrics"
               },
-              "expr": "sum(rate(otelcol_processor_queued_retry_success_send{processor=~\"$processor\"}[1m])) by (processor)",
+              "exemplar": true,
+              "expr": "sum(rate(otelcol_exporter_sent_spans{exporter=~\"$exporter\"}[1m])) by (exporter)",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{processor}}",
+              "legendFormat": "{{exporter}}",
               "refId": "A"
             },
             {
@@ -817,9 +817,10 @@ data:
                 "type": "prometheus",
                 "uid": "webstore-metrics"
               },
-              "expr": "sum(rate(otelcol_processor_queued_retry_fail_send{processor=~\"$processor\"}[1m])) by (processor)",
+              "exemplar": true,
+              "expr": "sum(rate(otelcol_exporter_send_failed_spans{exporter=~\"$exporter\"}[1m])) by (exporter)",
               "interval": "",
-              "legendFormat": "{{processor}}",
+              "legendFormat": "{{exporter}}",
               "refId": "B"
             }
           ],
@@ -1259,8 +1260,8 @@ data:
       "schemaVersion": 27,
       "style": "dark",
       "tags": [
-        "kyma",
-        "opentelemetry"
+          "kyma",
+          "opentelemetry"
       ],
       "templating": {
         "list": [
@@ -1269,10 +1270,10 @@ data:
             "current": {
               "selected": true,
               "text": [
-                "All"
+                  "All"
               ],
               "value": [
-                "$__all"
+                  "$__all"
               ]
             },
             "datasource": null,
@@ -1304,10 +1305,10 @@ data:
             "current": {
               "selected": true,
               "text": [
-                "All"
+                  "All"
               ],
               "value": [
-                "$__all"
+                  "$__all"
               ]
             },
             "datasource": null,
@@ -1339,10 +1340,10 @@ data:
             "current": {
               "selected": true,
               "text": [
-                "All"
+                  "All"
               ],
               "value": [
-                "$__all"
+                  "$__all"
               ]
             },
             "datasource": null,
@@ -1372,37 +1373,36 @@ data:
         ]
       },
       "time": {
-        "from": "now-1h",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {
         "refresh_intervals": [
-          "10s",
-          "30s",
-          "1m",
-          "5m",
-          "15m",
-          "30m",
-          "1h",
-          "2h",
-          "1d"
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
         ],
         "time_options": [
-          "5m",
-          "15m",
-          "1h",
-          "6h",
-          "12h",
-          "24h",
-          "2d",
-          "7d",
-          "30d"
+            "5m",
+            "15m",
+            "1h",
+            "6h",
+            "12h",
+            "24h",
+            "2d",
+            "7d",
+            "30d"
         ]
       },
       "timezone": "",
       "title": "Kyma / OpenTelemetry Collector",
       "uid": "znctoH5Vk",
-      "version": 25
+      "version": 27
     }
-
 {{- end }}
