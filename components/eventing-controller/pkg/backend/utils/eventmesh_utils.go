@@ -189,6 +189,11 @@ func getEventMeshWebhookAuth(subscription *eventingv1alpha2.Subscription,
 		auth.Type = types.AuthTypeClientCredentials
 	}
 
+	// if auth type was not provided then use default webhook auth
+	if auth.Type == "" {
+		return defaultWebhookAuth, nil
+	}
+
 	if grantType, ok := subscription.Spec.Config[eventingv1alpha2.WebhookAuthGrantType]; ok {
 		if grantType != string(types.GrantTypeClientCredentials) {
 			return nil, fmt.Errorf("invalid GrantType: %v, required: %v", grantType,
@@ -209,11 +214,7 @@ func getEventMeshWebhookAuth(subscription *eventingv1alpha2.Subscription,
 		auth.ClientSecret = clientSecret
 	}
 
-	// check if auth was provided in subscription CR
-	if auth.Type != "" {
-		return auth, nil
-	}
-	return defaultWebhookAuth, nil
+	return auth, nil
 }
 
 func GetCleanedEventMeshSubscription(subscription *types.Subscription) *types.Subscription {
