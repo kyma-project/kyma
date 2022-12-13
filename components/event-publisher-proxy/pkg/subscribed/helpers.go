@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	eventingv1alpha2 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha2"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -19,14 +21,20 @@ import (
 
 var (
 	GVR = schema.GroupVersionResource{
+		Version:  eventingv1alpha2.GroupVersion.Version,
+		Group:    eventingv1alpha2.GroupVersion.Group,
+		Resource: "subscriptions",
+	}
+	GVRV1alpha1 = schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
 		Group:    eventingv1alpha1.GroupVersion.Group,
 		Resource: "subscriptions",
 	}
 )
 
-// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object by converting to unstructured in between
-func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha1.Subscription, error) {
+// ConvertRuntimeObjToSubscriptionV1alpha1 converts a runtime.Object to a v1alpha1 version of Subscription object
+// by converting to unstructured in between
+func ConvertRuntimeObjToSubscriptionV1alpha1(sObj runtime.Object) (*eventingv1alpha1.Subscription, error) {
 	sub := &eventingv1alpha1.Subscription{}
 	if subUnstructured, ok := sObj.(*unstructured.Unstructured); ok {
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(subUnstructured.Object, sub)
@@ -37,15 +45,31 @@ func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha1.Sub
 	return sub, nil
 }
 
+// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object by converting to unstructured in between
+func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha2.Subscription, error) {
+	sub := &eventingv1alpha2.Subscription{}
+	if subUnstructured, ok := sObj.(*unstructured.Unstructured); ok {
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(subUnstructured.Object, sub)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return sub, nil
+}
+
 // GenerateSubscriptionInfFactory generates DynamicSharedInformerFactory for Subscription
-func GenerateSubscriptionInfFactory(k8sConfig *rest.Config) dynamicinformer.DynamicSharedInformerFactory {
+func GenerateSubscriptionInfFactory(k8sConfig *rest.Config, enableNewCrd bool) dynamicinformer.DynamicSharedInformerFactory {
 	subDynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
 	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(subDynamicClient,
 		informers.DefaultResyncPeriod,
 		v1.NamespaceAll,
 		nil,
 	)
-	dFilteredSharedInfFactory.ForResource(GVR)
+	if enableNewCrd {
+		dFilteredSharedInfFactory.ForResource(GVR)
+	} else {
+		dFilteredSharedInfFactory.ForResource(GVRV1alpha1)
+	}
 	return dFilteredSharedInfFactory
 }
 
@@ -72,10 +96,47 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 }
 
 // FilterEventTypeVersions returns a slice of Events:
+// if the event source matches the appName for typeMatching standard
+// if the <eventTypePrefix>.<appName> is present in the eventType for typeMatching exact
+func FilterEventTypeVersions(eventTypePrefix, appName string, subscription *eventingv1alpha2.Subscription) []Event {
+	events := make([]Event, 0)
+	prefixAndAppName := fmt.Sprintf("%s.%s.", eventTypePrefix, appName)
+
+	for _, eventType := range subscription.Spec.Types {
+		if subscription.Spec.TypeMatching == eventingv1alpha2.TypeMatchingExact {
+			// in case of type matching exact, we have app name as a part of event type
+			if strings.HasPrefix(eventType, prefixAndAppName) {
+				eventTypeVersion := strings.ReplaceAll(eventType, prefixAndAppName, "")
+				event := buildEvent(eventTypeVersion)
+				events = append(events, event)
+			}
+		} else {
+			// in case of type matching standard, the source must be app name
+			if appName == subscription.Spec.Source {
+				event := buildEvent(eventType)
+				events = append(events, event)
+			}
+		}
+	}
+	return events
+}
+
+// it receives event and type version, e.g. order.created.v1 and returns {Name: order.created, Version: v1}
+func buildEvent(eventTypeAndVersion string) Event {
+	lastDotIndex := strings.LastIndex(eventTypeAndVersion, ".")
+	eventName := eventTypeAndVersion[:lastDotIndex]
+	eventVersion := eventTypeAndVersion[lastDotIndex+1:]
+	return Event{
+		Name:    eventName,
+		Version: eventVersion,
+	}
+}
+
+// FilterEventTypeVersionsV1alpha1 returns a slice of Events for v1alpha1 version of Subscription resource:
 // 1. if the eventType matches the format: <eventTypePrefix><appName>.<event-name>.<version>
 // E.g. sap.kyma.custom.varkes.order.created.v0
 // 2. if the eventSource matches BEBNamespace name
-func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BEBFilters) []Event {
+func FilterEventTypeVersionsV1alpha1(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BEBFilters) []Event {
 	events := make([]Event, 0)
 	if filters == nil {
 		return events
