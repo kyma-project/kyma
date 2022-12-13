@@ -80,7 +80,15 @@ func (h *Handler) setupMux() {
 	router := mux.NewRouter()
 	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
 	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
-	router.HandleFunc(SubscribedEndpointPattern, h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	if h.Options.EnableNewCRDVersion {
+		router.HandleFunc(
+			SubscribedEndpointPattern,
+			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptions)).Methods(http.MethodGet)
+	} else {
+		router.HandleFunc(
+			SubscribedEndpointPattern,
+			h.maxBytes(h.SubscribedProcessor.ExtractEventsFromSubscriptionsV1alpha1)).Methods(http.MethodGet)
+	}
 	router.HandleFunc(health.ReadinessURI, h.maxBytes(h.HealthChecker.ReadinessCheck))
 	router.HandleFunc(health.LivenessURI, h.maxBytes(h.HealthChecker.LivenessCheck))
 	h.router = router

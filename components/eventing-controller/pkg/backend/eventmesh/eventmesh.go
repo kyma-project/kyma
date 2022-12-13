@@ -56,7 +56,7 @@ func NewEventMesh(credentials *backendbebv1.OAuth2ClientCredentials, mapper back
 type EventMesh struct {
 	client            client.PublisherManager
 	webhookAuth       *types.WebhookAuth
-	protocolSettings  *eventingv1alpha2.ProtocolSettings
+	protocolSettings  *backendutils.ProtocolSettings
 	namespace         string
 	eventMeshPrefix   string
 	oAuth2credentials *backendbebv1.OAuth2ClientCredentials
@@ -73,7 +73,7 @@ func (em *EventMesh) Initialize(cfg env.Config) error {
 		}
 		em.client = client.NewClient(httpClient)
 		em.webhookAuth = getWebHookAuth(cfg, em.oAuth2credentials)
-		em.protocolSettings = &eventingv1alpha2.ProtocolSettings{
+		em.protocolSettings = &backendutils.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
 			ExemptHandshake: &cfg.ExemptHandshake,
 			Qos:             &cfg.Qos,

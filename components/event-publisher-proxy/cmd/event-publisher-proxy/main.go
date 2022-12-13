@@ -32,7 +32,10 @@ type Config struct {
 }
 
 func main() {
-	opts := options.ParseArgs()
+	opts := options.New()
+	if err := opts.Parse(); err != nil {
+		golog.Fatalf("Failed to parse options, error: %v", err)
+	}
 
 	// parse the config for main:
 	cfg := new(Config)
