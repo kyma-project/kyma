@@ -49,9 +49,9 @@ The TracePipeline resource is managed by the Telemetry Operator, a typical Kuber
 The Telemetry Operator watches all TracePipeline resources and related Secrets. Whenever the configuration changes, it validates the configuration and generates a new configuration for the Otel Collector, where a ConfigMaps for the configuration is generated. Furthermore, referenced Secrets are copied into one Secret that is mounted to the Collector as well.
 Furthermore, the operator manages the full lifecycle of the Otel Collector Deployment itself. With that, it only gets deployed when there is an actual TracePipeline defined. At anytime you can opt-out of using the tracing feature by not specifying a TracePipeline.
 
-### Pipelines
-
 ## Setting up a TracePipeline
+
+In the following a typical setup of a TracePipeline gets discussed. For a overview of all available attributes please have a look at the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md)
 
 ### 1. Create a TracePipeline with an output
 1. To ship traces to a new OTLP output, create a resource file of kind TracePipeline:
@@ -169,40 +169,6 @@ stringData:
   user: myUser
   password: XXX
 ```
-## Parameters
-
-
-### TracePipeline.spec attribute
-
-For details, see the [TracePipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/tracepipeline_types.go).
-
-| Parameter | Type | Description |
-|---|---|---|
-| output | object | Defines a destination for shipping trace data. Only one can be defined per pipeline.
-| output.otlp | object | Configures the underlying Otel Collector with an [OTLP exporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md). By switching the `protocol`to `http` a [OTLP HTTP exporter](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlphttpexporter) is used. |
-| output.otlp.protocol | string | Use either GRPC or HTTP protocol. Default is GRPC. |
-| output.otlp.endpoint | object | Configures the endpoint of the destination backend in format `<scheme>://<host>:<port>` where host and port are mandatory. |
-| output.otlp.endpoint.value | string | Endpoint taken from a static value |
-| output.otlp.endpoint.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-| output.otlp.authentication | object | Configures the authentication mechanism for the destination. |
-| output.otlp.authentication.basic | object | Activates `Basic` authentication for the destination providing relevant secrets. |
-| output.otlp.authentication.basic.password | object | Configures the password to be used for `Basic` authentication. |
-| output.otlp.authentication.basic.password.value | string | Password as plain text provided as static value. Do not use in production, as it does not satisfy standards for secret handling. Use the `valueFrom.secretKeyRef` instead. |
-| output.otlp.authentication.basic.password.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`.|
-| output.otlp.authentication.basic.user | object | Configures the username to be used for `Basic` authentication. |
-| output.otlp.authentication.basic.user.value | string | Username as plain text provided as static value. |
-| output.otlp.authentication.basic.user.valueFrom.secretKeyRef | object | Reference to a key in a Secret. You must provide `name` and `namespace` of the Secret, as well as the name of the `key`. |
-
-### TracePipeline.status attribute
-
-For details, see the [TracePipeline specification file](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/apis/telemetry/v1alpha1/tracepipeline_types.go).
-
-| Parameter | Type | Description |
-|---|---|---|
-| conditions | []object | An array of conditions describing the status of the pipeline.
-| conditions[].lastTransitionTime | []object | An array of conditions describing the status of the pipeline.
-| conditions[].reason | []object | An array of conditions describing the status of the pipeline.
-| conditions[].type | enum | The possible transition types are:<br>- Running: The instance is ready and usable.<br>- Pending: The pipeline is being activated. |
 
 ## Limitations
 
