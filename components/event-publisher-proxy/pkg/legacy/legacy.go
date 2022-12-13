@@ -190,15 +190,12 @@ func (t *Transformer) convertPublishRequestToEvent(appName string, publishReques
 		builder.WithName(publishRequest.PublishrequestV1.EventType),
 		builder.WithVersion(publishRequest.PublishrequestV1.EventTypeVersion),
 		builder.WithRemoveNonAlphanumericsFromType(),
+		builder.WithEventSource(t.namespace),
+		builder.WithEventExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion),
+		builder.WithEventDataContentType(internal.ContentTypeApplicationJSON),
 	)
 	if err != nil {
 		return nil, err
 	}
-
-	// Set values to the TransitionEvent.
-	event.SetSource(t.namespace)
-	event.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
-	event.SetDataContentType(internal.ContentTypeApplicationJSON)
-
 	return event, nil
 }

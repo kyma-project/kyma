@@ -12,6 +12,7 @@ import (
 type Event struct {
 	ce.Event
 
+	
 	// These are the segments of a CloudEvent's Type: "prefix.app.name.version".
 	prefix       string
 	app          string
