@@ -25,10 +25,12 @@ import (
 	utils "github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	resources "github.com/kyma-project/kyma/components/telemetry-operator/internal/resources/logpipeline"
 	"github.com/prometheus/client_golang/prometheus"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
@@ -138,7 +140,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 
 func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, name types.NamespacedName) error {
 	daemonSet := resources.MakeDaemonSet(name)
-	if err := utils.CreateOrUpdateDaemonSet(ctx, r, daemonSet); err != nil {
+	if _, err := controllerutil.CreateOrPatch(ctx, r.Client, daemonSet, r.mutate(daemonSet, name)); err != nil {
 		return fmt.Errorf("failed to create fluent bit daemonset: %w", err)
 	}
 	service := resources.MakeService(name)
@@ -152,6 +154,24 @@ func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, name types.N
 	luaConfigMap := resources.MakeLuaConfigMap(name)
 	if err := utils.CreateOrUpdateConfigMap(ctx, r, luaConfigMap); err != nil {
 		return fmt.Errorf("failed to create fluent bit lua configmap: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Reconciler) mutate(obj client.Object, name types.NamespacedName) controllerutil.MutateFn {
+
+	switch o := obj.(type) {
+	case *appsv1.DaemonSet:
+		expected := resources.MakeDaemonSet(name)
+
+		return func() error {
+			o.Labels = expected.Labels
+			o.Annotations = expected.Annotations
+			o.Spec = expected.Spec
+			return nil
+		}
+	default:
 	}
 
 	return nil
