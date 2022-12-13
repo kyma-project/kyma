@@ -136,5 +136,5 @@ traceCollector:
       cpu: 1
       memory: 1Gi
     requests:
-      cpu: 150m
-      memory: 256Mi
+      cpu: 25m
+      memory: 32Mi
