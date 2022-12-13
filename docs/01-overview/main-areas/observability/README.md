@@ -2,7 +2,7 @@
 title: What is Observability in Kyma?
 ---
 
-Out of the box, Kyma provides tools to collect and ship telemetry data via the [Telemetry Module](./assets/../../telemetry/README.md). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
+Out of the box, Kyma provides tools to collect and ship telemetry data using the [Telemetry Module](./assets/../../telemetry/README.md). Of course, you'll want to view and analyze the data you're collecting. This is where observability tools come in.
 
 ## Data Collection
 
@@ -10,9 +10,9 @@ Kyma collects telemetry data with the following in-cluster components:
 
 - [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately.
 
-- [Fluent Bit](https://fluentbit.io/) collects logs, provided via the [Telemetry Module](./assets/../../telemetry/README.md).
+- [Fluent Bit](https://fluentbit.io/) collects logs, provided using the [Telemetry Module](./assets/../../telemetry/README.md).
 
-- An [Otel Collector](https://opentelemetry.io/docs/collector/) collects traces, provided via the [Telemetry Module](./assets/../../telemetry/README.md).
+- An [OTel Collector](https://opentelemetry.io/docs/collector/) collects traces, provided using the [Telemetry Module](./assets/../../telemetry/README.md).
 
 The collected telemetry data are exposed so that you can view and analyze them with observability tools.
 
