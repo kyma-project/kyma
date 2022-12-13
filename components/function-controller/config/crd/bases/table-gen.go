@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"sigs.k8s.io/yaml"
+	"sort"
 	"strings"
 	"time"
 )
@@ -18,14 +19,14 @@ const (
 )
 const indentType = IndentParentPath
 
-//TODO: use relative path of from param
+// TODO: use relative path or from param
 const InputCRDFilename = `/Users/I567085/src/2022jul/kyma/components/function-controller/config/crd/bases/serverless.kyma-project.io_functions.yaml`
 const APIVersion = "v1alpha2"
 
-//TODO: use relative path of from param
+// TODO: use relative path or from param
 const OutputMDFilename = `/Users/I567085/src/2022jul/kyma/docs/05-technical-reference/00-custom-resources/svls-01-function.md`
 
-//TODO: rename - this script create only SPEC
+// TODO: rename - this script create only SPEC
 const ReplacePartIdentifier = `FUNCTION-CRD-PARAMETERS-TABLE`
 const REPatternToReplace = `(?s)<!--\s*` + ReplacePartIdentifier + `\(START\).*<!--\s*` + ReplacePartIdentifier + `\(END\)[^\n]*`
 
@@ -105,17 +106,34 @@ func generateElementDoc(obj interface{}, name string, required bool, indent int,
 	if d := element["description"]; d != nil {
 		description = d.(string)
 	}
-	//TODO: remove first word from description (or unify descriptions in other way)
 	result = append(result,
 		fmt.Sprintf("| **%s%s** | %s | %s |",
 			getIndent(indent, parentPath), name,
-			yesNo(required), description))
+			yesNo(required), normalizeDescription(description, name)))
 
 	if elementType == "object" {
 		result = append(result,
 			generateObjectDoc(element, name, indent, parentPath)...)
 	}
 	return result
+}
+
+func normalizeDescription(description string, name string) any {
+	d := strings.Trim(description, " ")
+	n := strings.Trim(name, " ")
+	if len(n) == 0 {
+		return d
+	}
+	dParts := strings.SplitN(d, " ", 2)
+	if len(dParts) < 2 {
+		return description
+	}
+	if !strings.EqualFold(n, dParts[0]) {
+		return description
+	}
+	d = strings.Trim(dParts[1], " ")
+	d = strings.ToUpper(d[:1]) + d[1:]
+	return d
 }
 
 func generateObjectDoc(element map[string]interface{}, name string, indent int, parentPath string) []string {
@@ -128,15 +146,24 @@ func generateObjectDoc(element map[string]interface{}, name string, indent int, 
 	if rc := getElement(element, "required"); rc != nil {
 		requiredChildren = rc.([]interface{})
 	}
-	//TODO: sort by propName
 	//TODO: skip some elements - keep current descriptions
-	for propName, propVal := range properties.(map[string]interface{}) {
+	propMap := properties.(map[string]interface{})
+	for _, propName := range sortedKeys(propMap) {
 		propRequired := contains(requiredChildren, name)
 		result = append(result,
-			generateElementDoc(propVal, propName, propRequired,
+			generateElementDoc(propMap[propName], propName, propRequired,
 				indent+1, parentPath+name+".")...)
 	}
 	return result
+}
+
+func sortedKeys(propMap map[string]interface{}) []string {
+	var keys []string
+	for key := range propMap {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func getIndent(indent int, path string) string {
