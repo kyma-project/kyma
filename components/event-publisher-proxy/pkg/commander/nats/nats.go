@@ -2,7 +2,6 @@ package nats
 
 import (
 	"context"
-
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kelseyhightower/envconfig"
@@ -103,7 +102,7 @@ func (c *Commander) Start() error {
 	)
 
 	// configure Subscription Lister
-	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig)
+	subDynamicSharedInfFactory := subscribed.GenerateSubscriptionInfFactory(k8sConfig, c.opts.EnableNewCRDVersion)
 	var subLister cache.GenericLister
 	if c.opts.EnableNewCRDVersion {
 		subLister = subDynamicSharedInfFactory.ForResource(subscribed.GVR).Lister()
