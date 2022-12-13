@@ -118,9 +118,6 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 		outputType: map[string]any{
 			"endpoint": fmt.Sprintf("${%s}", otlpEndpointVariable),
 			"headers":  headers,
-			"tls": map[string]any{
-				"insecure": true,
-			},
 			"sending_queue": map[string]any{
 				"enabled":    true,
 				"queue_size": 512,
