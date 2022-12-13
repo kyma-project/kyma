@@ -177,7 +177,6 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{Name: name.Name},
-									Optional:             pointer.Bool(true),
 								},
 							},
 						},
@@ -186,7 +185,6 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{Name: fmt.Sprintf("%s-luascripts", name.Name)},
-									Optional:             pointer.Bool(true),
 								},
 							},
 						},
