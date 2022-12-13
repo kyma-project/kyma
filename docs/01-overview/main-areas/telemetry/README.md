@@ -40,7 +40,7 @@ Supported integration scenarios are neutral to the vendor of the target system; 
 
 ### Telemetry Operator
 
-The module ships the Telemetry Operator as it's heart component. The operator implements the Kubernetes controller pattern and manages the whole lifecycle of all other components covered in the module. The operator watches for resources created by the user of type LogPipeline, TracePipeline and in future MetricPipeline. With these, the user describes in a declarative way what data of a signal type to collect and where to ship it.
+The module ships the Telemetry Operator as its heart component. The operator implements the Kubernetes controller pattern and manages the whole lifecycle of all other components covered in the module. The operator watches for LogPipeline, TracePipeline, and, in the future, MetricPipeline resources created by the user. With these, the user describes in a declarative way what data of a signal type to collect and where to ship it.
 If the operator detects a configuration, it will on demand roll out the relevant collector components.
 You can find more details about the operator on the [operator](./telemetry-01-operator.md) page.
 
