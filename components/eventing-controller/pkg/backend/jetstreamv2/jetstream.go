@@ -447,7 +447,7 @@ func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.Msg
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
 			js.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
-			ceLogger.Errorw("Failed to dispatch the CloudEvent")
+			ceLogger.Errorw("Failed to dispatch the CloudEvent", "error", result.Error())
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
