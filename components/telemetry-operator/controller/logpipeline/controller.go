@@ -159,8 +159,7 @@ func (r *Reconciler) createOrPatchFluentBit(ctx context.Context, name types.Name
 	return nil
 }
 
-func (r *Reconciler) mutate(obj client.Object, name types.NamespacedName) controllerutil.MutateFn {
-
+func (r *Reconciler) mutate(ctx context.Context, obj client.Object, name types.NamespacedName) controllerutil.MutateFn {
 	switch o := obj.(type) {
 	case *appsv1.DaemonSet:
 		expected := resources.MakeDaemonSet(name)
@@ -169,6 +168,9 @@ func (r *Reconciler) mutate(obj client.Object, name types.NamespacedName) contro
 			o.Labels = expected.Labels
 			o.Annotations = expected.Annotations
 			o.Spec = expected.Spec
+
+			logf.FromContext(ctx).Info("Mutating the daemonset")
+
 			return nil
 		}
 	default:
