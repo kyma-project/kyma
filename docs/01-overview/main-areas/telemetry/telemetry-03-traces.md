@@ -65,7 +65,7 @@ spec:
   output:
     otlp:
       endpoint:
-        value: tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
+        value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4317
 ```
 
 That will configure the underlying Otel Collector with a pipeline for traces. The receiver of the pipeline will be of type OTLP and be accessible via the `telemetry-otlp-traces` service. As exporter an `otlp` or an `otlphttp` exporter gets used, dependent on the configured protocol.
