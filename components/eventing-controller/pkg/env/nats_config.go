@@ -6,10 +6,6 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const (
-	JetStreamSubjectPrefix = "kyma"
-)
-
 // NatsConfig represents the environment config for the Eventing Controller with Nats.
 type NatsConfig struct {
 	// Following details are for eventing-controller to communicate to Nats
@@ -29,7 +25,8 @@ type NatsConfig struct {
 
 	// JetStream-specific configs
 	// Name of the JetStream stream where all events are stored.
-	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
+	JSStreamName    string `envconfig:"JS_STREAM_NAME" required:"true"`
+	JSSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"false" default:"kyma"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
 	// Number of replicas for the JetStream stream

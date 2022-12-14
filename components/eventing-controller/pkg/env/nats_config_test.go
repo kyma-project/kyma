@@ -43,6 +43,7 @@ func TestGetNatsConfig(t *testing.T) {
 				MaxIdleConnsPerHost:     50,
 				IdleConnTimeout:         10 * time.Second,
 				JSStreamName:            "jsn",
+				JSSubjectPrefix:         "kyma",
 				JSStreamStorageType:     "memory",
 				JSStreamReplicas:        1,
 				JSStreamRetentionPolicy: "interest",
@@ -59,6 +60,7 @@ func TestGetNatsConfig(t *testing.T) {
 				envs: map[string]string{
 					"EVENT_TYPE_PREFIX":          "etp",
 					"JS_STREAM_NAME":             "jsn",
+					"JS_STREAM_SUBJECT_PREFIX": "testjsn",
 					"NATS_URL":                   "natsurl",
 					"MAX_IDLE_CONNS":             "1",
 					"MAX_CONNS_PER_HOST":         "2",
@@ -86,6 +88,7 @@ func TestGetNatsConfig(t *testing.T) {
 				MaxIdleConnsPerHost:     3,
 				IdleConnTimeout:         1 * time.Second,
 				JSStreamName:            "jsn",
+				JSSubjectPrefix:         "testjsn",
 				JSStreamStorageType:     "jsst",
 				JSStreamReplicas:        4,
 				JSStreamRetentionPolicy: "jsrp",
