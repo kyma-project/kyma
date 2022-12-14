@@ -61,7 +61,7 @@ describe('SKR own_cluster test', function() {
   });
 
   after('Cleanup the resources', async function() {
-    console.log("Cleaning up")
+    console.log('Cleaning up');
     this.timeout(deprovisioningTimeout);
     await gardener.deleteShoot(shootName);
   });
