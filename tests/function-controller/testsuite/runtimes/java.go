@@ -55,7 +55,7 @@ const additionalLib = `
 var basicDeps = fmt.Sprintf(basicJavaRequirementsTpl, "")
 var updatedDeps = fmt.Sprintf(basicJavaRequirementsTpl, additionalLib)
 
-const functionCodeTpl = `
+const basicHandler = `
 package io.project.kyma.serverless.handler;
         
         import javax.ws.rs.core.Context;
@@ -70,17 +70,50 @@ package io.project.kyma.serverless.handler;
         
             @Override
             public Response call(CloudEvent event, Context context) {
-                return Response.ok("%s").build();
+			return Response.ok("%s").build();
             }
         }
 `
+
+const csvHandler = `
+package io.project.kyma.serverless.handler;
+        import javax.ws.rs.core.Context;
+        import javax.ws.rs.core.Response;
+        import io.project.kyma.serverless.sdk.CloudEvent;
+        import io.project.kyma.serverless.sdk.Function;
+		import com.fasterxml.jackson.core.JsonProcessingException;
+		import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+        
+        
+        public class Handler implements Function {
+        
+            public static final String RETURN_STRING = "Hello World from local java11 runtime from docker graalvm with serverless SDK!";
+        
+            @Override
+            public Response call(CloudEvent event, Context context) {
+				var msgData = new String[]{"Hello", "from", "new", "library"};
+				var mapper = new CsvMapper();
+				var msg = "empty";
+				try {
+					msg = mapper.writeValueAsString(msgData);
+				} catch (JsonProcessingException e ){
+					throw new RuntimeException(e);
+				}
+				return Response.ok(msg).build();
+			}
+        }
+
+
+`
+
+const ExpectedUpdatedResponse = `Hello,from,new,library`
 
 func BasicJavaFunction(returnMsg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	var spec = serverlessv1alpha2.FunctionSpec{
 		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
-				Source:       fmt.Sprintf(functionCodeTpl, returnMsg),
+				Source:       fmt.Sprintf(basicHandler, returnMsg),
 				Dependencies: basicDeps,
 			},
 		},
@@ -89,12 +122,12 @@ func BasicJavaFunction(returnMsg string, rtm serverlessv1alpha2.Runtime) serverl
 	return spec
 }
 
-func BasicJavaFunctionWithCustomDependency(returnMsg string, rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
+func UpdatedDepJavaCsvResponse(rtm serverlessv1alpha2.Runtime) serverlessv1alpha2.FunctionSpec {
 	var spec = serverlessv1alpha2.FunctionSpec{
 		Runtime: rtm,
 		Source: serverlessv1alpha2.Source{
 			Inline: &serverlessv1alpha2.InlineSource{
-				Source:       fmt.Sprintf(functionCodeTpl, returnMsg),
+				Source:       csvHandler,
 				Dependencies: updatedDeps,
 			},
 		},
