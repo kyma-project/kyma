@@ -5,5 +5,5 @@ import javax.ws.rs.core.Response;
 
 
 public interface Function {
-    Response call(CloudEvent event, Context context);
+    Response main(CloudEvent event, Context context);
 }

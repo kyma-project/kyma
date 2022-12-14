@@ -10,7 +10,7 @@ import io.project.kyma.serverless.sdk.Function;
 public class Handler implements Function {
 
     @Override
-    public Response call(CloudEvent event, Context context) {
+    public Response main(CloudEvent event, Context context) {
         throw new IllegalStateException("Not implemented stub Handler");
     }
 }

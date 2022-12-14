@@ -12,7 +12,7 @@ public class Handler implements Function {
     public static final String RETURN_STRING = "Hello World from java17 runtime with serverless SDK!";
 
     @Override
-    public Response call(CloudEvent event, Context context) {
+    public Response main(CloudEvent event, Context context) {
         return Response.ok(RETURN_STRING).build();
     }
 }

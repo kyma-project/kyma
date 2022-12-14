@@ -45,19 +45,19 @@ public class CloudEvent {
     }
 
     public ContainerRequestContext req;
-    private final MultivaluedMap<String, String> ceHeaders;
-
-    private final URI publishedProxyAddress;
+    public final MultivaluedMap<String, String> ceHeaders;
 
     public Tracer tracer;
+
+    private final URI publishedProxyAddress;
 
     private final OpenTelemetry openTelemetry;
 
     public CloudEvent(ContainerRequestContext req, OpenTelemetry openTelemetry, Tracer tracer, URI publisherAddr) {
         this.req = req;
-        this.openTelemetry = openTelemetry;
         this.tracer = tracer;
         this.ceHeaders = extractCloudEventHeaders(req.getHeaders());
+        this.openTelemetry = openTelemetry;
         this.publishedProxyAddress = publisherAddr;
     }
 

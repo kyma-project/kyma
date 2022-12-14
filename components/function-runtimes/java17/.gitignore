@@ -2,5 +2,4 @@ target
 .idea
 opentelemetry-javaagent.jar
 
-Dockerfile-jvm11-function-local
-Dockerfile-jvm11-function-kyma
+Dockerfile-jvm-function-local

@@ -52,11 +52,11 @@ export BASE_IMAGE = ${RUNTIME_IMAGE}
 
 FUNCTION_IMAGE=java-jvm${JVM_VERSION}-function
 
-.PHONY: Dockerfile-jvm-function-local
-Dockerfile-jvm-function-local:
+.PHONY: generate-local-fn-dockerfile
+generate-local-fn-dockerfile:
 	DOCKERFILE=Dockerfile-jvm-function.tpl BASE_IMAGE=${RUNTIME_IMAGE}  python3 ./resources/generate-dockerfile.py > Dockerfile-jvm-function-local
 
-run-jvm-hello-world: build-runtime Dockerfile-jvm-function-local
+run-jvm-hello-world: build-runtime generate-local-fn-dockerfile
 	docker build --tag ${FUNCTION_IMAGE} \
 		  --build-arg DEPS_DIR=./examples/hello-world/ \
 		 --build-arg SOURCE_DIR=./examples/hello-world/src/main/java/io/project/kyma/serverless/handler \

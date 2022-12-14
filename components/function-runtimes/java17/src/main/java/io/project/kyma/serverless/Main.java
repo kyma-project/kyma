@@ -49,7 +49,7 @@ public class Main {
         return server;
     }
 
-    protected static String createSvcName(String podName, String svcNamespace) {
+    static String createSvcName(String podName, String svcNamespace) {
         if ((podName == null) || (svcNamespace == null)) {
             return "generic-svc";
         }
