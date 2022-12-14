@@ -28,11 +28,12 @@ describe('SKR own_cluster test', function() {
 
   before('Shoot should be ready', async function() {
     this.timeout(provisioningTimeout);
-    console.log('Creating a shoot');
+    console.log(`Creating a shoot ${shootName}`);
     await gardener.createShoot(shootName);
   });
 
   before('Ensure SKR is provisioned', async function() {
+    console.log(`Waiting for a shoot ${shootName}`);
     const shoot = await gardener.getShoot(shootName);
 
     this.timeout(provisioningTimeout);
@@ -40,6 +41,7 @@ describe('SKR own_cluster test', function() {
     options.customParams.shootDomain = shoot.shootDomain;
     options.customParams.shootName = shootName;
 
+    console.log(`Waiting for provisioned SKR`);
     skr = await getOrProvisionSKR(options,
         false, provisioningTimeout);
     options = skr.options;
@@ -59,6 +61,7 @@ describe('SKR own_cluster test', function() {
   });
 
   after('Cleanup the resources', async function() {
+    console.log("Cleaning up")
     this.timeout(deprovisioningTimeout);
     await gardener.deleteShoot(shootName);
   });

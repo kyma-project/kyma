@@ -1,5 +1,5 @@
 const k8s = require('@kubernetes/client-node');
-const {fromBase64, getEnvOrThrow, debug} = require('../utils');
+const {fromBase64, getEnvOrThrow, debug, error} = require('../utils');
 
 const GARDENER_PROJECT = process.env.KCP_GARDENER_NAMESPACE || 'garden-kyma-dev';
 const COMPASS_ID_ANNOTATION_KEY = 'compass.provisioner.kyma-project.io/runtime-id';
@@ -52,7 +52,7 @@ class GardenerClient {
   async createShoot(shootName) {
     debug(`Creating a K8S cluster in gardener namespace`);
     if (!this.shootTemplate) {
-      debug(`No shoot Template`);
+      error(`No shoot Template`);
       return new Error(`no shoot template defined in the Gardener client`);
     }
 
@@ -65,8 +65,8 @@ class GardenerClient {
 
     await this.dynamicAPI.create(shootTemplate)
         .catch((err) => {
-          const response = JSON.stringify(err.body.message);
-          debug(`Got the error with response ${response}`);
+          const message = JSON.stringify(err.body.message);
+          error(`Got the error with response ${message}`)
         });
 
     await this.waitForShoot(shootName);
@@ -84,8 +84,8 @@ class GardenerClient {
       },
     })
         .catch((err) => {
-          const response = JSON.stringify(err.body.message);
-          debug(`Got the error with response ${response}`);
+          const message = JSON.stringify(err.body.message);
+          error(`Got the error with response ${message}`);
         });
   }
 
