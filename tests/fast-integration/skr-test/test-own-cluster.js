@@ -24,7 +24,7 @@ describe('SKR own_cluster test', function() {
   let options = gatherOptions(); // with default values
   let skr;
 
-  const shootName = genRandom(13);
+  const shootName = genRandom(6);
 
   before('Shoot should be ready', async function() {
     this.timeout(provisioningTimeout);
