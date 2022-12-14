@@ -123,15 +123,15 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	if err = cleanupFinalizersIfNeeded(ctx, r.Client, pipeline); err != nil {
 		return err
 	}
+	//
+	//var checksum string
+	//if checksum, err = r.calculateChecksum(ctx); err != nil {
+	//	return err
+	//}
 
-	var checksum string
-	if checksum, err = r.calculateChecksum(ctx); err != nil {
-		return err
-	}
-
-	if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
-		return err
-	}
+	//if err = r.annotator.SetAnnotation(ctx, r.config.DaemonSet, checksumAnnotationKey, checksum); err != nil {
+	//	return err
+	//}
 
 	return err
 }
