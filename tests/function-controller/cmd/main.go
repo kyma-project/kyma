@@ -1,4 +1,3 @@
-// To run tests locally run `kubectl proxy --proxy 8001` in background and set env KUBECTL_PROXY_ENABLED=true
 package main
 
 import (
