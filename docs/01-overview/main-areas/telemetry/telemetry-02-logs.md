@@ -270,7 +270,7 @@ spec:
 
 ### Step 5: Rotate the Secret
 
-As used in the previous step, a Secret referenced with the **secretKeyRef** construct can be rotated manually or automatically. For automatic rotation, update the Secret's actual values and keep the Secret's keys stable. The LogPipeline watches the referenced Secrets and detects changes, so the Secret rotation takes immediate effect.
+As used in the previous step, a Secret referenced with the **secretKeyRef** construct can be rotated manually or automatically. For automatic rotation, update the Secret's actual values and keep the Secret's keys stable. The LogPipeline watches the referenced Secrets and detects changes, so the Secret rotation takes immediate effect. When using a Secret owned by the [SAP BTP Operator](https://github.com/SAP/sap-btp-service-operator) you can configure a `credentialsRotationPolicy` with a specific `rotationFrequency` to achieve a automated rotation.
 
 ### Step 6: Add a parser
 
