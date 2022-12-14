@@ -1,4 +1,3 @@
-{{- if .Values.controllers.tracing.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1393,4 +1392,3 @@ data:
       "uid": "znctoH5Vk",
       "version": 27
     }
-{{- end }}
