@@ -85,6 +85,7 @@ func CreateOrUpdateDaemonSet(ctx context.Context, c client.Client, desired *apps
 	mutated := existing.DeepCopy()
 	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
 	mergeKubectlAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
+	mergeChecksumAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
 	return c.Update(ctx, desired)
 }
 
@@ -123,6 +124,10 @@ func mergeMaps(new map[string]string, old map[string]string) map[string]string {
 
 func mergeKubectlAnnotations(from *metav1.ObjectMeta, to metav1.ObjectMeta) {
 	from.SetAnnotations(mergeMapsByPrefix(from.Annotations, to.Annotations, "kubectl.kubernetes.io/"))
+}
+
+func mergeChecksumAnnotations(from *metav1.ObjectMeta, to metav1.ObjectMeta) {
+	from.SetAnnotations(mergeMapsByPrefix(from.Annotations, to.Annotations, "checksum/"))
 }
 
 func mergeMapsByPrefix(from map[string]string, to map[string]string, prefix string) map[string]string {
