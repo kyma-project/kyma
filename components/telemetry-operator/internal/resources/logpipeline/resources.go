@@ -328,7 +328,7 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     Match null.*
     Alias null-null
 
-    @INCLUDE dynamic/*.conf
+@INCLUDE dynamic/*.conf
 `
 	lokiLabelmap := `
   {
