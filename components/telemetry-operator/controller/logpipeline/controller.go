@@ -113,7 +113,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	if r.config.ManageFluentBit && pipeline.DeletionTimestamp.IsZero() {
-		if err = r.installOrUpgradeFluentBit(ctx, r.config.DaemonSet); err != nil {
+		if err = r.createOrPatchFluentBit(ctx, r.config.DaemonSet); err != nil {
 			return err
 		}
 	}
@@ -138,7 +138,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	return err
 }
 
-func (r *Reconciler) installOrUpgradeFluentBit(ctx context.Context, name types.NamespacedName) error {
+func (r *Reconciler) createOrPatchFluentBit(ctx context.Context, name types.NamespacedName) error {
 	daemonSet := resources.MakeDaemonSet(name)
 	if _, err := controllerutil.CreateOrPatch(ctx, r.Client, daemonSet, r.mutate(daemonSet, name)); err != nil {
 		return fmt.Errorf("failed to create fluent bit daemonset: %w", err)
