@@ -46,7 +46,7 @@ func NewFunction(name string, proxyEnabled bool, c shared.Container) *Function {
 		},
 	}
 
-	fnURL, err := calculateFunctionURL(name, c.Namespace, proxyEnabled)
+	fnURL, err := helpers.GetSvcURL(name, c.Namespace, proxyEnabled)
 	if err != nil {
 		panic(err)
 	}
@@ -199,18 +199,4 @@ func (f Function) LogReadiness(ready bool) {
 	if f.verbose {
 		f.log.Infof("%+v", f.function)
 	}
-}
-
-func calculateFunctionURL(name, namespace string, useProxy bool) (*url.URL, error) {
-	var functionURL = ""
-	if useProxy {
-		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/", namespace, name)
-	} else {
-		functionURL = fmt.Sprintf("http://%s.%s.svc.cluster.local", name, namespace)
-	}
-	parsedURL, err := url.Parse(functionURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while parsing function access URL")
-	}
-	return parsedURL, nil
 }

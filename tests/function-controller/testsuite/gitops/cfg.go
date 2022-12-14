@@ -1,9 +1,7 @@
 package gitops
 
 import (
-	"fmt"
-	"net/url"
-
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
 
@@ -18,9 +16,8 @@ type GitopsConfig struct {
 }
 
 const (
-	gitServerServiceName    = "gitserver"
-	gitServerServicePort    = 80
-	gitServerEndpointFormat = "http://%s.%s.svc.cluster.local:%v/%s.git"
+	gitServerServiceName = "gitserver"
+	gitServerServicePort = 80
 )
 
 func NewGitopsConfig(fnName, gitServerImage, gitServerRepoName string, toolbox shared.Container) (GitopsConfig, error) {
@@ -35,26 +32,14 @@ func NewGitopsConfig(fnName, gitServerImage, gitServerRepoName string, toolbox s
 }
 
 func (c *GitopsConfig) GetGitServerURL(useProxy bool) string {
-	var functionURL = ""
-	if useProxy {
-		functionURL = fmt.Sprintf("http://127.0.0.1:8001/api/v1/namespaces/%s/services/%s:80/proxy/%s.git", c.Toolbox.Namespace, c.GitServerServiceName, c.GitServerRepoName)
-	} else {
-		functionURL = c.GetGitServerInClusterURL()
-	}
-	parsedURL, err := url.Parse(functionURL)
+	gitURL, err := helpers.GetGitURL(c.GitServerServiceName, c.Toolbox.Namespace, c.GitServerRepoName, useProxy)
 	if err != nil {
 		panic(err)
 	}
-
-	return parsedURL.String()
+	return gitURL.String()
 }
 
 func (c *GitopsConfig) GetGitServerInClusterURL() string {
-	functionURL := fmt.Sprintf(gitServerEndpointFormat, c.GitServerServiceName, c.Toolbox.Namespace, c.GitServerServicePort, c.GitServerRepoName)
-	parsedURL, err := url.Parse(functionURL)
-	if err != nil {
-		panic(err)
-	}
+	return c.GetGitServerURL(false)
 
-	return parsedURL.String()
 }
