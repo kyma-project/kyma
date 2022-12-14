@@ -39,20 +39,20 @@ You can find the broken consumer in two ways: by using Grafana dashboard or dire
 echo -n "tunas-testing/test-noapp3/kyma.noapp.order.created.v1" | md5
 ```
 
-this shell command results in `6642d54a92f357ba28280b9cb609e79d`.
+this shell command results in `ebcabfe5c902612f0ba3ebde7653f30b`.
 
 4. Then, you need to find consumer's leader:
 
 ```bash
-nats consumer info sap 6642d54a92f357ba28280b9cb609e79d
+nats consumer info sap ebcabfe5c902612f0ba3ebde7653f30b
 ```
 
 ```bash
-Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-24T15:49:43+02:00
+Information for Consumer sap > ebcabfe5c902612f0ba3ebde7653f30b created 2022-10-24T15:49:43+02:00
 
 Configuration:
 
-                Name: 6642d54a92f357ba28280b9cb609e79d
+                Name: ebcabfe5c902612f0ba3ebde7653f30b
          Description: tunas-testing/test-noapp3/kyma.noapp.order.created.v1
           ...
 
@@ -80,11 +80,11 @@ If you have NATS cli installed on your machine, you can simply run this shell sc
 You must get the following output:
 
 ```bash
-{"name":"6642d54a92f357ba28280b9cb609e79d","pending":25,"leader":"eventing-nats-1"}
+{"name":"ebcabfe5c902612f0ba3ebde7653f30b","pending":25,"leader":"eventing-nats-1"}
 {"name":"c74c20756af53b592f87edebff67bdf8","pending":0,"leader":"eventing-nats-0"}
 ```
 
-here you can see, that the consumer `6bfe94b513b39fb348e97b959c632e28` has pending messages. The other one has no
+here you can see, that the consumer `ebcabfe5c902612f0ba3ebde7653f30b` has pending messages. The other one has no
 pending message and
 is successfully processing events.
 
@@ -101,7 +101,7 @@ kubectl port-forward -n kyma-system eventing-nats-1 4222
 2. Trigger the leader reelection:
 
 ```bash
-nats consumer cluster step-down sap 6642d54a92f357ba28280b9cb609e79d
+nats consumer cluster step-down sap ebcabfe5c902612f0ba3ebde7653f30b
 ```
 
 After execution, you see the following message:
@@ -109,7 +109,7 @@ After execution, you see the following message:
 ```yaml
 New leader elected "eventing-nats-2"
 
-Information for Consumer sap > 6642d54a92f357ba28280b9cb609e79d created 2022-10-24T15:49:43+02:00
+Information for Consumer sap > ebcabfe5c902612f0ba3ebde7653f30b created 2022-10-24T15:49:43+02:00
 ```
 
 You can check the consumer now and confirm that the pending messages started to be dispatched.
