@@ -140,7 +140,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 
 func (r *Reconciler) createOrPatchFluentBit(ctx context.Context, name types.NamespacedName) error {
 	daemonSet := resources.MakeDaemonSet(name)
-	if _, err := controllerutil.CreateOrPatch(ctx, r.Client, daemonSet, r.mutate(daemonSet, name)); err != nil {
+	if _, err := controllerutil.CreateOrPatch(ctx, r.Client, daemonSet, r.mutate(ctx, daemonSet, name)); err != nil {
 		return fmt.Errorf("failed to create fluent bit daemonset: %w", err)
 	}
 	service := resources.MakeService(name)
