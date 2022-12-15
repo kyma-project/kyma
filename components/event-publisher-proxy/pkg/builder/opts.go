@@ -11,16 +11,24 @@ import (
 
 // WithCloudEvent will set the TransitionEvent's event as the given one.
 func WithCloudEvent(cloudEvent *ce.Event) func(*Event) error {
-	return func(t *Event) error {
-		t.Event = *cloudEvent
+	return func(e *Event) error {
+		e.cloudEvent = cloudEvent
 		return nil
 	}
 }
 
-// WithOriginalType sets the OriginalType.
-func WithOriginalType(originalType string) func(*Event) error {
+// WithOriginalEventType sets the OriginalType.
+func WithOriginalEventType(originalType string) func(*Event) error {
 	return func(e *Event) error {
 		e.originalType = originalType
+		return nil
+	}
+}
+
+// TODO
+func WithOrginalEventTypeFromUnderlyingCloudEvent() func(*Event) error {
+	return func(e *Event) error {
+		e.originalType = e.cloudEvent.Type()
 		return nil
 	}
 }
@@ -30,9 +38,9 @@ func WithOriginalType(originalType string) func(*Event) error {
 // TODO
 func WithCleaner(cleaner et.Cleaner) func(*Event) error {
 	return func(e *Event) error {
-		cleanType, err := cleaner.Clean(e.Event.Type())
+		cleanType, err := cleaner.Clean(e.cloudEvent.Type())
 
-		e.SetType(cleanType)
+		e.cloudEvent.SetType(cleanType)
 
 		return err
 	}
@@ -84,7 +92,7 @@ func WithCloudEventFromRequest(request *http.Request) func(*Event) error {
 			return err
 		}
 
-		e.Event = *cloudEvent
+		e.cloudEvent = cloudEvent
 		return nil
 	}
 }
@@ -102,21 +110,21 @@ func WithRemoveNonAlphanumericsFromType() func(*Event) error {
 
 func WithEventSource(source string) func(*Event) error {
 	return func(e *Event) error {
-		e.Event.SetSource(source)
+		e.cloudEvent.SetSource(source)
 		return nil
 	}
 }
 
 func WithEventExtension(name string, obj interface{}) func(*Event) error {
 	return func(e *Event) error {
-		e.Event.SetExtension(name, obj)
+		e.cloudEvent.SetExtension(name, obj)
 		return nil
 	}
 }
 
 func WithEventDataContentType(contentType string) func(*Event) error {
 	return func(e *Event) error {
-		e.Event.SetDataContentType(contentType)
+		e.cloudEvent.SetDataContentType(contentType)
 		return nil
 	}
 }

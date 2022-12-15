@@ -27,9 +27,10 @@ const (
 	eventTypeVersionExtensionKey    = "eventtypeversion"
 )
 
+
 type RequestToCETransformer interface {
-	TransformLegacyRequestsToEvent(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
-	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
+	TransformLegacyRequestsToEvent(http.ResponseWriter, *http.Request) *builder.Event
+	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *builder.Event, string)
 }
 
 type Transformer struct {
@@ -37,6 +38,9 @@ type Transformer struct {
 	eventTypePrefix   string
 	applicationLister *application.Lister
 }
+
+// Compile time check of the interface implementation.
+var _ RequestToCETransformer = &Transformer{}
 
 func NewTransformer(namespace string, eventTypePrefix string, applicationLister *application.Lister) *Transformer {
 	return &Transformer{
@@ -83,12 +87,12 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 // TransformLegacyRequestsToEvent transforms the http request containing a legacy event
 // to a Event from the given request. It's second return type is a string that holds
 // the original Type without any cleanup.
-func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
+func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter, request *http.Request) *builder.Event {
 	// Parse request body to PublishRequestV1.
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
 		writeJSONResponse(writer, resp)
-		return nil, ""
+		return nil 
 	}
 
 	parameters := &apiv1.PublishEventParametersV1{}
@@ -101,14 +105,14 @@ func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter,
 			resp = ErrorResponseBadRequest(err.Error())
 		}
 		writeJSONResponse(writer, resp)
-		return nil, ""
+		return nil
 	}
 
 	// Validate the PublishRequestV1 for missing or incoherent values.
 	checkResp := t.checkParameters(parameters)
 	if checkResp.Error != nil {
 		writeJSONResponse(writer, checkResp)
-		return nil, ""
+		return nil
 	}
 
 	// Clean the application name from non-alphanumeric characters.
@@ -126,19 +130,20 @@ func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter,
 	if err != nil {
 		response := ErrorResponse(http.StatusInternalServerError, err)
 		writeJSONResponse(writer, response)
-		return nil, ""
+		return nil
 	}
 
 	// Add tracing context to cloud events.
-	tracing.AddTracingContextToCEExtensions(request.Header, &event.Event)
+	tracing.AddTracingContextToCEExtensions(request.Header, event.CloudEvent())
 
 	// Prepare the original event-type without cleanup.
 	originalEventType := formatEventType(t.eventTypePrefix, originalAppName, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
+    event.SetOriginalEventType(originalEventType)
 
-	return &event.Event, originalEventType
+	return  event 
 }
 
-func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *cev2event.Event, msg string) {
+func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *builder.Event, msg string) {
 	response := &apiv1.PublishEventResponses{}
 	// Fail.
 	if !is2XXStatusCode(statusCode) {
@@ -151,7 +156,7 @@ func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseW
 	}
 
 	// Success.
-	response.Ok = &apiv1.PublishResponse{EventID: event.ID()}
+	response.Ok = &apiv1.PublishResponse{EventID: event.CloudEvent().ID()}
 	writeJSONResponse(writer, response)
 }
 

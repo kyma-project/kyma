@@ -11,9 +11,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"go.uber.org/zap"
 
-	"github.com/cloudevents/sdk-go/v2/event"
-
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
@@ -62,7 +61,7 @@ func (s *Sender) ConnectionStatus() nats.Status {
 
 // Send dispatches the event to the NATS backend in JetStream mode.
 // If the NATS connection is not open, it returns an error.
-func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResult, error) {
+func (s *Sender) Send(_ context.Context, event *builder.Event) (sender.PublishResult, error) {
 	if s.ConnectionStatus() != nats.CONNECTED {
 		return nil, ErrNotConnected
 	}
@@ -100,13 +99,13 @@ func (s *Sender) Send(_ context.Context, event *event.Event) (sender.PublishResu
 }
 
 // eventToNATSMsg translates cloud event into the NATS Msg.
-func (s *Sender) eventToNATSMsg(event *event.Event) (*nats.Msg, error) {
+func (s *Sender) eventToNATSMsg(event *builder.Event) (*nats.Msg, error) {
 	header := make(nats.Header)
-	header.Set(internal.HeaderContentType, event.DataContentType())
-	header.Set(internal.CeSpecVersionHeader, event.SpecVersion())
+	header.Set(internal.HeaderContentType, event.CloudEvent().DataContentType())
+	header.Set(internal.CeSpecVersionHeader, event.CloudEvent().SpecVersion())
 	header.Set(internal.CeTypeHeader, event.Type())
-	header.Set(internal.CeSourceHeader, event.Source())
-	header.Set(internal.CeIDHeader, event.ID())
+	header.Set(internal.CeSourceHeader, event.CloudEvent().Source())
+	header.Set(internal.CeIDHeader, event.CloudEvent().ID())
 
 	eventJSON, err := json.Marshal(event)
 	if err != nil {

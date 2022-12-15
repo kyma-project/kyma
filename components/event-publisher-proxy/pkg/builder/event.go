@@ -10,7 +10,7 @@ import (
 // Event is a wrapper around a CloudEvent that allows to directly manipulate the segments of type of an event.
 // in kyma eventing.
 type Event struct {
-	ce.Event
+	cloudEvent   *ce.Event
 
 	
 	// These are the segments of a CloudEvent's Type: "prefix.app.name.version".
@@ -29,7 +29,7 @@ type Opt func(*Event) error
 // NewEvent will take options to create an Event.
 func NewEvent(options ...Opt) (*Event, error) {
 	event := Event{
-		Event: ce.Event{},
+		cloudEvent: &ce.Event{},
 	}
 
 	// Apply all options.
@@ -52,6 +52,17 @@ func NewEvent(options ...Opt) (*Event, error) {
 
 	return &event, nil
 }
+
+
+func (e *Event) CloudEvent() *ce.Event {
+    return e.cloudEvent
+}
+
+func (e *Event) SetCloudEvent(cloudEvent *ce.Event) error {
+    e.cloudEvent = cloudEvent
+    err := e.setTypeSegmentsViaCloudEvent()
+    return err
+} 
 
 // Prefix only returns the prefix segment of the Type.
 func (e *Event) Prefix() string {
@@ -104,18 +115,30 @@ func (e *Event) SetVersion(s string) {
 
 // Type returns EventType.
 func (e *Event) Type() string {
-	return e.Event.Type()
+	return e.cloudEvent.Type()
+}
+
+
+// TODO
+func (e *Event) SetOriginalEventType(s string) {
+    e.originalType = s
+}
+
+//TODO
+//TODO can originalType be publis instead
+func (e *Event) OriginalEventType() string {
+    return e.originalType
 }
 
 func (e *Event) updateType() {
 	_type := concatSegmentsWithDot(e.prefix, e.app, e.name, e.version)
-	e.Event.SetType(_type)
+	e.cloudEvent.SetType(_type)
 }
 
 // setTypeSegmentsViaCloudEvent will set the four type segments by trying to
 // extract them from the underlying cloud event.
 func (e *Event) setTypeSegmentsViaCloudEvent() error {
-	prefix, appName, eventName, version, err := extractSegmentsFromEvent(&e.Event)
+	prefix, appName, eventName, version, err := extractSegmentsFromEvent(e.cloudEvent)
 	if err != nil {
 		return err
 	}

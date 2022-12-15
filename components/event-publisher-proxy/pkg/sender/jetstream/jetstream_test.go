@@ -19,6 +19,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
@@ -81,6 +82,12 @@ func TestJetStreamMessageSender(t *testing.T) {
 			}
 
 			ce := createCloudEvent(t)
+            event, err := builder.NewEvent(
+                builder.WithCloudEvent(ce),
+            )
+            if err != nil {
+                //todo
+            }
 
 			ctx := context.Background()
 			sender := NewSender(context.Background(), connection, testEnv.Config, mockedLogger)
@@ -90,7 +97,7 @@ func TestJetStreamMessageSender(t *testing.T) {
 			}
 
 			// act
-			status, err := sender.Send(ctx, ce)
+			status, err := sender.Send(ctx, event)
 
 			testEnv.Logger.WithContext().Errorf("err: %v", err)
 

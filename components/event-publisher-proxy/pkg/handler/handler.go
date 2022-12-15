@@ -15,6 +15,7 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
@@ -111,8 +112,8 @@ func (h *Handler) maxBytes(f http.HandlerFunc) http.HandlerFunc {
 // publishLegacyEventsAsCE converts an incoming request in legacy event format to a cloudevent and dispatches it using
 // the configured GenericSender.
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	event, _ := h.LegacyTransformer.TransformLegacyRequestsToEvent(writer, request)
-	if event == nil {
+	event  := h.LegacyTransformer.TransformLegacyRequestsToEvent(writer, request)
+	if event.CloudEvent() == nil {
 		h.namedLogger().Error("Failed to transform legacy event to CloudEvent, event is nil")
 		return
 	}
@@ -141,7 +142,12 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
-	event, err := extractCloudEventFromRequest(request)
+	//event, err := extractCloudEventFromRequest(request)
+	event, err := builder.NewEvent(
+		builder.WithCloudEventFromRequest(request),
+		builder.WithOrginalEventTypeFromUnderlyingCloudEvent(),
+		builder.WithCleaner(h.eventTypeCleaner),
+	)
 	if err != nil {
 		h.namedLogger().With().Error(err)
 		e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
@@ -150,18 +156,6 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		}
 		return
 	}
-
-	eventTypeOriginal := event.Type()
-	eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
-	if err != nil {
-		h.namedLogger().Error(err)
-		e := writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
-		if e != nil {
-			h.namedLogger().Error(e)
-		}
-		return
-	}
-	event.SetType(eventTypeClean)
 
 	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
@@ -199,11 +193,11 @@ func extractCloudEventFromRequest(request *http.Request) (*cev2event.Event, erro
 }
 
 // sendEventAndRecordMetrics dispatches an Event and records metrics based on dispatch success.
-func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2event.Event, host string, header http.Header) (sender.PublishResult, error) {
+func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *builder.Event, host string, header http.Header) (sender.PublishResult, error) {
 	ctx, cancel := context.WithTimeout(ctx, h.RequestTimeout)
 	defer cancel()
 	h.applyDefaults(ctx, event)
-	tracing.AddTracingContextToCEExtensions(header, event)
+	tracing.AddTracingContextToCEExtensions(header, event.CloudEvent())
 	start := time.Now()
 	result, err := h.Sender.Send(ctx, event)
 	duration := time.Since(start)
@@ -211,7 +205,7 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 		h.collector.RecordError()
 		return nil, err
 	}
-	h.collector.RecordEventType(event.Type(), event.Source(), result.HTTPStatus())
+	h.collector.RecordEventType(event.Type(), event.CloudEvent().Source(), result.HTTPStatus())
 	h.collector.RecordLatency(duration, result.HTTPStatus(), host)
 	h.collector.RecordRequests(result.HTTPStatus(), host)
 	return result, nil
@@ -228,11 +222,11 @@ func writeResponse(writer http.ResponseWriter, statusCode int, respBody []byte) 
 	return err
 }
 
-// applyDefaults applies the default values (if any) to the given Cloud Event.
-func (h *Handler) applyDefaults(ctx context.Context, event *cev2event.Event) {
+// applyDefaults applies the default values (if any exist) to the given Event.
+func (h *Handler) applyDefaults(ctx context.Context, event *builder.Event) {
 	if h.Defaulter != nil {
-		newEvent := h.Defaulter(ctx, *event)
-		*event = newEvent
+		newEvent := h.Defaulter(ctx, *event.CloudEvent())
+		event.SetCloudEvent(&newEvent)
 	}
 }
 

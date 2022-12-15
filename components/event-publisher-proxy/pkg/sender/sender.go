@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 )
 
 type GenericSender interface {
-	Send(context.Context, *event.Event) (PublishResult, error)
+	Send(context.Context, *builder.Event) (PublishResult, error)
 	URL() string
 }
 

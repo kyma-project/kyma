@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 )
 
 const (
@@ -127,13 +128,21 @@ func (b *CloudEventBuilder) BuildStructured() (string, http.Header) {
 	return payload, headers
 }
 
-func (b *CloudEventBuilder) Build(t *testing.T) *cev2.Event {
+func (b *CloudEventBuilder) Build(t *testing.T) *builder.Event {
 	e := cev2.New(b.specVersion)
 	assert.NoError(t, e.Context.SetID(b.id))
 	assert.NoError(t, e.Context.SetType(b.eventType))
 	assert.NoError(t, e.Context.SetSource(b.eventSource))
 	assert.NoError(t, e.SetData(b.dataContentType, b.data))
-	return &e
+
+
+    // todo simplify this
+    event, err := builder.NewEvent(
+        builder.WithCloudEvent(&e),
+    )
+    assert.NoError(t, err)
+
+	return event
 }
 
 type LegacyEvent struct {

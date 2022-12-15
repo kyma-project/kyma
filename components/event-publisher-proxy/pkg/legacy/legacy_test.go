@@ -102,21 +102,21 @@ func TestTransformLegacyRequestsToTransitionEvent(t *testing.T) {
 			appLister := fake.NewApplicationListerOrDie(ctx, app)
 			transformer := NewTransformer("test", tc.givenPrefix, appLister)
 
-			gotEvent, gotOriginalEventType := transformer.TransformLegacyRequestsToEvent(writer, request)
+			gotEvent := transformer.TransformLegacyRequestsToEvent(writer, request)
 			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
-			assert.Equal(t, wantEventType, gotOriginalEventType)
+			assert.Equal(t, wantEventType, gotEvent.OriginalEventType())
 
 			// Check eventType.
-			gotType := gotEvent.Context.GetType()
+			gotType := gotEvent.CloudEvent().Context.GetType()
 			assert.Equal(t, tc.wantType, gotType)
 
 			// Check extensions 'eventtypeversion'.
-			gotVersion, ok := gotEvent.Extensions()["eventtypeversion"].(string)
+			gotVersion, ok := gotEvent.CloudEvent().Extensions()["eventtypeversion"].(string)
 			assert.True(t, ok)
 			assert.Equal(t, tc.wantVersion, gotVersion)
 
 			// Check HTTP ContentType set properly.
-			gotContentType := gotEvent.Context.GetDataContentType()
+			gotContentType := gotEvent.CloudEvent().Context.GetDataContentType()
 			assert.Equal(t, internal.ContentTypeApplicationJSON, gotContentType)
 		})
 	}
@@ -154,14 +154,14 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	legacyTransformer := NewTransformer(wantBEBNamespace, givenEventTypePrefix, nil)
 	gotEvent, err := legacyTransformer.convertPublishRequestToEvent(givenApplicationName, givenPublishReqParams)
 	require.NoError(t, err)
-	assert.Equal(t, wantBEBNamespace, gotEvent.Context.GetSource())
-	assert.Equal(t, wantEventID, gotEvent.Context.GetID())
-	assert.Equal(t, wantEventType, gotEvent.Context.GetType())
-	assert.Equal(t, wantTimeNowFormatted, gotEvent.Context.GetTime())
-	assert.Equal(t, wantDataContentType, gotEvent.Context.GetDataContentType())
+	assert.Equal(t, wantBEBNamespace, gotEvent.CloudEvent().Context.GetSource())
+	assert.Equal(t, wantEventID, gotEvent.CloudEvent().Context.GetID())
+	assert.Equal(t, wantEventType, gotEvent.CloudEvent().Context.GetType())
+	assert.Equal(t, wantTimeNowFormatted, gotEvent.CloudEvent().Context.GetTime())
+	assert.Equal(t, wantDataContentType, gotEvent.CloudEvent().Context.GetDataContentType())
 
 	wantLegacyEventVersion := givenLegacyEventVersion
-	gotExtension, err := gotEvent.Context.GetExtension(eventTypeVersionExtensionKey)
+	gotExtension, err := gotEvent.CloudEvent().Context.GetExtension(eventTypeVersionExtensionKey)
 	assert.NoError(t, err)
 	assert.Equal(t, wantLegacyEventVersion, gotExtension)
 }

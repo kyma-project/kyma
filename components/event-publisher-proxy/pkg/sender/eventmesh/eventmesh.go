@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/cloudevents/sdk-go/v2/binding"
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
@@ -53,13 +53,13 @@ func (s *Sender) Checker() *health.ConfigurableChecker {
 	return &health.ConfigurableChecker{}
 }
 
-func (s *Sender) Send(ctx context.Context, event *cev2event.Event) (sender.PublishResult, error) {
+func (s *Sender) Send(ctx context.Context, event *builder.Event) (sender.PublishResult, error) {
 	request, err := s.NewRequestWithTarget(ctx, s.Target)
 	if err != nil {
 		return nil, err
 	}
 
-	message := binding.ToMessage(event)
+	message := binding.ToMessage(event.CloudEvent())
 	defer func() { _ = message.Finish(nil) }()
 
 	err = cloudevents.WriteRequestWithHeaders(ctx, message, request, additionalHeaders)
