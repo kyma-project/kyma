@@ -60,7 +60,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 			"pipelines": map[string]any{
 				"traces": map[string]any{
 					"receivers":  []any{"opencensus", "otlp"},
-					"processors": []any{"memory_limiter", "batch"},
+					"processors": []any{"memory_limiter", "k8sAttributes", "resource", "batch"},
 					"exporters":  []any{outputType},
 				},
 			},
@@ -133,6 +133,39 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 }
 
 func makeProcessorsConfig() map[string]any {
+	k8sAttributes := []any{
+		"k8s.pod.name",
+		"k8s.node.name",
+		"k8s.namespace.name",
+		"k8s.deployment.name",
+		"k8s.statefulset.name",
+		"k8s.daemonset.name",
+		"k8s.cronjob.name",
+		"k8s.job.name",
+	}
+
+	podAssociations := []map[string]any{
+		{
+			"source": []map[string]any{{
+				"from": "resource_attribute",
+				"name": "k8s.pod.ip",
+			},
+			},
+		},
+		{
+			"source": []map[string]any{{
+				"from": "resource_attribute",
+				"name": "k8s.pod.uid",
+			},
+			},
+		},
+		{
+			"source": []map[string]any{{
+				"from": "connection",
+			},
+			},
+		},
+	}
 	return map[string]any{
 		"batch": map[string]any{
 			"send_batch_size":     512,
@@ -143,6 +176,23 @@ func makeProcessorsConfig() map[string]any {
 			"check_interval":         "1s",
 			"limit_percentage":       75,
 			"spike_limit_percentage": 10,
+		},
+		"k8sattributes": map[string]any{
+			"auth_type":   "serviceAccount",
+			"passthrough": "false",
+			"extract": map[string]any{
+				"metadata": k8sAttributes,
+			},
+			"pod_association": podAssociations,
+		},
+		"resource": map[string]any{
+			"attributes": []map[string]any{
+				{
+					"action": "insert",
+					"key":    "k8s.cluster.name",
+					"value":  "${KUBERNETES_SERVICE_HOST}",
+				},
+			},
 		},
 	}
 }
@@ -211,7 +261,8 @@ func makeDeployment(config Config, configHash string) *appsv1.Deployment {
 							},
 						},
 					},
-					PriorityClassName: config.Deployment.PriorityClassName,
+					ServiceAccountName: config.BaseName,
+					PriorityClassName:  config.Deployment.PriorityClassName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser:    pointer.Int64(collectorUser),
 						RunAsNonRoot: pointer.Bool(true),
