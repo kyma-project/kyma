@@ -30,3 +30,4 @@ kcproxy:
     requests:
       cpu: 10m
       memory: 5Mi
+

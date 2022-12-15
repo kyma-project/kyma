@@ -1,0 +1,3 @@
+istio:
+  samplingRate: 1.0
+
