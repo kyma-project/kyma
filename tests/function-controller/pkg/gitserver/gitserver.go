@@ -3,6 +3,7 @@ package gitserver
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

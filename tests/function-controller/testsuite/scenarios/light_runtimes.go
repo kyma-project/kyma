@@ -2,8 +2,9 @@ package scenarios
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 
@@ -51,11 +52,11 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		Log:         logf,
 	}
 
-	python39Fn := function.NewFunction("python39", genericContainer.WithLogger(python39Logger))
+	python39Fn := function.NewFunction("python39", cfg.KubectlProxyEnabled, genericContainer.WithLogger(python39Logger))
 
-	nodeJS14Fn := function.NewFunction("nodejs14", genericContainer.WithLogger(nodejs14Logger))
+	nodeJS14Fn := function.NewFunction("nodejs14", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs14Logger))
 
-	nodejs16Fn := function.NewFunction("nodejs16", genericContainer.WithLogger(nodejs16Logger))
+	nodejs16Fn := function.NewFunction("nodejs16", cfg.KubectlProxyEnabled, genericContainer.WithLogger(nodejs16Logger))
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
