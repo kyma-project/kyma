@@ -92,7 +92,7 @@ Create a [Subscription](../../05-technical-reference/00-custom-resources/evnt-01
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-payment-sub

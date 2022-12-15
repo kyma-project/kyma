@@ -11,7 +11,7 @@ The `subscriptions.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a
 
 This sample Subscription custom resource (CR) subscribes to an event called `order.created.v1`.
 
-> **WARNING:** Prohibited characters in event names under the **spec.types** property, are not supported in some backends. If any are detected, Eventing may remove them. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
+> **WARNING:** Prohibited characters in event names under the **spec.types** property, are not supported in some backends. If any are detected, Eventing will remove them. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
 
 > **NOTE:** Both the subscriber and the Subscription should exist in the same Namespace.
 
@@ -39,7 +39,7 @@ This table lists all the possible parameters of a given resource together with t
 |-------------|:---------:|--------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless your specify otherwise. |
-| **spec.typeMatching** | No | Defines the matching type (`standard` or `exact`) for event types. When it is set to `exact`, Eventing will not do any kind of modifications to the provided `spec.types` internally. It is set to `standard` unless you specify otherwise. |
+| **spec.typeMatching** | No | Defines the matching type (`standard` or `exact`) for event types. When it is set to `exact`, Eventing will not do any kind of modifications to the provided `spec.types` internally. In case of `standard`, Eventing will modify the types internally to fulfil the backend requirements. It is set to `standard` unless you specify otherwise. |
 | **spec.source** | Yes | The origin from which events are published. |
 | **spec.types** | Yes | Defines the list of event types used to trigger workloads. |
 | **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`. |

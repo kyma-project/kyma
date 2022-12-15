@@ -110,7 +110,7 @@ All the published events of this type are then forwarded to an HTTP endpoint cal
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.kyma-project.io/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha2
    kind: Subscription
    metadata:
      name: lastorder-sub

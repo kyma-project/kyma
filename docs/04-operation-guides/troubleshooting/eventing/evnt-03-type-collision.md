@@ -15,16 +15,16 @@ In some cases, it can lead to a naming collision, which can cause subscribers to
 
 Follow these steps to detect if naming collision is the source of the problem:
 
-1. Get the clean event types from the status of the Subscription.
+1. Get the clean types from the status of the Subscription.
  
     ```bash
     kubectl -n {NAMESPACE} get subscriptions.eventing.kyma-project.io {NAME} -o jsonpath='{.status.types}'
     ```
 
-2. Search for any other Subscription using the same `CleanEventType` as in your Subscription.
+2. Search for any other Subscription using the same `CleanType` as in your Subscription.
     
     ```bash
-    kubectl get subscriptions.eventing.kyma-project.io -A | grep {CLEAN_EVENT_TYPE}
+    kubectl get subscriptions.eventing.kyma-project.io -A | grep {CLEAN_TYPE}
     ```
     
-3. If you find that the `CleanEventType` collides with some other Subscription, a solution for this would be to use a different event type. 
+3. If you find that the `CleanType` collides with some other Subscription, a solution for this would be to use a different event type. 

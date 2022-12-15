@@ -43,7 +43,7 @@ To subscribe to multiple events, you need a [Subscription](../../05-technical-re
 Run:
 ```bash
 cat <<EOF | kubectl apply -f -
-    apiVersion: eventing.kyma-project.io/v1alpha1
+    apiVersion: eventing.kyma-project.io/v1alpha2
     kind: Subscription
     metadata:
       name: lastorder-sub
