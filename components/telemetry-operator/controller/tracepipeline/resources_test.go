@@ -27,6 +27,22 @@ var (
 		},
 	}
 
+	tracePipelineHttp = v1alpha1.TracePipelineOutput{
+		Otlp: &v1alpha1.OtlpOutput{
+			Endpoint: v1alpha1.ValueType{
+				Value: "http://localhost",
+			},
+		},
+	}
+
+	tracePipelineHttps = v1alpha1.TracePipelineOutput{
+		Otlp: &v1alpha1.OtlpOutput{
+			Endpoint: v1alpha1.ValueType{
+				Value: "https://localhost",
+			},
+		},
+	}
+
 	tracePipelineWithBasicAuth = v1alpha1.TracePipelineOutput{
 		Otlp: &v1alpha1.OtlpOutput{
 			Endpoint: v1alpha1.ValueType{
@@ -58,6 +74,39 @@ func TestMakeConfigMap(t *testing.T) {
 	var collectorConfigYaml interface{}
 	require.NoError(t, yaml.Unmarshal([]byte(collectorConfig), &collectorConfigYaml), "Otel Collector config must be valid yaml")
 	require.True(t, strings.Contains(collectorConfig, expectedEndpoint), "Otel Collector config must contain OTLP endpoint")
+}
+
+func TestMakeConfigMapTLSInsecureNoScheme(t *testing.T) {
+	cm := makeConfigMap(config, tracePipeline)
+
+	require.NotNil(t, cm)
+	collectorConfig := cm.Data[configMapKey]
+	require.NotEmpty(t, collectorConfig)
+
+	expectedTLSConfig := "insecure: false"
+	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure true")
+}
+
+func TestMakeConfigMapTLSInsecureHttp(t *testing.T) {
+	cm := makeConfigMap(config, tracePipelineHttp)
+
+	require.NotNil(t, cm)
+	collectorConfig := cm.Data[configMapKey]
+	require.NotEmpty(t, collectorConfig)
+
+	expectedTLSConfig := "insecure: true"
+	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure true")
+}
+
+func TestMakeConfigMapTLSInsecureHttps(t *testing.T) {
+	cm := makeConfigMap(config, tracePipelineHttps)
+
+	require.NotNil(t, cm)
+	collectorConfig := cm.Data[configMapKey]
+	require.NotEmpty(t, collectorConfig)
+
+	expectedTLSConfig := "insecure: false"
+	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure false")
 }
 
 func TestMakeConfigMapWithBasicAuth(t *testing.T) {
