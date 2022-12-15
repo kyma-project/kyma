@@ -1,4 +1,4 @@
-package v1alpha2
+package utils
 
 const (
 	ProtocolSettingsContentModeBinary     string = "BINARY"
