@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/pointer"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -108,6 +109,7 @@ func getOutputType(output v1alpha1.TracePipelineOutput) string {
 
 func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 	outputType := getOutputType(output)
+	isInsecure := len(strings.TrimSpace(output.Otlp.Endpoint.Value)) > 0 && strings.HasPrefix(output.Otlp.Endpoint.Value, "http://")
 	var headers map[string]any
 	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
 		headers = map[string]any{
@@ -118,6 +120,9 @@ func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 		outputType: map[string]any{
 			"endpoint": fmt.Sprintf("${%s}", otlpEndpointVariable),
 			"headers":  headers,
+			"tls": map[string]any{
+				"insecure": isInsecure,
+			},
 			"sending_queue": map[string]any{
 				"enabled":    true,
 				"queue_size": 512,

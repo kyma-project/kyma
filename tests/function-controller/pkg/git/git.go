@@ -1,7 +1,7 @@
 package git
 
 import (
-	"io/ioutil"
+	"io"
 	"strings"
 	"time"
 
@@ -83,7 +83,7 @@ func (c Client) readFileContent(fs billy.Filesystem, filePath string) (string, e
 	}
 	defer file.Close()
 
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		return "", errors.Wrap(err, "while reading file")
 	}

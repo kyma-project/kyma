@@ -1,0 +1,61 @@
+apiVersion: operator.kyma-project.io/v1alpha1
+kind: ModuleTemplate
+metadata:
+  name: moduletemplate-keda
+  namespace: kcp-system
+  labels:
+    "operator.kyma-project.io/managed-by": "lifecycle-manager"
+    "operator.kyma-project.io/controller-name": "manifest"
+    "operator.kyma-project.io/module-name": "keda"
+  annotations:
+    "operator.kyma-project.io/module-version": "0.0.1-a0e8648"
+    "operator.kyma-project.io/module-provider": "internal"
+    "operator.kyma-project.io/descriptor-schema-version": "v2"
+spec:
+  target: remote
+  channel: alpha
+  data:
+    apiVersion: operator.kyma-project.io/v1alpha1
+    kind: Keda
+    metadata:
+      name: keda-sample
+    spec:
+      logging:
+        operator:
+          level: "debug"
+  descriptor:
+    component:
+      componentReferences: []
+      name: kyma.project.io/module/keda
+      provider: internal
+      repositoryContexts:
+      - baseUrl: europe-docker.pkg.dev/kyma-project/prod/unsigned
+        componentNameMapping: urlPath
+        type: ociRegistry
+      resources:
+      - access:
+          digest: sha256:86f21c6cc5d82167b10a23bb5a82e852cd5b8d6292e0ea448261c90ff6893a1a
+          type: localOciBlob
+        name: keda
+        relation: local
+        type: helm-chart
+        version: 0.0.1-a0e8648
+      - access:
+          digest: sha256:f4a599c4310b0fe9133b67b72d9b15ee96b52a1872132528c83978239b5effef
+          type: localOciBlob
+        name: config
+        relation: local
+        type: yaml
+        version: 0.0.1-a0e8648
+      sources:
+      - access:
+          commit: a0e86481d91cb126972e2cba82361c11d6e4d2db
+          ref: refs/heads/main
+          repoUrl: github.com/kyma-project/keda-manager
+          type: github
+        name: keda-manager
+        type: git
+        version: 0.0.1-a0e8648
+      version: 0.0.1-a0e8648
+    meta:
+      schemaVersion: v2

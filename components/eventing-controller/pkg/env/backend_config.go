@@ -36,8 +36,9 @@ type PublisherConfig struct {
 	LimitsMemory      string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
 	PriorityClassName string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
 	// publisher takes the controller values
-	AppLogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
-	AppLogLevel  string `envconfig:"APP_LOG_LEVEL" default:"info"`
+	AppLogFormat        string `envconfig:"APP_LOG_FORMAT" default:"json"`
+	AppLogLevel         string `envconfig:"APP_LOG_LEVEL" default:"info"`
+	EnableNewCRDVersion bool   `envconfig:"ENABLE_NEW_CRD_VERSION" default:"false"`
 }
 
 type DefaultSubscriptionConfig struct {

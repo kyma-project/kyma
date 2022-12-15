@@ -215,6 +215,17 @@ func WithDefaultWebhookAuth() ProtoOpt {
 	}
 }
 
+func WithRequiredWebhookAuth() ProtoOpt {
+	return func(p *eventingv1alpha1.ProtocolSettings) {
+		p.WebhookAuth = &eventingv1alpha1.WebhookAuth{
+			GrantType:    "client_credentials",
+			ClientID:     "xxx",
+			ClientSecret: "xxx",
+			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
+		}
+	}
+}
+
 type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
 
 func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {

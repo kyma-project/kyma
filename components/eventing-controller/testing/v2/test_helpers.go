@@ -189,50 +189,6 @@ func MarkReady(r *apigatewayv1beta1.APIRule) {
 	}
 }
 
-type ProtoOpt func(p *eventingv1alpha2.ProtocolSettings)
-
-func NewProtocolSettings(opts ...ProtoOpt) *eventingv1alpha2.ProtocolSettings {
-	protoSettings := &eventingv1alpha2.ProtocolSettings{}
-	for _, o := range opts {
-		o(protoSettings)
-	}
-	return protoSettings
-}
-
-func WithBinaryContentMode() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.ContentMode = utils.StringPtr(eventingv1alpha2.ProtocolSettingsContentModeBinary)
-	}
-}
-
-func WithExemptHandshake() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.ExemptHandshake = func() *bool {
-			exemptHandshake := true
-			return &exemptHandshake
-		}()
-	}
-}
-
-func WithAtLeastOnceQOS() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.Qos = utils.StringPtr(string(types.QosAtLeastOnce))
-	}
-}
-
-func WithDefaultWebhookAuth() ProtoOpt {
-	return func(p *eventingv1alpha2.ProtocolSettings) {
-		p.WebhookAuth = &eventingv1alpha2.WebhookAuth{
-			Type:         "oauth2",
-			GrantType:    "client_credentials",
-			ClientID:     "xxx",
-			ClientSecret: "xxx",
-			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-			Scope:        []string{"guid-identifier"},
-		}
-	}
-}
-
 type SubscriptionOpt func(subscription *eventingv1alpha2.Subscription)
 
 func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha2.Subscription {
@@ -342,7 +298,7 @@ func WithWebhookForNATS() SubscriptionOpt {
 			sub.Spec.Config = map[string]string{}
 		}
 		sub.Spec.Config[eventingv1alpha2.Protocol] = "NATS"
-		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode] = eventingv1alpha2.ProtocolSettingsContentModeBinary
+		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode] = "BINARY"
 		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsExemptHandshake] = "true"
 		sub.Spec.Config[eventingv1alpha2.ProtocolSettingsQos] = "true"
 	}
@@ -378,15 +334,31 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha2.Subscription) {
 		s.Spec.Config = map[string]string{
 			eventingv1alpha2.Protocol:                        "BEB",
-			eventingv1alpha2.ProtocolSettingsContentMode:     eventingv1alpha2.ProtocolSettingsContentModeBinary,
+			eventingv1alpha2.ProtocolSettingsContentMode:     "BINARY",
 			eventingv1alpha2.ProtocolSettingsExemptHandshake: "true",
-			eventingv1alpha2.ProtocolSettingsQos:             "true",
+			eventingv1alpha2.ProtocolSettingsQos:             "AT_LEAST_ONCE",
 			eventingv1alpha2.WebhookAuthType:                 "oauth2",
 			eventingv1alpha2.WebhookAuthGrantType:            "client_credentials",
 			eventingv1alpha2.WebhookAuthClientID:             "xxx",
 			eventingv1alpha2.WebhookAuthClientSecret:         "xxx",
 			eventingv1alpha2.WebhookAuthTokenURL:             "https://oauth2.xxx.com/oauth2/token",
 			eventingv1alpha2.WebhookAuthScope:                "guid-identifier,root",
+		}
+	}
+}
+
+func WithInvalidProtocolSettingsQos() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		s.Spec.Config = map[string]string{
+			eventingv1alpha2.ProtocolSettingsQos: "AT_INVALID_ONCE",
+		}
+	}
+}
+
+func WithInvalidWebhookAuthType() SubscriptionOpt {
+	return func(s *eventingv1alpha2.Subscription) {
+		s.Spec.Config = map[string]string{
+			eventingv1alpha2.WebhookAuthType: "abcd",
 		}
 	}
 }
@@ -460,6 +432,15 @@ func WithEmptyStatus() SubscriptionOpt {
 func WithEmptyConfig() SubscriptionOpt {
 	return func(subscription *eventingv1alpha2.Subscription) {
 		subscription.Spec.Config = map[string]string{}
+	}
+}
+
+func WithConfigValue(key, value string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha2.Subscription) {
+		if subscription.Spec.Config == nil {
+			subscription.Spec.Config = map[string]string{}
+		}
+		subscription.Spec.Config[key] = value
 	}
 }
 

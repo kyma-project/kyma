@@ -16,7 +16,7 @@ The monitoring flow in Kyma comes down to the following components and steps:
 4. If you have configured a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.
 5. You can visualize metrics and track their historical data on **Grafana** dashboards.
 
-Learn how to [set up the monitoring flow](../../03-tutorials/00-observability/README.md).
+Learn how to [set up the monitoring flow](../../03-tutorials/00-observability.md).
 
 ## Monitoring components
 
