@@ -1,4 +1,4 @@
-z---
+---
 title: Function's specification
 ---
 
