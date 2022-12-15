@@ -25,8 +25,9 @@ type NatsConfig struct {
 
 	// JetStream-specific configs
 	// Name of the JetStream stream where all events are stored.
-	JSStreamName    string `envconfig:"JS_STREAM_NAME" required:"true"`
-	JSSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"false" default:"kyma"`
+	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
+	// Prefix for the subjects in the stream
+	JSSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
 	// Number of replicas for the JetStream stream

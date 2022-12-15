@@ -1636,7 +1636,7 @@ func startJetStream(t *testing.T, testEnv *TestEnvironment) {
 		evtesting.WithPort(testEnv.natsPort),
 		evtesting.WithJetStreamEnabled())
 	require.Eventually(t, func() bool {
-		info, streamErr := testEnv.jsClient.StreamInfo(defaultStreamName)
+		info, streamErr := testEnv.jsClient.StreamInfo(testEnv.natsConfig.JSStreamName)
 		require.NoError(t, streamErr)
 		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
@@ -1660,5 +1660,5 @@ func assertNewSubscriptionReturnItsKey(t *testing.T,
 func cleanUpTestEnvironment(testEnvironment *TestEnvironment) {
 	defer testEnvironment.natsServer.Shutdown()
 	defer testEnvironment.jsClient.natsConn.Close()
-	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
+	defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
 }

@@ -367,7 +367,8 @@ func TestChangeSubscription(t *testing.T) {
 						reconcilertestingv2.BeExistingSubscription(),
 						reconcilertestingv2.BeValidSubscription(),
 						reconcilertestingv2.BeJetStreamSubscriptionWithSubject(
-							testingv2.EventTypePrefix, reconcilertestingv2.NewCleanEventType("0"), eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config,
+							testingv2.EventTypePrefix, reconcilertestingv2.NewCleanEventType("0"),
+							eventingv1alpha2.TypeMatchingExact, ens.jetStreamBackend.Config,
 						),
 					},
 				},
