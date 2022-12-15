@@ -64,9 +64,7 @@ func CreateOrUpdateDeployment(ctx context.Context, c client.Client, desired *app
 		return c.Create(ctx, desired)
 	}
 
-	mutated := existing.DeepCopy()
-	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
-	// Propagate annotations set by kubectl on spec.template.annotations. e.g. performing a rolling restart.
+	mergeMetadata(&desired.ObjectMeta, existing.ObjectMeta)
 	mergeKubectlAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
 	return c.Update(ctx, desired)
 }
@@ -82,10 +80,9 @@ func CreateOrUpdateDaemonSet(ctx context.Context, c client.Client, desired *apps
 		return c.Create(ctx, desired)
 	}
 
-	mutated := existing.DeepCopy()
-	mergeMetadata(&desired.ObjectMeta, mutated.ObjectMeta)
-	mergeKubectlAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
-	mergeChecksumAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
+	mergeMetadata(&desired.ObjectMeta, existing.ObjectMeta)
+	mergeKubectlAnnotations(&desired.Spec.Template.ObjectMeta, existing.Spec.Template.ObjectMeta)
+	mergeChecksumAnnotations(&desired.Spec.Template.ObjectMeta, existing.Spec.Template.ObjectMeta)
 	return c.Update(ctx, desired)
 }
 
@@ -122,30 +119,30 @@ func mergeMaps(new map[string]string, old map[string]string) map[string]string {
 	return mergeMapsByPrefix(new, old, "")
 }
 
-func mergeKubectlAnnotations(from *metav1.ObjectMeta, to metav1.ObjectMeta) {
-	from.SetAnnotations(mergeMapsByPrefix(from.Annotations, to.Annotations, "kubectl.kubernetes.io/"))
+func mergeKubectlAnnotations(new *metav1.ObjectMeta, old metav1.ObjectMeta) {
+	new.SetAnnotations(mergeMapsByPrefix(new.Annotations, old.Annotations, "kubectl.kubernetes.io/"))
 }
 
-func mergeChecksumAnnotations(from *metav1.ObjectMeta, to metav1.ObjectMeta) {
-	from.SetAnnotations(mergeMapsByPrefix(from.Annotations, to.Annotations, "checksum/"))
+func mergeChecksumAnnotations(new *metav1.ObjectMeta, old metav1.ObjectMeta) {
+	new.SetAnnotations(mergeMapsByPrefix(new.Annotations, old.Annotations, "checksum/"))
 }
 
-func mergeMapsByPrefix(from map[string]string, to map[string]string, prefix string) map[string]string {
-	if to == nil {
-		to = make(map[string]string)
+func mergeMapsByPrefix(new map[string]string, old map[string]string, prefix string) map[string]string {
+	if old == nil {
+		old = make(map[string]string)
 	}
 
-	if from == nil {
-		from = make(map[string]string)
+	if new == nil {
+		new = make(map[string]string)
 	}
 
-	for k, v := range from {
+	for k, v := range new {
 		if strings.HasPrefix(k, prefix) {
-			to[k] = v
+			old[k] = v
 		}
 	}
 
-	return to
+	return old
 }
 
 func CreateOrUpdateServiceMonitor(ctx context.Context, c client.Client, desired *monitoringv1.ServiceMonitor) error {
