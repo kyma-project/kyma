@@ -92,7 +92,7 @@ func v1WithWebhookAuthForBEB() eventingtesting.SubscriptionOpt {
 				return &contentMode
 			}(),
 			Qos: func() *string {
-				qos := "true"
+				qos := "AT_LEAST_ONCE"
 				return &qos
 			}(),
 			ExemptHandshake: utils.BoolPtr(true),

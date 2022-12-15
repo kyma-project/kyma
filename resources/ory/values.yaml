@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20221124-ed850f15"
+      version: "v20221213-1840f45a"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
@@ -61,7 +61,7 @@ global:
       directory: "external/oryd"
     postgres:
       name: "postgres"
-      version: "11.17-alpine3.16"
+      version: "11.18-alpine3.17"
       directory: "external"
     postgres_exporter:
       name: "postgres-exporter"

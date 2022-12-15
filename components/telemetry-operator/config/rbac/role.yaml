@@ -53,9 +53,12 @@ rules:
   resources:
   - daemonsets
   verbs:
+  - create
+  - delete
   - get
   - list
   - patch
+  - update
   - watch
 - apiGroups:
   - apps

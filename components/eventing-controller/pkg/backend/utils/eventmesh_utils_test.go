@@ -4,9 +4,12 @@ package utils
 import (
 	"crypto/sha1"
 	"fmt"
-
 	"strings"
 	"testing"
+
+	apigatewayv1beta1 "github.com/kyma-incubator/api-gateway/api/v1beta1"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
@@ -19,7 +22,8 @@ import (
 )
 
 func TestConvertKymaSubToEventMeshSub(t *testing.T) {
-	defaultProtocolSettings := &eventingv1alpha2.ProtocolSettings{
+	// given
+	defaultProtocolSettings := &ProtocolSettings{
 		ContentMode: func() *string {
 			cm := types.ContentModeBinary
 			return &cm
@@ -59,172 +63,314 @@ func TestConvertKymaSubToEventMeshSub(t *testing.T) {
 	host := "foo-host"
 	scheme := "https"
 	expectedWebhookURL := fmt.Sprintf("%s://%s", scheme, host)
-	g := NewGomegaWithT(t)
 
-	// @TODO: Fix this test after update protocol settings for EventMesh
-	//t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
-	//	// given
-	//	subscription := eventingtestingv2.NewSubscription("name", "namespace",
-	//		eventingtestingv2.WithDefaultSource(),
-	//		eventingtestingv2.WithOrderCreatedFilter(),
-	//		eventingtestingv2.WithValidSink("ns", svcName),
-	//	)
-	//
-	//	subscription.Spec.ProtocolSettings = eventingtestingv2.NewProtocolSettings(
-	//		eventingtestingv2.WithBinaryContentMode(),
-	//		eventingtestingv2.WithExemptHandshake(),
-	//		eventingtestingv2.WithAtLeastOnceQOS(),
-	//		eventingtestingv2.WithDefaultWebhookAuth(),
-	//	)
-	//
-	//	eventTypeInfos := getTypeInfos(subscription.Spec.Types)
-	//
-	//	// Values should be overridden by the given values in subscription
-	//	expectedWebhookAuth := &types.WebhookAuth{
-	//		Type:         types.AuthTypeClientCredentials,
-	//		GrantType:    types.GrantTypeClientCredentials,
-	//		ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientID,
-	//		ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-	//		TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL,
-	//	}
-	//	expectedBEBSubscription := eventingtestingv2.NewBEBSubscription(
-	//		defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
-	//		*subscription.Spec.ProtocolSettings.ContentMode,
-	//		expectedWebhookURL,
-	//		bebSubEvents,
-	//		expectedWebhookAuth,
-	//	)
-	//
-	//	apiRule := eventingtestingv2.NewAPIRule(subscription,
-	//		eventingtestingv2.WithPath(),
-	//		eventingtestingv2.WithService(svcName, host),
-	//	)
-	//
-	//	// then
-	//	gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(
-	//		subscription, eventTypeInfos, apiRule, defaultWebhookAuth,
-	//		defaultProtocolSettings, defaultNamespace, defaultNameMapper,
-	//	)
-	//
-	//	// when
-	//	g.Expect(err).To(BeNil())
-	//	g.Expect(*expectedBEBSubscription).To(Equal(*gotBEBSubscription))
-	//})
+	// test cases
+	testCases := []struct {
+		name                          string
+		givenSubscription             *eventingv1alpha2.Subscription
+		givenAPIRuleFunc              func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule
+		wantError                     bool
+		wantEventMeshSubscriptionFunc func(subscription *eventingv1alpha2.Subscription) *types.Subscription
+	}{
+		{
+			name: "subscription with protocol settings and webhook auth",
+			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
+				eventingtestingv2.WithDefaultSource(),
+				eventingtestingv2.WithOrderCreatedFilter(),
+				eventingtestingv2.WithValidSink("ns", svcName),
+				eventingtestingv2.WithWebhookAuthForBEB(),
+			),
+			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
+				return eventingtestingv2.NewAPIRule(subscription,
+					eventingtestingv2.WithPath(),
+					eventingtestingv2.WithService(svcName, host),
+				)
+			},
+			wantEventMeshSubscriptionFunc: func(subscription *eventingv1alpha2.Subscription) *types.Subscription {
+				expectedWebhookAuth := &types.WebhookAuth{
+					Type:         types.AuthTypeClientCredentials,
+					GrantType:    types.GrantTypeClientCredentials,
+					ClientID:     subscription.Spec.Config[eventingv1alpha2.WebhookAuthClientID],
+					ClientSecret: subscription.Spec.Config[eventingv1alpha2.WebhookAuthClientSecret],
+					TokenURL:     subscription.Spec.Config[eventingv1alpha2.WebhookAuthTokenURL],
+				}
 
-	t.Run("subscription with default setting", func(t *testing.T) {
-		// given
-		subscription := eventingtestingv2.NewSubscription("name", "namespace",
-			eventingtestingv2.WithOrderCreatedFilter(),
-			eventingtestingv2.WithValidSink("ns", svcName),
-		)
+				return eventingtestingv2.NewBEBSubscription(
+					defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
+					subscription.Spec.Config[eventingv1alpha2.ProtocolSettingsContentMode],
+					expectedWebhookURL,
+					bebSubEvents,
+					expectedWebhookAuth,
+				)
+			},
+		},
+		{
+			name: "subscription with default setting",
+			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
+				eventingtestingv2.WithOrderCreatedFilter(),
+				eventingtestingv2.WithValidSink("ns", svcName),
+			),
+			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
+				return eventingtestingv2.NewAPIRule(subscription,
+					eventingtestingv2.WithPath(),
+					eventingtestingv2.WithService(svcName, host),
+				)
+			},
+			wantEventMeshSubscriptionFunc: func(subscription *eventingv1alpha2.Subscription) *types.Subscription {
+				return eventingtestingv2.NewBEBSubscription(
+					defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
+					*defaultProtocolSettings.ContentMode,
+					expectedWebhookURL,
+					bebSubEvents,
+					defaultWebhookAuth, // WebhookAuth should retain defaults
+				)
+			},
+		},
+		{
+			name: "subscription with invalid protocol settings QoS",
+			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
+				eventingtestingv2.WithDefaultSource(),
+				eventingtestingv2.WithOrderCreatedFilter(),
+				eventingtestingv2.WithValidSink("ns", svcName),
+				eventingtestingv2.WithInvalidProtocolSettingsQos(),
+			),
+			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
+				return eventingtestingv2.NewAPIRule(subscription,
+					eventingtestingv2.WithPath(),
+					eventingtestingv2.WithService(svcName, host),
+				)
+			},
+			wantError: true,
+		},
+		{
+			name: "subscription with invalid webhook auth type",
+			givenSubscription: eventingtestingv2.NewSubscription("name", "namespace",
+				eventingtestingv2.WithDefaultSource(),
+				eventingtestingv2.WithOrderCreatedFilter(),
+				eventingtestingv2.WithValidSink("ns", svcName),
+				eventingtestingv2.WithInvalidWebhookAuthType(),
+			),
+			givenAPIRuleFunc: func(subscription *eventingv1alpha2.Subscription) *apigatewayv1beta1.APIRule {
+				return eventingtestingv2.NewAPIRule(subscription,
+					eventingtestingv2.WithPath(),
+					eventingtestingv2.WithService(svcName, host),
+				)
+			},
+			wantError: true,
+		},
+	}
 
-		eventTypeInfos := getTypeInfos(subscription.Spec.Types)
+	// execute test cases
+	for _, test := range testCases {
+		tc := test
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// given
+			eventTypeInfos := getTypeInfos(tc.givenSubscription.Spec.Types)
 
-		expectedBEBSubWithDefault := eventingtestingv2.NewBEBSubscription(
-			defaultNameMapper.MapSubscriptionName(subscription.Name, subscription.Namespace),
-			*defaultProtocolSettings.ContentMode,
-			expectedWebhookURL,
-			bebSubEvents,
-			defaultWebhookAuth, // WebhookAuth should retain defaults
-		)
+			// when
+			gotEventMeshSubscription, err := ConvertKymaSubToEventMeshSub(
+				tc.givenSubscription, eventTypeInfos, tc.givenAPIRuleFunc(tc.givenSubscription), defaultWebhookAuth,
+				defaultProtocolSettings, defaultNamespace, defaultNameMapper,
+			)
 
-		apiRule := eventingtestingv2.NewAPIRule(subscription,
-			eventingtestingv2.WithPath(),
-			eventingtestingv2.WithService(svcName, host),
-		)
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, *tc.wantEventMeshSubscriptionFunc(tc.givenSubscription), *gotEventMeshSubscription)
+			}
+		})
+	}
+}
 
-		// then
-		gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(
-			subscription, eventTypeInfos, apiRule, defaultWebhookAuth,
-			defaultProtocolSettings, defaultNamespace, defaultNameMapper,
-		)
+func Test_setEventMeshProtocolSettings(t *testing.T) {
+	t.Parallel()
 
-		// when
-		g.Expect(err).To(BeNil())
-		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
-	})
+	testCases := []struct {
+		name                       string
+		givenSubscription          *eventingv1alpha2.Subscription
+		givenEventMeshSubscription *types.Subscription
+		wantEventMeshSubscription  *types.Subscription
+		wantError                  bool
+	}{
+		{
+			name:              "should use default values if protocol settings are not provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{},
+			givenEventMeshSubscription: &types.Subscription{
+				ContentMode:     types.ContentModeStructured,
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+			},
+			wantEventMeshSubscription: &types.Subscription{
+				ContentMode:     types.ContentModeStructured,
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+			},
+		},
+		{
+			name: "should use protocol settings values provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Config: map[string]string{
+						eventingv1alpha2.ProtocolSettingsContentMode:     types.ContentModeBinary,
+						eventingv1alpha2.ProtocolSettingsExemptHandshake: "false",
+						eventingv1alpha2.ProtocolSettingsQos:             string(types.QosAtMostOnce),
+					},
+				},
+			},
+			givenEventMeshSubscription: &types.Subscription{
+				ContentMode:     types.ContentModeStructured,
+				ExemptHandshake: true,
+				Qos:             types.QosAtLeastOnce,
+			},
+			wantEventMeshSubscription: &types.Subscription{
+				ContentMode:     types.ContentModeBinary,
+				ExemptHandshake: false,
+				Qos:             types.QosAtMostOnce,
+			},
+		},
+		{
+			name: "should return error if invalid Qos value is provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Config: map[string]string{
+						eventingv1alpha2.ProtocolSettingsQos: "invalid",
+					},
+				},
+			},
+			givenEventMeshSubscription: &types.Subscription{},
+			wantError:                  true,
+		},
+		{
+			name: "should set ExemptHandshake to true if invalid ExemptHandshake value is provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Config: map[string]string{
+						eventingv1alpha2.ProtocolSettingsExemptHandshake: "invalid",
+					},
+				},
+			},
+			givenEventMeshSubscription: &types.Subscription{
+				ExemptHandshake: false,
+			},
+			wantEventMeshSubscription: &types.Subscription{
+				ExemptHandshake: true,
+			},
+		},
+	}
 
-	// @TODO: Fix this test after update protocol settings for EventMesh
-	//t.Run("subscription with custom webhookauth config followed by a subscription "+
-	//	"with default webhookauth config should not alter the default config", func(t *testing.T) {
-	//	// given
-	//	subWithGivenWebhookAuth := eventingtestingv2.NewSubscription("name", "namespace",
-	//		eventingtestingv2.WithOrderCreatedFilter(),
-	//		eventingtestingv2.WithValidSink("ns", svcName),
-	//	)
-	//
-	//	subWithGivenWebhookAuth.Spec.ProtocolSettings = eventingtestingv2.NewProtocolSettings(
-	//		eventingtestingv2.WithBinaryContentMode(),
-	//		eventingtestingv2.WithExemptHandshake(),
-	//		eventingtestingv2.WithAtLeastOnceQOS(),
-	//		eventingtestingv2.WithDefaultWebhookAuth(),
-	//	)
-	//	expectedWebhookAuth := types.WebhookAuth{
-	//		Type:         types.AuthTypeClientCredentials,
-	//		GrantType:    types.GrantTypeClientCredentials,
-	//		ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientID,
-	//		ClientSecret: subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-	//		TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenURL,
-	//	}
-	//
-	//	expectedBEBSubWithWebhookAuth := eventingtestingv2.NewBEBSubscription(
-	//		defaultNameMapper.MapSubscriptionName(subWithGivenWebhookAuth.Name, subWithGivenWebhookAuth.Namespace),
-	//		*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
-	//		expectedWebhookURL,
-	//		bebSubEvents,
-	//		&expectedWebhookAuth, // WebhookAuth should retain the supplied config
-	//	)
-	//
-	//	apiRule := eventingtestingv2.NewAPIRule(subWithGivenWebhookAuth,
-	//		eventingtestingv2.WithPath(),
-	//		eventingtestingv2.WithService(svcName, host),
-	//	)
-	//
-	//	// then
-	//	eventTypeInfos := getTypeInfos(subWithGivenWebhookAuth.Spec.Types)
-	//	gotBEBSubscription, err := ConvertKymaSubToEventMeshSub(
-	//		subWithGivenWebhookAuth, eventTypeInfos, apiRule, defaultWebhookAuth,
-	//		defaultProtocolSettings, defaultNamespace, defaultNameMapper,
-	//	)
-	//
-	//	// when
-	//	g.Expect(err).To(BeNil())
-	//	g.Expect(*expectedBEBSubWithWebhookAuth).To(Equal(*gotBEBSubscription))
-	//
-	//	// Use another subscription without webhookAuthConfig
-	//	// given
-	//	subscriptionWithoutWebhookAuth := eventingtestingv2.NewSubscription("name", "namespace",
-	//		eventingtestingv2.WithOrderCreatedFilter(),
-	//		eventingtestingv2.WithValidSink("ns", svcName),
-	//	)
-	//
-	//	expectedBEBSubWithDefault := eventingtestingv2.NewBEBSubscription(
-	//		defaultNameMapper.MapSubscriptionName(
-	//			subscriptionWithoutWebhookAuth.Name,
-	//			subscriptionWithoutWebhookAuth.Namespace),
-	//		*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
-	//		expectedWebhookURL,
-	//		bebSubEvents,
-	//		defaultWebhookAuth, // WebhookAuth should retain defaults
-	//	)
-	//
-	//	apiRule = eventingtestingv2.NewAPIRule(subscriptionWithoutWebhookAuth,
-	//		eventingtestingv2.WithPath(),
-	//		eventingtestingv2.WithService(svcName, host),
-	//	)
-	//
-	//	// then
-	//	gotBEBSubWithDefaultCfg, err := ConvertKymaSubToEventMeshSub(
-	//		subscriptionWithoutWebhookAuth, eventTypeInfos,
-	//		apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper,
-	//	)
-	//
-	//	// when
-	//	g.Expect(err).To(BeNil())
-	//	g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
-	//	g.Expect(*expectedBEBSubWithDefault.WebhookAuth).To(Equal(*gotBEBSubWithDefaultCfg.WebhookAuth))
-	//
-	//})
+	// execute test cases
+	for _, test := range testCases {
+		tc := test
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// given
+			eventMeshSubscription := tc.givenEventMeshSubscription
+
+			// when
+			err := setEventMeshProtocolSettings(tc.givenSubscription, eventMeshSubscription)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.wantEventMeshSubscription, eventMeshSubscription)
+			}
+		})
+	}
+}
+
+func Test_getEventMeshWebhookAuth(t *testing.T) {
+	t.Parallel()
+
+	defaultWebhookAuth := &types.WebhookAuth{
+		Type:         types.AuthTypeClientCredentials,
+		GrantType:    types.GrantTypeClientCredentials,
+		ClientID:     "clientID",
+		ClientSecret: "clientSecret",
+		TokenURL:     "tokenURL",
+	}
+
+	testCases := []struct {
+		name              string
+		givenSubscription *eventingv1alpha2.Subscription
+		wantWebhook       *types.WebhookAuth
+		wantError         bool
+	}{
+		{
+			name:              "should use default values if webhook auth settings are not provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{},
+			wantWebhook:       defaultWebhookAuth,
+		},
+		{
+			name: "should use webhook auth values provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Config: map[string]string{
+						eventingv1alpha2.WebhookAuthType:         string(types.AuthTypeClientCredentials),
+						eventingv1alpha2.WebhookAuthGrantType:    string(types.GrantTypeClientCredentials),
+						eventingv1alpha2.WebhookAuthClientID:     "xxx",
+						eventingv1alpha2.WebhookAuthClientSecret: "xxx123",
+						eventingv1alpha2.WebhookAuthTokenURL:     "https://oauth2.xxx.com/oauth2/token",
+					},
+				},
+			},
+			wantWebhook: &types.WebhookAuth{
+				Type:         types.AuthTypeClientCredentials,
+				GrantType:    types.GrantTypeClientCredentials,
+				ClientID:     "xxx",
+				ClientSecret: "xxx123",
+				TokenURL:     "https://oauth2.xxx.com/oauth2/token",
+			},
+		},
+		{
+			name: "should return error if invalid Type value is provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Config: map[string]string{
+						eventingv1alpha2.WebhookAuthType: "invalid",
+					},
+				},
+			},
+			wantError: true,
+		},
+		{
+			name: "should return error if invalid GrantType value is provided in subscription",
+			givenSubscription: &eventingv1alpha2.Subscription{
+				Spec: eventingv1alpha2.SubscriptionSpec{
+					Config: map[string]string{
+						eventingv1alpha2.WebhookAuthType:      "oauth2",
+						eventingv1alpha2.WebhookAuthGrantType: "invalid",
+					},
+				},
+			},
+			wantError: true,
+		},
+	}
+
+	// execute test cases
+	for _, test := range testCases {
+		tc := test
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// given
+
+			// when
+			webhookAuth, err := getEventMeshWebhookAuth(tc.givenSubscription, defaultWebhookAuth)
+
+			// then
+			if tc.wantError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.wantWebhook, webhookAuth)
+			}
+		})
+	}
+
 }
 
 func TestGetCleanedEventMeshSubscription(t *testing.T) {
