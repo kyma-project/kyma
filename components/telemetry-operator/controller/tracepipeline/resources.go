@@ -60,7 +60,7 @@ func makeConfigMap(config Config, output v1alpha1.TracePipelineOutput) *corev1.C
 			"pipelines": map[string]any{
 				"traces": map[string]any{
 					"receivers":  []any{"opencensus", "otlp"},
-					"processors": []any{"memory_limiter", "k8sAttributes", "resource", "batch"},
+					"processors": []any{"memory_limiter", "k8sattributes", "resource", "batch"},
 					"exporters":  []any{outputType},
 				},
 			},
@@ -146,21 +146,21 @@ func makeProcessorsConfig() map[string]any {
 
 	podAssociations := []map[string]any{
 		{
-			"source": []map[string]any{{
+			"sources": []map[string]any{{
 				"from": "resource_attribute",
 				"name": "k8s.pod.ip",
 			},
 			},
 		},
 		{
-			"source": []map[string]any{{
+			"sources": []map[string]any{{
 				"from": "resource_attribute",
 				"name": "k8s.pod.uid",
 			},
 			},
 		},
 		{
-			"source": []map[string]any{{
+			"sources": []map[string]any{{
 				"from": "connection",
 			},
 			},
