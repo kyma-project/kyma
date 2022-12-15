@@ -89,7 +89,7 @@ global:
       version: "PR-16183"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-16259"
+      version: "PR-16274"
     function_runtime_nodejs16:
       name: "function-runtime-nodejs16"
       version: "PR-16259"
