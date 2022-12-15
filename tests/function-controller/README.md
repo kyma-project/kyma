@@ -74,7 +74,7 @@ Use the following environment variables to configure the application:
 | **APP_TEST_INSECURE_SKIP_VERIFY**       | No       | `true`                       | The flag that controls whether tests use verification of the server's certificate and the host name to reach the Function     |
 | **APP_TEST_VERBOSE**                    | No       | `true`                       | The value that controls whether tests log resources that are subject to change                                                |
 | **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                         | The maximum period of time in which the Function must reconfigure after an update                                             |
-| **APP_TEST_KUBECTL_PROXY_ENABLED**      | No       | `false`                      | It enables to run test locally with `kubectl proxy`. Run `kubectl proxy --proxy 8001` in background and set the env to `true` |
+| **APP_TEST_KUBECTL_PROXY_ENABLED**      | No       | `false`                      | It enables running test locally with `kubectl proxy`. Run `kubectl proxy --proxy 8001` in the background and set the env to `true` |
 
 ## Development
 
