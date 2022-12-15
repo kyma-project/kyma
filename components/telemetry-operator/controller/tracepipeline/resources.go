@@ -109,7 +109,7 @@ func getOutputType(output v1alpha1.TracePipelineOutput) string {
 
 func makeExporterConfig(output v1alpha1.TracePipelineOutput) map[string]any {
 	outputType := getOutputType(output)
-	isInsecure := len(strings.TrimSpace(output.Otlp.Endpoint.Value)) > 0 && !strings.HasPrefix(output.Otlp.Endpoint.Value, "https://")
+	isInsecure := len(strings.TrimSpace(output.Otlp.Endpoint.Value)) > 0 && strings.HasPrefix(output.Otlp.Endpoint.Value, "http://")
 	var headers map[string]any
 	if output.Otlp.Authentication != nil && output.Otlp.Authentication.Basic.IsDefined() {
 		headers = map[string]any{

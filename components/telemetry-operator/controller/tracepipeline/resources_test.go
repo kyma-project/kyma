@@ -83,7 +83,7 @@ func TestMakeConfigMapTLSInsecureNoScheme(t *testing.T) {
 	collectorConfig := cm.Data[configMapKey]
 	require.NotEmpty(t, collectorConfig)
 
-	expectedTLSConfig := "insecure: true"
+	expectedTLSConfig := "insecure: false"
 	require.True(t, strings.Contains(collectorConfig, expectedTLSConfig), "Otel Collector config must contain TLS insecure true")
 }
 
