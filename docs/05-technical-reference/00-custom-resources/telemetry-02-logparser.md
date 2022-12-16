@@ -10,7 +10,7 @@ kubectl get crd logparser.telemetry.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following LogParser object defines a 
+The following LogParser object defines a parser which can parse a log line like: This is an example of parsing a record `{"data":"100 0.5 true This is example"}`.
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -20,10 +20,7 @@ metadata:
 spec:
   parser: |
     Format regex
-    Regex  ^(?<user>[^ ]*) (?<pass>[^ ]*)$
-    Time_Key time
-    Time_Format %d/%b/%Y:%H:%M:%S %z
-    Types user:string pass:string
+    Regex ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
 ```
 
 For further LogParser examples, see the [samples](https://github.com/kyma-project/kyma/blob/main/components/telemetry-operator/config/samples) directory.
@@ -48,4 +45,4 @@ For details, see the [LogParser specification file](https://github.com/kyma-proj
 | conditions | []object | An array of conditions describing the status of the parser.
 | conditions[].lastTransitionTime | []object | An array of conditions describing the status of the parser.
 | conditions[].reason | []object | An array of conditions describing the status of the parser.
-| conditions[].type | enum | The possible transition types are:<br>- Running: The parser is ready and usable.<br>- Pending: The parser is being activated. |
+| conditions[].type | enum | The possible transition types are:<br>- `Running`: The parser is ready and usable.<br>- `Pending`: The parser is being activated. |

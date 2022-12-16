@@ -23,7 +23,7 @@ The Telemetry component provides [Fluent Bit](https://fluentbit.io/) as a log co
 3. Fluent Bit queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
 4. The Telemetry component configures Fluent Bit with your custom output configuration.
 5. If Kyma's [deprecated](https://kyma-project.io/blog/2022/11/2/loki-deprecation/) logging component is installed, the operator configures the shipment to the in-cluster Loki instance automatically.
-6. As specified in your `LogPipeline` configuration, Fluent Bit sends the log data to observability systems outside or inside the Kyma cluster. Here, you can use the integration with HTTP to integrate a system directly or with an additional Fluentd installation.
+6. As specified in your LogPipeline configuration, Fluent Bit sends the log data to observability systems outside or inside the Kyma cluster. Here, you can use the integration with HTTP to integrate a system directly or with an additional Fluentd installation.
 7. The user accesses the internal and external observability system to analyze and visualize the logs.
 
 ### Pipelines
@@ -35,7 +35,7 @@ Kyma's Telemetry component brings a predefined setup of the Fluent Bit DaemonSet
 
 1. A central `tail` input plugin reads the application logs.
 
-2. The application logs are enriched by a `kubernetes` filter. Then, for every LogPipeline definition, a `rewrite_tag` filter is generated, which uses a dedicated `tag` with name `<logpipeline>.*`, followed by the custom configuration defined in the LogPipeline resource. You can add your own filters to the default filters.
+2. The application logs are enriched by the `kubernetes` filter. Then, for every LogPipeline definition, a `rewrite_tag` filter is generated, which uses a dedicated `tag` with the name `<logpipeline>.*`, followed by the custom configuration defined in the LogPipeline resource. You can add your own filters to the default filters.
 
 3. Based on the default and custom filters, you get the desired output for each `LogPipeline`.
 
@@ -51,7 +51,7 @@ The Telemetry Operator watches all LogPipeline resources and related Secrets. Wh
 
 ## Setting up a LogPipeline
 
-In the following a typical setup of a LogPipeline gets discussed. For a overview of all available attributes please have a look at the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md)
+In the following steps, you can see how to set up a typical LogPipeline. For an overview of all available attributes, see the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md).
 
 ### Step 1: Create a LogPipeline and output
 
@@ -82,7 +82,7 @@ In the following a typical setup of a LogPipeline gets discussed. For a overview
     - **custom**, which supports the configuration of any destination in the Fluent Bit configuration syntax. 
     > **Note:** If you use a `custom` output, you put the LogPipeline in the [unsupported mode](#unsupported-mode).
 
-    See the following example of the **custom** output:
+    See the following example of the `custom` output:
     ```yaml
     spec:
       output:
@@ -113,10 +113,10 @@ In the following a typical setup of a LogPipeline gets discussed. For a overview
 
 ### Step 2: Create an input
 
-If you need selection mechanisms for application logs on Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
+If you need selection mechanisms for application logs on the Namespace or container level, you can use an input spec to restrict or specify from which resources logs are included.
 If you don't define any input, it's collected from all Namespaces, except the system Namespaces `kube-system`, `istio-system`, `kyma-system`, and `kyma-integration`, which are excluded by default. For example, you can define the Namespaces to include in the input collection, exclude Namespaces from the input collection, or choose that only system Namespaces are included. Learn more about the available [parameters and attributes](./../../../05-technical-reference/00-custom-resources/telemetry-01-logpipeline.md).
 
-The following example collects input from all Namespaces excluding `kyma-system` and only from `istio-proxy` containers:
+The following example collects input from all Namespaces excluding `kyma-system` and only from the `istio-proxy` containers:
 ```yaml
 kind: LogPipeline
 apiVersion: telemetry.kyma-project.io/v1alpha1
@@ -239,7 +239,7 @@ stringData:
   HTTP_PASSWORD: XXX
 ```
 
-To leverage data provided by the Kubernetes Secrets in a **custom** output definition, use placeholder expressions for the data provided by the Secret, then specify the actual mapping to the Secret keys in the **variables** section, like in the following example:
+To leverage data provided by the Kubernetes Secrets in a `custom` output definition, use placeholder expressions for the data provided by the Secret, then specify the actual mapping to the Secret keys in the **variables** section, like in the following example:
 
 ```yaml
 kind: LogPipeline
@@ -274,7 +274,7 @@ As used in the previous step, a Secret referenced with the **secretKeyRef** cons
 
 ### Step 6: Add a parser
 
-Typically, you want your logs shipped in a structured format so that a backend like OpenSearch can immediately index the content according to the log attributes. By default, a LogPipeline tries to parse all logs as a JSON document and enrich the record with the parsed attributes on the root record. Thus, logging in JSON format in the application results in structured log records. Sometimes, logging in JSON is not an option (the log configuration is not under your control), and the logs are in an unstructured or plain format. To adjust this, you can define your custom [parser](https://docs.fluentbit.io/manual/concepts/data-pipeline/parser) and activate it with a filter or a Pod annotation.
+Typically, you want your logs shipped in a structured format so that a backend like [OpenSearch](https://opensearch.org/) can immediately index the content according to the log attributes. By default, a LogPipeline tries to parse all logs as a JSON document and enrich the record with the parsed attributes on the root record. Thus, logging in JSON format in the application results in structured log records. Sometimes, logging in JSON is not an option (the log configuration is not under your control), and the logs are in an unstructured or plain format. To adjust this, you can define your custom [parser](https://docs.fluentbit.io/manual/concepts/data-pipeline/parser) and activate it with a filter or a Pod annotation.
 
 The following example defines a parser named `dummy_test` using a dedicated `LogParser` resource type:
 
@@ -332,7 +332,7 @@ Learn more about these attributes in the following sections.
 
 ### Container log message
 
-In the example, we assume there's a container `myContainer` of Pod `myPod` running in Namespace `myNamespace` logging to `stdout` with the following log message in JSON format:
+In the example, we assume there's a container `myContainer` of Pod `myPod`, running in Namespace `myNamespace`, logging to `stdout` with the following log message in the JSON format:
 
 ```json
 {
@@ -399,7 +399,7 @@ In the next stage, the [Kubernetes filter](https://docs.fluentbit.io/manual/pipe
 
 After the enrichment of the log record with the Kubernetes-relevant metadata, the [Kubernetes filter](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes) also tries to parse the record as a JSON document. If that is successful, all the parsed root attributes of the parsed document are added as new individual root attributes of the log.
 
-Record **before** applying the JSON parser:
+The record **before** applying the JSON parser:
 
 ```json
 {
@@ -411,7 +411,7 @@ Record **before** applying the JSON parser:
 }
 ```
 
-Record **after** applying the JSON parser:
+The record **after** applying the JSON parser:
 
 ```json
 {
@@ -429,7 +429,7 @@ Record **after** applying the JSON parser:
 
 ### Rewrite tag
 
-As per LogPipeline definition, a dedicated [rewrite_tag](https://docs.fluentbit.io/manual/pipeline/filters/rewrite-tag) filter is introduced. The filter brings a dedicated filesystem buffer for the outputs defined in the related pipeline, and with that, ensures a shipment of the logs isolated from outputs of other pipelines. As a consequence, each pipeline runs on its own [tag](https://docs.fluentbit.io/manual/concepts/key-concepts#tag).
+As per the LogPipeline definition, a dedicated [rewrite_tag](https://docs.fluentbit.io/manual/pipeline/filters/rewrite-tag) filter is introduced. The filter brings a dedicated filesystem buffer for the outputs defined in the related pipeline, and with that, ensures a shipment of the logs isolated from outputs of other pipelines. As a consequence, each pipeline runs on its own [tag](https://docs.fluentbit.io/manual/concepts/key-concepts#tag).
 
 ## Limitations
 
@@ -437,7 +437,7 @@ Currently there are the following limitations for LogPipelines that are served b
 
 ### Unsupported Mode
 
-The `unsupportedMode` attribute of a `LogPipeline` indicates that you are using a `custom` filter and/or `custom` output. The Kyma team does not provide support for a custom configuration.
+The `unsupportedMode` attribute of a LogPipeline indicates that you are using a `custom` filter and/or `custom` output. The Kyma team does not provide support for a custom configuration.
 
 ### Fluent Bit plugins
 
@@ -450,7 +450,7 @@ You cannot enable the following plugins, because they potentially harm the stabi
 ### Reserved log attributes
 The log attribute named `kubernetes` is a special attribute that's enriched by the `kubernetes` filter. When you use that attribute as part of your structured log payload, the metadata enriched by the filter are overwritten by the payload data. Filters that rely on the original metadata might no longer work as expected.
 
-Furthermore, the prefix `__kyma__` is used internally by the telemetry operator. When you use the attribute prefix in your log data, the data might be overwritten.
+Furthermore, the prefix `__kyma__` is used internally by the Telemetry Operator. When you use the attribute prefix in your log data, the data might be overwritten.
 
 ### Buffer limits
 
