@@ -38,15 +38,15 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
-			Labels:    labels(name),
+			Labels:    labels(),
 		},
 		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: labels(name),
+				MatchLabels: labels(),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels(name),
+					Labels: labels(),
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: name.Name,
@@ -117,7 +117,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: &corev1.HTTPGetAction{
 										Path: "/",
-										Port: intstr.IntOrString{StrVal: "http"},
+										Port: intstr.FromString("http"),
 									},
 								},
 							},
@@ -125,7 +125,7 @@ func MakeDaemonSet(name types.NamespacedName) *appsv1.DaemonSet {
 								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: &corev1.HTTPGetAction{
 										Path: "/api/v1/health",
-										Port: intstr.IntOrString{StrVal: "http"},
+										Port: intstr.FromString("http"),
 									},
 								},
 							},
@@ -251,7 +251,7 @@ func MakeService(name types.NamespacedName) *corev1.Service {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
-			Labels:    labels(name),
+			Labels:    labels(),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -259,16 +259,16 @@ func MakeService(name types.NamespacedName) *corev1.Service {
 					Name:       "http",
 					Protocol:   "TCP",
 					Port:       2020,
-					TargetPort: intstr.IntOrString{StrVal: "http"},
+					TargetPort: intstr.FromString("http"),
 				},
 				{
 					Name:       "http-metrics",
 					Protocol:   "TCP",
 					Port:       2021,
-					TargetPort: intstr.IntOrString{StrVal: "http-metrics"},
+					TargetPort: intstr.FromString("http-metrics"),
 				},
 			},
-			Selector: labels(name),
+			Selector: labels(),
 		},
 	}
 }
@@ -328,7 +328,7 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
     Match null.*
     Alias null-null
 
-    @INCLUDE dynamic/*.conf
+@INCLUDE dynamic/*.conf
 `
 	lokiLabelmap := `
   {
@@ -352,7 +352,7 @@ func MakeConfigMap(name types.NamespacedName) *corev1.ConfigMap {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
-			Labels:    labels(name),
+			Labels:    labels(),
 		},
 		Data: map[string]string{
 			"custom_parsers.conf": parserConfig,
@@ -398,14 +398,15 @@ end
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-luascripts", name.Name),
 			Namespace: name.Namespace,
-			Labels:    labels(name),
+			Labels:    labels(),
 		},
 		Data: map[string]string{"filter-script.lua": luaFilter},
 	}
 }
 
-func labels(name types.NamespacedName) map[string]string {
+func labels() map[string]string {
 	return map[string]string{
-		"app.kubernetes.io/name": name.Name,
+		"app.kubernetes.io/name":     "fluent-bit",
+		"app.kubernetes.io/instance": "telemetry",
 	}
 }
