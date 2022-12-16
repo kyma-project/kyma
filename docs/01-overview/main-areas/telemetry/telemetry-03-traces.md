@@ -16,7 +16,7 @@ For a complete recording of a distributed trace, it is [essential](https://www.w
 
 With that, your application must also propagate the W3C Trace Context for any user-related user activity. This can be achieved easily using the [Open Telemetry SDKs](https://opentelemetry.io/docs/instrumentation/) available for all common programming languages. If an application follows that guidance and is part of the Istio Service Mesh, it's already outlined with dedicated span data in the trace data collected by the Kyma telemetry setup.
 
-Furthermore, an application should enrich a trace with additional span data and send these data to the cluster-central telemetry services. That as well, can be achieved with the help of the mentioned [Open Telemetry SDKs](https://opentelemetry.io/docs/instrumentation/).
+Furthermore, an application should enrich a trace with additional span data and send these data to the cluster-central telemetry services. That can also be achieved with the help of the mentioned [Open Telemetry SDKs](https://opentelemetry.io/docs/instrumentation/).
 
 ## Architecture
 
@@ -26,11 +26,11 @@ The telemetry module provides an in-cluster central deployment of an [OTel Colle
 
 1. An end-to-end request is triggered and populates across the distributed application. Every involved component is propagating the trace context using the [W3C Trace Context](https://www.w3.org/TR/trace-context/) protocol.
 2. The involved components which have contributed a new span to the trace send the related span data to the trace collector using the `telemetry-otlp-traces` service. The communication happens based on the [OTLP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md) protocol either using GRPC or HTTP.
-1. the trace collector enriches the span data with relevant metadata typical for sources running on kubernetes, like pod identifiers.
-1. Via a `LogPipeline` resource, the trace collector got configured with a target backend
-1. The backend can run either in-cluster
-1. or outer-cluster having a proper way of authentication in place.
-1. The trace data can be consumed via the backend system
+1. The trace collector enriches the span data with relevant metadata, typical for sources running on Kubernetes, like Pod identifiers.
+1. With the `LogPipeline` resource, the trace collector is configured with a target backend.
+1. The backend can run in-cluster.
+1. The backend can also run out-cluster, having a proper way of authentication in place.
+1. The trace data can be consumed using the backend system.
 
 ### OTel Collector
 The OTel Collector comes with a [concept](https://opentelemetry.io/docs/collector/configuration/) of pipelines consisting of receivers, processors, and exporters with which you can flexibly plug pipelines together. Kyma's TracePipeline provides a hardened setup of an OTel Collector and also abstracts the underlying pipeline concept. The benefits of having that abstraction in place are:
