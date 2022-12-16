@@ -13,7 +13,7 @@ global:
       version: "v20221122-200937b4"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.66.0-61707459"
+      version: "0.66.0-a80d981f"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
