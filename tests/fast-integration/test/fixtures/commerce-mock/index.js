@@ -299,11 +299,11 @@ async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test',
 
 async function checkInClusterEventTracing(targetNamespace) {
   const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
+  expect(res.data).to.have.nested.property('event.headers.traceparent');
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
-  const traceId = res.data.event.headers['x-b3-traceid'];
+  const traceId = res.data.event.headers['traceparent'].split('-')[1];
 
   // Define expected trace data
   const correctTraceProcessSequence = [
