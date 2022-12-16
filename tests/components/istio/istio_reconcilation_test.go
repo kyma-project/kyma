@@ -16,17 +16,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const KYMA_SOURCES_DIR = "KYMA_SOURCES_DIR"
-
 func InitializeScenarioReconcilation(ctx *godog.ScenarioContext) {
 	profile := os.Getenv(deployedKymaProfileVar)
 
 	reconcilationCase := istioReconcilationCase{}
-	if dir, ok := os.LookupEnv(KYMA_SOURCES_DIR); !ok {
-		reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "-s", "main", "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
-	} else {
-		reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "--source", "local", "--workspace", dir, "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
-	}
+	reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "--source", "local", "--workspace", "../../../", "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
 
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		out, err := os.Create("kyma")
