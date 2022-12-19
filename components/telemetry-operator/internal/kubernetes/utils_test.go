@@ -113,10 +113,10 @@ func TestMergeKubectlAnnotations(t *testing.T) {
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/2")
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/3")
 	require.Contains(t, desired.Annotations, "kubectl.kubernetes.io/4")
-	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/1"],  "1")
-	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/2"],  "b")
-	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/3"],  "3")
-	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/4"],  "4")
+	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/1"], "1")
+	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/2"], "b")
+	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/3"], "3")
+	require.Equal(t, desired.Annotations["kubectl.kubernetes.io/4"], "4")
 }
 
 func TestMergeChecksumAnnotations(t *testing.T) {
@@ -153,8 +153,8 @@ func TestMergeChecksumAnnotations(t *testing.T) {
 	require.Contains(t, desired.Annotations, "checksum/2")
 	require.Contains(t, desired.Annotations, "checksum/3")
 	require.Contains(t, desired.Annotations, "checksum/4")
-	require.Equal(t, desired.Annotations["checksum/1"],  "1")
-	require.Equal(t, desired.Annotations["checksum/2"],  "b")
-	require.Equal(t, desired.Annotations["checksum/3"],  "3")
-	require.Equal(t, desired.Annotations["checksum/4"],  "4")
+	require.Equal(t, desired.Annotations["checksum/1"], "1")
+	require.Equal(t, desired.Annotations["checksum/2"], "b")
+	require.Equal(t, desired.Annotations["checksum/3"], "3")
+	require.Equal(t, desired.Annotations["checksum/4"], "4")
 }
