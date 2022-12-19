@@ -8,7 +8,7 @@ The Telemetry component provides the [Fluent Bit](https://fluentbit.io/) log col
 
 ## Prerequisites
 
-Your application must log to `stdout` or `stderr`, which is the recommended way by Kubernetes to [emit logs](https://kubernetes.io/docs/concepts/cluster-administration/logging/). That also will assure that the logs will be processable by Kubernetes primitives like `kubectl logs`. Any other way of instrumentation is not supported yet. In the future, an OTLP push-based endpoint might be provided to send logs from the application to the collector/agent.
+Your application must log to `stdout` or `stderr`, which is the recommended way by Kubernetes to [emit logs](https://kubernetes.io/docs/concepts/cluster-administration/logging/). It ensures that the logs are processable by Kubernetes primitives like `kubectl logs`. Any other way of instrumentation is not supported yet. In the future, an OTLP push-based endpoint might be provided to send logs from the application to the collector/agent.
 
 ## Architecture
 
@@ -270,7 +270,7 @@ spec:
 
 ### Step 5: Rotate the Secret
 
-As used in the previous step, a Secret referenced with the **secretKeyRef** construct can be rotated manually or automatically. For automatic rotation, update the Secret's actual values and keep the Secret's keys stable. The LogPipeline watches the referenced Secrets and detects changes, so the Secret rotation takes immediate effect. When using a Secret owned by the [SAP BTP Operator](https://github.com/SAP/sap-btp-service-operator) you can configure a `credentialsRotationPolicy` with a specific `rotationFrequency` to achieve a automated rotation.
+As used in the previous step, a Secret referenced with the **secretKeyRef** construct can be rotated manually or automatically. For automatic rotation, update the Secret's actual values and keep the Secret's keys stable. The LogPipeline watches the referenced Secrets and detects changes, so the Secret rotation takes immediate effect. When using a Secret owned by the [SAP BTP Operator](https://github.com/SAP/sap-btp-service-operator) you can configure a `credentialsRotationPolicy` with a specific `rotationFrequency` to achieve an automated rotation.
 
 ### Step 6: Add a parser
 
@@ -450,7 +450,7 @@ You cannot enable the following plugins, because they potentially harm the stabi
 ### Reserved log attributes
 The log attribute named `kubernetes` is a special attribute that's enriched by the `kubernetes` filter. When you use that attribute as part of your structured log payload, the metadata enriched by the filter are overwritten by the payload data. Filters that rely on the original metadata might no longer work as expected.
 
-Furthermore, the prefix `__kyma__` is used internally by the Telemetry Operator. When you use the attribute prefix in your log data, the data might be overwritten.
+Furthermore, the `__kyma__` prefix is used internally by the Telemetry Operator. When you use the prefix attribute in your log data, the data might be overwritten.
 
 ### Buffer limits
 

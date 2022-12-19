@@ -8,9 +8,9 @@ In order to implement Day-2 operations for a distributed application running in 
 
 ![Stages of Observability](./assets/general-stages.drawio.svg)
 
-There are plenty of observability backends available either as a service or as a self-manageable solution focussing on different aspects and scenarios. Here, one solution will never fit all sizes, and the need to integrate with a specific solution will always be present. That's why instrumenting and shipping your telemetry data easily in a vendor-neutral way is relevant for Kyma to enable observability for your application with a low effort by integrating it into existing backends. These aspects must happen alongside your application, and managed tooling with guidance can benefit users' initial investment and maintenance effort. Also, Kyma will not focus on providing a managed in-cluster backend solution as a solution for an enterprise-grade setup will demand a central outer-cluster solution.
+There are plenty of observability backends available either as a service or as a self-manageable solution focusing on different aspects and scenarios. Here, one solution will never fit all sizes, and the need to integrate with a specific solution will always be present. That's why instrumenting and shipping your telemetry data easily in a vendor-neutral way is relevant for Kyma to enable observability for your application with a low effort by integrating it into existing backends. These aspects must happen alongside your application, and managed tooling with guidance can benefit users' initial investment and maintenance effort. Also, Kyma will not focus on providing a managed in-cluster backend solution as a solution for an enterprise-grade setup will demand a central out-cluster solution.
 
-The Telemetry module focuses exactly on these aspects (instrumentation/collection/shipment) happening in the runtime and explicitly de-focus backends. In addition, you can check the [tutorials](telemetry-04-tutorials.md) on how to install lightweight in-cluster backends for demo or development purposes.
+The Telemetry module focuses exactly on these aspects (instrumentation/collection/shipment) happening in the runtime and explicitly defocuses on backends. In addition, you can check the [tutorials](telemetry-04-tutorials.md) on how to install lightweight in-cluster backends for demo or development purposes.
 
 ## Features
 
@@ -30,7 +30,7 @@ Initially,
 
 ## Scope
 
-There will be a focus on the signals of application logs, distributed traces, and metrics only. Other kinds of signals are not considered. Also, logs like audit logs or operational logs are specifically de-scoped.
+There will be a focus on the signals of application logs, distributed traces, and metrics only. Other kinds of signals are not considered. Also, logs like audit logs or operational logs are specifically descoped.
 
 Supported integration scenarios are neutral to the vendor of the target system; a vendor-specific way is not planned at the moment.
 
