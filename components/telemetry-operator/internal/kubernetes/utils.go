@@ -108,6 +108,50 @@ func CreateOrUpdateService(ctx context.Context, c client.Client, desired *corev1
 	return c.Update(ctx, desired)
 }
 
+func DeleteFluentBit(ctx context.Context, c client.Client, name types.NamespacedName) error {
+	var ds appsv1.DaemonSet
+	err := c.Get(ctx, name, &ds)
+	if err == nil {
+		if err = c.Delete(ctx, &ds); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var service corev1.Service
+	err = c.Get(ctx, name, &service)
+	if err == nil {
+		if err = c.Delete(ctx, &service); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var cm corev1.ConfigMap
+	err = c.Get(ctx, name, &cm)
+	if err == nil {
+		if err = c.Delete(ctx, &cm); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	var luaCm corev1.ConfigMap
+	err = c.Get(ctx, name, &luaCm)
+	if err == nil {
+		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+	} else if !errors.IsNotFound(err) {
+		return err
+	}
+
+	return nil
+}
+
 func mergeMetadata(new *metav1.ObjectMeta, old metav1.ObjectMeta) {
 	new.ResourceVersion = old.ResourceVersion
 
