@@ -690,22 +690,22 @@ func TestHandler_sendEventAndRecordMetrics(t *testing.T) {
 				metricLatency:   1,
 				metricPublished: 1,
 				metricLatencyTEF: `
-# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
-# TYPE eventing_epp_backend_duration_milliseconds histogram
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
-eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
-eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
-eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
+					# HELP eventing_epp_backend_duration_milliseconds The duration of sending events to the messaging server in milliseconds
+					# TYPE eventing_epp_backend_duration_milliseconds histogram
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.005"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.01"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.025"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.05"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.25"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="0.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="1"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="2.5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="5"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="10"} 1
+					eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="foo",le="+Inf"} 1
+					eventing_epp_backend_duration_milliseconds_sum{code="204",destination_service="foo"} 0
+					eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="foo"} 1
 `,
 			},
 		},
