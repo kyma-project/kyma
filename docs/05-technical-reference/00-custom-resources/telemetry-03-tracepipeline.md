@@ -10,7 +10,7 @@ kubectl get crd tracepipeline.telemetry.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following TracePipeline object defines a pipeline integrating to the local jaeger instance.
+The following TracePipeline object defines a pipeline integrating into the local Jaeger instance.
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1

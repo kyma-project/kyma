@@ -10,7 +10,7 @@ kubectl get crd logpipeline.telemetry.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following LogPipeline object defines a pipeline integrating via the HTTP/JSON based output using basic authentication, excluding application logs emitted by istio-proxy containers.
+The following LogPipeline object defines a pipeline integrating with the HTTP/JSON-based output using basic authentication, excluding application logs emitted by istio-proxy containers.
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1

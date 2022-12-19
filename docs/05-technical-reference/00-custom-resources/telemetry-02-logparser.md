@@ -10,7 +10,7 @@ kubectl get crd logparser.telemetry.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following LogParser object defines a parser which can parse a log line like: This is an example of parsing a record `{"data":"100 0.5 true This is example"}`.
+The following LogParser object defines a parser which can parse a log line like: `{"data":"100 0.5 true This is example"}`.
 
 ```yaml
 apiVersion: telemetry.kyma-project.io/v1alpha1
