@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 )
 
-// EnsureMetricErrors ensures metric eventing_epp_errors_total exists.
+// EnsureMetricErrors ensures metric eventing_epp_backend_errors_total exists.
 func EnsureMetricErrors(t *testing.T, collector metrics.PublishingMetricsCollector, count int) {
 	ensureMetricCount(t, collector, metrics.BackendErrorsKey, count)
 }
