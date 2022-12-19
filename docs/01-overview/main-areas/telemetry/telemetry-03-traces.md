@@ -82,7 +82,25 @@ This configures the underlying OTel Collector with a pipeline for traces. The re
     http-backend      Ready     44s
     ```
 
-### 2. Switch the protocol to HTTP
+### Step 2. Enable Istio Tracing
+
+By default, the tracing feature of the Istio module is disabled to avoid increased network utilization in case of an absent of a TracePipeline.
+To activate the [Istio tracing](#istio) feature with a sampling rate of 100% (not recommended on production), place a resource like:
+
+```yaml
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing-default
+  namespace: istio-system
+spec:
+  tracing:
+  - providers:
+    - name: "kyma-tracing"
+  randomSamplingPercentage: 100.00
+```
+
+### Step 3. Switch the protocol to HTTP
 
 To use the HTTP protocol instead of the default GRPC, use the `protocol` attribute and ensure that the proper port is configured as part of the endpoint. Typically port `4317` is used for GRPC and port `4318` for HTTP.
 ```yaml
@@ -98,7 +116,7 @@ spec:
         value: http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318
 ```
 
-### Step 3: Add authentication details
+### Step 4: Add authentication details
 
 To integrate with external systems, you must configure authentication details. At the moment, only Basic Authentication is supported. A more general token-based authentication will be supported [soon](https://github.com/kyma-project/kyma/issues/16258).
 
@@ -120,7 +138,7 @@ spec:
             value: myPwd
 ```
 
-### Step 4: Add authentication details from Secrets
+### Step 5: Add authentication details from Secrets
 
 Integrations into external systems usually require authentication details dealing with sensitive data. To handle that data properly in Secrets, TracePipeline supports the reference of Secrets.
 
@@ -170,9 +188,56 @@ stringData:
   password: XXX
 ```
 
-### Step 5: Rotate the Secret
+### Step 6: Rotate the Secret
 
 As used in the previous step, a Secret referenced with the **secretKeyRef** construct can be rotated manually or automatically. For automatic rotation, update the Secret's actual values and keep the Secret's keys stable. TracePipeline watches the referenced Secrets and detects changes, so the Secret rotation takes immediate effect. When using a Secret owned by the [SAP BTP Operator](https://github.com/SAP/sap-btp-service-operator), you can configure `credentialsRotationPolicy` with a specific `rotationFrequency` to achieve an automated rotation.
+
+## Kyma Components with tracing capabilities
+
+Kyma bundles several modules which are potentially involved in user flows and with must propagate the trace context properly and optional provide custom spans.
+
+### Istio
+
+The Istio module plays a crucial aspect in a distributed trace as the module provides the ingress gateway where usually requests from external are entering the cluster scope and will be enriched with trace context if that did not happen yet. Furthermore, every components being part of the Istio Service Mesh is running an Istio Proxies which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application will already assure that you will get a complete picture of a trace as every component will contribute span data automatically.
+
+The Istio module is configured with an [ExtensionProvider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-tracing`. The provider can be activated on global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
+
+```yaml
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing-default
+  namespace: istio-system
+spec:
+  tracing:
+  - providers:
+    - name: "kyma-tracing"
+```
+That will configure all Istio proxies with the `kyma-tracing` extension provider which by default will report span data to the trace collector of the telemetry module.
+
+Be aware of, that by default the samplingRate is configured to 1 percent. That means that only 1 trace out of 100 traces will be reported to the trace collector, all others will be dropped. Hereby, the sampling decision itself gets propagated as part of the [trace context](https://www.w3.org/TR/trace-context/#sampled-flag) so that either all involved components are reporting the span data of a trace or none. Turning up the sampling rate will increase the network utilization in the cluster a lot and also will increase the amount of data send to your tracing backend. Usually a very low percentage around 5% are getting used in a productive setup to reduce costs and performance impacts.
+
+To configure an "always-on" sampling, you will need to configure a sampling rate of 100% by:
+```yaml
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing-default
+  namespace: istio-system
+spec:
+  tracing:
+  - providers:
+    - name: "kyma-tracing"
+    randomSamplingPercentage: 100.00
+```
+
+Selectively, namespaces or workloads can be configured with individual settings by placing further resources. To not report spans at all the `disableSpanReporting` flag can be activated.
+
+### Eventing
+The Kyma [eventing](./../../main-areas/eventing/README.md) component dispatches events from an in- or out-cluster backend to your workload. Hereby, it is leveraging the [cloudevents](https://cloudevents.io/) protocol which natively supports [W3C Trace Context] propagation. Having that said, the veneting component already propagates trace context properly, however does not enrich a trace with more advanced span data.
+
+### Serverless
+All engines for the [Serverless](./../../main-areas/serverless/README.md) runtime are integrating the [Open Telemetry SDK](https://opentelemetry.io/docs/reference/specification/metrics/sdk/) by default. With that, trace propagation will not your concern anymore as the used middlewares are configured to propagate the context for chained calls automatically. By having the Telemetry endpoints configured by default, it also reports custom spans for incoming and outgoing requests. With the provided [tooling](./../../../03-tutorials/00-serverless/svls-12-customize-function-traces.md), more spans can be added easily as part of your Serverless source code.
 
 ## Limitations
 
@@ -195,3 +260,12 @@ The used buffers are volatile, and the data can be lost on the otel-collector in
 ### Single TracePipeline support
 
 Only one TracePipeline resource at a time is supported at the moment.
+
+## Frequently Asked Questions
+
+1. Traces are not arriving at the destination at all
+  - Check the `telemetry-trace-collector` pods for error logs by calling `kubectl logs -n kyma-system <pod-nam>`
+  - Check at the monitoring dashboard for kyma telemetry if data gets exported
+  - Verify that you activated Istio tracing
+1. Custom spans are not arriving at the destination, but istio spans do arrive
+  - Verify that you are using an SDK version for instrumentation which is compatible with the otel-collector version used
