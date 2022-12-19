@@ -65,7 +65,7 @@ func CreateOrUpdateDeployment(ctx context.Context, c client.Client, desired *app
 	}
 
 	mergeMetadata(&desired.ObjectMeta, existing.ObjectMeta)
-	mergeKubectlAnnotations(&existing.Spec.Template.ObjectMeta, desired.Spec.Template.ObjectMeta)
+	mergeKubectlAnnotations(&desired.Spec.Template.ObjectMeta, existing.Spec.Template.ObjectMeta)
 	return c.Update(ctx, desired)
 }
 
