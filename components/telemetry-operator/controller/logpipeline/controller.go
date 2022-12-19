@@ -111,7 +111,8 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	if r.config.ManageFluentBit {
-		if err = r.reconcileFluentBit(ctx, r.config.DaemonSet, pipeline); err != nil {
+		name := r.config.DaemonSet
+		if err = r.reconcileFluentBit(ctx, name, pipeline); err != nil {
 			return err
 		}
 	}
@@ -159,14 +160,14 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 
 	var allPipelines telemetryv1alpha1.LogPipelineList
 	if err := r.List(ctx, &allPipelines); err != nil {
-		return err
+		return fmt.Errorf("failed to determine condition for deleting fluent bit: %w", err)
 	}
 
-	if len(allPipelines.Items) > 0 {
-		return nil
+	if len(allPipelines.Items) == 0 {
+		return utils.DeleteFluentBit(ctx, r, name)
 	}
 
-	return utils.DeleteFluentBit(ctx, r, name)
+	return nil
 }
 
 func (r *Reconciler) updateMetrics(ctx context.Context) error {
