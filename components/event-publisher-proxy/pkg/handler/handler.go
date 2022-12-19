@@ -15,6 +15,7 @@ import (
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
@@ -118,7 +119,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	}
 	ctx := request.Context()
 
-	result, err := h.sendEventAndRecordMetrics(ctx, &event.Event, h.Sender.URL(), request.Header)
+	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
 	if err != nil {
 		h.namedLogger().With().Error(err)
 		httpStatus := http.StatusInternalServerError
@@ -162,8 +163,16 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		return
 	}
 	event.SetType(eventTypeClean)
+	//todo remove above
+	ev, err := builder.NewEvent(
+		builder.WithCloudEvent(event),
+	)
+	if err != nil {
+		//todo
+		h.namedLogger().With().Error(err)
+	}
 
-	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
+	result, err := h.sendEventAndRecordMetrics(ctx, ev, h.Sender.URL(), request.Header)
 	if err != nil {
 		httpStatus := http.StatusInternalServerError
 		if errors.Is(err, sender.ErrInsufficientStorage) {
@@ -199,13 +208,16 @@ func extractCloudEventFromRequest(request *http.Request) (*cev2event.Event, erro
 }
 
 // sendEventAndRecordMetrics dispatches an Event and records metrics based on dispatch success.
-func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2event.Event, host string, header http.Header) (sender.PublishResult, error) {
+func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *builder.Event, host string, header http.Header) (sender.PublishResult, error) {
 	ctx, cancel := context.WithTimeout(ctx, h.RequestTimeout)
 	defer cancel()
-	h.applyDefaults(ctx, event)
-	tracing.AddTracingContextToCEExtensions(header, event)
+	
+	h.applyDefaults(ctx, &event.Event)
+	tracing.AddTracingContextToCEExtensions(header, &event.Event)
+	
+
 	start := time.Now()
-	result, err := h.Sender.Send(ctx, event)
+	result, err := h.Sender.Send(ctx, &event.Event)
 	duration := time.Since(start)
 	if err != nil {
 		h.collector.RecordError()
@@ -215,6 +227,10 @@ func (h *Handler) sendEventAndRecordMetrics(ctx context.Context, event *cev2even
 	h.collector.RecordLatency(duration, result.HTTPStatus(), host)
 	h.collector.RecordRequests(result.HTTPStatus(), host)
 	return result, nil
+}
+
+func (h *Handler)setSubject(event *builder.Event) {
+	//todo 
 }
 
 // writeResponse writes the HTTP response given the status code and response body.

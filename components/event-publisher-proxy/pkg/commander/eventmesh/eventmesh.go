@@ -43,7 +43,7 @@ type Commander struct {
 	opts             *options.Options
 }
 
-// NewCommander creates the Commander for publisher to BEB.
+// NewCommander creates the Commander for publisher to Event Mesh.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logger.Logger) *Commander {
 	return &Commander{
 		metricsCollector: metricsCollector,
@@ -53,7 +53,7 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 	}
 }
 
-// Init implements the Commander interface and initializes the publisher to BEB.
+// Init implements the Commander interface and initializes the publisher to Event Mesh.
 func (c *Commander) Init() error {
 	if err := envconfig.Process("", c.envCfg); err != nil {
 		return xerrors.Errorf("failed to read configuration for %s : %v", bebCommanderName, err)

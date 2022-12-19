@@ -21,6 +21,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/builder"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy"
@@ -743,9 +744,15 @@ eventing_epp_messaging_server_latency_duration_milliseconds_count{destination_se
 				Defaulter: tt.fields.Defaulter,
 				collector: tt.fields.collector,
 			}
+			event, err := builder.NewEvent(
+				builder.WithCloudEvent(tt.args.event),
+			)
+			if err != nil {
+				//todo
+			}
 
 			// when
-			got, err := h.sendEventAndRecordMetrics(tt.args.ctx, tt.args.event, tt.args.host, tt.args.header)
+			got, err := h.sendEventAndRecordMetrics(tt.args.ctx, event, tt.args.host, tt.args.header)
 
 			// then
 			if !tt.wants.assertionFunc(t, err, fmt.Sprintf("sendEventAndRecordMetrics(%v, %v, %v)", tt.args.ctx, tt.args.host, tt.args.event)) {
@@ -794,7 +801,14 @@ func TestHandler_sendEventAndRecordMetrics_TracingAndDefaults(t *testing.T) {
 		"b3flags":        "X-B3-Flags",
 	}
 	// when
-	_, err := h.sendEventAndRecordMetrics(context.Background(), CreateCloudEvent(t), "", header)
+	event, err := builder.NewEvent(
+		builder.WithCloudEvent(CreateCloudEvent(t)),
+	)
+	if err != nil {
+		//todo 
+	}
+
+	_, err = h.sendEventAndRecordMetrics(context.Background(), event, "", header)
 
 	// then
 	assert.NoError(t, err)
