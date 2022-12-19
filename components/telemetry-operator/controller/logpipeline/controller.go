@@ -138,7 +138,7 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 }
 
 func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.NamespacedName, pipeline *telemetryv1alpha1.LogPipeline) error {
-	if pipeline.DeletionTimestamp.IsZero() {
+	if isNotMarkedForDeletion(pipeline) {
 		ds := resources.MakeDaemonSet(name)
 		if err := utils.CreateOrUpdateDaemonSet(ctx, r, ds); err != nil {
 			return fmt.Errorf("failed to reconcile fluent bit daemonset: %w", err)
@@ -163,7 +163,7 @@ func (r *Reconciler) reconcileFluentBit(ctx context.Context, name types.Namespac
 		return fmt.Errorf("failed to determine condition for deleting fluent bit: %w", err)
 	}
 
-	if len(allPipelines.Items) == 0 {
+	if len(allPipelines.Items) == 1 && allPipelines.Items[0].Name == pipeline.Name {
 		return utils.DeleteFluentBit(ctx, r, name)
 	}
 
@@ -195,7 +195,7 @@ func count(pipelines *telemetryv1alpha1.LogPipelineList, keep keepFunc) int {
 }
 
 func isNotMarkedForDeletion(pipeline *telemetryv1alpha1.LogPipeline) bool {
-	return pipeline.DeletionTimestamp.IsZero()
+	return pipeline.ObjectMeta.DeletionTimestamp.IsZero()
 }
 
 func isUnsupported(pipeline *telemetryv1alpha1.LogPipeline) bool {
