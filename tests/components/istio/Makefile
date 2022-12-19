@@ -8,6 +8,7 @@ GOVET=$(GOCMD) vet
 BINARY_NAME=example
 VERSION?=0.0.0
 
+
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
 WHITE  := $(shell tput -Txterm setaf 7)
