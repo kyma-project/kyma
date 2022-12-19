@@ -218,7 +218,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="5"} 1
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="10"} 1
 				eventing_epp_backend_duration_milliseconds_bucket{code="204",destination_service="FOO",le="+Inf"} 1
-                eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
+				eventing_epp_backend_duration_milliseconds_count{code="204",destination_service="FOO"} 1
 				# HELP eventing_epp_backend_requests_total The total number of backend requests
 				# TYPE eventing_epp_backend_requests_total counter
 				eventing_epp_backend_requests_total{code="204",destination_service="FOO"} 1
