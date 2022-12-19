@@ -45,8 +45,6 @@ func fillConfigEnvVars(runtime serverlessv1alpha2.Runtime, config *Config) {
 				{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)"},
 				{Name: "PYTHONUNBUFFERED", Value: "TRUE"}}...)
 		return
-	case serverlessv1alpha2.Java17JvmAlpha:
-		return
 	}
 }
 
