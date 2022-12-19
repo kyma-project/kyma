@@ -118,7 +118,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	}
 	ctx := request.Context()
 
-	result, err := h.sendEventAndRecordMetrics(ctx, event, h.Sender.URL(), request.Header)
+	result, err := h.sendEventAndRecordMetrics(ctx, &event.Event, h.Sender.URL(), request.Header)
 	if err != nil {
 		h.namedLogger().With().Error(err)
 		httpStatus := http.StatusInternalServerError
@@ -127,13 +127,13 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		} else if errors.Is(err, sender.ErrBackendTargetNotFound) {
 			httpStatus = http.StatusBadGateway
 		}
-		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, event, err.Error())
+		h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, httpStatus, &event.Event, err.Error())
 		return
 	}
 	h.namedLogger().With().Debug(result)
 
 	// Change response as per old error codes.
-	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), event, string(result.ResponseBody()))
+	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, result.HTTPStatus(), &event.Event, string(result.ResponseBody()))
 }
 
 // publishCloudEvents validates an incoming cloudevent and dispatches it using

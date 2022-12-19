@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"time"
 
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	ce "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
@@ -28,8 +28,8 @@ const (
 )
 
 type RequestToCETransformer interface {
-	TransformLegacyRequestsToEvent(http.ResponseWriter, *http.Request) (*cev2event.Event, string)
-	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *cev2event.Event, string)
+	TransformLegacyRequestsToEvent(http.ResponseWriter, *http.Request) (*builder.Event, string)
+	TransformsCEResponseToLegacyResponse(http.ResponseWriter, int, *ce.Event, string)
 }
 
 type Transformer struct {
@@ -83,7 +83,7 @@ func (t *Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1
 // TransformLegacyRequestsToEvent transforms the http request containing a legacy event
 // to a Event from the given request. It's second return type is a string that holds
 // the original Type without any cleanup.
-func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter, request *http.Request) (*cev2event.Event, string) {
+func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter, request *http.Request) (*builder.Event, string) {
 	// Parse request body to PublishRequestV1.
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
@@ -135,10 +135,10 @@ func (t *Transformer) TransformLegacyRequestsToEvent(writer http.ResponseWriter,
 	// Prepare the original event-type without cleanup.
 	originalEventType := formatEventType(t.eventTypePrefix, originalAppName, parameters.PublishrequestV1.EventType, parameters.PublishrequestV1.EventTypeVersion)
 
-	return &event.Event, originalEventType
+	return event, originalEventType
 }
 
-func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *cev2event.Event, msg string) {
+func (t *Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWriter, statusCode int, event *ce.Event, msg string) {
 	response := &apiv1.PublishEventResponses{}
 	// Fail.
 	if !is2XXStatusCode(statusCode) {
@@ -162,7 +162,7 @@ func (t *Transformer) convertPublishRequestToEvent(appName string, publishReques
 		return nil, errors.New("application name should be cleaned from none-alphanumeric characters")
 	}
 
-	cloudEvent := cev2event.New(cev2event.CloudEventsVersionV1)
+	cloudEvent := ce.New(ce.CloudEventsVersionV1)
 
 	evTime, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)
 	if err != nil {
