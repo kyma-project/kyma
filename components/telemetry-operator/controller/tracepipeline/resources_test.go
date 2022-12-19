@@ -27,7 +27,7 @@ var (
 		},
 	}
 
-	tracePipelineHttp = v1alpha1.TracePipelineOutput{
+	tracePipelineHTTP = v1alpha1.TracePipelineOutput{
 		Otlp: &v1alpha1.OtlpOutput{
 			Endpoint: v1alpha1.ValueType{
 				Value: "http://localhost",
@@ -35,7 +35,7 @@ var (
 		},
 	}
 
-	tracePipelineHttps = v1alpha1.TracePipelineOutput{
+	tracePipelineHTTPS = v1alpha1.TracePipelineOutput{
 		Otlp: &v1alpha1.OtlpOutput{
 			Endpoint: v1alpha1.ValueType{
 				Value: "https://localhost",
@@ -88,7 +88,7 @@ func TestMakeConfigMapTLSInsecureNoScheme(t *testing.T) {
 }
 
 func TestMakeConfigMapTLSInsecureHttp(t *testing.T) {
-	cm := makeConfigMap(config, tracePipelineHttp)
+	cm := makeConfigMap(config, tracePipelineHTTP)
 
 	require.NotNil(t, cm)
 	collectorConfig := cm.Data[configMapKey]
@@ -99,7 +99,7 @@ func TestMakeConfigMapTLSInsecureHttp(t *testing.T) {
 }
 
 func TestMakeConfigMapTLSInsecureHttps(t *testing.T) {
-	cm := makeConfigMap(config, tracePipelineHttps)
+	cm := makeConfigMap(config, tracePipelineHTTPS)
 
 	require.NotNil(t, cm)
 	collectorConfig := cm.Data[configMapKey]
