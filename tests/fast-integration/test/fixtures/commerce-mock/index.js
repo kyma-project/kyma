@@ -303,6 +303,7 @@ async function checkInClusterEventTracing(targetNamespace) {
   expect(res.data).to.have.nested.property('podName');
 
   // Extract traceId from response
+  // Second part of traceparent header contains trace-id. See https://www.w3.org/TR/trace-context/#traceparent-header
   const traceId = res.data.event.headers['traceparent'].split('-')[1];
 
   // Define expected trace data
@@ -315,8 +316,9 @@ async function checkInClusterEventTracing(targetNamespace) {
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
 
-  // wait sometime for jaeger to complete tracing data
-  await sleep(10_000);
+  // wait sometime for jaeger to complete tracing data.
+  // Arrival of traces might be delayed by otel-collectors batch timeout.
+  await sleep(20_000);
   await checkTrace(traceId, correctTraceProcessSequence);
 }
 
