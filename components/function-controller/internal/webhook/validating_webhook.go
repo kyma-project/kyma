@@ -16,17 +16,19 @@ import (
 )
 
 type ValidatingWebHook struct {
-	configv1alpha1 *serverlessv1alpha1.ValidationConfig
-	configv1alpha2 *serverlessv1alpha2.ValidationConfig
-	client         ctrlclient.Client
-	decoder        *admission.Decoder
+	configv1alpha1       *serverlessv1alpha1.ValidationConfig
+	configv1alpha2       *serverlessv1alpha2.ValidationConfig
+	client               ctrlclient.Client
+	decoder              *admission.Decoder
+	rejectJava17AlphaJVM bool
 }
 
-func NewValidatingHook(configv1alpha1 *serverlessv1alpha1.ValidationConfig, configv1alpha2 *serverlessv1alpha2.ValidationConfig, client ctrlclient.Client) *ValidatingWebHook {
+func NewValidatingWebHook(configv1alpha1 *serverlessv1alpha1.ValidationConfig, configv1alpha2 *serverlessv1alpha2.ValidationConfig, featureFlags FeatureFlags, client ctrlclient.Client) *ValidatingWebHook {
 	return &ValidatingWebHook{
-		configv1alpha1: configv1alpha1,
-		configv1alpha2: configv1alpha2,
-		client:         client,
+		configv1alpha1:       configv1alpha1,
+		configv1alpha2:       configv1alpha2,
+		client:               client,
+		rejectJava17AlphaJVM: !featureFlags.Java17JvmAlphaEnabled,
 	}
 }
 func (w *ValidatingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
@@ -65,9 +67,15 @@ func (w *ValidatingWebHook) handleFunctionValidation(req admission.Request) admi
 			if err := w.decoder.Decode(req, fn); err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
+
+			if w.rejectJava17AlphaJVM && fn.Spec.Runtime == serverlessv1alpha2.Java17JvmAlpha {
+				return admission.Denied("Java 17 Alpha JVM is not enabled")
+			}
+
 			if err := fn.Validate(w.configv1alpha2); err != nil {
 				return admission.Denied(fmt.Sprintf("validation failed: %s", err.Error()))
 			}
+
 		}
 	default:
 		return admission.Errored(http.StatusBadRequest, errors.Errorf("Invalid resource version provided: %s", req.Kind.Version))

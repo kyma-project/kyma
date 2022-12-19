@@ -7,11 +7,8 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
-type Config struct {
-	SystemNamespace    string `envconfig:"default=kyma-system"`
-	WebhookServiceName string `envconfig:"default=serverless-webhook"`
-	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
-	WebhookPort        int    `envconfig:"default=8443"`
+type FeatureFlags struct {
+	Java17JvmAlphaEnabled bool `envconfig:"default=false"`
 }
 
 // TODO: We should split configuration to seperate env or use file to pass configuration per version.

@@ -26,11 +26,12 @@ import (
 )
 
 type config struct {
-	SystemNamespace    string `envconfig:"default=kyma-system"`
-	WebhookServiceName string `envconfig:"default=serverless-webhook"`
-	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
-	WebhookPort        int    `envconfig:"default=8443"`
-	WebhookConfigPath  string `envconfig:"default=/appdata/config.yaml"`
+	SystemNamespace     string               `envconfig:"default=kyma-system"`
+	WebhookServiceName  string               `envconfig:"default=serverless-webhook"`
+	WebhookSecretName   string               `envconfig:"default=serverless-webhook"`
+	WebhookPort         int                  `envconfig:"default=8443"`
+	WebhookConfigPath   string               `envconfig:"default=/appdata/config.yaml"`
+	WebhookFeatureFlags webhook.FeatureFlags `envconfig:""`
 }
 
 var (
@@ -132,7 +133,7 @@ func main() {
 	})
 
 	whs.Register(resources.FunctionValidationWebhookPath, &ctrlwebhook.Admission{
-		Handler: webhook.NewValidatingHook(validationConfigv1alpha1, validationConfigv1alpha2, mgr.GetClient()),
+		Handler: webhook.NewValidatingWebHook(validationConfigv1alpha1, validationConfigv1alpha2, cfg.WebhookFeatureFlags, mgr.GetClient()),
 	})
 
 	whs.Register(resources.RegistryConfigDefaultingWebhookPath, &ctrlwebhook.Admission{Handler: webhook.NewRegistryWatcher()})

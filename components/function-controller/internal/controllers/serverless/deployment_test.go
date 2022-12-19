@@ -1,8 +1,9 @@
 package serverless
 
 import (
-	"k8s.io/utils/pointer"
 	"testing"
+
+	"k8s.io/utils/pointer"
 
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"

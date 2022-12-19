@@ -305,6 +305,9 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
+  values:
+    featureFlags:
+      java17AlphaEnabled: false
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value
