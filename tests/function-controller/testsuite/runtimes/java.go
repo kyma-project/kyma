@@ -69,7 +69,7 @@ package io.project.kyma.serverless.handler;
             public static final String RETURN_STRING = "Hello World from local java11 runtime from docker graalvm with serverless SDK!";
         
             @Override
-            public Response call(CloudEvent event, Context context) {
+            public Response main(CloudEvent event, Context context) {
 			return Response.ok("%s").build();
             }
         }
@@ -90,7 +90,7 @@ package io.project.kyma.serverless.handler;
             public static final String RETURN_STRING = "Hello World from local java11 runtime from docker graalvm with serverless SDK!";
         
             @Override
-            public Response call(CloudEvent event, Context context) {
+            public Response main(CloudEvent event, Context context) {
 				var msgData = new String[]{"Hello", "from", "new", "library"};
 				var mapper = new CsvMapper();
 				var msg = "empty";
