@@ -19,28 +19,28 @@ func TestNewRegistryClient(t *testing.T) {
 		{
 			name: "valid options",
 			opts: &RegistryClientOptions{
-				Username: "username",
-				Password: "password",
+				Username: "test-user",
+				Password: "test-password",
 				URL:      "docker-registry.kyma-system.svc.cluster.local:5000",
 			},
 			want: &registryClient{
 				ctx:      ctx,
-				userName: "username",
-				password: "password",
+				userName: "test-user",
+				password: "test-password",
 				url:      validURL("http://docker-registry.kyma-system.svc.cluster.local:5000"),
 			},
 		},
 		{
 			name: "valid options with URL scheme",
 			opts: &RegistryClientOptions{
-				Username: "username",
-				Password: "password",
+				Username: "test-user",
+				Password: "test-password",
 				URL:      "http://docker-registry.kyma-system.svc.cluster.local:5000",
 			},
 			want: &registryClient{
 				ctx:      ctx,
-				userName: "username",
-				password: "password",
+				userName: "test-user",
+				password: "test-password",
 				url:      validURL("http://docker-registry.kyma-system.svc.cluster.local:5000"),
 			},
 		},
@@ -48,7 +48,7 @@ func TestNewRegistryClient(t *testing.T) {
 			name: "Empty username",
 			opts: &RegistryClientOptions{
 				Username: "",
-				Password: "password",
+				Password: "test-password",
 				URL:      "docker-registry.kyma-system.svc.cluster.local:5000",
 			},
 			want:    nil,

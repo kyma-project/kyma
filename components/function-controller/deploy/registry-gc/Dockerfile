@@ -15,10 +15,7 @@ WORKDIR ${BASE_APP_DIR}
 #
 COPY . ${BASE_APP_DIR}/
 
-RUN go build -ldflags "-s -w" -a -o registry-gc cmd/registry-gc/main.go \
-    && mkdir /app \
-    && mv ./registry-gc /app/registry-gc
-
+RUN go build -ldflags "-s -w" -a -o registry-gc cmd/registry-gc/main.go 
 # result container base on alpine:3.16.2
 FROM eu.gcr.io/kyma-project/external/alpine@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870
 
@@ -27,7 +24,8 @@ LABEL source = git@github.com:kyma-project/kyma.git
 RUN apk update --no-cache && apk upgrade --no-cache
 RUN apk add --no-cache ca-certificates
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client openssl=3.0.7-r0
+ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller
 
-COPY --from=builder /app /app
+COPY --from=builder ${BASE_APP_DIR}/registry-gc /app
 
 ENTRYPOINT ["/app/registry-gc"]

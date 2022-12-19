@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/docker/distribution/reference"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -21,7 +22,7 @@ const (
 
 var (
 	functionRuntimeLabels = map[string]string{
-		"serverless.kyma-project.io/managed-by": "function-controller",
+		v1alpha2.FunctionManagedByLabel: v1alpha2.FunctionControllerValue,
 	}
 )
 

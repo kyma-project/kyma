@@ -25,7 +25,7 @@ type repositoryClient struct {
 
 	namedImage reference.Named
 
-	tagSservice     distribution.TagService
+	tagService      distribution.TagService
 	manifestService distribution.ManifestService
 }
 
@@ -36,7 +36,7 @@ type Tag struct {
 var _ RepositoryClient = &repositoryClient{}
 
 func (rc *repositoryClient) ListTags() ([]string, error) {
-	return rc.tagSservice.All(rc.ctx)
+	return rc.tagService.All(rc.ctx)
 }
 
 func (rc *repositoryClient) GetImageTag(strTag string) (*Tag, error) {
@@ -44,7 +44,7 @@ func (rc *repositoryClient) GetImageTag(strTag string) (*Tag, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while validating image tag")
 	}
-	tag, err := rc.tagSservice.Get(rc.ctx, strTag)
+	tag, err := rc.tagService.Get(rc.ctx, strTag)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting image tag object")
 	}

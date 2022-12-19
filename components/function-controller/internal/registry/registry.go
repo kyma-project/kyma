@@ -75,7 +75,7 @@ func (c *registryClient) ImageRepository(imageName string) (RepositoryClient, er
 	return &repositoryClient{
 		ctx:             c.ctx,
 		namedImage:      named,
-		tagSservice:     repo.Tags(c.ctx),
+		tagService:      repo.Tags(c.ctx),
 		manifestService: manifestService,
 	}, nil
 }

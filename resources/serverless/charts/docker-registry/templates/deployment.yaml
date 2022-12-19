@@ -187,7 +187,7 @@ spec:
             - name: REGISTRY_STORAGE_SWIFT_CONTAINER
               value: {{ required ".Values.swift.container is required" .Values.swift.container }}
 {{- end }}
-{{- if .Values.persistence.deleteEnabled }}
+{{- if .Values.garbageCollection.enabled }}
             - name: REGISTRY_STORAGE_DELETE_ENABLED
               value: "true"
 {{- end }}

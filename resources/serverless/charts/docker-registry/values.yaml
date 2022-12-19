@@ -56,7 +56,6 @@ persistence:
   accessMode: 'ReadWriteOnce'
   enabled: true
   size: 20Gi
-  deleteEnabled: true
   # storageClass: '-'
 
 garbageCollection:

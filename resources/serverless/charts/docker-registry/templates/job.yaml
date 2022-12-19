@@ -15,7 +15,7 @@ spec:
           serviceAccountName: {{ template "docker-registry.name" . }}
           restartPolicy: Never
           containers:
-          - name: function-image-gc
+          - name: function-image-untagger
             image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_registry_gc) }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             {{- if .Values.containers.securityContext }}
