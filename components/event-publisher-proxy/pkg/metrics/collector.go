@@ -65,7 +65,7 @@ type PublishingMetricsCollector interface {
 	RecordBackendLatency(duration time.Duration, statusCode int, destSvc string)
 	RecordEventType(eventType, eventSource string, statusCode int)
 	RecordBackendRequests(statusCode int, destSvc string)
-	MetricsMiddleware(destService string) mux.MiddlewareFunc
+	MetricsMiddleware() mux.MiddlewareFunc
 }
 
 var _ PublishingMetricsCollector = &Collector{}
@@ -173,7 +173,7 @@ func (c *Collector) RecordBackendRequests(statusCode int, destSvc string) {
 	c.backendRequests.WithLabelValues(fmt.Sprint(statusCode), destSvc).Inc()
 }
 
-func (c *Collector) MetricsMiddleware(destService string) mux.MiddlewareFunc {
+func (c *Collector) MetricsMiddleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			route := mux.CurrentRoute(r)

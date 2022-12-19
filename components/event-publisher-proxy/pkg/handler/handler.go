@@ -78,7 +78,7 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender sender.GenericSen
 // setupMux configures the request router for all required endpoints.
 func (h *Handler) setupMux() {
 	router := mux.NewRouter()
-	router.Use(h.collector.MetricsMiddleware(h.Sender.URL()))
+	router.Use(h.collector.MetricsMiddleware())
 	router.HandleFunc(PublishEndpoint, h.maxBytes(h.publishCloudEvents)).Methods(http.MethodPost)
 	router.HandleFunc(LegacyEndpointPattern, h.maxBytes(h.publishLegacyEventsAsCE)).Methods(http.MethodPost)
 	if h.Options.EnableNewCRDVersion {
