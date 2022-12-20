@@ -194,13 +194,13 @@ As used in the previous step, a Secret referenced with the **secretKeyRef** cons
 
 ## Kyma Components with tracing capabilities
 
-Kyma bundles several modules which are potentially involved in user flows. Applications involved in a distributed trace must propagate the trace context to keep the trace complete, optional they can enrich the trace with custom spans which requires to report them to the backend.
+Kyma bundles several modules which are potentially involved in user flows. Applications involved in a distributed trace must propagate the trace context to keep the trace complete. Optionally, they can enrich the trace with custom spans which requires reporting them to the backend.
 
 ### Istio
 
-The Istio module is crucial enabler in distributed tracing as it provides [ingress gateway](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/) where usually external requests enter the cluster scope and are enriched with trace context if it hasn't happened yet. Furthermore, every component being part of the Istio Service Mesh is running an Istio proxy, which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application already ensures that you will get a complete picture of a trace, as every component will automatically contribute span data.
+The Istio module is a crucial enabler in distributed tracing as it provides [ingress gateway](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/) where usually external requests enter the cluster scope and are enriched with trace context if it hasn't happened yet. Furthermore, every component being part of the Istio Service Mesh is running an Istio proxy, which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application already ensures that you will get a complete picture of a trace, as every component will automatically contribute span data.
 
-The Istio module is configured with an [extension provider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-traces`. The provider can be activated on global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
+The Istio module is configured with an [extension provider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-traces`. The provider can be activated on the global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
 
 ```yaml
 apiVersion: telemetry.istio.io/v1alpha1
@@ -215,7 +215,7 @@ spec:
 ```
 It configures all Istio proxies with the `kyma-traces` extension provider, which by default, reports span data to the trace collector of the telemetry module.
 
-Be aware that by default, that the sampling rate is configured to 1 percent. That means that only 1 trace out of 100 traces is reported to the trace collector, and all others are dropped. Hereby, the sampling decision itself gets propagated as part of the [trace context](https://www.w3.org/TR/trace-context/#sampled-flag) so that either all involved components are reporting the span data of a trace or none. Increasing the sampling rate results in much higher network utilization in the cluster and also increases the amount of data sent to your tracing backend. Usually, a very low percentage of around 5% is used in a production setup to reduce costs and performance impacts.
+Be aware that by default, the sampling rate is configured to 1 percent. That means that only 1 trace out of 100 traces is reported to the trace collector, and all others are dropped. Hereby, the sampling decision itself gets propagated as part of the [trace context](https://www.w3.org/TR/trace-context/#sampled-flag) so that either all involved components are reporting the span data of a trace or none. Increasing the sampling rate results in much higher network utilization in the cluster and also increases the amount of data sent to your tracing backend. Usually, a very low percentage of around 5% is used in a production setup to reduce costs and performance impacts.
 
 To configure an "always-on" sampling, you need to configure a sampling rate of 100% by:
 ```yaml
