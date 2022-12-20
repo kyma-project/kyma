@@ -359,6 +359,7 @@ func TestHandler_publishCloudEvents(t *testing.T) {
 				Logger:           logger,
 				collector:        tt.fields.collector,
 				eventTypeCleaner: tt.fields.eventTypeCleaner,
+				Options:          &options.Options{},
 			}
 			writer := httptest.NewRecorder()
 

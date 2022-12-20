@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/builder"
 )
 
 // parse splits the event-type using the given prefix and returns the application name, event and version
@@ -23,7 +25,7 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	// make sure that the remaining string has at least 4 segments separated by "."
 	// (e.g. application.businessObject.operation.version)
 	parts := strings.Split(eventType, ".")
-	if len(parts) < 4 || checkForEmptySegments(parts) {
+	if len(parts) < 4 || builder.CheckForEmptySegments(parts) {
 		return "", "", "", errors.New("invalid format")
 	}
 
@@ -35,13 +37,4 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	event := fmt.Sprintf("%s.%s", businessObject, operation)
 
 	return applicationName, event, version, nil
-}
-
-func checkForEmptySegments(segments []string) bool {
-	for _, segment := range segments {
-		if segment == "" {
-			return true
-		}
-	}
-	return false
 }
