@@ -1,5 +1,5 @@
 ---
-title: Telemetry - Traces
+title: Traces
 ---
 
 Observability tools aim to show the big picture, no matter if you're monitoring just a few or many components. In a cloud-native microservice architecture, a user request often flows through dozens of different microservices. Logging and monitoring tools help to track the request's path. However, they treat each component or microservice in isolation. This individual treatment results in operational issues.
