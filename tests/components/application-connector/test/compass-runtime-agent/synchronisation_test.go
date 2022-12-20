@@ -16,6 +16,7 @@ import (
 
 const checkAppExistsPeriod = 10 * time.Second
 const appCreationTimeout = 2 * time.Minute
+const appUpdateTimeout = 3 * time.Minute
 
 type ApplicationReader interface {
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Application, error)
@@ -23,6 +24,7 @@ type ApplicationReader interface {
 
 func (cs *CompassRuntimeAgentSuite) TestApplication() {
 	expectedAppName := "app1"
+	updatedAppName := "app1-updated"
 	compassAppName := expectedAppName + random.RandomString(10)
 
 	//Create Application in Director
@@ -42,11 +44,42 @@ func (cs *CompassRuntimeAgentSuite) TestApplication() {
 		cs.Assert().NoError(err)
 	})
 
+	cs.Run("Update app", func() {
+		err := cs.updateAndWaitForCompare(applicationInterface, synchronizedCompassAppName, applicationID, updatedAppName)
+		cs.NoError(err)
+	})
+
 	// Clean up
 	cs.Run("Compass Runtime Agent should remove Application", func() {
 		err = cs.removeApplicationAndWaitForSync(applicationInterface, synchronizedCompassAppName, applicationID)
 		cs.NoError(err)
 	})
+}
+
+func (cs *CompassRuntimeAgentSuite) updateAndWaitForCompare(appReader ApplicationReader, compassAppName, applicationID, updatedName string) error {
+	t := cs.T()
+	t.Helper()
+
+	exec := func() error {
+		_, err := cs.directorClient.UpdateApplication(applicationID, "Updated")
+		return err
+	}
+
+	verify := func() bool {
+		err := cs.appComparator.Compare(cs.T(), updatedName, compassAppName)
+		if err != nil {
+			t.Logf("Couldn't verify update: %v", err)
+		}
+
+		return err == nil
+	}
+
+	return executor.ExecuteAndWaitForCondition{
+		RetryableExecuteFunc: exec,
+		ConditionMetFunc:     verify,
+		Tick:                 checkAppExistsPeriod,
+		Timeout:              appUpdateTimeout,
+	}.Do()
 }
 
 func (cs *CompassRuntimeAgentSuite) assignApplicationToFormationAndWaitForSync(appReader ApplicationReader, compassAppName, applicationID string) error {
