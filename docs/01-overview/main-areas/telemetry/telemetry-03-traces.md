@@ -96,7 +96,7 @@ metadata:
 spec:
   tracing:
   - providers:
-    - name: "kyma-tracing"
+    - name: "kyma-traces"
   randomSamplingPercentage: 100.00
 ```
 
@@ -200,7 +200,7 @@ Kyma bundles several modules which are potentially involved in user flows and wi
 
 The Istio module plays a crucial aspect in a distributed trace as the module provides the ingress gateway where usually requests from external are entering the cluster scope and will be enriched with trace context if that did not happen yet. Furthermore, every components being part of the Istio Service Mesh is running an Istio Proxies which propagates the context properly but also creates span data. Having Istio tracing activated and doing trace propagation in your application will already assure that you will get a complete picture of a trace as every component will contribute span data automatically.
 
-The Istio module is configured with an [ExtensionProvider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-tracing`. The provider can be activated on global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
+The Istio module is configured with an [ExtensionProvider](https://istio.io/latest/docs/tasks/observability/telemetry/) called `kyma-traces`. The provider can be activated on global mesh label using the Istio [Telemetry API](https://istio.io/latest/docs/reference/config/telemetry/#Tracing) by placing a resource to the istio-system namespace like that:
 
 ```yaml
 apiVersion: telemetry.istio.io/v1alpha1
@@ -211,9 +211,9 @@ metadata:
 spec:
   tracing:
   - providers:
-    - name: "kyma-tracing"
+    - name: "kyma-traces"
 ```
-That will configure all Istio proxies with the `kyma-tracing` extension provider which by default will report span data to the trace collector of the telemetry module.
+That will configure all Istio proxies with the `kyma-traces` extension provider which by default will report span data to the trace collector of the telemetry module.
 
 Be aware of, that by default the samplingRate is configured to 1 percent. That means that only 1 trace out of 100 traces will be reported to the trace collector, all others will be dropped. Hereby, the sampling decision itself gets propagated as part of the [trace context](https://www.w3.org/TR/trace-context/#sampled-flag) so that either all involved components are reporting the span data of a trace or none. Turning up the sampling rate will increase the network utilization in the cluster a lot and also will increase the amount of data send to your tracing backend. Usually a very low percentage around 5% are getting used in a productive setup to reduce costs and performance impacts.
 
@@ -227,11 +227,28 @@ metadata:
 spec:
   tracing:
   - providers:
-    - name: "kyma-tracing"
+    - name: "kyma-traces"
     randomSamplingPercentage: 100.00
 ```
 
-Selectively, namespaces or workloads can be configured with individual settings by placing further resources. To not report spans at all the `disableSpanReporting` flag can be activated.
+Selectively, namespaces or workloads can be configured with individual settings by placing further resources. To not report spans at all for a specific workload, the `disableSpanReporting` flag can be activated using a selector expression.
+
+```yaml
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing-default
+  namespace: my-namespace
+spec:
+  selector:
+    matchLabels:
+      kubernetes.io/name: "my-app"
+  tracing:
+  - providers:
+    - name: "kyma-traces"
+    randomSamplingPercentage: 100.00
+```
+
 
 ### Eventing
 The Kyma [eventing](./../../main-areas/eventing/README.md) component dispatches events from an in- or out-cluster backend to your workload. Hereby, it is leveraging the [cloudevents](https://cloudevents.io/) protocol which natively supports [W3C Trace Context] propagation. Having that said, the veneting component already propagates trace context properly, however does not enrich a trace with more advanced span data.
