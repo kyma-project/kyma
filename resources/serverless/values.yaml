@@ -217,7 +217,7 @@ containers:
       functionJaegerServiceEndpoint:
         value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionTraceCollectorEndpoint:
-        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:4318/v1/traces"
+        value: "http://telemetry-otlp-traces.kyma-system.svc.cluster.local:4318/v1/traces"
       functionPublisherProxyAddress:
         value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
