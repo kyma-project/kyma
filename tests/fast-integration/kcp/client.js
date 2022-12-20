@@ -195,6 +195,11 @@ class KCPWrapper {
     return JSON.stringify(reconciliationsInfo, null, '\t');
   }
 
+  async getRuntimeEvents(instanceID) {
+    await this.login();
+    return this.exec(['runtimes', '--instance-id', instanceID, '--events']);
+  }
+
   async getRuntimeStatusOperations(instanceID) {
     await this.login();
     const runtimeStatus = await this.runtimes({instanceID: instanceID, ops: true});
