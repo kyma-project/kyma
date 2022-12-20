@@ -53,7 +53,7 @@ Furthermore, the operator manages the full lifecycle of the OTel Collector Deplo
 
 In the following steps, you can see how to set up a typical TracePipeline. For an overview of all available attributes, see the [reference document](./../../../05-technical-reference/00-custom-resources/telemetry-03-tracepipeline.md).
 
-### 1. Create a TracePipeline with an output
+### Step 1. Create a TracePipeline with an output
 1. To ship traces to a new OTLP output, create a resource file of the TracePipeline kind:
 
 ```yaml
