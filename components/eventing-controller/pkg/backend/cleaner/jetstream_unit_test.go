@@ -16,9 +16,9 @@ func Test_JSCleanSource(t *testing.T) {
 		wantEventSource  string
 	}{
 		{
-			name:             "removes only dots, greater than, asterisk, spaces and tabs",
-			givenEventSource: "source1-Part1-Part*2-Ä.te--<>  <>s__t!!a@  \t @*p##p%%",
-			wantEventSource:  "source1-Part1-Part2-Äte--<<s__t!!a@@p##p%%",
+			name:             "removes only dots, greater than, asterisk, spaces, slashes and tabs",
+			givenEventSource: "source1-Part1/2-Part*2\\3-Ä.te--<>  <>s__t!!a@  \t @*p##p%%",
+			wantEventSource:  "source1-Part12-Part23-Äte--<<s__t!!a@@p##p%%",
 		},
 		{
 			name:             "does nothing for allowed characters",
@@ -51,9 +51,9 @@ func Test_JSCleanEventType(t *testing.T) {
 		wantEventType  string
 	}{
 		{
-			name:           "removes only asterisk, greater than, spaces and tabs",
-			givenEventType: "prefix.  testapp.\tSegment1.Segment2>*.Segment3<.Segment4>>-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
-			wantEventType:  "prefix.testapp.Segment1.Segment2.Segment3<.Segment4-Part1-Part2-Ä.Segment5-Part1-Part2-Ä.v1",
+			name:           "removes only asterisk, greater than, spaces, slashes and tabs",
+			givenEventType: "prefix.  testapp.\tSegment1.Segment2>*.Segment3<.Segment4>>-Part1/2-Part2\\3-Ä.Segment5-Part1-Ä.v1",
+			wantEventType:  "prefix.testapp.Segment1.Segment2.Segment3<.Segment4-Part12-Part23-Ä.Segment5-Part1-Ä.v1",
 		},
 		{
 			name:           "does nothing for allowed characters",

@@ -2,7 +2,9 @@ package logpipeline
 
 import (
 	"context"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -11,7 +13,7 @@ const (
 	filesFinalizer    = "FLUENT_BIT_FILES"
 )
 
-func (r *Reconciler) ensureFinalizers(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+func ensureFinalizers(ctx context.Context, client client.Client, pipeline *telemetryv1alpha1.LogPipeline) error {
 	if !pipeline.DeletionTimestamp.IsZero() {
 		return nil
 	}
@@ -31,10 +33,10 @@ func (r *Reconciler) ensureFinalizers(ctx context.Context, pipeline *telemetryv1
 		return nil
 	}
 
-	return r.Update(ctx, pipeline)
+	return client.Update(ctx, pipeline)
 }
 
-func (r *Reconciler) cleanupFinalizersIfNeeded(ctx context.Context, pipeline *telemetryv1alpha1.LogPipeline) error {
+func cleanupFinalizersIfNeeded(ctx context.Context, client client.Client, pipeline *telemetryv1alpha1.LogPipeline) error {
 	if pipeline.DeletionTimestamp.IsZero() {
 		return nil
 	}
@@ -54,5 +56,5 @@ func (r *Reconciler) cleanupFinalizersIfNeeded(ctx context.Context, pipeline *te
 		return nil
 	}
 
-	return r.Update(ctx, pipeline)
+	return client.Update(ctx, pipeline)
 }

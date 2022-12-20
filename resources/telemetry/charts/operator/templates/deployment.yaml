@@ -71,11 +71,28 @@ spec:
 {{- else }}
             - --enable-tracing=true
             - --trace-collector-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_otel_collector) }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+            - --trace-collector-priority-class={{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
+            - --trace-collector-cpu-limit={{ .Values.traceCollector.resources.limits.cpu }}
+            - --trace-collector-memory-limit={{ .Values.traceCollector.resources.limits.memory }}
+            - --trace-collector-cpu-request={{ .Values.traceCollector.resources.requests.cpu }}
+            - --trace-collector-memory-request={{ .Values.traceCollector.resources.requests.memory }}
+{{- end }}
+{{- if .Values.global.operatorManagedFluentBit }}
+            - --enable-managed-fluentbit={{.Values.global.operatorManagedFluentBit}}
 {{- end }}
           name: manager
           ports:
           - containerPort: 9443
             protocol: TCP
+            name: webook
+          - containerPort: 8081
+            protocol: TCP
+            name: health
+          - containerPort: 8080
+            protocol: TCP
+            name: metrics
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_operator) }}"

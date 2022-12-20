@@ -4,6 +4,7 @@ module.exports = {
   waitForLogPipelineStatusRunning,
   waitForTracePipeline,
   waitForPodWithLabel,
+  waitForTracePipelineStatusRunning,
 };
 
 const k8s = require('@kubernetes/client-node');
@@ -32,6 +33,24 @@ function loadResourceFromFile(file) {
 function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   return waitForK8sObject(
       '/apis/telemetry.kyma-project.io/v1alpha1/logpipelines',
+      {},
+      (_type, watchObj, _) => {
+        return (
+          watchObj.metadata.name === name && checkLastCondition(watchObj, lastConditionType)
+        );
+      },
+      timeout,
+      `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
+  );
+}
+
+function waitForTracePipelineStatusRunning(name) {
+  return waitForTracePipelineStatusCondition(name, 'Running', 180000);
+}
+
+function waitForTracePipelineStatusCondition(name, lastConditionType, timeout) {
+  return waitForK8sObject(
+      '/apis/telemetry.kyma-project.io/v1alpha1/tracepipelines',
       {},
       (_type, watchObj, _) => {
         return (

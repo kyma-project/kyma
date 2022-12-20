@@ -7,13 +7,13 @@ global:
       version: "v20221020-e314a071"
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-16204"
+      version: "PR-16338"
     telemetry_webhook_cert_init:
       name: "webhook-cert-init"
       version: "v20221122-200937b4"
     telemetry_otel_collector:
       name: "otel-collector"
-      version: "0.66.0-9bbc6dff"
+      version: "0.66.0-a80d981f"
       directory: "tpi"
     fluent_bit:
       name: "fluent-bit"
@@ -27,3 +27,4 @@ global:
   log:
     format: "json"
     level: "info"
+  operatorManagedFluentBit: false

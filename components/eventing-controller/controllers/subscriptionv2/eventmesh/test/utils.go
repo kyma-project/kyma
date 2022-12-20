@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
@@ -95,13 +97,11 @@ func setupSuite() error {
 	emTestEnsemble.eventMeshMock = startNewEventMeshMock()
 
 	// add schemes
-	err = eventingv1alpha2.AddToScheme(scheme.Scheme)
-	if err != nil {
+	if err = eventingv1alpha2.AddToScheme(scheme.Scheme); err != nil {
 		return err
 	}
 
-	err = apigatewayv1beta1.AddToScheme(scheme.Scheme)
-	if err != nil {
+	if err = apigatewayv1beta1.AddToScheme(scheme.Scheme); err != nil {
 		return err
 	}
 	// +kubebuilder:scaffold:scheme
@@ -114,9 +114,13 @@ func setupSuite() error {
 
 	// start eventMesh manager instance
 	syncPeriod := syncPeriodSeconds * time.Second
+	webhookInstallOptions := &emTestEnsemble.testEnv.WebhookInstallOptions
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
+		Host:               webhookInstallOptions.LocalServingHost,
+		Port:               webhookInstallOptions.LocalServingPort,
+		CertDir:            webhookInstallOptions.LocalServingCertDir,
 		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
 	})
 	if err != nil {
@@ -146,8 +150,7 @@ func setupSuite() error {
 		sinkValidator,
 	)
 
-	err = testReconciler.SetupUnmanaged(k8sManager)
-	if err != nil {
+	if err = testReconciler.SetupUnmanaged(k8sManager); err != nil {
 		return err
 	}
 
@@ -162,6 +165,11 @@ func setupSuite() error {
 	}()
 
 	emTestEnsemble.k8sClient = k8sManager.GetClient()
+
+	if err = testingv2.StartAndWaitForWebhookServer(k8sManager, webhookInstallOptions); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -175,6 +183,9 @@ func startTestEnv() (*rest.Config, error) {
 		},
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
+		WebhookInstallOptions: envtest.WebhookInstallOptions{
+			Paths: []string{filepath.Join("../../../../", "config", "webhook")},
+		},
 	}
 
 	var cfg *rest.Config
@@ -264,6 +275,10 @@ func fixtureNamespace(name string) *corev1.Namespace {
 
 func ensureK8sResourceCreated(ctx context.Context, t *testing.T, obj client.Object) {
 	assert.NoError(t, emTestEnsemble.k8sClient.Create(ctx, obj))
+}
+
+func ensureK8sResourceNotCreated(ctx context.Context, t *testing.T, obj client.Object, err error) {
+	assert.Equal(t, emTestEnsemble.k8sClient.Create(ctx, obj), err)
 }
 
 func ensureK8sResourceUpdated(ctx context.Context, t *testing.T, obj client.Object) {

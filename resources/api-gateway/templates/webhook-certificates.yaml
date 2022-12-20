@@ -21,22 +21,24 @@ spec:
           type: RuntimeDefault
       restartPolicy: Never
       containers:
-      - name: init-certificates
-        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_webhook_certificates) }}"
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: SERVICE_NAME
-          value: {{ include "api-gateway.fullname" . }}-webhook-service
-        - name: SECRET_NAMESPACE
-          value: {{ .Release.Namespace }}
-        - name: SECRET_NAME
-          value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
+        - name: init-certificates
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_webhook_certificates) }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CRD_NAME
+              value: {{ .Values.webhook.crdName }}
+            - name: SERVICE_NAME
+              value: {{ include "api-gateway.fullname" . }}-webhook-service
+            - name: SECRET_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: SECRET_NAME
+              value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
       serviceAccountName: {{ include "api-gateway.name" . }}-certificates-account
 ---
 apiVersion: batch/v1
@@ -59,14 +61,16 @@ spec:
         spec:
           restartPolicy: Never
           containers:
-          - name: init-certificates
-            image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_webhook_certificates) }}"
-            imagePullPolicy: IfNotPresent
-            env:
-            - name: SERVICE_NAME
-              value: {{ include "api-gateway.fullname" . }}-webhook-service
-            - name: SECRET_NAMESPACE
-              value: {{ .Release.Namespace }}
-            - name: SECRET_NAME
-              value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
+            - name: init-certificates
+              image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_webhook_certificates) }}"
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRD_NAME
+                  value: {{ .Values.webhook.crdName }}
+                - name: SERVICE_NAME
+                  value: {{ include "api-gateway.fullname" . }}-webhook-service
+                - name: SECRET_NAMESPACE
+                  value: {{ .Release.Namespace }}
+                - name: SECRET_NAME
+                  value: {{ include "api-gateway.fullname" . }}-webhook-server-cert
           serviceAccountName: {{ include "api-gateway.name" . }}-certificates-account

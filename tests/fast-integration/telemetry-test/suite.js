@@ -22,6 +22,7 @@ const {
   waitForLogPipelineStatusRunning,
   waitForTracePipeline,
   waitForPodWithLabel,
+  waitForTracePipelineStatusRunning,
 } = require('./helpers');
 
 
@@ -67,7 +68,7 @@ describe('Telemetry Operator', function() {
   });
 
   it('Should be ready', async function() {
-    const res = await k8sCoreV1Api.listNamespacedPod(
+    const podRes = await k8sCoreV1Api.listNamespacedPod(
         'kyma-system',
         'true',
         undefined,
@@ -75,8 +76,21 @@ describe('Telemetry Operator', function() {
         undefined,
         'control-plane=telemetry-operator',
     );
-    const podList = res.body.items;
+    const podList = podRes.body.items;
     assert.equal(podList.length, 1);
+
+    const epRes = await k8sCoreV1Api.listNamespacedEndpoints(
+        'kyma-system',
+        'true',
+        undefined,
+        undefined,
+        undefined,
+        'control-plane=telemetry-operator',
+    );
+    const epList = epRes.body.items;
+    assert.equal(epList.length, 2);
+    assert.isNotEmpty(epList[0].subsets);
+    assert.isNotEmpty(epList[0].subsets[0].addresses);
   });
 
   context('Configurable Logging', function() {
@@ -322,6 +336,10 @@ describe('Telemetry Operator', function() {
       it(`Should create TracePipeline '${pipelineName}'`, async function() {
         await k8sApply(pipeline);
         await waitForTracePipeline(pipelineName);
+      });
+
+      it('Should be \'Running\'', async function() {
+        await waitForTracePipelineStatusRunning(pipelineName);
       });
 
       it('Should have ready trace collector pods', async () => {

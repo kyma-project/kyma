@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	testingv2 "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscriptionv2/reconcilertesting"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertestingv1 "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/stretchr/testify/assert"
@@ -19,8 +20,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-const invalidSinkErrMsg = "failed to validate subscription sink URL. " +
-	"It is not a valid cluster local svc: Service \"invalid\" not found"
+const (
+	invalidSinkErrMsg = "failed to validate subscription sink URL. " +
+		"It is not a valid cluster local svc: Service \"invalid\" not found"
+	testName = "test"
+)
 
 // TestMain pre-hook and post-hook to run before and after all tests.
 func TestMain(m *testing.M) {
@@ -43,6 +47,73 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+func Test_ValidationWebhook(t *testing.T) {
+	t.Parallel()
+	var testCases = []struct {
+		name                  string
+		givenSubscriptionFunc func(namespace string) *eventingv1alpha2.Subscription
+		wantError             error
+	}{
+		{
+			name: "should fail to create subscription with invalid event source",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithStandardTypeMatching(),
+					reconcilertesting.WithSource(""),
+					reconcilertesting.WithOrderCreatedV1Event(),
+					reconcilertesting.WithValidSink(namespace, "svc"),
+				)
+			},
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.SourcePath),
+		},
+		{
+			name: "should fail to create subscription with invalid event types",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithStandardTypeMatching(),
+					reconcilertesting.WithSource("source"),
+					reconcilertesting.WithTypes([]string{}),
+					reconcilertesting.WithValidSink(namespace, "svc"),
+				)
+			},
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.EmptyErrDetail, eventingv1alpha2.TypesPath),
+		},
+		{
+			name: "should fail to create subscription with invalid sink",
+			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
+				return reconcilertesting.NewSubscription(testName, namespace,
+					reconcilertesting.WithStandardTypeMatching(),
+					reconcilertesting.WithSource("source"),
+					reconcilertesting.WithOrderCreatedV1Event(),
+					reconcilertesting.WithSink("https://svc2.test.local"),
+				)
+			},
+			wantError: testingv2.GenerateInvalidSubscriptionError(testName,
+				eventingv1alpha2.SuffixMissingErrDetail, eventingv1alpha2.SinkPath),
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			ctx := context.Background()
+
+			// create unique namespace for this test run
+			testNamespace := getTestNamespace()
+			ensureNamespaceCreated(ctx, t, testNamespace)
+
+			// update namespace information in given test assets
+			givenSubscription := tc.givenSubscriptionFunc(testNamespace)
+
+			// attempt to create subscription
+			ensureK8sResourceNotCreated(ctx, t, givenSubscription, tc.wantError)
+		})
+	}
+}
+
 func Test_CreateSubscription(t *testing.T) {
 	t.Parallel()
 	var testCases = []struct {
@@ -53,7 +124,7 @@ func Test_CreateSubscription(t *testing.T) {
 		{
 			name: "should fail to create subscription if sink does not exist",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
@@ -74,14 +145,14 @@ func Test_CreateSubscription(t *testing.T) {
 		{
 			name: "should succeed to create subscription if types are non-empty",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
@@ -138,13 +209,13 @@ func Test_UpdateSubscription(t *testing.T) {
 		{
 			name: "should succeed to update subscription when event type is added",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
@@ -157,14 +228,14 @@ func Test_UpdateSubscription(t *testing.T) {
 				}),
 			),
 			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantUpdateSubscriptionMatchers: gomega.And(
@@ -183,14 +254,14 @@ func Test_UpdateSubscription(t *testing.T) {
 		{
 			name: "should succeed to update subscription when event types are updated",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
@@ -206,14 +277,14 @@ func Test_UpdateSubscription(t *testing.T) {
 				}),
 			),
 			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1alpha", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantUpdateSubscriptionMatchers: gomega.And(
@@ -232,14 +303,14 @@ func Test_UpdateSubscription(t *testing.T) {
 		{
 			name: "should succeed to update subscription when event type is deleted",
 			givenSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantSubscriptionMatchers: gomega.And(
@@ -255,13 +326,13 @@ func Test_UpdateSubscription(t *testing.T) {
 				}),
 			),
 			givenUpdateSubscriptionFunc: func(namespace string) *eventingv1alpha2.Subscription {
-				return reconcilertesting.NewSubscription("test", namespace,
+				return reconcilertesting.NewSubscription(testName, namespace,
 					reconcilertesting.WithDefaultSource(),
 					reconcilertesting.WithTypes([]string{
 						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedV1EventNotClean),
 					}),
 					reconcilertesting.WithWebhookAuthForBEB(),
-					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, "test")),
+					reconcilertesting.WithSinkURL(reconcilertesting.ValidSinkURL(namespace, testName)),
 				)
 			},
 			wantUpdateSubscriptionMatchers: gomega.And(

@@ -19,10 +19,12 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/kubernetes"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -50,30 +52,36 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 	//+kubebuilder:scaffold:imports
 )
 
 var (
-	certDir              string
-	deniedFilterPlugins  string
-	deniedOutputPlugins  string
-	enableLeaderElection bool
-	enableLogging        bool
-	enableTracing        bool
-	logFormat            string
-	logLevel             string
-	metricsAddr          string
-	probeAddr            string
-	scheme               = runtime.NewScheme()
-	setupLog             = ctrl.Log.WithName("setup")
-	syncPeriod           time.Duration
-	telemetryNamespace   string
+	certDir                string
+	deniedFilterPlugins    string
+	deniedOutputPlugins    string
+	enableLeaderElection   bool
+	enableLogging          bool
+	enableTracing          bool
+	enableManagedFluentBit bool
+	logFormat              string
+	logLevel               string
+	metricsAddr            string
+	probeAddr              string
+	scheme                 = runtime.NewScheme()
+	setupLog               = ctrl.Log.WithName("setup")
+	syncPeriod             time.Duration
+	telemetryNamespace     string
 
-	createServiceMonitor         bool
-	traceCollectorDeploymentName string
-	traceCollectorImage          string
+	traceCollectorCreateServiceMonitor bool
+	traceCollectorBaseName             string
+	traceCollectorOTLPServiceName      string
+	traceCollectorImage                string
+	traceCollectorPriorityClass        string
+	traceCollectorCPULimit             string
+	traceCollectorMemoryLimit          string
+	traceCollectorCPURequest           string
+	traceCollectorMemoryRequest        string
 
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
@@ -90,7 +98,7 @@ var (
 	maxLogPipelines            int
 )
 
-const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221125-9bbc6dff"
+const otelImage = "eu.gcr.io/kyma-project/tpi/otel-collector:v20221130-61707459"
 
 //nolint:gochecknoinits
 func init() {
@@ -121,7 +129,7 @@ func getEnvOrDefault(envVar string, defaultValue string) string {
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;patch
+//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 
 //+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
 
@@ -135,14 +143,21 @@ func main() {
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.BoolVar(&enableLogging, "enable-logging", true, "Enable configurable logging.")
 	flag.BoolVar(&enableTracing, "enable-tracing", true, "Enable configurable tracing.")
+	flag.BoolVar(&enableManagedFluentBit, "enable-managed-fluentbit", false, "Enable operator managed Fluent Bit resources.")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", ".", "Webhook TLS certificate directory")
 	flag.StringVar(&telemetryNamespace, "telemetry-namespace", "kyma-system", "Telemetry namespace")
 
-	flag.BoolVar(&createServiceMonitor, "create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
-	flag.StringVar(&traceCollectorDeploymentName, "trace-collector-deployment-name", "telemetry-trace-collector", "Deployment name for tracing OpenTelemetry Collector")
+	flag.BoolVar(&traceCollectorCreateServiceMonitor, "trace-collector-create-service-monitor", true, "Create Prometheus ServiceMonitor for opentelemetry-collector")
+	flag.StringVar(&traceCollectorBaseName, "trace-collector-base-name", "telemetry-trace-collector", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
+	flag.StringVar(&traceCollectorOTLPServiceName, "trace-collector-otlp-service-name", "telemetry-otlp-traces", "Default name for tracing OpenTelemetry Collector Kubernetes resources")
 	flag.StringVar(&traceCollectorImage, "trace-collector-image", otelImage, "Image for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorPriorityClass, "trace-collector-priority-class", "", "Priority class name for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorCPULimit, "trace-collector-cpu-limit", "1", "CPU limit for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorMemoryLimit, "trace-collector-memory-limit", "1Gi", "Memory limit for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorCPURequest, "trace-collector-cpu-request", "25m", "CPU request for tracing OpenTelemetry Collector")
+	flag.StringVar(&traceCollectorMemoryRequest, "trace-collector-memory-request", "32Mi", "Memory request for tracing OpenTelemetry Collector")
 
 	flag.StringVar(&fluentBitConfigMap, "fluent-bit-cm-name", "telemetry-fluent-bit", "ConfigMap name of Fluent Bit")
 	flag.StringVar(&fluentBitSectionsConfigMap, "fluent-bit-sections-cm-name", "telemetry-fluent-bit-sections", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
@@ -173,7 +188,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() {
-		if err := ctrLogger.WithContext().Sync(); err != nil {
+		if err = ctrLogger.WithContext().Sync(); err != nil {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
@@ -223,11 +238,11 @@ func main() {
 
 	//+kubebuilder:scaffold:builder
 
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+	if err := mgr.AddHealthzCheck("healthz", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "Failed to set up health check")
 		os.Exit(1)
 	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+	if err := mgr.AddReadyzCheck("readyz", mgr.GetWebhookServer().StartedChecker()); err != nil {
 		setupLog.Error(err, "Failed to set up ready check")
 		os.Exit(1)
 	}
@@ -279,6 +294,7 @@ func createLogPipelineReconciler(client client.Client) *logpipelinecontroller.Re
 		EnvSecret:         types.NamespacedName{Name: fluentBitEnvSecret, Namespace: telemetryNamespace},
 		DaemonSet:         types.NamespacedName{Namespace: telemetryNamespace, Name: fluentBitDaemonSet},
 		PipelineDefaults:  createPipelineDefaults(),
+		ManageFluentBit:   enableManagedFluentBit,
 	}
 	return logpipelinecontroller.NewReconciler(client, config, &kubernetes.DaemonSetProber{Client: client}, &kubernetes.DaemonSetAnnotator{Client: client})
 }
@@ -312,12 +328,22 @@ func createLogParserValidator(client client.Client) *logparserwebhook.Validating
 
 func createTracePipelineReconciler(client client.Client) *tracepipelinereconciler.Reconciler {
 	config := tracepipelinereconciler.Config{
-		CreateServiceMonitor: createServiceMonitor,
-		CollectorNamespace:   telemetryNamespace,
-		ResourceName:         traceCollectorDeploymentName,
-		CollectorImage:       traceCollectorImage,
+		CreateServiceMonitor: traceCollectorCreateServiceMonitor,
+		Namespace:            telemetryNamespace,
+		BaseName:             traceCollectorBaseName,
+		Deployment: tracepipelinereconciler.DeploymentConfig{
+			Image:             traceCollectorImage,
+			PriorityClassName: traceCollectorPriorityClass,
+			CPULimit:          resource.MustParse(traceCollectorCPULimit),
+			MemoryLimit:       resource.MustParse(traceCollectorMemoryLimit),
+			CPURequest:        resource.MustParse(traceCollectorCPURequest),
+			MemoryRequest:     resource.MustParse(traceCollectorMemoryRequest),
+		},
+		Service: tracepipelinereconciler.ServiceConfig{
+			OTLPServiceName: traceCollectorOTLPServiceName,
+		},
 	}
-	return tracepipelinereconciler.NewReconciler(client, config, scheme)
+	return tracepipelinereconciler.NewReconciler(client, config, &kubernetes.DeploymentProber{Client: client}, scheme)
 }
 
 func createDryRunConfig() dryrun.Config {

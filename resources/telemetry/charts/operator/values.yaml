@@ -130,5 +130,11 @@ tolerations: []
 
 affinity: {}
 
-dashboardExtension:
-  enabled: true
+traceCollector:
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 25m
+      memory: 32Mi
