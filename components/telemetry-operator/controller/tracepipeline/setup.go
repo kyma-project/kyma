@@ -5,7 +5,6 @@ import (
 	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/setup"
-	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -18,7 +17,7 @@ import (
 )
 
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	newReconciler := ctrl.NewControllerManagedBy(mgr).
+	return ctrl.NewControllerManagedBy(mgr).
 		For(&telemetryv1alpha1.TracePipeline{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
@@ -28,13 +27,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&source.Kind{Type: &corev1.Secret{}},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecret),
 			builder.WithPredicates(setup.CreateOrUpdate()),
-		)
-
-	if r.config.CreateServiceMonitor {
-		newReconciler.Owns(&monitoringv1.ServiceMonitor{})
-	}
-
-	return newReconciler.Complete(r)
+		).
+		Complete(r)
 }
 
 func (r *Reconciler) mapSecret(object client.Object) []reconcile.Request {
