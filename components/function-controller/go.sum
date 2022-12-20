@@ -324,6 +324,8 @@ github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
+github.com/kyma-project/kyma/common/logging v0.0.0-20221208072023-1c1502074930 h1:lX7bKUOWIGBVqvHmbGbEwYhprZJHICPqj0BCImDc6fM=
+github.com/kyma-project/kyma/common/logging v0.0.0-20221208072023-1c1502074930/go.mod h1:JGb5RBi8Uz+RZ/jf54+qA+RqY6uPQBJ8pO1w3KSwm1Q=
 github.com/libgit2/git2go/v31 v31.7.9 h1:RUDiYm7+i3GY414acI31oDD8x5P0PZyWeZZfwpPuynE=
 github.com/libgit2/git2go/v31 v31.7.9/go.mod h1:c/rkJcBcUFx6wHaT++UwNpKvIsmPNqCeQ/vzO4DrEec=
 github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
@@ -374,8 +376,6 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.17.0 h1:9Luw4uT5HTjHTN8+aNcSThgH1vdXnmdJ8xIfZ4wyTRE=
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
-github.com/pPrecel/kyma/common/logging v0.0.0-20221103083340-8c749c35c79b h1:7xPR9IZcvShl/squTYCemWSrFmdteYrhf5iJ9Gif2S8=
-github.com/pPrecel/kyma/common/logging v0.0.0-20221103083340-8c749c35c79b/go.mod h1:oXoP77o6Am2IWp8wDS3jaA1gGWLrcaO6gLWyDZbAkJs=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
