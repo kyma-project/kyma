@@ -45,9 +45,8 @@ var ctx context.Context
 var cancel context.CancelFunc
 
 var testConfig = Config{
-	CreateServiceMonitor: false,
-	BaseName:             "telemetry-trace-collector",
-	Namespace:            "kyma-system",
+	BaseName:  "telemetry-trace-collector",
+	Namespace: "kyma-system",
 	Deployment: DeploymentConfig{
 		Image:         "otel/opentelemetry-collector-contrib:0.60.0",
 		CPULimit:      resource.MustParse("1"),
