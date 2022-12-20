@@ -997,12 +997,14 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-func defaultNatsConfig(url string) env.NatsConfig {
+func defaultNatsConfig(url string, natsPort int) env.NatsConfig {
+	streamName := fmt.Sprintf("%s%d", defaultStreamName, natsPort)
 	return env.NatsConfig{
 		URL:                     url,
 		MaxReconnects:           defaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
-		JSStreamName:            defaultStreamName,
+		JSStreamName:            streamName,
+		JSSubjectPrefix:         streamName,
 		JSStreamStorageType:     StorageTypeMemory,
 		JSStreamRetentionPolicy: RetentionPolicyInterest,
 		JSStreamDiscardPolicy:   DiscardPolicyNew,
@@ -1052,7 +1054,7 @@ type TestEnvironment struct {
 func setupTestEnvironment(t *testing.T, newCRD bool) *TestEnvironment {
 	natsServer, natsPort, err := natstesting.StartNATSServer(evtesting.WithJetStreamEnabled())
 	require.NoError(t, err)
-	natsConfig := defaultNatsConfig(natsServer.ClientURL())
+	natsConfig := defaultNatsConfig(natsServer.ClientURL(), natsPort)
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
@@ -1430,7 +1432,7 @@ func TestJetStreamSubAfterSync_ForExplicitlyBoundSubscriptionDeletion(t *testing
 	jsBackend := testEnvironment.jsBackend
 	defer testEnvironment.natsServer.Shutdown()
 	defer testEnvironment.jsClient.natsConn.Close()
-	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
+	defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
 
 	testEnvironment.jsBackend.Config.JSStreamStorageType = StorageTypeFile
 	testEnvironment.jsBackend.Config.MaxReconnects = 0
@@ -1498,7 +1500,7 @@ func TestJetStreamSubAfterSync_ForExplicitlyBoundSubscriptionDeletion(t *testing
 	// the unacknowledged message must still be present in the stream
 
 	require.Eventually(t, func() bool {
-		info, streamErr := testEnvironment.jsClient.StreamInfo(defaultStreamName)
+		info, streamErr := testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 		require.NoError(t, streamErr)
 		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
@@ -1634,7 +1636,7 @@ func startJetStream(t *testing.T, testEnv *TestEnvironment) {
 		evtesting.WithPort(testEnv.natsPort),
 		evtesting.WithJetStreamEnabled())
 	require.Eventually(t, func() bool {
-		info, streamErr := testEnv.jsClient.StreamInfo(defaultStreamName)
+		info, streamErr := testEnv.jsClient.StreamInfo(testEnv.natsConfig.JSStreamName)
 		require.NoError(t, streamErr)
 		return info != nil && streamErr == nil
 	}, 60*time.Second, 5*time.Second)
@@ -1658,5 +1660,5 @@ func assertNewSubscriptionReturnItsKey(t *testing.T,
 func cleanUpTestEnvironment(testEnvironment *TestEnvironment) {
 	defer testEnvironment.natsServer.Shutdown()
 	defer testEnvironment.jsClient.natsConn.Close()
-	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
+	defer func() { _ = testEnvironment.jsClient.DeleteStream(testEnvironment.natsConfig.JSStreamName) }()
 }

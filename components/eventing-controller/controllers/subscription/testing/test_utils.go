@@ -9,7 +9,6 @@ import (
 
 	subscriptionjetstream "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
 	backendjetstream "github.com/kyma-project/kyma/components/eventing-controller/pkg/backend/nats/jetstream"
-	v2 "github.com/kyma-project/kyma/components/eventing-controller/testing/v2"
 	"github.com/stretchr/testify/require"
 
 	"github.com/avast/retry-go/v3"
@@ -40,6 +39,7 @@ const (
 type JetStreamTestEnsemble struct {
 	Reconciler       *subscriptionjetstream.Reconciler
 	JetStreamBackend *backendjetstream.JetStream
+	JSStreamName     string
 	*TestEnsemble
 }
 
@@ -203,7 +203,9 @@ func CleanupResources(t *testing.T, ens *JetStreamTestEnsemble) {
 	StopTestEnv(ens.TestEnsemble)
 
 	jsCtx := ens.Reconciler.Backend.GetJetStreamContext()
-	require.NoError(t, jsCtx.DeleteStream(v2.JSStreamName))
+	require.NoError(t, jsCtx.DeleteStream(ens.JSStreamName))
+
+	reconcilertesting.ShutDownNATSServer(ens.NatsServer)
 }
 
 func StartSubscriberSvc(ens *TestEnsemble) {
