@@ -18,8 +18,9 @@ package tracepipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
-
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/apis/telemetry/v1alpha1"
@@ -168,4 +169,27 @@ func (r *Reconciler) doReconcile(ctx context.Context, pipeline *telemetryv1alpha
 	}
 
 	return nil
+}
+
+func (r *Reconciler) checkLock(ctx context.Context, pipeline *telemetryv1alpha1.TracePipeline) error {
+	lockName := types.NamespacedName{Name: "things-n-stuff"}
+	var lock corev1.ConfigMap
+	if err := r.Get(ctx, lockName, &lock); err != nil {
+		if apierrors.IsNotFound(err) {
+			lock.Name = lockName.Name
+			lock.Namespace = lockName.Namespace
+			controllerutil.SetControllerReference(pipeline, &lock, r.Scheme)
+			return r.Create(ctx, &lock)
+		}
+		return fmt.Errorf("failed to get the lock: %v", err)
+	}
+
+	for _, ref := range lock.GetOwnerReferences() {
+		if ref.Name == pipeline.Name && ref.UID == pipeline.UID {
+			// I am the owner
+			return nil
+		}
+	}
+
+	return errors.New("lock is already used")
 }
