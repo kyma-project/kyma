@@ -126,6 +126,7 @@ describe('Eventing tests', function() {
     }
   }
 
+
   // eventingE2ETestSuiteWithCommerceMock - Runs Eventing end-to-end tests with Compass
   function eventingE2ETestSuiteWithCommerceMock(backend) {
     it('order.created.v1 legacy event from CommerceMock should trigger the lastorder function', async function() {
