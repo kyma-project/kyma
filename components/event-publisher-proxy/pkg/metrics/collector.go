@@ -29,7 +29,7 @@ const (
 	backendRequestsHelp = "The total number of backend requests"
 
 	// durationKey name of the duration metric
-	durationKey = "eventing_epp_requests_duration_seconds"
+	durationKey = "eventing_epp_requests_duration_milliseconds"
 	// durationHelp help text for the duration metric
 	durationHelp = "The duration of processing an incoming request (includes sending to the backend)"
 
