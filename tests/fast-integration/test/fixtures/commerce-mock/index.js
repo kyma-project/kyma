@@ -762,9 +762,6 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, eventTyp
         send: true,
         encoding: encoding,
       },
-      headers: {
-        'X-B3-Sampled': 1,
-      },
     });
 
     debug('Send response:', {
@@ -789,9 +786,6 @@ async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLef
       params: {
         send: true,
         isLegacyEvent: true,
-      },
-      headers: {
-        'X-B3-Sampled': 1,
       },
     });
 
