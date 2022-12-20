@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"fmt"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -140,6 +141,7 @@ func DeleteFluentBit(ctx context.Context, c client.Client, name types.Namespaced
 	}
 
 	var luaCm corev1.ConfigMap
+	name.Name = fmt.Sprintf("%s-luascripts", name.Name)
 	err = c.Get(ctx, name, &luaCm)
 	if err == nil {
 		if err = c.Delete(ctx, &luaCm); err != nil && !errors.IsNotFound(err) {
