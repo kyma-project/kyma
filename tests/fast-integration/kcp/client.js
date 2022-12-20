@@ -54,8 +54,8 @@ class KCPWrapper {
     const stream = fs.createWriteStream(`${this.kcpConfigPath}`);
     stream.once('open', (_) => {
       stream.write(`gardener-namespace: "${this.gardenerNamespace}"\n`);
-      stream.write(`oidc-client-id: "${this.clientID}"\n`);
       if (process.env.KCP_OIDC_CLIENT_SECRET) {
+        stream.write(`oidc-client-id: "${this.clientID}"\n`);
         stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
         stream.write(`username: ${this.username}\n`);
       } else {
