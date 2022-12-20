@@ -20,7 +20,7 @@ func InitializeScenarioReconcilation(ctx *godog.ScenarioContext) {
 	profile := os.Getenv(deployedKymaProfileVar)
 
 	reconcilationCase := istioReconcilationCase{}
-	reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "-s", "main", "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
+	reconcilationCase.command = helpers.Command{Cmd: "./kyma", Args: []string{"deploy", "--source", "local", "--workspace", "../../../", "--component", "istio", "-v", "--ci", "-p", profile}, OutputChannel: make(chan string)}
 
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		out, err := os.Create("kyma")
@@ -133,7 +133,7 @@ func (i *istioReconcilationCase) reconcilerRestartsTheFaultyDeployment() error {
 	}
 }
 
-func (i *istioReconcilationCase) abort() error{
+func (i *istioReconcilationCase) abort() error {
 	i.command.Kill()
 	return nil
 }

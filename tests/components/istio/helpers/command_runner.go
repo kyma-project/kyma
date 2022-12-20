@@ -10,7 +10,7 @@ type Command struct {
 	Cmd           string
 	Args          []string
 	OutputChannel chan string
-	cmd *exec.Cmd
+	cmd           *exec.Cmd
 }
 
 func (c *Command) Run() (chan struct{}, error) {
@@ -52,6 +52,6 @@ func (c *Command) Run() (chan struct{}, error) {
 	return done, nil
 }
 
-func (c *Command) Kill(){
+func (c *Command) Kill() {
 	c.cmd.Process.Kill()
 }

@@ -34,7 +34,7 @@ func NewHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Po
 		log:         log.WithField(step.LogStepKey, name),
 		endpoint:    url.String(),
 		expectedMsg: expectedMsg,
-		poll:        poller,
+		poll:        poller.WithLogger(log),
 	}
 
 }
