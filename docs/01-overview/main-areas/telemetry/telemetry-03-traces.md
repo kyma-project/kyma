@@ -284,5 +284,5 @@ Only one TracePipeline resource at a time is supported at the moment.
   - Check the `telemetry-trace-collector` Pods for error logs by calling `kubectl logs -n kyma-system {POD_NAME}`
   - Check the monitoring dashboard for Kyma telemetry if the data gets exported
   - Verify that you activated Istio tracing
-1. Custom spans are not arriving at the destination, but Istio spans do
+2. Custom spans are not arriving at the destination, but Istio spans do
   - Verify that you are using the SDK version for instrumentation that is compatible with the otel-collector version used
