@@ -48,3 +48,6 @@ nats:
     logging:
       debug: false
       trace: false
+    healthcheck:
+      startup:
+        enabled: true
