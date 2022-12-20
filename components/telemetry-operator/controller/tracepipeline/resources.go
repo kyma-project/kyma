@@ -352,6 +352,10 @@ func makeMetricsService(config Config) *corev1.Service {
 			Name:      config.BaseName + "-metrics",
 			Namespace: config.Namespace,
 			Labels:    labels,
+			Annotations: map[string]string{
+				"prometheus.io/scrape": "true",
+				"prometheus.io/port":   "8888",
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
