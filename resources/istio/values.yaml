@@ -48,7 +48,7 @@ meshConfig:
   enablePrometheusMerge: false
   enableTracing: "{{ .Values.global.tracing.enabled }}"
   extensionProviders:
-    - name: kyma-tracing
+    - name: kyma-traces
       opencensus:
         service: "telemetry-trace-collector-internal.kyma-system.svc.cluster.local"
         port: 55678
